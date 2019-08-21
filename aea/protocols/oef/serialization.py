@@ -22,114 +22,16 @@
 import copy
 import json
 import pickle
-from typing import Dict
 
 import base58
-from google.protobuf import json_format
-from google.protobuf.json_format import MessageToJson
-from oef import query_pb2, dap_interface_pb2
-from oef.messages import OEFErrorOperation
-from oef.query import Query, ConstraintExpr, And, Or, Not, Constraint
-from oef.schema import Description, DataModel
 
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
 from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.models import Description, Query
 
 """default 'to' field for OEF envelopes."""
 DEFAULT_OEF = "oef"
-
-
-class ConstraintWrapper:
-    """Make the constraint object pickable."""
-
-    def __init__(self, c: ConstraintExpr):
-        """Wrap the constraint object."""
-        self.c = c
-
-    def to_json(self) -> Dict:
-        """
-        Convert to json.
-
-        :return: the dictionary
-        """
-        result = {}
-        if isinstance(self.c, And) or isinstance(self.c, Or):
-            wraps = [ConstraintWrapper(subc).to_json() for subc in self.c.constraints]
-            key = "and" if isinstance(self.c, And) else "or" if isinstance(self.c, Or) else ""
-            result[key] = wraps
-        elif isinstance(self.c, Not):
-            wrap = ConstraintWrapper(self.c.constraint).to_json()
-            result["not"] = wrap
-        elif isinstance(self.c, Constraint):
-            result["attribute_name"] = self.c.attribute_name
-            result["constraint_type"] = base58.b58encode(pickle.dumps(self.c.constraint)).decode("utf-8")
-        else:
-            raise ValueError("ConstraintExpr not recognized.")
-
-        return result
-
-    @classmethod
-    def from_json(cls, d: Dict) -> Constraint:
-        """
-        Convert from json.
-
-        :param d: the dictionary.
-        :return: the constraint
-        """
-        if "and" in d:
-            return And([ConstraintWrapper.from_json(subc) for subc in d["and"]])
-        elif "or" in d:
-            return Or([ConstraintWrapper.from_json(subc) for subc in d["or"]])
-        elif "not" in d:
-            return Not(ConstraintWrapper.from_json(d["not"]))
-        else:
-            constraint_type = pickle.loads(base58.b58decode(d["constraint_type"]))
-            return Constraint(d["attribute_name"], constraint_type)
-
-
-class QueryWrapper:
-    """Make the query object pickable."""
-
-    def __init__(self, q: Query):
-        """
-        Initialize.
-
-        :param q: the query
-        """
-        self.q = q
-
-    def to_json(self) -> Dict:
-        """
-        Convert to json.
-
-        :return: the dictionary
-        """
-        result = {}
-        if self.q.model:
-            result["data_model"] = base58.b58encode(self.q.model.to_pb().SerializeToString()).decode("utf-8")
-        else:
-            result["data_model"] = None
-        result["constraints"] = [ConstraintWrapper(c).to_json() for c in self.q.constraints]
-        return result
-
-    @classmethod
-    def from_json(self, d: Dict) -> Query:
-        """
-        Convert from json.
-
-        :param d: the dictionary.
-        :return: the query
-        """
-        if d["data_model"]:
-            data_model_pb = dap_interface_pb2.ValueMessage.DataModel()
-            data_model_pb.ParseFromString(base58.b58decode(d["data_model"]))
-            data_model = DataModel.from_pb(data_model_pb)
-        else:
-            data_model = None
-
-        constraints = [ConstraintWrapper.from_json(c) for c in d["constraints"]]
-        return Query(constraints, data_model)
 
 
 class OEFSerializer(Serializer):
@@ -147,17 +49,16 @@ class OEFSerializer(Serializer):
 
         if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
             service_description = msg.body["service_description"]  # type: Description
-            service_description_pb = service_description.to_pb()
-            service_description_json = MessageToJson(service_description_pb)
-            new_body["service_description"] = service_description_json
+            service_description_bytes = base58.b58encode(pickle.dumps(service_description)).decode("utf-8")
+            new_body["service_description"] = service_description_bytes
         elif oef_type in {OEFMessage.Type.REGISTER_AGENT}:
             agent_description = msg.body["agent_description"]  # type: Description
-            agent_description_pb = agent_description.to_pb()
-            agent_description_json = MessageToJson(agent_description_pb)
-            new_body["agent_description"] = agent_description_json
+            agent_description_bytes = base58.b58encode(pickle.dumps(agent_description)).decode("utf-8")
+            new_body["agent_description"] = agent_description_bytes
         elif oef_type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
             query = msg.body["query"]  # type: Query
-            new_body["query"] = QueryWrapper(query).to_json()
+            query_bytes = base58.b58encode(pickle.dumps(query)).decode("utf-8")
+            new_body["query"] = query_bytes
         elif oef_type in {OEFMessage.Type.SEARCH_RESULT}:
             # we need this cast because the "agents" field might contains
             # the Protobuf type "RepeatedScalarContainer", which is not JSON serializable.
@@ -182,23 +83,22 @@ class OEFSerializer(Serializer):
         new_body["type"] = oef_type
 
         if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
-            service_description_json = json_msg["service_description"]
-            service_description_pb = json_format.Parse(service_description_json, query_pb2.Query.Instance())
-            service_description = Description.from_pb(service_description_pb)
+            service_description_bytes = base58.b58decode(json_msg["service_description"])
+            service_description = pickle.loads(service_description_bytes)
             new_body["service_description"] = service_description
         elif oef_type in {OEFMessage.Type.REGISTER_AGENT}:
-            agent_description_json = json_msg["agent_description"]
-            agent_description_pb = json_format.Parse(agent_description_json, query_pb2.Query.Instance())
-            agent_description = Description.from_pb(agent_description_pb)
+            agent_description_bytes = base58.b58decode(json_msg["agent_description"])
+            agent_description = pickle.loads(agent_description_bytes)
             new_body["agent_description"] = agent_description
         elif oef_type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
-            query = QueryWrapper.from_json(json_msg["query"])
+            query_bytes = base58.b58decode(json_msg["query"])
+            query = pickle.loads(query_bytes)
             new_body["query"] = query
         elif oef_type in {OEFMessage.Type.SEARCH_RESULT}:
             new_body["agents"] = list(json_msg["agents"])
         elif oef_type in {OEFMessage.Type.OEF_ERROR}:
             operation = json_msg["operation"]
-            new_body["operation"] = OEFErrorOperation(operation)
+            new_body["operation"] = OEFMessage.OEFErrorOperation(operation)
 
         oef_message = Message(body=new_body)
         return oef_message

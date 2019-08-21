@@ -19,14 +19,15 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
+import pickle
+
 from google.protobuf.struct_pb2 import Struct
-from oef import data_model_instance_pb2
-from oef.schema import Description
 
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
-from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa import fipa_pb2
+from aea.protocols.fipa.message import FIPAMessage
+from aea.protocols.oef.models import Description
 
 
 class FIPASerializer(Serializer):
@@ -103,9 +104,8 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.PROPOSE:
             descriptions = []
             for p_bytes in fipa_pb.propose.proposal:
-                p_pb = data_model_instance_pb2.Instance()
-                p_pb.ParseFromString(p_bytes)
-                descriptions.append(Description.from_pb(p_pb))
+                p = pickle.loads(p_bytes)  # type: Description
+                descriptions.append(p)
             performative_content["proposal"] = descriptions
         elif performative_id == FIPAMessage.Performative.ACCEPT:
             pass

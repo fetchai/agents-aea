@@ -22,11 +22,8 @@
 from enum import Enum
 from typing import Optional
 
-from oef.messages import OEFErrorOperation
-from oef.query import Query
-from oef.schema import Description
-
 from aea.protocols.base.message import Message
+from aea.protocols.oef.models import Description, Query
 
 
 class OEFMessage(Message):
@@ -50,6 +47,19 @@ class OEFMessage(Message):
         def __str__(self):
             """Get string representation."""
             return self.value
+
+    class OEFErrorOperation(Enum):
+        """Operation code for the OEF. It is returned in the OEF Error messages."""
+        REGISTER_SERVICE = 0
+        UNREGISTER_SERVICE = 1
+        REGISTER_DESCRIPTION = 2
+        UNREGISTER_DESCRIPTION = 3
+        SEARCH_SERVICES = 4
+        SEARCH_SERVICES_WIDE = 5
+        SEARCH_AGENTS = 6
+        SEND_MESSAGE = 7
+
+        OTHER = 10000
 
     def __init__(self, oef_type: Optional[Type] = None,
                  **kwargs):
@@ -103,7 +113,7 @@ class OEFMessage(Message):
                 assert self.is_set("id")
                 assert self.is_set("operation")
                 operation = self.get("operation")
-                assert operation in set(OEFErrorOperation)
+                assert operation in set(OEFMessage.Type.OEFErrorOperation)
             elif oef_type == OEFMessage.Type.DIALOGUE_ERROR:
                 assert self.is_set("id")
                 assert self.is_set("dialogue_id")
