@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package fetch.aea;
+
+message Envelope{
+    string to = 1;
+    string sender = 2;
+    string protocol_id = 3;
+    bytes message = 4;
+}

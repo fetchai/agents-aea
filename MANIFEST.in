@@ -1,0 +1,3 @@
+include README.md LICENSE Pipfile Pipfile.lock
+
+recursive-include aea *

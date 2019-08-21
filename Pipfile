@@ -1,0 +1,26 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[[source]]
+url = "https://test.pypi.org/simple"
+verify_ssl = true
+name = "test-pypi"
+
+[dev-packages]
+flake8 = "*"
+pytest = "*"
+tox = "*"
+tox-pipenv = "*"
+pytest-cov = "*"
+flake8-docstrings = "*"
+pygments = "*"
+
+[packages]
+cryptography = "*"
+base58 = "*"
+oef = {version = "==0.6.0",index = "test-pypi"}
+
+[requires]
+python_version = "3.7"
