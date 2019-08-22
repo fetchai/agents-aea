@@ -46,7 +46,7 @@ setup(
     author=about['__author__'],
     url=about['__url__'],
     long_description=readme,
-    packages=find_packages(include=["aea"]),
+    packages=find_packages(include=["aea*"]),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
