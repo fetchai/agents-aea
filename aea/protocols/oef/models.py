@@ -75,8 +75,7 @@ class Attribute:
         return isinstance(other, Attribute) \
             and self.name == other.name \
             and self.type == other.type \
-            and self.is_required == other.is_required \
-            and self.description == other.description
+            and self.is_required == other.is_required
 
 
 class DataModel:
@@ -98,8 +97,7 @@ class DataModel:
         """Compare with another object."""
         return isinstance(other, DataModel) \
             and self.name == other.name \
-            and self.attributes == other.attributes \
-            and self.description == other.description
+            and self.attributes == other.attributes
 
 
 class Description:

@@ -29,12 +29,10 @@ from queue import Queue
 from threading import Thread
 from typing import Dict, List, Optional
 
-from oef.query import Query
-from oef.schema import Description
-
 from aea.channel.oef import STUB_DIALOGUE_ID
 from aea.mail.base import Connection, Envelope
 from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.models import Description, Query
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
@@ -209,7 +207,7 @@ class LocalNode:
         """
         Search the agents in the local Agent Directory, and send back the result.
 
-        The provided query will be checked with every instance of the Agent Directory.
+        This is actually a dummy search, it will return all the registered agents with the data model provided.
 
         :param public_key: the source of the search request.
         :param search_id: the search identifier associated with the search request.
@@ -218,7 +216,7 @@ class LocalNode:
         """
         result = []
         for agent_public_key, description in self.agents.items():
-            if query.check(description):
+            if query.model == description.data_model:
                 result.append(agent_public_key)
 
         msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
@@ -230,7 +228,7 @@ class LocalNode:
         """
         Search the agents in the local Service Directory, and send back the result.
 
-        The provided query will be checked with every instance of the Agent Directory.
+        This is actually a dummy search, it will return all the registered agents.
 
         :param public_key: the source of the search request.
         :param search_id: the search identifier associated with the search request.
@@ -240,7 +238,7 @@ class LocalNode:
         result = []
         for agent_public_key, descriptions in self.services.items():
             for description in descriptions:
-                if query.check(description):
+                if description.data_model == query.model:
                     result.append(agent_public_key)
 
         msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
