@@ -32,12 +32,10 @@ from typing import Dict, List, Optional
 from oef.query import Query
 from oef.schema import Description
 
-from aea.mail.base import Connection
-
-from aea.mail.oef import STUB_DIALOGUE_ID
-from aea.mail.protocol import Envelope
+from aea.channel.oef import STUB_DIALOGUE_ID
+from aea.mail.base import Connection, Envelope
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF, OEFErrorOperation
+from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +178,7 @@ class LocalNode:
         """
         with self._lock:
             if public_key not in self.agents:
-                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFErrorOperation.UNREGISTER_DESCRIPTION)
+                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_DESCRIPTION)
                 msg_bytes = OEFSerializer().encode(msg)
                 envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
                 self._send(envelope)
@@ -198,7 +196,7 @@ class LocalNode:
         """
         with self._lock:
             if public_key not in self.services:
-                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFErrorOperation.UNREGISTER_SERVICE)
+                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE)
                 msg_bytes = OEFSerializer().encode(msg)
                 envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
                 self._send(envelope)

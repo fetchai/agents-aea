@@ -27,13 +27,25 @@ from queue import Empty, Queue
 from threading import Thread
 from typing import List, Dict, Optional
 
+import oef
 from oef.agents import OEFAgent
-from oef.messages import CFP_TYPES, PROPOSE_TYPES, OEFErrorOperation
+from oef.messages import CFP_TYPES, PROPOSE_TYPES
+from oef.query import (
+    Query as OEFQuery,
+    ConstraintExpr as OEFConstraintExpr,
+    And as OEFAnd,
+    Or as OEFOr,
+    Not as OEFNot,
+    Constraint as OEFConstraint
+)
+
+from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
 
 from aea.mail.base import Connection, MailBox, Envelope
 from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.oef.message import OEFMessage
 from aea.protocols.fipa.serialization import FIPASerializer
+from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint
 from aea.protocols.oef.serialization import OEFSerializer
 
 logger = logging.getLogger(__name__)
@@ -41,6 +53,86 @@ logger = logging.getLogger(__name__)
 
 STUB_MESSSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
+
+
+class OEFObjectTranslator:
+    """Translate our OEF object to object of OEF SDK classes."""
+
+    @classmethod
+    def to_oef_description(cls, desc: Description) -> OEFDescription:
+        """From our description to OEF description."""
+        oef_data_model = cls.to_oef_data_model(desc.data_model)
+        return OEFDescription(desc.values, oef_data_model)
+
+    @classmethod
+    def to_oef_data_model(cls, data_model: DataModel) -> OEFDataModel:
+        """From our data model to OEF data model."""
+        oef_attributes = [cls.to_oef_attribute(attribute) for attribute in data_model.attributes]
+        return OEFDataModel(data_model.name, oef_attributes, data_model.description)
+
+    @classmethod
+    def to_oef_attribute(cls, attribute: Attribute) -> OEFAttribute:
+        """From our attribute to OEF attribute."""
+        return OEFAttribute(attribute.name, attribute.type, attribute.is_required, attribute.description)
+
+    @classmethod
+    def to_oef_query(cls, query: Query) -> OEFQuery:
+        """From our query to OEF query."""
+        oef_data_model = cls.to_oef_data_model(query.model)
+        constraints = [cls.to_oef_constraint_expr(c) for c in query.constraints]
+        return OEFQuery(constraints, oef_data_model)
+
+    @classmethod
+    def to_oef_constraint_expr(cls, constraint_expr: ConstraintExpr) -> OEFConstraintExpr:
+        """From our constraint expression to the OEF constraint expression."""
+        if isinstance(constraint_expr, And):
+            return OEFAnd([cls.to_oef_constraint_expr(c) for c in constraint_expr.constraints])
+        elif isinstance(constraint_expr, Or):
+            return OEFOr([cls.to_oef_constraint_expr(c) for c in constraint_expr.constraints])
+        elif isinstance(constraint_expr, Not):
+            return OEFNot(cls.to_oef_constraint_expr(constraint_expr.constraint))
+        elif isinstance(constraint_expr, Constraint):
+            return OEFConstraint(constraint_expr.attribute_name, constraint_expr.constraint_type)
+        else:
+            raise ValueError("Constraint expression not supported.")
+
+    @classmethod
+    def from_oef_description(cls, oef_desc: OEFDescription) -> Description:
+        """From an OEF description to our description."""
+        data_model = cls.from_oef_data_model(oef_desc.data_model)
+        return Description(oef_desc.values, data_model=data_model)
+
+    @classmethod
+    def from_oef_data_model(cls, oef_data_model: OEFDataModel) -> DataModel:
+        """From an OEF data model to our data model."""
+        attributes = [cls.from_oef_attribute(oef_attribute) for oef_attribute in oef_data_model.attribute_schemas]
+        return DataModel(oef_data_model.name, attributes, oef_data_model.description)
+
+    @classmethod
+    def from_oef_attribute(cls, oef_attribute: OEFAttribute) -> Attribute:
+        """From an OEF attribute to our attribute."""
+        return Attribute(oef_attribute.name, oef_attribute.type, oef_attribute.required, oef_attribute.description)
+
+    @classmethod
+    def from_oef_query(cls, oef_query: OEFQuery) -> Query:
+        """From our query to OrOEF query."""
+        data_model = cls.from_oef_data_model(oef_query.model)
+        constraints = [cls.from_oef_constraint_expr(c) for c in oef_query.constraints]
+        return Query(constraints, data_model)
+
+    @classmethod
+    def from_oef_constraint_expr(cls, oef_constraint_expr: OEFConstraintExpr) -> ConstraintExpr:
+        """From our query to OEF query."""
+        if isinstance(oef_constraint_expr, OEFAnd):
+            return And([cls.from_oef_constraint_expr(c) for c in oef_constraint_expr.constraints])
+        elif isinstance(oef_constraint_expr, OEFOr):
+            return Or([cls.from_oef_constraint_expr(c) for c in oef_constraint_expr.constraints])
+        elif isinstance(oef_constraint_expr, OEFNot):
+            return Not(cls.from_oef_constraint_expr(oef_constraint_expr.constraint))
+        elif isinstance(oef_constraint_expr, OEFConstraint):
+            return Constraint(oef_constraint_expr.attribute_name, oef_constraint_expr.constraint)
+        else:
+            raise ValueError("OEF Constraint not supported.")
 
 
 class MailStats(object):
@@ -164,6 +256,9 @@ class OEFChannel(OEFAgent):
         :param proposals: the proposals.
         :return: None
         """
+        if type(proposals) == list:
+            proposals = [OEFObjectTranslator.from_oef_description(p) for p in proposals]
+
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
                           target=target,
@@ -224,7 +319,7 @@ class OEFChannel(OEFAgent):
         envelope = Envelope(to=self.public_key, sender=None, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
-    def on_oef_error(self, answer_id: int, operation: OEFErrorOperation) -> None:
+    def on_oef_error(self, answer_id: int, operation: oef.messages.OEFErrorOperation) -> None:
         """
         On oef error event handler.
 
@@ -232,9 +327,12 @@ class OEFChannel(OEFAgent):
         :param operation: the error operation.
         :return: None
         """
-        msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR,
-                         id=answer_id,
-                         operation=operation)
+        try:
+            operation = OEFMessage.OEFErrorOperation(operation)
+        except ValueError:
+            operation = OEFMessage.OEFErrorOperation.OTHER
+
+        msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=None, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
@@ -287,28 +385,33 @@ class OEFChannel(OEFAgent):
             id = oef_message.get("id")
             service_description = oef_message.get("service_description")
             service_id = oef_message.get("service_id")
-            self.register_service(id, service_description, service_id)
+            oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
+            self.register_service(id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.REGISTER_AGENT:
             id = oef_message.get("id")
             agent_description = oef_message.get("agent_description")
-            self.register_agent(id, agent_description)
+            oef_agent_description = OEFObjectTranslator.to_oef_description(agent_description)
+            self.register_agent(id, oef_agent_description)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             id = oef_message.get("id")
             service_description = oef_message.get("service_description")
             service_id = oef_message.get("service_id")
-            self.unregister_service(id, service_description, service_id)
+            oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
+            self.unregister_service(id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
             id = oef_message.get("id")
             self.unregister_agent(id)
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
             id = oef_message.get("id")
             query = oef_message.get("query")
-            self.search_agents(id, query)
+            oef_query = OEFObjectTranslator.to_oef_query(query)
+            self.search_agents(id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             id = oef_message.get("id")
             query = oef_message.get("query")
+            oef_query = OEFObjectTranslator.to_oef_query(query)
             self.mail_stats.search_start(id)
-            self.search_services(id, query)
+            self.search_services(id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
 

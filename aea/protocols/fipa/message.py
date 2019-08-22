@@ -23,9 +23,9 @@ from enum import Enum
 from typing import Optional, Union
 
 from oef.query import Query
-from oef.schema import Description
 
 from aea.protocols.base.message import Message
+from aea.protocols.oef.models import Description
 
 
 class FIPAMessage(Message):
