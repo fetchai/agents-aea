@@ -57,7 +57,7 @@ class FIPASerializer(Serializer):
         elif performative_id == "propose":
             performative = fipa_pb2.FIPAMessage.Propose()
             proposal = msg.get("proposal")
-            p_array_bytes = [p.to_pb().SerializeToString() for p in proposal]
+            p_array_bytes = [pickle.dumps(p) for p in proposal]
             performative.proposal.extend(p_array_bytes)
             fipa_msg.propose.CopyFrom(performative)
 
