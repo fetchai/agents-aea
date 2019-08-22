@@ -29,7 +29,6 @@ from typing import List, Dict, Optional
 
 import oef
 from oef.agents import OEFAgent
-from oef.messages import CFP_TYPES, PROPOSE_TYPES
 from oef.query import (
     Query as OEFQuery,
     ConstraintExpr as OEFConstraintExpr,
@@ -38,7 +37,6 @@ from oef.query import (
     Not as OEFNot,
     Constraint as OEFConstraint
 )
-
 from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
 
 from aea.mail.base import Connection, MailBox, Envelope
