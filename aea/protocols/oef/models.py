@@ -178,7 +178,7 @@ class Constraint(ConstraintExpr):
     def __init__(self, attribute_name: str, constraint_type: ConstraintType):
         """
         Initialize a constraint.
-        
+
         :param attribute_name: the name of the attribute to be constrained.
         :param constraint_type: the constraint type.
         """
