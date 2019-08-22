@@ -36,7 +36,6 @@ from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 logger = logging.getLogger(__name__)
 
 
-
 class LocalNode:
     """A light-weight local implementation of a OEF Node."""
 
@@ -46,17 +45,7 @@ class LocalNode:
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self._lock = threading.Lock()
 
-        self._stopped = True  # type: bool
-        self._thread = None  # type: Optional[Thread]
-
         self._queues = {}  # type: Dict[str, Queue]
-
-    def __enter__(self):
-        """Start the OEF Node."""
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Stop the OEF Node."""
 
     def connect(self, public_key: str) -> Optional[Queue]:
         """
@@ -131,7 +120,7 @@ class LocalNode:
         destination = envelope.to
 
         if destination not in self._queues:
-            msg = OEFMessage(type=OEFMessage.Type.DIALOGUE_ERROR, id=STUB_DIALOGUE_ID, dialogue_id=STUB_DIALOGUE_ID, origin=destination)
+            msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR, id=STUB_DIALOGUE_ID, dialogue_id=STUB_DIALOGUE_ID, origin=destination)
             msg_bytes = OEFSerializer().encode(msg)
             error_envelope = Envelope(to=destination, sender=envelope.sender, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
             self._send(error_envelope)
@@ -175,7 +164,7 @@ class LocalNode:
         """
         with self._lock:
             if public_key not in self.agents:
-                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_DESCRIPTION)
+                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_DESCRIPTION)
                 msg_bytes = OEFSerializer().encode(msg)
                 envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
                 self._send(envelope)
@@ -193,7 +182,7 @@ class LocalNode:
         """
         with self._lock:
             if public_key not in self.services:
-                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE)
+                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE)
                 msg_bytes = OEFSerializer().encode(msg)
                 envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
                 self._send(envelope)
@@ -206,7 +195,8 @@ class LocalNode:
         """
         Search the agents in the local Agent Directory, and send back the result.
 
-        This is actually a dummy search, it will return all the registered agents with the data model provided.
+        This is actually a dummy search, it will return all the registered agents with the specified data model.
+        If the data model is not specified, it will return all the agents.
 
         :param public_key: the source of the search request.
         :param search_id: the search identifier associated with the search request.
@@ -214,11 +204,14 @@ class LocalNode:
         :return: None
         """
         result = []
-        for agent_public_key, description in self.agents.items():
-            if query.model == description.data_model:
-                result.append(agent_public_key)
+        if query.model is None:
+            result = set(self.services.keys())
+        else:
+            for agent_public_key, description in self.agents.items():
+                if query.model == description.data_model:
+                    result.append(agent_public_key)
 
-        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
+        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self._send(envelope)
@@ -227,7 +220,8 @@ class LocalNode:
         """
         Search the agents in the local Service Directory, and send back the result.
 
-        This is actually a dummy search, it will return all the registered agents.
+        This is actually a dummy search, it will return all the registered agents with the specified data model.
+        If the data model is not specified, it will return all the agents.
 
         :param public_key: the source of the search request.
         :param search_id: the search identifier associated with the search request.
@@ -235,12 +229,15 @@ class LocalNode:
         :return: None
         """
         result = []
-        for agent_public_key, descriptions in self.services.items():
-            for description in descriptions:
-                if description.data_model == query.model:
-                    result.append(agent_public_key)
+        if query.model is None:
+            result = set(self.services.keys())
+        else:
+            for agent_public_key, descriptions in self.services.items():
+                for description in descriptions:
+                    if description.data_model == query.model:
+                        result.append(agent_public_key)
 
-        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
+        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self._send(envelope)
