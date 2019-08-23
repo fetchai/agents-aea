@@ -26,9 +26,6 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Query, Description, DataModel
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 
 def test_connection():
@@ -103,4 +100,3 @@ def test_communication():
 
     mailbox1.disconnect()
     mailbox2.disconnect()
-
