@@ -23,8 +23,8 @@ from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import ProtobufSerializer, JSONSerializer
 
 
-class TestDefaultSerializations:
-    """Test that the default serializations work."""
+class TestBaseSerializations:
+    """Test that the base serializations work."""
 
     @classmethod
     def setup_class(cls):
