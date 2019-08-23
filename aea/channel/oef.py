@@ -19,17 +19,16 @@
 # ------------------------------------------------------------------------------
 
 """Extension to the OEF Python SDK."""
-import asyncio
 import datetime
 import logging
 import pickle
-from asyncio import AbstractEventLoop
 from queue import Empty, Queue
 from threading import Thread
 from typing import List, Dict, Optional
 
 import oef
 from oef.agents import OEFAgent
+from oef.core import AsyncioCore
 from oef.messages import CFP_TYPES, PROPOSE_TYPES
 from oef.query import (
     Query as OEFQuery,
@@ -184,7 +183,7 @@ class MailStats(object):
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, loop: Optional[AbstractEventLoop] = None, in_queue: Optional[Queue] = None):
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore, in_queue: Optional[Queue] = None):
         """
         Initialize.
 
@@ -193,22 +192,9 @@ class OEFChannel(OEFAgent):
         :param oef_port: the OEF port.
         :param in_queue: the in queue.
         """
-        super().__init__(public_key, oef_addr, oef_port, loop=loop)
+        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core)
         self.in_queue = in_queue
         self.mail_stats = MailStats()
-
-    @property
-    def loop(self) -> asyncio.AbstractEventLoop:
-        """Get the event loop."""
-        return self._loop
-
-    def is_connected(self) -> bool:
-        """Get connected status."""
-        return self._oef_proxy.is_connected()
-
-    def is_active(self) -> bool:
-        """Get active status."""
-        return self._oef_proxy._active_loop
 
     def on_message(self, msg_id: int, dialogue_id: int, origin: str, content: bytes) -> None:
         """
@@ -468,12 +454,25 @@ class OEFConnection(Connection):
         :param oef_port: the OEF port.
         """
         super().__init__()
-
-        self.bridge = OEFChannel(public_key, oef_addr, oef_port, loop=asyncio.new_event_loop(), in_queue=self.in_queue)
+        core = AsyncioCore(logger=logger)
+        core.run_threaded()
+        self._core = core  # type: Optional[AsyncioCore]
+        self.bridge = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
 
         self._stopped = True
+        self._connected = False
         self.in_thread = Thread(target=self.bridge.run)
         self.out_thread = Thread(target=self._fetch)
+
+    @property
+    def is_active(self) -> bool:
+        """Get active status."""
+        return self._core is not None
+
+    @property
+    def is_established(self) -> bool:
+        """Get the connection status."""
+        return self._is_connected
 
     def _fetch(self) -> None:
         """
@@ -499,6 +498,7 @@ class OEFConnection(Connection):
             self.bridge.connect()
             self.in_thread.start()
             self.out_thread.start()
+            self._connected = True
 
     def disconnect(self) -> None:
         """
@@ -507,7 +507,7 @@ class OEFConnection(Connection):
         :return: None
         """
         self._stopped = True
-        if self.bridge.is_active():
+        if self.is_active():
             self.bridge.stop()
 
         self.in_thread.join()
@@ -515,11 +515,9 @@ class OEFConnection(Connection):
         self.in_thread = Thread(target=self.bridge.run)
         self.out_thread = Thread(target=self._fetch)
         self.bridge.disconnect()
-
-    @property
-    def is_established(self) -> bool:
-        """Get the connection status."""
-        return self.bridge.is_connected()
+        self._connected = False
+        self._core.stop()
+        self._core = None
 
     def send(self, envelope: Envelope):
         """

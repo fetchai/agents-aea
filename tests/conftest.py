@@ -27,6 +27,7 @@ import docker as docker
 import pytest
 from docker.models.containers import Container
 from oef.agents import OEFAgent
+from oef.core import AsyncioCore
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,7 @@ class OEFHealthCheck(object):
         """
         self.oef_addr = oef_addr
         self.oef_port = oef_port
+        self.core = None
 
     def run(self) -> bool:
         """
@@ -74,24 +76,24 @@ class OEFHealthCheck(object):
         result = False
         try:
             pbk = 'check'
-            print("Connecting to {}:{}".format(self.oef_addr, self.oef_port))
-            # core = AsyncioCore(logger=logger)  # OEF-SDK 0.6.1
-            # core.run_threaded()  # OEF-SDK 0.6.1
-            import asyncio
-            agent = OEFAgent(pbk, oef_addr=self.oef_addr, oef_port=self.oef_port, loop=asyncio.new_event_loop())
-            # agent = OEFAgent(pbk, oef_addr=self.addr, oef_port=self.port, core=core)  # OEF-SDK 0.6.1
+            logger.info("Connecting to {}:{}".format(self.oef_addr, self.oef_port))
+            core = AsyncioCore(logger=logger)
+            core.run_threaded()
+            self.core = core
+            logger.info("Core running. Trying to establish connection ...")
+            agent = OEFAgent(pbk, oef_addr=self.addr, oef_port=self.port, core=core)
             agent.connect()
+            logger.info("Connection established. Tearing down connection....")
             agent.disconnect()
-            # core.stop()  # OEF-SDK 0.6.1
-            print("OK!")
+
+            self.core.stop()
             result = True
             return result
         except Exception as e:
             print(str(e))
             return result
-        # finally:
-        # core.stop(). # OEF-SDK 0.6.1
-
+        finally:
+            self.core.stop()
 
 
 def _stop_oef_search_images():

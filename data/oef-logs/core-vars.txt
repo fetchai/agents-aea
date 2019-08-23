@@ -1,0 +1,108 @@
+# TYPE mtCore_comms_protopath_read_bytesConsumed_total counter
+mtCore_comms_protopath_read_bytesConsumed_total 0
+# TYPE mtCore_comms_protopath_read_bytesRequested_total counter
+mtCore_comms_protopath_read_bytesRequested_total 0
+# TYPE mtCore_comms_protopath_read_messagesHandled_total counter
+mtCore_comms_protopath_read_messagesHandled_total 0
+# TYPE mtCore_comms_protopath_send_bytesProduced_total counter
+mtCore_comms_protopath_send_bytesProduced_total 0
+# TYPE mtCore_comms_protopath_send_bytesRequested_total counter
+mtCore_comms_protopath_send_bytesRequested_total 0
+# TYPE mtCore_comms_protopath_send_messagesHandled_total counter
+mtCore_comms_protopath_send_messagesHandled_total 0
+# TYPE mtCore_futureTasks_poppedForRun_total counter
+mtCore_futureTasks_poppedForRun_total 2
+# TYPE mtCore_gauge_rss gauge
+mtCore_gauge_rss 8953856
+# TYPE mtCore_gauge_rss_mb gauge
+mtCore_gauge_rss_mb 8
+# TYPE mtCore_gauge_vsize gauge
+mtCore_gauge_vsize 22858956800
+# TYPE mtCore_gauge_vsize_mb gauge
+mtCore_gauge_vsize_mb 21800
+# TYPE mtCore_immediateTasks_poppedForRun_total counter
+mtCore_immediateTasks_poppedForRun_total 3
+# TYPE mtCore_network_Endpoint_total counter
+mtCore_network_Endpoint_total 2
+# TYPE mtCore_network_EndpointBase_total counter
+mtCore_network_EndpointBase_total 3
+# TYPE mtCore_network_EndpointSSL_total counter
+mtCore_network_EndpointSSL_total 1
+# TYPE mtCore_network_EndpointWebSocket_total counter
+mtCore_network_EndpointWebSocket_total 0
+# TYPE mtCore_network_OefAgentEndpoint_total counter
+mtCore_network_OefAgentEndpoint_total 2
+# TYPE mtCore_network_OefAgentEndpoint_heartbeats_maxOutstand_total counter
+mtCore_network_OefAgentEndpoint_heartbeats_maxOutstand_total 0
+# TYPE mtCore_network_OefAgentEndpoint_heartbeats_recvd_total counter
+mtCore_network_OefAgentEndpoint_heartbeats_recvd_total 0
+# TYPE mtCore_network_OefAgentEndpoint_heartbeats_sent_total counter
+mtCore_network_OefAgentEndpoint_heartbeats_sent_total 0
+# TYPE mtCore_network_accept_total counter
+mtCore_network_accept_total 2
+# TYPE mtCore_network_accepted_total counter
+mtCore_network_accepted_total 0
+# TYPE mtCore_network_accepterror_total counter
+mtCore_network_accepterror_total 0
+# TYPE mtCore_network_asio_ended_total counter
+mtCore_network_asio_ended_total 0
+# TYPE mtCore_network_asio_run_total counter
+mtCore_network_asio_run_total 10
+# TYPE mtCore_oefFunctionsEndpointClosed_total counter
+mtCore_oefFunctionsEndpointClosed_total 0
+# TYPE mtCore_search_query_tasksCreated_total counter
+mtCore_search_query_tasksCreated_total 0
+# TYPE mtCore_search_query_tasksReplied_total counter
+mtCore_search_query_tasksReplied_total 0
+# TYPE mtCore_search_query_tasksResolved_total counter
+mtCore_search_query_tasksResolved_total 0
+# TYPE mtCore_search_query_tasksSucceeded_total counter
+mtCore_search_query_tasksSucceeded_total 0
+# TYPE mtCore_search_query_tasksUnreplied_total counter
+mtCore_search_query_tasksUnreplied_total 0
+# TYPE mtCore_search_remove_tasksCreated_total counter
+mtCore_search_remove_tasksCreated_total 0
+# TYPE mtCore_search_remove_tasksErrored_total counter
+mtCore_search_remove_tasksErrored_total 0
+# TYPE mtCore_search_remove_tasksSucceeded_total counter
+mtCore_search_remove_tasksSucceeded_total 0
+# TYPE mtCore_search_update_tasksCreated_total counter
+mtCore_search_update_tasksCreated_total 0
+# TYPE mtCore_search_update_tasksErrored_total counter
+mtCore_search_update_tasksErrored_total 0
+# TYPE mtCore_search_update_tasksSucceeded_total counter
+mtCore_search_update_tasksSucceeded_total 0
+# TYPE mtCore_taskpool_gauge_futureTasks gauge
+mtCore_taskpool_gauge_futureTasks 1
+# TYPE mtCore_taskpool_gauge_runnableTasks gauge
+mtCore_taskpool_gauge_runnableTasks 0
+# TYPE mtCore_taskpool_gauge_runningTasks gauge
+mtCore_taskpool_gauge_runningTasks 0
+# TYPE mtCore_taskpool_gauge_sleepingTasks gauge
+mtCore_taskpool_gauge_sleepingTasks 1
+# TYPE mtCore_tasks_created_total counter
+mtCore_tasks_created_total 4
+# TYPE mtCore_tasks_destroyed_total counter
+mtCore_tasks_destroyed_total 2
+# TYPE mtCore_tasks_futured_total counter
+mtCore_tasks_futured_total 3
+# TYPE mtCore_tasks_movedToRunnable_total counter
+mtCore_tasks_movedToRunnable_total 3
+# TYPE mtCore_tasks_poppedForRun_total counter
+mtCore_tasks_poppedForRun_total 5
+# TYPE mtCore_tasks_run_cancelled_total counter
+mtCore_tasks_run_cancelled_total 0
+# TYPE mtCore_tasks_run_completed_total counter
+mtCore_tasks_run_completed_total 5
+# TYPE mtCore_tasks_run_deferred_total counter
+mtCore_tasks_run_deferred_total 0
+# TYPE mtCore_tasks_run_errored_total counter
+mtCore_tasks_run_errored_total 0
+# TYPE mtCore_tasks_run_exception_total counter
+mtCore_tasks_run_exception_total 0
+# TYPE mtCore_tasks_run_std::exception_total counter
+mtCore_tasks_run_std::exception_total 0
+# TYPE mtCore_tasks_suspended_total counter
+mtCore_tasks_suspended_total 1
+# TYPE status_linux_total counter
+status_linux_total 1
