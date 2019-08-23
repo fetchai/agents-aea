@@ -35,8 +35,7 @@ class DefaultSerializer(Serializer):
         """Encode a 'default' message into bytes."""
         body = {}
 
-        msg_type = msg.get("type")
-        assert msg_type in set(DefaultMessage.Type)
+        msg_type = DefaultMessage.Type(msg.get("type"))
         body["type"] = str(msg_type.value)
 
         if msg_type == DefaultMessage.Type.BYTES:
@@ -56,7 +55,7 @@ class DefaultSerializer(Serializer):
         body = {}
 
         msg_type = DefaultMessage.Type(json_body["type"])
-        body["type"] = msg_type
+        body["type"] = str(msg_type)
         if msg_type == DefaultMessage.Type.BYTES:
             content = base58.b58decode(json_body["content"].encode("utf-8"))
             body["content"] = content

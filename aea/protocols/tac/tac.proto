@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package fetch.oef.pb;
+
+import "google/protobuf/struct.proto";
+
+message StrIntPair {
+    string first = 1;
+    int32 second = 2;
+}
+
+message StrStrPair {
+    string first = 1;
+    string second = 2;
+}
+
+message TACController {
+
+    message Registered {
+    }
+    message Unregistered {
+    }
+    message Cancelled {
+    }
+
+    message GameData {
+        double money = 1;
+        repeated int32 endowment = 2;
+        repeated double utility_params = 3;
+        int32 nb_agents = 4;
+        int32 nb_goods = 5;
+        double tx_fee = 6;
+        repeated StrStrPair agent_pbk_to_name = 7;
+        repeated StrStrPair good_pbk_to_name = 8;
+    }
+
+    message TransactionConfirmation {
+        string transaction_id = 1;
+    }
+
+    message StateUpdate {
+        GameData initial_state = 1;
+        repeated TACAgent.Transaction txs = 2;
+    }
+
+    message Error {
+        enum ErrorCode {
+            GENERIC_ERROR = 0;
+            REQUEST_NOT_VALID = 1;
+            AGENT_PBK_ALREADY_REGISTERED = 2;
+            AGENT_NAME_ALREADY_REGISTERED = 3;
+            AGENT_NOT_REGISTERED = 4;
+            TRANSACTION_NOT_VALID = 5;
+            TRANSACTION_NOT_MATCHING = 6;
+            AGENT_NAME_NOT_IN_WHITELIST = 7;
+            COMPETITION_NOT_RUNNING = 8;
+        }
+
+        ErrorCode error_code = 1;
+        string error_msg = 2;
+        google.protobuf.Struct details = 3;
+    }
+
+}
+
+message TACAgent {
+
+    message Register {
+        string agent_name = 1;
+    }
+    message Unregister {
+    }
+
+    message Transaction {
+        string transaction_id = 1;
+        bool is_sender_buyer = 2;  // is the sender of this message a buyer?
+        string counterparty = 3;
+        double amount = 4;
+        repeated StrIntPair quantities = 5;
+    }
+
+    message GetStateUpdate {
+    }
+
+}
+
+message TACMessage {
+    oneof content{
+        TACAgent.Register register = 1;
+        TACAgent.Unregister unregister = 2;
+        TACAgent.Transaction transaction = 3;
+        TACAgent.GetStateUpdate get_state_update = 4;
+        TACController.Registered registered = 5;
+        TACController.Unregistered unregistered = 6;
+        TACController.Cancelled cancelled = 7;
+        TACController.GameData game_data = 8;
+        TACController.TransactionConfirmation transaction_confirmation = 9;
+        TACController.StateUpdate state_update = 10;
+        TACController.Error error = 11;
+    }
+}
