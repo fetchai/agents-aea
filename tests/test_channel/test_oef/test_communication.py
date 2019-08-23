@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF communication using an OEF."""
-import time
 
 import pytest
 from oef.query import Eq
@@ -37,10 +36,11 @@ class TestOEF:
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
-        pass
+        """Start an oef node."""
 
     @classmethod
     def setup_class(cls):
+        """Set the test up."""
         cls.crypto1 = Crypto()
         cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
         cls.mailbox1.connect()
@@ -68,6 +68,7 @@ class TestOEF:
 
     @classmethod
     def teardown_class(cls):
+        """Teardowm the test."""
         cls.mailbox1.disconnect()
 
 
@@ -76,10 +77,12 @@ class TestFIPA:
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
+        """Activate the OEF Node fixture."""
         pass
 
     @classmethod
     def setup_class(cls):
+        """Set up the test class."""
         cls.crypto1 = Crypto()
         cls.crypto2 = Crypto()
         cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
@@ -152,5 +155,6 @@ class TestFIPA:
 
     @classmethod
     def teardown_class(cls):
+        """Teardown the test."""
         cls.mailbox1.disconnect()
         cls.mailbox2.disconnect()

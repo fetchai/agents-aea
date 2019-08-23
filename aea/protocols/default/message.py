@@ -36,6 +36,10 @@ class DefaultMessage(Message):
         BYTES = "bytes"
         ERROR = "error"
 
+        def __str__(self):
+            """Get the string representation."""
+            return self.value
+
     def __init__(self, type: Optional[Type] = None,
                  **kwargs):
         """
@@ -43,4 +47,4 @@ class DefaultMessage(Message):
 
         :param type: the type.
         """
-        super().__init__(type=type, **kwargs)
+        super().__init__(type=str(type), **kwargs)
