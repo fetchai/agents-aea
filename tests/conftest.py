@@ -93,7 +93,6 @@ class OEFHealthCheck(object):
         # core.stop(). # OEF-SDK 0.6.1
 
 
-
 def _stop_oef_search_images():
     client = docker.from_env()
     for container in client.containers.list():
