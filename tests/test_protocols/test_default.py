@@ -19,38 +19,22 @@
 
 """This module contains the tests of the messages module."""
 
-from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
 
-def test_simple_bytes_serialization():
+def test_default_bytes_serialization():
     """Test that the serialization for the 'simple' protocol works for the BYTES message."""
-    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-    msg_bytes = DefaultSerializer().encode(msg)
-    envelope = Envelope(to="receiver", sender="sender", protocol_id="simple", message=msg_bytes)
-    envelope_bytes = envelope.encode()
-
-    actual_envelope = Envelope.decode(envelope_bytes)
-    expected_envelope = envelope
-    assert expected_envelope == actual_envelope
-
-    actual_msg = DefaultSerializer().decode(actual_envelope.message)
-    expected_msg = msg
+    expected_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    msg_bytes = DefaultSerializer().encode(expected_msg)
+    actual_msg = DefaultSerializer().decode(msg_bytes)
     assert expected_msg == actual_msg
 
 
-def test_simple_error_serialization():
+def test_default_error_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""
     msg = DefaultMessage(type=DefaultMessage.Type.ERROR, error_code=-1, error_msg="An error")
     msg_bytes = DefaultSerializer().encode(msg)
-    envelope = Envelope(to="receiver", sender="sender", protocol_id="simple", message=msg_bytes)
-    envelope_bytes = envelope.encode()
-
-    actual_envelope = Envelope.decode(envelope_bytes)
-    expected_envelope = envelope
-    assert expected_envelope == actual_envelope
-
-    actual_msg = DefaultSerializer().decode(actual_envelope.message)
+    actual_msg = DefaultSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
