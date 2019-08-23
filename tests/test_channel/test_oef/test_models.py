@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the OEF channel."""
+"""This test module contains the tests for the OEF models."""
 import pickle
 
 import pytest

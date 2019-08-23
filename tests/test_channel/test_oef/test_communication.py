@@ -1,0 +1,112 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This test module contains the tests for the OEF communication using an OEF."""
+import pytest
+
+from aea.channel.oef import OEFMailBox
+from aea.crypto.base import Crypto
+from aea.protocols.fipa.message import FIPAMessage
+from aea.protocols.fipa.serialization import FIPASerializer
+from aea.protocols.oef.models import Description, DataModel, Attribute
+
+
+class TestFIPA:
+    """Test that the FIPA protocols is correctly implemented by the OEF channel."""
+
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        pass
+
+    @classmethod
+    def setup_class(cls):
+        cls.crypto1 = Crypto()
+        cls.crypto2 = Crypto()
+        cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.mailbox2 = OEFMailBox(cls.crypto2.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.mailbox1.connect()
+        cls.mailbox2.connect()
+
+    def test_cfp(self):
+        """Test that a CFP can be sent correctly."""
+        cfp_none = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=None)
+        cfp_bytes = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=b"hello")
+
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_none))
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_bytes))
+
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        expected_cfp_none = FIPASerializer().decode(envelope.message)
+        assert expected_cfp_none == cfp_none
+
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        expected_cfp_bytes = FIPASerializer().decode(envelope.message)
+        assert expected_cfp_bytes == cfp_bytes
+
+    def test_propose(self):
+        """Test that a Propose can be sent correctly."""
+        propose_empty = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.PROPOSE, proposal=[])
+        propose_descriptions = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.PROPOSE,
+                                           proposal=[
+                                               Description({"foo": "bar"}, DataModel("foobar", [Attribute("foo", str, True)])),
+                                           ])
+
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(propose_empty))
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(propose_descriptions))
+
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        expected_propose_empty = FIPASerializer().decode(envelope.message)
+        assert expected_propose_empty == propose_empty
+
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        expected_propose_descriptions = FIPASerializer().decode(envelope.message)
+        assert expected_propose_descriptions == propose_descriptions
+
+    def test_accept(self):
+        """Test that an Accept can be sent correctly."""
+        accept = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(accept))
+
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        expected_accept = FIPASerializer().decode(envelope.message)
+        assert expected_accept == accept
+
+    def test_match_accept(self):
+        """Test that a match accept can be sent correctly."""
+        # TODO since the OEF SDK doesn't support the match accept, we have to use a fixed message id!
+        match_accept = FIPAMessage(message_id=4, dialogue_id=0, target=3, performative=FIPAMessage.Performative.MATCH_ACCEPT)
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(match_accept))
+
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        expected_match_accept = FIPASerializer().decode(envelope.message)
+        assert expected_match_accept == match_accept
+
+    def test_decline(self):
+        """Test that a Decline can be sent correctly."""
+        decline = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.DECLINE)
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(decline))
+
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        expected_decline = FIPASerializer().decode(envelope.message)
+        assert expected_decline == decline
+
+    @classmethod
+    def teardown_class(cls):
+        cls.mailbox1.disconnect()
+        cls.mailbox2.disconnect()
