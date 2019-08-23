@@ -18,17 +18,61 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF communication using an OEF."""
+import time
+
 import pytest
+from oef.query import Eq
 
 from aea.channel.oef import OEFMailBox
 from aea.crypto.base import Crypto
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Description, DataModel, Attribute
+from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.models import Description, DataModel, Attribute, Query, Constraint
+from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+
+
+class TestOEF:
+    """Test that the OEF protocol is correctly implemented by the OEF channel."""
+
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        pass
+
+    @classmethod
+    def setup_class(cls):
+        cls.crypto1 = Crypto()
+        cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.mailbox1.connect()
+
+    def test_search_services(self):
+        """Test that a search services request can be sent correctly."""
+        request_id = 1
+        data_model = DataModel("foobar", [Attribute("foo", str, True)])
+        search_query = Query([Constraint("foo", Eq("bar"))], model=data_model)
+        search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id, query=search_query)
+        self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
+
+        envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+        search_result = OEFSerializer().decode(envelope.message)
+        assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == 1
+
+        request_id = 2
+        search_query_empty_model = Query([Constraint("foo", Eq("bar"))], model=None)
+        search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id, query=search_query_empty_model)
+        self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
+
+        envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+        search_result = OEFSerializer().decode(envelope.message)
+        assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == 2
+
+    @classmethod
+    def teardown_class(cls):
+        cls.mailbox1.disconnect()
 
 
 class TestFIPA:
-    """Test that the FIPA protocols is correctly implemented by the OEF channel."""
+    """Test that the FIPA protocol is correctly implemented by the OEF channel."""
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
