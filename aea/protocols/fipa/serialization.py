@@ -21,8 +21,6 @@
 """Serialization for the FIPA protocol."""
 import pickle
 
-from google.protobuf.struct_pb2 import Struct
-
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
 from aea.protocols.fipa import fipa_pb2
