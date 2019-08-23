@@ -16,11 +16,13 @@ tox-pipenv = "*"
 pytest-cov = "*"
 flake8-docstrings = "*"
 pygments = "*"
+docker = "*"
 
 [packages]
 cryptography = "*"
 base58 = "*"
 oef = {version = "==0.6.0",index = "test-pypi"}
+docker = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,0 +1,149 @@
+{
+  "host": "127.0.0.1",
+  "search_key": "London-search",
+  "search_port": 20000,
+  "search_broadcast_cache_lifetime_sec": 6,
+  "director_port": 40000,
+  "html_dir": "api/src/resources/website",
+  "prometheus_api_path": "/metrics",
+  "prometheus_log_file": "./fetch-logs/core-vars.txt",
+  "search_prometheus_log_file": "./fetch-logs/search-vars.txt",
+  "http_port": 7500,
+  "log_dir": "./fetch-logs/",
+  "search_log": "/logs/search.log",
+  "core_log": "/logs/core.log",
+  "ssl_certificate": "",
+  "core": {
+    "core_binary": "/oef-mt-core/bazel-bin/mt-core/main/src/cpp/app",
+     "config": {
+      "core_key": "CoreKey",
+      "core_uri": "tcp://127.0.0.1:10000",
+      "ws_uri": "",
+      "ssl_uri": "ssl://127.0.0.1:15000",
+      "white_list_file":"",
+      "core_cert_pk_file": "/app/ssl/core.pem",
+      "core_pubkey_file": "/app/ssl/core_pub.pem",
+      "tmp_dh_file": "/app/ssl/dh2048.pem",
+      "search_uri": "tcp://127.0.0.1:20000",
+      "tasks_thread_count": 10,
+      "comms_thread_count": 10,
+      "karma_policy": {
+      },
+      "prometheus_log_interval": 3,
+      "prometheus_log_file": "/logs/core-vars.txt"
+    }
+  },
+  "search_peers": ["KEY:HOST:PORT"],
+   "bootstrap": {
+    "bootstrap-url": "",
+    "network-name": "oeftestnet",
+    "client-name": "oef-node",
+    "client-version": "0.1.0",
+    "remote-host": "$EXTERNAL_HOSTNAME",
+    "remote-port": -1,
+    "private-key": "",
+    "user-token": "",
+    "notify-period-in-sec": 180
+  },
+  "state": {
+    "file": "/storage/state.json",
+    "fields": ["bootstrap:private-key"]
+  },
+  "search_config": {
+    "search_prometheus_log_file": "/logs/search-vars.txt",
+    "daps": {
+      "network_search": {
+        "class": "DapERNetwork",
+        "config": {
+          "module": "dap_e_r_network.src.python.DapERNetwork",
+          "structure": {
+            "locations": {
+            }
+          }
+        }
+      },
+      "geo_search": {
+        "class": "DapGeo",
+        "config": {
+          "module": "dap_2d_geo.src.python.DapGeo",
+          "structure": {
+            "location": {
+              "location.location": {
+                "type": "location",
+                "options": [
+                  "plane",
+                  "os-grid"
+                ]
+              },
+              "latlon": {
+                "latlon.location": {
+                  "type": "location",
+                  "options": [
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "address_registry": {
+        "class": "AddressRegistry",
+        "config": {
+          "module": "dap_in_memory.src.python.AddressRegistry",
+          "structure": {
+            "address_registry_table": {
+              "address_field": "address"
+            }
+          }
+        }
+      },
+      "in_memory_dap": {
+        "class": "exe.InMemoryDap",
+        "config": {
+          "binary": "cpp_dap_in_memory/src/cpp/cpp_dap_in_memory_server",
+          "host": "127.0.0.1",
+          "port": 30000,
+          "structure": {
+            "value_table": {
+              "field": "string"
+            }
+          }
+        }
+      },
+      "attrs": {
+        "class": "DapAttributeStore",
+        "config": {
+          "module": "dap_attribute_store.src.python.DapAttributeStore",
+          "structure": {
+          },
+          "options": [
+            "lazy"
+          ]
+        }
+      },
+      "uniquer": {
+        "class": "DapUniquer",
+        "config": {
+          "module": "uniqer.src.python.DapUniquer",
+          "structure": {
+          }
+        }
+      },
+      "data_model_searcher": {
+        "class": "SearchEngine",
+        "config": {
+          "module": "ai_search_engine.src.python.SearchEngine",
+          "structure": {
+            "data_model_table": {
+              "data_model": "embedding"
+            }
+          }
+        }
+      }
+    },
+    "attribute_tbfld_map": {
+      "latlon": ["latlon", "latlon"],
+      "NETWORK_ADDRESS": ["address_registry_table", "address_field"]
+    }
+  }
+}

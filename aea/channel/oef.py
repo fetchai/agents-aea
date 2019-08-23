@@ -22,6 +22,7 @@
 import asyncio
 import datetime
 import logging
+import pickle
 from asyncio import AbstractEventLoop
 from queue import Empty, Queue
 from threading import Thread
@@ -60,7 +61,7 @@ class OEFObjectTranslator:
     @classmethod
     def to_oef_description(cls, desc: Description) -> OEFDescription:
         """From our description to OEF description."""
-        oef_data_model = cls.to_oef_data_model(desc.data_model)
+        oef_data_model = cls.to_oef_data_model(desc.data_model) if desc.data_model is not None else None
         return OEFDescription(desc.values, oef_data_model)
 
     @classmethod
@@ -77,7 +78,7 @@ class OEFObjectTranslator:
     @classmethod
     def to_oef_query(cls, query: Query) -> OEFQuery:
         """From our query to OEF query."""
-        oef_data_model = cls.to_oef_data_model(query.model)
+        oef_data_model = cls.to_oef_data_model(query.model) if query.model is not None else None
         constraints = [cls.to_oef_constraint_expr(c) for c in query.constraints]
         return OEFQuery(constraints, oef_data_model)
 
@@ -98,7 +99,7 @@ class OEFObjectTranslator:
     @classmethod
     def from_oef_description(cls, oef_desc: OEFDescription) -> Description:
         """From an OEF description to our description."""
-        data_model = cls.from_oef_data_model(oef_desc.data_model)
+        data_model = cls.from_oef_data_model(oef_desc.data_model) if oef_desc.data_model is not None else None
         return Description(oef_desc.values, data_model=data_model)
 
     @classmethod
@@ -115,7 +116,7 @@ class OEFObjectTranslator:
     @classmethod
     def from_oef_query(cls, oef_query: OEFQuery) -> Query:
         """From our query to OrOEF query."""
-        data_model = cls.from_oef_data_model(oef_query.model)
+        data_model = cls.from_oef_data_model(oef_query.model) if oef_query.model is not None else None
         constraints = [cls.from_oef_constraint_expr(c) for c in oef_query.constraints]
         return Query(constraints, data_model)
 
@@ -255,8 +256,11 @@ class OEFChannel(OEFAgent):
         :param proposals: the proposals.
         :return: None
         """
-        if type(proposals) == list:
+        if type(proposals) == bytes:
+            proposals = pickle.loads(proposals)  # type: List[Description]
             proposals = [OEFObjectTranslator.from_oef_description(p) for p in proposals]
+        else:
+            assert False  # No support for non-bytes proposals.
 
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
@@ -432,6 +436,7 @@ class OEFChannel(OEFAgent):
             self.send_cfp(id, dialogue_id, destination, target, query)
         elif performative == FIPAMessage.Performative.PROPOSE:
             proposal = fipa_message.get("proposal")
+            proposal = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])
             self.send_propose(id, dialogue_id, destination, target, proposal)
         elif performative == FIPAMessage.Performative.ACCEPT:
             self.send_accept(id, dialogue_id, destination, target)

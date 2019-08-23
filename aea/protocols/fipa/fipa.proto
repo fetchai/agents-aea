@@ -10,7 +10,6 @@ message FIPAMessage{
         message Nothing {
         }
         oneof query{
-            google.protobuf.Struct json = 1;
             bytes bytes = 2;
             Nothing nothing = 3;
         }

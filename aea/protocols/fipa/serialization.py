@@ -21,8 +21,6 @@
 """Serialization for the FIPA protocol."""
 import pickle
 
-from google.protobuf.struct_pb2 import Struct
-
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
 from aea.protocols.fipa import fipa_pb2
@@ -47,8 +45,6 @@ class FIPASerializer(Serializer):
             if query is None:
                 nothing = fipa_pb2.FIPAMessage.CFP.Nothing()
                 performative.nothing.CopyFrom(nothing)
-            elif type(query) == dict:
-                performative.json.update(query)
             elif type(query) == bytes:
                 performative.bytes = query
             else:
@@ -91,10 +87,6 @@ class FIPASerializer(Serializer):
             query_type = fipa_pb.cfp.WhichOneof("query")
             if query_type == "nothing":
                 query = None
-            elif query_type == "json":
-                query_pb = Struct()
-                query_pb.update(fipa_pb.cfp.json)
-                query = dict(query_pb)
             elif query_type == "bytes":
                 query = fipa_pb.cfp.bytes
             else:

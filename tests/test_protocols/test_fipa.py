@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the FIPA protocol."""
+import base64
+import json
 
 from aea.mail.base import Envelope
 from aea.protocols.fipa.message import FIPAMessage
@@ -27,7 +29,8 @@ from aea.protocols.oef.models import Description
 
 def test_fipa_cfp_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
-    msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query={"foo": "bar"})
+    query = base64.b64encode(json.dumps({"foo": "bar"}).encode("utf-8"))
+    msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=query)
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver", sender="sender", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
     envelope_bytes = envelope.encode()
