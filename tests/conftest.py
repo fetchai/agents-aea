@@ -95,6 +95,7 @@ class OEFHealthCheck(object):
         finally:
             self.core.stop()
 
+
 def _stop_oef_search_images():
     """Stop the OEF search image."""
     client = docker.from_env()
