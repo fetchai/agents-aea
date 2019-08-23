@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,4 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The test protocols module contains the tests of the AEA protocols."""
+"""This module contains the support resources for the Gym protocol."""

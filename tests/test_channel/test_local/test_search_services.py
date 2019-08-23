@@ -109,6 +109,7 @@ class TestSimpleSearchResult:
 
     @classmethod
     def teardown_class(cls):
+        """Teardown the test."""
         cls.mailbox1.disconnect()
 
 
@@ -166,6 +167,6 @@ class TestFilteredSearchResult:
 
     @classmethod
     def teardown_class(cls):
+        """Teardown the test."""
         cls.mailbox1.disconnect()
         cls.mailbox2.disconnect()
-
