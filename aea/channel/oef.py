@@ -364,16 +364,50 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        if envelope.protocol_id == "oef":
-            self.send_oef_message(envelope)
+        if envelope.protocol_id == "default":
+            self.send_default_message(envelope)
         elif envelope.protocol_id == "fipa":
             self.send_fipa_message(envelope)
-        elif envelope.protocol_id == "bytes":
-            self.send_bytes_message(envelope)
-        elif envelope.protocol_id == "default":
+        elif envelope.protocol_id == "oef":
+            self.send_oef_message(envelope)
+        elif envelope.protocol_id == "tac":
             self.send_default_message(envelope)
         else:
+            logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
             raise ValueError("Cannot send message.")
+
+    def send_default_message(self, envelope: Envelope):
+        """Send a 'default' message."""
+        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
+
+    def send_fipa_message(self, envelope: Envelope) -> None:
+        """
+        Send fipa message handler.
+
+        :param envelope: the message.
+        :return: None
+        """
+        fipa_message = FIPASerializer().decode(envelope.message)
+        id = fipa_message.get("id")
+        dialogue_id = fipa_message.get("dialogue_id")
+        destination = envelope.to
+        target = fipa_message.get("target")
+        performative = FIPAMessage.Performative(fipa_message.get("performative"))
+        if performative == FIPAMessage.Performative.CFP:
+            query = fipa_message.get("query")
+            self.send_cfp(id, dialogue_id, destination, target, query)
+        elif performative == FIPAMessage.Performative.PROPOSE:
+            proposal = fipa_message.get("proposal")
+            proposal = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])
+            self.send_propose(id, dialogue_id, destination, target, proposal)
+        elif performative == FIPAMessage.Performative.ACCEPT:
+            self.send_accept(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT:
+            self.send_accept(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.DECLINE:
+            self.send_decline(id, dialogue_id, destination, target)
+        else:
+            raise ValueError("OEF FIPA message not recognized.")
 
     def send_oef_message(self, envelope: Envelope) -> None:
         """
@@ -417,43 +451,6 @@ class OEFChannel(OEFAgent):
             self.search_services(id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
-
-    def send_fipa_message(self, envelope: Envelope) -> None:
-        """
-        Send fipa message handler.
-
-        :param envelope: the message.
-        :return: None
-        """
-        fipa_message = FIPASerializer().decode(envelope.message)
-        id = fipa_message.get("id")
-        dialogue_id = fipa_message.get("dialogue_id")
-        destination = envelope.to
-        target = fipa_message.get("target")
-        performative = FIPAMessage.Performative(fipa_message.get("performative"))
-        if performative == FIPAMessage.Performative.CFP:
-            query = fipa_message.get("query")
-            self.send_cfp(id, dialogue_id, destination, target, query)
-        elif performative == FIPAMessage.Performative.PROPOSE:
-            proposal = fipa_message.get("proposal")
-            proposal = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])
-            self.send_propose(id, dialogue_id, destination, target, proposal)
-        elif performative == FIPAMessage.Performative.ACCEPT:
-            self.send_accept(id, dialogue_id, destination, target)
-        elif performative == FIPAMessage.Performative.MATCH_ACCEPT:
-            self.send_accept(id, dialogue_id, destination, target)
-        elif performative == FIPAMessage.Performative.DECLINE:
-            self.send_decline(id, dialogue_id, destination, target)
-        else:
-            raise ValueError("OEF FIPA message not recognized.")
-
-    def send_bytes_message(self, envelope: Envelope):
-        """Send a 'bytes' message."""
-        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
-
-    def send_default_message(self, envelope: Envelope):
-        """Send a 'default' message."""
-        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
 
 
 class OEFConnection(Connection):
