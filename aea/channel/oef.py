@@ -379,13 +379,18 @@ class OEFChannel(OEFAgent):
             service_description = oef_message.get("service_description")
             service_id = oef_message.get("service_id")
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
-            self.register_service(id, oef_service_description.values, service_id)
+            self.register_service(id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             id = oef_message.get("id")
             service_description = oef_message.get("service_description")
             service_id = oef_message.get("service_id")
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
-            self.unregister_service(id, oef_service_description.values, service_id)
+            self.unregister_service(id, oef_service_description, service_id)
+        elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
+            id = oef_message.get("id")
+            query = oef_message.get("query")
+            oef_query = OEFObjectTranslator.to_oef_query(query)
+            self.search_agents(id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             id = oef_message.get("id")
             query = oef_message.get("query")

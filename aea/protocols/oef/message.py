@@ -37,6 +37,7 @@ class OEFMessage(Message):
         REGISTER_SERVICE = "register_service"
         UNREGISTER_SERVICE = "unregister_service"
         SEARCH_SERVICES = "search_services"
+        SEARCH_AGENTS = "search_agents"
         OEF_ERROR = "oef_error"
         DIALOGUE_ERROR = "dialogue_error"
         SEARCH_RESULT = "search_result"
@@ -50,12 +51,10 @@ class OEFMessage(Message):
 
         REGISTER_SERVICE = 0
         UNREGISTER_SERVICE = 1
-        REGISTER_DESCRIPTION = 2
-        UNREGISTER_DESCRIPTION = 3
-        SEARCH_SERVICES = 4
-        SEARCH_SERVICES_WIDE = 5
-        SEARCH_AGENTS = 6
-        SEND_MESSAGE = 7
+        SEARCH_SERVICES = 2
+        SEARCH_SERVICES_WIDE = 3
+        SEARCH_AGENTS = 4
+        SEND_MESSAGE = 5
 
         OTHER = 10000
 
