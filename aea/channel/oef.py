@@ -361,10 +361,6 @@ class OEFChannel(OEFAgent):
             logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
             raise ValueError("Cannot send message.")
 
-    def send_default_message(self, envelope: Envelope):
-        """Send a 'default' message."""
-        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
-
     def send_oef_message(self, envelope: Envelope) -> None:
         """
         Send oef message handler.

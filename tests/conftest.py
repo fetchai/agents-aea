@@ -23,7 +23,6 @@ import inspect
 import logging
 import os
 import time
-from threading import Thread
 from typing import Optional
 
 import docker as docker
@@ -76,22 +75,21 @@ class OEFHealthCheck(object):
         self._core = AsyncioCore(loop=self._loop)
 
     def exception_handler(self, loop, d):
+        """Handle exception during a connection attempt."""
         print("An error occurred. Details: {}".format(d))
         self._stop = True
 
     def on_connect_ok(self, conn=None, url=None, ex=None, conn_name=None):
+        """Handle a successful connection."""
         print("Connection OK!")
         self._result = True
         self._stop = True
 
     def on_connect_fail(self, conn=None, url=None, ex=None, conn_name=None):
+        """Handle a connection failure."""
         print("Connection failed. {}".format(ex))
         self._result = False
         self._stop = True
-
-    async def stop_after(self, when):
-        await asyncio.sleep(when)
-        self._loop.stop()
 
     async def _run(self) -> bool:
         """
@@ -133,6 +131,7 @@ class OEFHealthCheck(object):
         :return: True if the check is successful, False otherwise.
         """
         return self._loop.run_until_complete(self._run())
+
 
 def _stop_oef_search_images():
     """Stop the OEF search image."""
