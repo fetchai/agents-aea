@@ -134,8 +134,8 @@ class OEFHealthCheck(object):
         """
         return self._loop.run_until_complete(self._run())
 
-
 def _stop_oef_search_images():
+    """Stop the OEF search image."""
     client = docker.from_env()
     for container in client.containers.list():
         if "fetchai/oef-search:latest" in container.image.tags:
@@ -143,6 +143,7 @@ def _stop_oef_search_images():
 
 
 def _wait_for_oef(max_attempts: int = 15, sleep_rate: float = 1.0):
+    """Wait until the OEF is up."""
     success = False
     attempt = 0
     while not success and attempt < max_attempts:

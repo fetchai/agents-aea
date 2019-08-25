@@ -349,16 +349,21 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        if envelope.protocol_id == "oef":
-            self.send_oef_message(envelope)
+        if envelope.protocol_id == "default":
+            self.send_default_message(envelope)
         elif envelope.protocol_id == "fipa":
             self.send_fipa_message(envelope)
-        elif envelope.protocol_id == "bytes":
-            self.send_bytes_message(envelope)
-        elif envelope.protocol_id == "default":
+        elif envelope.protocol_id == "oef":
+            self.send_oef_message(envelope)
+        elif envelope.protocol_id == "tac":
             self.send_default_message(envelope)
         else:
+            logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
             raise ValueError("Cannot send message.")
+
+    def send_default_message(self, envelope: Envelope):
+        """Send a 'default' message."""
+        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
 
     def send_oef_message(self, envelope: Envelope) -> None:
         """
