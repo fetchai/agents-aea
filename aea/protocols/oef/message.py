@@ -35,11 +35,8 @@ class OEFMessage(Message):
         """OEF Message types."""
 
         REGISTER_SERVICE = "register_service"
-        REGISTER_AGENT = "register_agent"
         UNREGISTER_SERVICE = "unregister_service"
-        UNREGISTER_AGENT = "unregister_agent"
         SEARCH_SERVICES = "search_services"
-        SEARCH_AGENTS = "search_agents"
         OEF_ERROR = "oef_error"
         DIALOGUE_ERROR = "dialogue_error"
         SEARCH_RESULT = "search_result"
@@ -83,18 +80,11 @@ class OEFMessage(Message):
                 service_id = self.get("service_id")
                 assert isinstance(service_description, Description)
                 assert isinstance(service_id, str)
-            elif oef_type == OEFMessage.Type.REGISTER_AGENT:
-                assert self.is_set("id")
-                assert self.is_set("agent_description")
-                agent_description = self.get("agent_description")
-                assert isinstance(agent_description, Description)
             elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
                 assert self.is_set("id")
                 assert self.is_set("service_id")
                 service_id = self.get("service_id")
                 assert isinstance(service_id, str)
-            elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
-                assert self.is_set("id")
             elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
                 assert self.is_set("id")
                 assert self.is_set("query")

@@ -226,7 +226,7 @@ class OEFChannel(OEFAgent):
                           dialogue_id=dialogue_id,
                           target=target,
                           performative=FIPAMessage.Performative.CFP,
-                          query=query)
+                          query=query if query != b"" else None)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
@@ -244,9 +244,8 @@ class OEFChannel(OEFAgent):
         """
         if type(proposals) == bytes:
             proposals = pickle.loads(proposals)  # type: List[Description]
-            proposals = [OEFObjectTranslator.from_oef_description(p) for p in proposals]
         else:
-            assert False  # No support for non-bytes proposals.
+            raise ValueError("No support for non-bytes proposals.")
 
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
@@ -375,26 +374,13 @@ class OEFChannel(OEFAgent):
             service_description = oef_message.get("service_description")
             service_id = oef_message.get("service_id")
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
-            self.register_service(id, oef_service_description, service_id)
-        elif oef_type == OEFMessage.Type.REGISTER_AGENT:
-            id = oef_message.get("id")
-            agent_description = oef_message.get("agent_description")
-            oef_agent_description = OEFObjectTranslator.to_oef_description(agent_description)
-            self.register_agent(id, oef_agent_description)
+            self.register_service(id, oef_service_description.values, service_id)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             id = oef_message.get("id")
             service_description = oef_message.get("service_description")
             service_id = oef_message.get("service_id")
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
-            self.unregister_service(id, oef_service_description, service_id)
-        elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
-            id = oef_message.get("id")
-            self.unregister_agent(id)
-        elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-            id = oef_message.get("id")
-            query = oef_message.get("query")
-            oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.search_agents(id, oef_query)
+            self.unregister_service(id, oef_service_description.values, service_id)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             id = oef_message.get("id")
             query = oef_message.get("query")
@@ -419,10 +405,12 @@ class OEFChannel(OEFAgent):
         performative = FIPAMessage.Performative(fipa_message.get("performative"))
         if performative == FIPAMessage.Performative.CFP:
             query = fipa_message.get("query")
+            if query is None:
+                query = b""
             self.send_cfp(id, dialogue_id, destination, target, query)
         elif performative == FIPAMessage.Performative.PROPOSE:
             proposal = fipa_message.get("proposal")
-            proposal = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])
+            proposal = pickle.dumps(proposal)
             self.send_propose(id, dialogue_id, destination, target, proposal)
         elif performative == FIPAMessage.Performative.ACCEPT:
             self.send_accept(id, dialogue_id, destination, target)
@@ -472,7 +460,7 @@ class OEFConnection(Connection):
     @property
     def is_established(self) -> bool:
         """Get the connection status."""
-        return self._is_connected
+        return self._connected
 
     def _fetch(self) -> None:
         """
@@ -507,7 +495,7 @@ class OEFConnection(Connection):
         :return: None
         """
         self._stopped = True
-        if self.is_active():
+        if self.is_active:
             self.bridge.stop()
 
         self.in_thread.join()

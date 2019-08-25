@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF communication using an OEF."""
-import time
 
 import pytest
 from oef.query import Eq
@@ -30,6 +29,15 @@ from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, DataModel, Attribute, Query, Constraint
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+
+
+def test_connection(network_node):
+    """Test that a mailbox can connect to the OEF."""
+    crypto = Crypto()
+    mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
+    mailbox.connect()
+
+    mailbox.disconnect()
 
 
 class TestOEF:
@@ -89,35 +97,28 @@ class TestFIPA:
 
     def test_cfp(self):
         """Test that a CFP can be sent correctly."""
-        cfp_none = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=None)
         cfp_bytes = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=b"hello")
-
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_none))
         self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_bytes))
-
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
-        expected_cfp_none = FIPASerializer().decode(envelope.message)
-        assert expected_cfp_none == cfp_none
-
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        envelope = self.mailbox2.inbox.get(block=True, timeout=5.0)
         expected_cfp_bytes = FIPASerializer().decode(envelope.message)
         assert expected_cfp_bytes == cfp_bytes
+
+        cfp_none = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=None)
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_none))
+        envelope = self.mailbox2.inbox.get(block=True, timeout=5.0)
+        expected_cfp_none = FIPASerializer().decode(envelope.message)
+        assert expected_cfp_none == cfp_none
 
     def test_propose(self):
         """Test that a Propose can be sent correctly."""
         propose_empty = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.PROPOSE, proposal=[])
-        propose_descriptions = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.PROPOSE,
-                                           proposal=[
-                                               Description({"foo": "bar"}, DataModel("foobar", [Attribute("foo", str, True)])),
-                                           ])
-
         self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(propose_empty))
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(propose_descriptions))
-
         envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
         expected_propose_empty = FIPASerializer().decode(envelope.message)
         assert expected_propose_empty == propose_empty
 
+        propose_descriptions = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.PROPOSE, proposal=[Description({"foo": "bar"}, DataModel("foobar", [Attribute("foo", str, True)]))])
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(propose_descriptions))
         envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
         expected_propose_descriptions = FIPASerializer().decode(envelope.message)
         assert expected_propose_descriptions == propose_descriptions
@@ -126,7 +127,6 @@ class TestFIPA:
         """Test that an Accept can be sent correctly."""
         accept = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(accept))
-
         envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
         expected_accept = FIPASerializer().decode(envelope.message)
         assert expected_accept == accept
@@ -136,7 +136,6 @@ class TestFIPA:
         # TODO since the OEF SDK doesn't support the match accept, we have to use a fixed message id!
         match_accept = FIPAMessage(message_id=4, dialogue_id=0, target=3, performative=FIPAMessage.Performative.MATCH_ACCEPT)
         self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(match_accept))
-
         envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
         expected_match_accept = FIPASerializer().decode(envelope.message)
         assert expected_match_accept == match_accept
@@ -145,7 +144,6 @@ class TestFIPA:
         """Test that a Decline can be sent correctly."""
         decline = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.DECLINE)
         self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(decline))
-
         envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
         expected_decline = FIPASerializer().decode(envelope.message)
         assert expected_decline == decline

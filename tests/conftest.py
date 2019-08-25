@@ -18,16 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """Conftest module for Pytest."""
+import asyncio
 import inspect
 import logging
 import os
 import time
+from threading import Thread
+from typing import Optional
 
 import docker as docker
 import pytest
 from docker.models.containers import Container
-from oef.agents import OEFAgent
-from oef.core import AsyncioCore
+from oef.agents import AsyncioCore, Connection
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +58,7 @@ def oef_port() -> int:
 class OEFHealthCheck(object):
     """A health check class."""
 
-    def __init__(self, oef_addr: str, oef_port: int):
+    def __init__(self, oef_addr: str, oef_port: int, loop: Optional[asyncio.AbstractEventLoop] = None):
         """
         Initialize.
 
@@ -65,35 +67,72 @@ class OEFHealthCheck(object):
         """
         self.oef_addr = oef_addr
         self.oef_port = oef_port
-        self.core = None
 
-    def run(self) -> bool:
-        """
-        Run the check.
+        self._result = False
+        self._stop = False
+        self._conn = None
+        self._loop = asyncio.get_event_loop() if loop is None else loop
+        self._loop.set_exception_handler(self.exception_handler)
+        self._core = AsyncioCore(loop=self._loop)
 
-        :return:
+    def exception_handler(self, loop, d):
+        print("An error occurred. Details: {}".format(d))
+        self._stop = True
+
+    def on_connect_ok(self, conn=None, url=None, ex=None, conn_name=None):
+        print("Connection OK!")
+        self._result = True
+        self._stop = True
+
+    def on_connect_fail(self, conn=None, url=None, ex=None, conn_name=None):
+        print("Connection failed. {}".format(ex))
+        self._result = False
+        self._stop = True
+
+    async def stop_after(self, when):
+        await asyncio.sleep(when)
+        self._loop.stop()
+
+    async def _run(self) -> bool:
         """
-        result = False
+        Run the check, asynchronously.
+
+        :return: True if the check is successful, False otherwise.
+        """
+        self._result = False
+        self._stop = False
+        pbk = 'check'
+        seconds = 3.0
         try:
-            pbk = 'check'
-            logger.info("Connecting to {}:{}".format(self.oef_addr, self.oef_port))
-            core = AsyncioCore(logger=logger)
-            core.run_threaded()
-            self.core = core
-            logger.info("Core running. Trying to establish connection ...")
-            agent = OEFAgent(pbk, oef_addr=self.addr, oef_port=self.port, core=core)
-            agent.connect()
-            logger.info("Connection established. Tearing down connection....")
-            agent.disconnect()
+            print("Connecting to {}:{}...".format(self.oef_addr, self.oef_port))
 
-            self.core.stop()
-            result = True
-            return result
+            self._conn = Connection(self._core)
+            self._conn.connect(url="127.0.0.1:10000", success=self.on_connect_ok,
+                               failure=self.on_connect_fail,
+                               public_key=pbk)
+
+            while not self._stop and seconds > 0:
+                await asyncio.sleep(1.0)
+                seconds -= 1.0
+
+            if self._result:
+                print("Connection established. Tearing down connection...")
+                self._core.call_soon_async(self._conn.do_stop)
+                await asyncio.sleep(1.0)
+            else:
+                print("A problem occurred. Exiting...")
+
         except Exception as e:
             print(str(e))
-            return result
         finally:
-            self.core.stop()
+            return self._result
+
+    def run(self) -> bool:
+        """Run the check.
+
+        :return: True if the check is successful, False otherwise.
+        """
+        return self._loop.run_until_complete(self._run())
 
 
 def _stop_oef_search_images():
