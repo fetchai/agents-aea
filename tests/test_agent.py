@@ -29,24 +29,30 @@ from aea.protocols.default.serialization import DefaultSerializer
 
 
 class TAgent(Agent):
+    """Implement a test agent."""
 
     def setup(self) -> None:
+        """Set up the agent."""
         pass
 
     def act(self) -> None:
+        """Do actions."""
         pass
 
     def react(self) -> None:
+        """Do reactions."""
         pass
 
     def update(self) -> None:
+        """Update the agent's state."""
         pass
 
     def teardown(self) -> None:
         pass
 
 
-def test_connect_agent(network_node):
+def test_start_agent(network_node):
+    """Test that the start method works as expected."""
     crypto = Crypto()
     mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
     agent = TAgent("my_agent", oef_addr="127.0.0.1", oef_port=10000)
@@ -61,6 +67,7 @@ def test_connect_agent(network_node):
 
 
 def test_send_message(network_node):
+    """Test that an agent can send a message."""
     crypto = Crypto()
     mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
     mailbox.connect()
@@ -69,13 +76,14 @@ def test_send_message(network_node):
 
     job = Thread(target=agent.start)
     job.start()
-    time.sleep(5.0)
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     agent.outbox.put_message(to=crypto.public_key, sender=crypto.public_key, protocol_id=DefaultMessage.protocol_id,
                              message=DefaultSerializer().encode(msg))
+    envelope = agent.inbox.get(block=True, timeout=5.0)
+    actual_message = DefaultSerializer().decode(envelope.message)
+    assert actual_message.get("content") == b"hello"
 
-    msg = agent.inbox.get(block=True, timeout=5.0)
     agent.stop()
     job.join()
 
