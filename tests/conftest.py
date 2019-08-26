@@ -138,6 +138,7 @@ def _stop_oef_search_images():
     client = docker.from_env()
     for container in client.containers.list():
         if "fetchai/oef-search:latest" in container.image.tags:
+            logger.info("Stopping existing Docker image...")
             container.stop()
 
 
