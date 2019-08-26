@@ -32,9 +32,6 @@ from aea.mail.base import InBox, OutBox, MailBox, ProtocolId
 
 logger = logging.getLogger(__name__)
 
-Handler = object
-Behaviour = object
-
 
 class AgentState(Enum):
     """Enumeration for an agent state."""
@@ -61,8 +58,6 @@ class Agent:
     """This class implements a template agent."""
 
     def __init__(self, name: str,
-                 oef_addr: str,
-                 oef_port: int = 10000,
                  private_key_pem_path: Optional[str] = None,
                  timeout: Optional[float] = 1.0,
                  debug: bool = False) -> None:
@@ -70,8 +65,6 @@ class Agent:
         Instantiate the agent.
 
         :param name: the name of the agent
-        :param oef_addr: TCP/IP address of the OEF Agent
-        :param oef_port: TCP/IP port of the OEF Agent
         :param private_key_pem_path: the path to the private key of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
@@ -82,9 +75,6 @@ class Agent:
         self._crypto = Crypto(private_key_pem_path=private_key_pem_path)
         self._liveness = Liveness()
         self._timeout = timeout
-
-        self._handlers = {}  # type: Dict[ProtocolId, Handler]
-        self._behaviours = {}  # type: Dict[ProtocolId, Behaviour]
 
         self.debug = debug
 
@@ -114,16 +104,6 @@ class Agent:
     def liveness(self) -> Liveness:
         """Get the liveness."""
         return self._liveness
-
-    @property
-    def handlers(self) -> Dict[str, object]:
-        """Get the registered handlers."""
-        return self._behaviours
-
-    @property
-    def behaviours(self) -> Dict[str, object]:
-        """Get the registered behaviours."""
-        return self._behaviours
 
     @property
     def agent_state(self) -> AgentState:
