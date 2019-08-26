@@ -467,7 +467,7 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        while not self._connected:
+        while self._connected:
             try:
                 msg = self.out_queue.get(block=True, timeout=1.0)
                 self.send(msg)
@@ -483,10 +483,10 @@ class OEFConnection(Connection):
         if self._stopped and not self._connected:
             self._stopped = False
             self._core.run_threaded()
-            self.bridge.connect()
+            assert self.bridge.connect()
+            self._connected = True
             self.out_thread = Thread(target=self._fetch)
             self.out_thread.start()
-            self._connected = True
 
     def disconnect(self) -> None:
         """

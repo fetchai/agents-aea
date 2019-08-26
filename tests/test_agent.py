@@ -48,6 +48,7 @@ class TAgent(Agent):
         pass
 
     def teardown(self) -> None:
+        """Teardown the agent."""
         pass
 
 
@@ -70,7 +71,6 @@ def test_send_message(network_node):
     """Test that an agent can send a message."""
     crypto = Crypto()
     mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
-    mailbox.connect()
     agent = TAgent("my_agent", oef_addr="127.0.0.1", oef_port=10000)
     agent.mailbox = mailbox
 
@@ -86,7 +86,3 @@ def test_send_message(network_node):
 
     agent.stop()
     job.join()
-
-
-
-
