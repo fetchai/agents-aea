@@ -56,7 +56,7 @@ def test_start_agent(network_node):
     """Test that the start method works as expected."""
     crypto = Crypto()
     mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
-    agent = TAgent("my_agent", oef_addr="127.0.0.1", oef_port=10000)
+    agent = TAgent("my_agent")
     agent.mailbox = mailbox
 
     job = Thread(target=agent.start)
@@ -71,15 +71,14 @@ def test_send_message(network_node):
     """Test that an agent can send a message."""
     crypto = Crypto()
     mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
-    agent = TAgent("my_agent", oef_addr="127.0.0.1", oef_port=10000)
+    agent = TAgent("my_agent")
     agent.mailbox = mailbox
 
     job = Thread(target=agent.start)
     job.start()
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-    agent.outbox.put_message(to=crypto.public_key, sender=crypto.public_key, protocol_id=DefaultMessage.protocol_id,
-                             message=DefaultSerializer().encode(msg))
+    agent.outbox.put_message(to=crypto.public_key, sender=crypto.public_key, protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
     envelope = agent.inbox.get(block=True, timeout=5.0)
     actual_message = DefaultSerializer().decode(envelope.message)
     assert actual_message.get("content") == b"hello"

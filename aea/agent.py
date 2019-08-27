@@ -22,13 +22,12 @@
 
 import logging
 import time
-
 from abc import abstractmethod, ABC
 from enum import Enum
-from typing import Dict, Optional
+from typing import Optional
 
 from aea.crypto.base import Crypto
-from aea.mail.base import InBox, OutBox, MailBox, ProtocolId
+from aea.mail.base import InBox, OutBox, MailBox
 
 logger = logging.getLogger(__name__)
 
