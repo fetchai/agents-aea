@@ -97,8 +97,9 @@ class GymChannel:
         performative = gym_message.get("performative")
         assert GymMessage.Performative(performative) == GymMessage.Performative.ACT, "This is not a valid message."
         action = gym_message.get("action")
-        observation, reward, done, info = self.gym_env.step(action)
-        msg = GymMessage(performative=GymMessage.Performative.PERCEPT, observation=observation, reward=reward, done=done, info=info)
+        step_id = gym_message.get("step_id")
+        observation, reward, done, info = self.gym_env.step(action)  # type: Tuple[any, any, bool, Dict]
+        msg = GymMessage(performative=GymMessage.Performative.PERCEPT, observation=observation, reward=reward, done=done, info=info, step_id=step_id)
         msg_bytes = GymSerializer().encode(msg)
         envelope = Envelope(to=envelope.sender, sender=DEFAULT_GYM, protocol_id=GymMessage.protocol_id, message=msg_bytes)
         self._send(envelope)
