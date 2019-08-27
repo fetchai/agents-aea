@@ -23,7 +23,7 @@
 import logging
 import time
 
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from enum import Enum
 from typing import Dict, Optional
 
@@ -57,7 +57,7 @@ class Liveness:
         return self._is_stopped
 
 
-class Agent:
+class Agent(ABC):
     """This class implements a template agent."""
 
     def __init__(self, name: str,

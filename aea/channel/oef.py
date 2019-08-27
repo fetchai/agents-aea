@@ -449,19 +449,12 @@ class OEFConnection(Connection):
         """
         super().__init__()
         core = AsyncioCore(logger=logger)
-        core.run_threaded()
         self._core = core  # type: Optional[AsyncioCore]
         self.bridge = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
 
         self._stopped = True
         self._connected = False
-        self.in_thread = Thread(target=self.bridge.run)
-        self.out_thread = Thread(target=self._fetch)
-
-    @property
-    def is_active(self) -> bool:
-        """Get active status."""
-        return self._core is not None
+        self.out_thread = None  # type: Optional[Thread]
 
     @property
     def is_established(self) -> bool:
@@ -474,7 +467,7 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        while not self._stopped:
+        while self._connected:
             try:
                 msg = self.out_queue.get(block=True, timeout=1.0)
                 self.send(msg)
@@ -487,12 +480,13 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        if self._stopped:
+        if self._stopped and not self._connected:
             self._stopped = False
-            self.bridge.connect()
-            self.in_thread.start()
-            self.out_thread.start()
+            self._core.run_threaded()
+            assert self.bridge.connect()
             self._connected = True
+            self.out_thread = Thread(target=self._fetch)
+            self.out_thread.start()
 
     def disconnect(self) -> None:
         """
@@ -500,18 +494,13 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        self._stopped = True
-        if self.is_active:
-            self.bridge.stop()
-
-        self.in_thread.join()
-        self.out_thread.join()
-        self.in_thread = Thread(target=self.bridge.run)
-        self.out_thread = Thread(target=self._fetch)
-        self.bridge.disconnect()
-        self._connected = False
-        self._core.stop()
-        self._core = None
+        if not self._stopped and self._connected:
+            self._connected = False
+            self.out_thread.join()
+            self.out_thread = None
+            self.bridge.disconnect()
+            self._core.stop()
+            self._stopped = True
 
     def send(self, envelope: Envelope):
         """
@@ -519,7 +508,8 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        self.bridge.send(envelope)
+        if self._connected:
+            self.bridge.send(envelope)
 
 
 class OEFMailBox(MailBox):

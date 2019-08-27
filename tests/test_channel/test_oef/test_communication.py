@@ -24,6 +24,8 @@ from oef.query import Eq
 
 from aea.channel.oef import OEFMailBox
 from aea.crypto.base import Crypto
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
@@ -38,6 +40,35 @@ def test_connection(network_node):
     mailbox.connect()
 
     mailbox.disconnect()
+
+
+class TestDefault:
+    """Test that the default protocol is correctly implemented by the OEF channel."""
+
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.crypto1 = Crypto()
+        cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.mailbox1.connect()
+
+    def test_send_message(self):
+        """Test that a default byte message can be sent correctly."""
+        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        self.mailbox1.outbox.put_message(to=self.crypto1.public_key, sender=self.crypto1.public_key,
+                                         protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
+
+        recv_msg = self.mailbox1.inbox.get(block=True, timeout=3.0)
+        assert recv_msg is not None
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        cls.mailbox1.disconnect()
 
 
 class TestOEF:
