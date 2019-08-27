@@ -157,26 +157,32 @@ class TestOEF:
 
         @classmethod
         def setup_class(cls):
-            """Set the test up.
+            """
+            Set the test up.
 
             Steps:
             - Register a service
-            - Check that the registration worked."""
+            - Check that the registration worked.
+            """
             cls.crypto1 = Crypto()
             cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
             cls.mailbox1.connect()
 
+            cls.request_id = 1
             cls.foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
             cls.desc = Description({"bar": 1}, data_model=cls.foo_datamodel)
-            msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=cls.desc, service_id="")
+            msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=cls.request_id, service_description=cls.desc, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             cls.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=cls.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=2, query=Query([Constraint("bar", Eq(1))], model=cls.foo_datamodel))
+            time.sleep(1.0)
+
+            cls.request_id += 1
+            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=cls.request_id, query=Query([Constraint("bar", Eq(1))], model=cls.foo_datamodel))
             cls.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=cls.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
             envelope = cls.mailbox1.inbox.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
-            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == 2 and search_result.get("agents") == [cls.crypto1.public_key]
+            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == cls.request_id and search_result.get("agents") == [cls.crypto1.public_key]
 
         def test_unregister_service(self):
             """Test that an unregister service request works correctly.
@@ -186,16 +192,18 @@ class TestOEF:
             3. search for that service
             4. assert that no result is found.
             """
-            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=2, service_description=self.desc, service_id="")
+            self.request_id += 1
+            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=self.request_id, service_description=self.desc, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=2, query=Query([Constraint("bar", Eq(1))], model=self.foo_datamodel))
+            self.request_id += 1
+            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=self.request_id, query=Query([Constraint("bar", Eq(1))], model=self.foo_datamodel))
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
 
             envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
-            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == 2 and search_result.get("agents") == []
+            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == self.request_id and search_result.get("agents") == []
 
         @classmethod
         def teardown_class(cls):
