@@ -73,16 +73,20 @@ class OEFMessage(Message):
             assert self.is_set("type")
             oef_type = OEFMessage.Type(self.get("type"))
             if oef_type == OEFMessage.Type.REGISTER_SERVICE:
-                service_description = self.get("service_description")
                 assert self.is_set("id")
+                assert self.is_set("service_description")
                 assert self.is_set("service_id")
+                service_description = self.get("service_description")
                 service_id = self.get("service_id")
                 assert isinstance(service_description, Description)
                 assert isinstance(service_id, str)
             elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
                 assert self.is_set("id")
+                assert self.is_set("service_description")
                 assert self.is_set("service_id")
+                service_description = self.get("service_description")
                 service_id = self.get("service_id")
+                assert isinstance(service_description, Description)
                 assert isinstance(service_id, str)
             elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
                 assert self.is_set("id")
