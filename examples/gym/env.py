@@ -47,7 +47,7 @@ class BanditEnv(gym.Env):
         self.nb_bandits = nb_bandits
         self.reward_params = reward_params
 
-        self.action_space = spaces.Discrete(self.nb_bandits)  # an action is pulling one of nb_bandits and offering a price.
+        self.action_space = spaces.Tuple((spaces.Discrete(self.nb_bandits), spaces.Box(low=0.0, high=1000.0, shape=(1, ))))  # an action is pulling one of nb_bandits and offering a price.
         self.observation_space = spaces.Space()  # None type space. agents only get a reward back.
 
         self.seed()  # seed environment randomness

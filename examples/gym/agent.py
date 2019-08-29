@@ -95,7 +95,7 @@ class GoodPriceModel(object):
         :param outcome: the negotiation outcome
         :return: None
         """
-        bandit = self.price_bandits[price]
+        bandit = self.price_bandits[price[0]]
         bandit.update(outcome)
 
     def get_price_expectation(self) -> int:
@@ -127,7 +127,7 @@ class RLAgent(Agent):
 
         :return: None
         """
-        super().__init__(name)
+        super().__init__(name,timeout=0)
         self.mailbox = MailBox(GymConnection(self.crypto.public_key, GymChannel(gym_env)))
         self.good_price_models = dict((good_id, GoodPriceModel()) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
         self.action_counter = 0
@@ -201,12 +201,13 @@ class RLAgent(Agent):
         good_price_model = self.good_price_models[good_id]
         price = good_price_model.get_price_expectation()
 
-        action = [good_id, price]
+        action = [good_id, np.array([price])]
         step_id = self.action_counter
 
         # Store action for step id
         self.actions[step_id] = action
 
+        print("step_id={}, action taken: {}".format(step_id, action))
         # create and serialize the message
         gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
         gym_bytes = GymSerializer().encode(gym_msg)
@@ -238,6 +239,8 @@ class RLAgent(Agent):
         # Take another action if we are below max actions.
         if self.action_counter < MAX_ACTIONS:
             self._take_an_action()
+        else:
+            self.stop()
 
 
 def main():
