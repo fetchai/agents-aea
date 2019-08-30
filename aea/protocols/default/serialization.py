@@ -55,7 +55,7 @@ class DefaultSerializer(Serializer):
         body = {}
 
         msg_type = DefaultMessage.Type(json_body["type"])
-        body["type"] = str(msg_type)
+        body["type"] = msg_type
         if msg_type == DefaultMessage.Type.BYTES:
             content = base58.b58decode(json_body["content"].encode("utf-8"))
             body["content"] = content

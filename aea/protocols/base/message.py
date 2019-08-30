@@ -32,6 +32,7 @@ class Message:
         Initialize a Message object.
 
         :param body: the dictionary of values to hold.
+        :param kwargs: any additional value to add to the body. It will overwrite the body values.
         """
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)

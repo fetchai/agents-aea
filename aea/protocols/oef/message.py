@@ -65,7 +65,7 @@ class OEFMessage(Message):
 
         :param oef_type: the type of OEF message.
         """
-        super().__init__(type=str(oef_type), **kwargs)
+        super().__init__(type=oef_type, **kwargs)
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""

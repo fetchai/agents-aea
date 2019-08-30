@@ -77,7 +77,7 @@ def test_cancelled_serialization():
 def test_error_serialization(error_code):
     """Test that the serialization of the 'Error' message works."""
     tac_message = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
-                             error_code=error_code.value)
+                             error_code=error_code)
     tac_message_bytes = TACSerializer().encode(tac_message)
     expected_msg = TACSerializer().decode(tac_message_bytes)
 

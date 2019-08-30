@@ -133,7 +133,7 @@ class TACSerializer(Serializer):
             tac_container.state_update.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.TAC_ERROR:
             tac_msg = tac_pb2.TACController.Error()
-            tac_msg.error_code = msg.get("error_code")
+            tac_msg.error_code = msg.get("error_code").value
             if msg.is_set("error_msg"):
                 tac_msg.error_msg = msg.get("error_msg")
             if msg.is_set("details"):
@@ -215,7 +215,7 @@ class TACSerializer(Serializer):
             new_body["transactions"] = transactions
         elif tac_type == "error":
             new_body["type"] = TACMessage.Type.TAC_ERROR
-            new_body["error_code"] = tac_container.error.error_code
+            new_body["error_code"] = TACMessage.ErrorCode(tac_container.error.error_code)
             if tac_container.error.error_msg:
                 new_body["error_msg"] = tac_container.error.error_msg
             if tac_container.error.details:
@@ -223,6 +223,6 @@ class TACSerializer(Serializer):
         else:
             raise ValueError("Type not recognized.")
 
-        new_body["type"] = str(new_body["type"])
+        new_body["type"] = TACMessage.Type(new_body["type"])
         tac_message = Message(body=new_body)
         return tac_message
