@@ -20,8 +20,6 @@
 
 """Serialization for the TAC protocol."""
 
-from google.protobuf.struct_pb2 import Struct
-
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
 from aea.protocols.tac import tac_pb2
@@ -137,7 +135,6 @@ class TACSerializer(Serializer):
             if msg.is_set("error_msg"):
                 tac_msg.error_msg = msg.get("error_msg")
             if msg.is_set("details"):
-                tac_msg.details = Struct()
                 tac_msg.details.update(msg.get("details"))
 
             tac_container.error.CopyFrom(tac_msg)
