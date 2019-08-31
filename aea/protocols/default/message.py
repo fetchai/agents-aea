@@ -47,4 +47,4 @@ class DefaultMessage(Message):
 
         :param type: the type.
         """
-        super().__init__(type=str(type), **kwargs)
+        super().__init__(type=type, **kwargs)
