@@ -40,6 +40,9 @@ class DefaultMessage(Message):
             """Get the string representation."""
             return self.value
 
+    class ErrorCode(Enum):
+        UNSUPPORTED_PROTOCOL = -10001
+
     def __init__(self, type: Optional[Type] = None,
                  **kwargs):
         """

@@ -30,6 +30,8 @@ from typing import Optional
 from aea.crypto.base import Crypto
 from aea.mail.base import InBox, OutBox, MailBox
 from aea.mail.base import ProtocolId, Envelope
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -216,26 +218,6 @@ class Agent(ABC):
 SkillId = str
 
 
-class Behaviour(ABC):
-    """This class implements an abstract behaviour."""
-
-    @abstractmethod
-    def act(self) -> None:
-        """
-        Implement the behaviour.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Implement the behaviour teardown.
-
-        :return: None
-        """
-
-
 class Handler(ABC):
     """This class implements an abstract behaviour."""
 
@@ -252,29 +234,6 @@ class Handler(ABC):
     def teardown(self) -> None:
         """
         Implement the handler teardown.
-
-        :return: None
-        """
-
-
-TaskId = str
-
-
-class Task(ABC):
-    """This class implements an abstract task."""
-
-    @abstractmethod
-    def execute(self) -> None:
-        """
-        Run the task logic.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Teardown the task.
 
         :return: None
         """
@@ -376,108 +335,35 @@ class HandlerRegistry(Registry):
         self._handlers = {}
 
 
-class BehaviourRegistry(Registry):
-    """This class implements the behaviour registry."""
-
-    def __init__(self) -> None:
-        """
-        Instantiate the registry.
-
-        :return: None
-        """
-        self._behaviours = {}  # type: Dict[SkillId, Behaviour]
-
-    def populate(self) -> None:
-        """
-        Load the behaviours as specified in the config and apply consistency checks.
-
-        :return: None
-        """
-        pass
-
-    def fetch_behaviours(self) -> Optional[List[Behaviour]]:
-        """
-        Return a list of behaviours for processing.
-
-        :return: the list of behaviours
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-        for behaviour in self._behaviours:
-            behaviour.teardown()
-        self._behaviours = {}
-
-
-class TaskRegistry(Registry):
-    """This class implements the task registry."""
-
-    def __init__(self) -> None:
-        """
-        Instantiate the registry.
-
-        :return: None
-        """
-        self._tasks = {}  # type: Dict[TaskId, Task]
-
-    def populate(self) -> None:
-        """
-        Load the tasks as specified in the config and apply consistency checks.
-
-        :return: None
-        """
-        pass
-
-    def fetch_tasks(self) -> Optional[List[Task]]:
-        """
-        Return a list of tasks for processing.
-
-        :return: a list of tasks.
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-        for task in self._tasks:
-            task.teardown()
-        self._tasks = {}
-
-
 class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
     def __init__(self, name: str,
-                 oef_addr: str,
-                 oef_port: int = 10000,
                  private_key_pem_path: Optional[str] = None,
                  timeout: Optional[float] = 1.0,
-                 debug: bool = False) -> None:
+                 debug: bool = False,
+                 max_reactions: int = 20) -> None:
         """
         Instantiate the agent.
 
         :param name: the name of the agent
-        :param oef_addr: TCP/IP address of the OEF Agent
-        :param oef_port: TCP/IP port of the OEF Agent
         :param private_key_pem_path: the path to the private key of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
+        :param max_reactions: the processing rate of messages per iteration.
 
         :return: None
         """
-        super().__init__(name=name, oef_addr=oef_addr, private_key_pem_path=private_key_pem_path, timeout=timeout, debug=debug)
+        super().__init__(name=name, private_key_pem_path=private_key_pem_path, timeout=timeout, debug=debug)
 
+        self.max_reactions = max_reactions
         self._protocol_registry = ProtocolRegistry()
         self._handler_registry = HandlerRegistry()
-        self._behaviour_registry = BehaviourRegistry()
+
+    @property
+    def protocol_registry(self) -> ProtocolRegistry:
+        """Get the protocol registry."""
+        return self._protocol_registry
 
     def setup(self) -> None:
         """
@@ -487,7 +373,6 @@ class AEA(Agent):
         """
         self._protocol_registry.populate()
         self._handler_registry.populate()
-        self._behaviour_registry.populate()
 
     def act(self) -> None:
         """
@@ -495,8 +380,8 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self._behaviour_registry.fetch_behaviours():
-            behaviour.act()
+        # for behaviour in self._behaviour_registry.fetch_behaviours():
+        #     behaviour.act()
 
     def react(self) -> None:
         """
@@ -505,7 +390,7 @@ class AEA(Agent):
         :return: None
         """
         counter = 0
-        while (not self.inbox.empty() and counter < self.max_reactions):
+        while not self.inbox.empty() and counter < self.max_reactions:
             counter += 1
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
             if envelope is not None:
@@ -513,14 +398,26 @@ class AEA(Agent):
                 if protocol_id is not None:
                     handler = self._handler_registry.fetch_handler(protocol_id)
                     handler.handle_envelope(envelope)
+                else:
+                    self.on_unsupported_protocol(envelope)
+
+    def on_unsupported_protocol(self, envelope: Envelope):
+        """Handle the received envelope in case the protocol is not supported."""
+        logger.warning("Unsupported protocol: {}".format(envelope.protocol_id))
+        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
+                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
+                               error_msg="",
+                               error_data={"protocol_id": envelope.protocol_id})
+        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
+                                message=DefaultSerializer().encode(reply))
 
     def update(self) -> None:
         """Update the current state of the agent.
 
         :return None
         """
-        for task in self._task_registry.fetch_tasks():
-            task.execute()
+        # for task in self._task_registry.fetch_tasks():
+        #     task.execute()
 
     def teardown(self) -> None:
         """
@@ -528,6 +425,4 @@ class AEA(Agent):
 
         :return: None
         """
-        self._behaviour_registry.teardown()
-        self._handler_registry.teardown()
         self._protocol_registry.teardown()
