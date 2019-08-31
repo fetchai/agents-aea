@@ -55,11 +55,13 @@ class GymMessage(Message):
             performative = GymMessage.Performative(self.get("performative"))
             if performative == GymMessage.Performative.ACT:
                 assert self.is_set("action")
+                assert self.is_set("step_id")
             elif performative == GymMessage.Performative.PERCEPT:
                 assert self.is_set("observation")
                 assert self.is_set("reward")
                 assert self.is_set("done")
                 assert self.is_set("info")
+                assert self.is_set("step_id")
             else:
                 raise ValueError("Performative not recognized.")
 

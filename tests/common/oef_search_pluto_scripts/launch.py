@@ -1,4 +1,24 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This test module contains the launch script for the oef."""
+
 from __future__ import print_function
 import json
 import subprocess
@@ -8,6 +28,7 @@ import os
 
 
 def run(cmd):
+    """Run."""
     print(' '.join(cmd))
     c = subprocess.Popen(cmd)
     c.wait()
@@ -15,19 +36,22 @@ def run(cmd):
 
 
 def error(*x):
+    """Error."""
     print(''.join([str(xx) for xx in x]), file=sys.stderr)
 
 
 def fail(*x):
+    """Fail."""
     error(x)
     exit(1)
 
 
 def pull_image(run_sudo, img):
+    """Pull the image."""
     c = []
 
     if run_sudo:
-        c += [ 'sudo' ]
+        c += ['sudo']
     c += [
         'docker',
         'pull',
@@ -39,6 +63,7 @@ def pull_image(run_sudo, img):
 
 
 def parse_command(j):
+    """Parse the command."""
     cmd = []
     used_keys = ["positional_args"]
     for key in j["positional_args"]:
@@ -49,7 +74,7 @@ def parse_command(j):
             continue
         cmd.extend(
             [
-                "--"+key,
+                "--" + key,
                 str(j[key])
             ]
         )
@@ -57,6 +82,7 @@ def parse_command(j):
 
 
 def launch_job(args, j):
+    """Launch the job."""
     img = j['image']
     if '/' in img:
         pull_image(args.sudo, img)
@@ -77,9 +103,9 @@ def launch_job(args, j):
     print("Work dir: ", work_dir)
     c += [
         "-v",
-        work_dir+":/config",
+        work_dir + ":/config",
         "-v",
-        project_dir+"/data/oef-logs:/logs"
+        project_dir + "/data/oef-logs:/logs"
     ]
 
     for arg in j['params']:
@@ -101,6 +127,7 @@ def launch_job(args, j):
 
 
 def main(args):
+    """Run the script."""
     with open(args.config, "r") as f:
         config = json.load(f)
     launch_job(args, config)
@@ -110,9 +137,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', required=True, type=str, help='Publish the image to GCR')
     parser.add_argument("--sudo", required=False, action='store_true', help="Run docker as root")
-    parser.add_argument("--background", required=False,  action='store_true', help="Run image in background.")
-    parser.add_argument("--cmd", required=False, type=str, default="oef-search", help="The available commands are defined"
-                                                                                    " in the config file "
-                                                                                    "('cmd' dictionary) ")
+    parser.add_argument("--background", required=False, action='store_true', help="Run image in background.")
+    parser.add_argument("--cmd", required=False, type=str, default="oef-search", help="The available commands are defined in the config file ('cmd' dictionary) ")
     parser.add_argument('rest', nargs=argparse.REMAINDER)
     main(parser.parse_args())

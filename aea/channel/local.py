@@ -96,12 +96,8 @@ class LocalNode:
         oef_type = OEFMessage.Type(oef_message.get("type"))
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
             self.register_service(sender, oef_message.get("service_description"))
-        elif oef_type == OEFMessage.Type.REGISTER_AGENT:
-            self.register_agent(sender, oef_message.get("agent_description"))
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             self.unregister_service(sender, request_id, oef_message.get("service_description"))
-        elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
-            self.unregister_agent(sender, request_id)
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
             self.search_agents(sender, request_id, oef_message.get("query"))
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
@@ -128,17 +124,6 @@ class LocalNode:
         else:
             self._send(envelope)
 
-    def register_agent(self, public_key: str, agent_description: Description) -> None:
-        """
-        Register an agent in the agent directory of the node.
-
-        :param public_key: the public key of the agent to be registered.
-        :param agent_description: the description of the agent to be registered.
-        :return: None
-        """
-        with self._lock:
-            self.agents[public_key] = agent_description
-
     def register_service(self, public_key: str, service_description: Description):
         """
         Register a service agent in the service directory of the node.
@@ -153,23 +138,6 @@ class LocalNode:
     def register_service_wide(self, public_key: str, service_description: Description):
         """Register service wide."""
         raise NotImplementedError
-
-    def unregister_agent(self, public_key: str, msg_id: int) -> None:
-        """
-        Unregister an agent.
-
-        :param public_key: the public key of the agent to be unregistered.
-        :param msg_id: the message id of the request.
-        :return: None
-        """
-        with self._lock:
-            if public_key not in self.agents:
-                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_DESCRIPTION)
-                msg_bytes = OEFSerializer().encode(msg)
-                envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-                self._send(envelope)
-            else:
-                self.agents.pop(public_key)
 
     def unregister_service(self, public_key: str, msg_id: int, service_description: Description) -> None:
         """

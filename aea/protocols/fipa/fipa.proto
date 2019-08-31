@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package fetch.aea.fipa;
 
-import "google/protobuf/struct.proto";
-
 message FIPAMessage{
 
     message CFP{

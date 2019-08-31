@@ -19,17 +19,16 @@
 # ------------------------------------------------------------------------------
 
 """Extension to the OEF Python SDK."""
-import asyncio
 import datetime
 import logging
 import pickle
-from asyncio import AbstractEventLoop
 from queue import Empty, Queue
 from threading import Thread
 from typing import List, Dict, Optional
 
 import oef
 from oef.agents import OEFAgent
+from oef.core import AsyncioCore
 from oef.messages import CFP_TYPES, PROPOSE_TYPES
 from oef.query import (
     Query as OEFQuery,
@@ -184,7 +183,7 @@ class MailStats(object):
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, loop: Optional[AbstractEventLoop] = None, in_queue: Optional[Queue] = None):
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore, in_queue: Optional[Queue] = None):
         """
         Initialize.
 
@@ -193,22 +192,9 @@ class OEFChannel(OEFAgent):
         :param oef_port: the OEF port.
         :param in_queue: the in queue.
         """
-        super().__init__(public_key, oef_addr, oef_port, loop=loop)
+        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core)
         self.in_queue = in_queue
         self.mail_stats = MailStats()
-
-    @property
-    def loop(self) -> asyncio.AbstractEventLoop:
-        """Get the event loop."""
-        return self._loop
-
-    def is_connected(self) -> bool:
-        """Get connected status."""
-        return self._oef_proxy.is_connected()
-
-    def is_active(self) -> bool:
-        """Get active status."""
-        return self._oef_proxy._active_loop
 
     def on_message(self, msg_id: int, dialogue_id: int, origin: str, content: bytes) -> None:
         """
@@ -240,7 +226,7 @@ class OEFChannel(OEFAgent):
                           dialogue_id=dialogue_id,
                           target=target,
                           performative=FIPAMessage.Performative.CFP,
-                          query=query)
+                          query=query if query != b"" else None)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
@@ -258,9 +244,8 @@ class OEFChannel(OEFAgent):
         """
         if type(proposals) == bytes:
             proposals = pickle.loads(proposals)  # type: List[Description]
-            proposals = [OEFObjectTranslator.from_oef_description(p) for p in proposals]
         else:
-            assert False  # No support for non-bytes proposals.
+            raise ValueError("No support for non-bytes proposals.")
 
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
@@ -364,15 +349,16 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        if envelope.protocol_id == "oef":
-            self.send_oef_message(envelope)
+        if envelope.protocol_id == "default":
+            self.send_default_message(envelope)
         elif envelope.protocol_id == "fipa":
             self.send_fipa_message(envelope)
-        elif envelope.protocol_id == "bytes":
-            self.send_bytes_message(envelope)
-        elif envelope.protocol_id == "default":
+        elif envelope.protocol_id == "oef":
+            self.send_oef_message(envelope)
+        elif envelope.protocol_id == "tac":
             self.send_default_message(envelope)
         else:
+            logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
             raise ValueError("Cannot send message.")
 
     def send_oef_message(self, envelope: Envelope) -> None:
@@ -390,20 +376,12 @@ class OEFChannel(OEFAgent):
             service_id = oef_message.get("service_id")
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
             self.register_service(id, oef_service_description, service_id)
-        elif oef_type == OEFMessage.Type.REGISTER_AGENT:
-            id = oef_message.get("id")
-            agent_description = oef_message.get("agent_description")
-            oef_agent_description = OEFObjectTranslator.to_oef_description(agent_description)
-            self.register_agent(id, oef_agent_description)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             id = oef_message.get("id")
             service_description = oef_message.get("service_description")
             service_id = oef_message.get("service_id")
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
             self.unregister_service(id, oef_service_description, service_id)
-        elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
-            id = oef_message.get("id")
-            self.unregister_agent(id)
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
             id = oef_message.get("id")
             query = oef_message.get("query")
@@ -433,10 +411,12 @@ class OEFChannel(OEFAgent):
         performative = FIPAMessage.Performative(fipa_message.get("performative"))
         if performative == FIPAMessage.Performative.CFP:
             query = fipa_message.get("query")
+            if query is None:
+                query = b""
             self.send_cfp(id, dialogue_id, destination, target, query)
         elif performative == FIPAMessage.Performative.PROPOSE:
             proposal = fipa_message.get("proposal")
-            proposal = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])
+            proposal = pickle.dumps(proposal)
             self.send_propose(id, dialogue_id, destination, target, proposal)
         elif performative == FIPAMessage.Performative.ACCEPT:
             self.send_accept(id, dialogue_id, destination, target)
@@ -468,12 +448,18 @@ class OEFConnection(Connection):
         :param oef_port: the OEF port.
         """
         super().__init__()
-
-        self.bridge = OEFChannel(public_key, oef_addr, oef_port, loop=asyncio.new_event_loop(), in_queue=self.in_queue)
+        core = AsyncioCore(logger=logger)
+        self._core = core  # type: Optional[AsyncioCore]
+        self.bridge = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
 
         self._stopped = True
-        self.in_thread = Thread(target=self.bridge.run)
-        self.out_thread = Thread(target=self._fetch)
+        self._connected = False
+        self.out_thread = None  # type: Optional[Thread]
+
+    @property
+    def is_established(self) -> bool:
+        """Get the connection status."""
+        return self._connected
 
     def _fetch(self) -> None:
         """
@@ -481,7 +467,7 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        while not self._stopped:
+        while self._connected:
             try:
                 msg = self.out_queue.get(block=True, timeout=1.0)
                 self.send(msg)
@@ -494,10 +480,12 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        if self._stopped:
+        if self._stopped and not self._connected:
             self._stopped = False
-            self.bridge.connect()
-            self.in_thread.start()
+            self._core.run_threaded()
+            assert self.bridge.connect()
+            self._connected = True
+            self.out_thread = Thread(target=self._fetch)
             self.out_thread.start()
 
     def disconnect(self) -> None:
@@ -506,20 +494,13 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        self._stopped = True
-        if self.bridge.is_active():
-            self.bridge.stop()
-
-        self.in_thread.join()
-        self.out_thread.join()
-        self.in_thread = Thread(target=self.bridge.run)
-        self.out_thread = Thread(target=self._fetch)
-        self.bridge.disconnect()
-
-    @property
-    def is_established(self) -> bool:
-        """Get the connection status."""
-        return self.bridge.is_connected()
+        if not self._stopped and self._connected:
+            self._connected = False
+            self.out_thread.join()
+            self.out_thread = None
+            self.bridge.disconnect()
+            self._core.stop()
+            self._stopped = True
 
     def send(self, envelope: Envelope):
         """
@@ -527,7 +508,8 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        self.bridge.send(envelope)
+        if self._connected:
+            self.bridge.send(envelope)
 
 
 class OEFMailBox(MailBox):

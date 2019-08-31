@@ -61,7 +61,7 @@ def test_communication():
 
     mailbox.connect()
 
-    msg = GymMessage(performative=GymMessage.Performative.ACT, action='some_action')
+    msg = GymMessage(performative=GymMessage.Performative.ACT, action='some_action', step_id=1)
     msg_bytes = GymSerializer().encode(msg)
     envelope = Envelope(to=DEFAULT_GYM, sender="agent_public_key", protocol_id=GymMessage.protocol_id, message=msg_bytes)
     mailbox.send(envelope)
@@ -77,5 +77,6 @@ def test_communication():
     assert msg.get("reward") == 1
     assert msg.get("done") is False
     assert msg.get("info") == {}
+    assert msg.get("step_id") == 1
 
     mailbox.disconnect()

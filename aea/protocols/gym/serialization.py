@@ -60,6 +60,8 @@ class GymSerializer(Serializer):
             info_bytes = base58.b58encode(pickle.dumps(info)).decode("utf-8")
             new_body["info"] = info_bytes
 
+        new_body["step_id"] = msg.body["step_id"]  # type: int
+
         gym_message_bytes = json.dumps(new_body).encode("utf-8")
         return gym_message_bytes
 
@@ -90,6 +92,7 @@ class GymSerializer(Serializer):
             info_bytes = base58.b58decode(json_msg["info"])
             info = pickle.loads(info_bytes)
             new_body["info"] = info  # type: Any
+        new_body["step_id"] = json_msg["step_id"]
 
         gym_message = Message(body=new_body)
         return gym_message

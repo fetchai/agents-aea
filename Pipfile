@@ -21,7 +21,7 @@ docker = "*"
 [packages]
 cryptography = "*"
 base58 = "*"
-oef = {version = "==0.6.0",index = "test-pypi"}
+oef = {index = "test-pypi",version = "==0.6.4"}
 docker = "*"
 
 [requires]

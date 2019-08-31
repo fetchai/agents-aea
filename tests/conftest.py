@@ -18,15 +18,17 @@
 # ------------------------------------------------------------------------------
 
 """Conftest module for Pytest."""
+import asyncio
 import inspect
 import logging
 import os
 import time
+from typing import Optional
 
 import docker as docker
 import pytest
 from docker.models.containers import Container
-from oef.agents import OEFAgent
+from oef.agents import AsyncioCore, Connection
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +57,7 @@ def oef_port() -> int:
 class OEFHealthCheck(object):
     """A health check class."""
 
-    def __init__(self, oef_addr: str, oef_port: int):
+    def __init__(self, oef_addr: str, oef_port: int, loop: Optional[asyncio.AbstractEventLoop] = None):
         """
         Initialize.
 
@@ -65,43 +67,83 @@ class OEFHealthCheck(object):
         self.oef_addr = oef_addr
         self.oef_port = oef_port
 
-    def run(self) -> bool:
-        """
-        Run the check.
+        self._result = False
+        self._stop = False
+        self._conn = None
+        self._loop = asyncio.get_event_loop() if loop is None else loop
+        self._loop.set_exception_handler(self.exception_handler)
+        self._core = AsyncioCore(loop=self._loop)
 
-        :return:
+    def exception_handler(self, loop, d):
+        """Handle exception during a connection attempt."""
+        print("An error occurred. Details: {}".format(d))
+        self._stop = True
+
+    def on_connect_ok(self, conn=None, url=None, ex=None, conn_name=None):
+        """Handle a successful connection."""
+        print("Connection OK!")
+        self._result = True
+        self._stop = True
+
+    def on_connect_fail(self, conn=None, url=None, ex=None, conn_name=None):
+        """Handle a connection failure."""
+        print("Connection failed. {}".format(ex))
+        self._result = False
+        self._stop = True
+
+    async def _run(self) -> bool:
         """
-        result = False
+        Run the check, asynchronously.
+
+        :return: True if the check is successful, False otherwise.
+        """
+        self._result = False
+        self._stop = False
+        pbk = 'check'
+        seconds = 3.0
         try:
-            pbk = 'check'
-            print("Connecting to {}:{}".format(self.oef_addr, self.oef_port))
-            # core = AsyncioCore(logger=logger)  # OEF-SDK 0.6.1
-            # core.run_threaded()  # OEF-SDK 0.6.1
-            import asyncio
-            agent = OEFAgent(pbk, oef_addr=self.oef_addr, oef_port=self.oef_port, loop=asyncio.new_event_loop())
-            # agent = OEFAgent(pbk, oef_addr=self.addr, oef_port=self.port, core=core)  # OEF-SDK 0.6.1
-            agent.connect()
-            agent.disconnect()
-            # core.stop()  # OEF-SDK 0.6.1
-            print("OK!")
-            result = True
-            return result
+            print("Connecting to {}:{}...".format(self.oef_addr, self.oef_port))
+
+            self._conn = Connection(self._core)
+            self._conn.connect(url="127.0.0.1:10000", success=self.on_connect_ok,
+                               failure=self.on_connect_fail,
+                               public_key=pbk)
+
+            while not self._stop and seconds > 0:
+                await asyncio.sleep(1.0)
+                seconds -= 1.0
+
+            if self._result:
+                print("Connection established. Tearing down connection...")
+                self._core.call_soon_async(self._conn.do_stop)
+                await asyncio.sleep(1.0)
+            else:
+                print("A problem occurred. Exiting...")
+
         except Exception as e:
             print(str(e))
-            return result
-        # finally:
-        # core.stop(). # OEF-SDK 0.6.1
+        finally:
+            return self._result
 
+    def run(self) -> bool:
+        """Run the check.
+
+        :return: True if the check is successful, False otherwise.
+        """
+        return self._loop.run_until_complete(self._run())
 
 
 def _stop_oef_search_images():
+    """Stop the OEF search image."""
     client = docker.from_env()
     for container in client.containers.list():
         if "fetchai/oef-search:latest" in container.image.tags:
+            logger.info("Stopping existing Docker image...")
             container.stop()
 
 
 def _wait_for_oef(max_attempts: int = 15, sleep_rate: float = 1.0):
+    """Wait until the OEF is up."""
     success = False
     attempt = 0
     while not success and attempt < max_attempts:
