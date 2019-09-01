@@ -132,7 +132,7 @@ class HandlerRegistry(Registry):
         """
         pass
 
-    def fetch_handler(self, protocol_id: ProtocolId) -> Handler:
+    def fetch_handler(self, protocol_id: ProtocolId) -> Optional[Handler]:
         """
         Fetch the handler for the protocol_id.
 
@@ -229,9 +229,14 @@ class AEA(Agent):
 
         if not protocol.check(msg):
             self.on_invalid_message(envelope)
+            return
 
-        # handler = self._handler_registry.fetch_handler(protocol_id)
-        # handler.handle_envelope(envelope)
+        handler = self._handler_registry.fetch_handler(protocol.name)
+        if handler is None:
+            logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
+            return
+
+        handler.handle_envelope(envelope)
 
     def on_unsupported_protocol(self, envelope: Envelope):
         """Handle the received envelope in case the protocol is not supported."""

@@ -33,13 +33,20 @@ class Protocol(ABC):
     - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
     """
 
-    def __init__(self, serializer: Serializer):
+    def __init__(self, name: str, serializer: Serializer):
         """
         Initialize the protocol manager.
 
+        :param name: the protocol name.
         :param serializer: the serializer.
         """
+        self._name = name
         self._serializer = serializer
+
+    @property
+    def name(self):
+        """Get the name."""
+        return self._name
 
     @property
     def serializer(self) -> Serializer:
