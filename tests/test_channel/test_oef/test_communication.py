@@ -197,6 +197,8 @@ class TestOEF:
             msg_bytes = OEFSerializer().encode(msg)
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
+            time.sleep(1.0)
+
             self.request_id += 1
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=self.request_id, query=Query([Constraint("bar", Eq(1))], model=self.foo_datamodel))
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
