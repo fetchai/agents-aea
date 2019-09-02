@@ -57,16 +57,13 @@ def cli(ctx, config):
 
 
 @cli.command()
-@click.argument('name', type=str)
-@click.argument('path', type=click.Path(), required=False, default=None)
+@click.argument('name', type=str, required=True)
 @pass_ctx
-def create(ctx: Context, name, path):
+def create(ctx: Context, name):
     """Create an agent."""
-    if path is None:
-        # default agent's directory name: the agent's name.
-        path = Path("./{}".format(name))
 
-    logger.info("creating agent's directory in '{}'".format(path))
+    path = Path(name)
+    logger.info("Creating agent's directory in '{}'".format(path))
 
     # create the agent's directory
     try:
@@ -81,6 +78,7 @@ def create(ctx: Context, name, path):
     yaml.safe_dump("""- name: {}""".format(name), config_file)
 
     logger.info("Created config file {}".format(config_file_path))
+
 
 if __name__ == '__main__':
     cli()
