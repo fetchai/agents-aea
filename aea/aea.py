@@ -159,7 +159,8 @@ class AEA(Agent):
                  private_key_pem_path: Optional[str] = None,
                  timeout: Optional[float] = 1.0,
                  debug: bool = False,
-                 max_reactions: int = 20) -> None:
+                 max_reactions: int = 20,
+                 directory: Optional[str] = None) -> None:
         """
         Instantiate the agent.
 
@@ -168,12 +169,16 @@ class AEA(Agent):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
+        :param directory: the agent's directory.
 
         :return: None
         """
         super().__init__(name=name, private_key_pem_path=private_key_pem_path, timeout=timeout, debug=debug)
 
         self.max_reactions = max_reactions
+        self._directory = directory
+
+
         self._protocol_registry = ProtocolRegistry()
         self._handler_registry = HandlerRegistry()
 

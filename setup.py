@@ -38,6 +38,14 @@ with open(os.path.join(here, PACKAGE_NAME, '__version__.py'), 'r') as f:
 with open('README.md', 'r') as f:
     readme = f.read()
 
+extras = {
+    "cli": [
+        "click",
+        "click_log",
+        "PyYAML"
+    ],
+}
+
 
 setup(
     name=about['__title__'],
@@ -61,6 +69,10 @@ setup(
         "base58"
     ],
     tests_require=["tox"],
+    extras_require=extras,
+    entry_points={
+        'console_scripts': ["aea=aea.__main__:cli"],
+    },
     license=about['__license__'],
 )
 
