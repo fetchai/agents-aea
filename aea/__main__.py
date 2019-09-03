@@ -80,5 +80,28 @@ def create(ctx: Context, name):
     logger.info("Created config file {}".format(config_file_path))
 
 
+@cli.group()
+@pass_ctx
+def add(ctx):
+    """Add a resource to the agent."""
+    pass
+
+
+@add.command()
+@click.argument('protocol_name')
+@pass_ctx
+def protocol(ctx):
+    """Add a protocol to the agent."""
+    pass
+
+
+@add.command()
+@click.argument('skill_name')
+@pass_ctx
+def skill(ctx):
+    """Add a skill to the agent."""
+    pass
+
+
 if __name__ == '__main__':
     cli()
