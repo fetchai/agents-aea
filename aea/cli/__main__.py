@@ -41,7 +41,7 @@ class CLIDotFile(object):
 
     def __init__(self, filepath: str = ".aea.yaml"):
         """Initialize the handler for the AEA dotfile."""
-        self._stream = open(filepath, "r+")
+        self._stream = open(filepath, "a+")
         self.data = {}
         self.load()
 
@@ -118,15 +118,15 @@ def cli(ctx):
 
     # create the cli dotfile file, if not present
     dotfile_path = Path(".aea.yaml")
-    dotfile_path_str = str(dotfile_path)
+    dotfile_path_str = str(dotfile_path.absolute())
     if not dotfile_path.exists():
-        logger.debug("Creating '{}' file.")
-        dotfile = CLIDotFile(str(dotfile_path.absolute()))
+        logger.debug("Creating '{}' file.".format(dotfile_path_str))
+        dotfile = CLIDotFile(dotfile_path_str)
         dotfile.data["agents"] = []
         dotfile.save()
     else:
         logger.debug("Loading '{}' file.".format(dotfile_path_str))
-        dotfile = CLIDotFile(str(dotfile_path.absolute()))
+        dotfile = CLIDotFile(dotfile_path_str)
 
     ctx.obj.dotfile = dotfile
 
@@ -181,9 +181,13 @@ def delete(ctx: Context, agent_name):
 @cli.command()
 @pass_ctx
 def list(ctx: Context):
-    logger.info("Agents:")
-    for idx, a in enumerate(ctx.dotfile.data["agents"]):
-        print("{idx}. {name}".format(idx=idx + 1, name=a))
+    """List the name of the available agents."""
+    if len(ctx.dotfile.data["agents"]) == 0:
+        logger.info("No agent found.")
+    else:
+        logger.info("Agents:")
+        for idx, a in enumerate(ctx.dotfile.data["agents"]):
+            print("{idx}. {name}".format(idx=idx + 1, name=a))
 
 
 @cli.command()
@@ -193,7 +197,6 @@ def list(ctx: Context):
 @pass_ctx
 def run(ctx: Context, agent_name, oef_addr, oef_port):
     """Run the agent."""
-    agent_name = ctx.config["agent_name"]
     agent = AEA(agent_name, directory=str(Path(agent_name)))
     agent.mailbox = OEFMailBox(public_key=agent.crypto.public_key, oef_addr=oef_addr, oef_port=oef_port)
     try:
@@ -215,13 +218,17 @@ def add(ctx):
 
 @add.command()
 @click.argument('agent_name', type=str, required=True)
-@click.argument('protocol_name')
+@click.argument('protocol_name', type=str, required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_name):
+def protocol(ctx: Context, agent_name, protocol_name):
     """Add a protocol to the agent."""
-    agent_name = ctx.config["agent_name"]
     logger.debug("Adding protocol {protocol_name} to the agent {agent_name}..."
                  .format(agent_name=agent_name, protocol_name=protocol_name))
+
+    if agent_name not in ctx.dotfile.data["agents"]:
+        logger.error("Agent '{agent_name}' not found. Please use 'aea create {agent_name}' "
+                     .format(agent_name=agent_name))
+        return
 
     protocols_module_spec = importlib.util.find_spec("aea.protocols")
     _protocols_submodules = protocols_module_spec.loader.contents()
@@ -232,14 +239,15 @@ def protocol(ctx: Context, protocol_name):
         logger.error("Protocol '{}' not supported. Aborting...".format(protocol_name))
         return
     else:
-        src = protocols_module_spec.submodule_search_locations[0]
+        src = os.path.join(protocols_module_spec.submodule_search_locations[0], protocol_name)
         dest = os.path.join(agent_name, "protocols", protocol_name)
         logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
         shutil.copytree(src, dest)
 
 
 @add.command()
-@click.argument('skill_name')
+@click.argument('agent_name', type=str, required=True)
+@click.argument('skill_name', type=str, required=True)
 @pass_ctx
 def skill(ctx: Context, skill_name):
     """Add a skill to the agent."""
