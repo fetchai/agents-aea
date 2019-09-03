@@ -178,7 +178,6 @@ class AEA(Agent):
         self.max_reactions = max_reactions
         self._directory = directory
 
-
         self._protocol_registry = ProtocolRegistry()
         self._handler_registry = HandlerRegistry()
 

@@ -18,15 +18,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-import fileinput
-import glob
 import os
-import re
-import shutil
-import subprocess
-import sys
 
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
 
 PACKAGE_NAME = "aea"
 
@@ -71,7 +65,7 @@ setup(
     tests_require=["tox"],
     extras_require=extras,
     entry_points={
-        'console_scripts': ["aea=aea.__main__:cli"],
+        'console_scripts': ["aea=aea.cli:cli"],
     },
     license=about['__license__'],
 )
