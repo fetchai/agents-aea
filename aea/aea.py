@@ -20,9 +20,15 @@
 
 """This module contains the implementation of an Autonomous Economic Agent."""
 import base64
+import importlib.util
+import inspect
 import logging
+import os
+import re
 from abc import abstractmethod, ABC
-from typing import List, Optional, Dict
+from typing import Optional, Dict
+
+from aea.protocols.base.abstract_handler import AbstractHandler
 
 from aea.agent import Agent
 from aea.mail.base import Envelope, ProtocolId
@@ -35,35 +41,15 @@ logger = logging.getLogger(__name__)
 SkillId = str
 
 
-class Handler(ABC):
-    """This class implements an abstract behaviour."""
-
-    @abstractmethod
-    def handle_envelope(self, envelope: Envelope) -> None:
-        """
-        Implement the reaction to an envelope.
-
-        :param envelope: the envelope
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
-
-
 class Registry(ABC):
     """This class implements an abstract registry."""
 
     @abstractmethod
-    def populate(self) -> None:
+    def populate(self, directory: str) -> None:
         """
         Load into the registry as specified in the config and apply consistency checks.
 
+        :param directory: the filepath to the agent's resource directory.
         :return: None
         """
 
@@ -85,15 +71,25 @@ class ProtocolRegistry(Registry):
 
         :return: None
         """
-        self._protocols = []  # type: List[Protocol]
+        self._protocols = {}  # type: Dict[ProtocolId, Protocol]
+        self._handlers = {}  # type: Dict[ProtocolId, AbstractHandler]
 
-    def populate(self) -> None:
+    def populate(self, directory: str) -> None:
         """
         Load the handlers as specified in the config and apply consistency checks.
 
+        :param directory: the filepath to the agent's resource directory.
         :return: None
         """
-        pass
+
+        protocols_spec = importlib.util.find_spec(".".join([directory, "protocols"]))
+        protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))
+        logger.debug("Processing the following protocol packages: {}".format(protocols_packages))
+        for protocol_name in protocols_packages:
+            try:
+                self._add_protocol(directory, protocol_name)
+            except Exception:
+                logger.exception("Not able to add protocol {}.".format(protocol_name))
 
     def fetch_protocol(self, envelope: Envelope) -> Optional[Protocol]:
         """
@@ -102,7 +98,16 @@ class ProtocolRegistry(Registry):
         :pass envelope: the envelope
         :return: the protocol id or None if the protocol is not registered
         """
-        pass
+        return self._protocols.get(envelope.protocol_id, None)
+
+    def fetch_handler(self, envelope: Envelope) -> Optional[AbstractHandler]:
+        """
+        Fetch the handler for the envelope.
+
+        :pass envelope: the envelope
+        :return: the protocol id or None if the protocol is not registered
+        """
+        return self._protocols.get(envelope.protocol_id, None)
 
     def teardown(self) -> None:
         """
@@ -110,46 +115,39 @@ class ProtocolRegistry(Registry):
 
         :return: None
         """
-        self._protocols = []
+        self._protocols = {}
 
-
-class HandlerRegistry(Registry):
-    """This class implements the handlers registry."""
-
-    def __init__(self) -> None:
+    def _add_protocol(self, directory: str, protocol_name: str):
         """
-        Instantiate the registry.
+        Add a protocol.
 
+        :param directory: the agent's resources directory.
+        :param protocol_name: the name of the protocol to be added.
         :return: None
         """
-        self._behaviours = {}  # type: Dict[SkillId, Handler]
+        # get the serializer
+        serialization_module = importlib.import_module(".".join([directory, "protocols", protocol_name, "serialization"]))
+        classes = inspect.getmembers(serialization_module, inspect.isclass)
+        serializer_classes = list(filter(lambda x: re.match("\\w+Serializer", x[0]), classes))
+        serializer_class = serializer_classes[0][1]
 
-    def populate(self) -> None:
-        """
-        Load the handlers as specified in the config and apply consistency checks.
+        logger.debug("Found serializer class {serializer_class} for protocol {protocol_name}"
+                     .format(serializer_class=serializer_class, protocol_name=protocol_name))
+        serializer = serializer_class()
 
-        :return: None
-        """
-        pass
+        # get the handler
+        handler_module = importlib.import_module(".".join([directory, "protocols", protocol_name, "handlers"]))
+        classes = inspect.getmembers(handler_module, inspect.isclass)
+        handler_classes = list(filter(lambda x: re.match("Handler", x[0]), classes))
+        handler_class = handler_classes[0][1]
 
-    def fetch_handler(self, protocol_id: ProtocolId) -> Optional[Handler]:
-        """
-        Fetch the handler for the protocol_id.
+        logger.debug("Found handler class {handler_class} for protocol {protocol_name}"
+                     .format(handler_class=handler_class, protocol_name=protocol_name))
+        handler = handler_class()
 
-        :param protocol_id: the protocol id
-        :return: the handler
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-        for handler in self._handlers:
-            handler.teardown()
-        self._handlers = {}
+        # instantiate the protocol manager.
+        protocol = Protocol(protocol_name, serializer, handler)
+        self._protocols[protocol_name] = protocol
 
 
 class AEA(Agent):
@@ -177,9 +175,10 @@ class AEA(Agent):
 
         self.max_reactions = max_reactions
         self._directory = directory
+        if self._directory is None:
+            self._directory = self.name
 
         self._protocol_registry = ProtocolRegistry()
-        self._handler_registry = HandlerRegistry()
 
     @property
     def protocol_registry(self) -> ProtocolRegistry:
@@ -192,8 +191,7 @@ class AEA(Agent):
 
         :return: None
         """
-        self._protocol_registry.populate()
-        self._handler_registry.populate()
+        self._protocol_registry.populate(self._directory)
 
     def act(self) -> None:
         """
@@ -231,11 +229,11 @@ class AEA(Agent):
             self.on_decoding_error(envelope)
             return
 
-        if not protocol.check(msg):
-            self.on_invalid_message(envelope)
-            return
+        # if not protocol.check(msg):
+        #     self.on_invalid_message(envelope)
+        #     return
 
-        handler = self._handler_registry.fetch_handler(protocol.name)
+        handler = self._protocol_registry.fetch_handler(protocol.name)
         if handler is None:
             logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
             return

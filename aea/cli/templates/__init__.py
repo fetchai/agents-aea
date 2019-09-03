@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,3 +16,5 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+"""This module contains template modules to be pulled into the agent's resources."""

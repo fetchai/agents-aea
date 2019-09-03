@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -21,6 +20,7 @@
 """This module contains the implementation of a protocol manager."""
 from abc import ABC, abstractmethod
 
+from aea.protocols.base.abstract_handler import AbstractHandler
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
 
@@ -33,7 +33,7 @@ class Protocol(ABC):
     - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
     """
 
-    def __init__(self, name: str, serializer: Serializer):
+    def __init__(self, name: str, serializer: Serializer, handler: AbstractHandler):
         """
         Initialize the protocol manager.
 
@@ -42,6 +42,7 @@ class Protocol(ABC):
         """
         self._name = name
         self._serializer = serializer
+        self._handler = handler
 
     @property
     def name(self):
@@ -53,12 +54,17 @@ class Protocol(ABC):
         """Get the serializer."""
         return self._serializer
 
-    @abstractmethod
-    def check(self, msg: Message) -> bool:
-        """
-        Check whether the message belongs to the allowed messages.
+    @property
+    def handler(self) -> AbstractHandler:
+        """Get the handler."""
+        return self._handler
 
-        :param msg: the message.
-        :return: True if the message is valid wrt the protocol, False otherwise.
-        """
+    # @abstractmethod
+    # def check(self, msg: Message) -> bool:
+    #     """
+    #     Check whether the message belongs to the allowed messages.
+    #
+    #     :param msg: the message.
+    #     :return: True if the message is valid wrt the protocol, False otherwise.
+    #     """
 

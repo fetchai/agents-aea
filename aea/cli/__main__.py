@@ -20,6 +20,7 @@
 import importlib.util
 import logging
 import os
+import pprint
 import shutil
 from pathlib import Path
 from typing import Optional
@@ -37,7 +38,7 @@ logger = click_log.basic_config(logger=logger)
 
 
 class CLIDotFile(object):
-    """Handler for the '.aea' file."""
+    """AbstractHandler for the '.aea' file."""
 
     def __init__(self, filepath: str = ".aea.yaml"):
         """Initialize the handler for the AEA dotfile."""
@@ -102,6 +103,7 @@ class AgentConfig(object):
 
     def dump(self, file):
         """Dump data to an agent configuration file."""
+        logger.debug("Dumping YAML: {}".format(pprint.pformat(vars(self))))
         yaml.safe_dump(vars(self), file)
 
 
@@ -202,7 +204,7 @@ def run(ctx: Context, agent_name, oef_addr, oef_port):
     try:
         agent.start()
     except KeyboardInterrupt:
-        agent.stop()
+        logger.info("Interrupted.")
     except Exception:
         raise
     finally:
@@ -230,19 +232,44 @@ def protocol(ctx: Context, agent_name, protocol_name):
                      .format(agent_name=agent_name))
         return
 
+    # find the supported protocols and check if the candidate protocol is supported.
     protocols_module_spec = importlib.util.find_spec("aea.protocols")
     _protocols_submodules = protocols_module_spec.loader.contents()
-    _protocols_submodules = filter(lambda x: not x.startswith("__"), _protocols_submodules)
+    _protocols_submodules = filter(lambda x: not x.startswith("__") and x != "base", _protocols_submodules)
     aea_supported_protocol = set(_protocols_submodules)
     logger.debug("Supported protocols: {}".format(aea_supported_protocol))
     if protocol_name not in aea_supported_protocol:
         logger.error("Protocol '{}' not supported. Aborting...".format(protocol_name))
         return
-    else:
-        src = os.path.join(protocols_module_spec.submodule_search_locations[0], protocol_name)
-        dest = os.path.join(agent_name, "protocols", protocol_name)
-        logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
-        shutil.copytree(src, dest)
+
+    # check if we already have a protocol with the same name
+    config_filepath = os.path.join(agent_name, "config.yaml")
+    agent_config = AgentConfig()
+    agent_config.load(config_filepath)
+    logger.debug("Protocols already supported by the agent: {}".format(agent_config.protocols))
+    if protocol_name in agent_config.protocols:
+        logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
+        return
+
+    # copy the protocol package into the agent's supported protocols.
+    protocols_dir = protocols_module_spec.submodule_search_locations[0]
+    src = os.path.join(protocols_dir, protocol_name)
+    dest = os.path.join(agent_name, "protocols", protocol_name)
+    logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
+    shutil.copytree(src, dest)
+
+    # copy the template handler into the protocol package.
+    template_handler_path = importlib.util.find_spec("aea.cli.templates.handlers").loader.path
+    shutil.copy(template_handler_path, dest)
+
+    # make the 'protocols' folder a Python package.
+    logger.debug("Creating {}".format(os.path.join(agent_name, "protocols", "__init__.py")))
+    Path(os.path.join(agent_name, "protocols", "__init__.py")).touch(exist_ok=True)
+
+    # add the protocol to the configurations.
+    logger.debug("Registering the protocol into {}".format(config_filepath))
+    agent_config.protocols.append(protocol_name)
+    agent_config.dump(open(config_filepath, "w"))
 
 
 @add.command()
