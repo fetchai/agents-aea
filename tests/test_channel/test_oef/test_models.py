@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the OEF channel."""
+"""This test module contains the tests for the OEF models."""
 import pickle
 
 import pytest
@@ -73,8 +73,7 @@ class TestTranslator:
                 ]),
                 Constraint("foo", LtEq(2)),
             ])
-        ],
-        data_model_foobar)
+        ], data_model_foobar)
 
         oef_query = OEFObjectTranslator.to_oef_query(query)
         expected_query = OEFObjectTranslator.from_oef_query(oef_query)

@@ -167,7 +167,7 @@ class InBox(object):
         """
         return self._queue.empty()
 
-    def get(self, block: bool = True, timeout: Optional[float] = None) -> Optional[Envelope]:
+    def get(self, block: bool = True, timeout: Optional[float] = None) -> Envelope:
         """
         Check for a message on the in queue.
 
@@ -175,10 +175,12 @@ class InBox(object):
         :param timeout: times out the block after timeout seconds.
 
         :return: the message object.
+        :raises Empty: if the attempt to get a message fails.
         """
         logger.debug("Checks for message from the in queue...")
         msg = self._queue.get(block=block, timeout=timeout)
-        logger.debug("Incoming message type: type={}".format(type(msg)))
+        logger.debug("Incoming message: to='{}' sender='{}' protocol_id='{}' message='{}'"
+                     .format(msg.to, msg.sender, msg.protocol_id, msg.message))
         return msg
 
     def get_nowait(self) -> Optional[Envelope]:
@@ -218,7 +220,8 @@ class OutBox(object):
         :param item: the message.
         :return: None
         """
-        logger.debug("Put a message in the queue...")
+        logger.debug("Put a message in the queue: to='{}' sender='{}' protocol_id='{}' message='{}'..."
+                     .format(item.to, item.sender, item.protocol_id, item.message))
         self._queue.put(item)
 
     def put_message(self, to: Optional[Address] = None, sender: Optional[Address] = None,

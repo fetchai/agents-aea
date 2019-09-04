@@ -1,9 +1,9 @@
 
 pipeline {
 
-    agent {
-        docker 'gcr.io/organic-storm-201412/docker-tac-develop:latest'
-    }
+    agent none
+        //
+        // pip install tox pipenv
 
     stages {
 
@@ -22,14 +22,45 @@ pipeline {
 
                 stage('Unit Tests') {
 
-                    steps {
-                        sh 'pip3 install tox'
-                        sh 'tox -e py37 -- --no-oef'
-                    }
+                    parallel {
+
+                        stage('Python 3.6') {
+
+                            agent {
+                                docker {
+                                    image "python:3.6-alpine"
+                                }
+                            }
+
+                            steps {
+                                sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
+                                sh 'pip install tox pipenv'
+                                sh 'tox -e py36'
+                            }
+
+                        }  // python 3.6
+
+                        stage('Python 3.7') {
+
+                            agent {
+                                docker {
+                                    image "python:3.7-alpine"
+                                }
+                            }
+
+                            steps {
+                                sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
+                                sh 'pip install tox pipenv'
+                                sh 'tox -e py37'
+                            }
+
+                        } // python 3.7
+
+                    }  // parallel
 
                 } // unit tests
 
-            } // stages
+            } // parallel
 
         }  // unit tests & code style check
 

@@ -21,8 +21,6 @@
 """Serialization for the FIPA protocol."""
 import pickle
 
-from google.protobuf.struct_pb2 import Struct
-
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
 from aea.protocols.fipa import fipa_pb2
@@ -44,11 +42,9 @@ class FIPASerializer(Serializer):
         if performative_id == "cfp":
             performative = fipa_pb2.FIPAMessage.CFP()
             query = msg.get("query")
-            if query is None:
+            if query is None or query == b"":
                 nothing = fipa_pb2.FIPAMessage.CFP.Nothing()
                 performative.nothing.CopyFrom(nothing)
-            elif type(query) == dict:
-                performative.json.update(query)
             elif type(query) == bytes:
                 performative.bytes = query
             else:
@@ -57,7 +53,7 @@ class FIPASerializer(Serializer):
         elif performative_id == "propose":
             performative = fipa_pb2.FIPAMessage.Propose()
             proposal = msg.get("proposal")
-            p_array_bytes = [p.to_pb().SerializeToString() for p in proposal]
+            p_array_bytes = [pickle.dumps(p) for p in proposal]
             performative.proposal.extend(p_array_bytes)
             fipa_msg.propose.CopyFrom(performative)
 
@@ -91,10 +87,6 @@ class FIPASerializer(Serializer):
             query_type = fipa_pb.cfp.WhichOneof("query")
             if query_type == "nothing":
                 query = None
-            elif query_type == "json":
-                query_pb = Struct()
-                query_pb.update(fipa_pb.cfp.json)
-                query = dict(query_pb)
             elif query_type == "bytes":
                 query = fipa_pb.cfp.bytes
             else:
