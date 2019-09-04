@@ -23,12 +23,9 @@ import base64
 import importlib.util
 import inspect
 import logging
-import os
 import re
 from abc import abstractmethod, ABC
 from typing import Optional, Dict
-
-from aea.protocols.base.abstract_handler import AbstractHandler
 
 from aea.agent import Agent
 from aea.mail.base import Envelope, ProtocolId
@@ -84,7 +81,7 @@ class ProtocolRegistry(Registry):
 
         protocols_spec = importlib.util.find_spec(".".join([directory, "protocols"]))
         protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))
-        logger.debug("Processing the following protocol packages: {}".format(protocols_packages))
+        logger.debug("Processing the following protocol package: {}".format(protocols_packages))
         for protocol_name in protocols_packages:
             try:
                 self._add_protocol(directory, protocol_name)
@@ -94,15 +91,6 @@ class ProtocolRegistry(Registry):
     def fetch_protocol(self, envelope: Envelope) -> Optional[Protocol]:
         """
         Fetch the protocol for the envelope.
-
-        :pass envelope: the envelope
-        :return: the protocol id or None if the protocol is not registered
-        """
-        return self._protocols.get(envelope.protocol_id, None)
-
-    def fetch_handler(self, envelope: Envelope) -> Optional[AbstractHandler]:
-        """
-        Fetch the handler for the envelope.
 
         :pass envelope: the envelope
         :return: the protocol id or None if the protocol is not registered
@@ -135,18 +123,8 @@ class ProtocolRegistry(Registry):
                      .format(serializer_class=serializer_class, protocol_name=protocol_name))
         serializer = serializer_class()
 
-        # get the handler
-        handler_module = importlib.import_module(".".join([directory, "protocols", protocol_name, "handlers"]))
-        classes = inspect.getmembers(handler_module, inspect.isclass)
-        handler_classes = list(filter(lambda x: re.match("Handler", x[0]), classes))
-        handler_class = handler_classes[0][1]
-
-        logger.debug("Found handler class {handler_class} for protocol {protocol_name}"
-                     .format(handler_class=handler_class, protocol_name=protocol_name))
-        handler = handler_class()
-
         # instantiate the protocol manager.
-        protocol = Protocol(protocol_name, serializer, handler)
+        protocol = Protocol(protocol_name, serializer)
         self._protocols[protocol_name] = protocol
 
 
@@ -233,12 +211,12 @@ class AEA(Agent):
         #     self.on_invalid_message(envelope)
         #     return
 
-        handler = self._protocol_registry.fetch_handler(protocol.name)
-        if handler is None:
-            logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
-            return
-
-        handler.handle_envelope(envelope)
+        # handler = self._protocol_registry.fetch_handler(protocol.name)
+        # if handler is None:
+        #     logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
+        #     return
+        #
+        # handler.handle_envelope(envelope)
 
     def on_unsupported_protocol(self, envelope: Envelope):
         """Handle the received envelope in case the protocol is not supported."""

@@ -258,10 +258,6 @@ def protocol(ctx: Context, agent_name, protocol_name):
     logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
     shutil.copytree(src, dest)
 
-    # copy the template handler into the protocol package.
-    template_handler_path = importlib.util.find_spec("aea.cli.templates.handlers").loader.path
-    shutil.copy(template_handler_path, dest)
-
     # make the 'protocols' folder a Python package.
     logger.debug("Creating {}".format(os.path.join(agent_name, "protocols", "__init__.py")))
     Path(os.path.join(agent_name, "protocols", "__init__.py")).touch(exist_ok=True)
