@@ -25,8 +25,9 @@ from aea.protocols.base.serialization import Serializer
 
 class Protocol(ABC):
     """
-    This class implements a specifications for a protocol. It includes:
+    This class implements a specifications for a protocol.
 
+    It includes:
     - a serializer, to encode/decode a message.
     - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
     """

@@ -78,7 +78,6 @@ class ProtocolRegistry(Registry):
         :param directory: the filepath to the agent's resource directory.
         :return: None
         """
-
         protocols_spec = importlib.util.find_spec(".".join([directory, "protocols"]))
         protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))
         logger.debug("Processing the following protocol package: {}".format(protocols_packages))
@@ -201,11 +200,11 @@ class AEA(Agent):
             self.on_unsupported_protocol(envelope)
             return
 
-        try:
-            msg = protocol.serializer.decode(envelope.message)
-        except Exception:
-            self.on_decoding_error(envelope)
-            return
+        # try:
+        #     msg = protocol.serializer.decode(envelope.message)
+        # except Exception:
+        #     self.on_decoding_error(envelope)
+        #     return
 
         # if not protocol.check(msg):
         #     self.on_invalid_message(envelope)
@@ -265,4 +264,3 @@ class AEA(Agent):
         :return: None
         """
         self._protocol_registry.teardown()
-

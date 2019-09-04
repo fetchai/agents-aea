@@ -17,6 +17,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+"""Module implements the main classes of the cli."""
 import importlib.util
 import logging
 import os
@@ -102,8 +104,13 @@ def _try_to_load_agent_config(ctx: Context):
 @click.version_option('0.1.0')
 @click.pass_context
 @click_log.simple_verbosity_option(logger, default="INFO")
-def cli(ctx):
-    """A command-line tool for setting up an Autonomous Economic Agent."""
+def cli(ctx) -> None:
+    """
+    Command-line tool for setting up an Autonomous Economic Agent.
+
+    :param ctx: the context
+    :return: None
+    """
     ctx.obj = Context()
 
 
