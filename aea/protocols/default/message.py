@@ -41,6 +41,8 @@ class DefaultMessage(Message):
             return self.value
 
     class ErrorCode(Enum):
+        """The error codes."""
+
         UNSUPPORTED_PROTOCOL = -10001
         DECODING_ERROR = -10002
         INVALID_MESSAGE = -10003
