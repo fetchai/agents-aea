@@ -13,16 +13,14 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
-from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='fipa.proto',
   package='fetch.aea.fipa',
   syntax='proto3',
-  serialized_pb=_b('\n\nfipa.proto\x12\x0e\x66\x65tch.aea.fipa\x1a\x1cgoogle/protobuf/struct.proto\"\xc0\x04\n\x0b\x46IPAMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64ialogue_id\x18\x02 \x01(\x05\x12\x0e\n\x06target\x18\x03 \x01(\x05\x12.\n\x03\x63\x66p\x18\x04 \x01(\x0b\x32\x1f.fetch.aea.fipa.FIPAMessage.CFPH\x00\x12\x36\n\x07propose\x18\x05 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.ProposeH\x00\x12\x34\n\x06\x61\x63\x63\x65pt\x18\x06 \x01(\x0b\x32\".fetch.aea.fipa.FIPAMessage.AcceptH\x00\x12?\n\x0cmatch_accept\x18\x07 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.MatchAcceptH\x00\x12\x36\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.DeclineH\x00\x1a\x8f\x01\n\x03\x43\x46P\x12\'\n\x04json\x18\x01 \x01(\x0b\x32\x17.google.protobuf.StructH\x00\x12\x0f\n\x05\x62ytes\x18\x02 \x01(\x0cH\x00\x12:\n\x07nothing\x18\x03 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.CFP.NothingH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1a\x1b\n\x07Propose\x12\x10\n\x08proposal\x18\x04 \x03(\x0c\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\r\n\x0bMatchAccept\x1a\t\n\x07\x44\x65\x63lineB\x0e\n\x0cperformativeb\x06proto3')
-  ,
-  dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,])
+  serialized_pb=_b('\n\nfipa.proto\x12\x0e\x66\x65tch.aea.fipa\"\x96\x04\n\x0b\x46IPAMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64ialogue_id\x18\x02 \x01(\x05\x12\x0e\n\x06target\x18\x03 \x01(\x05\x12.\n\x03\x63\x66p\x18\x04 \x01(\x0b\x32\x1f.fetch.aea.fipa.FIPAMessage.CFPH\x00\x12\x36\n\x07propose\x18\x05 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.ProposeH\x00\x12\x34\n\x06\x61\x63\x63\x65pt\x18\x06 \x01(\x0b\x32\".fetch.aea.fipa.FIPAMessage.AcceptH\x00\x12?\n\x0cmatch_accept\x18\x07 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.MatchAcceptH\x00\x12\x36\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.DeclineH\x00\x1a\x66\n\x03\x43\x46P\x12\x0f\n\x05\x62ytes\x18\x02 \x01(\x0cH\x00\x12:\n\x07nothing\x18\x03 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.CFP.NothingH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1a\x1b\n\x07Propose\x12\x10\n\x08proposal\x18\x04 \x03(\x0c\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\r\n\x0bMatchAccept\x1a\t\n\x07\x44\x65\x63lineB\x0e\n\x0cperformativeb\x06proto3')
+)
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
@@ -47,8 +45,8 @@ _FIPAMESSAGE_CFP_NOTHING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=538,
-  serialized_end=547,
+  serialized_start=466,
+  serialized_end=475,
 )
 
 _FIPAMESSAGE_CFP = _descriptor.Descriptor(
@@ -59,21 +57,14 @@ _FIPAMESSAGE_CFP = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='json', full_name='fetch.aea.fipa.FIPAMessage.CFP.json', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='bytes', full_name='fetch.aea.fipa.FIPAMessage.CFP.bytes', index=1,
+      name='bytes', full_name='fetch.aea.fipa.FIPAMessage.CFP.bytes', index=0,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='nothing', full_name='fetch.aea.fipa.FIPAMessage.CFP.nothing', index=2,
+      name='nothing', full_name='fetch.aea.fipa.FIPAMessage.CFP.nothing', index=1,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -94,8 +85,8 @@ _FIPAMESSAGE_CFP = _descriptor.Descriptor(
       name='query', full_name='fetch.aea.fipa.FIPAMessage.CFP.query',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=413,
-  serialized_end=556,
+  serialized_start=382,
+  serialized_end=484,
 )
 
 _FIPAMESSAGE_PROPOSE = _descriptor.Descriptor(
@@ -124,8 +115,8 @@ _FIPAMESSAGE_PROPOSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=558,
-  serialized_end=585,
+  serialized_start=486,
+  serialized_end=513,
 )
 
 _FIPAMESSAGE_ACCEPT = _descriptor.Descriptor(
@@ -147,8 +138,8 @@ _FIPAMESSAGE_ACCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=587,
-  serialized_end=595,
+  serialized_start=515,
+  serialized_end=523,
 )
 
 _FIPAMESSAGE_MATCHACCEPT = _descriptor.Descriptor(
@@ -170,8 +161,8 @@ _FIPAMESSAGE_MATCHACCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=597,
-  serialized_end=610,
+  serialized_start=525,
+  serialized_end=538,
 )
 
 _FIPAMESSAGE_DECLINE = _descriptor.Descriptor(
@@ -193,8 +184,8 @@ _FIPAMESSAGE_DECLINE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=612,
-  serialized_end=621,
+  serialized_start=540,
+  serialized_end=549,
 )
 
 _FIPAMESSAGE = _descriptor.Descriptor(
@@ -275,17 +266,13 @@ _FIPAMESSAGE = _descriptor.Descriptor(
       name='performative', full_name='fetch.aea.fipa.FIPAMessage.performative',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=61,
-  serialized_end=637,
+  serialized_start=31,
+  serialized_end=565,
 )
 
 _FIPAMESSAGE_CFP_NOTHING.containing_type = _FIPAMESSAGE_CFP
-_FIPAMESSAGE_CFP.fields_by_name['json'].message_type = google_dot_protobuf_dot_struct__pb2._STRUCT
 _FIPAMESSAGE_CFP.fields_by_name['nothing'].message_type = _FIPAMESSAGE_CFP_NOTHING
 _FIPAMESSAGE_CFP.containing_type = _FIPAMESSAGE
-_FIPAMESSAGE_CFP.oneofs_by_name['query'].fields.append(
-  _FIPAMESSAGE_CFP.fields_by_name['json'])
-_FIPAMESSAGE_CFP.fields_by_name['json'].containing_oneof = _FIPAMESSAGE_CFP.oneofs_by_name['query']
 _FIPAMESSAGE_CFP.oneofs_by_name['query'].fields.append(
   _FIPAMESSAGE_CFP.fields_by_name['bytes'])
 _FIPAMESSAGE_CFP.fields_by_name['bytes'].containing_oneof = _FIPAMESSAGE_CFP.oneofs_by_name['query']

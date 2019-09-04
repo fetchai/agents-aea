@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the common modules."""
+"""This test module contains the tests for the AEA."""

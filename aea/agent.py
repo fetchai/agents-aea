@@ -22,18 +22,14 @@
 
 import logging
 import time
-
 from abc import abstractmethod, ABC
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Optional
 
 from aea.crypto.base import Crypto
-from aea.mail.base import InBox, OutBox, MailBox, ProtocolId, Envelope
+from aea.mail.base import InBox, OutBox, MailBox
 
 logger = logging.getLogger(__name__)
-
-Handler = object
-Behaviour = object
 
 
 class AgentState(Enum):
@@ -57,12 +53,10 @@ class Liveness:
         return self._is_stopped
 
 
-class Agent:
+class Agent(ABC):
     """This class implements a template agent."""
 
     def __init__(self, name: str,
-                 oef_addr: str,
-                 oef_port: int = 10000,
                  private_key_pem_path: Optional[str] = None,
                  timeout: Optional[float] = 1.0,
                  debug: bool = False) -> None:
@@ -70,8 +64,6 @@ class Agent:
         Instantiate the agent.
 
         :param name: the name of the agent
-        :param oef_addr: TCP/IP address of the OEF Agent
-        :param oef_port: TCP/IP port of the OEF Agent
         :param private_key_pem_path: the path to the private key of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
@@ -111,16 +103,6 @@ class Agent:
     def liveness(self) -> Liveness:
         """Get the liveness."""
         return self._liveness
-
-    @property
-    def handlers(self) -> Dict[str, object]:
-        """Get the registered handlers."""
-        return self._behaviours
-
-    @property
-    def behaviours(self) -> Dict[str, object]:
-        """Get the registered behaviours."""
-        return self._behaviours
 
     @property
     def agent_state(self) -> AgentState:
@@ -227,323 +209,3 @@ class Agent:
 
         :return: None
         """
-
-
-SkillId = str
-
-
-class Behaviour(ABC):
-    """This class implements an abstract behaviour."""
-
-    @abstractmethod
-    def act(self) -> None:
-        """
-        Implement the behaviour.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Implement the behaviour teardown.
-
-        :return: None
-        """
-
-
-class Handler(ABC):
-    """This class implements an abstract behaviour."""
-
-    @abstractmethod
-    def handle_envelope(self, envelope: Envelope) -> None:
-        """
-        Implement the reaction to an envelope.
-
-        :param envelope: the envelope
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
-
-
-TaskId = str
-
-
-class Task(ABC):
-    """This class implements an abstract task."""
-
-    @abstractmethod
-    def execute(self) -> None:
-        """
-        Run the task logic.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Teardown the task.
-
-        :return: None
-        """
-
-
-class Registry(ABC):
-    """This class implements an abstract registry."""
-
-    @abstractmethod
-    def populate(self) -> None:
-        """
-        Load into the registry as specified in the config and apply consistency checks.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-
-
-class ProtocolRegistry(Registry):
-    """This class implements the handlers registry."""
-
-    def __init__(self) -> None:
-        """
-        Instantiate the registry.
-
-        :return: None
-        """
-        self._protocols = []  # type: List
-
-    def populate(self) -> None:
-        """
-        Load the handlers as specified in the config and apply consistency checks.
-
-        :return: None
-        """
-        pass
-
-    def fetch_protocol(self, envelope: Envelope) -> Optional[ProtocolId]:
-        """
-        Fetch the protocol for the envelope.
-
-        :pass envelope: the envelope
-        :return: the protocol id or None if the protocol is not registered
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-        self._protocols = []
-
-
-class HandlerRegistry(Registry):
-    """This class implements the handlers registry."""
-
-    def __init__(self) -> None:
-        """
-        Instantiate the registry.
-
-        :return: None
-        """
-        self._behaviours = {}  # type: Dict[SkillId, Handler]
-
-    def populate(self) -> None:
-        """
-        Load the handlers as specified in the config and apply consistency checks.
-
-        :return: None
-        """
-        pass
-
-    def fetch_handler(self, protocol_id: ProtocolId) -> Handler:
-        """
-        Fetch the handler for the protocol_id.
-
-        :param protocol_id: the protocol id
-        :return: the handler
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-        for handler in self._handlers:
-            handler.teardown()
-        self._handlers = {}
-
-
-class BehaviourRegistry(Registry):
-    """This class implements the behaviour registry."""
-
-    def __init__(self) -> None:
-        """
-        Instantiate the registry.
-
-        :return: None
-        """
-        self._behaviours = {}  # type: Dict[SkillId, Behaviour]
-
-    def populate(self) -> None:
-        """
-        Load the behaviours as specified in the config and apply consistency checks.
-
-        :return: None
-        """
-        pass
-
-    def fetch_behaviours(self) -> Optional[List[Behaviour]]:
-        """
-        Return a list of behaviours for processing.
-
-        :return: the list of behaviours
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-        for behaviour in self._behaviours:
-            behaviour.teardown()
-        self._behaviours = {}
-
-
-class TaskRegistry(Registry):
-    """This class implements the task registry."""
-
-    def __init__(self) -> None:
-        """
-        Instantiate the registry.
-
-        :return: None
-        """
-        self._tasks = {}  # type: Dict[TaskId, Task]
-
-    def populate(self) -> None:
-        """
-        Load the tasks as specified in the config and apply consistency checks.
-
-        :return: None
-        """
-        pass
-
-    def fetch_tasks(self) -> Optional[List[Task]]:
-        """
-        Return a list of tasks for processing.
-
-        :return: a list of tasks.
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-        for task in self._tasks:
-            task.teardown()
-        self._tasks = {}
-
-
-class AEA(Agent):
-    """This class implements an autonomous economic agent."""
-
-    def __init__(self, name: str,
-                 oef_addr: str,
-                 oef_port: int = 10000,
-                 private_key_pem_path: Optional[str] = None,
-                 timeout: Optional[float] = 1.0,
-                 debug: bool = False) -> None:
-        """
-        Instantiate the agent.
-
-        :param name: the name of the agent
-        :param oef_addr: TCP/IP address of the OEF Agent
-        :param oef_port: TCP/IP port of the OEF Agent
-        :param private_key_pem_path: the path to the private key of the agent.
-        :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param debug: if True, run the agent in debug mode.
-
-        :return: None
-        """
-        super().__init__(name=name, oef_addr=oef_addr, private_key_pem_path=private_key_pem_path, timeout=timeout, debug=debug)
-
-        self._protocol_registry = ProtocolRegistry()
-        self._handler_registry = HandlerRegistry()
-        self._behaviour_registry = BehaviourRegistry()
-
-    def setup(self) -> None:
-        """
-        Set up the agent.
-
-        :return: None
-        """
-        self._protocol_registry.populate()
-        self._handler_registry.populate()
-        self._behaviour_registry.populate()
-
-    def act(self) -> None:
-        """
-        Perform actions.
-
-        :return: None
-        """
-        for behaviour in self._behaviour_registry.fetch_behaviours():
-            behaviour.act()
-
-    def react(self) -> None:
-        """
-        React to incoming events.
-
-        :return: None
-        """
-        counter = 0
-        while (not self.inbox.empty() and counter < self.max_reactions):
-            counter += 1
-            envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            if envelope is not None:
-                protocol_id = self._protocol_registry.fetch_protocol(envelope)
-                if protocol_id is not None:
-                    handler = self._handler_registry.fetch_handler(protocol_id)
-                    handler.handle_envelope(envelope)
-
-    def update(self) -> None:
-        """Update the current state of the agent.
-
-        :return None
-        """
-        for task in self._task_registry.fetch_tasks():
-            task.execute()
-
-    def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        :return: None
-        """
-        self._behaviour_registry.teardown()
-        self._handler_registry.teardown()
-        self._protocol_registry.teardown()

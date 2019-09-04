@@ -35,8 +35,7 @@ class DefaultSerializer(Serializer):
         """Encode a 'default' message into bytes."""
         body = {}
 
-        msg_type = msg.get("type")
-        assert msg_type in set(DefaultMessage.Type)
+        msg_type = DefaultMessage.Type(msg.get("type"))
         body["type"] = str(msg_type.value)
 
         if msg_type == DefaultMessage.Type.BYTES:
@@ -44,6 +43,7 @@ class DefaultSerializer(Serializer):
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = msg.get("error_code")
             body["error_msg"] = msg.get("error_msg")
+            body["error_data"] = msg.get("error_data")
         else:
             raise ValueError("Type not recognized.")
 
@@ -63,6 +63,7 @@ class DefaultSerializer(Serializer):
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = json_body["error_code"]
             body["error_msg"] = json_body["error_msg"]
+            body["error_data"] = json_body["error_data"]
         else:
             raise ValueError("Type not recognized.")
 

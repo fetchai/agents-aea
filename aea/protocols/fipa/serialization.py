@@ -42,7 +42,7 @@ class FIPASerializer(Serializer):
         if performative_id == "cfp":
             performative = fipa_pb2.FIPAMessage.CFP()
             query = msg.get("query")
-            if query is None:
+            if query is None or query == b"":
                 nothing = fipa_pb2.FIPAMessage.CFP.Nothing()
                 performative.nothing.CopyFrom(nothing)
             elif type(query) == bytes:

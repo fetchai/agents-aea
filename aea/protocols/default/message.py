@@ -36,6 +36,15 @@ class DefaultMessage(Message):
         BYTES = "bytes"
         ERROR = "error"
 
+        def __str__(self):
+            """Get the string representation."""
+            return self.value
+
+    class ErrorCode(Enum):
+        UNSUPPORTED_PROTOCOL = -10001
+        DECODING_ERROR = -10002
+        INVALID_MESSAGE = -10003
+
     def __init__(self, type: Optional[Type] = None,
                  **kwargs):
         """
