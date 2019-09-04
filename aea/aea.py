@@ -36,7 +36,6 @@ from aea.protocols.default.serialization import DefaultSerializer
 logger = logging.getLogger(__name__)
 
 SkillId = str
-TaskId = str
 
 
 class Behaviour(ABC):
@@ -154,6 +153,8 @@ class ProtocolRegistry(Registry):
         :return: None
         """
 
+        import pdb
+        pdb.set_trace()
         protocols_spec = importlib.util.find_spec("protocols")
         if protocols_spec is None:
             logger.warning("No protocol found.")
@@ -193,7 +194,7 @@ class ProtocolRegistry(Registry):
         :return: None
         """
         # get the serializer
-        serialization_module = importlib.import_module(".".join([directory, "protocols", protocol_name, "serialization"]))
+        serialization_module = importlib.import_module(".".join(["protocols", protocol_name, "serialization"]))
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(filter(lambda x: re.match("\\w+Serializer", x[0]), classes))
         serializer_class = serializer_classes[0][1]
@@ -222,7 +223,18 @@ class HandlerRegistry(Registry):
         Load the handlers as specified in the config and apply consistency checks.
         :return: None
         """
-        pass
+        skills_spec = importlib.util.find_spec("skills")
+        if skills_spec is None:
+            logger.warning("No skill found.")
+            return
+
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        logger.debug("Processing the following skill package: {}".format(skills_packages))
+        for skill_name in skills_packages:
+            try:
+                self._add_skill_handler(directory, skill_name)
+            except Exception:
+                logger.exception("Not able to add handler for skill {}.".format(skill_name))
 
     def fetch_handler(self, protocol_id: ProtocolId) -> Optional[Handler]:
         """
@@ -230,7 +242,7 @@ class HandlerRegistry(Registry):
         :param protocol_id: the protocol id
         :return: the handler
         """
-        return None
+        return self._handlers.get(protocol_id, None)
 
     def teardown(self) -> None:
         """
@@ -240,6 +252,18 @@ class HandlerRegistry(Registry):
         for handler in self._handlers.values():
             handler.teardown()
         self._handlers = {}
+
+    def _add_skill_handler(self, directory, skill_name):
+        """Add a skill handler."""
+        handler_module = importlib.import_module(".".join([directory, "skills", skill_name, "handler"]))
+        classes = inspect.getmembers(handler_module, inspect.isclass)
+        handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
+        handler_class = handler_classes[0][1]
+
+        logger.debug("Found handler class {handler_class} for skill {skill_name}"
+                     .format(handler_class=handler_class, skill_name=skill_name))
+        handler = handler_class()
+        self._handlers[handler.SUPPORTED_PROTOCOL] = handler
 
 
 class BehaviourRegistry(Registry):
