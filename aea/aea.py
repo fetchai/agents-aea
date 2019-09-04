@@ -25,7 +25,7 @@ import inspect
 import logging
 import re
 from abc import abstractmethod, ABC
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from aea.agent import Agent
 from aea.mail.base import Envelope, ProtocolId
@@ -36,6 +36,81 @@ from aea.protocols.default.serialization import DefaultSerializer
 logger = logging.getLogger(__name__)
 
 SkillId = str
+
+
+class Behaviour(ABC):
+    """This class implements an abstract behaviour."""
+
+    @abstractmethod
+    def act(self) -> None:
+        """
+        Implement the behaviour.
+        :return: None
+        """
+
+    @abstractmethod
+    def teardown(self) -> None:
+        """
+        Implement the behaviour teardown.
+        :return: None
+        """
+
+
+class Handler(ABC):
+    """This class implements an abstract behaviour."""
+
+    SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
+
+    @abstractmethod
+    def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Implement the reaction to an envelope.
+        :param envelope: the envelope
+        :return: None
+        """
+
+    @abstractmethod
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+        :return: None
+        """
+
+
+class Task(ABC):
+    """This class implements an abstract task."""
+
+    @abstractmethod
+    def execute(self) -> None:
+        """
+        Run the task logic.
+        :return: None
+        """
+
+    @abstractmethod
+    def teardown(self) -> None:
+        """
+        Teardown the task.
+        :return: None
+        """
+
+
+class Skill:
+    """This class implement a skill."""
+
+    def __init__(self, handler: Handler,
+                 behaviours: List[Behaviour],
+                 tasks: List[Task]):
+        """
+        Initialize a skill.
+
+        :param handler: the handler to handle incoming envelopes.
+        :param behaviours: the list of behaviours that defines the proactive component of the agent.
+        :param tasks: the list of tasks executed at every iteration of the main loop.
+        """
+        self.handler = handler
+        self.behaviours = behaviours
+        self.tasks = tasks
 
 
 class Registry(ABC):
@@ -69,7 +144,6 @@ class ProtocolRegistry(Registry):
         :return: None
         """
         self._protocols = {}  # type: Dict[ProtocolId, Protocol]
-        # self._handlers = {}  # type: Dict[ProtocolId, Handler]
 
     def populate(self, directory: str) -> None:
         """
@@ -78,7 +152,13 @@ class ProtocolRegistry(Registry):
         :param directory: the filepath to the agent's resource directory.
         :return: None
         """
-        protocols_spec = importlib.util.find_spec(".".join([directory, "protocols"]))
+        import pdb
+        pdb.set_trace()
+        protocols_spec = importlib.util.find_spec("protocols")
+        if protocols_spec is None:
+            logger.warning("No protocol found.")
+            return
+
         protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))
         logger.debug("Processing the following protocol package: {}".format(protocols_packages))
         for protocol_name in protocols_packages:
@@ -113,7 +193,7 @@ class ProtocolRegistry(Registry):
         :return: None
         """
         # get the serializer
-        serialization_module = importlib.import_module(".".join([directory, "protocols", protocol_name, "serialization"]))
+        serialization_module = importlib.import_module(".".join(["protocols", protocol_name, "serialization"]))
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(filter(lambda x: re.match("\\w+Serializer", x[0]), classes))
         serializer_class = serializer_classes[0][1]
@@ -125,6 +205,153 @@ class ProtocolRegistry(Registry):
         # instantiate the protocol manager.
         protocol = Protocol(protocol_name, serializer)
         self._protocols[protocol_name] = protocol
+
+
+class HandlerRegistry(Registry):
+    """This class implements the handlers registry."""
+
+    def __init__(self) -> None:
+        """
+        Instantiate the registry.
+        :return: None
+        """
+        self._handlers = {}  # type: Dict[SkillId, Handler]
+
+    def populate(self, directory: str) -> None:
+        """
+        Load the handlers as specified in the config and apply consistency checks.
+        :return: None
+        """
+        skills_spec = importlib.util.find_spec("skills")
+        if skills_spec is None:
+            logger.warning("No skill found.")
+            return
+
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        logger.debug("Processing the following skill package: {}".format(skills_packages))
+        for skill_name in skills_packages:
+            try:
+                self._add_skill_handler(directory, skill_name)
+            except Exception:
+                logger.exception("Not able to add handler for skill {}.".format(skill_name))
+
+    def fetch_handler(self, protocol_id: ProtocolId) -> Optional[Handler]:
+        """
+        Fetch the handler for the protocol_id.
+        :param protocol_id: the protocol id
+        :return: the handler
+        """
+        return self._handlers.get(protocol_id, None)
+
+    def teardown(self) -> None:
+        """
+        Teardown the registry.
+        :return: None
+        """
+        for handler in self._handlers.values():
+            handler.teardown()
+        self._handlers = {}
+
+    def _add_skill_handler(self, directory, skill_name):
+        """Add a skill handler."""
+        handler_module = importlib.import_module(".".join([directory, "skills", skill_name, "handler"]))
+        classes = inspect.getmembers(handler_module, inspect.isclass)
+        handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
+        handler_class = handler_classes[0][1]
+
+        logger.debug("Found handler class {handler_class} for skill {skill_name}"
+                     .format(handler_class=handler_class, skill_name=skill_name))
+        handler = handler_class()
+        self._handlers[handler.SUPPORTED_PROTOCOL] = handler
+
+
+class BehaviourRegistry(Registry):
+    """This class implements the behaviour registry."""
+
+    def __init__(self) -> None:
+        """
+        Instantiate the registry.
+        :return: None
+        """
+        self._behaviours = {}  # type: Dict[SkillId, Behaviour]
+
+    def populate(self, directory: str) -> None:
+        """
+        Load the behaviours as specified in the config and apply consistency checks.
+        :return: None
+        """
+        pass
+
+    def fetch_behaviours(self) -> List[Behaviour]:
+        """
+        Return a list of behaviours for processing.
+        :return: the list of behaviours
+        """
+        return []
+
+    def teardown(self) -> None:
+        """
+        Teardown the registry.
+        :return: None
+        """
+        for behaviour in self._behaviours.values():
+            behaviour.teardown()
+        self._behaviours = {}
+
+
+class TaskRegistry(Registry):
+    """This class implements the task registry."""
+
+    def __init__(self) -> None:
+        """
+        Instantiate the registry.
+        :return: None
+        """
+        self._tasks = {}  # type: Dict[TaskId, Task]
+
+    def populate(self, directory: str) -> None:
+        """
+        Load the tasks as specified in the config and apply consistency checks.
+        :return: None
+        """
+        pass
+
+    def fetch_tasks(self) -> List[Task]:
+        """
+        Return a list of tasks for processing.
+        :return: a list of tasks.
+        """
+        return []
+
+    def teardown(self) -> None:
+        """
+        Teardown the registry.
+        :return: None
+        """
+        for task in self._tasks.values():
+            task.teardown()
+        self._tasks = {}
+
+
+class Resources(object):
+    """This class implements the resources of an AEA."""
+
+    def __init__(self):
+        self.protocol_registry = ProtocolRegistry()
+        self.handler_registry = HandlerRegistry()
+        self.behaviour_registry = BehaviourRegistry()
+        self.task_registry = TaskRegistry()
+        self._skills = dict()  # type: Dict[SkillId, Skill]
+
+        self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
+
+    def populate(self, directory: str):
+        for r in self._registries:
+            r.populate(directory)
+
+    def teardown(self):
+        for r in self._registries:
+            r.teardown()
 
 
 class AEA(Agent):
@@ -155,12 +382,7 @@ class AEA(Agent):
         if self._directory is None:
             self._directory = self.name
 
-        self._protocol_registry = ProtocolRegistry()
-
-    @property
-    def protocol_registry(self) -> ProtocolRegistry:
-        """Get the protocol registry."""
-        return self._protocol_registry
+        self.resources = Resources()
 
     def setup(self) -> None:
         """
@@ -168,7 +390,7 @@ class AEA(Agent):
 
         :return: None
         """
-        self._protocol_registry.populate(self._directory)
+        self.resources.populate(self._directory)
 
     def act(self) -> None:
         """
@@ -176,8 +398,8 @@ class AEA(Agent):
 
         :return: None
         """
-        # for behaviour in self._behaviour_registry.fetch_behaviours():
-        #     behaviour.act()
+        for behaviour in self.resources.behaviour_registry.fetch_behaviours():
+            behaviour.act()
 
     def react(self) -> None:
         """
@@ -194,7 +416,7 @@ class AEA(Agent):
 
     def handle(self, envelope: Envelope) -> None:
         """Handle an envelope."""
-        protocol = self._protocol_registry.fetch_protocol(envelope)
+        protocol = self.resources.protocol_registry.fetch_protocol(envelope)
 
         if protocol is None:
             self.on_unsupported_protocol(envelope)
@@ -210,12 +432,12 @@ class AEA(Agent):
         #     self.on_invalid_message(envelope)
         #     return
 
-        # handler = self._protocol_registry.fetch_handler(protocol.name)
-        # if handler is None:
-        #     logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
-        #     return
-        #
-        # handler.handle_envelope(envelope)
+        handler = self.resources.handler_registry.fetch_handler(protocol.name)
+        if handler is None:
+            logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
+            return
+
+        handler.handle_envelope(envelope)
 
     def on_unsupported_protocol(self, envelope: Envelope):
         """Handle the received envelope in case the protocol is not supported."""
@@ -263,4 +485,4 @@ class AEA(Agent):
 
         :return: None
         """
-        self._protocol_registry.teardown()
+        self.resources.teardown()

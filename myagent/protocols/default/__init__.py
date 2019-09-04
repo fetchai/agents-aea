@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,4 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains an example using the Gym channel."""
+"""This module contains the support resources for the default protocol."""

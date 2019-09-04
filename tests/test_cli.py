@@ -17,4 +17,17 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains an example using the Gym channel."""
+"""This test module contains the tests for the `aea` command-line tool."""
+
+
+from click.testing import CliRunner
+from aea.cli import cli
+
+
+def test_no_argument():
+    """Test that if we run the cli tool without arguments, it exits gracefully."""
+    runner = CliRunner()
+    result = runner.invoke(cli, [])
+    assert result.exit_code == 0
+
+
