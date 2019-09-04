@@ -18,3 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the behaviours for the 'echo' skill."""
+from aea.aea import Behaviour
+
+
+class EchoBehaviour(Behaviour):
+    """Echo behaviour."""
+
+    def act(self) -> None:
+        print("Echo behaviour: act method called.")
+
+    def teardown(self) -> None:
+        print("Echo behaviour: teardown method called.")

@@ -28,7 +28,7 @@ pip install aea[cli]
 
 - add a skill to the agent, e.g.:
 
-      aea add skill echo_skill ../examples/ 
+      aea add skill echo_skill ../examples/echo_skill 
 
   This command will create the `my-first-agent/protocols` folder, with inside the `oef` protocol package.
   You can check the supported protocols in `aea/protocols`
