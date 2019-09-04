@@ -24,6 +24,8 @@ from aea.mail.base import Envelope
 
 class EchoHandler(Handler):
 
+    SUPPORTED_PROTOCOL = "default"
+
     def handle_envelope(self, envelope: Envelope) -> None:
         print("Echo handler: envelope={}".format(envelope))
 

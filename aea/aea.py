@@ -36,6 +36,7 @@ from aea.protocols.default.serialization import DefaultSerializer
 logger = logging.getLogger(__name__)
 
 SkillId = str
+TaskId = str
 
 
 class Behaviour(ABC):
@@ -59,6 +60,8 @@ class Behaviour(ABC):
 class Handler(ABC):
     """This class implements an abstract behaviour."""
 
+    SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
+
     @abstractmethod
     def handle_envelope(self, envelope: Envelope) -> None:
         """
@@ -73,9 +76,6 @@ class Handler(ABC):
         Implement the handler teardown.
         :return: None
         """
-
-
-TaskId = str
 
 
 class Task(ABC):
@@ -94,6 +94,24 @@ class Task(ABC):
         Teardown the task.
         :return: None
         """
+
+
+class Skill:
+    """This class implement a skill."""
+
+    def __init__(self, handler: Handler,
+                 behaviours: List[Behaviour],
+                 tasks: List[Task]):
+        """
+        Initialize a skill.
+
+        :param handler: the handler to handle incoming envelopes.
+        :param behaviours: the list of behaviours that defines the proactive component of the agent.
+        :param tasks: the list of tasks executed at every iteration of the main loop.
+        """
+        self.handler = handler
+        self.behaviours = behaviours
+        self.tasks = tasks
 
 
 class Registry(ABC):
@@ -127,7 +145,6 @@ class ProtocolRegistry(Registry):
         :return: None
         """
         self._protocols = {}  # type: Dict[ProtocolId, Protocol]
-        # self._handlers = {}  # type: Dict[ProtocolId, Handler]
 
     def populate(self, directory: str) -> None:
         """
@@ -293,6 +310,27 @@ class TaskRegistry(Registry):
         self._tasks = {}
 
 
+class Resources(object):
+    """This class implements the resources of an AEA."""
+
+    def __init__(self):
+        self.protocol_registry = ProtocolRegistry()
+        self.handler_registry = HandlerRegistry()
+        self.behaviour_registry = BehaviourRegistry()
+        self.task_registry = TaskRegistry()
+        self._skills = dict()  # type: Dict[SkillId, Skill]
+
+        self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
+
+    def populate(self, directory: str):
+        for r in self._registries:
+            r.populate(directory)
+
+    def teardown(self):
+        for r in self._registries:
+            r.teardown()
+
+
 class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
@@ -321,15 +359,7 @@ class AEA(Agent):
         if self._directory is None:
             self._directory = self.name
 
-        self._protocol_registry = ProtocolRegistry()
-        self._handler_registry = HandlerRegistry()
-        self._behaviour_registry = BehaviourRegistry()
-        self._task_registry = TaskRegistry()
-
-    @property
-    def protocol_registry(self) -> ProtocolRegistry:
-        """Get the protocol registry."""
-        return self._protocol_registry
+        self.resources = Resources()
 
     def setup(self) -> None:
         """
@@ -337,10 +367,7 @@ class AEA(Agent):
 
         :return: None
         """
-        self._protocol_registry.populate(self._directory)
-        self._handler_registry.populate(self._directory)
-        self._behaviour_registry.populate(self._directory)
-        self._task_registry.populate(self._directory)
+        self.resources.populate(self._directory)
 
     def act(self) -> None:
         """
@@ -348,7 +375,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self._behaviour_registry.fetch_behaviours():
+        for behaviour in self.resources.behaviour_registry.fetch_behaviours():
             behaviour.act()
 
     def react(self) -> None:
@@ -366,7 +393,7 @@ class AEA(Agent):
 
     def handle(self, envelope: Envelope) -> None:
         """Handle an envelope."""
-        protocol = self._protocol_registry.fetch_protocol(envelope)
+        protocol = self.resources.protocol_registry.fetch_protocol(envelope)
 
         if protocol is None:
             self.on_unsupported_protocol(envelope)
@@ -382,7 +409,7 @@ class AEA(Agent):
         #     self.on_invalid_message(envelope)
         #     return
 
-        handler = self._handler_registry.fetch_handler(protocol.name)
+        handler = self.resources.handler_registry.fetch_handler(protocol.name)
         if handler is None:
             logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
             return
@@ -435,7 +462,4 @@ class AEA(Agent):
 
         :return: None
         """
-        self._behaviour_registry.teardown()
-        self._handler_registry.teardown()
-        self._protocol_registry.teardown()
-        self._task_registry.teardown()
+        self.resources.teardown()
