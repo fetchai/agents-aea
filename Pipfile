@@ -21,11 +21,12 @@ docker = "*"
 [packages]
 cryptography = "*"
 base58 = "*"
-oef = {index = "test-pypi",version = "==0.6.4"}
 docker = "*"
 click = "*"
 pyyaml = "*"
 click-log = "*"
+oef = "==0.6.7"
+colorlog = "*"
 
 [requires]
 python_version = "3.7"
