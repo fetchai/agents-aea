@@ -46,3 +46,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 - To run linters:
 
 	  tox -e flake8
+
+## Use the `aea` command-line tool
+
+Please check this [README](./aea/cli/README.md) if you want to use the `aea` command-line tool.

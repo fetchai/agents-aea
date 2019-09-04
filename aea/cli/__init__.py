@@ -17,4 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the dialogue modules."""
+"""This module contains the implementation of command-line tool 'aea'."""
+
+from .__main__ import cli
