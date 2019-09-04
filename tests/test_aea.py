@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the dialogue modules."""
+"""This test module contains the tests for the AEA."""
