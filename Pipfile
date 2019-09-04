@@ -23,6 +23,7 @@ cryptography = "*"
 base58 = "*"
 docker = "*"
 oef = "==0.6.7"
+colorlog = "*"
 
 [requires]
 python_version = "3.7"
