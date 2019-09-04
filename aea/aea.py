@@ -69,7 +69,7 @@ class ProtocolRegistry(Registry):
         :return: None
         """
         self._protocols = {}  # type: Dict[ProtocolId, Protocol]
-        self._handlers = {}  # type: Dict[ProtocolId, AbstractHandler]
+        # self._handlers = {}  # type: Dict[ProtocolId, Handler]
 
     def populate(self, directory: str) -> None:
         """
