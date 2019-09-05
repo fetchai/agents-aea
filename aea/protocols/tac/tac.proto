@@ -54,6 +54,7 @@ message TACController {
             TRANSACTION_NOT_MATCHING = 6;
             AGENT_NAME_NOT_IN_WHITELIST = 7;
             COMPETITION_NOT_RUNNING = 8;
+            DIALOGUE_INCONSISTENT = 9;
         }
 
         ErrorCode error_code = 1;
