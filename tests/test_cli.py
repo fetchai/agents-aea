@@ -29,5 +29,3 @@ def test_no_argument():
     runner = CliRunner()
     result = runner.invoke(cli, [])
     assert result.exit_code == 0
-
-

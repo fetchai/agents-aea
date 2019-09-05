@@ -46,7 +46,7 @@ def protocol(ctx: Context, protocol_name):
     """Remove a protocol from the agent."""
     agent_name = ctx.agent_config.agent_name
     logger.info("Removing protocol {protocol_name} from the agent {agent_name}..."
-                 .format(agent_name=agent_name, protocol_name=protocol_name))
+                .format(agent_name=agent_name, protocol_name=protocol_name))
 
     if protocol_name not in ctx.agent_config.protocols:
         logger.warning("The protocol '{}' is not supported.".format(protocol_name))
@@ -71,10 +71,10 @@ def skill(ctx: Context, skill_name):
     """Remove a skill from the agent."""
     agent_name = ctx.agent_config.agent_name
     logger.info("Removing skill {skill_name} from the agent {agent_name}..."
-                 .format(agent_name=agent_name, skill_name=skill_name))
+                .format(agent_name=agent_name, skill_name=skill_name))
 
     if skill_name not in ctx.agent_config.skills:
-        logger.warning("The skill '{}' is not supported.".format(protocol_name))
+        logger.warning("The skill '{}' is not supported.".format(skill_name))
 
     try:
         shutil.rmtree(os.path.join("skills", skill_name))

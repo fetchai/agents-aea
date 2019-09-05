@@ -45,6 +45,7 @@ class Behaviour(ABC):
     def act(self) -> None:
         """
         Implement the behaviour.
+
         :return: None
         """
 
@@ -52,6 +53,7 @@ class Behaviour(ABC):
     def teardown(self) -> None:
         """
         Implement the behaviour teardown.
+
         :return: None
         """
 
@@ -65,6 +67,7 @@ class Handler(ABC):
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Implement the reaction to an envelope.
+
         :param envelope: the envelope
         :return: None
         """
@@ -73,8 +76,97 @@ class Handler(ABC):
     def teardown(self) -> None:
         """
         Implement the handler teardown.
+
         :return: None
         """
+
+
+class DefaultHandler(Handler):
+    """This class implements the default handler."""
+
+    SUPPORTED_PROTOCOL = 'default'  # type: Optional[ProtocolId]
+
+    def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Implement the reaction to an envelope.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        pass  # TODO: this could be the ping method? > no, then on error from other agent causes endless loop; just print out the response and raise a warning?
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+    def on_unsupported_protocol(self, envelope: Envelope) -> None:
+        """
+        Handle the received envelope in case the protocol is not supported.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        logger.warning("Unsupported protocol: {}".format(envelope.protocol_id))
+        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
+                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
+                               error_msg="Unsupported protocol.",
+                               error_data={"protocol_id": envelope.protocol_id})
+        # TODO: outbox not available in handler yet
+        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
+                                message=DefaultSerializer().encode(reply))
+
+    def on_decoding_error(self, envelope: Envelope) -> None:
+        """
+        Handle a decoding error.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        logger.warning("Decoding error: {}.".format(envelope))
+        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
+        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
+                               error_code=DefaultMessage.ErrorCode.DECODING_ERROR,
+                               error_msg="Decoding error.",
+                               error_data={"envelope": encoded_envelope})
+        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
+                                message=DefaultSerializer().encode(reply))
+
+    def on_invalid_message(self, envelope: Envelope) -> None:
+        """
+        Handle an message that is invalid wrt a protocol.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        logger.warning("Invalid message wrt protocol: {}.".format(envelope.protocol_id))
+        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
+        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
+                               error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
+                               error_msg="Invalid message.",
+                               error_data={"envelope": encoded_envelope})
+        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
+                                message=DefaultSerializer().encode(reply))
+
+    def on_unsupported_skill(self, envelope: Envelope, protocol: Protocol) -> None:
+        """
+        Handle the received envelope in case the skill is not supported.
+
+        :param envelope: the envelope
+        :param protocol: the protocol
+        :return: None
+        """
+        logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
+        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
+        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
+                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_SKILL,
+                               error_msg="Unsupported skill.",
+                               error_data={"envelope": encoded_envelope})
+        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
+                                message=DefaultSerializer().encode(reply))
 
 
 class Task(ABC):
@@ -84,6 +176,7 @@ class Task(ABC):
     def execute(self) -> None:
         """
         Run the task logic.
+
         :return: None
         """
 
@@ -91,12 +184,13 @@ class Task(ABC):
     def teardown(self) -> None:
         """
         Teardown the task.
+
         :return: None
         """
 
 
 class Skill:
-    """This class implement a skill."""
+    """This class implements a skill."""
 
     def __init__(self, handler: Handler,
                  behaviours: List[Behaviour],
@@ -167,14 +261,14 @@ class ProtocolRegistry(Registry):
             except Exception:
                 logger.exception("Not able to add protocol {}.".format(protocol_name))
 
-    def fetch_protocol(self, envelope: Envelope) -> Optional[Protocol]:
+    def fetch_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
         """
         Fetch the protocol for the envelope.
 
-        :pass envelope: the envelope
+        :pass protocol_id: the protocol id
         :return: the protocol id or None if the protocol is not registered
         """
-        return self._protocols.get(envelope.protocol_id, None)
+        return self._protocols.get(protocol_id, None)
 
     def teardown(self) -> None:
         """
@@ -213,6 +307,7 @@ class HandlerRegistry(Registry):
     def __init__(self) -> None:
         """
         Instantiate the registry.
+
         :return: None
         """
         self._handlers = {}  # type: Dict[SkillId, Handler]
@@ -220,6 +315,8 @@ class HandlerRegistry(Registry):
     def populate(self, directory: str) -> None:
         """
         Load the handlers as specified in the config and apply consistency checks.
+
+        :param directory: the agent's resources directory.
         :return: None
         """
         skills_spec = importlib.util.find_spec("skills")
@@ -238,14 +335,24 @@ class HandlerRegistry(Registry):
     def fetch_handler(self, protocol_id: ProtocolId) -> Optional[Handler]:
         """
         Fetch the handler for the protocol_id.
+
         :param protocol_id: the protocol id
         :return: the handler
         """
         return self._handlers.get(protocol_id, None)
 
+    def fetch_default(self) -> Handler:
+        """
+        Fetch the handler for the default protocol.
+
+        :return: the handler
+        """
+        return self._handlers.get('default')  # TODO: 'default' handler must always be present. So it should be a reserved handler distributed with the base aea. However, this might clash with what people want to use default protocol for?
+
     def teardown(self) -> None:
         """
         Teardown the registry.
+
         :return: None
         """
         for handler in self._handlers.values():
@@ -271,6 +378,7 @@ class BehaviourRegistry(Registry):
     def __init__(self) -> None:
         """
         Instantiate the registry.
+
         :return: None
         """
         self._behaviours = {}  # type: Dict[SkillId, Behaviour]
@@ -278,6 +386,8 @@ class BehaviourRegistry(Registry):
     def populate(self, directory: str) -> None:
         """
         Load the behaviours as specified in the config and apply consistency checks.
+
+        :param directory: the agent's resources directory.
         :return: None
         """
         pass
@@ -285,6 +395,7 @@ class BehaviourRegistry(Registry):
     def fetch_behaviours(self) -> List[Behaviour]:
         """
         Return a list of behaviours for processing.
+
         :return: the list of behaviours
         """
         return []
@@ -292,6 +403,7 @@ class BehaviourRegistry(Registry):
     def teardown(self) -> None:
         """
         Teardown the registry.
+
         :return: None
         """
         for behaviour in self._behaviours.values():
@@ -305,13 +417,16 @@ class TaskRegistry(Registry):
     def __init__(self) -> None:
         """
         Instantiate the registry.
+
         :return: None
         """
-        self._tasks = {}  # type: Dict[TaskId, Task]
+        self._tasks = {}  # type: Dict[SkillId, Task]
 
     def populate(self, directory: str) -> None:
         """
         Load the tasks as specified in the config and apply consistency checks.
+
+        :param directory: the agent's resources directory.
         :return: None
         """
         pass
@@ -319,6 +434,7 @@ class TaskRegistry(Registry):
     def fetch_tasks(self) -> List[Task]:
         """
         Return a list of tasks for processing.
+
         :return: a list of tasks.
         """
         return []
@@ -326,6 +442,7 @@ class TaskRegistry(Registry):
     def teardown(self) -> None:
         """
         Teardown the registry.
+
         :return: None
         """
         for task in self._tasks.values():
@@ -337,6 +454,7 @@ class Resources(object):
     """This class implements the resources of an AEA."""
 
     def __init__(self):
+        """Instantiate the resources."""
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = BehaviourRegistry()
@@ -345,11 +463,22 @@ class Resources(object):
 
         self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
 
-    def populate(self, directory: str):
+    def populate(self, directory: str) -> None:
+        """
+        Populate the resources based on the registries.
+
+        :param directory: the agent's resources directory.
+        :return: None
+        """
         for r in self._registries:
             r.populate(directory)
 
     def teardown(self):
+        """
+        Teardown the resources.
+
+        :return: None
+        """
         for r in self._registries:
             r.teardown()
 
@@ -359,10 +488,9 @@ class AEA(Agent):
 
     def __init__(self, name: str,
                  private_key_pem_path: Optional[str] = None,
-                 timeout: Optional[float] = 1.0,
+                 timeout: Optional[float] = 1.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
                  debug: bool = False,
-                 max_reactions: int = 20,
-                 directory: Optional[str] = None) -> None:
+                 max_reactions: int = 20) -> None:
         """
         Instantiate the agent.
 
@@ -371,16 +499,13 @@ class AEA(Agent):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
-        :param directory: the agent's directory.
 
         :return: None
         """
         super().__init__(name=name, private_key_pem_path=private_key_pem_path, timeout=timeout, debug=debug)
 
         self.max_reactions = max_reactions
-        self._directory = directory
-        if self._directory is None:
-            self._directory = self.name
+        self._directory = self.name  # TODO fix, should be inferred from directory of the agent
 
         self.resources = Resources()
 
@@ -398,12 +523,13 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self.resources.behaviour_registry.fetch_behaviours():
+        for behaviour in self.resources.behaviour_registry.fetch_behaviours():  # the skill should be able to register things here as active so we hand control fully to the skill and let this just spin through
             behaviour.act()
+        # NOTE: we must ensure that these are non-blocking.
 
     def react(self) -> None:
         """
-        React to incoming events.
+        React to incoming events (envelopes).
 
         :return: None
         """
@@ -413,71 +539,50 @@ class AEA(Agent):
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
             if envelope is not None:
                 self.handle(envelope)
+        # Note: here things are processed sequentially, but on a skill level anything can be done (e.g. wait for several messages/ create templates etc.)
+        # NOTE: we must ensure that these are non-blocking.
 
     def handle(self, envelope: Envelope) -> None:
-        """Handle an envelope."""
-        protocol = self.resources.protocol_registry.fetch_protocol(envelope)
+        """
+        Handle an envelope.
+
+        :param envelope: the envelope to handle.
+        :return: None
+        """
+        protocol = self.resources.protocol_registry.fetch_protocol(envelope.protocol_id)
 
         if protocol is None:
-            self.on_unsupported_protocol(envelope)
+            default_handler = self.resources.handler_registry.fetch_default()
+            default_handler.on_unsupported_protocol(envelope)
             return
 
-        # try:
-        #     msg = protocol.serializer.decode(envelope.message)
-        # except Exception:
-        #     self.on_decoding_error(envelope)
-        #     return
+        try:
+            msg = protocol.serializer.decode(envelope.message)
+        except Exception:
+            default_handler = self.resources.handler_registry.fetch_default()
+            default_handler.on_decoding_error(envelope)
+            return
 
-        # if not protocol.check(msg):
-        #     self.on_invalid_message(envelope)
-        #     return
+        if not protocol.check(msg):
+            default_handler = self.resources.handler_registry.fetch_default()
+            default_handler.on_invalid_message(envelope)
+            return
 
-        handler = self.resources.handler_registry.fetch_handler(protocol.name)
+        handler = self.resources.handler_registry.fetch_handler(protocol.name)  # what is id vs name? TODO: so handler_registry is responsible for deciding which handler gets to serve the protocol!..is that what we want? again, seems like the skills should register themselves with the registry as well and be able to do so programmatically,
         if handler is None:
-            logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
+            default_handler = self.resources.handler_registry.fetch_default()
+            default_handler.on_unsupported_skill(envelope)
             return
 
         handler.handle_envelope(envelope)
-
-    def on_unsupported_protocol(self, envelope: Envelope):
-        """Handle the received envelope in case the protocol is not supported."""
-        logger.warning("Unsupported protocol: {}".format(envelope.protocol_id))
-        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
-                               error_msg="Unsupported protocol.",
-                               error_data={"protocol_id": envelope.protocol_id})
-        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
-                                message=DefaultSerializer().encode(reply))
-
-    def on_decoding_error(self, envelope):
-        """Handle a decoding error."""
-        logger.warning("Decoding error: {}.".format(envelope))
-        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
-        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.DECODING_ERROR,
-                               error_msg="Decoding error.",
-                               error_data={"envelope": encoded_envelope})
-        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
-                                message=DefaultSerializer().encode(reply))
-
-    def on_invalid_message(self, envelope):
-        """Handle an message that is invalid wrt a protocol.."""
-        logger.warning("Invalid message wrt protocol: {}.".format(envelope.protocol_id))
-        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
-        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
-                               error_msg="Invalid message.",
-                               error_data={"envelope": encoded_envelope})
-        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
-                                message=DefaultSerializer().encode(reply))
 
     def update(self) -> None:
         """Update the current state of the agent.
 
         :return None
         """
-        # for task in self._task_registry.fetch_tasks():
-        #     task.execute()
+        for task in self._task_registry.fetch_tasks():
+            task.execute()
 
     def teardown(self) -> None:
         """
@@ -486,3 +591,7 @@ class AEA(Agent):
         :return: None
         """
         self.resources.teardown()
+
+        # TODO: docs step 1: what can an aea with no skills do? > it just sends the default responses
+        # step 2: add ping skill
+        # step 3: add negotiation_skill
