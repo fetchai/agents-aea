@@ -17,17 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'echo' skill."""
-from aea.mail.base import Envelope
-from aea.skills.base import Handler
-
-
-class EchoHandler(Handler):
-
-    SUPPORTED_PROTOCOL = "default"
-
-    def handle_envelope(self, envelope: Envelope) -> None:
-        print("Echo handler: envelope={}".format(envelope))
-
-    def teardown(self) -> None:
-        print("Echo handler: teardown method called.")
+"""This module contains the skills supported by the framework."""
