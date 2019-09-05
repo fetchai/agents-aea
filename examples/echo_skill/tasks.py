@@ -22,9 +22,12 @@ from aea.aea import Task
 
 
 class EchoTask(Task):
+    """Echo task."""
 
     def execute(self) -> None:
+        """Execute the task."""
         print("Echo Task: execute method called.")
 
     def teardown(self) -> None:
+        """Teardown the task."""
         print("Echo Task: teardown method called.")

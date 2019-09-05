@@ -244,7 +244,7 @@ class HandlerRegistry(Registry):
         :return: None
         """
         skills_spec = importlib.util.spec_from_file_location("skills",
-                                                                os.path.join(directory, "skills", "__init__.py"))
+                                                             os.path.join(directory, "skills", "__init__.py"))
         if skills_spec is None:
             logger.warning("No skill found.")
             return
@@ -276,9 +276,14 @@ class HandlerRegistry(Registry):
             handler.teardown()
         self._handlers = {}
 
-    def _add_skill_handler(self, directory, skill_name):
-        """Add a skill handler."""
+    def _add_skill_handler(self, directory: str, skill_name: str) -> None:
+        """
+        Add a skill handler.
 
+        :param directory: the agent's resources directory.
+        :param skill_name: the skill's name
+        :return: None
+        """
         handler_spec = importlib.util.spec_from_file_location("handler",
                                                               os.path.join(directory, "skills", skill_name, "handler.py"))
         handler_module = importlib.util.module_from_spec(handler_spec)
@@ -403,4 +408,3 @@ class Resources(object):
         """
         for r in self._registries:
             r.teardown()
-

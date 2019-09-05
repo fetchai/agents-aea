@@ -117,4 +117,3 @@ class DefaultHandler(Handler):
                                error_data={"envelope": encoded_envelope})
         self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_name, protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
-

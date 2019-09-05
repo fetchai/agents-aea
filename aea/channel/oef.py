@@ -429,6 +429,7 @@ class OEFChannel(OEFAgent):
         else:
             raise ValueError("OEF request not recognized.")
 
+
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 

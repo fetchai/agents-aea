@@ -146,4 +146,3 @@ class AEA(Agent):
         :return: None
         """
         self.resources.teardown()
-
