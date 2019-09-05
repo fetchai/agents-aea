@@ -17,4 +17,29 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains an example using the Gym channel."""
+"""This module contains the handler for the 'echo' skill."""
+from aea.mail.base import Envelope
+from aea.skills.base import Handler
+
+
+class EchoHandler(Handler):
+    """Echo handler."""
+
+    SUPPORTED_PROTOCOL = "default"
+
+    def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle envelopes.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        print("Echo handler: envelope={}".format(envelope))
+
+    def teardown(self) -> None:
+        """
+        Teardown the handler.
+
+        :return: None
+        """
+        print("Echo handler: teardown method called.")

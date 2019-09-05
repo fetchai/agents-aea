@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -19,112 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the implementation of an Autonomous Economic Agent."""
-import base64
-import importlib.util
-import inspect
 import logging
-import re
-from abc import abstractmethod, ABC
-from typing import Optional, Dict
+from pathlib import Path
+from typing import Optional
 
 from aea.agent import Agent
-from aea.mail.base import Envelope, ProtocolId
-from aea.protocols.base.protocol import Protocol
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
+from aea.mail.base import Envelope
+from aea.skills.base import Resources, Context
 
 logger = logging.getLogger(__name__)
-
-SkillId = str
-
-
-class Registry(ABC):
-    """This class implements an abstract registry."""
-
-    @abstractmethod
-    def populate(self, directory: str) -> None:
-        """
-        Load into the registry as specified in the config and apply consistency checks.
-
-        :param directory: the filepath to the agent's resource directory.
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-
-
-class ProtocolRegistry(Registry):
-    """This class implements the handlers registry."""
-
-    def __init__(self) -> None:
-        """
-        Instantiate the registry.
-
-        :return: None
-        """
-        self._protocols = {}  # type: Dict[ProtocolId, Protocol]
-        # self._handlers = {}  # type: Dict[ProtocolId, Handler]
-
-    def populate(self, directory: str) -> None:
-        """
-        Load the handlers as specified in the config and apply consistency checks.
-
-        :param directory: the filepath to the agent's resource directory.
-        :return: None
-        """
-        protocols_spec = importlib.util.find_spec(".".join([directory, "protocols"]))
-        protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))
-        logger.debug("Processing the following protocol package: {}".format(protocols_packages))
-        for protocol_name in protocols_packages:
-            try:
-                self._add_protocol(directory, protocol_name)
-            except Exception:
-                logger.exception("Not able to add protocol {}.".format(protocol_name))
-
-    def fetch_protocol(self, envelope: Envelope) -> Optional[Protocol]:
-        """
-        Fetch the protocol for the envelope.
-
-        :pass envelope: the envelope
-        :return: the protocol id or None if the protocol is not registered
-        """
-        return self._protocols.get(envelope.protocol_id, None)
-
-    def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
-        self._protocols = {}
-
-    def _add_protocol(self, directory: str, protocol_name: str):
-        """
-        Add a protocol.
-
-        :param directory: the agent's resources directory.
-        :param protocol_name: the name of the protocol to be added.
-        :return: None
-        """
-        # get the serializer
-        serialization_module = importlib.import_module(".".join([directory, "protocols", protocol_name, "serialization"]))
-        classes = inspect.getmembers(serialization_module, inspect.isclass)
-        serializer_classes = list(filter(lambda x: re.match("\\w+Serializer", x[0]), classes))
-        serializer_class = serializer_classes[0][1]
-
-        logger.debug("Found serializer class {serializer_class} for protocol {protocol_name}"
-                     .format(serializer_class=serializer_class, protocol_name=protocol_name))
-        serializer = serializer_class()
-
-        # instantiate the protocol manager.
-        protocol = Protocol(protocol_name, serializer)
-        self._protocols[protocol_name] = protocol
 
 
 class AEA(Agent):
@@ -132,7 +34,7 @@ class AEA(Agent):
 
     def __init__(self, name: str,
                  private_key_pem_path: Optional[str] = None,
-                 timeout: Optional[float] = 1.0,
+                 timeout: Optional[float] = 1.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
                  debug: bool = False,
                  max_reactions: int = 20,
                  directory: Optional[str] = None) -> None:
@@ -144,7 +46,8 @@ class AEA(Agent):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
-        :param directory: the agent's directory.
+        :param directory: the path to the agent's resource directory.
+                        | If None, we assume the directory is in the working directory of the interpreter.
 
         :return: None
         """
@@ -153,14 +56,10 @@ class AEA(Agent):
         self.max_reactions = max_reactions
         self._directory = directory
         if self._directory is None:
-            self._directory = self.name
+            self._directory = str(Path(".").absolute())
 
-        self._protocol_registry = ProtocolRegistry()
-
-    @property
-    def protocol_registry(self) -> ProtocolRegistry:
-        """Get the protocol registry."""
-        return self._protocol_registry
+        self.context = Context(self.name, self.outbox)
+        self.resources = Resources(self.context)
 
     def setup(self) -> None:
         """
@@ -168,7 +67,7 @@ class AEA(Agent):
 
         :return: None
         """
-        self._protocol_registry.populate(self._directory)
+        self.resources.populate(self._directory)
 
     def act(self) -> None:
         """
@@ -176,12 +75,13 @@ class AEA(Agent):
 
         :return: None
         """
-        # for behaviour in self._behaviour_registry.fetch_behaviours():
-        #     behaviour.act()
+        for behaviour in self.resources.behaviour_registry.fetch_behaviours():  # the skill should be able to register things here as active so we hand control fully to the skill and let this just spin through
+            behaviour.act()
+        # NOTE: we must ensure that these are non-blocking.
 
     def react(self) -> None:
         """
-        React to incoming events.
+        React to incoming events (envelopes).
 
         :return: None
         """
@@ -191,71 +91,53 @@ class AEA(Agent):
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
             if envelope is not None:
                 self.handle(envelope)
+        # Note: here things are processed sequentially, but on a skill level anything can be done (e.g. wait for several messages/ create templates etc.)
+        # NOTE: we must ensure that these are non-blocking.
 
     def handle(self, envelope: Envelope) -> None:
-        """Handle an envelope."""
-        protocol = self._protocol_registry.fetch_protocol(envelope)
+        """
+        Handle an envelope.
+
+        :param envelope: the envelope to handle.
+        :return: None
+        """
+        protocol = self.resources.protocol_registry.fetch_protocol(envelope.protocol_id)
+
+        # fetch the handler of the "default" protocol for error handling. TODO: change with the handler of "error" protocol.
+        default_handler = self.resources.handler_registry.fetch_handler("default")
 
         if protocol is None:
-            self.on_unsupported_protocol(envelope)
+            if default_handler is not None:
+                default_handler.send_unsupported_protocol(envelope)
             return
 
-        # try:
-        #     msg = protocol.serializer.decode(envelope.message)
-        # except Exception:
-        #     self.on_decoding_error(envelope)
-        #     return
+        try:
+            msg = protocol.serializer.decode(envelope.message)
+        except Exception:
+            if default_handler is not None:
+                default_handler.send_decoding_error(envelope)
+            return
 
-        # if not protocol.check(msg):
-        #     self.on_invalid_message(envelope)
-        #     return
+        if not protocol.check(msg):
+            if default_handler is not None:
+                default_handler.send_invalid_message(envelope)
+            return
 
-        # handler = self._protocol_registry.fetch_handler(protocol.name)
-        # if handler is None:
-        #     logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.name))
-        #     return
-        #
-        # handler.handle_envelope(envelope)
+        handler = self.resources.handler_registry.fetch_handler(protocol.id)
+        if handler is None:
+            if default_handler is not None:
+                default_handler.send_unsupported_skill(envelope, protocol)
+            return
 
-    def on_unsupported_protocol(self, envelope: Envelope):
-        """Handle the received envelope in case the protocol is not supported."""
-        logger.warning("Unsupported protocol: {}".format(envelope.protocol_id))
-        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
-                               error_msg="Unsupported protocol.",
-                               error_data={"protocol_id": envelope.protocol_id})
-        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
-                                message=DefaultSerializer().encode(reply))
-
-    def on_decoding_error(self, envelope):
-        """Handle a decoding error."""
-        logger.warning("Decoding error: {}.".format(envelope))
-        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
-        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.DECODING_ERROR,
-                               error_msg="Decoding error.",
-                               error_data={"envelope": encoded_envelope})
-        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
-                                message=DefaultSerializer().encode(reply))
-
-    def on_invalid_message(self, envelope):
-        """Handle an message that is invalid wrt a protocol.."""
-        logger.warning("Invalid message wrt protocol: {}.".format(envelope.protocol_id))
-        encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
-        reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
-                               error_msg="Invalid message.",
-                               error_data={"envelope": encoded_envelope})
-        self.outbox.put_message(to=envelope.sender, sender=self.name, protocol_id=DefaultMessage.protocol_id,
-                                message=DefaultSerializer().encode(reply))
+        handler.handle_envelope(envelope)
 
     def update(self) -> None:
         """Update the current state of the agent.
 
         :return None
         """
-        # for task in self._task_registry.fetch_tasks():
-        #     task.execute()
+        for task in self.resources.task_registry.fetch_tasks():
+            task.execute()
 
     def teardown(self) -> None:
         """
@@ -263,4 +145,4 @@ class AEA(Agent):
 
         :return: None
         """
-        self._protocol_registry.teardown()
+        self.resources.teardown()

@@ -17,4 +17,17 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains an example using the Gym channel."""
+"""This module contains the tasks for the 'echo' skill."""
+from aea.aea import Task
+
+
+class EchoTask(Task):
+    """Echo task."""
+
+    def execute(self) -> None:
+        """Execute the task."""
+        print("Echo Task: execute method called.")
+
+    def teardown(self) -> None:
+        """Teardown the task."""
+        print("Echo Task: teardown method called.")
