@@ -20,6 +20,7 @@
 """This module contains the implementation of a protocol manager."""
 from abc import ABC
 
+from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
 
 
@@ -32,31 +33,32 @@ class Protocol(ABC):
     - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
     """
 
-    def __init__(self, name: str, serializer: Serializer):
+    def __init__(self, id: str, serializer: Serializer):
         """
         Initialize the protocol manager.
 
-        :param name: the protocol name.
+        :param id: the protocol id.
         :param serializer: the serializer.
         """
-        self._name = name
+        self._id = id
         self._serializer = serializer
 
     @property
-    def name(self):
+    def id(self):
         """Get the name."""
-        return self._name
+        return self._id
 
     @property
     def serializer(self) -> Serializer:
         """Get the serializer."""
         return self._serializer
 
-    # @abstractmethod
-    # def check(self, msg: Message) -> bool:
-    #     """
-    #     Check whether the message belongs to the allowed messages.
-    #
-    #     :param msg: the message.
-    #     :return: True if the message is valid wrt the protocol, False otherwise.
-    #     """
+    def check(self, msg: Message) -> bool:
+        """
+        Check whether the message belongs to the allowed messages.
+
+        :param msg: the message.
+        :return: True if the message is valid wrt the protocol, False otherwise.
+        """
+        # TODO 'check' should be an abstract method, and every protocol should provide a concrete Protocol class that implements it.
+        return True
