@@ -23,6 +23,8 @@ import base64
 import importlib.util
 import inspect
 import logging
+import os
+import pprint
 import re
 from abc import abstractmethod, ABC
 from typing import Optional, Dict, List
@@ -152,9 +154,7 @@ class ProtocolRegistry(Registry):
         :param directory: the filepath to the agent's resource directory.
         :return: None
         """
-        import pdb
-        pdb.set_trace()
-        protocols_spec = importlib.util.find_spec("protocols")
+        protocols_spec = importlib.util.spec_from_file_location("protocols")
         if protocols_spec is None:
             logger.warning("No protocol found.")
             return
@@ -254,7 +254,7 @@ class HandlerRegistry(Registry):
 
     def _add_skill_handler(self, directory, skill_name):
         """Add a skill handler."""
-        handler_module = importlib.import_module(".".join([directory, "skills", skill_name, "handler"]))
+        handler_module = importlib.import_module(".".join(["skills", skill_name, "handler"]))
         classes = inspect.getmembers(handler_module, inspect.isclass)
         handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
         handler_class = handler_classes[0][1]

@@ -1,6 +1,0 @@
-aea_version: 0.1.1
-agent_name: myagent
-protocols:
-- default
-skills:
-- echo_skill
