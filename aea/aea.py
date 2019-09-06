@@ -75,7 +75,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self.resources.behaviour_registry.fetch_behaviours():  # the skill should be able to register things here as active so we hand control fully to the skill and let this just spin through
+        for behaviour in self.resources.behaviour_registry.fetch_all():  # the skill should be able to register things here as active so we hand control fully to the skill and let this just spin through
             behaviour.act()
         # NOTE: we must ensure that these are non-blocking.
 
@@ -104,7 +104,7 @@ class AEA(Agent):
         protocol = self.resources.protocol_registry.fetch_protocol(envelope.protocol_id)
 
         # fetch the handler of the "default" protocol for error handling. TODO: change with the handler of "error" protocol.
-        default_handler = self.resources.handler_registry.fetch_handler("default")
+        default_handler = self.resources.handler_registry.fetch("default")
 
         if protocol is None:
             if default_handler is not None:
@@ -136,7 +136,7 @@ class AEA(Agent):
 
         :return None
         """
-        for task in self.resources.task_registry.fetch_tasks():
+        for task in self.resources.task_registry.fetch_all():
             task.execute()
 
     def teardown(self) -> None:

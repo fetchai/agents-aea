@@ -24,7 +24,7 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 
 from aea.mail.base import OutBox, ProtocolId, Envelope
 from aea.protocols.base.protocol import Protocol
@@ -110,6 +110,13 @@ class Task(ABC):
         """
 
 
+class SkillConfig:
+
+    def __init__(self,
+                 ):
+        pass
+
+
 class Skill:
     """This class implements a skill."""
 
@@ -130,6 +137,42 @@ class Skill:
 
 class Registry(ABC):
     """This class implements an abstract registry."""
+
+    @abstractmethod
+    def register(self, id: Any, item: Any) -> None:
+        """
+        Register an item.
+
+        :param id: the identifier of the item.
+        :param item: the item.
+        :return: None
+        """
+
+    @abstractmethod
+    def unregister(self, id: Any) -> None:
+        """
+        Unregister an item.
+
+        :param id: the identifier of the item.
+        :return: None
+        """
+
+    @abstractmethod
+    def fetch(self, id: Any) -> Optional[Any]:
+        """
+        Fetch an item.
+
+        :param id: the identifier of the item.
+        :return: the Item
+        """
+
+    @abstractmethod
+    def fetch_all(self) -> List[Any]:
+        """
+        Fetch all the items.
+
+        :return: the list of items.
+        """
 
     @abstractmethod
     def populate(self, directory: str) -> None:
@@ -160,6 +203,27 @@ class ProtocolRegistry(Registry):
         """
         self._protocols = {}  # type: Dict[ProtocolId, Protocol]
 
+    def register(self, protocol_id: ProtocolId, protocol: Protocol) -> None:
+        """Register a protocol."""
+        self._protocols[protocol_id] = protocol
+
+    def unregister(self, protocol_id: ProtocolId) -> None:
+        """Unregister a protocol."""
+        self._protocols.pop(protocol_id, None)
+
+    def fetch(self, protocol_id: ProtocolId) -> Optional[Protocol]:
+        """
+        Fetch the protocol for the envelope.
+
+        :pass protocol_id: the protocol id
+        :return: the protocol id or None if the protocol is not registered
+        """
+        return self._protocols.get(protocol_id, None)
+
+    def fetch_all(self) -> List[Protocol]:
+        """Fetch all the protocols."""
+        return list(self._protocols.values())
+
     def populate(self, directory: str) -> None:
         """
         Load the handlers as specified in the config and apply consistency checks.
@@ -180,15 +244,6 @@ class ProtocolRegistry(Registry):
                 self._add_protocol(directory, protocol_name)
             except Exception:
                 logger.exception("Not able to add protocol {}.".format(protocol_name))
-
-    def fetch_protocol(self, protocol_id: ProtocolId) -> Optional[Protocol]:
-        """
-        Fetch the protocol for the envelope.
-
-        :pass protocol_id: the protocol id
-        :return: the protocol id or None if the protocol is not registered
-        """
-        return self._protocols.get(protocol_id, None)
 
     def teardown(self) -> None:
         """
@@ -221,7 +276,7 @@ class ProtocolRegistry(Registry):
 
         # instantiate the protocol manager.
         protocol = Protocol(protocol_name, serializer)
-        self._protocols[protocol_name] = protocol
+        self.register(protocol_name, protocol)
 
 
 class HandlerRegistry(Registry):
@@ -235,6 +290,40 @@ class HandlerRegistry(Registry):
         """
         self._handlers = {}  # type: Dict[SkillId, Handler]
         self.context = context
+
+    def register(self, skill_id: SkillId, handler: Handler) -> None:
+        """
+        Register a behaviour.
+
+        :param skill_id: the skill id.
+        :param handler: the handler.
+        :return: None
+        """
+        if skill_id in self._handlers.keys():
+            logger.warning("Another handler already registered with skill id '{}'".format(skill_id))
+        self._handlers[skill_id] = handler
+
+    def unregister(self, skill_id: SkillId) -> None:
+        """
+        Unregister a handler.
+
+        :param skill_id: the skill id.
+        :return: None
+        """
+        self._handlers.pop(skill_id, None)
+
+    def fetch(self, protocol_id: ProtocolId) -> Optional[Handler]:
+        """
+        Fetch the handler for the protocol_id.
+
+        :param protocol_id: the protocol id
+        :return: the handler
+        """
+        return self._handlers.get(protocol_id, None)
+
+    def fetch_all(self) -> List[Handler]:
+        """Fetch all the handlers."""
+        return list(self._handlers.values())
 
     def populate(self, directory: str) -> None:
         """
@@ -256,15 +345,6 @@ class HandlerRegistry(Registry):
                 self._add_skill_handler(directory, skill_name)
             except Exception:
                 logger.exception("Not able to add handler for skill {}.".format(skill_name))
-
-    def fetch_handler(self, protocol_id: ProtocolId) -> Optional[Handler]:
-        """
-        Fetch the handler for the protocol_id.
-
-        :param protocol_id: the protocol id
-        :return: the handler
-        """
-        return self._handlers.get(protocol_id, None)
 
     def teardown(self) -> None:
         """
@@ -295,7 +375,7 @@ class HandlerRegistry(Registry):
         logger.debug("Found handler class {handler_class} for skill {skill_name}"
                      .format(handler_class=handler_class, skill_name=skill_name))
         handler = handler_class(self.context)
-        self._handlers[handler.SUPPORTED_PROTOCOL] = handler
+        self.register(skill_name, handler)
 
 
 class BehaviourRegistry(Registry):
@@ -309,6 +389,39 @@ class BehaviourRegistry(Registry):
         """
         self._behaviours = {}  # type: Dict[SkillId, Behaviour]
         self.context = context
+
+    def register(self, skill_id: SkillId, behaviour: Behaviour) -> None:
+        """
+        Register a behaviour.
+
+        :param skill_id: the skill id.
+        :param behaviour: the behaviour.
+        :return: None
+        """
+        if skill_id in self._behaviours.keys():
+            logger.warning("Another behaviour already registered with skill id '{}'".format(skill_id))
+        self._behaviours[skill_id] = behaviour
+
+    def unregister(self, skill_id: SkillId) -> None:
+        """
+        Unregister a behaviour.
+
+        :param skill_id: the skill id.
+        :return: None
+        """
+        self._behaviours.pop(skill_id, None)
+
+    def fetch(self, skill_id: SkillId) -> Optional[Behaviour]:
+        """
+        Return a behaviour.
+
+        :return: the list of behaviours
+        """
+        return self._behaviours.get(skill_id, None)
+
+    def fetch_all(self) -> List[Behaviour]:
+        """Fetch all the behaviours."""
+        return list(self._behaviours.values())
 
     def populate(self, directory: str) -> None:
         """
@@ -350,15 +463,7 @@ class BehaviourRegistry(Registry):
             logger.debug("Found behaviour class {behaviour_class} for skill {skill_name}"
                          .format(behaviour_class=behaviour_class, skill_name=skill_name))
             behaviour = behaviour_class()
-            self._behaviours[skill_name] = behaviour
-
-    def fetch_behaviours(self) -> List[Behaviour]:
-        """
-        Return a list of behaviours for processing.
-
-        :return: the list of behaviours
-        """
-        return list(self._behaviours.values())
+            self.register(skill_name, behaviour)
 
     def teardown(self) -> None:
         """
@@ -382,6 +487,43 @@ class TaskRegistry(Registry):
         """
         self._tasks = {}  # type: Dict[SkillId, Task]
         self.context = context
+
+    def register(self, skill_id: SkillId, task: Task) -> None:
+        """
+        Register a task.
+
+        :param skill_id: the skill id.
+        :param task: the task.
+        :return: None
+        """
+        if skill_id in self._tasks.keys():
+            logger.warning("Another behaviour already registered with skill id '{}'".format(skill_id))
+        self._tasks[skill_id] = task
+
+    def unregister(self, skill_id: SkillId) -> None:
+        """
+        Unregister a task.
+
+        :param skill_id: the skill id.
+        :return: None
+        """
+        self._tasks.pop(skill_id, None)
+
+    def fetch(self, skill_id: SkillId) -> Optional[Task]:
+        """
+        Return a task.
+
+        :return: the list of tasks
+        """
+        return self._tasks.get(skill_id, None)
+
+    def fetch_all(self) -> List[Task]:
+        """
+        Return a list of tasks for processing.
+
+        :return: a list of tasks.
+        """
+        return list(self._tasks.values())
 
     def populate(self, directory: str) -> None:
         """
@@ -424,15 +566,7 @@ class TaskRegistry(Registry):
             logger.debug("Found task class {task_class} for skill {skill_name}"
                          .format(task_class=task_class, skill_name=skill_name))
             task = task_class()
-            self._tasks[skill_name] = task
-
-    def fetch_tasks(self) -> List[Task]:
-        """
-        Return a list of tasks for processing.
-
-        :return: a list of tasks.
-        """
-        return list(self._tasks.values())
+            self.register(skill_name, task)
 
     def teardown(self) -> None:
         """
