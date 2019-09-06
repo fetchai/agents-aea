@@ -26,6 +26,8 @@ import re
 from abc import ABC, abstractmethod
 from typing import Optional, List, Dict, Any
 
+import yaml
+
 from aea.mail.base import OutBox, ProtocolId, Envelope
 from aea.protocols.base.protocol import Protocol
 
@@ -68,9 +70,10 @@ class Handler(ABC):
 
     SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
 
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, **kwargs):
         """Initialize a handler object."""
         self.context = context
+        self.config = kwargs
 
     @abstractmethod
     def handle_envelope(self, envelope: Envelope) -> None:
@@ -113,8 +116,48 @@ class Task(ABC):
 class SkillConfig:
 
     def __init__(self,
-                 ):
-        pass
+                 name: str,
+                 authors: List[str],
+                 version: str,
+                 license: str,
+                 url: str,
+                 handler_config: Dict,
+                 behaviours_config: List[Dict],
+                 tasks_config: List[Dict]):
+        self.name = name
+        self.authors = authors
+        self.version = version
+        self.license = license
+        self.url = url
+        self.handler_config = handler_config
+        self.behaviours_config = behaviours_config
+        self.tasks_config = tasks_config
+
+    @classmethod
+    def from_config_file(cls, filepath: str) -> Optional['SkillConfig']:
+        """
+        Parse a configuration file
+
+        :param filepath:
+        :return:
+        """
+        try:
+            file = open(filepath, "r")
+            data = yaml.safe_load(file)
+            skill_config = SkillConfig(
+                data.get("name"),
+                data.get("authors"),
+                data.get("version"),
+                data.get("license"),
+                data.get("url"),
+                data.get("handler"),
+                data.get("behaviours"),
+                data.get("tasks")
+            )
+            return skill_config
+        except Exception as e:
+            logger.exception("An error occured while parsing the skill config: {}".format(e))
+            return None
 
 
 class Skill:
@@ -133,6 +176,26 @@ class Skill:
         self.handler = handler
         self.behaviours = behaviours
         self.tasks = tasks
+
+    @classmethod
+    def from_dir(cls, directory: str) -> Optional['Skill']:
+        """
+        Load a skill from a directory
+
+        :param directory: the skill
+        :return:
+        """
+        # check if there is the config file.
+
+
+        skills_spec = importlib.util.spec_from_file_location("skills",
+                                                             os.path.join(directory, "__init__.py"))
+        if skills_spec is None:
+            logger.warning("No skill found.")
+            return None
+
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        logger.debug("Processing the following skill package: {}".format(skills_packages))
 
 
 class Registry(ABC):
