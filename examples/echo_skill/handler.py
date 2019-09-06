@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'echo' skill."""
+
 from aea.mail.base import Envelope
 from aea.skills.base import Handler
 
@@ -26,6 +27,9 @@ class EchoHandler(Handler):
     """Echo handler."""
 
     SUPPORTED_PROTOCOL = "default"
+
+    def __init__(self, **kwargs):
+        print("EchoHandler.__init__: arguments: {}".format(kwargs))
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """

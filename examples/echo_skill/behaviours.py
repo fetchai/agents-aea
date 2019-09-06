@@ -18,11 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the behaviours for the 'echo' skill."""
+
 from aea.skills.base import Behaviour
 
 
 class EchoBehaviour(Behaviour):
     """Echo behaviour."""
+
+    def __init__(self, **kwargs):
+        print("EchoBehaviour.__init__: arguments: {}".format(kwargs))
 
     def act(self) -> None:
         """Act according to the behaviour."""
