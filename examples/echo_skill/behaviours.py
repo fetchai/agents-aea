@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the behaviours for the 'echo' skill."""
-from aea.aea import Behaviour
+from aea.skills.base import Behaviour
 
 
 class EchoBehaviour(Behaviour):
@@ -26,8 +26,8 @@ class EchoBehaviour(Behaviour):
 
     def act(self) -> None:
         """Act according to the behaviour."""
-        print("Echo behaviour: act method called.")
+        print("Echo Behaviour: act method called.")
 
     def teardown(self) -> None:
         """Teardown the behaviour."""
-        print("Echo behaviour: teardown method called.")
+        print("Echo Behaviour: teardown method called.")

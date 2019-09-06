@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'echo' skill."""
-from aea.aea import Task
+from aea.skills.base import Task
 
 
 class EchoTask(Task):

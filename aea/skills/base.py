@@ -301,13 +301,14 @@ class HandlerRegistry(Registry):
 class BehaviourRegistry(Registry):
     """This class implements the behaviour registry."""
 
-    def __init__(self) -> None:
+    def __init__(self, context: Context) -> None:
         """
         Instantiate the registry.
 
         :return: None
         """
         self._behaviours = {}  # type: Dict[SkillId, Behaviour]
+        self.context = context
 
     def populate(self, directory: str) -> None:
         """
@@ -316,7 +317,40 @@ class BehaviourRegistry(Registry):
         :param directory: the agent's resources directory.
         :return: None
         """
-        pass
+        logger.debug("Populating the behaviour registry. Resource directory: {}".format(directory))
+        skills_spec = importlib.util.spec_from_file_location("skills",
+                                                             os.path.join(directory, "skills", "__init__.py"))
+        if skills_spec is None:
+            logger.warning("No skill found.")
+            return
+
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        logger.debug("Processing the following skill package: {}".format(skills_packages))
+        for skill_name in skills_packages:
+            try:
+                self._add_skill_behaviours(directory, skill_name)
+            except Exception:
+                logger.exception("Not able to add handler for skill {}.".format(skill_name))
+
+    def _add_skill_behaviours(self, directory: str, skill_name: str) -> None:
+        """
+        Add skill behaviours.
+
+        :param directory: the agent's resources directory.
+        :param skill_name: the skill's name
+        :return: None
+        """
+        behaviours_spec = importlib.util.spec_from_file_location("behaviours",
+                                                              os.path.join(directory, "skills", skill_name, "behaviours.py"))
+        behaviour_module = importlib.util.module_from_spec(behaviours_spec)
+        behaviours_spec.loader.exec_module(behaviour_module)
+        classes = inspect.getmembers(behaviour_module, inspect.isclass)
+        behaviours_classes = list(filter(lambda x: re.match("\\w+Behaviour", x[0]), classes))
+        for _, behaviour_class in behaviours_classes:
+            logger.debug("Found behaviour class {behaviour_class} for skill {skill_name}"
+                         .format(behaviour_class=behaviour_class, skill_name=skill_name))
+            behaviour = behaviour_class()
+            self._behaviours[skill_name] = behaviour
 
     def fetch_behaviours(self) -> List[Behaviour]:
         """
@@ -324,7 +358,7 @@ class BehaviourRegistry(Registry):
 
         :return: the list of behaviours
         """
-        return []
+        return list(self._behaviours.values())
 
     def teardown(self) -> None:
         """
@@ -340,13 +374,14 @@ class BehaviourRegistry(Registry):
 class TaskRegistry(Registry):
     """This class implements the task registry."""
 
-    def __init__(self) -> None:
+    def __init__(self, context: Context) -> None:
         """
         Instantiate the registry.
 
         :return: None
         """
         self._tasks = {}  # type: Dict[SkillId, Task]
+        self.context = context
 
     def populate(self, directory: str) -> None:
         """
@@ -355,7 +390,41 @@ class TaskRegistry(Registry):
         :param directory: the agent's resources directory.
         :return: None
         """
-        pass
+        logger.debug("Populating the task registry. Resource directory: {}".format(directory))
+        skills_spec = importlib.util.spec_from_file_location("skills",
+                                                             os.path.join(directory, "skills", "__init__.py"))
+        if skills_spec is None:
+            logger.warning("No skill found.")
+            return
+
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        logger.debug("Processing the following skill package: {}".format(skills_packages))
+        for skill_name in skills_packages:
+            try:
+                self._add_skill_tasks(directory, skill_name)
+            except Exception:
+                logger.exception("Not able to add handler for skill {}.".format(skill_name))
+
+    def _add_skill_tasks(self, directory, skill_name):
+        """
+        Add skill tasks.
+
+        :param directory: the agent's resources directory.
+        :param skill_name: the skill's name
+        :return: None
+        """
+        tasks_spec = importlib.util.spec_from_file_location("tasks",
+                                                                 os.path.join(directory, "skills", skill_name,
+                                                                              "tasks.py"))
+        task_module = importlib.util.module_from_spec(tasks_spec)
+        tasks_spec.loader.exec_module(task_module)
+        classes = inspect.getmembers(task_module, inspect.isclass)
+        task_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
+        for _, task_class in task_classes:
+            logger.debug("Found task class {task_class} for skill {skill_name}"
+                         .format(task_class=task_class, skill_name=skill_name))
+            task = task_class()
+            self._tasks[skill_name] = task
 
     def fetch_tasks(self) -> List[Task]:
         """
@@ -363,7 +432,7 @@ class TaskRegistry(Registry):
 
         :return: a list of tasks.
         """
-        return []
+        return list(self._tasks.values())
 
     def teardown(self) -> None:
         """
@@ -384,8 +453,8 @@ class Resources(object):
         self.context = context
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry(context)
-        self.behaviour_registry = BehaviourRegistry()
-        self.task_registry = TaskRegistry()
+        self.behaviour_registry = BehaviourRegistry(context)
+        self.task_registry = TaskRegistry(context)
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
