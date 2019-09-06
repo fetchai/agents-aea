@@ -59,7 +59,7 @@ class AEA(Agent):
             self._directory = str(Path(".").absolute())
 
         self.context = Context(self.name, self.outbox)
-        self.resources = Resources(self.context)
+        self.resources = None  # type: Optional[Resources]
 
     def setup(self) -> None:
         """
@@ -67,7 +67,7 @@ class AEA(Agent):
 
         :return: None
         """
-        self.resources.populate(self._directory)
+        self.resources = Resources.from_resource_dir(self._directory, self.context)
 
     def act(self) -> None:
         """

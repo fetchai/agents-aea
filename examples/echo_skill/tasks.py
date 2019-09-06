@@ -24,6 +24,9 @@ from aea.skills.base import Task
 class EchoTask(Task):
     """Echo task."""
 
+    def __init__(self, **kwargs):
+        print("EchoTask.__init__: arguments: {}".format(kwargs))
+
     def execute(self) -> None:
         """Execute the task."""
         print("Echo Task: execute method called.")

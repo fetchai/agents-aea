@@ -7,3 +7,4 @@ behaviours: []
 handler:
   class_name: DefaultHandler
 tasks: []
+protocol: "default"
