@@ -38,8 +38,16 @@ extras = {
         "click_log",
         "PyYAML"
     ],
+    "fipa": [
+        "protobuf"
+    ],
+    "tac": [
+        "protobuf"
+    ],
 }
 
+# add "all" extras
+extras["all"] = [dep for e in extras.values() for dep in e]
 
 setup(
     name=about['__title__'],
@@ -70,4 +78,3 @@ setup(
     },
     license=about['__license__'],
 )
-
