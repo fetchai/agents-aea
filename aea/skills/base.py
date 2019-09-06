@@ -421,7 +421,7 @@ class TaskRegistry(Registry):
         classes = inspect.getmembers(task_module, inspect.isclass)
         task_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
         for _, task_class in task_classes:
-            logger.debug("Found behaviour class {task_class} for skill {skill_name}"
+            logger.debug("Found task class {task_class} for skill {skill_name}"
                          .format(task_class=task_class, skill_name=skill_name))
             task = task_class()
             self._tasks[skill_name] = task
