@@ -60,7 +60,7 @@ class GymChannel:
             return None
 
         assert len(self._queues.keys()) <= 1, "Only one public key can register to a gym."
-        q = Queue()  # type: Optional[Queue]
+        q = Queue()  # type: Queue
         self._queues[public_key] = q
         return q
 
