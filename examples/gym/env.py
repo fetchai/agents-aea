@@ -24,16 +24,15 @@ from typing import List, Tuple
 
 import numpy as np
 import gym
-from gym import spaces
+from gym import spaces  # type: ignore
 
 BanditId = int
 Price = int
-Action = [BanditId, Price]
-Observation = None
+Action = Tuple[BanditId, Price]
 Reward = bool
 Done = bool
 Info = dict
-Feedback = Tuple[Observation, Reward, Done, Info]
+Feedback = Tuple[None, Reward, Done, Info]
 
 
 class BanditEnv(gym.Env):
@@ -56,7 +55,7 @@ class BanditEnv(gym.Env):
 
         self.seed()  # seed environment randomness
 
-    def reset(self) -> Observation:
+    def reset(self) -> None:
         """
         Reset the environment.
 
@@ -80,7 +79,7 @@ class BanditEnv(gym.Env):
         # defaults
         observation = None
         done = False
-        info = {}
+        info = {}  # type: Info
 
         cutoff_price = np.random.normal(self.reward_params[bandit][0], self.reward_params[bandit][1])
         reward = offered_price > cutoff_price
@@ -115,6 +114,7 @@ class BanditNArmedRandom(BanditEnv):
         reward_params = []  # type: List[Tuple[float, int]]
         for i in range(nb_bandits):
             # Mean m is pulled from a uniform distribution over [0, bound). To induce a normal distribution with params (m, 1).
-            reward_params.append([np.random.uniform(0, nb_prices_per_bandit), stdev])
+            mean = np.random.uniform(0, nb_prices_per_bandit)
+            reward_params.append([mean, stdev])  # type: ignore
 
         BanditEnv.__init__(self, nb_bandits=nb_bandits, nb_prices_per_bandit=nb_prices_per_bandit, reward_params=reward_params)

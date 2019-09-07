@@ -231,7 +231,7 @@ class OEFChannel(OEFAgent):
         envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
-    def on_propose(self, msg_id: int, dialogue_id: int, origin: str, target: int, proposals: PROPOSE_TYPES) -> None:
+    def on_propose(self, msg_id: int, dialogue_id: int, origin: str, target: int, b_proposals: PROPOSE_TYPES) -> None:
         """
         On propose event handler.
 
@@ -239,11 +239,11 @@ class OEFChannel(OEFAgent):
         :param dialogue_id: the dialogue id.
         :param origin: the public key of the sender.
         :param target: the message target.
-        :param proposals: the proposals.
+        :param b_proposals: the proposals.
         :return: None
         """
-        if type(proposals) == bytes:
-            proposals = pickle.loads(proposals)  # type: List[Description]
+        if type(b_proposals) == bytes:
+            proposals = pickle.loads(b_proposals)  # type: List[Description]
         else:
             raise ValueError("No support for non-bytes proposals.")
 

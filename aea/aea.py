@@ -101,32 +101,32 @@ class AEA(Agent):
         :param envelope: the envelope to handle.
         :return: None
         """
-        protocol = self.resources.protocol_registry.fetch_protocol(envelope.protocol_id)
+        protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
         # fetch the handler of the "default" protocol for error handling. TODO: change with the handler of "error" protocol.
         default_handler = self.resources.handler_registry.fetch("default")
 
         if protocol is None:
             if default_handler is not None:
-                default_handler.send_unsupported_protocol(envelope)
+                default_handler.send_unsupported_protocol(envelope)  # type: ignore
             return
 
         try:
             msg = protocol.serializer.decode(envelope.message)
         except Exception:
             if default_handler is not None:
-                default_handler.send_decoding_error(envelope)
+                default_handler.send_decoding_error(envelope)  # type: ignore
             return
 
         if not protocol.check(msg):
             if default_handler is not None:
-                default_handler.send_invalid_message(envelope)
+                default_handler.send_invalid_message(envelope)  # type: ignore
             return
 
-        handler = self.resources.handler_registry.fetch_handler(protocol.id)
+        handler = self.resources.handler_registry.fetch(protocol.id)
         if handler is None:
             if default_handler is not None:
-                default_handler.send_unsupported_skill(envelope, protocol)
+                default_handler.send_unsupported_skill(envelope, protocol)  # type: ignore
             return
 
         handler.handle_envelope(envelope)

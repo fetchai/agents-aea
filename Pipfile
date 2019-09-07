@@ -17,6 +17,7 @@ pytest-cov = "*"
 flake8-docstrings = "*"
 pygments = "*"
 docker = "*"
+mypy = "*"
 
 [packages]
 cryptography = "*"

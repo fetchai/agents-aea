@@ -23,7 +23,7 @@
 import logging
 from abc import abstractmethod
 from queue import Queue
-from typing import Optional
+from typing import Any, Optional
 
 from aea.mail import base_pb2
 
@@ -241,6 +241,8 @@ class OutBox(object):
 
 class Connection:
     """Abstract definition of a connection."""
+
+    bridge: Optional[Any]
 
     def __init__(self):
         """Initialize the connection."""

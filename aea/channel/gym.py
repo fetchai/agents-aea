@@ -24,7 +24,7 @@ import queue
 import threading
 from queue import Queue
 from threading import Thread
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional
 
 from aea.mail.base import Envelope, Connection
 from aea.protocols.gym.message import GymMessage
@@ -60,7 +60,7 @@ class GymChannel:
             return None
 
         assert len(self._queues.keys()) <= 1, "Only one public key can register to a gym."
-        q = Queue()
+        q = Queue()  # type: Optional[Queue]
         self._queues[public_key] = q
         return q
 
@@ -98,7 +98,7 @@ class GymChannel:
         assert GymMessage.Performative(performative) == GymMessage.Performative.ACT, "This is not a valid message."
         action = gym_message.get("action")
         step_id = gym_message.get("step_id")
-        observation, reward, done, info = self.gym_env.step(action)  # type: Tuple[Any, Any, bool, Dict]
+        observation, reward, done, info = self.gym_env.step(action)  # type: ignore
         msg = GymMessage(performative=GymMessage.Performative.PERCEPT, observation=observation, reward=reward, done=done, info=info, step_id=step_id)
         msg_bytes = GymSerializer().encode(msg)
         envelope = Envelope(to=envelope.sender, sender=DEFAULT_GYM, protocol_id=GymMessage.protocol_id, message=msg_bytes)
@@ -141,8 +141,8 @@ class GymConnection(Connection):
         self._connection = None  # type: Optional[Queue]
 
         self._stopped = True
-        self.in_thread = None
-        self.out_thread = None
+        self.in_thread = None  # type: Optional[Thread]
+        self.out_thread = None  # type: Optional[Thread]
 
     def _fetch(self) -> None:
         """

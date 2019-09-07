@@ -43,9 +43,13 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 	  tox -e py37
 
-- To run linters:
+- To run linters (code style checks):
 
 	  tox -e flake8
+
+- To run static type checks:
+
+	  mypy aea tests examples
 
 ## Use the `aea` command-line tool
 

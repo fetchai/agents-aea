@@ -31,14 +31,15 @@ import gym
 import logging
 import numpy as np
 import random
-from typing import Dict, Optional
+from typing import Dict, List, Optional, cast
 
 from aea.agent import Agent
 from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
 from aea.mail.base import Envelope, MailBox
+from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
-from env import BanditNArmedRandom
+from .env import BanditNArmedRandom
 
 MAX_ACTIONS = 4000
 
@@ -62,13 +63,13 @@ class PriceBandit(object):
         self.beta_a = beta_a
         self.beta_b = beta_b
 
-    def sample(self) -> float:
+    def sample(self) -> int:
         """
         Sample from the bandit.
 
         :return: the sampled value
         """
-        return np.random.beta(self.beta_a, self.beta_b)
+        return round(np.random.beta(self.beta_a, self.beta_b))
 
     def update(self, outcome: bool) -> None:
         """
@@ -139,7 +140,7 @@ class RLAgent(Agent):
         self.mailbox = MailBox(GymConnection(self.crypto.public_key, GymChannel(gym_env)))
         self.good_price_models = dict((good_id, GoodPriceModel(nb_prices_per_good)) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
         self.action_counter = 0
-        self.actions = {}  # Dict[int, Tuple[int, int]]
+        self.actions = {}  # type: Dict[int, List[int]]
 
     def setup(self) -> None:
         """
@@ -169,7 +170,8 @@ class RLAgent(Agent):
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
             if envelope is not None:
                 if envelope.protocol_id == 'gym':
-                    gym_msg = GymSerializer().decode(envelope.message)
+                    gym_msg = GymSerializer().decode(envelope.message)  # type: Message
+                    gym_msg = cast(GymMessage, gym_msg)
                     gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
                     if gym_msg_performative == GymMessage.Performative.PERCEPT:
                         self._handle_message(gym_msg)

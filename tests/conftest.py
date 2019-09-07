@@ -69,7 +69,7 @@ class OEFHealthCheck(object):
 
         self._result = False
         self._stop = False
-        self._conn = None
+        self._conn = None  # type: Optional[Connection]
         self._loop = asyncio.get_event_loop() if loop is None else loop
         self._loop.set_exception_handler(self.exception_handler)
         self._core = AsyncioCore(loop=self._loop)

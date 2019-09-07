@@ -52,7 +52,7 @@ def protocol(ctx: Context, protocol_name):
 
     # find the supported protocols and check if the candidate protocol is supported.
     protocols_module_spec = importlib.util.find_spec("aea.protocols")
-    _protocols_submodules = protocols_module_spec.loader.contents()
+    _protocols_submodules = protocols_module_spec.loader.contents()  # type: ignore
     _protocols_submodules = filter(lambda x: not x.startswith("__") and x != "base", _protocols_submodules)
     aea_supported_protocol = set(_protocols_submodules)
     logger.debug("Supported protocols: {}".format(aea_supported_protocol))

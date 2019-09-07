@@ -60,7 +60,7 @@ class GymSerializer(Serializer):
             info_bytes = base58.b58encode(pickle.dumps(info)).decode("utf-8")
             new_body["info"] = info_bytes
 
-        new_body["step_id"] = msg.body["step_id"]  # type: int
+        new_body["step_id"] = msg.body["step_id"]
 
         gym_message_bytes = json.dumps(new_body).encode("utf-8")
         return gym_message_bytes
@@ -80,18 +80,18 @@ class GymSerializer(Serializer):
         if performative == GymMessage.Performative.ACT:
             action_bytes = base58.b58decode(json_msg["action"])
             action = pickle.loads(action_bytes)
-            new_body["action"] = action   # type: Any
+            new_body["action"] = action
         elif performative == GymMessage.Performative.PERCEPT:
             # observation, reward and info are gym implementation specific, done is boolean
             observation_bytes = base58.b58decode(json_msg["observation"])
             observation = pickle.loads(observation_bytes)
-            new_body["observation"] = observation  # type: Any
+            new_body["observation"] = observation
             reward_bytes = base58.b58decode(json_msg["reward"])
             reward = pickle.loads(reward_bytes)
-            new_body["reward"] = reward  # type: Any
+            new_body["reward"] = reward
             info_bytes = base58.b58decode(json_msg["info"])
             info = pickle.loads(info_bytes)
-            new_body["info"] = info  # type: Any
+            new_body["info"] = info
         new_body["step_id"] = json_msg["step_id"]
 
         gym_message = Message(body=new_body)

@@ -57,7 +57,7 @@ class LocalNode:
         if public_key in self._queues:
             return None
 
-        q = Queue()
+        q = Queue()  # type: Queue
         self._queues[public_key] = q
         return q
 
@@ -171,9 +171,9 @@ class LocalNode:
         :param query: the query that constitutes the search.
         :return: None
         """
-        result = []
+        result = []  # type: List[str]
         if query.model is None:
-            result = set(self.services.keys())
+            result = list(set(self.services.keys()))
         else:
             for agent_public_key, description in self.agents.items():
                 if query.model == description.data_model:
@@ -196,9 +196,9 @@ class LocalNode:
         :param query: the query that constitutes the search.
         :return: None
         """
-        result = []
+        result = []  # type: List[str]
         if query.model is None:
-            result = set(self.services.keys())
+            result = list(set(self.services.keys()))
         else:
             for agent_public_key, descriptions in self.services.items():
                 for description in descriptions:
