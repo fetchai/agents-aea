@@ -49,7 +49,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 - To run static type checks:
 
-	  mypy aea tests examples
+	  mypy aea examples scripts tests
 
 ## Use the `aea` command-line tool
 
