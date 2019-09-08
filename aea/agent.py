@@ -80,14 +80,16 @@ class Agent(ABC):
         self.mailbox = None  # type: Optional[MailBox]
 
     @property
-    def inbox(self) -> Optional[InBox]:
+    def inbox(self) -> InBox:
         """Get the inbox."""
-        return self.mailbox.inbox if self.mailbox else None
+        assert self.mailbox is not None, "Cannot retrieve inbox. No mailbox specified."
+        return self.mailbox.inbox
 
     @property
-    def outbox(self) -> Optional[OutBox]:
+    def outbox(self) -> OutBox:
         """Get the outbox."""
-        return self.mailbox.outbox if self.mailbox else None
+        assert self.mailbox is not None, "Cannot retrieve outbox. No mailbox specified."
+        return self.mailbox.outbox
 
     @property
     def name(self) -> str:
