@@ -25,6 +25,7 @@ class EchoTask(Task):
     """Echo task."""
 
     def __init__(self, **kwargs):
+        """Initialize the task."""
         print("EchoTask.__init__: arguments: {}".format(kwargs))
 
     def execute(self) -> None:

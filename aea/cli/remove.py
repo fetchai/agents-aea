@@ -53,7 +53,7 @@ def protocol(ctx: Context, protocol_name):
 
     try:
         shutil.rmtree(os.path.join("protocols", protocol_name))
-    except:
+    except BaseException:
         logger.exception("An error occurred.")
         return
 
@@ -78,7 +78,7 @@ def skill(ctx: Context, skill_name):
 
     try:
         shutil.rmtree(os.path.join("skills", skill_name))
-    except:
+    except BaseException:
         logger.exception("An error occurred.")
         return
 

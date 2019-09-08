@@ -40,10 +40,10 @@ class FIPASerializer(Serializer):
 
         performative_id = msg.get("performative").value
         if performative_id == "cfp":
-            performative = fipa_pb2.FIPAMessage.CFP()
+            performative = fipa_pb2.FIPAMessage.CFP()  # type: ignore
             query = msg.get("query")
             if query is None or query == b"":
-                nothing = fipa_pb2.FIPAMessage.CFP.Nothing()
+                nothing = fipa_pb2.FIPAMessage.CFP.Nothing()  # type: ignore
                 performative.nothing.CopyFrom(nothing)
             elif type(query) == bytes:
                 performative.bytes = query
@@ -51,20 +51,20 @@ class FIPASerializer(Serializer):
                 raise ValueError("Query type not supported: {}".format(type(query)))
             fipa_msg.cfp.CopyFrom(performative)
         elif performative_id == "propose":
-            performative = fipa_pb2.FIPAMessage.Propose()
+            performative = fipa_pb2.FIPAMessage.Propose()  # type: ignore
             proposal = msg.get("proposal")
             p_array_bytes = [pickle.dumps(p) for p in proposal]
             performative.proposal.extend(p_array_bytes)
             fipa_msg.propose.CopyFrom(performative)
 
         elif performative_id == "accept":
-            performative = fipa_pb2.FIPAMessage.Accept()
+            performative = fipa_pb2.FIPAMessage.Accept()  # type: ignore
             fipa_msg.accept.CopyFrom(performative)
         elif performative_id == "match_accept":
-            performative = fipa_pb2.FIPAMessage.MatchAccept()
+            performative = fipa_pb2.FIPAMessage.MatchAccept()  # type: ignore
             fipa_msg.match_accept.CopyFrom(performative)
         elif performative_id == "decline":
-            performative = fipa_pb2.FIPAMessage.Decline()
+            performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))

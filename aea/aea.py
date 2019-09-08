@@ -20,11 +20,12 @@
 """This module contains the implementation of an Autonomous Economic Agent."""
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 
 from aea.agent import Agent
 from aea.mail.base import Envelope
 from aea.skills.base import Resources, Context
+from aea.skills.default.handler import DefaultHandler
 
 logger = logging.getLogger(__name__)
 
@@ -101,10 +102,11 @@ class AEA(Agent):
         :param envelope: the envelope to handle.
         :return: None
         """
-        protocol = self.resources.protocol_registry.fetch_protocol(envelope.protocol_id)
+        protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
         # fetch the handler of the "default" protocol for error handling. TODO: change with the handler of "error" protocol.
         default_handler = self.resources.handler_registry.fetch("default")
+        default_handler = cast(DefaultHandler, default_handler)
 
         if protocol is None:
             if default_handler is not None:
@@ -123,7 +125,7 @@ class AEA(Agent):
                 default_handler.send_invalid_message(envelope)
             return
 
-        handler = self.resources.handler_registry.fetch_handler(protocol.id)
+        handler = self.resources.handler_registry.fetch(protocol.id)
         if handler is None:
             if default_handler is not None:
                 default_handler.send_unsupported_skill(envelope, protocol)

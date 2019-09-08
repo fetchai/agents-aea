@@ -24,9 +24,9 @@ import queue
 import threading
 from queue import Queue
 from threading import Thread
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional
 
-from aea.mail.base import Envelope, Connection
+from aea.mail.base import Envelope, Channel, Connection
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
 
@@ -39,32 +39,32 @@ DEFAULT_GYM = "gym"
 gym_Env = object  # typing stub for gym.Env
 
 
-class GymChannel:
-    """A ."""
+class GymChannel(Channel):
+    """A wrapper of the gym environment."""
 
-    def __init__(self, gym_env: gym_Env):
+    def __init__(self, public_key: str, gym_env: gym_Env):
         """Initialize a gym channel."""
+        self.public_key = public_key
         self.gym_env = gym_env
         self._lock = threading.Lock()
 
         self._queues = {}  # type: Dict[str, Queue]
 
-    def connect(self, public_key: str) -> Optional[Queue]:
+    def connect(self) -> Optional[Queue]:
         """
         Connect a public key to the gym.
 
-        :param public_key: the public key of the agent.
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        if public_key in self._queues:
+        if self.public_key in self._queues:
             return None
 
-        assert len(self._queues.keys()) <= 1, "Only one public key can register to a gym."
-        q = Queue()
-        self._queues[public_key] = q
+        assert len(self._queues.keys()) == 0, "Only one public key can register to a gym."
+        q = Queue()  # type: Queue
+        self._queues[self.public_key] = q
         return q
 
-    def send_envelope(self, envelope: Envelope) -> None:
+    def send(self, envelope: Envelope) -> None:
         """
         Process the envelopes to the gym.
 
@@ -98,7 +98,7 @@ class GymChannel:
         assert GymMessage.Performative(performative) == GymMessage.Performative.ACT, "This is not a valid message."
         action = gym_message.get("action")
         step_id = gym_message.get("step_id")
-        observation, reward, done, info = self.gym_env.step(action)  # type: Tuple[Any, Any, bool, Dict]
+        observation, reward, done, info = self.gym_env.step(action)  # type: ignore
         msg = GymMessage(performative=GymMessage.Performative.PERCEPT, observation=observation, reward=reward, done=done, info=info, step_id=step_id)
         msg_bytes = GymSerializer().encode(msg)
         envelope = Envelope(to=envelope.sender, sender=DEFAULT_GYM, protocol_id=GymMessage.protocol_id, message=msg_bytes)
@@ -113,21 +113,20 @@ class GymChannel:
         destination = envelope.to
         self._queues[destination].put_nowait(envelope)
 
-    def disconnect(self, public_key: str) -> None:
+    def disconnect(self) -> None:
         """
         Disconnect.
 
-        :param public_key: the public key
         :return: None
         """
         with self._lock:
-            self._queues.pop(public_key, None)
+            self._queues.pop(self.public_key, None)
 
 
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    def __init__(self, public_key: str, gym_channel: GymChannel):
+    def __init__(self, public_key: str, gym_env: gym_Env):
         """
         Initialize a connection to a local gym environment.
 
@@ -136,13 +135,13 @@ class GymConnection(Connection):
         """
         super().__init__()
         self.public_key = public_key
-        self.gym_channel = gym_channel
+        self.channel = GymChannel(public_key, gym_env)
 
         self._connection = None  # type: Optional[Queue]
 
         self._stopped = True
-        self.in_thread = None
-        self.out_thread = None
+        self.in_thread = None  # type: Optional[Thread]
+        self.out_thread = None  # type: Optional[Thread]
 
     def _fetch(self) -> None:
         """
@@ -183,7 +182,7 @@ class GymConnection(Connection):
         """
         if self._stopped:
             self._stopped = False
-            self._connection = self.gym_channel.connect(self.public_key)
+            self._connection = self.channel.connect()
             self.in_thread = Thread(target=self._receive_loop)
             self.out_thread = Thread(target=self._fetch)
             self.in_thread.start()
@@ -201,7 +200,7 @@ class GymConnection(Connection):
             self.out_thread.join()
             self.in_thread = None
             self.out_thread = None
-            self.gym_channel.disconnect(self.public_key)
+            self.channel.disconnect()
             self.stop()
 
     def send(self, envelope: Envelope) -> None:
@@ -213,7 +212,7 @@ class GymConnection(Connection):
         """
         if not self.is_established:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
-        self.gym_channel.send_envelope(envelope)
+        self.channel.send(envelope)
 
     def stop(self) -> None:
         """

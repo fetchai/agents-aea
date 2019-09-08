@@ -239,6 +239,35 @@ class OutBox(object):
         self._queue.put(envelope)
 
 
+class Channel:
+    """Abstract definition of a channel."""
+
+    @abstractmethod
+    def connect(self) -> Optional[Queue]:
+        """
+        Set up the connection.
+
+        :return: A queue or None.
+        """
+
+    @abstractmethod
+    def disconnect(self) -> None:
+        """
+        Tear down the connection.
+
+        :return: None.
+        """
+
+    @abstractmethod
+    def send(self, envelope: Envelope) -> None:
+        """
+        Send an envelope.
+
+        :param envelope: the envelope to send.
+        :return: None.
+        """
+
+
 class Connection:
     """Abstract definition of a connection."""
 
@@ -246,6 +275,7 @@ class Connection:
         """Initialize the connection."""
         self.in_queue = Queue()
         self.out_queue = Queue()
+        self.channel = None  # type: Optional[Channel]
 
     @abstractmethod
     def connect(self):

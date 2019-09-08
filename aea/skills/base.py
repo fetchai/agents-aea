@@ -24,7 +24,6 @@ import logging
 import os
 import pprint
 import re
-import shutil
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict, Any
@@ -87,7 +86,7 @@ class Behaviour(ABC):
         behaviours = []
         behaviours_spec = importlib.util.spec_from_file_location("behaviours", location=path)
         behaviour_module = importlib.util.module_from_spec(behaviours_spec)
-        behaviours_spec.loader.exec_module(behaviour_module)
+        behaviours_spec.loader.exec_module(behaviour_module)  # type: ignore
         classes = inspect.getmembers(behaviour_module, inspect.isclass)
         behaviours_classes = list(filter(lambda x: re.match("\\w+Behaviour", x[0]), classes))
 
@@ -144,7 +143,7 @@ class Handler(ABC):
         """
         handler_spec = importlib.util.spec_from_file_location("handler", location=path)
         handler_module = importlib.util.module_from_spec(handler_spec)
-        handler_spec.loader.exec_module(handler_module)
+        handler_spec.loader.exec_module(handler_module)  # type: ignore
         classes = inspect.getmembers(handler_module, inspect.isclass)
         handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
 
@@ -199,7 +198,7 @@ class Task(ABC):
         tasks = []
         tasks_spec = importlib.util.spec_from_file_location("tasks", location=path)
         task_module = importlib.util.module_from_spec(tasks_spec)
-        tasks_spec.loader.exec_module(task_module)
+        tasks_spec.loader.exec_module(task_module)  # type: ignore
         classes = inspect.getmembers(task_module, inspect.isclass)
         tasks_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
 
@@ -243,7 +242,7 @@ class SkillConfig:
     @classmethod
     def from_config_file(cls, filepath: str) -> Optional['SkillConfig']:
         """
-        Parse a configuration file
+        Parse a configuration file.
 
         :param filepath: the path to the config file.
         :return: the SkillConfig object. None if the parsing failed.
@@ -290,7 +289,7 @@ class Skill:
     @classmethod
     def from_dir(cls, directory: str, context: Context) -> Optional['Skill']:
         """
-        Load a skill from a directory
+        Load a skill from a directory.
 
         :param directory: the skill
         :return: the Skill object. None if the parsing failed.
@@ -305,7 +304,7 @@ class Skill:
             logger.warning("No skill found.")
             return None
 
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
         handler = Handler.parse_module(os.path.join(directory, "handler.py"), skill_config.handler_config)
@@ -420,7 +419,7 @@ class ProtocolRegistry(Registry):
             logger.warning("No protocol found.")
             return
 
-        protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))
+        protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following protocol package: {}".format(protocols_packages))
         for protocol_name in protocols_packages:
             try:
@@ -448,7 +447,7 @@ class ProtocolRegistry(Registry):
         serialization_spec = importlib.util.spec_from_file_location("serialization",
                                                                     os.path.join(directory, "protocols", protocol_name, "serialization.py"))
         serialization_module = importlib.util.module_from_spec(serialization_spec)
-        serialization_spec.loader.exec_module(serialization_module)
+        serialization_spec.loader.exec_module(serialization_module)  # type: ignore
         classes = inspect.getmembers(serialization_module, inspect.isclass)
         serializer_classes = list(filter(lambda x: re.match("\\w+Serializer", x[0]), classes))
         serializer_class = serializer_classes[0][1]
@@ -521,7 +520,7 @@ class HandlerRegistry(Registry):
             logger.warning("No skill found.")
             return
 
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
         for skill_name in skills_packages:
             try:
@@ -550,7 +549,7 @@ class HandlerRegistry(Registry):
         handler_spec = importlib.util.spec_from_file_location("handler",
                                                               os.path.join(directory, "skills", skill_name, "handler.py"))
         handler_module = importlib.util.module_from_spec(handler_spec)
-        handler_spec.loader.exec_module(handler_module)
+        handler_spec.loader.exec_module(handler_module)  # type: ignore
         classes = inspect.getmembers(handler_module, inspect.isclass)
         handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
         handler_class = handler_classes[0][1]
@@ -620,7 +619,7 @@ class BehaviourRegistry(Registry):
             logger.warning("No skill found.")
             return
 
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
         for skill_name in skills_packages:
             try:
@@ -637,9 +636,9 @@ class BehaviourRegistry(Registry):
         :return: None
         """
         behaviours_spec = importlib.util.spec_from_file_location("behaviours",
-                                                              os.path.join(directory, "skills", skill_name, "behaviours.py"))
+                                                                 os.path.join(directory, "skills", skill_name, "behaviours.py"))
         behaviour_module = importlib.util.module_from_spec(behaviours_spec)
-        behaviours_spec.loader.exec_module(behaviour_module)
+        behaviours_spec.loader.exec_module(behaviour_module)  # type: ignore
         classes = inspect.getmembers(behaviour_module, inspect.isclass)
         behaviours_classes = list(filter(lambda x: re.match("\\w+Behaviour", x[0]), classes))
         for _, behaviour_class in behaviours_classes:
@@ -654,8 +653,9 @@ class BehaviourRegistry(Registry):
 
         :return: None
         """
-        for behaviour in self._behaviours.values():
-            behaviour.teardown()
+        for behaviours in self._behaviours.values():
+            for behaviour in behaviours:
+                behaviour.teardown()
         self._behaviours = {}
 
 
@@ -692,7 +692,7 @@ class TaskRegistry(Registry):
         """
         self._tasks.pop(skill_id, None)
 
-    def fetch(self, skill_id: SkillId) -> Optional[Task]:
+    def fetch(self, skill_id: SkillId) -> Optional[List[Task]]:
         """
         Return a task.
 
@@ -721,7 +721,7 @@ class TaskRegistry(Registry):
             logger.warning("No skill found.")
             return
 
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))
+        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
         for skill_name in skills_packages:
             try:
@@ -738,8 +738,7 @@ class TaskRegistry(Registry):
         :return: None
         """
         tasks_spec = importlib.util.spec_from_file_location("tasks",
-                                                                 os.path.join(directory, "skills", skill_name,
-                                                                              "tasks.py"))
+                                                            os.path.join(directory, "skills", skill_name, "tasks.py"))
         task_module = importlib.util.module_from_spec(tasks_spec)
         tasks_spec.loader.exec_module(task_module)
         classes = inspect.getmembers(task_module, inspect.isclass)
@@ -756,8 +755,9 @@ class TaskRegistry(Registry):
 
         :return: None
         """
-        for task in self._tasks.values():
-            task.teardown()
+        for tasks in self._tasks.values():
+            for task in tasks:
+                task.teardown()
         self._tasks = {}
 
 

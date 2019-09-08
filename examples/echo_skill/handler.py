@@ -29,6 +29,7 @@ class EchoHandler(Handler):
     SUPPORTED_PROTOCOL = "default"
 
     def __init__(self, **kwargs):
+        """Initialize the handler."""
         print("EchoHandler.__init__: arguments: {}".format(kwargs))
 
     def handle_envelope(self, envelope: Envelope) -> None:

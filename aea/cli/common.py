@@ -21,7 +21,7 @@
 
 import logging
 import pprint
-from typing import Optional
+from typing import List, Optional
 
 import click
 import click_log
@@ -37,12 +37,12 @@ logger = click_log.basic_config(logger=logger)
 class AgentConfig(object):
     """Class to represent the agent configuration file."""
 
-    def __init__(self, agent_name: Optional[str] = None,):
+    def __init__(self, agent_name: Optional[str] = None):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
         self.aea_version = aea.__version__
-        self.protocols = []
-        self.skills = []
+        self.protocols = []  # type: List[str]
+        self.skills = []  # type: List[str]
 
     def load(self, path):
         """Load data from an agent configuration file."""
