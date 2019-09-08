@@ -34,7 +34,7 @@ import random
 from typing import Dict, List, Optional, cast
 
 from aea.agent import Agent
-from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
+from aea.channel.gym import GymConnection, DEFAULT_GYM
 from aea.mail.base import Envelope, MailBox
 from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
@@ -137,7 +137,7 @@ class RLAgent(Agent):
         :return: None
         """
         super().__init__(name, timeout=timeout)
-        self.mailbox = MailBox(GymConnection(self.crypto.public_key, GymChannel(gym_env)))
+        self.mailbox = MailBox(GymConnection(self.crypto.public_key, gym_env))
         self.good_price_models = dict((good_id, GoodPriceModel(nb_prices_per_good)) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
         self.action_counter = 0
         self.actions = {}  # type: Dict[int, List[int]]

@@ -23,7 +23,7 @@
 import logging
 from abc import abstractmethod
 from queue import Queue
-from typing import Any, Optional
+from typing import Optional
 
 from aea.mail import base_pb2
 
@@ -239,15 +239,43 @@ class OutBox(object):
         self._queue.put(envelope)
 
 
+class Channel:
+    """Abstract definition of a channel."""
+
+    @abstractmethod
+    def connect(self) -> Optional[Queue]:
+        """
+        Set up the connection.
+
+        :return: A queue or None.
+        """
+
+    @abstractmethod
+    def disconnect(self) -> None:
+        """
+        Tear down the connection.
+
+        :return: None.
+        """
+
+    @abstractmethod
+    def send(self, envelope: Envelope) -> None:
+        """
+        Send an envelope.
+
+        :param envelope: the envelope to send.
+        :return: None.
+        """
+
+
 class Connection:
     """Abstract definition of a connection."""
-
-    bridge: Optional[Any]
 
     def __init__(self):
         """Initialize the connection."""
         self.in_queue = Queue()
         self.out_queue = Queue()
+        self.channel = None  # type: Optional[Channel]
 
     @abstractmethod
     def connect(self):
