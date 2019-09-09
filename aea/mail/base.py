@@ -267,12 +267,12 @@ class Channel:
 class Connection:
     """Abstract definition of a connection."""
 
+    channel: Channel
+
     def __init__(self):
         """Initialize the connection."""
         self.in_queue = Queue()
         self.out_queue = Queue()
-        # self.channel = None  # type: Optional[Channel]
-        assert self.channel is not None, "You must specify a channel."
 
     @abstractmethod
     def connect(self):

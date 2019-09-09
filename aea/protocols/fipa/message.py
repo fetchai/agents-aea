@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 from aea.protocols.base.message import Message
 from aea.protocols.oef.models import Description
@@ -72,8 +72,8 @@ class FIPAMessage(Message):
                 query = self.get("query")
                 assert isinstance(query, dict) or isinstance(query, bytes) or query is None
             elif performative == FIPAMessage.Performative.PROPOSE:
-                proposal = cast(Description, self.get("proposal"))
-                assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)
+                proposal = self.get("proposal")
+                assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
             elif performative == FIPAMessage.Performative.ACCEPT \
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
                     or performative == FIPAMessage.Performative.DECLINE:

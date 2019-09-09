@@ -45,12 +45,11 @@ from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint
-from aea.protocols.oef.serialization import OEFSerializer
+from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
 
 
-STUB_OEF_PBK = 'oef'
 STUB_MESSSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 
@@ -305,7 +304,7 @@ class OEFChannel(OEFAgent, Channel):
         self.mail_stats.search_end(search_id, len(agents))
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=STUB_OEF_PBK, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
     def on_oef_error(self, answer_id: int, operation: oef.messages.OEFErrorOperation) -> None:
@@ -323,7 +322,7 @@ class OEFChannel(OEFAgent, Channel):
 
         msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=STUB_OEF_PBK, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
     def on_dialogue_error(self, answer_id: int, dialogue_id: int, origin: str) -> None:
@@ -340,7 +339,7 @@ class OEFChannel(OEFAgent, Channel):
                          dialogue_id=dialogue_id,
                          origin=origin)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=STUB_OEF_PBK, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
     def send(self, envelope: Envelope) -> None:
@@ -383,7 +382,7 @@ class OEFChannel(OEFAgent, Channel):
             query = fipa_message.get("query")
             self.send_cfp(id, dialogue_id, destination, target, query)
         elif performative == FIPAMessage.Performative.PROPOSE:
-            proposal = cast(Description, fipa_message.get("proposal"))
+            proposal = cast(List[Description], fipa_message.get("proposal"))
             proposal_b = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])  # type: bytes
             self.send_propose(id, dialogue_id, destination, target, proposal_b)
         elif performative == FIPAMessage.Performative.ACCEPT:
@@ -491,7 +490,7 @@ class OEFConnection(Connection):
             self._connected = False
             self.out_thread.join()
             self.out_thread = None
-            self.channel.disconnect()
+            assert self.channel.disconnect(), "Cannot disconnect from OEFChannel."
             self._core.stop()
             self._stopped = True
 
