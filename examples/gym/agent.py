@@ -28,24 +28,29 @@ Specifically:
 """
 
 import gym
+import logging
 import numpy as np
 import random
-from typing import Dict, Optional
+from typing import Dict, List, Optional, cast
 
 from aea.agent import Agent
-from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
+from aea.channel.gym import GymConnection, DEFAULT_GYM
 from aea.mail.base import Envelope, MailBox
+from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
-from env import BanditNArmedRandom
+from .env import BanditNArmedRandom
 
-MAX_ACTIONS = 1000
+MAX_ACTIONS = 4000
+
+
+logger = logging.getLogger(__name__)
 
 
 class PriceBandit(object):
     """A class for a multi-armed bandit model of price."""
 
-    def __init__(self, price: float, beta_a: float = 1.0, beta_b: float = 1.0):
+    def __init__(self, price: int, beta_a: float = 1.0, beta_b: float = 1.0):
         """
         Instantiate a price bandit object.
 
@@ -58,13 +63,13 @@ class PriceBandit(object):
         self.beta_a = beta_a
         self.beta_b = beta_b
 
-    def sample(self) -> float:
+    def sample(self) -> int:
         """
         Sample from the bandit.
 
         :return: the sampled value
         """
-        return np.random.beta(self.beta_a, self.beta_b)
+        return round(np.random.beta(self.beta_a, self.beta_b))
 
     def update(self, outcome: bool) -> None:
         """
@@ -81,11 +86,15 @@ class PriceBandit(object):
 class GoodPriceModel(object):
     """A class for a price model of a good."""
 
-    def __init__(self, bound: int = 100):
-        """Instantiate a good price model."""
+    def __init__(self, nb_prices_per_good: int):
+        """
+        Instantiate a good price model.
+
+        :param nb_prices_per_good: number of prices per good (starting from 0)
+        """
         self.price_bandits = dict(
             (price, PriceBandit(price))
-            for price in range(bound + 1))
+            for price in range(nb_prices_per_good))
 
     def update(self, outcome: bool, price: int) -> None:
         """
@@ -115,24 +124,24 @@ class GoodPriceModel(object):
 
 
 class RLAgent(Agent):
-    """This class implements a simple RL agent."""
+    """This class implements a simple (all-in-one) RL agent."""
 
-    def __init__(self, name: str, gym_env: gym.Env, nb_goods: int) -> None:
+    def __init__(self, name: str, gym_env: gym.Env, nb_goods: int, nb_prices_per_good: int, timeout: float = 0.0) -> None:
         """
         Instantiate the agent.
 
         :param name: the name of the agent
         :param gym_env: the open ai style gym environment
         :param nb_goods:  the number of goods
-
+        :param nb_prices_per_good: number of prices per good (starting from 0)
         :return: None
         """
-        super().__init__(name, timeout=0)
-        self.mailbox = MailBox(GymConnection(self.crypto.public_key, GymChannel(gym_env)))
-        self.good_price_models = dict(
-            (good_id, GoodPriceModel()) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
+        super().__init__(name, timeout=timeout)
+        self.mailbox = MailBox(GymConnection(self.crypto.public_key, gym_env))
+        self.good_price_models = dict((good_id, GoodPriceModel(nb_prices_per_good)) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
+
         self.action_counter = 0
-        self.actions = {}  # Dict[int, Tuple[int, int]]
+        self.actions = {}  # type: Dict[int, List[int]]
 
     def setup(self) -> None:
         """
@@ -163,7 +172,8 @@ class RLAgent(Agent):
             expected_step_id = self.action_counter
             if envelope is not None:
                 if envelope.protocol_id == 'gym':
-                    gym_msg = GymSerializer().decode(envelope.message)
+                    gym_msg = GymSerializer().decode(envelope.message)  # type: Message
+                    gym_msg = cast(GymMessage, gym_msg)
                     gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
                     gym_msg_step_id = gym_msg.get("step_id")
                     if gym_msg_performative == GymMessage.Performative.PERCEPT and gym_msg_step_id == expected_step_id:
@@ -211,7 +221,12 @@ class RLAgent(Agent):
         # Store action for step id
         self.actions[step_id] = action
 
-        print("step_id={}, action taken: {}".format(step_id, action))
+
+        if step_id % 10 == 0:
+            print("Action: step_id='{}' action='{}'".format(step_id, action))
+            logger.info("Update: step_id='{}' action='{}'".format(step_id, action))
+
+
         # create and serialize the message
         gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
         gym_bytes = GymSerializer().encode(gym_msg)
@@ -233,6 +248,9 @@ class RLAgent(Agent):
         # info = gym_msg.get("info")
         reward = gym_msg.get("reward")
         step_id = gym_msg.get("step_id")
+        if step_id % 10 == 0:
+            print("Reward: step_id='{}' reward='{}'".format(step_id, reward))
+            logger.info("Reward: step_id='{}' action='{}'".format(step_id, reward))
 
         # recover action:
         good_id, price = self.actions[step_id]
@@ -251,8 +269,9 @@ class RLAgent(Agent):
 def main():
     """Launch the agent."""
     nb_goods = 10
-    gym_env = BanditNArmedRandom(nb_goods)
-    rl_agent = RLAgent('my_rl_agent', gym_env, nb_goods)
+    nb_prices_per_good = 100
+    gym_env = BanditNArmedRandom(nb_goods, nb_prices_per_good)
+    rl_agent = RLAgent('my_rl_agent', gym_env, nb_goods, nb_prices_per_good)
     try:
         rl_agent.start()
     finally:

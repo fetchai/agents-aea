@@ -82,7 +82,11 @@ class ProtobufSerializer(Serializer):
 
 
 class JSONSerializer(Serializer):
-    """Default serialization in JSON for the Message object."""
+    """
+    Default serialization in JSON for the Message object.
+
+    It assumes that the Message contains a JSON-serializable body.
+    """
 
     def encode(self, msg: Message) -> bytes:
         """

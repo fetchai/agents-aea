@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -19,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the protocol modules."""
+"""This module contains an example using the Gym channel."""

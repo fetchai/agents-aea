@@ -65,7 +65,7 @@ class OEFMessage(Message):
 
         :param oef_type: the type of OEF message.
         """
-        super().__init__(type=str(oef_type), **kwargs)
+        super().__init__(type=oef_type, **kwargs)
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
@@ -107,7 +107,7 @@ class OEFMessage(Message):
                 assert self.is_set("id")
                 assert self.is_set("operation")
                 operation = self.get("operation")
-                assert operation in set(OEFMessage.Type.OEFErrorOperation)
+                assert operation in set(OEFMessage.OEFErrorOperation)
             elif oef_type == OEFMessage.Type.DIALOGUE_ERROR:
                 assert self.is_set("id")
                 assert self.is_set("dialogue_id")

@@ -81,7 +81,7 @@ class TACMessage(Message):
 
         :param tac_type: the type of TAC message.
         """
-        super().__init__(type=str(tac_type), **kwargs)
+        super().__init__(type=tac_type, **kwargs)
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
@@ -98,7 +98,7 @@ class TACMessage(Message):
                 assert self.is_set("counterparty")
                 assert self.is_set("amount")
                 amount = self.get("amount")
-                assert amount >= 0
+                assert amount >= 0.0
                 assert self.is_set("quantities_by_good_pbk")
                 quantities_by_good_pbk = self.get("quantities_by_good_pbk")
                 assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))

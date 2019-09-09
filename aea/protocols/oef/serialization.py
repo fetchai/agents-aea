@@ -46,6 +46,7 @@ class OEFSerializer(Serializer):
         """
         oef_type = OEFMessage.Type(msg.get("type"))
         new_body = copy.copy(msg.body)
+        new_body["type"] = oef_type.value
 
         if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
             service_description = msg.body["service_description"]  # type: Description

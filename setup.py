@@ -18,15 +18,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-import fileinput
-import glob
 import os
-import re
-import shutil
-import subprocess
-import sys
 
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
 
 PACKAGE_NAME = "aea"
 
@@ -38,6 +32,22 @@ with open(os.path.join(here, PACKAGE_NAME, '__version__.py'), 'r') as f:
 with open('README.md', 'r') as f:
     readme = f.read()
 
+extras = {
+    "cli": [
+        "click",
+        "click_log",
+        "PyYAML"
+    ],
+    "fipa": [
+        "protobuf"
+    ],
+    "tac": [
+        "protobuf"
+    ],
+}
+
+# add "all" extras
+extras["all"] = [dep for e in extras.values() for dep in e]
 
 setup(
     name=about['__title__'],
@@ -56,11 +66,15 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     install_requires=[
+        "colorlog",
         "oef",
         "cryptography",
         "base58"
     ],
     tests_require=["tox"],
+    extras_require=extras,
+    entry_points={
+        'console_scripts': ["aea=aea.cli:cli"],
+    },
     license=about['__license__'],
 )
-

@@ -11,3 +11,5 @@ Cd into the directory and execute:
 `
 python agent.py
 `
+
+The RLAgent abstracts the environment but directly implements the reinforcement learning logic.

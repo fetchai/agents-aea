@@ -40,7 +40,7 @@ from oef.query import (
 )
 from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
 
-from aea.mail.base import Connection, MailBox, Envelope
+from aea.mail.base import Channel, Connection, MailBox, Envelope
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
@@ -180,7 +180,7 @@ class MailStats(object):
         self._search_result_counts[search_id] = nb_search_results
 
 
-class OEFChannel(OEFAgent):
+class OEFChannel(OEFAgent, Channel):
     """The OEFChannel connects the OEF Agent with the connection."""
 
     def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore, in_queue: Optional[Queue] = None):
@@ -231,7 +231,7 @@ class OEFChannel(OEFAgent):
         envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
-    def on_propose(self, msg_id: int, dialogue_id: int, origin: str, target: int, proposals: PROPOSE_TYPES) -> None:
+    def on_propose(self, msg_id: int, dialogue_id: int, origin: str, target: int, b_proposals: PROPOSE_TYPES) -> None:
         """
         On propose event handler.
 
@@ -239,11 +239,11 @@ class OEFChannel(OEFAgent):
         :param dialogue_id: the dialogue id.
         :param origin: the public key of the sender.
         :param target: the message target.
-        :param proposals: the proposals.
+        :param b_proposals: the proposals.
         :return: None
         """
-        if type(proposals) == bytes:
-            proposals = pickle.loads(proposals)  # type: List[Description]
+        if type(b_proposals) == bytes:
+            proposals = pickle.loads(b_proposals)  # type: List[Description]
         else:
             raise ValueError("No support for non-bytes proposals.")
 
@@ -361,6 +361,39 @@ class OEFChannel(OEFAgent):
             logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
             raise ValueError("Cannot send message.")
 
+    def send_default_message(self, envelope: Envelope):
+        """Send a 'default' message."""
+        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
+
+    def send_fipa_message(self, envelope: Envelope) -> None:
+        """
+        Send fipa message handler.
+
+        :param envelope: the message.
+        :return: None
+        """
+        fipa_message = FIPASerializer().decode(envelope.message)
+        id = fipa_message.get("id")
+        dialogue_id = fipa_message.get("dialogue_id")
+        destination = envelope.to
+        target = fipa_message.get("target")
+        performative = FIPAMessage.Performative(fipa_message.get("performative"))
+        if performative == FIPAMessage.Performative.CFP:
+            query = fipa_message.get("query")
+            self.send_cfp(id, dialogue_id, destination, target, query)
+        elif performative == FIPAMessage.Performative.PROPOSE:
+            proposal = fipa_message.get("proposal")
+            proposal = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])
+            self.send_propose(id, dialogue_id, destination, target, proposal)
+        elif performative == FIPAMessage.Performative.ACCEPT:
+            self.send_accept(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT:
+            self.send_accept(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.DECLINE:
+            self.send_decline(id, dialogue_id, destination, target)
+        else:
+            raise ValueError("OEF FIPA message not recognized.")
+
     def send_oef_message(self, envelope: Envelope) -> None:
         """
         Send oef message handler.
@@ -396,45 +429,6 @@ class OEFChannel(OEFAgent):
         else:
             raise ValueError("OEF request not recognized.")
 
-    def send_fipa_message(self, envelope: Envelope) -> None:
-        """
-        Send fipa message handler.
-
-        :param envelope: the message.
-        :return: None
-        """
-        fipa_message = FIPASerializer().decode(envelope.message)
-        id = fipa_message.get("id")
-        dialogue_id = fipa_message.get("dialogue_id")
-        destination = envelope.to
-        target = fipa_message.get("target")
-        performative = FIPAMessage.Performative(fipa_message.get("performative"))
-        if performative == FIPAMessage.Performative.CFP:
-            query = fipa_message.get("query")
-            if query is None:
-                query = b""
-            self.send_cfp(id, dialogue_id, destination, target, query)
-        elif performative == FIPAMessage.Performative.PROPOSE:
-            proposal = fipa_message.get("proposal")
-            proposal = pickle.dumps(proposal)
-            self.send_propose(id, dialogue_id, destination, target, proposal)
-        elif performative == FIPAMessage.Performative.ACCEPT:
-            self.send_accept(id, dialogue_id, destination, target)
-        elif performative == FIPAMessage.Performative.MATCH_ACCEPT:
-            self.send_accept(id, dialogue_id, destination, target)
-        elif performative == FIPAMessage.Performative.DECLINE:
-            self.send_decline(id, dialogue_id, destination, target)
-        else:
-            raise ValueError("OEF FIPA message not recognized.")
-
-    def send_bytes_message(self, envelope: Envelope):
-        """Send a 'bytes' message."""
-        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
-
-    def send_default_message(self, envelope: Envelope):
-        """Send a 'default' message."""
-        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
-
 
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
@@ -450,7 +444,7 @@ class OEFConnection(Connection):
         super().__init__()
         core = AsyncioCore(logger=logger)
         self._core = core  # type: Optional[AsyncioCore]
-        self.bridge = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
+        self.channel = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
 
         self._stopped = True
         self._connected = False
@@ -476,21 +470,21 @@ class OEFConnection(Connection):
 
     def connect(self) -> None:
         """
-        Connect to the bridge.
+        Connect to the channel.
 
         :return: None
         """
         if self._stopped and not self._connected:
             self._stopped = False
             self._core.run_threaded()
-            assert self.bridge.connect()
+            assert self.channel.connect(), "Cannot connect to OEFChannel."
             self._connected = True
             self.out_thread = Thread(target=self._fetch)
             self.out_thread.start()
 
     def disconnect(self) -> None:
         """
-        Disconnect from the bridge.
+        Disconnect from the channel.
 
         :return: None
         """
@@ -498,7 +492,7 @@ class OEFConnection(Connection):
             self._connected = False
             self.out_thread.join()
             self.out_thread = None
-            self.bridge.disconnect()
+            self.channel.disconnect()
             self._core.stop()
             self._stopped = True
 
@@ -509,7 +503,7 @@ class OEFConnection(Connection):
         :return: None
         """
         if self._connected:
-            self.bridge.send(envelope)
+            self.channel.send(envelope)
 
 
 class OEFMailBox(MailBox):
@@ -529,4 +523,4 @@ class OEFMailBox(MailBox):
     @property
     def mail_stats(self) -> MailStats:
         """Get the mail stats object."""
-        return self._connection.bridge.mail_stats
+        return self._connection.channel.mail_stats  # type: ignore

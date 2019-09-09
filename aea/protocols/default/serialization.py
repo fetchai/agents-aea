@@ -43,6 +43,7 @@ class DefaultSerializer(Serializer):
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = msg.get("error_code")
             body["error_msg"] = msg.get("error_msg")
+            body["error_data"] = msg.get("error_data")
         else:
             raise ValueError("Type not recognized.")
 
@@ -55,14 +56,15 @@ class DefaultSerializer(Serializer):
         body = {}
 
         msg_type = DefaultMessage.Type(json_body["type"])
-        body["type"] = str(msg_type)
+        body["type"] = msg_type
         if msg_type == DefaultMessage.Type.BYTES:
             content = base58.b58decode(json_body["content"].encode("utf-8"))
             body["content"] = content
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = json_body["error_code"]
             body["error_msg"] = json_body["error_msg"]
+            body["error_data"] = json_body["error_data"]
         else:
             raise ValueError("Type not recognized.")
 
-        return Message(body=body)
+        return DefaultMessage(body=body)

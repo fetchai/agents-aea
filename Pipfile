@@ -11,18 +11,23 @@ name = "test-pypi"
 [dev-packages]
 flake8 = "*"
 pytest = "*"
-tox = "*"
-tox-pipenv = "*"
+tox = "==3.7.0"
+tox-pipenv = "==1.9.0"
 pytest-cov = "*"
 flake8-docstrings = "*"
 pygments = "*"
 docker = "*"
+mypy = "*"
 
 [packages]
 cryptography = "*"
 base58 = "*"
-oef = {index = "test-pypi",version = "==0.6.4"}
 docker = "*"
+click = "*"
+pyyaml = "*"
+click-log = "*"
+oef = "==0.6.7"
+colorlog = "*"
 
 [requires]
 python_version = "3.7"

@@ -24,36 +24,38 @@ from typing import List, Tuple
 
 import numpy as np
 import gym
-from gym import spaces
+from gym import spaces  # type: ignore
 
-Action = int
-Observation = None
+BanditId = int
+Price = int
+Action = Tuple[BanditId, Price]
 Reward = bool
 Done = bool
 Info = dict
-Feedback = Tuple[Observation, Reward, Done, Info]
+Feedback = Tuple[None, Reward, Done, Info]
 
 
 class BanditEnv(gym.Env):
     """Base environment for n-armed bandits."""
 
-    def __init__(self, nb_bandits: int, reward_params: List[Tuple[float, int]]):
+    def __init__(self, nb_bandits: int, nb_prices_per_bandit: int, reward_params: List[Tuple[float, int]]):
         """
         Initialize the environment.
 
         :param nb_bandits: number of bandits
+        :param nb_prices_per_bandit: number of prices per bandit
         :param reward_params: single param or tuple of params for the reward distribution
         """
         self.nb_bandits = nb_bandits
+        self.nb_prices_per_bandit = nb_prices_per_bandit
         self.reward_params = reward_params
 
-        self.action_space = spaces.Tuple((spaces.Discrete(self.nb_bandits), spaces.Box(low=0.0, high=1000.0, shape=[
-            1])))  # an action is pulling one of nb_bandits and offering a price.
+        self.action_space = spaces.Tuple((spaces.Discrete(self.nb_bandits), spaces.Discrete(self.nb_prices_per_bandit)))  # an action is specifying one of nb_bandits and specifying a price for the bandit.
         self.observation_space = spaces.Space()  # None type space. agents only get a reward back.
 
         self.seed()  # seed environment randomness
 
-    def reset(self) -> Observation:
+    def reset(self) -> None:
         """
         Reset the environment.
 
@@ -77,7 +79,7 @@ class BanditEnv(gym.Env):
         # defaults
         observation = None
         done = False
-        info = {}
+        info = {}  # type: Info
 
         cutoff_price = np.random.normal(self.reward_params[bandit][0], self.reward_params[bandit][1])
         reward = offered_price > cutoff_price
@@ -98,12 +100,12 @@ class BanditEnv(gym.Env):
 class BanditNArmedRandom(BanditEnv):
     """N armed bandit randomly initialized."""
 
-    def __init__(self, nb_bandits: int, bound: int = 100, stdev: int = 1, seed: int = 42):
+    def __init__(self, nb_bandits: int, nb_prices_per_bandit: int, stdev: int = 1, seed: int = 42):
         """
         Initialize the environment.
 
         :param nb_bandits: number of bandits.
-        :param bound: upper bound of the uniform distribution.
+        :param nb_prices_per_bandit: number of prices per bandit.
         :param stdev: standard deviation of the normal distribution.
         :param seed: the seed to initialize np random (not the env!)
         """
@@ -112,6 +114,7 @@ class BanditNArmedRandom(BanditEnv):
         reward_params = []  # type: List[Tuple[float, int]]
         for i in range(nb_bandits):
             # Mean m is pulled from a uniform distribution over [0, bound). To induce a normal distribution with params (m, 1).
-            reward_params.append([np.random.uniform(0, bound), stdev])
+            mean = np.random.uniform(0, nb_prices_per_bandit)
+            reward_params.append([mean, stdev])  # type: ignore
 
-        BanditEnv.__init__(self, nb_bandits=nb_bandits, reward_params=reward_params)
+        BanditEnv.__init__(self, nb_bandits=nb_bandits, nb_prices_per_bandit=nb_prices_per_bandit, reward_params=reward_params)

@@ -20,7 +20,7 @@
 
 """Serialization for the TAC protocol."""
 
-from google.protobuf.struct_pb2 import Struct
+from typing import Any, Dict
 
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
@@ -70,14 +70,14 @@ class TACSerializer(Serializer):
 
         if tac_type == TACMessage.Type.REGISTER:
             agent_name = msg.get("agent_name")
-            tac_msg = tac_pb2.TACAgent.Register()
+            tac_msg = tac_pb2.TACAgent.Register()  # type: ignore
             tac_msg.agent_name = agent_name
             tac_container.register.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.UNREGISTER:
-            tac_msg = tac_pb2.TACAgent.Unregister()
+            tac_msg = tac_pb2.TACAgent.Unregister()  # type: ignore
             tac_container.unregister.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.TRANSACTION:
-            tac_msg = tac_pb2.TACAgent.Transaction()
+            tac_msg = tac_pb2.TACAgent.Transaction()  # type: ignore
             tac_msg.transaction_id = msg.get("transaction_id")
             tac_msg.is_sender_buyer = msg.get("is_sender_buyer")
             tac_msg.counterparty = msg.get("counterparty")
@@ -85,13 +85,13 @@ class TACSerializer(Serializer):
             tac_msg.quantities.extend(_from_dict_to_pairs(msg.get("quantities_by_good_pbk")))
             tac_container.transaction.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.GET_STATE_UPDATE:
-            tac_msg = tac_pb2.TACAgent.GetStateUpdate()
+            tac_msg = tac_pb2.TACAgent.GetStateUpdate()  # type: ignore
             tac_container.get_state_update.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.CANCELLED:
-            tac_msg = tac_pb2.TACController.Cancelled()
+            tac_msg = tac_pb2.TACController.Cancelled()  # type: ignore
             tac_container.cancelled.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.GAME_DATA:
-            tac_msg = tac_pb2.TACController.GameData()
+            tac_msg = tac_pb2.TACController.GameData()  # type: ignore
             tac_msg.money = msg.get("money")
             tac_msg.endowment.extend(msg.get("endowment"))
             tac_msg.utility_params.extend(msg.get("utility_params"))
@@ -102,13 +102,13 @@ class TACSerializer(Serializer):
             tac_msg.good_pbk_to_name.extend(_from_dict_to_pairs(msg.get("good_pbk_to_name")))
             tac_container.game_data.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
-            tac_msg = tac_pb2.TACController.TransactionConfirmation()
+            tac_msg = tac_pb2.TACController.TransactionConfirmation()  # type: ignore
             tac_msg.transaction_id = msg.get("transaction_id")
             tac_container.transaction_confirmation.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.STATE_UPDATE:
-            tac_msg = tac_pb2.TACController.StateUpdate()
+            tac_msg = tac_pb2.TACController.StateUpdate()  # type: ignore
             game_data_json = msg.get("initial_state")
-            game_data = tac_pb2.TACController.GameData()
+            game_data = tac_pb2.TACController.GameData()  # type: ignore
             game_data.money = game_data_json["money"]
             game_data.endowment.extend(game_data_json["endowment"])
             game_data.utility_params.extend(game_data_json["utility_params"])
@@ -122,7 +122,7 @@ class TACSerializer(Serializer):
 
             transactions = []
             for t in msg.get("transactions"):
-                tx = tac_pb2.TACAgent.Transaction()
+                tx = tac_pb2.TACAgent.Transaction()  # type: ignore
                 tx.transaction_id = t.get("transaction_id")
                 tx.is_sender_buyer = t.get("is_sender_buyer")
                 tx.counterparty = t.get("counterparty")
@@ -132,12 +132,11 @@ class TACSerializer(Serializer):
             tac_msg.txs.extend(transactions)
             tac_container.state_update.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.TAC_ERROR:
-            tac_msg = tac_pb2.TACController.Error()
-            tac_msg.error_code = msg.get("error_code")
+            tac_msg = tac_pb2.TACController.Error()  # type: ignore
+            tac_msg.error_code = msg.get("error_code").value
             if msg.is_set("error_msg"):
                 tac_msg.error_msg = msg.get("error_msg")
             if msg.is_set("details"):
-                tac_msg.details = Struct()
                 tac_msg.details.update(msg.get("details"))
 
             tac_container.error.CopyFrom(tac_msg)
@@ -157,7 +156,7 @@ class TACSerializer(Serializer):
         tac_container = tac_pb2.TACMessage()
         tac_container.ParseFromString(obj)
 
-        new_body = {}
+        new_body = {}  # type: Dict[str, Any]
         tac_type = tac_container.WhichOneof("content")
 
         if tac_type == "register":
@@ -215,7 +214,7 @@ class TACSerializer(Serializer):
             new_body["transactions"] = transactions
         elif tac_type == "error":
             new_body["type"] = TACMessage.Type.TAC_ERROR
-            new_body["error_code"] = tac_container.error.error_code
+            new_body["error_code"] = TACMessage.ErrorCode(tac_container.error.error_code)
             if tac_container.error.error_msg:
                 new_body["error_msg"] = tac_container.error.error_msg
             if tac_container.error.details:
@@ -223,6 +222,6 @@ class TACSerializer(Serializer):
         else:
             raise ValueError("Type not recognized.")
 
-        new_body["type"] = str(new_body["type"])
+        new_body["type"] = TACMessage.Type(new_body["type"])
         tac_message = Message(body=new_body)
         return tac_message
