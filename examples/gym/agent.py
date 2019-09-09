@@ -43,7 +43,6 @@ from .env import BanditNArmedRandom
 
 MAX_ACTIONS = 4000
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -126,7 +125,8 @@ class GoodPriceModel(object):
 class RLAgent(Agent):
     """This class implements a simple (all-in-one) RL agent."""
 
-    def __init__(self, name: str, gym_env: gym.Env, nb_goods: int, nb_prices_per_good: int, timeout: float = 0.0) -> None:
+    def __init__(self, name: str, gym_env: gym.Env, nb_goods: int, nb_prices_per_good: int,
+                 timeout: float = 0.0) -> None:
         """
         Instantiate the agent.
 
@@ -138,7 +138,8 @@ class RLAgent(Agent):
         """
         super().__init__(name, timeout=timeout)
         self.mailbox = MailBox(GymConnection(self.crypto.public_key, gym_env))
-        self.good_price_models = dict((good_id, GoodPriceModel(nb_prices_per_good)) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
+        self.good_price_models = dict((good_id, GoodPriceModel(nb_prices_per_good)) for good_id in
+                                      range(nb_goods))  # type: Dict[int, GoodPriceModel]
 
         self.action_counter = 0
         self.actions = {}  # type: Dict[int, List[int]]
@@ -221,11 +222,9 @@ class RLAgent(Agent):
         # Store action for step id
         self.actions[step_id] = action
 
-
         if step_id % 10 == 0:
             print("Action: step_id='{}' action='{}'".format(step_id, action))
             logger.info("Update: step_id='{}' action='{}'".format(step_id, action))
-
 
         # create and serialize the message
         gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)

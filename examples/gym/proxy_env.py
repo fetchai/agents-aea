@@ -1,29 +1,13 @@
-# import os, subprocess, time, signal
-
 import gym
-# from gym import error, spaces, utils
-# from gym.utils import seeding
 
 from aea.protocols.base.message import Message
-# from aea.agent import Agent
-# from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
-# from aea.mail.base import Envelope, MailBox
-# from aea.protocols.gym.message import GymMessage
-# from aea.protocols.gym.serialization import GymSerializer
-# from env import BanditNArmedRandom
+from aea.mail.base import Envelope, OutBox
 
 from abc import ABC, abstractmethod
-# import numpy as np
 
-from typing import Tuple, Any  # , List
-
-# import logging
+from typing import Tuple, Any
 
 from queue import Queue
-
-# from aea.mail.base import InBox
-
-# logger = logging.getLogger(__name__)
 
 Action = Any
 Observation = Any
@@ -32,13 +16,16 @@ Done = bool
 Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
 
+outbox: OutBox
+public_key: str
+
 
 class ProxyEnv(gym.Env, ABC):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self,):
+    def __init__(self, ):
         super().__init__()
-        self._queue = Queue()
+        self.queue = Queue()
         # protocol object
         # outbox of the agent
         # queue between the training thread and the main thread that receives messages
@@ -106,17 +93,3 @@ class ProxyEnv(gym.Env, ABC):
         :return: a Tuple containing the Feedback of Observation, Reward, Done and Info
         """
         pass
-
-#     def action_to_message(self, action: Action):
-#         # translate the RL action into real action(s) (one or multiple messages)
-#         # using self.outbox put the message in the outbox
-#
-#         # gym_action_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
-#         return gym_action_msg
-#
-#     def send_message(self, gym_action_msg):
-# # send the message
-#
-# # gym_bytes = GymSerializer().encode(gym_action_msg)
-# # self.mailbox.outbox.put_message(to=DEFAULT_GYM, sender=self.crypto.public_key,
-# #                                 protocol_id=GymMessage.protocol_id, message=gym_bytes)

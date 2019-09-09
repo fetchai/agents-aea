@@ -1,49 +1,10 @@
-# -*- coding: utf-8 -*-
-
-# ------------------------------------------------------------------------------
-#
-#   Copyright 2018-2019 Fetch.AI Limited
-#
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
-#
-# ------------------------------------------------------------------------------
-
-"""
-This contains the classes for the agent.
-
-Specifically:
-    - a class for a multi-armed bandit model of price.
-    - a class for a price model of a good.
-    - a simple RL agent.
-"""
-
-import gym
-import numpy as np
-import random
-from typing import Dict, Optional, Any
-
-from aea.agent import Agent
-from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
-from aea.mail.base import Envelope, MailBox
-from aea.protocols.gym.message import GymMessage
-from aea.protocols.gym.serialization import GymSerializer
-# from env import BanditNArmedRandom
-# from bandit_proxy_env import BanditProxyEnv
-# import BanditProxyEnv
+from examples.gym.env import BanditNArmedRandom
 from examples.gym.bandit_proxy_env import BanditProxyEnv
 from examples.gym.proxy_env import ProxyEnv
 
-MAX_ACTIONS = 1000
+from typing import Any
+import random
+import numpy as np
 
 
 class PriceBandit(object):
@@ -99,7 +60,7 @@ class GoodPriceModel(object):
         :param outcome: the negotiation outcome
         :return: None
         """
-        bandit = self.price_bandits[price[0]]
+        bandit = self.price_bandits[price]
         bandit.update(outcome)
 
     def get_price_expectation(self) -> int:
@@ -118,73 +79,11 @@ class GoodPriceModel(object):
         return winning_price
 
 
-class RLAgent(Agent):
-    """This class implements a simple RL agent."""
+class RLAgent:
 
-    def __init__(self, name: str, nb_goods: int) -> None:
-        """
-        Instantiate the agent.
-
-        :param name: the name of the agent
-        :param nb_goods:  the number of goods
-
-        :return: None
-        """
-        super().__init__(name, timeout=0)
-
-        self.proxy_env = BanditProxyEnv(self.crypto.public_key)
-
+    def __init__(self, nb_goods: int):
         self.good_price_models = dict(
             (good_id, GoodPriceModel()) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
-        # self.action_counter = 0
-        self.actions = {}  # Dict[int, Tuple[int, int]]
-
-    def setup(self) -> None:
-        """
-        Set up the agent.
-
-        :return: None
-        """
-        pass
-
-    def act(self) -> None:
-        """
-        Perform actions.
-
-        :return: None
-        """
-        action_counter = 0
-
-        while action_counter < MAX_ACTIONS:
-            action = self._pick_an_action()
-            obs, reward, done, info = self.proxy_env.step(action)
-            self._update_state(obs, reward, done, info)
-            action_counter += 1
-
-        self.stop()
-
-    def react(self) -> None:
-        """
-        React to incoming events.
-
-        :return: None
-        """
-        pass
-
-    def update(self) -> None:
-        """Update the current state of the agent.
-
-        :return None
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        :return: None
-        """
-        pass
 
     def _pick_an_action(self) -> Any:
         """
@@ -202,7 +101,7 @@ class RLAgent(Agent):
         good_price_model = self.good_price_models[good_id]
         price = good_price_model.get_price_expectation()
 
-        action = [good_id, np.array([price])]
+        action = [good_id, price]
         print(action)
         # step_id = self.action_counter
 
@@ -242,18 +141,25 @@ class RLAgent(Agent):
         """Get the next good for trading (randomly)."""
         return random.choice(list(self.good_price_models.keys()))
 
-    # def forward_to_proxy(self):
-    #     self.proxy_env.set_mailbox(self.mailbox)
+    def fit(self, proxy_env: ProxyEnv, nb_steps: int):
+        action_counter = 0
 
+        while action_counter < nb_steps:
+            action = self._pick_an_action()
+            obs, reward, done, info = proxy_env.step(action)
+            self._update_state(obs, reward, done, info)
+            action_counter += 1
+
+
+# proxy_env.connect(proxy_agent, proxy_agent.outbox, proxy_agent.public_key):
 
 if __name__ == "__main__":
+    NB_GOODS = 10
+    nb_prices_per_good = 100
+
+    gym_env = BanditNArmedRandom(nb_bandits=NB_GOODS, nb_prices_per_bandit=nb_prices_per_good)
+    proxy_env = BanditProxyEnv(gym_env)
+
     """Launch the agent."""
-    nb_goods = 10
-    rl_agent = RLAgent('my_rl_agent', nb_goods)
-
-    try:
-        rl_agent.start()
-    finally:
-        rl_agent.stop()
-
-# proxy env needs public key to create connections
+    rl_agent = RLAgent(nb_goods=NB_GOODS)
+    rl_agent.fit(proxy_env, nb_steps=300000)
