@@ -20,6 +20,7 @@
 
 """Serialization for the FIPA protocol."""
 import pickle
+from typing import cast
 
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
@@ -38,8 +39,8 @@ class FIPASerializer(Serializer):
         fipa_msg.dialogue_id = msg.get("dialogue_id")
         fipa_msg.target = msg.get("target")
 
-        performative_id = msg.get("performative").value
-        if performative_id == "cfp":
+        performative_id = FIPAMessage.Performative(msg.get("performative"))
+        if performative_id == FIPAMessage.Performative.CFP:
             performative = fipa_pb2.FIPAMessage.CFP()  # type: ignore
             query = msg.get("query")
             if query is None or query == b"":
@@ -50,20 +51,20 @@ class FIPASerializer(Serializer):
             else:
                 raise ValueError("Query type not supported: {}".format(type(query)))
             fipa_msg.cfp.CopyFrom(performative)
-        elif performative_id == "propose":
+        elif performative_id == FIPAMessage.Performative.PROPOSE:
             performative = fipa_pb2.FIPAMessage.Propose()  # type: ignore
-            proposal = msg.get("proposal")
+            proposal = cast(Description, msg.get("proposal"))
             p_array_bytes = [pickle.dumps(p) for p in proposal]
             performative.proposal.extend(p_array_bytes)
             fipa_msg.propose.CopyFrom(performative)
 
-        elif performative_id == "accept":
+        elif performative_id == FIPAMessage.Performative.ACCEPT:
             performative = fipa_pb2.FIPAMessage.Accept()  # type: ignore
             fipa_msg.accept.CopyFrom(performative)
-        elif performative_id == "match_accept":
+        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
             performative = fipa_pb2.FIPAMessage.MatchAccept()  # type: ignore
             fipa_msg.match_accept.CopyFrom(performative)
-        elif performative_id == "decline":
+        elif performative_id == FIPAMessage.Performative.DECLINE:
             performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
         else:

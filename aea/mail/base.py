@@ -220,8 +220,8 @@ class OutBox(object):
                      .format(item.to, item.sender, item.protocol_id, item.message))
         self._queue.put(item)
 
-    def put_message(self, to: Optional[Address] = None, sender: Optional[Address] = None,
-                    protocol_id: Optional[ProtocolId] = None, message: bytes = b"") -> None:
+    def put_message(self, to: Address, sender: Address,
+                    protocol_id: ProtocolId, message: bytes) -> None:
         """
         Put a message in the outbox.
 
@@ -271,7 +271,8 @@ class Connection:
         """Initialize the connection."""
         self.in_queue = Queue()
         self.out_queue = Queue()
-        self.channel = None  # type: Optional[Channel]
+        # self.channel = None  # type: Optional[Channel]
+        assert self.channel is not None, "You must specify a channel."
 
     @abstractmethod
     def connect(self):

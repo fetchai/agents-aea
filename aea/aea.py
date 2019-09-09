@@ -35,7 +35,7 @@ class AEA(Agent):
 
     def __init__(self, name: str,
                  private_key_pem_path: Optional[str] = None,
-                 timeout: Optional[float] = 1.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
+                 timeout: float = 1.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
                  debug: bool = False,
                  max_reactions: int = 20,
                  directory: Optional[str] = None) -> None:

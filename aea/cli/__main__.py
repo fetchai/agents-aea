@@ -23,6 +23,7 @@
 import os
 import shutil
 from pathlib import Path
+from typing import cast
 
 import click
 import click_log
@@ -94,7 +95,7 @@ def delete(ctx: Context, agent_name):
 def run(ctx: Context, oef_addr, oef_port):
     """Run the agent."""
     _try_to_load_agent_config(ctx)
-    agent_name = ctx.agent_config.agent_name
+    agent_name = cast(str, ctx.agent_config.agent_name)
     agent = AEA(agent_name, directory=str(Path(".")))
     agent.mailbox = OEFMailBox(public_key=agent.crypto.public_key, oef_addr=oef_addr, oef_port=oef_port)
     try:

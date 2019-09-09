@@ -58,7 +58,7 @@ class Agent(ABC):
 
     def __init__(self, name: str,
                  private_key_pem_path: Optional[str] = None,
-                 timeout: Optional[float] = 1.0,
+                 timeout: float = 1.0,
                  debug: bool = False) -> None:
         """
         Instantiate the agent.
@@ -134,6 +134,7 @@ class Agent(ABC):
 
         :return: None
         """
+        assert self.mailbox is not None, "Cannot call start without mailbox instantiated."
         if not self.debug and not self.mailbox.is_connected:
             self.mailbox.connect()
 
@@ -168,6 +169,7 @@ class Agent(ABC):
 
         :return: None
         """
+        assert self.mailbox is not None, "Cannot call stop without mailbox instantiated."
         logger.debug("[{}]: Stopping message processing...".format(self.name))
         self.liveness._is_stopped = True
         if self.mailbox.is_connected:

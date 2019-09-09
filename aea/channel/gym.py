@@ -162,6 +162,7 @@ class GymConnection(Connection):
 
         :return: None
         """
+        assert self._connection is not None, "Call connect before calling _receive_loop."
         while not self._stopped:
             try:
                 data = self._connection.get(timeout=2.0)
@@ -194,6 +195,8 @@ class GymConnection(Connection):
 
         :return: None
         """
+        assert self.in_thread is not None, "Call connect before disconnect."
+        assert self.out_thread is not None, "Call connect before disconnect."
         if not self._stopped:
             self._stopped = True
             self.in_thread.join()
