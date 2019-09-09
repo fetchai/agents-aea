@@ -30,14 +30,18 @@ Specifically:
 import gym
 import numpy as np
 import random
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 from aea.agent import Agent
 from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
 from aea.mail.base import Envelope, MailBox
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
-from env import BanditNArmedRandom
+# from env import BanditNArmedRandom
+# from bandit_proxy_env import BanditProxyEnv
+# import BanditProxyEnv
+from examples.gym.bandit_proxy_env import BanditProxyEnv
+from examples.gym.proxy_env import ProxyEnv
 
 MAX_ACTIONS = 1000
 
@@ -117,21 +121,22 @@ class GoodPriceModel(object):
 class RLAgent(Agent):
     """This class implements a simple RL agent."""
 
-    def __init__(self, name: str, gym_env: gym.Env, nb_goods: int) -> None:
+    def __init__(self, name: str, nb_goods: int) -> None:
         """
         Instantiate the agent.
 
         :param name: the name of the agent
-        :param gym_env: the open ai style gym environment
         :param nb_goods:  the number of goods
 
         :return: None
         """
         super().__init__(name, timeout=0)
-        self.mailbox = MailBox(GymConnection(self.crypto.public_key, GymChannel(gym_env)))
+
+        self.proxy_env = BanditProxyEnv(self.crypto.public_key)
+
         self.good_price_models = dict(
             (good_id, GoodPriceModel()) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
-        self.action_counter = 0
+        # self.action_counter = 0
         self.actions = {}  # Dict[int, Tuple[int, int]]
 
     def setup(self) -> None:
@@ -148,9 +153,15 @@ class RLAgent(Agent):
 
         :return: None
         """
-        # we only take an action here once to kick of the message chain.
-        if self.action_counter == 0:
-            self._take_an_action()
+        action_counter = 0
+
+        while action_counter < MAX_ACTIONS:
+            action = self._pick_an_action()
+            obs, reward, done, info = self.proxy_env.step(action)
+            self._update_state(obs, reward, done, info)
+            action_counter += 1
+
+        self.stop()
 
     def react(self) -> None:
         """
@@ -158,21 +169,7 @@ class RLAgent(Agent):
 
         :return: None
         """
-        while not self.inbox.empty():
-            envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
-            expected_step_id = self.action_counter
-            if envelope is not None:
-                if envelope.protocol_id == 'gym':
-                    gym_msg = GymSerializer().decode(envelope.message)
-                    gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
-                    gym_msg_step_id = gym_msg.get("step_id")
-                    if gym_msg_performative == GymMessage.Performative.PERCEPT and gym_msg_step_id == expected_step_id:
-                        self._handle_message(gym_msg)
-                    else:
-                        raise ValueError(
-                            "Unexpected performative {} or step_id: {}".format(gym_msg_step_id, gym_msg_performative))
-                else:
-                    raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        pass
 
     def update(self) -> None:
         """Update the current state of the agent.
@@ -189,14 +186,14 @@ class RLAgent(Agent):
         """
         pass
 
-    def _take_an_action(self) -> None:
+    def _pick_an_action(self) -> Any:
         """
-        Take an action.
+        Pick an action.
 
         :return: None
         """
         # Increment the counter
-        self.action_counter += 1
+        # self.action_counter += 1
 
         # Get the good
         good_id = self._get_random_next_good()
@@ -206,23 +203,17 @@ class RLAgent(Agent):
         price = good_price_model.get_price_expectation()
 
         action = [good_id, np.array([price])]
-        step_id = self.action_counter
+        print(action)
+        # step_id = self.action_counter
 
         # Store action for step id
-        self.actions[step_id] = action
+        # self.actions[step_id] = action
+        #
+        # print("step_id={}, action taken: {}".format(step_id, action))
 
-        print("step_id={}, action taken: {}".format(step_id, action))
-        # create and serialize the message
-        gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
-        gym_bytes = GymSerializer().encode(gym_msg)
-        self.mailbox.outbox.put_message(to=DEFAULT_GYM, sender=self.crypto.public_key,
-                                        protocol_id=GymMessage.protocol_id, message=gym_bytes)
+        return action
 
-    def _get_random_next_good(self) -> int:
-        """Get the next good for trading (randomly)."""
-        return random.choice(list(self.good_price_models.keys()))
-
-    def _handle_message(self, gym_msg: GymMessage) -> None:
+    def _update_state(self, obs, reward, done, info) -> None:
         """
         Take an action.
 
@@ -231,8 +222,8 @@ class RLAgent(Agent):
         # observation = gym_msg.get("observation")
         # done = gym_msg.get("done")
         # info = gym_msg.get("info")
-        reward = gym_msg.get("reward")
-        step_id = gym_msg.get("step_id")
+        # reward = gym_msg.get("reward")
+        step_id = info.get("step_id")
 
         # recover action:
         good_id, price = self.actions[step_id]
@@ -241,23 +232,28 @@ class RLAgent(Agent):
         good_price_model = self.good_price_models[good_id]
         good_price_model.update(reward, price)
 
-        # Take another action if we are below max actions.
-        if self.action_counter < MAX_ACTIONS:
-            self._take_an_action()
-        else:
-            self.stop()
+        # # Take another action if we are below max actions.
+        # if self.action_counter < MAX_ACTIONS:
+        #     self._pick_an_action()
+        # else:
+        #     self.stop()
+
+    def _get_random_next_good(self) -> int:
+        """Get the next good for trading (randomly)."""
+        return random.choice(list(self.good_price_models.keys()))
+
+    # def forward_to_proxy(self):
+    #     self.proxy_env.set_mailbox(self.mailbox)
 
 
-def main():
+if __name__ == "__main__":
     """Launch the agent."""
     nb_goods = 10
-    gym_env = BanditNArmedRandom(nb_goods)
-    rl_agent = RLAgent('my_rl_agent', gym_env, nb_goods)
+    rl_agent = RLAgent('my_rl_agent', nb_goods)
+
     try:
         rl_agent.start()
     finally:
         rl_agent.stop()
 
-
-if __name__ == "__main__":
-    main()
+# proxy env needs public key to create connections

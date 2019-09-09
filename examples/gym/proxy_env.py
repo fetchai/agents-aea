@@ -1,28 +1,29 @@
 # import os, subprocess, time, signal
 
 import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
+# from gym import error, spaces, utils
+# from gym.utils import seeding
 
 from aea.protocols.base.message import Message
-from aea.agent import Agent
-from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
-from aea.mail.base import Envelope, MailBox
-from aea.protocols.gym.message import GymMessage
-from aea.protocols.gym.serialization import GymSerializer
-from env import BanditNArmedRandom
+# from aea.agent import Agent
+# from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
+# from aea.mail.base import Envelope, MailBox
+# from aea.protocols.gym.message import GymMessage
+# from aea.protocols.gym.serialization import GymSerializer
+# from env import BanditNArmedRandom
 
 from abc import ABC, abstractmethod
-import numpy as np
+# import numpy as np
 
-from typing import List, Tuple, Any
+from typing import Tuple, Any  # , List
 
-import logging
+# import logging
 
 from queue import Queue
+
 # from aea.mail.base import InBox
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 Action = Any
 Observation = Any
@@ -35,9 +36,9 @@ Feedback = Tuple[Observation, Reward, Done, Info]
 class ProxyEnv(gym.Env, ABC):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, queue: Queue):
+    def __init__(self,):
         super().__init__()
-        self._queue = queue
+        self._queue = Queue()
         # protocol object
         # outbox of the agent
         # queue between the training thread and the main thread that receives messages
@@ -80,6 +81,7 @@ class ProxyEnv(gym.Env, ABC):
         """
         pass
 
+    @abstractmethod
     def receive_percept_message(self) -> Message:
         """"
         Receive the reply to the action taken.
@@ -92,21 +94,10 @@ class ProxyEnv(gym.Env, ABC):
 
         :return: a Tuple containing the Feedback of Observation, Reward, Done and Info
         """
-        envelope = self._queue.get(block=True, timeout=None)  # type: Optional[Envelope]
-        # assert to ensure envelope is an instance of Envelope
-        if envelope is not None:
-            if envelope.protocol_id == 'gym':
-                gym_msg = GymSerializer().decode(envelope.message)
-                gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
-                if gym_msg_performative == GymMessage.Performative.PERCEPT:
-                    return gym_msg
-                else:
-                    raise ValueError("Unexpected performative: {}".format(gym_msg_performative))
-            else:
-                raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        pass
 
     @abstractmethod
-    def message_to_percept(self, message) -> Feedback:
+    def message_to_percept(self, message: Message) -> Feedback:
         """"
         Transform the message received from the real (typically Multi-Agent) environment into
         observation, reward, done, info.
