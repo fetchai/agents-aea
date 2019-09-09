@@ -67,4 +67,4 @@ class DefaultSerializer(Serializer):
         else:
             raise ValueError("Type not recognized.")
 
-        return Message(body=body)
+        return DefaultMessage(body=body)

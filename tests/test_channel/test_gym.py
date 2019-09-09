@@ -22,7 +22,7 @@
 import time
 from typing import Any, Tuple
 
-from aea.channel.gym import GymChannel, GymConnection, DEFAULT_GYM
+from aea.channel.gym import GymConnection, DEFAULT_GYM
 from aea.mail.base import Envelope, MailBox
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
@@ -46,8 +46,7 @@ class GymEnvStub:
 
 def test_connection():
     """Test that two mailbox can connect to the node."""
-    channel = GymChannel(GymEnvStub())
-    mailbox = MailBox(GymConnection("agent_public_key", channel))
+    mailbox = MailBox(GymConnection("agent_public_key", GymEnvStub()))
 
     mailbox.connect()
 
@@ -56,8 +55,7 @@ def test_connection():
 
 def test_communication():
     """Test that the gym can be communicated with."""
-    channel = GymChannel(GymEnvStub())
-    mailbox = MailBox(GymConnection("agent_public_key", channel))
+    mailbox = MailBox(GymConnection("agent_public_key", GymEnvStub()))
 
     mailbox.connect()
 

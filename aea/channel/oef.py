@@ -477,7 +477,7 @@ class OEFConnection(Connection):
         if self._stopped and not self._connected:
             self._stopped = False
             self._core.run_threaded()
-            assert self.channel.connect()
+            assert self.channel.connect(), "Cannot connect to OEFChannel."
             self._connected = True
             self.out_thread = Thread(target=self._fetch)
             self.out_thread.start()
