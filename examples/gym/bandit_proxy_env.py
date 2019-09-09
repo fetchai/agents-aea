@@ -1,4 +1,27 @@
+# -*- coding: utf-8 -*-
+
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This contains the BanditProxyEnv."""
+
 import gym
+from threading import Thread
 
 from aea.protocols.base.message import Message
 from aea.channel.gym import DEFAULT_GYM
@@ -6,8 +29,8 @@ from aea.mail.base import Envelope
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
 
-from examples.gym.proxy_agent import ProxyAgent
-from examples.gym.proxy_env import ProxyEnv
+from proxy_agent import ProxyAgent
+from proxy_env import ProxyEnv
 
 from typing import Tuple, Any, Optional
 
@@ -30,36 +53,29 @@ class BanditProxyEnv(ProxyEnv):
         super().__init__()
         self.action_counter = 0
         self.proxy_agent = ProxyAgent(name="proxy", env=gym_env, proxy_env_queue=self.queue)
+        self.proxy_agent_thread = Thread(target=self.proxy_agent.start)
 
-        # self.env = env
+    def connect(self):
+        self.proxy_agent_thread.start()
 
-        # protocol object
-        # outbox of the agent
-        # queue between the training thread and the main thread that receives messages
-
-    # def connect(self, outbox: OutBox, public_key: str):
-    #     self.outbox = outbox
-    #     self.public_key = public_key
+    def disconnect(self):
+        self.proxy_agent.stop()
+        self.proxy_agent_thread.join()
+        self.proxy_agent_thread = None
 
     def apply_action(self, action: Action) -> None:
         self.action_counter += 1
+
         step_id = self.action_counter
-
-        # action = [good_id, price]
-
         gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
         gym_bytes = GymSerializer().encode(gym_msg)
-        self.proxy_agent.outbox.put_message(to=DEFAULT_GYM, sender=self.proxy_agent.public_key,
+        self.proxy_agent.outbox.put_message(to=DEFAULT_GYM, sender=self.proxy_agent.crypto.public_key,
                                             protocol_id=GymMessage.protocol_id, message=gym_bytes)
 
     def receive_percept_message(self) -> Message:
-        # Keep getting messages from the queue
-        # if the message in the queue is the right message (protocol==gym, Percept, correct step_id), then process
-        # otherwise put it back in the queue
-
         envelope = self.queue.get(block=True, timeout=None)  # type: Optional[Envelope]
-
         expected_step_id = self.action_counter
+
         # assert to ensure envelope is an instance of Envelope
         if envelope is not None:
             if envelope.protocol_id == 'gym':
@@ -72,14 +88,14 @@ class BanditProxyEnv(ProxyEnv):
                     raise ValueError("Unexpected performative or no step_id: {}".format(gym_msg_performative))
             else:
                 raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+        else:
+            raise ValueError("Missing envelope.")
 
     def message_to_percept(self, message: Message) -> Feedback:
         observation = message.get("observation")
         done = message.get("done")
         info = message.get("info")
         reward = message.get("reward")
-
-        # step_id = gym_msg.get("step_id")
 
         return observation, done, reward, info
 

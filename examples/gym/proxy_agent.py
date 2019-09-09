@@ -18,6 +18,8 @@
 #
 # ------------------------------------------------------------------------------
 
+"""This contains the proxy agent class."""
+
 import gym
 from typing import Optional
 from queue import Queue

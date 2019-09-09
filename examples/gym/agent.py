@@ -39,7 +39,7 @@ from aea.mail.base import Envelope, MailBox
 from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
-from .env import BanditNArmedRandom
+from env import BanditNArmedRandom
 
 MAX_ACTIONS = 4000
 
@@ -103,7 +103,7 @@ class GoodPriceModel(object):
         :param outcome: the negotiation outcome
         :return: None
         """
-        bandit = self.price_bandits[price[0]]
+        bandit = self.price_bandits[price]
         bandit.update(outcome)
 
     def get_price_expectation(self) -> int:
@@ -216,7 +216,7 @@ class RLAgent(Agent):
         good_price_model = self.good_price_models[good_id]
         price = good_price_model.get_price_expectation()
 
-        action = [good_id, np.array([price])]
+        action = [good_id, price]
         step_id = self.action_counter
 
         # Store action for step id

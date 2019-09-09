@@ -1,7 +1,29 @@
+# -*- coding: utf-8 -*-
+
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This contains the BanditEnv."""
+
 import gym
 
 from aea.protocols.base.message import Message
-from aea.mail.base import Envelope, OutBox
+from aea.mail.base import OutBox
 
 from abc import ABC, abstractmethod
 
@@ -26,9 +48,6 @@ class ProxyEnv(gym.Env, ABC):
     def __init__(self, ):
         super().__init__()
         self.queue = Queue()
-        # protocol object
-        # outbox of the agent
-        # queue between the training thread and the main thread that receives messages
 
     def step(self, action: Action) -> Feedback:
         """"
@@ -44,7 +63,6 @@ class ProxyEnv(gym.Env, ABC):
         :param action: the action sent to the step method (e.g. the output of an RL algorithm)
         :return: a Tuple containing the Feedback of Observation, Reward, Done and Info
         """
-
         self.apply_action(action)
 
         msg = self.receive_percept_message()

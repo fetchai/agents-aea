@@ -1,10 +1,32 @@
-from examples.gym.env import BanditNArmedRandom
-from examples.gym.bandit_proxy_env import BanditProxyEnv
-from examples.gym.proxy_env import ProxyEnv
+# -*- coding: utf-8 -*-
 
-from typing import Any
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This contains the rl agent class."""
+
+from typing import Any, Dict
 import random
 import numpy as np
+
+from env import BanditNArmedRandom
+from bandit_proxy_env import BanditProxyEnv
+from proxy_env import ProxyEnv
 
 
 class PriceBandit(object):
@@ -23,13 +45,13 @@ class PriceBandit(object):
         self.beta_a = beta_a
         self.beta_b = beta_b
 
-    def sample(self) -> float:
+    def sample(self) -> int:
         """
         Sample from the bandit.
 
         :return: the sampled value
         """
-        return np.random.beta(self.beta_a, self.beta_b)
+        return round(np.random.beta(self.beta_a, self.beta_b))
 
     def update(self, outcome: bool) -> None:
         """
@@ -91,9 +113,6 @@ class RLAgent:
 
         :return: None
         """
-        # Increment the counter
-        # self.action_counter += 1
-
         # Get the good
         good_id = self._get_random_next_good()
 
@@ -102,40 +121,20 @@ class RLAgent:
         price = good_price_model.get_price_expectation()
 
         action = [good_id, price]
-        print(action)
-        # step_id = self.action_counter
-
-        # Store action for step id
-        # self.actions[step_id] = action
-        #
-        # print("step_id={}, action taken: {}".format(step_id, action))
 
         return action
 
-    def _update_state(self, obs, reward, done, info) -> None:
+    def _update_model(self, obs, reward, done, info, action) -> None:
         """
-        Take an action.
+        Update model.
 
         :return: None
         """
-        # observation = gym_msg.get("observation")
-        # done = gym_msg.get("done")
-        # info = gym_msg.get("info")
-        # reward = gym_msg.get("reward")
-        step_id = info.get("step_id")
-
-        # recover action:
-        good_id, price = self.actions[step_id]
+        good_id, price = action
 
         # Update the price model:
         good_price_model = self.good_price_models[good_id]
         good_price_model.update(reward, price)
-
-        # # Take another action if we are below max actions.
-        # if self.action_counter < MAX_ACTIONS:
-        #     self._pick_an_action()
-        # else:
-        #     self.stop()
 
     def _get_random_next_good(self) -> int:
         """Get the next good for trading (randomly)."""
@@ -144,22 +143,28 @@ class RLAgent:
     def fit(self, proxy_env: ProxyEnv, nb_steps: int):
         action_counter = 0
 
+        print("Connecting to proxy env ...")
+        proxy_env.connect()
+
         while action_counter < nb_steps:
             action = self._pick_an_action()
             obs, reward, done, info = proxy_env.step(action)
-            self._update_state(obs, reward, done, info)
+            self._update_model(obs, reward, done, info, action)
             action_counter += 1
+            if action_counter % 10 == 0:
+                print("Action: step_id='{}' action='{}'".format(action_counter, action))
 
+        proxy_env.disconnect()
+        print("Disconnected from proxy env!")
 
-# proxy_env.connect(proxy_agent, proxy_agent.outbox, proxy_agent.public_key):
 
 if __name__ == "__main__":
     NB_GOODS = 10
-    nb_prices_per_good = 100
+    NB_PRICES_PER_GOOD = 100
 
-    gym_env = BanditNArmedRandom(nb_bandits=NB_GOODS, nb_prices_per_bandit=nb_prices_per_good)
+    gym_env = BanditNArmedRandom(nb_bandits=NB_GOODS, nb_prices_per_bandit=NB_PRICES_PER_GOOD)
     proxy_env = BanditProxyEnv(gym_env)
 
     """Launch the agent."""
     rl_agent = RLAgent(nb_goods=NB_GOODS)
-    rl_agent.fit(proxy_env, nb_steps=300000)
+    rl_agent.fit(proxy_env, nb_steps=1000)
