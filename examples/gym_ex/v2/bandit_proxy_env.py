@@ -145,3 +145,11 @@ class BanditProxyEnv(ProxyEnv):
         reward = message.get("reward")
 
         return observation, done, reward, info
+
+    def render(self, mode='human'):
+        """This is an implementation of the gym.Env abstract method."""
+        pass
+
+    def reset(self):
+        """This is an implementation of the gym.Env abstract method."""
+        pass
