@@ -30,8 +30,8 @@ Specifically:
 import gym
 import logging
 import numpy as np
-import random
 from typing import Dict, List, Optional, cast
+import random
 
 from aea.agent import Agent
 from aea.channel.gym import GymConnection, DEFAULT_GYM
@@ -39,10 +39,10 @@ from aea.mail.base import Envelope, MailBox
 from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
-from .env import BanditNArmedRandom
+
+from env import BanditNArmedRandom
 
 MAX_ACTIONS = 4000
-
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +126,8 @@ class GoodPriceModel(object):
 class RLAgent(Agent):
     """This class implements a simple (all-in-one) RL agent."""
 
-    def __init__(self, name: str, gym_env: gym.Env, nb_goods: int, nb_prices_per_good: int, timeout: float = 0.0) -> None:
+    def __init__(self, name: str, gym_env: gym.Env, nb_goods: int, nb_prices_per_good: int,
+                 timeout: float = 0.0) -> None:
         """
         Instantiate the agent.
 
@@ -138,7 +139,9 @@ class RLAgent(Agent):
         """
         super().__init__(name, timeout=timeout)
         self.mailbox = MailBox(GymConnection(self.crypto.public_key, gym_env))
-        self.good_price_models = dict((good_id, GoodPriceModel(nb_prices_per_good)) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
+        self.good_price_models = dict((good_id, GoodPriceModel(nb_prices_per_good)) for good_id in
+                                      range(nb_goods))  # type: Dict[int, GoodPriceModel]
+
         self.action_counter = 0
         self.actions = {}  # type: Dict[int, List[int]]
 
@@ -168,15 +171,18 @@ class RLAgent(Agent):
         """
         while not self.inbox.empty():
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
+            expected_step_id = self.action_counter
             if envelope is not None:
                 if envelope.protocol_id == 'gym':
                     gym_msg = GymSerializer().decode(envelope.message)  # type: Message
                     gym_msg = cast(GymMessage, gym_msg)
                     gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
-                    if gym_msg_performative == GymMessage.Performative.PERCEPT:
+                    gym_msg_step_id = gym_msg.get("step_id")
+                    if gym_msg_performative == GymMessage.Performative.PERCEPT and gym_msg_step_id == expected_step_id:
                         self._handle_message(gym_msg)
                     else:
-                        raise ValueError("Unexpected performative: {}".format(gym_msg_performative))
+                        raise ValueError(
+                            "Unexpected performative {} or step_id: {}".format(gym_msg_step_id, gym_msg_performative))
                 else:
                     raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
 
@@ -225,7 +231,8 @@ class RLAgent(Agent):
         # create and serialize the message
         gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
         gym_bytes = GymSerializer().encode(gym_msg)
-        self.mailbox.outbox.put_message(to=DEFAULT_GYM, sender=self.crypto.public_key, protocol_id=GymMessage.protocol_id, message=gym_bytes)
+        self.mailbox.outbox.put_message(to=DEFAULT_GYM, sender=self.crypto.public_key,
+                                        protocol_id=GymMessage.protocol_id, message=gym_bytes)
 
     def _get_random_next_good(self) -> int:
         """Get the next good for trading (randomly)."""
