@@ -110,14 +110,18 @@ class Description:
         :param values: the values in the description.
         """
         _values = deepcopy(values)
-        self.values: Dict = _values
-        self.data_model: DataModel = data_model
+        self.values = _values
+        self.data_model = data_model
 
     def __eq__(self, other) -> bool:
         """Compare with another object."""
         return isinstance(other, Description) \
             and self.values == other.values \
             and self.data_model == other.data_model
+
+    def __iter__(self):
+        """Create an iterator."""
+        return self
 
 
 class ConstraintExpr(ABC):

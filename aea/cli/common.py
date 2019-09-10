@@ -63,10 +63,11 @@ class AgentConfig(object):
 class Context(object):
     """A class to keep configuration of the cli tool."""
 
+    agent_config: AgentConfig
+
     def __init__(self):
         """Init the context."""
         self.config = {}
-        self.agent_config = None  # type: Optional[AgentConfig]
 
     def set_config(self, key, value) -> None:
         """

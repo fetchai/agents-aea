@@ -20,7 +20,7 @@
 
 """This module contains the default message definition."""
 from enum import Enum
-from typing import Optional
+from typing import Optional, List, cast
 
 from aea.protocols.base.message import Message
 from aea.protocols.oef.models import Description, Query
@@ -101,7 +101,7 @@ class OEFMessage(Message):
             elif oef_type == OEFMessage.Type.SEARCH_RESULT:
                 assert self.is_set("id")
                 assert self.is_set("agents")
-                agents = self.get("agents")
+                agents = cast(List[str], self.get("agents"))
                 assert type(agents) == list and all(type(a) == str for a in agents)
             elif oef_type == OEFMessage.Type.OEF_ERROR:
                 assert self.is_set("id")

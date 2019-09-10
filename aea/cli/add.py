@@ -23,6 +23,7 @@ import importlib.util
 import os
 import shutil
 from pathlib import Path
+from typing import cast
 
 import click
 
@@ -46,12 +47,13 @@ def add(ctx: Context):
 @pass_ctx
 def protocol(ctx: Context, protocol_name):
     """Add a protocol to the agent."""
-    agent_name = ctx.agent_config.agent_name
+    agent_name = cast(str, ctx.agent_config.agent_name)
     logger.debug("Adding protocol {protocol_name} to the agent {agent_name}..."
                  .format(agent_name=agent_name, protocol_name=protocol_name))
 
     # find the supported protocols and check if the candidate protocol is supported.
     protocols_module_spec = importlib.util.find_spec("aea.protocols")
+    assert protocols_module_spec is not None, "Protocols module spec is None."
     _protocols_submodules = protocols_module_spec.loader.contents()  # type: ignore
     _protocols_submodules = filter(lambda x: not x.startswith("__") and x != "base", _protocols_submodules)
     aea_supported_protocol = set(_protocols_submodules)
@@ -67,6 +69,7 @@ def protocol(ctx: Context, protocol_name):
         return
 
     # copy the protocol package into the agent's supported protocols.
+    assert protocols_module_spec.submodule_search_locations is not None, "Submodule search locations is None."
     protocols_dir = protocols_module_spec.submodule_search_locations[0]
     src = os.path.join(protocols_dir, protocol_name)
     dest = os.path.join("protocols", protocol_name)
