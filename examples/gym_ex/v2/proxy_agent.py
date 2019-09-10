@@ -30,7 +30,7 @@ from aea.mail.base import Envelope, MailBox
 
 
 class ProxyAgent(Agent):
-    """This class implements a simple RL agent."""
+    """This class implements a proxy agent to be used by a proxy environment."""
 
     def __init__(self, name: str, env: gym.Env, proxy_env_queue: Queue) -> None:
         """

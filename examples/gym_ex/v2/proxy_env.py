@@ -40,15 +40,22 @@ public_key: str
 
 
 class ProxyEnv(gym.Env, ABC):
-    metadata = {'render.modes': ['human']}
+    """This class is an implementation of the ProxyEnv, using bandit RL solution."""
 
-    def __init__(self, ):
+    def __init__(self) -> None:
+        """
+        Instantiate the proxy environment.
+
+        :return: None
+        """
         super().__init__()
         self.queue = Queue()
 
     def step(self, action: Action) -> Feedback:
-        """"
-        The standard step method of a gym environment.
+        """
+        Run one time-step of the environment's dynamics.
+
+        Standard 'step' method of a gym environment.
 
         - The action is given to apply_action, which does the necessary conversion and then executes it.
         - Then through receive_percept_message, the method waits for a reply from the real environment.
@@ -70,7 +77,7 @@ class ProxyEnv(gym.Env, ABC):
 
     @abstractmethod
     def apply_action(self, action: Action) -> None:
-        """"
+        """
         Execute the 'action' sent to the step function.
 
         This usually involves
@@ -78,21 +85,19 @@ class ProxyEnv(gym.Env, ABC):
         that is executable in the real environment (e.g. a proposal message containing the price).
         - Executing the action in the real environment (e.g. send the proposal to another agent).
 
-        :param action: the action sent to the step method (e.g. the output of an RL algorithm)
-        :return: a Tuple containing the Feedback of Observation, Reward, Done and Info
+        :param action: the action produced by an RL algorithm.
         """
         pass
 
     @abstractmethod
     def receive_percept_message(self) -> Message:
-        """"
-        Receive the reply to the action taken.
+        """
+        Receive the response of the real environment to the action taken via apply_action.
 
-        The command to receive the message is blocking.
-        This usually involves
-        - Transforming the 'action' (e.g. price) that is an output of an RL algorithm into an action
-        that is executable in the real environment (e.g. a proposal message containing the price).
-        - Executing the action in the real environment (e.g. send the proposal to another agent).
+        The response is assumed to be in the form of a message, since the real environment is assumed
+        to be a multi-agent system.
+
+        It is assumed that the command to receive the message is blocking.
 
         :return: a Tuple containing the Feedback of Observation, Reward, Done and Info
         """
@@ -100,9 +105,8 @@ class ProxyEnv(gym.Env, ABC):
 
     @abstractmethod
     def message_to_percept(self, message: Message) -> Feedback:
-        """"
-        Transform the message received from the real (typically Multi-Agent) environment into
-        observation, reward, done, info.
+        """
+        Transform the message received from the real environment into observation, reward, done, info.
 
         :param message: the message received from the real environment.
         :return: a Tuple containing the Feedback of Observation, Reward, Done and Info

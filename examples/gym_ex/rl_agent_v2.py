@@ -24,9 +24,9 @@ import numpy as np
 import random
 from typing import Any, Dict
 
-from env import BanditNArmedRandom
-from v2.bandit_proxy_env import BanditProxyEnv
-from v2.proxy_env import ProxyEnv
+from examples.gym_ex.env import BanditNArmedRandom
+from examples.gym_ex.v2.bandit_proxy_env import BanditProxyEnv
+from examples.gym_ex.v2.proxy_env import ProxyEnv
 
 
 class PriceBandit(object):
@@ -102,8 +102,15 @@ class GoodPriceModel(object):
 
 
 class RLAgent:
+    """This class is a reinforcement learning agent that interacts with the agent framework."""
 
-    def __init__(self, nb_goods: int):
+    def __init__(self, nb_goods: int) -> None:
+        """
+        Instantiate the RL agent.
+
+        :param nb_goods: number of goods
+        :return: None
+        """
         self.good_price_models = dict(
             (good_id, GoodPriceModel()) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
 
@@ -124,10 +131,15 @@ class RLAgent:
 
         return action
 
-    def _update_model(self, obs, reward, done, info, action) -> None:
+    def _update_model(self, observation, reward, done, info, action) -> None:
         """
-        Update model.
+        Update the model.
 
+        :param: observation: agent's observation of the current environment
+        :param: reward: amount of reward returned after previous action
+        :param: done: whether the episode has ended
+        :param: info: auxiliary diagnostic information
+        :param: action: action the agent performed on the environment to which the response was the above 4
         :return: None
         """
         good_id, price = action
@@ -137,10 +149,21 @@ class RLAgent:
         good_price_model.update(reward, price)
 
     def _get_random_next_good(self) -> int:
-        """Get the next good for trading (randomly)."""
+        """
+        Get the next good for trading (randomly).
+
+        :return: a random good
+        """
         return random.choice(list(self.good_price_models.keys()))
 
-    def fit(self, proxy_env: ProxyEnv, nb_steps: int):
+    def fit(self, proxy_env: ProxyEnv, nb_steps: int) -> None:
+        """
+        Train the agent on the given proxy environment.
+
+        :param proxy_env: the proxy gym environment
+        :param nb_steps: number of training steps to be performed.
+        :return: None
+        """
         action_counter = 0
 
         print("Connecting to proxy env ...")

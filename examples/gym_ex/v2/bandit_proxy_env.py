@@ -45,23 +45,53 @@ Feedback = Tuple[Observation, Reward, Done, Info]
 
 
 class BanditProxyEnv(ProxyEnv):
+    """This class is an implementation of the ProxyEnv, using bandit RL solution."""
+
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, gym_env: gym.Env):
+    def __init__(self, gym_env: gym.Env) -> None:
+        """
+        Instantiate the Bandit implementation of the proxy gym environment.
+
+        :param gym_env: gym environment
+        :return: None
+        """
         super().__init__()
         self.action_counter = 0
         self.proxy_agent = ProxyAgent(name="proxy", env=gym_env, proxy_env_queue=self.queue)
         self.proxy_agent_thread = Thread(target=self.proxy_agent.start)
 
     def connect(self):
+        """
+        Connect to this proxy environment. It starts a proxy agent that can interact with the framework.
+
+        :return: None
+        """
         self.proxy_agent_thread.start()
 
     def disconnect(self):
+        """
+        Disconnect from this proxy environment. It stops the proxy agent and kills its thread.
+
+        :return: None
+        """
         self.proxy_agent.stop()
         self.proxy_agent_thread.join()
         self.proxy_agent_thread = None
 
     def apply_action(self, action: Action) -> None:
+        """
+        Execute the 'action' sent to the step function.
+
+        This involves:
+        - Creating an ACT message containing the action and the step_id of the action.
+        - Putting the message in the outbox of the proxy agent.
+
+        This is an implementation of the abstract method in ProxyEnv.
+
+        :param action: the action that is the output of an RL algorithm.
+        :return: None
+        """
         self.action_counter += 1
 
         step_id = self.action_counter
@@ -71,6 +101,17 @@ class BanditProxyEnv(ProxyEnv):
                                             protocol_id=GymMessage.protocol_id, message=gym_bytes)
 
     def receive_percept_message(self) -> Message:
+        """
+        Receive the response of the real environment to the action taken via apply_action.
+
+        The response is a PERCEPT message containing the usual 'observation', 'reward', 'done', 'info' parameters.
+
+        The call to receive the message is blocking.
+
+        This is an implementation of the abstract method in ProxyEnv.
+
+        :return: a message received as a response to the action performed in apply_action.
+        """
         envelope = self.queue.get(block=True, timeout=None)  # type: Optional[Envelope]
         expected_step_id = self.action_counter
 
@@ -90,15 +131,17 @@ class BanditProxyEnv(ProxyEnv):
             raise ValueError("Missing envelope.")
 
     def message_to_percept(self, message: Message) -> Feedback:
+        """
+        Transform the message received from the real environment into observation, reward, done, info.
+
+        This is an implementation of the abstract method in ProxyEnv.
+
+        :param: the message received as a response to the action performed in apply_action.
+        :return: the standard feedback (observation, reward, done, info) of a gym environment.
+        """
         observation = message.get("observation")
         done = message.get("done")
         info = message.get("info")
         reward = message.get("reward")
 
         return observation, done, reward, info
-
-    def render(self, mode='human'):
-        pass
-
-    def reset(self):
-        pass
