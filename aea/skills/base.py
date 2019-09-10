@@ -26,7 +26,7 @@ import pprint
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, cast
 
 import yaml
 
@@ -92,7 +92,7 @@ class Behaviour(ABC):
 
         name_to_class = dict(behaviours_classes)
         for behaviour_config in behaviours_configs:
-            behaviour_class_name = behaviour_config.get("class_name")
+            behaviour_class_name = cast(str, behaviour_config.get("class_name"))
             logger.debug("Processing behaviour {}".format(behaviour_class_name))
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
@@ -110,9 +110,10 @@ class Handler(ABC):
 
     SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
 
+    context: Context
+
     def __init__(self, *args, **kwargs):
         """Initialize a handler object."""
-        self.context = None  # type: Optional[Context]
         self.config = kwargs
 
     @abstractmethod
@@ -148,7 +149,7 @@ class Handler(ABC):
         handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
 
         name_to_class = dict(handler_classes)
-        handler_class_name = handler_config.get("class_name")
+        handler_class_name = cast(str, handler_config.get("class_name"))
         logger.debug("Processing handler {}".format(handler_class_name))
         handler_class = name_to_class.get(handler_class_name, None)
         if handler_class is None:
@@ -270,9 +271,9 @@ class Skill:
     """This class implements a skill."""
 
     def __init__(self, config: SkillConfig,
-                 handler: Handler,
-                 behaviours: List[Behaviour],
-                 tasks: List[Task]):
+                 handler: Optional[Handler],
+                 behaviours: Optional[List[Behaviour]],
+                 tasks: Optional[List[Task]]):
         """
         Initialize a skill.
 
@@ -308,7 +309,8 @@ class Skill:
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
         handler = Handler.parse_module(os.path.join(directory, "handler.py"), skill_config.handler_config)
-        handler.context = context
+        if handler is not None:
+            handler.context = context
 
         behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), skill_config.behaviours_config)
         tasks = Task.parse_module(os.path.join(directory, "tasks.py"), skill_config.tasks_config)
@@ -804,9 +806,12 @@ class Resources(object):
         """Add a skill to the set of resources."""
         skill_id = skill.config.id
         self._skills[skill_id] = skill
-        self.handler_registry.register(skill_id, skill.handler)
-        self.behaviour_registry.register(skill_id, skill.behaviours)
-        self.task_registry.register(skill_id, skill.tasks)
+        if skill.handler is not None:
+            self.handler_registry.register(skill_id, cast(Handler, skill.handler))
+        if skill.behaviours is not None:
+            self.behaviour_registry.register(skill_id, cast(List[Behaviour], skill.behaviours))
+        if skill.tasks is not None:
+            self.task_registry.register(skill_id, cast(List[Task], skill.tasks))
 
     def remove_skill(self, skill_id: SkillId):
         """Remove a skill from the set of resources."""

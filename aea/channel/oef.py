@@ -24,7 +24,7 @@ import logging
 import pickle
 from queue import Empty, Queue
 from threading import Thread
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -45,7 +45,7 @@ from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint
-from aea.protocols.oef.serialization import OEFSerializer
+from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
 
@@ -183,7 +183,7 @@ class MailStats(object):
 class OEFChannel(OEFAgent, Channel):
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore, in_queue: Optional[Queue] = None):
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore, in_queue: Queue):
         """
         Initialize.
 
@@ -304,7 +304,7 @@ class OEFChannel(OEFAgent, Channel):
         self.mail_stats.search_end(search_id, len(agents))
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=None, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
     def on_oef_error(self, answer_id: int, operation: oef.messages.OEFErrorOperation) -> None:
@@ -322,7 +322,7 @@ class OEFChannel(OEFAgent, Channel):
 
         msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=None, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
     def on_dialogue_error(self, answer_id: int, dialogue_id: int, origin: str) -> None:
@@ -339,7 +339,7 @@ class OEFChannel(OEFAgent, Channel):
                          dialogue_id=dialogue_id,
                          origin=origin)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=None, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.in_queue.put(envelope)
 
     def send(self, envelope: Envelope) -> None:
@@ -382,9 +382,9 @@ class OEFChannel(OEFAgent, Channel):
             query = fipa_message.get("query")
             self.send_cfp(id, dialogue_id, destination, target, query)
         elif performative == FIPAMessage.Performative.PROPOSE:
-            proposal = fipa_message.get("proposal")
-            proposal = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])
-            self.send_propose(id, dialogue_id, destination, target, proposal)
+            proposal = cast(List[Description], fipa_message.get("proposal"))
+            proposal_b = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])  # type: bytes
+            self.send_propose(id, dialogue_id, destination, target, proposal_b)
         elif performative == FIPAMessage.Performative.ACCEPT:
             self.send_accept(id, dialogue_id, destination, target)
         elif performative == FIPAMessage.Performative.MATCH_ACCEPT:
@@ -403,29 +403,26 @@ class OEFChannel(OEFAgent, Channel):
         """
         oef_message = OEFSerializer().decode(envelope.message)
         oef_type = OEFMessage.Type(oef_message.get("type"))
+        oef_msg_id = cast(int, oef_message.get("id"))
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
-            id = oef_message.get("id")
-            service_description = oef_message.get("service_description")
-            service_id = oef_message.get("service_id")
+            service_description = cast(Description, oef_message.get("service_description"))
+            service_id = cast(int, oef_message.get("service_id"))
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
-            self.register_service(id, oef_service_description, service_id)
+            self.register_service(oef_msg_id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
-            id = oef_message.get("id")
-            service_description = oef_message.get("service_description")
-            service_id = oef_message.get("service_id")
+            service_description = cast(Description, oef_message.get("service_description"))
+            service_id = cast(int, oef_message.get("service_id"))
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
-            self.unregister_service(id, oef_service_description, service_id)
+            self.unregister_service(oef_msg_id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-            id = oef_message.get("id")
-            query = oef_message.get("query")
+            query = cast(Query, oef_message.get("query"))
             oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.search_agents(id, oef_query)
+            self.search_agents(oef_msg_id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
-            id = oef_message.get("id")
-            query = oef_message.get("query")
+            query = cast(Query, oef_message.get("query"))
             oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.mail_stats.search_start(id)
-            self.search_services(id, oef_query)
+            self.mail_stats.search_start(oef_msg_id)
+            self.search_services(oef_msg_id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
 
@@ -443,7 +440,7 @@ class OEFConnection(Connection):
         """
         super().__init__()
         core = AsyncioCore(logger=logger)
-        self._core = core  # type: Optional[AsyncioCore]
+        self._core = core  # type: AsyncioCore
         self.channel = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
 
         self._stopped = True
@@ -488,11 +485,12 @@ class OEFConnection(Connection):
 
         :return: None
         """
+        assert self.out_thread is not None, "Call connect before disconnect."
         if not self._stopped and self._connected:
             self._connected = False
             self.out_thread.join()
             self.out_thread = None
-            self.channel.disconnect()
+            assert self.channel.disconnect(), "Cannot disconnect from OEFChannel."
             self._core.stop()
             self._stopped = True
 

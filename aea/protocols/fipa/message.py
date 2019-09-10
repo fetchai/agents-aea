@@ -73,7 +73,7 @@ class FIPAMessage(Message):
                 assert isinstance(query, dict) or isinstance(query, bytes) or query is None
             elif performative == FIPAMessage.Performative.PROPOSE:
                 proposal = self.get("proposal")
-                assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)
+                assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
             elif performative == FIPAMessage.Performative.ACCEPT \
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
                     or performative == FIPAMessage.Performative.DECLINE:

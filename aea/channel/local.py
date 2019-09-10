@@ -25,7 +25,7 @@ import threading
 from collections import defaultdict
 from queue import Queue
 from threading import Thread
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 from aea.channel.oef import STUB_DIALOGUE_ID
 from aea.mail.base import Envelope, Channel, Connection
@@ -92,16 +92,16 @@ class LocalNode:
         """
         oef_message = OEFSerializer().decode(envelope.message)
         sender = envelope.sender
-        request_id = oef_message.get("id")
+        request_id = cast(int, oef_message.get("id"))
         oef_type = OEFMessage.Type(oef_message.get("type"))
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
-            self.register_service(sender, oef_message.get("service_description"))
+            self.register_service(sender, cast(Description, oef_message.get("service_description")))
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
-            self.unregister_service(sender, request_id, oef_message.get("service_description"))
+            self.unregister_service(sender, request_id, cast(Description, oef_message.get("service_description")))
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-            self.search_agents(sender, request_id, oef_message.get("query"))
+            self.search_agents(sender, request_id, cast(Query, oef_message.get("query")))
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
-            self.search_services(sender, request_id, oef_message.get("query"))
+            self.search_services(sender, request_id, cast(Query, oef_message.get("query")))
         else:
             # request not recognized
             pass
