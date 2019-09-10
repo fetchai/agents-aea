@@ -20,13 +20,13 @@
 
 """This contains the rl agent class."""
 
-from typing import Any, Dict
-import random
 import numpy as np
+import random
+from typing import Any, Dict
 
 from env import BanditNArmedRandom
-from bandit_proxy_env import BanditProxyEnv
-from proxy_env import ProxyEnv
+from v2.bandit_proxy_env import BanditProxyEnv
+from v2.proxy_env import ProxyEnv
 
 
 class PriceBandit(object):
@@ -167,4 +167,4 @@ if __name__ == "__main__":
 
     """Launch the agent."""
     rl_agent = RLAgent(nb_goods=NB_GOODS)
-    rl_agent.fit(proxy_env, nb_steps=1000)
+    rl_agent.fit(proxy_env, nb_steps=4000)

@@ -30,8 +30,8 @@ Specifically:
 import gym
 import logging
 import numpy as np
-import random
 from typing import Dict, List, Optional, cast
+import random
 
 from aea.agent import Agent
 from aea.channel.gym import GymConnection, DEFAULT_GYM
@@ -39,6 +39,7 @@ from aea.mail.base import Envelope, MailBox
 from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
+
 from env import BanditNArmedRandom
 
 MAX_ACTIONS = 4000

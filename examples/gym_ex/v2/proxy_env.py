@@ -20,16 +20,13 @@
 
 """This contains the BanditEnv."""
 
-import gym
-
-from aea.protocols.base.message import Message
-from aea.mail.base import OutBox
-
 from abc import ABC, abstractmethod
-
+import gym
+from queue import Queue
 from typing import Tuple, Any
 
-from queue import Queue
+from aea.mail.base import OutBox
+from aea.protocols.base.message import Message
 
 Action = Any
 Observation = Any

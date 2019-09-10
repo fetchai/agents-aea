@@ -21,8 +21,8 @@
 """This contains the proxy agent class."""
 
 import gym
-from typing import Optional
 from queue import Queue
+from typing import Optional
 
 from aea.agent import Agent
 from aea.channel.gym import GymConnection

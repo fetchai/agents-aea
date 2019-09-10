@@ -21,20 +21,18 @@
 """This contains the BanditProxyEnv."""
 
 import gym
+import logging
 from threading import Thread
+from typing import Tuple, Any, Optional
 
-from aea.protocols.base.message import Message
 from aea.channel.gym import DEFAULT_GYM
 from aea.mail.base import Envelope
+from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
 
-from proxy_agent import ProxyAgent
-from proxy_env import ProxyEnv
-
-from typing import Tuple, Any, Optional
-
-import logging
+from .proxy_agent import ProxyAgent
+from .proxy_env import ProxyEnv
 
 logger = logging.getLogger(__name__)
 
