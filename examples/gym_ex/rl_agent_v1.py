@@ -207,6 +207,7 @@ class RLAgent(Agent):
 
         :return: None
         """
+        assert self.mailbox is not None, "Cannot take an action without a mailbox."
         # Increment the counter
         self.action_counter += 1
 
@@ -246,8 +247,8 @@ class RLAgent(Agent):
         # observation = gym_msg.get("observation")
         # done = gym_msg.get("done")
         # info = gym_msg.get("info")
-        reward = gym_msg.get("reward")
-        step_id = gym_msg.get("step_id")
+        reward = cast(bool, gym_msg.get("reward"))
+        step_id = cast(int, gym_msg.get("step_id"))
         if step_id % 10 == 0:
             print("Reward: step_id='{}' reward='{}'".format(step_id, reward))
             logger.info("Reward: step_id='{}' action='{}'".format(step_id, reward))
