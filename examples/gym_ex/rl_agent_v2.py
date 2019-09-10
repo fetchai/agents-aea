@@ -24,9 +24,9 @@ import numpy as np
 import random
 from typing import Any, Dict
 
-from examples.gym_ex.env import BanditNArmedRandom
-from examples.gym_ex.v2.bandit_proxy_env import BanditProxyEnv
-from examples.gym_ex.v2.proxy_env import ProxyEnv
+from env import BanditNArmedRandom
+from v2.bandit_proxy_env import BanditProxyEnv
+from v2.proxy_env import ProxyEnv
 
 
 class PriceBandit(object):
