@@ -38,7 +38,7 @@ class AEA(Agent):
                  timeout: float = 1.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
                  debug: bool = False,
                  max_reactions: int = 20,
-                 directory: Optional[str] = None) -> None:
+                 directory: str = '') -> None:
         """
         Instantiate the agent.
 
@@ -55,10 +55,21 @@ class AEA(Agent):
         super().__init__(name=name, private_key_pem_path=private_key_pem_path, timeout=timeout, debug=debug)
 
         self.max_reactions = max_reactions
-        self._directory = directory if directory is not None else str(Path(".").absolute())
+        self._directory = directory if directory else str(Path(".").absolute())
 
-        self.context = Context(self.name, self.outbox)
-        self.resources = None  # type: Optional[Resources]
+        self._context = Context(self.name, self.outbox)
+        self._resources = None  # type: Optional[Resources]
+
+    @property
+    def context(self) -> Context:
+        """Get context."""
+        return self._context
+
+    @property
+    def resources(self) -> Resources:
+        """Get resources."""
+        assert self._resources is not None, "No resources initialized. Call setup."
+        return self._resources
 
     def setup(self) -> None:
         """
@@ -66,7 +77,7 @@ class AEA(Agent):
 
         :return: None
         """
-        self.resources = Resources.from_resource_dir(self._directory, self.context)
+        self._resources = Resources.from_resource_dir(self._directory, self.context)
 
     def act(self) -> None:
         """
@@ -74,7 +85,6 @@ class AEA(Agent):
 
         :return: None
         """
-        assert self.resources is not None, "Call setup before calling act."
         for behaviour in self.resources.behaviour_registry.fetch_all():  # the skill should be able to register things here as active so we hand control fully to the skill and let this just spin through
             behaviour.act()
         # NOTE: we must ensure that these are non-blocking.
@@ -85,7 +95,6 @@ class AEA(Agent):
 
         :return: None
         """
-        assert self.resources is not None, "Call setup before calling react."
         counter = 0
         while not self.inbox.empty() and counter < self.max_reactions:
             counter += 1
@@ -102,7 +111,6 @@ class AEA(Agent):
         :param envelope: the envelope to handle.
         :return: None
         """
-        assert self.resources is not None, "Call setup before calling handle."
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
         # fetch the handler of the "default" protocol for error handling. TODO: change with the handler of "error" protocol.
@@ -139,7 +147,6 @@ class AEA(Agent):
 
         :return None
         """
-        assert self.resources is not None, "Call setup before calling update."
         for task in self.resources.task_registry.fetch_all():
             task.execute()
 
@@ -149,5 +156,4 @@ class AEA(Agent):
 
         :return: None
         """
-        assert self.resources is not None, "Call setup before calling teardown."
         self.resources.teardown()
