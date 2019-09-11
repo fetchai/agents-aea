@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Optional, cast
 
 from aea.agent import Agent
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, MailBox
 from aea.skills.base import Resources, Context
 from aea.skills.default.handler import DefaultHandler
 
@@ -34,6 +34,7 @@ class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
     def __init__(self, name: str,
+                 mailbox: MailBox,
                  private_key_pem_path: Optional[str] = None,
                  timeout: float = 1.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
                  debug: bool = False,
@@ -57,12 +58,14 @@ class AEA(Agent):
         self.max_reactions = max_reactions
         self._directory = directory if directory else str(Path(".").absolute())
 
+        self.mailbox = mailbox
         self._context = Context(self.name, self.outbox)
         self._resources = None  # type: Optional[Resources]
 
     @property
     def context(self) -> Context:
         """Get context."""
+        assert self._context is not None, "Context not initialized."
         return self._context
 
     @property

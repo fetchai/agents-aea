@@ -490,7 +490,7 @@ class OEFConnection(Connection):
             self._connected = False
             self.out_thread.join()
             self.out_thread = None
-            assert self.channel.disconnect(), "Cannot disconnect from OEFChannel."
+            self.channel.disconnect()
             self._core.stop()
             self._stopped = True
 
