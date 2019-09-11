@@ -1,6 +1,15 @@
 # agents-aea
 A framework for autonomous economic agent (AEA) development
 
+## Get started
+
+First, install the package from [test-pypi](https://test.pypi.org/project/aea/):
+
+`
+pip install -i https://test.pypi.org/simple/ aea
+`
+
+Then, build your agent as described in the [AEA CLI readme](../master/aea/cli/README.md)
 
 ## Dependencies
 

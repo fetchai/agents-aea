@@ -1,5 +1,5 @@
 {
-  "image": "fetchai/oef-search:latest",
+  "image": "fetchai/oef-search:0.7",
   "params": [
     [
       "--rm",
@@ -18,7 +18,7 @@
   "cmd": {
     "oef-search": {
       "positional_args": ["config_file"],
-      "config_file": "/config/node_config_latest.json"
+      "config_file": "/config/node_config.json"
     }
   }
 }
