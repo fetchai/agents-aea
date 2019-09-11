@@ -223,6 +223,7 @@ class TACSerializer(Serializer):
         else:
             raise ValueError("Type not recognized.")
 
-        new_body["type"] = TACMessage.Type(new_body["type"])
+        tac_type = TACMessage.Type(new_body["type"])
+        new_body["type"] = tac_type
         tac_message = TACMessage(tac_type=tac_type, body=new_body)
         return tac_message
