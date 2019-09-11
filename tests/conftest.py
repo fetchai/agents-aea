@@ -137,7 +137,7 @@ def _stop_oef_search_images():
     """Stop the OEF search image."""
     client = docker.from_env()
     for container in client.containers.list():
-        if "fetchai/oef-search:latest" in container.image.tags:
+        if "fetchai/oef-search:0.7" in container.image.tags:
             logger.info("Stopping existing Docker image...")
             container.stop()
 
@@ -170,8 +170,8 @@ def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
     ports = {'20000/tcp': ("0.0.0.0", 20000), '30000/tcp': ("0.0.0.0", 30000),
              '{}/tcp'.format(oef_port_): ("0.0.0.0", oef_port_)}
     volumes = {ROOT_DIR + '/tests/common/oef_search_pluto_scripts': {'bind': '/config', 'mode': 'rw'}, ROOT_DIR + '/data/oef-logs': {'bind': '/logs', 'mode': 'rw'}}
-    c = client.containers.run("fetchai/oef-search:latest",
-                              "/config/node_config_latest.json",
+    c = client.containers.run("fetchai/oef-search:0.7",
+                              "/config/node_config.json",
                               detach=True, ports=ports, volumes=volumes)
     return c
 
