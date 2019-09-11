@@ -44,6 +44,7 @@ class AEA(Agent):
         Instantiate the agent.
 
         :param name: the name of the agent
+        :param mailbox: the mailbox of the agent.
         :param private_key_pem_path: the path to the private key of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
@@ -65,7 +66,6 @@ class AEA(Agent):
     @property
     def context(self) -> Context:
         """Get context."""
-        assert self._context is not None, "Context not initialized."
         return self._context
 
     @property
