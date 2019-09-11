@@ -21,14 +21,14 @@
 
 from pathlib import Path
 from pydoc import locate
-from typing import cast, Type, Dict
+from typing import cast
 
 import click
 
 from aea.aea import AEA
-from aea.channel.oef import OEFConnection
 from aea.channel.gym import GymConnection
 from aea.channel.local import OEFLocalConnection, LocalNode
+from aea.channel.oef import OEFConnection
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
 from aea.mail.base import MailBox, Connection
 
@@ -94,4 +94,3 @@ def run(ctx: Context, connection_name):
         raise
     finally:
         agent.stop()
-

@@ -38,6 +38,7 @@ class ConnectionConfig:
     """Handle connection configuration."""
 
     def __init__(self, name: str, type: str, **config):
+        """Initialize a connection configuration object."""
         self.name = name
         self.type = type
         self.config = config
@@ -84,7 +85,6 @@ class AgentConfig(object):
 
     def dump(self, file):
         """Dump data to an agent configuration file."""
-
         result = vars(self)
         result["connections"] = [{"connection": vars(c)} for c in result["connections"].values()]
 
