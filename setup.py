@@ -33,6 +33,13 @@ with open('README.md', 'r') as f:
     readme = f.read()
 
 extras = {
+    "oef-channel": [
+        "colorlog",
+        "oef",
+    ],
+    "gym-channel": [
+        "gym"
+    ],
     "cli": [
         "click",
         "click_log",
@@ -66,8 +73,6 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     install_requires=[
-        "colorlog",
-        "oef",
         "cryptography",
         "base58"
     ],
