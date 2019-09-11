@@ -380,10 +380,11 @@ class OEFChannel(OEFAgent, Channel):
         performative = FIPAMessage.Performative(fipa_message.get("performative"))
         if performative == FIPAMessage.Performative.CFP:
             query = fipa_message.get("query")
+            query = b"" if query is None else query
             self.send_cfp(id, dialogue_id, destination, target, query)
         elif performative == FIPAMessage.Performative.PROPOSE:
             proposal = cast(List[Description], fipa_message.get("proposal"))
-            proposal_b = pickle.dumps([OEFObjectTranslator.to_oef_description(p) for p in proposal])  # type: bytes
+            proposal_b = pickle.dumps(proposal)  # type: bytes
             self.send_propose(id, dialogue_id, destination, target, proposal_b)
         elif performative == FIPAMessage.Performative.ACCEPT:
             self.send_accept(id, dialogue_id, destination, target)

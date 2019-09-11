@@ -30,6 +30,8 @@ def test_register_serialization():
     tac_message = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name="my_agent")
     tac_message_bytes = TACSerializer().encode(tac_message)
     expected_tac_message = TACSerializer().decode(tac_message_bytes)
+    print(tac_message.body)
+    print(expected_tac_message.body)
     assert expected_tac_message == tac_message
 
 

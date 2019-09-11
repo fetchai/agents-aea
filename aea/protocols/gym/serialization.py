@@ -94,5 +94,5 @@ class GymSerializer(Serializer):
             new_body["info"] = info
         new_body["step_id"] = json_msg["step_id"]
 
-        gym_message = Message(body=new_body)
+        gym_message = GymMessage(performative=performative, body=new_body)
         return gym_message

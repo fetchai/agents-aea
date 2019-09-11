@@ -33,7 +33,7 @@ def test_default_bytes_serialization():
 
 def test_default_error_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""
-    msg = DefaultMessage(type=DefaultMessage.Type.ERROR, error_code=-1, error_msg="An error")
+    msg = DefaultMessage(type=DefaultMessage.Type.ERROR, error_code=-1, error_msg="An error", error_data=None)
     msg_bytes = DefaultSerializer().encode(msg)
     actual_msg = DefaultSerializer().decode(msg_bytes)
     expected_msg = msg
