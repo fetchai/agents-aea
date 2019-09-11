@@ -23,16 +23,14 @@
 import os
 import shutil
 from pathlib import Path
-from typing import cast
 
 import click
 import click_log
 
-from aea.aea import AEA
-from aea.channel.oef import OEFMailBox
 from aea.cli.add import add
+from aea.cli.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
 from aea.cli.remove import remove
-from aea.cli.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, _try_to_load_agent_config, logger
+from aea.cli.run import run
 
 
 @click.group()
@@ -88,28 +86,9 @@ def delete(ctx: Context, agent_name):
         return
 
 
-@cli.command()
-@click.argument('oef_addr', type=str, default="127.0.0.1")
-@click.argument('oef_port', type=int, default=10000)
-@pass_ctx
-def run(ctx: Context, oef_addr, oef_port):
-    """Run the agent."""
-    _try_to_load_agent_config(ctx)
-    agent_name = cast(str, ctx.agent_config.agent_name)
-    agent = AEA(agent_name, directory=str(Path(".")))
-    agent.mailbox = OEFMailBox(public_key=agent.crypto.public_key, oef_addr=oef_addr, oef_port=oef_port)
-    try:
-        agent.start()
-    except KeyboardInterrupt:
-        logger.info("Interrupted.")
-    except Exception:
-        raise
-    finally:
-        agent.stop()
-
-
 cli.add_command(add)
 cli.add_command(remove)
+cli.add_command(run)
 
 if __name__ == '__main__':
     cli()

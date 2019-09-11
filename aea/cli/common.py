@@ -21,7 +21,7 @@
 
 import logging
 import pprint
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import click
 import click_log
@@ -34,6 +34,23 @@ logger = logging.getLogger("aea")
 logger = click_log.basic_config(logger=logger)
 
 
+class ConnectionConfig:
+    """Handle connection configuration."""
+
+    def __init__(self, name: str, type: str, **config):
+        self.name = name
+        self.type = type
+        self.config = config
+
+    @classmethod
+    def from_dict(cls, obj: dict) -> 'ConnectionConfig':
+        """Parse configuration from a dictionary object."""
+        name = obj["name"]
+        type = obj["type"]
+        config = obj["config"]
+        return ConnectionConfig(name, type, **config)
+
+
 class AgentConfig(object):
     """Class to represent the agent configuration file."""
 
@@ -41,8 +58,17 @@ class AgentConfig(object):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
         self.aea_version = aea.__version__
-        self.protocols = []  # type: List[str]
-        self.skills = []  # type: List[str]
+        self.connections = {}  # type: Dict[str, ConnectionConfig]
+        self.protocols = []  # type: List[Dict]
+        self.skills = []  # type: List[Dict]
+
+        # set default connection
+        self.connections["default-oef"] = ConnectionConfig(
+            name="default-oef",
+            type="oef",
+            config=dict(addr="127.0.0.1", port=10000)
+        )
+        self.default_connection = "default-oef"
 
     def load(self, path):
         """Load data from an agent configuration file."""
@@ -51,13 +77,19 @@ class AgentConfig(object):
 
         self.agent_name = config_file["agent_name"]
         self.aea_version = config_file["aea_version"]
+        self.connections = {c["connection"]["name"]: ConnectionConfig.from_dict(c["connection"])
+                            for c in config_file["connections"]}
         self.protocols = config_file["protocols"]
         self.skills = config_file["skills"]
 
     def dump(self, file):
         """Dump data to an agent configuration file."""
-        logger.debug("Dumping YAML: {}".format(pprint.pformat(vars(self))))
-        yaml.safe_dump(vars(self), file)
+
+        result = vars(self)
+        result["connections"] = [{"connection": vars(c)} for c in result["connections"].values()]
+
+        logger.debug("Dumping YAML: {}".format(pprint.pformat(result)))
+        yaml.safe_dump(result, file)
 
 
 class Context(object):
@@ -92,3 +124,7 @@ def _try_to_load_agent_config(ctx: Context):
         logger.error("Agent configuration file '{}' not found in the current directory. "
                      "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
         exit(-1)
+
+
+class AEAConfigException(Exception):
+    """Exception about AEA configuration."""

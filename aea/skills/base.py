@@ -417,7 +417,7 @@ class ProtocolRegistry(Registry):
         """
         protocols_spec = importlib.util.spec_from_file_location("protocols",
                                                                 os.path.join(directory, "protocols", "__init__.py"))
-        if protocols_spec is None:
+        if protocols_spec is None or not os.path.exists(protocols_spec.origin):
             logger.warning("No protocol found.")
             return
 
@@ -783,24 +783,37 @@ class Resources(object):
         Parse the resource directory.
 
         :param directory: the agent's resources directory.
+        :param context: the agent's context object
         :return: None
         """
         resource = Resources(context)
         resource.protocol_registry.populate(directory)
+        resource.populate_skills(directory, context)
+        return resource
 
+    def populate_skills(self, directory: str, context: Context) -> None:
+        """
+        Populate skills.
+
+        :param directory: the agent's resources directory.
+        :param context: the agent's context object
+        :return: None
+        """
         root_skill_directory = os.path.join(directory, "skills")
+        if not os.path.exists(root_skill_directory):
+            logger.warning("No skill found.")
+            return
+
         skill_directories = [str(x) for x in Path(root_skill_directory).iterdir() if x.is_dir()]
         logger.debug("Processing the following skill directories: {}".format(pprint.pformat(skill_directories)))
         for skill_directory in skill_directories:
             try:
                 skill = Skill.from_dir(skill_directory, context)
                 assert skill is not None
-                resource.add_skill(skill)
+                self.add_skill(skill)
             except Exception as e:
                 logger.warning("A problem occurred while parsing the skill directory {}. Exception: {}"
                                .format(skill_directory, str(e)))
-
-        return resource
 
     def add_skill(self, skill: Skill):
         """Add a skill to the set of resources."""

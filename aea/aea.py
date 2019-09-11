@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Optional, cast
 
 from aea.agent import Agent
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, MailBox
 from aea.skills.base import Resources, Context
 from aea.skills.default.handler import DefaultHandler
 
@@ -34,6 +34,7 @@ class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
     def __init__(self, name: str,
+                 mailbox: MailBox,
                  private_key_pem_path: Optional[str] = None,
                  timeout: float = 1.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
                  debug: bool = False,
@@ -43,6 +44,7 @@ class AEA(Agent):
         Instantiate the agent.
 
         :param name: the name of the agent
+        :param mailbox: the mailbox of the agent.
         :param private_key_pem_path: the path to the private key of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
@@ -57,6 +59,7 @@ class AEA(Agent):
         self.max_reactions = max_reactions
         self._directory = directory if directory else str(Path(".").absolute())
 
+        self.mailbox = mailbox
         self._context = Context(self.name, self.outbox)
         self._resources = None  # type: Optional[Resources]
 
