@@ -50,18 +50,16 @@ def _setup_connection(connection_name: str, ctx: Context) -> Connection:
 
     connection_configuration = available_connections[connection_name]
     connection_type = connection_configuration.type
+    agent_name = cast(str, ctx.agent_config.agent_name)
     if connection_type == "oef":
-        agent_name = ctx.agent_config.agent_name
         oef_addr = connection_configuration.config.get("addr", "127.0.0.1")
         oef_port = connection_configuration.config.get("port", 10000)
         return OEFConnection(agent_name, oef_addr, oef_port)
     elif connection_type == "local":
-        agent_name = ctx.agent_config.agent_name
         local_node = LocalNode()
         return OEFLocalConnection(agent_name, local_node)
     elif connection_type == "gym":
-        agent_name = ctx.agent_config.agent_name
-        gym_env_package = connection_configuration.config.get("env")
+        gym_env_package = cast(str, connection_configuration.config.get("env"))
         gym_env = locate(gym_env_package)
         return GymConnection(agent_name, gym_env)
     else:

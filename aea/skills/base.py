@@ -417,7 +417,8 @@ class ProtocolRegistry(Registry):
         """
         protocols_spec = importlib.util.spec_from_file_location("protocols",
                                                                 os.path.join(directory, "protocols", "__init__.py"))
-        if protocols_spec is None or not os.path.exists(protocols_spec.origin):
+        path = cast(str, protocols_spec.origin)
+        if protocols_spec is None or not os.path.exists(path):
             logger.warning("No protocol found.")
             return
 
