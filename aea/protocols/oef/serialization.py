@@ -93,5 +93,5 @@ class OEFSerializer(Serializer):
             operation = json_msg["operation"]
             new_body["operation"] = OEFMessage.OEFErrorOperation(operation)
 
-        oef_message = Message(body=new_body)
+        oef_message = OEFMessage(oef_type=oef_type, body=new_body)
         return oef_message
