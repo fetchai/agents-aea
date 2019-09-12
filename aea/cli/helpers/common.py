@@ -67,7 +67,8 @@ class AgentConfig(object):
         self.connections["default-oef"] = ConnectionConfig(
             name="default-oef",
             type="oef",
-            config=dict(addr="127.0.0.1", port=10000)
+            addr="127.0.0.1",
+            port=10000
         )
         self.default_connection = "default-oef"
 

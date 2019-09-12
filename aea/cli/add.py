@@ -27,7 +27,7 @@ from typing import cast
 
 import click
 
-from aea.cli.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
+from aea.cli.helpers.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
 
 
 @click.group()

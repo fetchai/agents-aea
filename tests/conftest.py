@@ -32,8 +32,8 @@ from oef.agents import AsyncioCore, Connection
 
 logger = logging.getLogger(__name__)
 
-CUR_PATH = inspect.getfile(inspect.currentframe())
-ROOT_DIR = os.path.join(os.path.dirname(CUR_PATH), "..")
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
+ROOT_DIR = os.path.join(CUR_PATH, "..")
 
 
 def pytest_addoption(parser):

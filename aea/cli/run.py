@@ -29,7 +29,7 @@ from aea.aea import AEA
 from aea.channel.gym import GymConnection
 from aea.channel.local import OEFLocalConnection, LocalNode
 from aea.channel.oef import OEFConnection
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
+from aea.cli.helpers.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
 from aea.mail.base import MailBox, Connection
 
 

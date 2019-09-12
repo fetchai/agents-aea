@@ -1,0 +1,17 @@
+aea_version: 0.1.1
+agent_name: myagent
+connections:
+- connection:
+    config:
+      addr: 127.0.0.1
+      port: 10000
+    name: default-oef
+    type: oef
+default_connection: default-oef
+protocols:
+- oef
+- default
+- tac
+- fipa
+skills:
+- echo_skill

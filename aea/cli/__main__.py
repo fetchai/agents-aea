@@ -28,7 +28,7 @@ import click
 import click_log
 
 from aea.cli.add import add
-from aea.cli.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
+from aea.cli.helpers.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
 from aea.cli.remove import remove
 from aea.cli.run import run
 
