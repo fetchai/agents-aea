@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the channel modules."""
+from typing import List
+
+gym_dependencies = []  # type: List[str]
+local_dependencies = []  # type: List[str]
+oef_dependencies = ["colorlog", "oef"]  # type: List[str]
