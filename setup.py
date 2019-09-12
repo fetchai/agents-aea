@@ -43,7 +43,8 @@ extras = {
     "cli": [
         "click",
         "click_log",
-        "PyYAML"
+        "PyYAML",
+        "jsonschema"
     ],
     "fipa": [
         "protobuf"
