@@ -26,9 +26,12 @@ from pathlib import Path
 from typing import cast
 
 import click
+from click import pass_context
+from jsonschema import ValidationError
 
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
+from aea.skills.base.core import DEFAULT_SKILL_CONFIG_FILE
 
 
 @click.group()
@@ -84,10 +87,11 @@ def protocol(ctx: Context, protocol_name):
 
 @add.command()
 @click.argument('skill_name', type=str, required=True)
-@click.argument('dirpath', type=str, default=None, required=False)
-@pass_ctx
-def skill(ctx: Context, skill_name, dirpath):
+@click.argument('dirpath', type=str, required=True)
+@pass_context
+def skill(click_context, skill_name, dirpath):
     """Add a skill to the agent."""
+    ctx = cast(Context, click_context.obj)
     agent_name = ctx.agent_config.agent_name
     logger.debug("Adding skill {skill_name} to the agent {agent_name}..."
                  .format(agent_name=agent_name, skill_name=skill_name))
@@ -96,16 +100,28 @@ def skill(ctx: Context, skill_name, dirpath):
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
     if skill_name in ctx.agent_config.skills:
         logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
+        exit(-1)
+        return
+
+    # check that the provided path points to a proper skill directory -> look for skill.yaml file.
+    skill_configuration_filepath = Path(os.path.join(dirpath, DEFAULT_SKILL_CONFIG_FILE))
+    if not skill_configuration_filepath.exists():
+        logger.error("Path '{}' does not exist.".format(skill_configuration_filepath))
+        exit(-1)
+        return
+
+    # try to load the skill configuration file
+    skill_configuration = None
+    try:
+        skill_configuration = ctx.loader.load_skill_configuration(open(str(skill_configuration_filepath)))
+    except ValidationError as e:
+        logger.error("Skill configuration file not valid: {}".format(str(e)))
+        exit(-1)
         return
 
     # copy the skill package into the agent's supported skills.
-    if dirpath is None:
-        logger.info("Path not specified. Using '{}'...".format(os.path.join(".", skill_name)))
-        src = skill_name
-    else:
-        dirpath = str(Path(dirpath).absolute())
-        src = dirpath
-
+    dirpath = str(Path(dirpath).absolute())
+    src = dirpath
     dest = os.path.join("skills", skill_name)
     logger.info("Copying skill modules. src={} dst={}".format(src, dest))
     try:
@@ -118,6 +134,11 @@ def skill(ctx: Context, skill_name, dirpath):
     skills_init_module = os.path.join("skills", "__init__.py")
     logger.debug("Creating {}".format(skills_init_module))
     Path(skills_init_module).touch(exist_ok=True)
+
+    # check for not supported protocol, and add it.
+    if skill_configuration.protocol not in ctx.agent_config.protocols:
+        logger.info("Adding protocol '{}' to the agent...".format(skill_configuration.protocol))
+        click_context.invoke(protocol, protocol_name=skill_configuration.protocol)
 
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
