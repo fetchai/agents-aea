@@ -46,7 +46,7 @@ class Context:
         """Initialize a context object."""
         self.agent_name = agent_name
         self.outbox = outbox
-        self.loader = ConfigLoader()
+        self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
 
 
 class Behaviour(ABC):
@@ -248,7 +248,7 @@ class Skill:
         :return: the Skill object. None if the parsing failed.
         """
         # check if there is the config file. If not, then return None.
-        skill_config = context.loader.load_skill_configuration(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
+        skill_config = context.skill_loader.load(open(os.path.join(directory)))
         if skill_config is None:
             return None
 

@@ -57,7 +57,7 @@ def protocol(ctx: Context, protocol_name):
     logger.debug("Removing the protocol from {}".format(DEFAULT_AEA_CONFIG_FILE))
     if protocol_name in ctx.agent_config.protocols:
         ctx.agent_config.protocols.remove(protocol_name)
-    ctx.loader.dump_agent_configuration(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @remove.command()
@@ -82,4 +82,4 @@ def skill(ctx: Context, skill_name):
     logger.debug("Removing the skill from {}".format(DEFAULT_AEA_CONFIG_FILE))
     if skill_name in ctx.agent_config.skills:
         ctx.agent_config.skills.remove(skill_name)
-    ctx.loader.dump_agent_configuration(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))

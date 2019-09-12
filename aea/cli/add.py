@@ -27,7 +27,7 @@ from typing import cast
 
 import click
 from click import pass_context
-from jsonschema import ValidationError
+from jsonschema import ValidationError  # type: ignore
 
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
@@ -82,7 +82,7 @@ def protocol(ctx: Context, protocol_name):
     # add the protocol to the configurations.
     logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.protocols.add(protocol_name)
-    ctx.loader.dump_agent_configuration(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @add.command()
@@ -111,9 +111,8 @@ def skill(click_context, skill_name, dirpath):
         return
 
     # try to load the skill configuration file
-    skill_configuration = None
     try:
-        skill_configuration = ctx.loader.load_skill_configuration(open(str(skill_configuration_filepath)))
+        skill_configuration = ctx.skill_loader.load(open(str(skill_configuration_filepath)))
     except ValidationError as e:
         logger.error("Skill configuration file not valid: {}".format(str(e)))
         exit(-1)
@@ -143,4 +142,4 @@ def skill(click_context, skill_name, dirpath):
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.skills.add(skill_name)
-    ctx.loader.dump_agent_configuration(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))

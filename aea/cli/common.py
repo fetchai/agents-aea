@@ -27,7 +27,7 @@ import click
 import click_log
 import jsonschema  # type: ignore
 
-from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig
 from aea.skills.base.loader import ConfigLoader
 
 logger = logging.getLogger("aea")
@@ -42,7 +42,8 @@ class Context(object):
     def __init__(self, cwd: str = "."):
         """Init the context."""
         self.config = dict()  # type: Dict
-        self.loader = ConfigLoader()
+        self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+        self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         self.cwd = cwd
 
     def set_config(self, key, value) -> None:
@@ -64,7 +65,7 @@ def _try_to_load_agent_config(ctx: Context):
     try:
         path = Path(DEFAULT_AEA_CONFIG_FILE)
         fp = open(str(path), mode="r", encoding="utf-8")
-        ctx.agent_config = ctx.loader.load_agent_configuration(fp)
+        ctx.agent_config = ctx.agent_loader.load(fp)
     except FileNotFoundError:
         logger.error("Agent configuration file '{}' not found in the current directory. "
                      "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))

@@ -66,7 +66,7 @@ def create(ctx: Context, agent_name):
             addr="127.0.0.1",
             port=10000
         ))
-        ctx.loader.dump_agent_configuration(agent_config, config_file)
+        ctx.agent_loader.dump(agent_config, config_file)
         logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))
 
     except OSError:
