@@ -18,3 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the protocol modules."""
+from typing import List
+
+default_dependencies = []  # type: List[str]
+fipa_dependencies = ["protobuf"]  # type: List[str]
+gym_dependencies = []  # type: List[str]
+oef_dependencies = ["colorlog", "oef"]  # type: List[str]
+tac_dependencies = ["protobuf"]  # type: List[str]
