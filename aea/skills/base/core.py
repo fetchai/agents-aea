@@ -28,8 +28,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict, Any, cast
 
-import yaml
-
+from aea.skills.base.config import BehaviourConfig, HandlerConfig, TaskConfig, SkillConfig
+from aea.skills.base.loader import ConfigLoader
 from aea.mail.base import OutBox, ProtocolId, Envelope
 from aea.protocols.base.protocol import Protocol
 
@@ -46,6 +46,7 @@ class Context:
         """Initialize a context object."""
         self.agent_name = agent_name
         self.outbox = outbox
+        self.loader = ConfigLoader()
 
 
 class Behaviour(ABC):
@@ -75,7 +76,7 @@ class Behaviour(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, behaviours_configs: List[Dict]) -> List['Behaviour']:
+    def parse_module(cls, path: str, behaviours_configs: List[BehaviourConfig]) -> List['Behaviour']:
         """
         Parse the behaviours module.
 
@@ -92,13 +93,13 @@ class Behaviour(ABC):
 
         name_to_class = dict(behaviours_classes)
         for behaviour_config in behaviours_configs:
-            behaviour_class_name = cast(str, behaviour_config.get("class_name"))
+            behaviour_class_name = cast(str, behaviour_config.class_name)
             logger.debug("Processing behaviour {}".format(behaviour_class_name))
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
                 logger.warning("Behaviour '{}' cannot be found.".format(behaviour_class))
             else:
-                args = behaviour_config.get("args", {})
+                args = behaviour_config.args
                 behaviour = behaviour_class(**args)
                 behaviours.append(behaviour)
 
@@ -134,7 +135,7 @@ class Handler(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, handler_config: Dict) -> Optional['Handler']:
+    def parse_module(cls, path: str, handler_config: HandlerConfig) -> Optional['Handler']:
         """
         Parse the handler module.
 
@@ -149,14 +150,14 @@ class Handler(ABC):
         handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
 
         name_to_class = dict(handler_classes)
-        handler_class_name = cast(str, handler_config.get("class_name"))
+        handler_class_name = cast(str, handler_config.class_name)
         logger.debug("Processing handler {}".format(handler_class_name))
         handler_class = name_to_class.get(handler_class_name, None)
         if handler_class is None:
-            logger.warning("Handler '{}' cannot be found.".format(handler_class))
+            logger.warning("Handler '{}' cannot be found.".format(handler_class_name))
             return None
         else:
-            args = handler_config.get("args", {})
+            args = handler_config.args
             handler = handler_class(**args)
             return handler
 
@@ -188,7 +189,7 @@ class Task(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, tasks_configs: List[Dict]) -> List['Task']:
+    def parse_module(cls, path: str, tasks_configs: List[TaskConfig]) -> List['Task']:
         """
         Parse the tasks module.
 
@@ -205,66 +206,17 @@ class Task(ABC):
 
         name_to_class = dict(tasks_classes)
         for task_config in tasks_configs:
-            task_class_name = task_config.get("class_name", None)
+            task_class_name = task_config.class_name
             logger.debug("Processing task {}".format(task_class_name))
             task_class = name_to_class.get(task_class_name, None)
             if task_class is None:
                 logger.warning("Task '{}' cannot be found.".format(task_class))
             else:
-                args = task_config.get("args", {})
+                args = task_config.args
                 task = task_class(**args)
                 tasks.append(task)
 
         return tasks
-
-
-class SkillConfig:
-    """This class represent the skill configuration."""
-
-    def __init__(self,
-                 id: SkillId,
-                 authors: List[str],
-                 version: str,
-                 license: str,
-                 url: str,
-                 handler_config: Dict,
-                 behaviours_config: List[Dict],
-                 tasks_config: List[Dict]):
-        """Initialize a skill configuration object."""
-        self.id = id
-        self.authors = authors
-        self.version = version
-        self.license = license
-        self.url = url
-        self.handler_config = handler_config
-        self.behaviours_config = behaviours_config
-        self.tasks_config = tasks_config
-
-    @classmethod
-    def from_config_file(cls, filepath: str) -> Optional['SkillConfig']:
-        """
-        Parse a configuration file.
-
-        :param filepath: the path to the config file.
-        :return: the SkillConfig object. None if the parsing failed.
-        """
-        try:
-            file = open(filepath, "r")
-            data = yaml.safe_load(file)
-            skill_config = SkillConfig(
-                data.get("name"),
-                data.get("authors"),
-                data.get("version"),
-                data.get("license"),
-                data.get("url"),
-                data.get("handler"),
-                data.get("behaviours"),
-                data.get("tasks")
-            )
-            return skill_config
-        except Exception as e:
-            logger.exception("An error occured while parsing the skill config: {}".format(e))
-            return None
 
 
 class Skill:
@@ -296,7 +248,7 @@ class Skill:
         :return: the Skill object. None if the parsing failed.
         """
         # check if there is the config file. If not, then return None.
-        skill_config = SkillConfig.from_config_file(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE))
+        skill_config = context.loader.load_skill_configuration(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
         if skill_config is None:
             return None
 
@@ -308,12 +260,15 @@ class Skill:
         skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
-        handler = Handler.parse_module(os.path.join(directory, "handler.py"), skill_config.handler_config)
+        handler = Handler.parse_module(os.path.join(directory, "handler.py"), skill_config.handler)
         if handler is not None:
             handler.context = context
 
-        behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), skill_config.behaviours_config)
-        tasks = Task.parse_module(os.path.join(directory, "tasks.py"), skill_config.tasks_config)
+        behaviours_configurations = list(dict(skill_config.behaviours.read_all()).values())
+        behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations)
+
+        tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
+        tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations)
 
         skill = Skill(skill_config, handler, behaviours, tasks)
         return skill
@@ -818,7 +773,7 @@ class Resources(object):
 
     def add_skill(self, skill: Skill):
         """Add a skill to the set of resources."""
-        skill_id = skill.config.id
+        skill_id = skill.config.name
         self._skills[skill_id] = skill
         if skill.handler is not None:
             self.handler_registry.register(skill_id, cast(Handler, skill.handler))

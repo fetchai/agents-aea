@@ -17,22 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Definition of the schemas for configuration file."""
-"""
-aea_version: 0.1.1
-agent_name: myagent
-connections:
-- connection:
-    config:
-      config:
-        addr: 127.0.0.1
-        port: 10000
-    name: default-oef
-    type: oef
-default_connection: default-oef
-protocols: []
-skills: []
-
-"""
-
-
+"""This module contains a dummy skill for an AEA."""

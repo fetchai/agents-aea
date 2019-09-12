@@ -29,7 +29,7 @@ from aea.aea import AEA
 from aea.channel.gym import GymConnection
 from aea.channel.local import OEFLocalConnection, LocalNode
 from aea.channel.oef import OEFConnection
-from aea.cli.helpers.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
+from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
 from aea.mail.base import MailBox, Connection
 
 
@@ -44,11 +44,12 @@ def _setup_connection(connection_name: str, ctx: Context) -> Connection:
                               | or if the connection type is not supported by the framework.
     """
     available_connections = ctx.agent_config.connections
-    available_connection_names = available_connections.keys()
+    available_connection_names = dict(available_connections.read_all()).keys()
     if connection_name not in available_connection_names:
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
-    connection_configuration = available_connections[connection_name]
+    connection_configuration = available_connections.read(connection_name)
+    assert connection_configuration is not None, "Connection not found."
     connection_type = connection_configuration.type
     agent_name = cast(str, ctx.agent_config.agent_name)
     if connection_type == "oef":
@@ -74,7 +75,7 @@ def run(ctx: Context, connection_name):
     """Run the agent."""
     _try_to_load_agent_config(ctx)
     agent_name = cast(str, ctx.agent_config.agent_name)
-    connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
+    connection_name = ctx.agent_config.default_connection.name if connection_name is None else connection_name
     try:
         connection = _setup_connection(connection_name, ctx)
     except AEAConfigException as e:

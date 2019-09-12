@@ -22,17 +22,20 @@
 from aea.skills.base.core import Behaviour
 
 
-class EchoBehaviour(Behaviour):
-    """Echo behaviour."""
+class DummyBehaviour(Behaviour):
+    """Dummy behaviour."""
 
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
-        print("EchoBehaviour.__init__: arguments: {}".format(kwargs))
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.nb_act_called = 0
+        self.nb_teardown_called = 0
 
     def act(self) -> None:
         """Act according to the behaviour."""
-        print("Echo Behaviour: act method called.")
+        self.nb_act_called += 1
 
     def teardown(self) -> None:
         """Teardown the behaviour."""
-        print("Echo Behaviour: teardown method called.")
+        self.nb_teardown_called += 1

@@ -4,17 +4,19 @@ version: 0.1.0
 license: Apache 2.0
 url: ""
 behaviours:
-  - class_name: EchoBehaviour
-    args:
-      foo: bar
+  - behaviour:
+      class_name: EchoBehaviour
+      args:
+        foo: bar
 handler:
   class_name: EchoHandler
   args:
     foo: bar
     bar: foo
 tasks:
-  - class_name: EchoTask
-    args:
-      foo: bar
-      bar: foo
+  - task:
+      class_name: EchoTask
+      args:
+        foo: bar
+        bar: foo
 protocol: "default"

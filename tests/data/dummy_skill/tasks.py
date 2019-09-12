@@ -17,4 +17,24 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the parser for configuration file."""
+"""This module contains the tasks for the 'echo' skill."""
+from aea.skills.base.core import Task
+
+
+class DummyTask(Task):
+    """Dummy task."""
+
+    def __init__(self, **kwargs):
+        """Initialize the task."""
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.nb_execute_called = 0
+        self.nb_teardown_called = 0
+
+    def execute(self) -> None:
+        """Execute the task."""
+        self.nb_execute_called += 1
+
+    def teardown(self) -> None:
+        """Teardown the task."""
+        self.nb_teardown_called += 1

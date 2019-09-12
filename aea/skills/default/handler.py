@@ -26,7 +26,7 @@ from aea.mail.base import ProtocolId, Envelope
 from aea.protocols.base.protocol import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.skills.base import Handler
+from aea.skills.base.core import Handler
 
 logger = logging.getLogger(__name__)
 

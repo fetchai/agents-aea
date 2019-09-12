@@ -27,19 +27,15 @@ from typing import cast
 
 import click
 
-from aea.cli.helpers.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
+from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
 
 
 @click.group()
 @pass_ctx
 def add(ctx: Context):
     """Add a resource to the agent."""
-    try:
-        ctx.agent_config = AgentConfig()
-        ctx.agent_config.load(DEFAULT_AEA_CONFIG_FILE)
-    except FileNotFoundError:
-        logger.error("Agent configuration file not found '{}'. Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
-        exit(-1)
+    _try_to_load_agent_config(ctx)
 
 
 @add.command()
@@ -82,8 +78,8 @@ def protocol(ctx: Context, protocol_name):
 
     # add the protocol to the configurations.
     logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
-    ctx.agent_config.protocols.append(protocol_name)
-    ctx.agent_config.dump(open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_config.protocols.add(protocol_name)
+    ctx.loader.dump_agent_configuration(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @add.command()
@@ -108,7 +104,6 @@ def skill(ctx: Context, skill_name, dirpath):
         src = skill_name
     else:
         dirpath = str(Path(dirpath).absolute())
-        # src = os.path.join(dirpath, skill_name)  TODO the source is dirpath or dirpath/skill_name?
         src = dirpath
 
     dest = os.path.join("skills", skill_name)
@@ -124,7 +119,7 @@ def skill(ctx: Context, skill_name, dirpath):
     logger.debug("Creating {}".format(skills_init_module))
     Path(skills_init_module).touch(exist_ok=True)
 
-    # add the protocol to the configurations.
+    # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
-    ctx.agent_config.skills.append(skill_name)
-    ctx.agent_config.dump(open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_config.skills.add(skill_name)
+    ctx.loader.dump_agent_configuration(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))

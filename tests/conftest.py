@@ -23,12 +23,13 @@ import inspect
 import logging
 import os
 import time
+from threading import Timer
 from typing import Optional
 
 import docker as docker
 import pytest
 from docker.models.containers import Container
-from oef.agents import AsyncioCore, Connection
+from oef.agents import AsyncioCore, OEFAgent
 
 logger = logging.getLogger(__name__)
 
@@ -69,29 +70,29 @@ class OEFHealthCheck(object):
 
         self._result = False
         self._stop = False
-        self._conn = None  # type: Optional[Connection]
-        self._loop = asyncio.get_event_loop() if loop is None else loop
-        self._loop.set_exception_handler(self.exception_handler)
-        self._core = AsyncioCore(loop=self._loop)
+        self._core = AsyncioCore()
+        self.agent = OEFAgent("check", core=self._core, oef_addr=self.oef_addr, oef_port=self.oef_port)
+        self.agent.on_connect_success = self.on_connect_ok
+        self.agent.on_connection_terminated = self.on_connect_terminated
+        self.agent.on_connect_failed = self.exception_handler
 
-    def exception_handler(self, loop, d):
+    def exception_handler(self, url=None, ex=None):
         """Handle exception during a connection attempt."""
-        print("An error occurred. Details: {}".format(d))
+        print("An error occurred. Exception: {}".format(ex))
         self._stop = True
 
-    def on_connect_ok(self, conn=None, url=None, ex=None, conn_name=None):
+    def on_connect_ok(self, url=None):
         """Handle a successful connection."""
         print("Connection OK!")
         self._result = True
         self._stop = True
 
-    def on_connect_fail(self, conn=None, url=None, ex=None, conn_name=None):
+    def on_connect_terminated(self, url=None):
         """Handle a connection failure."""
-        print("Connection failed. {}".format(ex))
-        self._result = False
+        print("Connection terminated.")
         self._stop = True
 
-    async def _run(self) -> bool:
+    def run(self) -> bool:
         """
         Run the check, asynchronously.
 
@@ -99,38 +100,36 @@ class OEFHealthCheck(object):
         """
         self._result = False
         self._stop = False
-        pbk = 'check'
-        seconds = 3.0
+
+        def stop_connection_attempt(self):
+            if self.agent.state == "connecting":
+                self.agent.state = "failed"
+
+        t = Timer(1.5, stop_connection_attempt, args=(self, ))
+
         try:
             print("Connecting to {}:{}...".format(self.oef_addr, self.oef_port))
+            self._core.run_threaded()
 
-            self._conn = Connection(self._core)
-            self._conn.connect(url="127.0.0.1:10000", success=self.on_connect_ok,
-                               failure=self.on_connect_fail,
-                               public_key=pbk)
-
-            while not self._stop and seconds > 0:
-                await asyncio.sleep(1.0)
-                seconds -= 1.0
+            t.start()
+            self._result = self.agent.connect()
+            self._stop = True
 
             if self._result:
                 print("Connection established. Tearing down connection...")
-                self._core.call_soon_async(self._conn.do_stop)
-                await asyncio.sleep(1.0)
+                self.agent.disconnect()
+                t.cancel()
             else:
                 print("A problem occurred. Exiting...")
 
         except Exception as e:
             print(str(e))
         finally:
+            t.join(1.0)
+            self.agent.stop()
+            self.agent.disconnect()
+            self._core.stop()
             return self._result
-
-    def run(self) -> bool:
-        """Run the check.
-
-        :return: True if the check is successful, False otherwise.
-        """
-        return self._loop.run_until_complete(self._run())
 
 
 def _stop_oef_search_images():
@@ -149,9 +148,6 @@ def _wait_for_oef(max_attempts: int = 15, sleep_rate: float = 1.0):
     while not success and attempt < max_attempts:
         attempt += 1
         logger.info("Attempt {}...".format(attempt))
-        # oef_healthcheck = subprocess.Popen(["python3", ROOT_DIR + "/sandbox/oef_healthcheck.py", "127.0.0.1", "10000"])
-        # oef_healthcheck.wait()
-        # oef_healthcheck.terminate()
         oef_healthcheck = OEFHealthCheck("127.0.0.1", 10000)
         result = oef_healthcheck.run()
         if result:
@@ -194,6 +190,7 @@ def network_node(oef_addr, oef_port, pytestconfig):
     else:
         _stop_oef_search_images()
         c = _create_oef_docker_image(oef_addr, oef_port)
+        c.start()
 
         # wait for the setup...
         logger.info("Setting up the OEF node...")

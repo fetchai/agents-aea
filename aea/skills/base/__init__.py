@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module includes helper resources for the CLI tool."""
+"""This module contains the base components for the skills."""
