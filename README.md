@@ -13,7 +13,9 @@ Then, build your agent as described in the [AEA CLI readme](../master/aea/cli/RE
 
 ## Dependencies
 
-- All python specific dependencies are specified in the Pipfile (and installed via the commands specified in 'Preliminaries').
+All python specific dependencies are specified in the Pipfile (and installed via the commands specified in 'Preliminaries').
+
+Or, you can have more control on the installed dependencies by leveraging the setuptools' extras mechanism (more details later). 
 
 ## Preliminaries
 
@@ -21,9 +23,13 @@ Then, build your agent as described in the [AEA CLI readme](../master/aea/cli/RE
 
       pipenv --python 3.7 && pipenv shell
 
-- Install the package:
+- Install the package from source:
 
-      python setup.py install
+      pip install .[all]
+
+- To install only specific extra dependencies, e.g. `cli` and `oef-protocol`:
+
+      pip install .[cli,oef-channel]
 
 ## Contribute
 
@@ -58,7 +64,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 - To run static type checks:
 
-	  mypy aea examples scripts tests
+	  tox -e mypy
 
 ## Use the `aea` command-line tool
 
