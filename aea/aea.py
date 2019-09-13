@@ -24,7 +24,7 @@ from typing import Optional, cast
 
 from aea.agent import Agent
 from aea.mail.base import Envelope, MailBox
-from aea.skills.base import Resources, Context
+from aea.skills.base import Resources, AgentContext
 from aea.skills.default.handler import DefaultHandler
 
 logger = logging.getLogger(__name__)
@@ -60,11 +60,11 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._context = Context(self.name, self.outbox)
+        self._context = AgentContext(self.name, self.outbox)
         self._resources = None  # type: Optional[Resources]
 
     @property
-    def context(self) -> Context:
+    def context(self) -> AgentContext:
         """Get context."""
         return self._context
 

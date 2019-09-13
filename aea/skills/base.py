@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the base classes for the skills."""
+
 import importlib.util
 import inspect
 import logging
@@ -39,24 +40,83 @@ DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 SkillId = str
 
 
-class Context:
+class AgentContext:
     """Save relevant data for the agent."""
 
     def __init__(self, agent_name: str, outbox: OutBox):
-        """Initialize a context object."""
-        self.agent_name = agent_name
-        self.outbox = outbox
+        """
+        Initialize a skill context.
+
+        :param agent_name: the agent's name
+        :param outbox: the outbox
+        """
+        self._agent_name = agent_name
+        self._outbox = outbox
+
+    @property
+    def agent_name(self) -> str:
+        """Get agent name."""
+        return self._agent_name
+
+    @property
+    def outbox(self) -> OutBox:
+        """Get outbox."""
+        return self._outbox
+
+
+class SkillContext:
+    """This class implements the context of a skill."""
+
+    def __init__(self, agent_context: AgentContext):
+        """
+        Initialize a skill context.
+
+        :param agent_context: the agent's context
+        """
+        self._agent_context = agent_context
+        self._skill = None  # type: Optional[Skill]
+
+    @property
+    def agent_name(self) -> str:
+        """Get agent name."""
+        return self._agent_context.agent_name
+
+    @property
+    def outbox(self) -> OutBox:
+        """Get outbox."""
+        return self._agent_context.outbox
+
+    @property
+    def handler(self) -> Optional['Handler']:
+        """Get handler of the skill."""
+        assert self._skill is not None, "Skill not initialized."
+        return self._skill.handler
+
+    @property
+    def behaviours(self) -> Optional[List['Behaviour']]:
+        """Get behaviours of the skill."""
+        assert self._skill is not None, "Skill not initialized."
+        return self._skill.behaviours
+
+    @property
+    def tasks(self) -> Optional[List['Task']]:
+        """Get tasks of the skill."""
+        assert self._skill is not None, "Skill not initialized."
+        return self._skill.tasks
 
 
 class Behaviour(ABC):
     """This class implements an abstract behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, skill_context: SkillContext, **kwargs):
         """
         Initialize a behaviour.
 
-        :param kwargs: keyword arguments.
+        :param skill_context: the skill context
+        :param kwargs: keyword arguments
         """
+        self.context = skill_context
+        self.config = kwargs
 
     @abstractmethod
     def act(self) -> None:
@@ -75,12 +135,13 @@ class Behaviour(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, behaviours_configs: List[Dict]) -> List['Behaviour']:
+    def parse_module(cls, path: str, behaviours_configs: List[Dict], skill_context: SkillContext) -> List['Behaviour']:
         """
         Parse the behaviours module.
 
         :param path: path to the Python module containing the Behaviour classes.
         :param behaviours_configs: a list of behaviour configurations.
+        :param skill_context: the skill context
         :return: a list of Behaviour.
         """
         behaviours = []
@@ -99,7 +160,7 @@ class Behaviour(ABC):
                 logger.warning("Behaviour '{}' cannot be found.".format(behaviour_class))
             else:
                 args = behaviour_config.get("args", {})
-                behaviour = behaviour_class(**args)
+                behaviour = behaviour_class(skill_context, **args)
                 behaviours.append(behaviour)
 
         return behaviours
@@ -110,10 +171,14 @@ class Handler(ABC):
 
     SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
 
-    context: Context
+    def __init__(self, skill_context: SkillContext, *args, **kwargs):
+        """
+        Initialize a handler object.
 
-    def __init__(self, *args, **kwargs):
-        """Initialize a handler object."""
+        :param skill_context: the skill context
+        :param kwargs: keyword arguments
+        """
+        self.context = skill_context
         self.config = kwargs
 
     @abstractmethod
@@ -134,12 +199,13 @@ class Handler(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, handler_config: Dict) -> Optional['Handler']:
+    def parse_module(cls, path: str, handler_config: Dict, skill_context: SkillContext) -> Optional['Handler']:
         """
         Parse the handler module.
 
         :param path: path to the Python module containing the Handler class.
         :param handler_config: the handler configuration.
+        :param skill_context: the skill context
         :return: an handler, or None if the parsing fails.
         """
         handler_spec = importlib.util.spec_from_file_location("handler", location=path)
@@ -157,19 +223,22 @@ class Handler(ABC):
             return None
         else:
             args = handler_config.get("args", {})
-            handler = handler_class(**args)
+            handler = handler_class(skill_context, **args)
             return handler
 
 
 class Task(ABC):
     """This class implements an abstract task."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, skill_context: SkillContext, *args, **kwargs):
         """
         Initialize a task.
 
+        :param skill_context: the skill context
         :param kwargs: keyword arguments.
         """
+        self.context = skill_context
+        self.config = kwargs
 
     @abstractmethod
     def execute(self) -> None:
@@ -188,12 +257,13 @@ class Task(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, tasks_configs: List[Dict]) -> List['Task']:
+    def parse_module(cls, path: str, tasks_configs: List[Dict], skill_context: SkillContext) -> List['Task']:
         """
         Parse the tasks module.
 
         :param path: path to the Python module containing the Task classes.
         :param tasks_configs: a list of tasks configurations.
+        :param skill_context: the skill context
         :return: a list of Tasks.
         """
         tasks = []
@@ -212,7 +282,7 @@ class Task(ABC):
                 logger.warning("Task '{}' cannot be found.".format(task_class))
             else:
                 args = task_config.get("args", {})
-                task = task_class(**args)
+                task = task_class(skill_context, **args)
                 tasks.append(task)
 
         return tasks
@@ -271,6 +341,7 @@ class Skill:
     """This class implements a skill."""
 
     def __init__(self, config: SkillConfig,
+                 skill_context: SkillContext,
                  handler: Optional[Handler],
                  behaviours: Optional[List[Behaviour]],
                  tasks: Optional[List[Task]]):
@@ -283,16 +354,18 @@ class Skill:
         :param tasks: the list of tasks executed at every iteration of the main loop.
         """
         self.config = config
+        self.skill_context = skill_context
         self.handler = handler
         self.behaviours = behaviours
         self.tasks = tasks
 
     @classmethod
-    def from_dir(cls, directory: str, context: Context) -> Optional['Skill']:
+    def from_dir(cls, directory: str, agent_context: AgentContext) -> Optional['Skill']:
         """
         Load a skill from a directory.
 
         :param directory: the skill
+        :param agent_context: the agent's context
         :return: the Skill object. None if the parsing failed.
         """
         # check if there is the config file. If not, then return None.
@@ -308,14 +381,15 @@ class Skill:
         skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
-        handler = Handler.parse_module(os.path.join(directory, "handler.py"), skill_config.handler_config)
-        if handler is not None:
-            handler.context = context
+        skill_context = SkillContext(agent_context)
 
-        behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), skill_config.behaviours_config)
-        tasks = Task.parse_module(os.path.join(directory, "tasks.py"), skill_config.tasks_config)
+        handler = Handler.parse_module(os.path.join(directory, "handler.py"), skill_config.handler_config, skill_context)
+        behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), skill_config.behaviours_config, skill_context)
+        tasks = Task.parse_module(os.path.join(directory, "tasks.py"), skill_config.tasks_config, skill_context)
 
-        skill = Skill(skill_config, handler, behaviours, tasks)
+        skill = Skill(skill_config, skill_context, handler, behaviours, tasks)
+        skill_context._skill = skill
+
         return skill
 
 
@@ -358,14 +432,14 @@ class Registry(ABC):
         :return: the list of items.
         """
 
-    @abstractmethod
-    def populate(self, directory: str) -> None:
-        """
-        Load into the registry as specified in the config and apply consistency checks.
+    # @abstractmethod
+    # def populate(self, directory: str) -> None:
+    #     """
+    #     Load into the registry as specified in the config and apply consistency checks.
 
-        :param directory: the filepath to the agent's resource directory.
-        :return: None
-        """
+    #     :param directory: the filepath to the agent's resource directory.
+    #     :return: None
+    #     """
 
     @abstractmethod
     def teardown(self) -> None:
@@ -467,14 +541,13 @@ class ProtocolRegistry(Registry):
 class HandlerRegistry(Registry):
     """This class implements the handlers registry."""
 
-    def __init__(self, context: Context) -> None:
+    def __init__(self) -> None:
         """
         Instantiate the registry.
 
         :return: None
         """
         self._handlers = {}  # type: Dict[SkillId, Handler]
-        self.context = context
 
     def register(self, skill_id: SkillId, handler: Handler) -> None:
         """
@@ -510,26 +583,26 @@ class HandlerRegistry(Registry):
         """Fetch all the handlers."""
         return list(self._handlers.values())
 
-    def populate(self, directory: str) -> None:
-        """
-        Load the handlers as specified in the config and apply consistency checks.
+    # def populate(self, directory: str) -> None:
+    #     """
+    #     Load the handlers as specified in the config and apply consistency checks.
 
-        :param directory: the agent's resources directory.
-        :return: None
-        """
-        skills_spec = importlib.util.spec_from_file_location("skills",
-                                                             os.path.join(directory, "skills", "__init__.py"))
-        if skills_spec is None:
-            logger.warning("No skill found.")
-            return
+    #     :param directory: the agent's resources directory.
+    #     :return: None
+    #     """
+    #     skills_spec = importlib.util.spec_from_file_location("skills",
+    #                                                          os.path.join(directory, "skills", "__init__.py"))
+    #     if skills_spec is None:
+    #         logger.warning("No skill found.")
+    #         return
 
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
-        logger.debug("Processing the following skill package: {}".format(skills_packages))
-        for skill_name in skills_packages:
-            try:
-                self._add_skill_handler(directory, skill_name)
-            except Exception:
-                logger.exception("Not able to add handler for skill {}.".format(skill_name))
+    #     skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
+    #     logger.debug("Processing the following skill package: {}".format(skills_packages))
+    #     for skill_name in skills_packages:
+    #         try:
+    #             self._add_skill_handler(directory, skill_name)
+    #         except Exception:
+    #             logger.exception("Not able to add handler for skill {}.".format(skill_name))
 
     def teardown(self) -> None:
         """
@@ -541,39 +614,38 @@ class HandlerRegistry(Registry):
             handler.teardown()
         self._handlers = {}
 
-    def _add_skill_handler(self, directory: str, skill_name: str) -> None:
-        """
-        Add a skill handler.
+    # def _add_skill_handler(self, directory: str, skill_name: str) -> None:
+    #     """
+    #     Add a skill handler.
 
-        :param directory: the agent's resources directory.
-        :param skill_name: the skill's name
-        :return: None
-        """
-        handler_spec = importlib.util.spec_from_file_location("handler",
-                                                              os.path.join(directory, "skills", skill_name, "handler.py"))
-        handler_module = importlib.util.module_from_spec(handler_spec)
-        handler_spec.loader.exec_module(handler_module)  # type: ignore
-        classes = inspect.getmembers(handler_module, inspect.isclass)
-        handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
-        handler_class = handler_classes[0][1]
+    #     :param directory: the agent's resources directory.
+    #     :param skill_name: the skill's name
+    #     :return: None
+    #     """
+    #     handler_spec = importlib.util.spec_from_file_location("handler",
+    #                                                           os.path.join(directory, "skills", skill_name, "handler.py"))
+    #     handler_module = importlib.util.module_from_spec(handler_spec)
+    #     handler_spec.loader.exec_module(handler_module)  # type: ignore
+    #     classes = inspect.getmembers(handler_module, inspect.isclass)
+    #     handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
+    #     handler_class = handler_classes[0][1]
 
-        logger.debug("Found handler class {handler_class} for skill {skill_name}"
-                     .format(handler_class=handler_class, skill_name=skill_name))
-        handler = handler_class(self.context)
-        self.register(skill_name, handler)
+    #     logger.debug("Found handler class {handler_class} for skill {skill_name}"
+    #                  .format(handler_class=handler_class, skill_name=skill_name))
+    #     handler = handler_class(self.context)
+    #     self.register(skill_name, handler)
 
 
 class BehaviourRegistry(Registry):
     """This class implements the behaviour registry."""
 
-    def __init__(self, context: Context) -> None:
+    def __init__(self) -> None:
         """
         Instantiate the registry.
 
         :return: None
         """
         self._behaviours = {}  # type: Dict[SkillId, List[Behaviour]]
-        self.context = context
 
     def register(self, skill_id: SkillId, behaviours: List[Behaviour]) -> None:
         """
@@ -608,47 +680,47 @@ class BehaviourRegistry(Registry):
         """Fetch all the behaviours."""
         return [b for skill_behaviours in self._behaviours.values() for b in skill_behaviours]
 
-    def populate(self, directory: str) -> None:
-        """
-        Load the behaviours as specified in the config and apply consistency checks.
+    # def populate(self, directory: str) -> None:
+    #     """
+    #     Load the behaviours as specified in the config and apply consistency checks.
 
-        :param directory: the agent's resources directory.
-        :return: None
-        """
-        logger.debug("Populating the behaviour registry. Resource directory: {}".format(directory))
-        skills_spec = importlib.util.spec_from_file_location("skills",
-                                                             os.path.join(directory, "skills", "__init__.py"))
-        if skills_spec is None:
-            logger.warning("No skill found.")
-            return
+    #     :param directory: the agent's resources directory.
+    #     :return: None
+    #     """
+    #     logger.debug("Populating the behaviour registry. Resource directory: {}".format(directory))
+    #     skills_spec = importlib.util.spec_from_file_location("skills",
+    #                                                          os.path.join(directory, "skills", "__init__.py"))
+    #     if skills_spec is None:
+    #         logger.warning("No skill found.")
+    #         return
 
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
-        logger.debug("Processing the following skill package: {}".format(skills_packages))
-        for skill_name in skills_packages:
-            try:
-                self._add_skill_behaviours(directory, skill_name)
-            except Exception:
-                logger.exception("Not able to add handler for skill {}.".format(skill_name))
+    #     skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
+    #     logger.debug("Processing the following skill package: {}".format(skills_packages))
+    #     for skill_name in skills_packages:
+    #         try:
+    #             self._add_skill_behaviours(directory, skill_name)
+    #         except Exception:
+    #             logger.exception("Not able to add handler for skill {}.".format(skill_name))
 
-    def _add_skill_behaviours(self, directory: str, skill_name: str) -> None:
-        """
-        Add skill behaviours.
+    # def _add_skill_behaviours(self, directory: str, skill_name: str) -> None:
+    #     """
+    #     Add skill behaviours.
 
-        :param directory: the agent's resources directory.
-        :param skill_name: the skill's name
-        :return: None
-        """
-        behaviours_spec = importlib.util.spec_from_file_location("behaviours",
-                                                                 os.path.join(directory, "skills", skill_name, "behaviours.py"))
-        behaviour_module = importlib.util.module_from_spec(behaviours_spec)
-        behaviours_spec.loader.exec_module(behaviour_module)  # type: ignore
-        classes = inspect.getmembers(behaviour_module, inspect.isclass)
-        behaviours_classes = list(filter(lambda x: re.match("\\w+Behaviour", x[0]), classes))
-        for _, behaviour_class in behaviours_classes:
-            logger.debug("Found behaviour class {behaviour_class} for skill {skill_name}"
-                         .format(behaviour_class=behaviour_class, skill_name=skill_name))
-            behaviour = behaviour_class()
-            self.register(skill_name, behaviour)
+    #     :param directory: the agent's resources directory.
+    #     :param skill_name: the skill's name
+    #     :return: None
+    #     """
+    #     behaviours_spec = importlib.util.spec_from_file_location("behaviours",
+    #                                                              os.path.join(directory, "skills", skill_name, "behaviours.py"))
+    #     behaviour_module = importlib.util.module_from_spec(behaviours_spec)
+    #     behaviours_spec.loader.exec_module(behaviour_module)  # type: ignore
+    #     classes = inspect.getmembers(behaviour_module, inspect.isclass)
+    #     behaviours_classes = list(filter(lambda x: re.match("\\w+Behaviour", x[0]), classes))
+    #     for _, behaviour_class in behaviours_classes:
+    #         logger.debug("Found behaviour class {behaviour_class} for skill {skill_name}"
+    #                      .format(behaviour_class=behaviour_class, skill_name=skill_name))
+    #         behaviour = behaviour_class()
+    #         self.register(skill_name, behaviour)
 
     def teardown(self) -> None:
         """
@@ -665,14 +737,13 @@ class BehaviourRegistry(Registry):
 class TaskRegistry(Registry):
     """This class implements the task registry."""
 
-    def __init__(self, context: Context) -> None:
+    def __init__(self) -> None:
         """
         Instantiate the registry.
 
         :return: None
         """
         self._tasks = {}  # type: Dict[SkillId, List[Task]]
-        self.context = context
 
     def register(self, skill_id: SkillId, tasks: List[Task]) -> None:
         """
@@ -711,46 +782,46 @@ class TaskRegistry(Registry):
         """
         return [t for skill_tasks in self._tasks.values() for t in skill_tasks]
 
-    def populate(self, directory: str) -> None:
-        """
-        Load the tasks as specified in the config and apply consistency checks.
+    # def populate(self, directory: str) -> None:
+    #     """
+    #     Load the tasks as specified in the config and apply consistency checks.
 
-        :param directory: the agent's resources directory.
-        :return: None
-        """
-        logger.debug("Populating the task registry. Resource directory: {}".format(directory))
-        skills_spec = importlib.util.spec_from_file_location("skills", os.path.join(directory, "skills", "__init__.py"))
-        if skills_spec is None:
-            logger.warning("No skill found.")
-            return
+    #     :param directory: the agent's resources directory.
+    #     :return: None
+    #     """
+    #     logger.debug("Populating the task registry. Resource directory: {}".format(directory))
+    #     skills_spec = importlib.util.spec_from_file_location("skills", os.path.join(directory, "skills", "__init__.py"))
+    #     if skills_spec is None:
+    #         logger.warning("No skill found.")
+    #         return
 
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
-        logger.debug("Processing the following skill package: {}".format(skills_packages))
-        for skill_name in skills_packages:
-            try:
-                self._add_skill_tasks(directory, skill_name)
-            except Exception:
-                logger.exception("Not able to add handler for skill {}.".format(skill_name))
+    #     skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
+    #     logger.debug("Processing the following skill package: {}".format(skills_packages))
+    #     for skill_name in skills_packages:
+    #         try:
+    #             self._add_skill_tasks(directory, skill_name)
+    #         except Exception:
+    #             logger.exception("Not able to add handler for skill {}.".format(skill_name))
 
-    def _add_skill_tasks(self, directory, skill_name):
-        """
-        Add skill tasks.
+    # def _add_skill_tasks(self, directory, skill_name):
+    #     """
+    #     Add skill tasks.
 
-        :param directory: the agent's resources directory.
-        :param skill_name: the skill's name
-        :return: None
-        """
-        tasks_spec = importlib.util.spec_from_file_location("tasks",
-                                                            os.path.join(directory, "skills", skill_name, "tasks.py"))
-        task_module = importlib.util.module_from_spec(tasks_spec)
-        tasks_spec.loader.exec_module(task_module)
-        classes = inspect.getmembers(task_module, inspect.isclass)
-        task_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
-        for _, task_class in task_classes:
-            logger.debug("Found task class {task_class} for skill {skill_name}"
-                         .format(task_class=task_class, skill_name=skill_name))
-            task = task_class()
-            self.register(skill_name, task)
+    #     :param directory: the agent's resources directory.
+    #     :param skill_name: the skill's name
+    #     :return: None
+    #     """
+    #     tasks_spec = importlib.util.spec_from_file_location("tasks",
+    #                                                         os.path.join(directory, "skills", skill_name, "tasks.py"))
+    #     task_module = importlib.util.module_from_spec(tasks_spec)
+    #     tasks_spec.loader.exec_module(task_module)
+    #     classes = inspect.getmembers(task_module, inspect.isclass)
+    #     task_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
+    #     for _, task_class in task_classes:
+    #         logger.debug("Found task class {task_class} for skill {skill_name}"
+    #                      .format(task_class=task_class, skill_name=skill_name))
+    #         task = task_class()
+    #         self.register(skill_name, task)
 
     def teardown(self) -> None:
         """
@@ -767,37 +838,36 @@ class TaskRegistry(Registry):
 class Resources(object):
     """This class implements the resources of an AEA."""
 
-    def __init__(self, context: Context):
+    def __init__(self):
         """Instantiate the resources."""
-        self.context = context
         self.protocol_registry = ProtocolRegistry()
-        self.handler_registry = HandlerRegistry(context)
-        self.behaviour_registry = BehaviourRegistry(context)
-        self.task_registry = TaskRegistry(context)
+        self.handler_registry = HandlerRegistry()
+        self.behaviour_registry = BehaviourRegistry()
+        self.task_registry = TaskRegistry()
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
 
     @classmethod
-    def from_resource_dir(cls, directory: str, context: Context) -> Optional['Resources']:
+    def from_resource_dir(cls, directory: str, agent_context: AgentContext) -> Optional['Resources']:
         """
         Parse the resource directory.
 
         :param directory: the agent's resources directory.
-        :param context: the agent's context object
+        :param agent_context: the agent's context object
         :return: None
         """
-        resource = Resources(context)
-        resource.protocol_registry.populate(directory)
-        resource.populate_skills(directory, context)
-        return resource
+        resources = Resources()
+        resources.protocol_registry.populate(directory)
+        resources.populate_skills(directory, agent_context)
+        return resources
 
-    def populate_skills(self, directory: str, context: Context) -> None:
+    def populate_skills(self, directory: str, agent_context: AgentContext) -> None:
         """
         Populate skills.
 
         :param directory: the agent's resources directory.
-        :param context: the agent's context object
+        :param agent_context: the agent's context object
         :return: None
         """
         root_skill_directory = os.path.join(directory, "skills")
@@ -809,7 +879,7 @@ class Resources(object):
         logger.debug("Processing the following skill directories: {}".format(pprint.pformat(skill_directories)))
         for skill_directory in skill_directories:
             try:
-                skill = Skill.from_dir(skill_directory, context)
+                skill = Skill.from_dir(skill_directory, agent_context)
                 assert skill is not None
                 self.add_skill(skill)
             except Exception as e:
