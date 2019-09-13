@@ -18,13 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'gym' skill."""
+from typing import cast
 
 from aea.mail.base import Envelope
-from aea.skills.base import Handler
+from aea.skills.base.core import Handler, SkillContext
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
 
-from .context import GymContext
+from .tasks import GymTask
 
 
 class GymHandler(Handler):
@@ -32,7 +33,7 @@ class GymHandler(Handler):
 
     SUPPORTED_PROTOCOL = "gym"
 
-    def __init__(self, skill_context: GymContext, **kwargs):
+    def __init__(self, skill_context: SkillContext, **kwargs):
         """Initialize the handler."""
         print("EchoHandler.__init__: arguments: {}".format(kwargs))
         super().__init__(skill_context, kwargs)
@@ -48,7 +49,10 @@ class GymHandler(Handler):
         gym_msg = GymSerializer().decode(envelope.message)
         gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
         if gym_msg_performative == GymMessage.Performative.PERCEPT:
-            self.context.queue.put(gym_msg)
+            assert self.context.tasks is not None, "Incorrect initialization."
+            assert len(self.context.tasks) == 1, "Too many tasks loaded!"
+            gym_task = cast(GymTask, self.context.tasks[0])
+            gym_task.proxy_env_queue.put(gym_msg)
         else:
             raise ValueError("Unexpected performative or no step_id: {}".format(gym_msg_performative))
 

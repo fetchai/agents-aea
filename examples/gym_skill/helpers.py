@@ -21,14 +21,14 @@
 
 from abc import ABC, abstractmethod
 import gym
+from queue import Queue
 from typing import Any, Tuple, cast
 
 from aea.mail.base import Envelope
+from aea.skills.base.core import SkillContext
 from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
-
-from .context import GymContext
 
 Action = Any
 Observation = Any
@@ -44,16 +44,29 @@ NB_STEPS = 4000
 class ProxyEnv(gym.Env):
     """This class is an implementation of the ProxyEnv, using bandit RL solution."""
 
-    def __init__(self, skill_context: GymContext) -> None:
+    def __init__(self, skill_context: SkillContext) -> None:
         """
         Instantiate the proxy environment.
 
         :param skill_context: the skill context
+        :param queue: the queue
         :return: None
         """
         super().__init__()
         self._skill_context = skill_context
+        self._queue = Queue()  # type: Queue
+        self._is_rl_agent_trained = False
         self._step_count = 0
+
+    @property
+    def queue(self) -> Queue:
+        """Get queue."""
+        return self._queue
+
+    @property
+    def is_rl_agent_trained(self) -> bool:
+        """Get training status."""
+        return self._is_rl_agent_trained
 
     def step(self, action: Action) -> Feedback:
         """
@@ -79,7 +92,7 @@ class ProxyEnv(gym.Env):
         self._skill_context.outbox.put(out_envelope)
 
         # Wait (blocking!) for the response envelope from the environment
-        gym_msg = self._skill_context.queue.get(block=True, timeout=None)  # type: GymMessage
+        gym_msg = self._queue.get(block=True, timeout=None)  # type: GymMessage
 
         gym_msg_step_id = gym_msg.get("step_id")
         if gym_msg_step_id == step_id:
@@ -104,6 +117,7 @@ class ProxyEnv(gym.Env):
         :return: None
         """
         self._step_count = 0
+        self._is_rl_agent_trained = False
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
         gym_bytes = GymSerializer().encode(gym_msg)
         envelope = Envelope(to=DEFAULT_GYM, sender=self._agent.crypto.public_key, protocol_id=GymMessage.protocol_id,
@@ -116,7 +130,7 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        self._skill_context.is_rl_agent_trained = True
+        self._is_rl_agent_trained = True
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
         gym_bytes = GymSerializer().encode(gym_msg)
         envelope = Envelope(to=DEFAULT_GYM, sender=self._agent.crypto.public_key, protocol_id=GymMessage.protocol_id,

@@ -19,15 +19,16 @@
 
 """This module contains the behaviours for the 'gym' skill."""
 
-from aea.skills.base import Behaviour
+from aea.skills.base.core import Behaviour, SkillContext
 
 
 class GymBehaviour(Behaviour):
     """Gym behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, skill_context: SkillContext, **kwargs):
         """Initialize the behaviour."""
         print("GymBehaviour.__init__: arguments: {}".format(kwargs))
+        super().__init__(skill_context, kwargs)
 
     def act(self) -> None:
         """Act according to the behaviour."""

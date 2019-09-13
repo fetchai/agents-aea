@@ -87,7 +87,7 @@ setup(
     ],
     install_requires=[
         "cryptography",
-        "base5
+        "base58"
     ],
     tests_require=["tox"],
     extras_require=get_all_extras(),

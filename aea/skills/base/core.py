@@ -105,10 +105,11 @@ class SkillContext:
         assert self._skill is not None, "Skill not initialized."
         return self._skill.tasks
 
+
 class Behaviour(ABC):
     """This class implements an abstract behaviour."""
 
-    def __init__(self, skill_context: SkillContext, **kwargs):
+    def __init__(self, skill_context: SkillContext, *args, **kwargs):
         """
         Initialize a behaviour.
 
@@ -320,7 +321,7 @@ class Skill:
         :return: the Skill object. None if the parsing failed.
         """
         # check if there is the config file. If not, then return None.
-        skill_config = context.skill_loader.load(open(os.path.join(directory)))
+        skill_config = agent_context.skill_loader.load(open(os.path.join(directory)))
         if skill_config is None:
             return None
 
