@@ -17,22 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the behaviours for the 'echo' skill."""
-
-from aea.skills.base.core import Behaviour
-
-
-class EchoBehaviour(Behaviour):
-    """Echo behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialize the echo behaviour."""
-        print("EchoBehaviour.__init__: arguments: {}".format(kwargs))
-
-    def act(self) -> None:
-        """Act according to the behaviour."""
-        print("Echo Behaviour: act method called.")
-
-    def teardown(self) -> None:
-        """Teardown the behaviour."""
-        print("Echo Behaviour: teardown method called.")
+"""This module contains a dummy skill for an AEA."""

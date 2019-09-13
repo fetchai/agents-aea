@@ -26,20 +26,19 @@ from pathlib import Path
 from typing import cast
 
 import click
+from click import pass_context
+from jsonschema import ValidationError  # type: ignore
 
-from aea.cli.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
+from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
+from aea.skills.base.core import DEFAULT_SKILL_CONFIG_FILE
 
 
 @click.group()
 @pass_ctx
 def add(ctx: Context):
     """Add a resource to the agent."""
-    try:
-        ctx.agent_config = AgentConfig()
-        ctx.agent_config.load(DEFAULT_AEA_CONFIG_FILE)
-    except FileNotFoundError:
-        logger.error("Agent configuration file not found '{}'. Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
-        exit(-1)
+    _try_to_load_agent_config(ctx)
 
 
 @add.command()
@@ -82,16 +81,17 @@ def protocol(ctx: Context, protocol_name):
 
     # add the protocol to the configurations.
     logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
-    ctx.agent_config.protocols.append(protocol_name)
-    ctx.agent_config.dump(open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_config.protocols.add(protocol_name)
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @add.command()
 @click.argument('skill_name', type=str, required=True)
-@click.argument('dirpath', type=str, default=None, required=False)
-@pass_ctx
-def skill(ctx: Context, skill_name, dirpath):
+@click.argument('dirpath', type=str, required=True)
+@pass_context
+def skill(click_context, skill_name, dirpath):
     """Add a skill to the agent."""
+    ctx = cast(Context, click_context.obj)
     agent_name = ctx.agent_config.agent_name
     logger.debug("Adding skill {skill_name} to the agent {agent_name}..."
                  .format(agent_name=agent_name, skill_name=skill_name))
@@ -100,17 +100,27 @@ def skill(ctx: Context, skill_name, dirpath):
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
     if skill_name in ctx.agent_config.skills:
         logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
+        exit(-1)
+        return
+
+    # check that the provided path points to a proper skill directory -> look for skill.yaml file.
+    skill_configuration_filepath = Path(os.path.join(dirpath, DEFAULT_SKILL_CONFIG_FILE))
+    if not skill_configuration_filepath.exists():
+        logger.error("Path '{}' does not exist.".format(skill_configuration_filepath))
+        exit(-1)
+        return
+
+    # try to load the skill configuration file
+    try:
+        skill_configuration = ctx.skill_loader.load(open(str(skill_configuration_filepath)))
+    except ValidationError as e:
+        logger.error("Skill configuration file not valid: {}".format(str(e)))
+        exit(-1)
         return
 
     # copy the skill package into the agent's supported skills.
-    if dirpath is None:
-        logger.info("Path not specified. Using '{}'...".format(os.path.join(".", skill_name)))
-        src = skill_name
-    else:
-        dirpath = str(Path(dirpath).absolute())
-        # src = os.path.join(dirpath, skill_name)  TODO the source is dirpath or dirpath/skill_name?
-        src = dirpath
-
+    dirpath = str(Path(dirpath).absolute())
+    src = dirpath
     dest = os.path.join("skills", skill_name)
     logger.info("Copying skill modules. src={} dst={}".format(src, dest))
     try:
@@ -124,7 +134,12 @@ def skill(ctx: Context, skill_name, dirpath):
     logger.debug("Creating {}".format(skills_init_module))
     Path(skills_init_module).touch(exist_ok=True)
 
-    # add the protocol to the configurations.
+    # check for not supported protocol, and add it.
+    if skill_configuration.protocol not in ctx.agent_config.protocols:
+        logger.info("Adding protocol '{}' to the agent...".format(skill_configuration.protocol))
+        click_context.invoke(protocol, protocol_name=skill_configuration.protocol)
+
+    # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
-    ctx.agent_config.skills.append(skill_name)
-    ctx.agent_config.dump(open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_config.skills.add(skill_name)
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))

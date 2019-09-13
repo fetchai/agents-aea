@@ -1,0 +1,23 @@
+name: dummy
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: DummyBehaviour
+      args:
+        behaviour_arg_1: 1
+        behaviour_arg_2: "2"
+handler:
+  class_name: DummyHandler
+  args:
+    handler_arg_1: 1
+    handler_arg_2: "2"
+tasks:
+  - task:
+      class_name: DummyTask
+      args:
+        task_arg_1: 1
+        task_arg_2: "2"
+protocol: "default"

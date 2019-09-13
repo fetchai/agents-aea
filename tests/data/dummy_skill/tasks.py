@@ -17,22 +17,24 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the behaviours for the 'echo' skill."""
+"""This module contains the tasks for the 'echo' skill."""
+from aea.skills.base.core import Task
 
-from aea.skills.base.core import Behaviour
 
-
-class EchoBehaviour(Behaviour):
-    """Echo behaviour."""
+class DummyTask(Task):
+    """Dummy task."""
 
     def __init__(self, **kwargs):
-        """Initialize the echo behaviour."""
-        print("EchoBehaviour.__init__: arguments: {}".format(kwargs))
+        """Initialize the task."""
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.nb_execute_called = 0
+        self.nb_teardown_called = 0
 
-    def act(self) -> None:
-        """Act according to the behaviour."""
-        print("Echo Behaviour: act method called.")
+    def execute(self) -> None:
+        """Execute the task."""
+        self.nb_execute_called += 1
 
     def teardown(self) -> None:
-        """Teardown the behaviour."""
-        print("Echo Behaviour: teardown method called.")
+        """Teardown the task."""
+        self.nb_teardown_called += 1

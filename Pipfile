@@ -28,6 +28,7 @@ pyyaml = "*"
 click-log = "*"
 oef = {index = "test-pypi",version = "==0.6.10"}
 colorlog = "*"
+jsonschema = "*"
 
 [requires]
 python_version = "3.7"

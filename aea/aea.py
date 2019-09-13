@@ -24,7 +24,7 @@ from typing import Optional, cast
 
 from aea.agent import Agent
 from aea.mail.base import Envelope, MailBox
-from aea.skills.base import Resources, Context
+from aea.skills.base.core import Context, Resources
 from aea.skills.default.handler import DefaultHandler
 
 logger = logging.getLogger(__name__)

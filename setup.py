@@ -68,6 +68,7 @@ with open(os.path.join(here, PACKAGE_NAME, '__version__.py'), 'r') as f:
 with open('README.md', 'r') as f:
     readme = f.read()
 
+   
 setup(
     name=about['__title__'],
     description=about['__description__'],
@@ -86,7 +87,7 @@ setup(
     ],
     install_requires=[
         "cryptography",
-        "base58"
+        "base5
     ],
     tests_require=["tox"],
     extras_require=get_all_extras(),
