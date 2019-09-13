@@ -20,76 +20,18 @@
 """Implementation of the common utils of the aea cli."""
 
 import logging
-import pprint
-from typing import List, Optional, Dict
+from pathlib import Path
+from typing import Dict
 
 import click
 import click_log
-import yaml
+import jsonschema  # type: ignore
 
-import aea
+from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig
+from aea.skills.base.loader import ConfigLoader
 
-DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 logger = logging.getLogger("aea")
 logger = click_log.basic_config(logger=logger)
-
-
-class ConnectionConfig:
-    """Handle connection configuration."""
-
-    def __init__(self, name: str, type: str, **config):
-        """Initialize a connection configuration object."""
-        self.name = name
-        self.type = type
-        self.config = config
-
-    @classmethod
-    def from_dict(cls, obj: dict) -> 'ConnectionConfig':
-        """Parse configuration from a dictionary object."""
-        name = obj["name"]
-        type = obj["type"]
-        config = obj["config"]
-        return ConnectionConfig(name, type, **config)
-
-
-class AgentConfig(object):
-    """Class to represent the agent configuration file."""
-
-    def __init__(self, agent_name: Optional[str] = None):
-        """Instantiate the agent configuration object."""
-        self.agent_name = agent_name
-        self.aea_version = aea.__version__
-        self.connections = {}  # type: Dict[str, ConnectionConfig]
-        self.protocols = []  # type: List[Dict]
-        self.skills = []  # type: List[Dict]
-
-        # set default connection
-        self.connections["default-oef"] = ConnectionConfig(
-            name="default-oef",
-            type="oef",
-            config=dict(addr="127.0.0.1", port=10000)
-        )
-        self.default_connection = "default-oef"
-
-    def load(self, path):
-        """Load data from an agent configuration file."""
-        file = open(path, mode="r", encoding="utf-8")
-        config_file = yaml.safe_load(file)
-
-        self.agent_name = config_file["agent_name"]
-        self.aea_version = config_file["aea_version"]
-        self.connections = {c["connection"]["name"]: ConnectionConfig.from_dict(c["connection"])
-                            for c in config_file["connections"]}
-        self.protocols = config_file["protocols"]
-        self.skills = config_file["skills"]
-
-    def dump(self, file):
-        """Dump data to an agent configuration file."""
-        result = vars(self)
-        result["connections"] = [{"connection": vars(c)} for c in result["connections"].values()]
-
-        logger.debug("Dumping YAML: {}".format(pprint.pformat(result)))
-        yaml.safe_dump(result, file)
 
 
 class Context(object):
@@ -97,9 +39,12 @@ class Context(object):
 
     agent_config: AgentConfig
 
-    def __init__(self):
+    def __init__(self, cwd: str = "."):
         """Init the context."""
-        self.config = {}
+        self.config = dict()  # type: Dict
+        self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+        self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
+        self.cwd = cwd
 
     def set_config(self, key, value) -> None:
         """
@@ -118,12 +63,16 @@ pass_ctx = click.make_pass_decorator(Context)
 
 def _try_to_load_agent_config(ctx: Context):
     try:
-        ctx.agent_config = AgentConfig()
-        ctx.agent_config.load(DEFAULT_AEA_CONFIG_FILE)
+        path = Path(DEFAULT_AEA_CONFIG_FILE)
+        fp = open(str(path), mode="r", encoding="utf-8")
+        ctx.agent_config = ctx.agent_loader.load(fp)
     except FileNotFoundError:
         logger.error("Agent configuration file '{}' not found in the current directory. "
                      "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
         exit(-1)
+    except jsonschema.exceptions.ValidationError:
+        logger.error("Agent configuration file '{}' is invalid. Please check the documentation."
+                     "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
 
 
 class AEAConfigException(Exception):

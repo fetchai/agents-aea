@@ -26,6 +26,8 @@ from queue import Queue
 from threading import Thread
 from typing import Dict, Optional
 
+import gym
+
 from aea.mail.base import Envelope, Channel, Connection
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
@@ -36,13 +38,11 @@ logger = logging.getLogger(__name__)
 """default 'to' field for Gym envelopes."""
 DEFAULT_GYM = "gym"
 
-gym_Env = object  # typing stub for gym.Env
-
 
 class GymChannel(Channel):
     """A wrapper of the gym environment."""
 
-    def __init__(self, public_key: str, gym_env: gym_Env):
+    def __init__(self, public_key: str, gym_env: gym.Env):
         """Initialize a gym channel."""
         self.public_key = public_key
         self.gym_env = gym_env
@@ -130,7 +130,7 @@ class GymChannel(Channel):
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    def __init__(self, public_key: str, gym_env: gym_Env):
+    def __init__(self, public_key: str, gym_env: gym.Env):
         """
         Initialize a connection to a local gym environment.
 

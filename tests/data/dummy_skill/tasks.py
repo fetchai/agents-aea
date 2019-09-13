@@ -17,10 +17,24 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the channel modules."""
-from typing import List
-import aea.protocols
+"""This module contains the tasks for the 'echo' skill."""
+from aea.skills.base.core import Task
 
-gym_dependencies = ["gym", *aea.protocols.gym_dependencies]  # type: List[str]
-local_dependencies = [*aea.protocols.oef_dependencies]  # type: List[str]
-oef_dependencies = ["colorlog", "oef", *aea.protocols.oef_dependencies]  # type: List[str]
+
+class DummyTask(Task):
+    """Dummy task."""
+
+    def __init__(self, **kwargs):
+        """Initialize the task."""
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.nb_execute_called = 0
+        self.nb_teardown_called = 0
+
+    def execute(self) -> None:
+        """Execute the task."""
+        self.nb_execute_called += 1
+
+    def teardown(self) -> None:
+        """Teardown the task."""
+        self.nb_teardown_called += 1

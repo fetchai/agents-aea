@@ -17,10 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the channel modules."""
-from typing import List
-import aea.protocols
-
-gym_dependencies = ["gym", *aea.protocols.gym_dependencies]  # type: List[str]
-local_dependencies = [*aea.protocols.oef_dependencies]  # type: List[str]
-oef_dependencies = ["colorlog", "oef", *aea.protocols.oef_dependencies]  # type: List[str]
+"""This module contains a dummy skill for an AEA."""

@@ -18,11 +18,47 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+import importlib
 import os
+import re
+from typing import List, Dict
 
 from setuptools import setup, find_packages
 
 PACKAGE_NAME = "aea"
+
+
+def get_aea_extras() -> Dict[str, List[str]]:
+    """Parse extra dependencies from aea channels and protocols."""
+    result = {}
+
+    # parse channel dependencies
+    channel_module = importlib.import_module("aea.channel")
+    channel_dependencies = {k.split("_")[0] + "-channel": v for k, v in vars(channel_module).items() if re.match(".+_dependencies", k)}
+    result.update(channel_dependencies)
+
+    # parse protocols dependencies
+    protocols_module = importlib.import_module("aea.protocols")
+    protocols_dependencies = {k.split("_")[0] + "-protocol": v for k, v in vars(protocols_module).items() if re.match(".+_dependencies", k)}
+    result.update(protocols_dependencies)
+
+    return result
+
+
+def get_all_extras() -> Dict:
+    extras = {
+        "cli": [
+            "click",
+            "click_log",
+            "PyYAML"
+        ],
+    }
+    extras.update(get_aea_extras())
+
+    # add "all" extras
+    extras["all"] = list(set(dep for e in extras.values() for dep in e))
+    return extras
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}
@@ -32,30 +68,7 @@ with open(os.path.join(here, PACKAGE_NAME, '__version__.py'), 'r') as f:
 with open('README.md', 'r') as f:
     readme = f.read()
 
-extras = {
-    "oef-channel": [
-        "colorlog",
-        "oef",
-    ],
-    "gym-channel": [
-        "gym"
-    ],
-    "cli": [
-        "click",
-        "click_log",
-        "PyYAML"
-    ],
-    "fipa": [
-        "protobuf"
-    ],
-    "tac": [
-        "protobuf"
-    ],
-}
-
-# add "all" extras
-extras["all"] = [dep for e in extras.values() for dep in e]
-
+   
 setup(
     name=about['__title__'],
     description=about['__description__'],
@@ -74,10 +87,10 @@ setup(
     ],
     install_requires=[
         "cryptography",
-        "base58"
+        "base5
     ],
     tests_require=["tox"],
-    extras_require=extras,
+    extras_require=get_all_extras(),
     entry_points={
         'console_scripts': ["aea=aea.cli:cli"],
     },

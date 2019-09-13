@@ -17,10 +17,25 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the channel modules."""
-from typing import List
-import aea.protocols
+"""This module contains the behaviours for the 'echo' skill."""
 
-gym_dependencies = ["gym", *aea.protocols.gym_dependencies]  # type: List[str]
-local_dependencies = [*aea.protocols.oef_dependencies]  # type: List[str]
-oef_dependencies = ["colorlog", "oef", *aea.protocols.oef_dependencies]  # type: List[str]
+from aea.skills.base.core import Behaviour
+
+
+class DummyBehaviour(Behaviour):
+    """Dummy behaviour."""
+
+    def __init__(self, **kwargs):
+        """Initialize the echo behaviour."""
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.nb_act_called = 0
+        self.nb_teardown_called = 0
+
+    def act(self) -> None:
+        """Act according to the behaviour."""
+        self.nb_act_called += 1
+
+    def teardown(self) -> None:
+        """Teardown the behaviour."""
+        self.nb_teardown_called += 1

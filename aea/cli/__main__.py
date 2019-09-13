@@ -26,9 +26,12 @@ from pathlib import Path
 
 import click
 import click_log
+from jsonschema import ValidationError  # type: ignore
 
+import aea
 from aea.cli.add import add
-from aea.cli.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
+from aea.cli.common import Context, pass_ctx, logger
+from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE, ConnectionConfig, AgentConfig
 from aea.cli.remove import remove
 from aea.cli.run import run
 
@@ -38,13 +41,8 @@ from aea.cli.run import run
 @click.pass_context
 @click_log.simple_verbosity_option(logger, default="INFO")
 def cli(ctx) -> None:
-    """
-    Command-line tool for setting up an Autonomous Economic Agent.
-
-    :param ctx: the context
-    :return: None
-    """
-    ctx.obj = Context()
+    """Command-line tool for setting up an Autonomous Economic Agent."""
+    ctx.obj = Context(cwd=".")
 
 
 @cli.command()
@@ -58,16 +56,30 @@ def create(ctx: Context, agent_name):
     # create the agent's directory
     try:
         path.mkdir(exist_ok=False)
+
+        # create a config file inside it
+        config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
+        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__)
+        agent_config.set_default_connection(ConnectionConfig(
+            name="default-oef",
+            type="oef",
+            addr="127.0.0.1",
+            port=10000
+        ))
+        ctx.agent_loader.dump(agent_config, config_file)
+        logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))
+
     except OSError:
         logger.error("Directory already exist. Aborting...")
-        return
-
-    # create a config file inside it
-    config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-    agent_config = AgentConfig(agent_name=agent_name)
-    agent_config.dump(config_file)
-
-    logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))
+        exit(-1)
+    except ValidationError as e:
+        logger.error(str(e))
+        shutil.rmtree(agent_name, ignore_errors=True)
+        exit(-1)
+    except Exception as e:
+        logger.exception(e)
+        shutil.rmtree(agent_name, ignore_errors=True)
+        exit(-1)
 
 
 @cli.command()
@@ -83,7 +95,7 @@ def delete(ctx: Context, agent_name):
         shutil.rmtree(path, ignore_errors=False)
     except OSError:
         logger.error("An error occurred while deleting the agent directory. Aborting...")
-        return
+        exit(-1)
 
 
 cli.add_command(add)

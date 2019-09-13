@@ -24,19 +24,15 @@ import shutil
 
 import click
 
-from aea.cli.common import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Context, pass_ctx, logger
+from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
 
 
 @click.group()
 @pass_ctx
 def remove(ctx: Context):
     """Remove a resource from the agent."""
-    try:
-        ctx.agent_config = AgentConfig()
-        ctx.agent_config.load(DEFAULT_AEA_CONFIG_FILE)
-    except FileNotFoundError:
-        logger.error("Agent configuration file not found '{}'. Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
-        exit(-1)
+    _try_to_load_agent_config(ctx)
 
 
 @remove.command()
@@ -61,7 +57,7 @@ def protocol(ctx: Context, protocol_name):
     logger.debug("Removing the protocol from {}".format(DEFAULT_AEA_CONFIG_FILE))
     if protocol_name in ctx.agent_config.protocols:
         ctx.agent_config.protocols.remove(protocol_name)
-    ctx.agent_config.dump(open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @remove.command()
@@ -86,4 +82,4 @@ def skill(ctx: Context, skill_name):
     logger.debug("Removing the skill from {}".format(DEFAULT_AEA_CONFIG_FILE))
     if skill_name in ctx.agent_config.skills:
         ctx.agent_config.skills.remove(skill_name)
-    ctx.agent_config.dump(open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
