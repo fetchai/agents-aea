@@ -73,7 +73,7 @@ def launch_job(args, j):
     else:
         c += ['-it']
     work_dir = os.path.abspath(os.path.dirname(__file__))
-    project_dir = os.path.abspath(os.path.join(work_dir, '..'))
+    project_dir = os.path.abspath(os.path.join(work_dir, '..', '..'))
     print("Work dir: ", work_dir)
     c += [
         "-v",
