@@ -18,14 +18,14 @@ A guide to create an AEA with the gym_skill.
 
 - Copy the gym environment to the agent directory:
 
-	mkdir gym
-	cp -a ../examples/gym_ex/gym/. gym/
+	mkdir gyms
+	cp -a ../examples/gym_ex/gyms/. gyms/
 
 - Add a gym connection to the `aea-config.yaml`:
 
       - connection:
         config:
-          env: gym.env.BanditNArmedRandom
+          env: gyms.env.BanditNArmedRandom
         name: gym
         type: gym
 

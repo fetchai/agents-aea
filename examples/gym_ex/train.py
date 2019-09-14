@@ -20,7 +20,7 @@
 
 """Training environment for multi armed bandit."""
 
-from gym.env import BanditNArmedRandom
+from gyms.env import BanditNArmedRandom
 from proxy.env import ProxyEnv
 from rl.agent import RLAgent
 
