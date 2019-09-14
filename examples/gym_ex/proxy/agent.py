@@ -32,18 +32,18 @@ from aea.mail.base import Envelope, MailBox
 class ProxyAgent(Agent):
     """This class implements a proxy agent to be used by a proxy environment."""
 
-    def __init__(self, name: str, env: gym.Env, proxy_env_queue: Queue) -> None:
+    def __init__(self, name: str, gym_env: gym.Env, proxy_env_queue: Queue) -> None:
         """
         Instantiate the agent.
 
         :param name: the name of the agent
-        :param env: gym environment
+        :param gym_env: gym environment
         :param proxy_env_queue: the queue of the proxy environment
         :return: None
         """
         super().__init__(name, timeout=0)
         self.proxy_env_queue = proxy_env_queue
-        self.mailbox = MailBox(GymConnection(self.crypto.public_key, env))
+        self.mailbox = MailBox(GymConnection(self.crypto.public_key, gym_env))
 
     def setup(self) -> None:
         """
@@ -70,10 +70,7 @@ class ProxyAgent(Agent):
         while not self.inbox.empty():
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
             if envelope is not None:
-                if envelope.protocol_id == 'gym':
-                    self.proxy_env_queue.put(envelope)
-                else:
-                    raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+                self.proxy_env_queue.put(envelope)
 
     def update(self) -> None:
         """Update the current state of the agent.

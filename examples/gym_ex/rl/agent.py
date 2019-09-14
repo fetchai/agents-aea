@@ -24,9 +24,7 @@ import numpy as np
 import random
 from typing import Any, Dict
 
-from env import BanditNArmedRandom
-from v2.bandit_proxy_env import BanditProxyEnv
-from v2.proxy_env import ProxyEnv
+from proxy.env import ProxyEnv
 
 
 class PriceBandit(object):
@@ -166,28 +164,12 @@ class RLAgent:
         """
         action_counter = 0
 
-        print("Connecting to proxy env ...")
-        proxy_env.connect()
-
+        proxy_env.reset()
         while action_counter < nb_steps:
             action = self._pick_an_action()
             obs, reward, done, info = proxy_env.step(action)
             self._update_model(obs, reward, done, info, action)
             action_counter += 1
             if action_counter % 10 == 0:
-                print("Action: step_id='{}' action='{}'".format(action_counter, action))
-
-        proxy_env.disconnect()
-        print("Disconnected from proxy env!")
-
-
-if __name__ == "__main__":
-    NB_GOODS = 10
-    NB_PRICES_PER_GOOD = 100
-
-    gym_env = BanditNArmedRandom(nb_bandits=NB_GOODS, nb_prices_per_bandit=NB_PRICES_PER_GOOD)
-    proxy_env = BanditProxyEnv(gym_env)
-
-    """Launch the agent."""
-    rl_agent = RLAgent(nb_goods=NB_GOODS)
-    rl_agent.fit(proxy_env, nb_steps=4000)
+                print("Action: step_id='{}' action='{}' reward='{}'".format(action_counter, action, reward))
+        proxy_env.close()

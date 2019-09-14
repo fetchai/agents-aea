@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,4 +18,20 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains an example using the Gym channel."""
+"""Training environment for multi armed bandit."""
+
+from proxy.env import ProxyEnv
+from rl.env import BanditNArmedRandom
+from rl.agent import RLAgent
+
+if __name__ == "__main__":
+    NB_GOODS = 10
+    NB_PRICES_PER_GOOD = 100
+    NB_STEPS = 4000
+
+    gym_env = BanditNArmedRandom(nb_bandits=NB_GOODS, nb_prices_per_bandit=NB_PRICES_PER_GOOD)
+    proxy_env = ProxyEnv(gym_env)
+
+    """Launch the agent."""
+    rl_agent = RLAgent(nb_goods=NB_GOODS)
+    rl_agent.fit(proxy_env, nb_steps=NB_STEPS)

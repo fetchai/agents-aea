@@ -9,15 +9,7 @@ This example requires `numpy` and `gym` in addition to the dependencies of the `
 Cd into the directory and execute:
 
 `
-python rl_agent_v1.py
+python train.py
 `
 
-The RLAgent abstracts the environment but directly implements the reinforcement learning logic.
-
-or 
-
-`
-python rl_agent_v2.py
-`
-
-which has the usual RL setup.
+which has the usual RL setup (that is, the `fit` method of the `RLAgent` has the typical signature and familiar implementation).
