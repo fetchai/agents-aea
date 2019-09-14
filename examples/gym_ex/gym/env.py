@@ -100,7 +100,7 @@ class BanditEnv(gym.Env):
 class BanditNArmedRandom(BanditEnv):
     """N armed bandit randomly initialized."""
 
-    def __init__(self, nb_bandits: int, nb_prices_per_bandit: int, stdev: int = 1, seed: int = 42):
+    def __init__(self, nb_bandits: int = 10, nb_prices_per_bandit: int = 100, stdev: int = 1, seed: int = 42):
         """
         Initialize the environment.
 

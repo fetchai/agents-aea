@@ -1,7 +1,6 @@
 # `aea` command-line tool
 
-The `aea` command-line tool is an extra feature of the `aea` package, that provides a useful tool to
-manage AEA agents.
+The `aea` command-line tool is an extra feature of the `aea` package, that provides a useful tool to manage AEA agents.
 
 ## Installation
 
@@ -36,6 +35,10 @@ This quick start explains how to create and launch an agent with the cli.
       aea add skill echo_skill ../examples/echo_skill 
 
   This command will create the `my_first_agent/skills` folder, with the `echo_skill` skill package inside.
+
+- start an oef
+
+      python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 - Run the agent. Assuming an OEF node is running at `127.0.0.1:10000`
 

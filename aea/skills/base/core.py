@@ -379,7 +379,7 @@ class Registry(ABC):
         """
 
     @abstractmethod
-    def fetch_all(self) -> List[Any]:
+    def fetch_all(self) -> Optional[List[Any]]:
         """
         Fetch all the items.
 
@@ -501,19 +501,20 @@ class HandlerRegistry(Registry):
 
         :return: None
         """
-        self._handlers = {}  # type: Dict[SkillId, Handler]
+        self._handlers = {}  # type: Dict[ProtocolId, Dict[SkillId, Handler]]
 
-    def register(self, skill_id: SkillId, handler: Handler) -> None:
+    def register(self, protocol_id: ProtocolId, skill_id: SkillId, handler: Handler) -> None:
         """
-        Register a behaviour.
+        Register a handler.
 
+        :param protocol_id: the protocol id.
         :param skill_id: the skill id.
         :param handler: the handler.
         :return: None
         """
-        if skill_id in self._handlers.keys():
-            logger.warning("Another handler already registered with skill id '{}'".format(skill_id))
-        self._handlers[skill_id] = handler
+        if protocol_id in self._handlers.keys():
+            logger.warning("Another handler also registered against protocol id '{}'".format(protocol_id))
+        self._handlers[protocol_id][skill_id] = handler
 
     def unregister(self, skill_id: SkillId) -> None:
         """
@@ -522,20 +523,35 @@ class HandlerRegistry(Registry):
         :param skill_id: the skill id.
         :return: None
         """
-        self._handlers.pop(skill_id, None)
+        for protocol_id, skill_to_handler_dict in self._handlers.items():
+            if skill_id in skill_to_handler_dict.keys():
+                self._handlers[protocol_id].pop(skill_id, None)
+            if self._handlers[protocol_id] == {}:
+                self._handlers.pop(protocol_id, None)
 
-    def fetch(self, protocol_id: ProtocolId) -> Optional[Handler]:
+    def fetch(self, protocol_id: ProtocolId) -> Optional[List[Handler]]:
         """
-        Fetch the handler for the protocol_id.
+        Fetch the handlers for the protocol_id.
 
         :param protocol_id: the protocol id
-        :return: the handler
+        :return: the list of handlers registered for the protocol_id
         """
-        return self._handlers.get(protocol_id, None)
+        result = self._handlers.get(protocol_id, None)
+        if result is None:
+            return None
+        else:
+            # TODO: introduce a controller class which intelligently selects the appropriate handler.
+            return list(result.values())
 
-    def fetch_all(self) -> List[Handler]:
+    def fetch_all(self) -> Optional[List[Handler]]:
         """Fetch all the handlers."""
-        return list(self._handlers.values())
+        if self._handlers.values() is None:
+            return None
+        else:
+            result = []
+            for skill_id_to_handler_dict in self._handlers.values():
+                result.extend(list(skill_id_to_handler_dict.values()))
+            return result
 
     # def populate(self, directory: str) -> None:
     #     """
@@ -564,8 +580,10 @@ class HandlerRegistry(Registry):
 
         :return: None
         """
-        for handler in self._handlers.values():
-            handler.teardown()
+        if self._handlers.values() is not None:
+            for skill_id_to_handler_dict in self._handlers.values():
+                for handler in skill_id_to_handler_dict.values():
+                    handler.teardown()
         self._handlers = {}
 
     # def _add_skill_handler(self, directory: str, skill_name: str) -> None:
@@ -845,7 +863,8 @@ class Resources(object):
         skill_id = skill.config.name
         self._skills[skill_id] = skill
         if skill.handler is not None:
-            self.handler_registry.register(skill_id, cast(Handler, skill.handler))
+            protocol_id = skill.config.protocol
+            self.handler_registry.register(protocol_id, skill_id, cast(Handler, skill.handler))
         if skill.behaviours is not None:
             self.behaviour_registry.register(skill_id, cast(List[Behaviour], skill.behaviours))
         if skill.tasks is not None:

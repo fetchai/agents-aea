@@ -102,7 +102,7 @@ class GoodPriceModel(object):
 class RLAgent:
     """This class is a reinforcement learning agent that interacts with the agent framework."""
 
-    def __init__(self, nb_goods: int) -> None:
+    def __init__(self, nb_goods: int = 10) -> None:
         """
         Instantiate the RL agent.
 

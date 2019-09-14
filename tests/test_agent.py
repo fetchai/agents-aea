@@ -22,7 +22,7 @@ import time
 from threading import Thread
 
 from aea.agent import Agent
-from aea.channel.oef import OEFMailBox
+from aea.channels.oef import OEFMailBox
 from aea.crypto.base import Crypto
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer

@@ -26,9 +26,9 @@ from typing import cast
 import click
 
 from aea.aea import AEA
-from aea.channel.gym import GymConnection
-from aea.channel.local import OEFLocalConnection, LocalNode
-from aea.channel.oef import OEFConnection
+from aea.channels.gym import GymConnection
+from aea.channels.local import OEFLocalConnection, LocalNode
+from aea.channels.oef import OEFConnection
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
 from aea.mail.base import MailBox, Connection
 
@@ -60,7 +60,7 @@ def _setup_connection(connection_name: str, ctx: Context) -> Connection:
         local_node = LocalNode()
         return OEFLocalConnection(agent_name, local_node)
     elif connection_type == "gym":
-        gym_env_package = cast(str, connection_configuration.config.get("env"))
+        gym_env_package = cast(str, connection_configuration.config.get('config').get("env"))
         gym_env = locate(gym_env_package)
         return GymConnection(agent_name, gym_env)
     else:

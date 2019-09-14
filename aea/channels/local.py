@@ -27,13 +27,14 @@ from queue import Queue
 from threading import Thread
 from typing import Dict, List, Optional, cast
 
-from aea.channel.oef import STUB_DIALOGUE_ID
 from aea.mail.base import Envelope, Channel, Connection
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, Query
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
+
+STUB_DIALOGUE_ID = 0
 
 
 class LocalNode:
