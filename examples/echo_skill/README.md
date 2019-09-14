@@ -1,13 +1,6 @@
-# `aea` command-line tool
+# echo_skill
 
-The `aea` command-line tool is an extra feature of the `aea` package, that provides a useful tool to manage AEA agents.
-
-## Installation
-
-To use `aea`, install by including the `[cli]` extra dependencies when installing the package:
-```
-pip install aea[cli]
-```
+A guide to create an AEA with the echo_skill.
 
 ## Quick start
 
@@ -48,9 +41,10 @@ This quick start explains how to create and launch an agent with the cli.
 
       aea -v DEBUG run
 
-Press CTRL+C to stop the execution.
+- Press CTRL+C to stop the execution.
 
 - Delete the agent:
 
       cd ..
       aea delete my_first_agent
+

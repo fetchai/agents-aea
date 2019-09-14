@@ -21,7 +21,7 @@
 from typing import cast
 
 from aea.mail.base import Envelope
-from aea.skills.base.core import Handler, SkillContext
+from aea.skills.base.core import Handler
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
 
@@ -33,10 +33,10 @@ class GymHandler(Handler):
 
     SUPPORTED_PROTOCOL = "gym"
 
-    def __init__(self, skill_context: SkillContext, **kwargs):
+    def __init__(self, **kwargs):
         """Initialize the handler."""
-        print("EchoHandler.__init__: arguments: {}".format(kwargs))
-        super().__init__(skill_context, kwargs)
+        print("GymHandler.__init__: arguments: {}".format(kwargs))
+        super().__init__(**kwargs)
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """

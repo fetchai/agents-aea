@@ -109,15 +109,26 @@ class SkillContext:
 class Behaviour(ABC):
     """This class implements an abstract behaviour."""
 
-    def __init__(self, skill_context: SkillContext, *args, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initialize a behaviour.
 
         :param skill_context: the skill context
         :param kwargs: keyword arguments
         """
-        self.context = skill_context
-        self.config = kwargs
+        self._context = None  # type: Optional[SkillContext]
+        self._config = kwargs
+
+    @property
+    def context(self) -> SkillContext:
+        """Get the context of the behaviour."""
+        assert self._context is not None, "SkillContext not assigned."
+        return self._context
+
+    @property
+    def config(self) -> Dict[Any, Any]:
+        """Get the config of the behaviour."""
+        return self._config
 
     @abstractmethod
     def act(self) -> None:
@@ -161,7 +172,8 @@ class Behaviour(ABC):
                 logger.warning("Behaviour '{}' cannot be found.".format(behaviour_class))
             else:
                 args = behaviour_config.args
-                behaviour = behaviour_class(skill_context, **args)
+                behaviour = behaviour_class(**args)
+                behaviour._context = skill_context
                 behaviours.append(behaviour)
 
         return behaviours
@@ -172,15 +184,26 @@ class Handler(ABC):
 
     SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
 
-    def __init__(self, skill_context: SkillContext, *args, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initialize a handler object.
 
         :param skill_context: the skill context
         :param kwargs: keyword arguments
         """
-        self.context = skill_context
-        self.config = kwargs
+        self._context = None  # type: Optional[SkillContext]
+        self._config = kwargs
+
+    @property
+    def context(self) -> SkillContext:
+        """Get the context of the handler."""
+        assert self._context is not None, "SkillContext not assigned."
+        return self._context
+
+    @property
+    def config(self) -> Dict[Any, Any]:
+        """Get the config of the handler."""
+        return self._config
 
     @abstractmethod
     def handle_envelope(self, envelope: Envelope) -> None:
@@ -224,22 +247,34 @@ class Handler(ABC):
             return None
         else:
             args = handler_config.args
-            handler = handler_class(skill_context, **args)
+            handler = handler_class(**args)
+            handler._context = skill_context
             return handler
 
 
 class Task(ABC):
     """This class implements an abstract task."""
 
-    def __init__(self, skill_context: SkillContext, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Initialize a task.
 
         :param skill_context: the skill context
         :param kwargs: keyword arguments.
         """
-        self.context = skill_context
-        self.config = kwargs
+        self._context = None  # type: Optional[SkillContext]
+        self._config = kwargs
+
+    @property
+    def context(self) -> SkillContext:
+        """Get the context of the task."""
+        assert self._context is not None, "SkillContext not assigned."
+        return self._context
+
+    @property
+    def config(self) -> Dict[Any, Any]:
+        """Get the config of the task."""
+        return self._config
 
     @abstractmethod
     def execute(self) -> None:
@@ -283,7 +318,8 @@ class Task(ABC):
                 logger.warning("Task '{}' cannot be found.".format(task_class))
             else:
                 args = task_config.args
-                task = task_class(skill_context, **args)
+                task = task_class(**args)
+                task._context = skill_context
                 tasks.append(task)
 
         return tasks
@@ -514,6 +550,8 @@ class HandlerRegistry(Registry):
         """
         if protocol_id in self._handlers.keys():
             logger.warning("Another handler also registered against protocol id '{}'".format(protocol_id))
+        if protocol_id not in self._handlers.keys():
+            self._handlers[protocol_id] = {}
         self._handlers[protocol_id][skill_id] = handler
 
     def unregister(self, skill_id: SkillId) -> None:

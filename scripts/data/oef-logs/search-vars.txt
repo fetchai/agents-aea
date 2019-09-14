@@ -9,17 +9,17 @@ search_api_query_exception 0
 # TYPE search_api_query_emptyResponse counter
 search_api_query_emptyResponse 0
 # TYPE search_api_update_request counter
-search_api_update_request 0
+search_api_update_request 1
 # TYPE search_api_update_success counter
-search_api_update_success 0
+search_api_update_success 1
 # TYPE search_api_update_fails counter
 search_api_update_fails 0
 # TYPE search_api_update_exception counter
 search_api_update_exception 0
 # TYPE search_api_remove_request counter
-search_api_remove_request 0
+search_api_remove_request 18
 # TYPE search_api_remove_success counter
-search_api_remove_success 0
+search_api_remove_success 18
 # TYPE search_api_remove_fails counter
 search_api_remove_fails 0
 # TYPE search_api_remove_exception counter
@@ -59,7 +59,7 @@ search_GeoSearch_row_count 0
 # TYPE search_GeoSearch_rows_added counter
 search_GeoSearch_rows_added 0
 # TYPE search_GeoSearch_rows_removed counter
-search_GeoSearch_rows_removed 0
+search_GeoSearch_rows_removed 18
 # TYPE search_GeoSearch_row_add_duplicate counter
 search_GeoSearch_row_add_duplicate 0
 # TYPE search_GeoSearch_row_add_fails counter
@@ -85,9 +85,9 @@ search_GeoSearch_originated_queries 0
 # TYPE search_GeoSearch_num_originated_rows counter
 search_GeoSearch_num_originated_rows 0
 # TYPE search_AddressRegistry_row_count counter
-search_AddressRegistry_row_count 0
+search_AddressRegistry_row_count 1
 # TYPE search_AddressRegistry_rows_added counter
-search_AddressRegistry_rows_added 0
+search_AddressRegistry_rows_added 1
 # TYPE search_AddressRegistry_rows_removed counter
 search_AddressRegistry_rows_removed 0
 # TYPE search_AddressRegistry_row_add_duplicate counter
@@ -157,7 +157,7 @@ search_Attrs_row_add_fails 0
 # TYPE search_Attrs_row_remove_fails counter
 search_Attrs_row_remove_fails 0
 # TYPE search_Attrs_row_remove_not_found counter
-search_Attrs_row_remove_not_found 0
+search_Attrs_row_remove_not_found 18
 # TYPE search_Attrs_prepare_constraint_count counter
 search_Attrs_prepare_constraint_count 0
 # TYPE search_Attrs_prepare_count counter

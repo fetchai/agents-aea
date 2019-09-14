@@ -10,7 +10,7 @@ A guide to create an AEA with the gym_skill.
 
 - Cd into agent:
 
-	  cd my_gym_agent
+      cd my_gym_agent
 
 - Add the 'gym' skill:
 
@@ -18,8 +18,8 @@ A guide to create an AEA with the gym_skill.
 
 - Copy the gym environment to the agent directory:
 
-	mkdir gyms
-	cp -a ../examples/gym_ex/gyms/. gyms/
+	    mkdir gyms
+	    cp -a ../examples/gym_ex/gyms/. gyms/
 
 - Add a gym connection to the `aea-config.yaml`:
 

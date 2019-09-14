@@ -22,7 +22,7 @@ from queue import Queue
 from threading import Thread
 
 
-from aea.skills.base.core import SkillContext, Task
+from aea.skills.base.core import Task
 
 from .helpers import ProxyEnv
 from .rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
@@ -31,12 +31,12 @@ from .rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
 class GymTask(Task):
     """Gym task."""
 
-    def __init__(self, skill_context: SkillContext, **kwargs):
+    def __init__(self, **kwargs):
         """Initialize the task."""
         print("GymTask.__init__: arguments: {}".format(kwargs))
-        super().__init__(skill_context, kwargs)
+        super().__init__(**kwargs)
         self._rl_agent = MyRLAgent(NB_GOODS)
-        self._proxy_env = ProxyEnv(skill_context)
+        self._proxy_env = ProxyEnv(self.context)
         self._rl_agent_training_thread = Thread(target=self._rl_agent.fit, args=[self._proxy_env, NB_STEPS])
         self.is_rl_agent_training = False
 
