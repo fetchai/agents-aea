@@ -141,7 +141,7 @@ class HandlerConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        class_name = cast(str, obj.get("name"))
+        class_name = cast(str, obj.get("class_name"))
         return HandlerConfig(
             class_name=class_name,
             args=obj.get("args")
@@ -167,7 +167,7 @@ class BehaviourConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        class_name = cast(str, obj.get("name"))
+        class_name = cast(str, obj.get("class_name"))
         return BehaviourConfig(
             class_name=class_name,
             args=obj.get("args")
@@ -193,7 +193,7 @@ class TaskConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        class_name = cast(str, obj.get("name"))
+        class_name = cast(str, obj.get("class_name"))
         return TaskConfig(
             class_name=class_name,
             args=obj.get("args")
@@ -307,7 +307,6 @@ class AgentConfig(Configuration):
             "protocols": sorted(self.protocols),
             "skills": sorted(self.skills)
         }
-
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""

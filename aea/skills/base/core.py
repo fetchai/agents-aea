@@ -321,7 +321,7 @@ class Skill:
         :return: the Skill object. None if the parsing failed.
         """
         # check if there is the config file. If not, then return None.
-        skill_config = agent_context.skill_loader.load(open(os.path.join(directory)))
+        skill_config = agent_context.skill_loader.load(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
         if skill_config is None:
             return None
 
