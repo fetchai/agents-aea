@@ -19,6 +19,7 @@
 #
 # ------------------------------------------------------------------------------
 import importlib
+import glob
 import os
 import re
 from typing import List, Dict
@@ -87,12 +88,17 @@ setup(
     ],
     install_requires=[
         "cryptography",
-        "base5
+        "base58"
     ],
     tests_require=["tox"],
     extras_require=get_all_extras(),
     entry_points={
         'console_scripts': ["aea=aea.cli:cli"],
     },
+    zip_safe=False,
+    include_package_data=True,
+    data_files=[
+        ("aea/skills/base/schemas/", glob.glob("aea/skills/base/schemas/*")),
+    ],
     license=about['__license__'],
 )
