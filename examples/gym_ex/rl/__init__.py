@@ -17,34 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'echo' skill."""
-
-from aea.mail.base import Envelope
-from aea.skills.base.core import Handler
-
-
-class EchoHandler(Handler):
-    """Echo handler."""
-
-    SUPPORTED_PROTOCOL = "default"
-
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        print("EchoHandler.__init__: arguments: {}".format(kwargs))
-
-    def handle_envelope(self, envelope: Envelope) -> None:
-        """
-        Handle envelopes.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        print("Echo Handler: envelope={}".format(envelope))
-
-    def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
-        print("Echo Handler: teardown method called.")
+"""This module contains the rl modules."""

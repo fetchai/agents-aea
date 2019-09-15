@@ -138,6 +138,9 @@ class Agent(ABC):
         if not self.debug and not self.mailbox.is_connected:
             self.mailbox.connect()
 
+        logger.debug("[{}]: Calling setup method...".format(self.name))
+        self.setup()
+
         self.liveness._is_stopped = False
         self._run_main_loop()
 
@@ -147,20 +150,12 @@ class Agent(ABC):
 
         :return: None
         """
-        logger.debug("[{}]: Calling setup method...".format(self.name))
-        self.setup()
-
         logger.debug("[{}]: Start processing messages...".format(self.name))
         while not self.liveness.is_stopped:
             self.act()
             time.sleep(self._timeout)
             self.react()
             self.update()
-
-        logger.debug("[{}]: Calling teardown method...".format(self.name))
-        self.teardown()
-
-        self.stop()
         logger.debug("[{}]: Exiting main loop...".format(self.name))
 
     def stop(self) -> None:
@@ -174,6 +169,9 @@ class Agent(ABC):
         self.liveness._is_stopped = True
         if self.mailbox.is_connected:
             self.mailbox.disconnect()
+
+        logger.debug("[{}]: Calling teardown method...".format(self.name))
+        self.teardown()
 
     @abstractmethod
     def setup(self) -> None:

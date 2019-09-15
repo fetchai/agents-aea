@@ -307,6 +307,7 @@ class AgentConfig(Configuration):
             "protocols": sorted(self.protocols),
             "skills": sorted(self.skills)
         }
+
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""

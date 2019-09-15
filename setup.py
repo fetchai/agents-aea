@@ -34,7 +34,7 @@ def get_aea_extras() -> Dict[str, List[str]]:
     result = {}
 
     # parse channel dependencies
-    channel_module = importlib.import_module("aea.channel")
+    channel_module = importlib.import_module("aea.channels")
     channel_dependencies = {k.split("_")[0] + "-channel": v for k, v in vars(channel_module).items() if re.match(".+_dependencies", k)}
     result.update(channel_dependencies)
 
@@ -69,7 +69,7 @@ with open(os.path.join(here, PACKAGE_NAME, '__version__.py'), 'r') as f:
 with open('README.md', 'r') as f:
     readme = f.read()
 
-   
+
 setup(
     name=about['__title__'],
     description=about['__description__'],

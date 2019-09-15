@@ -24,7 +24,7 @@ from typing import Optional, cast
 
 from aea.agent import Agent
 from aea.mail.base import Envelope, MailBox
-from aea.skills.base.core import Context, Resources
+from aea.skills.base.core import AgentContext, Resources
 from aea.skills.default.handler import DefaultHandler
 
 logger = logging.getLogger(__name__)
@@ -60,11 +60,11 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._context = Context(self.name, self.outbox)
+        self._context = AgentContext(self.name, self.outbox)
         self._resources = None  # type: Optional[Resources]
 
     @property
-    def context(self) -> Context:
+    def context(self) -> AgentContext:
         """Get context."""
         return self._context
 
@@ -90,7 +90,6 @@ class AEA(Agent):
         """
         for behaviour in self.resources.behaviour_registry.fetch_all():  # the skill should be able to register things here as active so we hand control fully to the skill and let this just spin through
             behaviour.act()
-        # NOTE: we must ensure that these are non-blocking.
 
     def react(self) -> None:
         """
@@ -104,8 +103,6 @@ class AEA(Agent):
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
             if envelope is not None:
                 self.handle(envelope)
-        # Note: here things are processed sequentially, but on a skill level anything can be done (e.g. wait for several messages/ create templates etc.)
-        # NOTE: we must ensure that these are non-blocking.
 
     def handle(self, envelope: Envelope) -> None:
         """
@@ -137,13 +134,15 @@ class AEA(Agent):
                 default_handler.send_invalid_message(envelope)
             return
 
-        handler = self.resources.handler_registry.fetch(protocol.id)
-        if handler is None:
+        handlers = self.resources.handler_registry.fetch(protocol.id)
+        if handlers is None:
             if default_handler is not None:
                 default_handler.send_unsupported_skill(envelope, protocol)
             return
 
-        handler.handle_envelope(envelope)
+        # each handler independently acts on the message
+        for handler in handlers:
+            handler.handle_envelope(envelope)
 
     def update(self) -> None:
         """Update the current state of the agent.

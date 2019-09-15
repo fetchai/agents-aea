@@ -17,4 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains an example using the Gym channel."""
+"""This module contains the behaviours for the 'gym' skill."""
+
+from aea.skills.base.core import Behaviour
+
+
+class GymBehaviour(Behaviour):
+    """Gym behaviour."""
+
+    def __init__(self, **kwargs):
+        """Initialize the behaviour."""
+        print("GymBehaviour.__init__: arguments: {}".format(kwargs))
+        super().__init__(**kwargs)
+
+    def act(self) -> None:
+        """Act according to the behaviour."""
+        print("Gym Behaviour: act method called.")
+
+    def teardown(self) -> None:
+        """Teardown the behaviour."""
+        print("Gym Behaviour: teardown method called.")

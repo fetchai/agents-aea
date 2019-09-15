@@ -17,20 +17,26 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'echo' skill."""
+"""This module contains the handler for the 'gym' skill."""
+from typing import cast
 
 from aea.mail.base import Envelope
 from aea.skills.base.core import Handler
+from aea.protocols.gym.message import GymMessage
+from aea.protocols.gym.serialization import GymSerializer
+
+from .tasks import GymTask
 
 
-class EchoHandler(Handler):
-    """Echo handler."""
+class GymHandler(Handler):
+    """Gym handler."""
 
-    SUPPORTED_PROTOCOL = "default"
+    SUPPORTED_PROTOCOL = "gym"
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        print("EchoHandler.__init__: arguments: {}".format(kwargs))
+        print("GymHandler.__init__: arguments: {}".format(kwargs))
+        super().__init__(**kwargs)
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """
@@ -39,7 +45,16 @@ class EchoHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        print("Echo Handler: envelope={}".format(envelope))
+        print("Gym handler: envelope={}".format(envelope))
+        gym_msg = GymSerializer().decode(envelope.message)
+        gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
+        if gym_msg_performative == GymMessage.Performative.PERCEPT:
+            assert self.context.tasks is not None, "Incorrect initialization."
+            assert len(self.context.tasks) == 1, "Too many tasks loaded!"
+            gym_task = cast(GymTask, self.context.tasks[0])
+            gym_task.proxy_env_queue.put(gym_msg)
+        else:
+            raise ValueError("Unexpected performative or no step_id: {}".format(gym_msg_performative))
 
     def teardown(self) -> None:
         """
@@ -47,4 +62,4 @@ class EchoHandler(Handler):
 
         :return: None
         """
-        print("Echo Handler: teardown method called.")
+        print("Echo handler: teardown method called.")
