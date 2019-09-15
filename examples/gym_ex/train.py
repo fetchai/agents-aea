@@ -30,9 +30,12 @@ if __name__ == "__main__":
     NB_PRICES_PER_GOOD = 100
     NB_STEPS = 4000
 
+    # Use any gym.Env compatible environment:
     gym_env = BanditNArmedRandom(nb_bandits=NB_GOODS, nb_prices_per_bandit=NB_PRICES_PER_GOOD)
+
+    # Pass the gym environment to a proxy environment:
     proxy_env = ProxyEnv(gym_env)
 
-    """Launch the agent."""
+    # Use any RL agent compatible with the gym environment and call the fix method:
     rl_agent = RLAgent(nb_goods=NB_GOODS)
     rl_agent.fit(proxy_env, nb_steps=NB_STEPS)
