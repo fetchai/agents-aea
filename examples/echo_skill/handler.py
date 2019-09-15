@@ -39,7 +39,7 @@ class EchoHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        print("Echo handler: envelope={}".format(envelope))
+        print("Echo Handler: envelope={}".format(envelope))
 
     def teardown(self) -> None:
         """
@@ -47,4 +47,4 @@ class EchoHandler(Handler):
 
         :return: None
         """
-        print("Echo handler: teardown method called.")
+        print("Echo Handler: teardown method called.")
