@@ -20,11 +20,10 @@
 
 """This contains the rl agent class."""
 
+import gym
 import numpy as np
 import random
 from typing import Any, Dict
-
-from proxy.env import ProxyEnv
 
 
 class PriceBandit(object):
@@ -154,7 +153,7 @@ class RLAgent:
         """
         return random.choice(list(self.good_price_models.keys()))
 
-    def fit(self, proxy_env: ProxyEnv, nb_steps: int) -> None:
+    def fit(self, gym_env: gym.Env, nb_steps: int) -> None:
         """
         Train the agent on the given proxy environment.
 
@@ -164,12 +163,12 @@ class RLAgent:
         """
         action_counter = 0
 
-        proxy_env.reset()
+        gym_env.reset()
         while action_counter < nb_steps:
             action = self._pick_an_action()
-            obs, reward, done, info = proxy_env.step(action)
+            obs, reward, done, info = gym_env.step(action)
             self._update_model(obs, reward, done, info, action)
             action_counter += 1
             if action_counter % 10 == 0:
                 print("Action: step_id='{}' action='{}' reward='{}'".format(action_counter, action, reward))
-        proxy_env.close()
+        gym_env.close()

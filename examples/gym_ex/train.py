@@ -38,4 +38,4 @@ if __name__ == "__main__":
 
     # Use any RL agent compatible with the gym environment and call the fix method:
     rl_agent = RLAgent(nb_goods=NB_GOODS)
-    rl_agent.fit(proxy_env, nb_steps=NB_STEPS)
+    rl_agent.fit(gym_env=proxy_env, nb_steps=NB_STEPS)
