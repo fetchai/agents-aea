@@ -24,7 +24,7 @@ import os
 from typing import TextIO, Type, TypeVar, Generic
 
 import yaml
-from jsonschema import validate  # type: ignore
+from jsonschema import validate
 
 from aea.skills.base.config import AgentConfig, SkillConfig
 

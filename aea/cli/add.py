@@ -27,7 +27,7 @@ from typing import cast
 
 import click
 from click import pass_context
-from jsonschema import ValidationError  # type: ignore
+from jsonschema import ValidationError
 
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
