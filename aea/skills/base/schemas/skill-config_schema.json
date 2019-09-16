@@ -1,0 +1,64 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema for the skill configuration file.",
+    "additionalProperties": false,
+    "type": "object",
+    "required": ["name", "authors", "version", "license", "url", "protocol", "handler", "behaviours", "tasks"],
+    "properties": {
+        "name": {"type": "string"},
+        "authors": {"type": "string"},
+        "version": {"type": "string"},
+        "license": {"type": "string"},
+        "url": {"type": "string"},
+        "protocol": {"type": "string"},
+        "handler": {"$ref": "#/definitions/handler"},
+        "behaviours": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required": ["behaviour"],
+              "properties": {
+                "behaviour": { "$ref": "#/definitions/behaviour" }
+              }
+            }
+        },
+        "tasks": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required": ["task"],
+              "properties": {
+                "task": { "$ref": "#/definitions/task" }
+              }
+            }
+        }
+    },
+    "definitions": {
+        "behaviour": {
+            "type": "object",
+            "required": ["class_name", "args"],
+            "properties": {
+                "class_name": {"type": "string"},
+                "args": {"type": "object"}
+            }
+        },
+        "task": {
+            "type": "object",
+            "required": ["class_name", "args"],
+            "properties": {
+                "class_name": {"type": "string"},
+                "args": {"type": "object"}
+            }
+        },
+        "handler": {
+            "type": "object",
+            "required": ["class_name", "args"],
+            "properties": {
+                "class_name": {"type": "string"},
+                "args": {"type": "object"}
+            }
+        }
+    }
+}

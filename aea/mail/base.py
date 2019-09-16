@@ -36,10 +36,10 @@ ProtocolId = str
 class Envelope:
     """The top level message class."""
 
-    def __init__(self, to: Optional[Address] = None,
-                 sender: Optional[Address] = None,
-                 protocol_id: Optional[ProtocolId] = None,
-                 message: Optional[bytes] = b""):
+    def __init__(self, to: Address,
+                 sender: Address,
+                 protocol_id: ProtocolId,
+                 message: bytes):
         """
         Initialize a Message object.
 
@@ -80,7 +80,7 @@ class Envelope:
         self._sender = sender
 
     @property
-    def protocol_id(self) -> Optional[ProtocolId]:
+    def protocol_id(self) -> ProtocolId:
         """Get protocol id."""
         return self._protocol_id
 
@@ -115,14 +115,10 @@ class Envelope:
         """
         envelope = self
         envelope_pb = base_pb2.Envelope()
-        if envelope.to is not None:
-            envelope_pb.to = envelope.to
-        if envelope.sender is not None:
-            envelope_pb.sender = envelope.sender
-        if envelope.protocol_id is not None:
-            envelope_pb.protocol_id = envelope.protocol_id
-        if envelope.message is not None:
-            envelope_pb.message = envelope.message
+        envelope_pb.to = envelope.to
+        envelope_pb.sender = envelope.sender
+        envelope_pb.protocol_id = envelope.protocol_id
+        envelope_pb.message = envelope.message
 
         envelope_bytes = envelope_pb.SerializeToString()
         return envelope_bytes
@@ -138,10 +134,10 @@ class Envelope:
         envelope_pb = base_pb2.Envelope()
         envelope_pb.ParseFromString(envelope_bytes)
 
-        to = envelope_pb.to if envelope_pb.to else None
-        sender = envelope_pb.sender if envelope_pb.sender else None
-        protocol_id = envelope_pb.protocol_id if envelope_pb.protocol_id else None
-        message = envelope_pb.message if envelope_pb.message else None
+        to = envelope_pb.to
+        sender = envelope_pb.sender
+        protocol_id = envelope_pb.protocol_id
+        message = envelope_pb.message
 
         envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
         return envelope
@@ -224,8 +220,8 @@ class OutBox(object):
                      .format(item.to, item.sender, item.protocol_id, item.message))
         self._queue.put(item)
 
-    def put_message(self, to: Optional[Address] = None, sender: Optional[Address] = None,
-                    protocol_id: Optional[ProtocolId] = None, message: bytes = b"") -> None:
+    def put_message(self, to: Address, sender: Address,
+                    protocol_id: ProtocolId, message: bytes) -> None:
         """
         Put a message in the outbox.
 
@@ -239,8 +235,39 @@ class OutBox(object):
         self._queue.put(envelope)
 
 
+class Channel:
+    """Abstract definition of a channel."""
+
+    @abstractmethod
+    def connect(self) -> Optional[Queue]:
+        """
+        Set up the connection.
+
+        :return: A queue or None.
+        """
+
+    @abstractmethod
+    def disconnect(self) -> None:
+        """
+        Tear down the connection.
+
+        :return: None.
+        """
+
+    @abstractmethod
+    def send(self, envelope: Envelope) -> None:
+        """
+        Send an envelope.
+
+        :param envelope: the envelope to send.
+        :return: None.
+        """
+
+
 class Connection:
     """Abstract definition of a connection."""
+
+    channel: Channel
 
     def __init__(self):
         """Initialize the connection."""

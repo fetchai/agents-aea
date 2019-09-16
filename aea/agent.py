@@ -58,7 +58,7 @@ class Agent(ABC):
 
     def __init__(self, name: str,
                  private_key_pem_path: Optional[str] = None,
-                 timeout: Optional[float] = 1.0,
+                 timeout: float = 1.0,
                  debug: bool = False) -> None:
         """
         Instantiate the agent.
@@ -80,14 +80,16 @@ class Agent(ABC):
         self.mailbox = None  # type: Optional[MailBox]
 
     @property
-    def inbox(self) -> Optional[InBox]:
+    def inbox(self) -> InBox:
         """Get the inbox."""
-        return self.mailbox.inbox if self.mailbox else None
+        assert self.mailbox is not None, "Cannot retrieve inbox. No mailbox specified."
+        return self.mailbox.inbox
 
     @property
-    def outbox(self) -> Optional[OutBox]:
+    def outbox(self) -> OutBox:
         """Get the outbox."""
-        return self.mailbox.outbox if self.mailbox else None
+        assert self.mailbox is not None, "Cannot retrieve outbox. No mailbox specified."
+        return self.mailbox.outbox
 
     @property
     def name(self) -> str:
@@ -132,8 +134,12 @@ class Agent(ABC):
 
         :return: None
         """
+        assert self.mailbox is not None, "Cannot call start without mailbox instantiated."
         if not self.debug and not self.mailbox.is_connected:
             self.mailbox.connect()
+
+        logger.debug("[{}]: Calling setup method...".format(self.name))
+        self.setup()
 
         self.liveness._is_stopped = False
         self._run_main_loop()
@@ -144,20 +150,12 @@ class Agent(ABC):
 
         :return: None
         """
-        logger.debug("[{}]: Calling setup method...".format(self.name))
-        self.setup()
-
         logger.debug("[{}]: Start processing messages...".format(self.name))
         while not self.liveness.is_stopped:
             self.act()
             time.sleep(self._timeout)
             self.react()
             self.update()
-
-        logger.debug("[{}]: Calling teardown method...".format(self.name))
-        self.teardown()
-
-        self.stop()
         logger.debug("[{}]: Exiting main loop...".format(self.name))
 
     def stop(self) -> None:
@@ -166,10 +164,14 @@ class Agent(ABC):
 
         :return: None
         """
+        assert self.mailbox is not None, "Cannot call stop without mailbox instantiated."
         logger.debug("[{}]: Stopping message processing...".format(self.name))
         self.liveness._is_stopped = True
         if self.mailbox.is_connected:
             self.mailbox.disconnect()
+
+        logger.debug("[{}]: Calling teardown method...".format(self.name))
+        self.teardown()
 
     @abstractmethod
     def setup(self) -> None:

@@ -1,0 +1,24 @@
+{
+  "image": "fetchai/oef-search:0.7",
+  "params": [
+    [
+      "--rm",
+      "--cap-add",
+      "sys_ptrace",
+      "-p",
+      "20000:20000",
+      "-p",
+      "10000:10000",
+      "-p",
+      "40000:40000",
+      "-p",
+      "7500:7500"
+    ]
+  ],
+  "cmd": {
+    "oef-search": {
+      "positional_args": ["config_file"],
+      "config_file": "/config/node_config.json"
+    }
+  }
+}

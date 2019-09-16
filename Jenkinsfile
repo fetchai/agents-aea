@@ -20,6 +20,15 @@ pipeline {
 
                 } // code style check
 
+                stage('Static Type Check') {
+
+                    steps {
+                        sh 'pip3 install mypy'
+                        sh 'mypy aea tests examples'
+                    }
+
+                } // static type check
+
                 stage('Unit Tests') {
 
                     parallel {

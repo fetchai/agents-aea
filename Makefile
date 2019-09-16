@@ -19,6 +19,7 @@ clean-test:
 	rm -fr htmlcov/
 	rm -fr .hypothesis
 	rm -fr .pytest_cache
+	rm -fr .mypy_cache/
 	find . -name 'log.txt' -exec rm -fr {} +
 	find . -name 'log.*.txt' -exec rm -fr {} +
 

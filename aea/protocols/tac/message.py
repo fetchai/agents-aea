@@ -20,7 +20,7 @@
 
 """This module contains the default message definition."""
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 from aea.protocols.base.message import Message
 
@@ -97,10 +97,10 @@ class TACMessage(Message):
                 assert self.is_set("is_sender_buyer")
                 assert self.is_set("counterparty")
                 assert self.is_set("amount")
-                amount = self.get("amount")
-                assert amount >= 0
+                amount = cast(float, self.get("amount"))
+                assert amount >= 0.0
                 assert self.is_set("quantities_by_good_pbk")
-                quantities_by_good_pbk = self.get("quantities_by_good_pbk")
+                quantities_by_good_pbk = cast(Dict[str, int], self.get("quantities_by_good_pbk"))
                 assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
                 assert all(quantity >= 0 for quantity in quantities_by_good_pbk.values())
             elif tac_type == TACMessage.Type.GET_STATE_UPDATE:

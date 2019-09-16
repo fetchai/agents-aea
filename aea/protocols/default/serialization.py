@@ -20,6 +20,7 @@
 
 """Serialization module for the default protocol."""
 import json
+from typing import cast
 
 import base58
 
@@ -33,7 +34,7 @@ class DefaultSerializer(Serializer):
 
     def encode(self, msg: Message) -> bytes:
         """Encode a 'default' message into bytes."""
-        body = {}
+        body = {}  # Dict[str, Any]
 
         msg_type = DefaultMessage.Type(msg.get("type"))
         body["type"] = str(msg_type.value)
@@ -41,8 +42,9 @@ class DefaultSerializer(Serializer):
         if msg_type == DefaultMessage.Type.BYTES:
             body["content"] = base58.b58encode(msg.get("content")).decode("utf-8")
         elif msg_type == DefaultMessage.Type.ERROR:
-            body["error_code"] = msg.get("error_code")
-            body["error_msg"] = msg.get("error_msg")
+            body["error_code"] = cast(str, msg.get("error_code"))
+            body["error_msg"] = cast(str, msg.get("error_msg"))
+            body["error_data"] = cast(str, msg.get("error_data"))
         else:
             raise ValueError("Type not recognized.")
 
@@ -62,7 +64,8 @@ class DefaultSerializer(Serializer):
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = json_body["error_code"]
             body["error_msg"] = json_body["error_msg"]
+            body["error_data"] = json_body["error_data"]
         else:
             raise ValueError("Type not recognized.")
 
-        return Message(body=body)
+        return DefaultMessage(type=msg_type, body=body)

@@ -117,7 +117,7 @@ class Crypto(object):
 
         :return: public key object
         """
-        public_key = self._private_key.public_key()
+        public_key = self._private_key.public_key()  # type: ignore
         return public_key
 
     def _pbk_obj_to_pem(self, pbk: object) -> bytes:
@@ -128,7 +128,7 @@ class Crypto(object):
 
         :return: the public key as a bytes string in pem format (base64)
         """
-        result = pbk.public_bytes(encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo)
+        result = pbk.public_bytes(encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo)  # type: ignore
         return result
 
     def _pbk_pem_to_b64(self, pbk: bytes) -> bytes:
@@ -212,7 +212,7 @@ class Crypto(object):
         :return: the signature
         """
         digest = self._hash_data(data)
-        signature = self._private_key.sign(digest, ec.ECDSA(utils.Prehashed(self._chosen_hash)))
+        signature = self._private_key.sign(digest, ec.ECDSA(utils.Prehashed(self._chosen_hash)))  # type: ignore
         return signature
 
     def is_confirmed_integrity(self, data: bytes, signature: bytes, signer_pbk: str) -> bool:
@@ -228,7 +228,7 @@ class Crypto(object):
         signer_pbk_obj = self._pbk_b58_to_obj(signer_pbk)
         digest = self._hash_data(data)
         try:
-            signer_pbk_obj.verify(signature, digest, ec.ECDSA(utils.Prehashed(self._chosen_hash)))
+            signer_pbk_obj.verify(signature, digest, ec.ECDSA(utils.Prehashed(self._chosen_hash)))  # type: ignore
             return True
         except CryptoError as e:
             logger.exception(str(e))
@@ -257,4 +257,4 @@ class Crypto(object):
         return pbk_hex
 
     def _pvk_obj_to_pem(self, pvk: object) -> bytes:
-        return pvk.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.TraditionalOpenSSL, serialization.NoEncryption())
+        return pvk.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.TraditionalOpenSSL, serialization.NoEncryption())  # type: ignore

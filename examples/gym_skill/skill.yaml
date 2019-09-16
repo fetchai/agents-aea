@@ -1,0 +1,20 @@
+name: gym
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: GymBehaviour
+      args:
+        skill_context: SkillContext
+handler:
+  class_name: GymHandler
+  args:
+    skill_context: SkillContext
+tasks:
+  - task:
+      class_name: GymTask
+      args:
+        skill_context: SkillContext
+protocol: "gym"

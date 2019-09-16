@@ -35,6 +35,8 @@ class GymMessage(Message):
 
         ACT = 'act'
         PERCEPT = 'percept'
+        RESET = 'reset'
+        CLOSE = 'close'
 
         def __str__(self):
             """Get string representation."""
@@ -62,6 +64,8 @@ class GymMessage(Message):
                 assert self.is_set("done")
                 assert self.is_set("info")
                 assert self.is_set("step_id")
+            elif performative == GymMessage.Performative.RESET or performative == GymMessage.Performative.CLOSE:
+                pass
             else:
                 raise ValueError("Performative not recognized.")
 
