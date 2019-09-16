@@ -52,7 +52,8 @@ def get_all_extras() -> Dict:
             "click",
             "click_log",
             "PyYAML",
-            "jsonschema"
+            "jsonschema",
+            "protobuf"
         ],
     }
     extras.update(get_aea_extras())
