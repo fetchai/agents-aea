@@ -26,7 +26,7 @@ from pathlib import Path
 
 import click
 import click_log
-from jsonschema import ValidationError  # type: ignore
+from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import add
