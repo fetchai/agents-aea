@@ -51,7 +51,8 @@ def get_all_extras() -> Dict:
         "cli": [
             "click",
             "click_log",
-            "PyYAML"
+            "PyYAML",
+            "jsonschema"
         ],
     }
     extras.update(get_aea_extras())
