@@ -48,7 +48,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 - Install package in (development mode):
 
-	  pip3 install -e .
+	  pip install -e .
 
 - After changes to the protobuf schema run:
 
