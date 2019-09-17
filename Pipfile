@@ -30,6 +30,7 @@ oef = {index = "test-pypi",version = "==0.6.10"}
 colorlog = "*"
 jsonschema = "*"
 protobuf = "*"
+mkdocs = "*"
 
 [requires]
 python_version = "3.7"
