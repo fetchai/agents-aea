@@ -30,7 +30,7 @@ from click import pass_context
 from jsonschema import ValidationError
 
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
+from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE, ConnectionConfig
 from aea.skills.base.core import DEFAULT_SKILL_CONFIG_FILE
 
 
@@ -39,6 +39,20 @@ from aea.skills.base.core import DEFAULT_SKILL_CONFIG_FILE
 def add(ctx: Context):
     """Add a resource to the agent."""
     _try_to_load_agent_config(ctx)
+
+
+@add.command()
+@click.argument('connection_name', type=str, required=True)
+@click.argument('connection_type', type=click.Choice(['oef', 'local', 'gym']), required=True)
+@click.option('--config', nargs=2, multiple=True, metavar='KEY VALUE', help='Overrides a config key/value pair.')
+@pass_ctx
+def connection(ctx: Context, connection_name, connection_type, config):
+    """Add a connection to the configuration file."""
+    connection_config = ConnectionConfig(name=connection_name,
+                                         type=connection_type,
+                                         **dict(config))
+    ctx.agent_config.connections.create(connection_config.name, connection_config)
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @add.command()

@@ -36,6 +36,20 @@ def remove(ctx: Context):
 
 
 @remove.command()
+@click.argument('connection_name', type=str, required=True)
+@pass_ctx
+def connection(ctx: Context, connection_name):
+    """Remove a connection from the agent."""
+    all_connection_names = dict(ctx.agent_config.connections.read_all()).keys()
+    if connection_name not in all_connection_names:
+        logger.error("Connection '{}' not found.".format(connection_name))
+        exit(-1)
+
+    logger.info("Removing connection '{}'...".format(connection_name))
+    ctx.agent_config.connections.delete(connection_name)
+
+
+@remove.command()
 @click.argument('protocol_name', type=str, required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_name):
