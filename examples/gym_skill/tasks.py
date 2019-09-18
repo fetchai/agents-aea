@@ -24,8 +24,8 @@ from threading import Thread
 
 from aea.skills.base.core import Task
 
-from .helpers import ProxyEnv
-from .rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
+from gym_skill.helpers import ProxyEnv
+from gym_skill.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
 
 
 class GymTask(Task):

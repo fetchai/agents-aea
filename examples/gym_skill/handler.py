@@ -25,7 +25,7 @@ from aea.skills.base.core import Handler
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
 
-from .tasks import GymTask
+from gym_skill.tasks import GymTask
 
 
 class GymHandler(Handler):

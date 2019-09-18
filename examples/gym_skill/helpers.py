@@ -49,7 +49,6 @@ class ProxyEnv(gym.Env):
         Instantiate the proxy environment.
 
         :param skill_context: the skill context
-        :param queue: the queue
         :return: None
         """
         super().__init__()
