@@ -60,7 +60,7 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._context = AgentContext(self.name, self.outbox)
+        self._context = AgentContext(self.name, self.crypto.public_key, self.outbox)
         self._resources = None  # type: Optional[Resources]
 
     @property
