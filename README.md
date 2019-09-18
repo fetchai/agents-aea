@@ -8,6 +8,7 @@ First, install the package from [test-pypi](https://test.pypi.org/project/aea/):
 `
 pip install cryptography base58
 `
+
 `
 pip install -i https://test.pypi.org/simple/ aea
 `
