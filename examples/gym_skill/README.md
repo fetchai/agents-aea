@@ -22,12 +22,8 @@ A guide to create an AEA with the gym_skill.
 	    cp -a ../examples/gym_ex/gyms/. gyms/
 
 - Add a gym connection to the `aea-config.yaml`:
-
-      - connection:
-        config:
-          env: gyms.env.BanditNArmedRandom
-        name: gym
-        type: gym
+        
+      aea add connection gym gym --config env gyms.env.BanditNArmedRandom 
 
 - Run the agent with the 'gym' connection:
 
