@@ -24,6 +24,7 @@ import logging
 import os
 import pprint
 import re
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast
@@ -360,11 +361,13 @@ class Skill:
         if skill_config is None:
             return None
 
-        skills_spec = importlib.util.spec_from_file_location("skill_module", os.path.join(directory, "__init__.py"))
+        skills_spec = importlib.util.spec_from_file_location(skill_config.name, os.path.join(directory, "__init__.py"))
         if skills_spec is None:
             logger.warning("No skill found.")
             return None
 
+        skill_module = importlib.util.module_from_spec(skills_spec)
+        sys.modules[skills_spec.name + "_skill"] = skill_module
         skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
@@ -545,8 +548,7 @@ class HandlerRegistry(Registry):
         """
         Register a handler.
 
-        :param protocol_id: the protocol id.
-        :param skill_id: the skill id.
+        :param ids: the pair (protocol id, skill id).
         :param handler: the handler.
         :return: None
         """
