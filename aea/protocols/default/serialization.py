@@ -39,7 +39,8 @@ class DefaultSerializer(Serializer):
         body["type"] = str(msg_type.value)
 
         if msg_type == DefaultMessage.Type.BYTES:
-            body["content"] = base64.b64encode(msg.get("content")).decode("utf-8")
+            content = cast(bytes, msg.get("content"))
+            body["content"] = base64.b64encode(content).decode("utf-8")
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = cast(str, msg.get("error_code"))
             body["error_msg"] = cast(str, msg.get("error_msg"))
@@ -59,7 +60,7 @@ class DefaultSerializer(Serializer):
         body["type"] = msg_type
         if msg_type == DefaultMessage.Type.BYTES:
             content = base64.b64decode(json_body["content"].encode("utf-8"))
-            body["content"] = content
+            body["content"] = content  # type: ignore
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = json_body["error_code"]
             body["error_msg"] = json_body["error_msg"]
