@@ -46,13 +46,17 @@ skills/                                        | Directory containing all the sk
   ...                                          | ...
   skillN/                                      | Skill L
 
-### AEA Core Components
+## AEA Core Components
 
-Envelopes are the core objects which agents use to communicate with each other. An Envelope has four attributes:
-- to: defines the destination address
-- sender: defines the sender address
-- protocol_id: defines the protocol_id
-- message: is a bytes field to hold the message in serialized form.
+The `Envelope` is the core object which agents use to communicate with each other. An `Envelope` has four attributes:
+
+* `to`: defines the destination address
+
+* `sender`: defines the sender address
+
+* `protocol_id`: defines the protocol_id
+
+* `message`: is a `bytes` field to hold the message in serialized form.
 
 ### AEA Protocols
 
