@@ -108,9 +108,23 @@ def test_agent_configuration_schema_is_valid_wrt_draft_07():
     Draft7Validator.check_schema(agent_config_schema)
 
 
-def test_validate_config():
+def test_skill_configuration_schema_is_valid_wrt_draft_07():
+    """Test that the JSON schema for the agent configuration file is compliant with the specification Draft 07."""
+    agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "skills", "base", "schemas", "skill-config_schema.json")))
+    Draft7Validator.check_schema(agent_config_schema)
+
+
+def test_validate_agent_config():
     """Test that the validation of the agent configuration file works correctly."""
     agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "skills", "base", "schemas", "aea-config_schema.json")))
     agent_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "aea-config.example.yaml")))
+    pprint.pprint(agent_config_file)
+    validate(instance=agent_config_file, schema=agent_config_schema)
+
+
+def test_validate_skill_config():
+    """Test that the validation of the agent configuration file works correctly."""
+    agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "skills", "base", "schemas", "skill-config_schema.json")))
+    agent_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_skill", "skill.yaml")))
     pprint.pprint(agent_config_file)
     validate(instance=agent_config_file, schema=agent_config_schema)
