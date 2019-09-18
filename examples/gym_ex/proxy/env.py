@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This contains the BanditEnv."""
+"""This contains the proxy gym environment."""
 
 import gym
 from queue import Queue
