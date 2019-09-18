@@ -18,9 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea run' subcommand."""
-
 from pathlib import Path
-from pydoc import locate
 from typing import cast
 
 import click
@@ -30,6 +28,7 @@ from aea.channels.gym import GymConnection
 from aea.channels.local import OEFLocalConnection, LocalNode
 from aea.channels.oef import OEFConnection
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
+from aea.helpers.base import locate
 from aea.mail.base import MailBox, Connection
 
 
@@ -62,7 +61,7 @@ def _setup_connection(connection_name: str, ctx: Context) -> Connection:
     elif connection_type == "gym":
         gym_env_package = cast(str, connection_configuration.config.get('config').get("env"))
         gym_env = locate(gym_env_package)
-        return GymConnection(agent_name, gym_env)
+        return GymConnection(agent_name, gym_env())
     else:
         raise AEAConfigException("Connection type '{}' not supported.".format(connection_type))
 
