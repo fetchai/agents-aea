@@ -23,7 +23,7 @@
 import gym
 import numpy as np
 import random
-from typing import Any, Dict, Tuple
+from typing import Dict, Tuple
 
 BanditId = int
 Price = int

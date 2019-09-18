@@ -88,9 +88,9 @@ class BanditEnv(gym.Env):
         cutoff_price = np.random.normal(self.reward_params[bandit][0], self.reward_params[bandit][1])
 
         if offered_price > cutoff_price:
-            reward = 1
+            reward = 1.0
         else:
-            reward = 0
+            reward = 0.0
 
         return observation, reward, done, info
 
