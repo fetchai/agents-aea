@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Training environment for multi armed bandit."""
+"""Training a multi armed bandit rl agent using the aea framework."""
 
 from gyms.env import BanditNArmedRandom
 from proxy.env import ProxyEnv
@@ -36,6 +36,6 @@ if __name__ == "__main__":
     # Pass the gym environment to a proxy environment:
     proxy_env = ProxyEnv(gym_env)
 
-    # Use any RL agent compatible with the gym environment and call the fix method:
+    # Use any RL agent compatible with the gym environment and call the fit method:
     rl_agent = RLAgent(nb_goods=NB_GOODS)
-    rl_agent.fit(gym_env=proxy_env, nb_steps=NB_STEPS)
+    rl_agent.fit(env=proxy_env, nb_steps=NB_STEPS)

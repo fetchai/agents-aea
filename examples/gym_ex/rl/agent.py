@@ -23,7 +23,18 @@
 import gym
 import numpy as np
 import random
-from typing import Any, Dict
+from typing import Dict, Tuple
+
+BanditId = int
+Price = int
+
+Action = Tuple[BanditId, Price]
+Observation = None
+Reward = float
+Done = bool
+Info = dict
+
+Feedback = Tuple[Observation, Reward, Done, Info]
 
 
 class PriceBandit(object):
@@ -50,16 +61,15 @@ class PriceBandit(object):
         """
         return round(np.random.beta(self.beta_a, self.beta_b))
 
-    def update(self, outcome: bool) -> None:
+    def update(self, outcome: float) -> None:
         """
         Update the bandit.
 
         :param outcome: the outcome used for updating
         :return: None
         """
-        outcome_int = 1 if outcome else 0  # explicit type conversion
-        self.beta_a += outcome_int
-        self.beta_b += 1 - outcome_int
+        self.beta_a += outcome
+        self.beta_b += 1 - outcome
 
 
 class GoodPriceModel(object):
@@ -71,7 +81,7 @@ class GoodPriceModel(object):
             (price, PriceBandit(price))
             for price in range(bound + 1))
 
-    def update(self, outcome: bool, price: int) -> None:
+    def update(self, outcome: float, price: int) -> None:
         """
         Update the respective bandit.
 
@@ -88,18 +98,18 @@ class GoodPriceModel(object):
 
         :return: the winning price
         """
-        maxsample = -1
+        max_sample = -1
         winning_price = 0
         for price, bandit in self.price_bandits.items():
             sample = bandit.sample()
-            if sample > maxsample:
-                maxsample = sample
+            if sample > max_sample:
+                max_sample = sample
                 winning_price = price
         return winning_price
 
 
 class RLAgent:
-    """This class is a reinforcement learning agent that interacts with the agent framework."""
+    """This class is a reinforcement learning agent that uses a Multi-Armed Bandit algorithm."""
 
     def __init__(self, nb_goods: int = 10) -> None:
         """
@@ -111,11 +121,11 @@ class RLAgent:
         self.good_price_models = dict(
             (good_id, GoodPriceModel()) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
 
-    def _pick_an_action(self) -> Any:
+    def _pick_an_action(self) -> Action:
         """
         Pick an action.
 
-        :return: None
+        :return: agent's action
         """
         # Get the good
         good_id = self._get_random_next_good()
@@ -124,11 +134,11 @@ class RLAgent:
         good_price_model = self.good_price_models[good_id]
         price = good_price_model.get_price_expectation()
 
-        action = [good_id, price]
+        action = (good_id, price)
 
         return action
 
-    def _update_model(self, observation, reward, done, info, action) -> None:
+    def _update_model(self, observation: Observation, reward: Reward, done: Done, info: Info, action: Action) -> None:
         """
         Update the model.
 
@@ -153,22 +163,22 @@ class RLAgent:
         """
         return random.choice(list(self.good_price_models.keys()))
 
-    def fit(self, gym_env: gym.Env, nb_steps: int) -> None:
+    def fit(self, env: gym.Env, nb_steps: int) -> None:
         """
         Train the agent on the given proxy environment.
 
-        :param proxy_env: the proxy gym environment
-        :param nb_steps: number of training steps to be performed.
+        :param env: the gym environment in which the agent is trained
+        :param nb_steps: number of training steps to be performed
         :return: None
         """
         action_counter = 0
 
-        gym_env.reset()
+        env.reset()
         while action_counter < nb_steps:
             action = self._pick_an_action()
-            obs, reward, done, info = gym_env.step(action)
-            self._update_model(obs, reward, done, info, action)
             action_counter += 1
+            obs, reward, done, info = env.step(action)
+            self._update_model(obs, reward, done, info, action)
             if action_counter % 10 == 0:
                 print("Action: step_id='{}' action='{}' reward='{}'".format(action_counter, action, reward))
-        gym_env.close()
+        env.close()

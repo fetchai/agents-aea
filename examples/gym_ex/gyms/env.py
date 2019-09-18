@@ -28,11 +28,14 @@ from gym import spaces  # type: ignore
 
 BanditId = int
 Price = int
+
 Action = Tuple[BanditId, Price]
-Reward = bool
+Observation = None
+Reward = float
 Done = bool
 Info = dict
-Feedback = Tuple[None, Reward, Done, Info]
+
+Feedback = Tuple[Observation, Reward, Done, Info]
 
 
 class BanditEnv(gym.Env):
@@ -50,12 +53,13 @@ class BanditEnv(gym.Env):
         self.nb_prices_per_bandit = nb_prices_per_bandit
         self.reward_params = reward_params
 
-        self.action_space = spaces.Tuple((spaces.Discrete(self.nb_bandits), spaces.Discrete(self.nb_prices_per_bandit)))  # an action is specifying one of nb_bandits and specifying a price for the bandit.
+        self.action_space = spaces.Tuple((spaces.Discrete(self.nb_bandits), spaces.Discrete(
+            self.nb_prices_per_bandit)))  # an action is specifying one of nb_bandits and specifying a price for the bandit.
         self.observation_space = spaces.Space()  # None type space. agents only get a reward back.
 
         self.seed()  # seed environment randomness
 
-    def reset(self) -> None:
+    def reset(self) -> Observation:
         """
         Reset the environment.
 
@@ -82,7 +86,11 @@ class BanditEnv(gym.Env):
         info = {}  # type: Info
 
         cutoff_price = np.random.normal(self.reward_params[bandit][0], self.reward_params[bandit][1])
-        reward = offered_price > cutoff_price
+
+        if offered_price > cutoff_price:
+            reward = 1.0
+        else:
+            reward = 0.0
 
         return observation, reward, done, info
 
@@ -98,7 +106,7 @@ class BanditEnv(gym.Env):
 
 
 class BanditNArmedRandom(BanditEnv):
-    """N armed bandit randomly initialized."""
+    """N-armed bandit randomly initialized."""
 
     def __init__(self, nb_bandits: int = 10, nb_prices_per_bandit: int = 100, stdev: int = 1, seed: int = 42):
         """
@@ -113,8 +121,10 @@ class BanditNArmedRandom(BanditEnv):
 
         reward_params = []  # type: List[Tuple[float, int]]
         for i in range(nb_bandits):
-            # Mean m is pulled from a uniform distribution over [0, bound). To induce a normal distribution with params (m, 1).
+            # Mean m is pulled from a uniform distribution over [0, bound). To induce a normal distribution with params
+            # (m, 1).
             mean = np.random.uniform(0, nb_prices_per_bandit)
-            reward_params.append([mean, stdev])  # type: ignore
+            reward_params.append((mean, stdev))  # type: ignore
 
-        BanditEnv.__init__(self, nb_bandits=nb_bandits, nb_prices_per_bandit=nb_prices_per_bandit, reward_params=reward_params)
+        BanditEnv.__init__(self, nb_bandits=nb_bandits, nb_prices_per_bandit=nb_prices_per_bandit,
+                           reward_params=reward_params)
