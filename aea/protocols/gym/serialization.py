@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
-import base58
+import base64
 import copy
 import json
 import pickle
@@ -46,19 +46,19 @@ class GymSerializer(Serializer):
 
         if performative == GymMessage.Performative.ACT:
             action = msg.body["action"]  # type: Any
-            action_bytes = base58.b58encode(pickle.dumps(action)).decode("utf-8")
+            action_bytes = base64.b64encode(pickle.dumps(action)).decode("utf-8")
             new_body["action"] = action_bytes
             new_body["step_id"] = msg.body["step_id"]
         elif performative == GymMessage.Performative.PERCEPT:
             # observation, reward and info are gym implementation specific, done is boolean
             observation = msg.body["observation"]  # type: Any
-            observation_bytes = base58.b58encode(pickle.dumps(observation)).decode("utf-8")
+            observation_bytes = base64.b64encode(pickle.dumps(observation)).decode("utf-8")
             new_body["observation"] = observation_bytes
             reward = msg.body["reward"]  # type: Any
-            reward_bytes = base58.b58encode(pickle.dumps(reward)).decode("utf-8")
+            reward_bytes = base64.b64encode(pickle.dumps(reward)).decode("utf-8")
             new_body["reward"] = reward_bytes
             info = msg.body["info"]  # type: Any
-            info_bytes = base58.b58encode(pickle.dumps(info)).decode("utf-8")
+            info_bytes = base64.b64encode(pickle.dumps(info)).decode("utf-8")
             new_body["info"] = info_bytes
             new_body["step_id"] = msg.body["step_id"]
 
@@ -78,19 +78,19 @@ class GymSerializer(Serializer):
         new_body["type"] = performative
 
         if performative == GymMessage.Performative.ACT:
-            action_bytes = base58.b58decode(json_msg["action"])
+            action_bytes = base64.b64decode(json_msg["action"])
             action = pickle.loads(action_bytes)
             new_body["action"] = action
             new_body["step_id"] = json_msg["step_id"]
         elif performative == GymMessage.Performative.PERCEPT:
             # observation, reward and info are gym implementation specific, done is boolean
-            observation_bytes = base58.b58decode(json_msg["observation"])
+            observation_bytes = base64.b64decode(json_msg["observation"])
             observation = pickle.loads(observation_bytes)
             new_body["observation"] = observation
-            reward_bytes = base58.b58decode(json_msg["reward"])
+            reward_bytes = base64.b64decode(json_msg["reward"])
             reward = pickle.loads(reward_bytes)
             new_body["reward"] = reward
-            info_bytes = base58.b58decode(json_msg["info"])
+            info_bytes = base64.b64decode(json_msg["info"])
             info = pickle.loads(info_bytes)
             new_body["info"] = info
             new_body["step_id"] = json_msg["step_id"]

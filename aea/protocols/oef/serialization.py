@@ -19,11 +19,10 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
+import base64
 import copy
 import json
 import pickle
-
-import base58
 
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
@@ -50,11 +49,11 @@ class OEFSerializer(Serializer):
 
         if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
             service_description = msg.body["service_description"]  # type: Description
-            service_description_bytes = base58.b58encode(pickle.dumps(service_description)).decode("utf-8")
+            service_description_bytes = base64.b64encode(pickle.dumps(service_description)).decode("utf-8")
             new_body["service_description"] = service_description_bytes
         elif oef_type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
             query = msg.body["query"]  # type: Query
-            query_bytes = base58.b58encode(pickle.dumps(query)).decode("utf-8")
+            query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
             new_body["query"] = query_bytes
         elif oef_type in {OEFMessage.Type.SEARCH_RESULT}:
             # we need this cast because the "agents" field might contains
@@ -80,11 +79,11 @@ class OEFSerializer(Serializer):
         new_body["type"] = oef_type
 
         if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
-            service_description_bytes = base58.b58decode(json_msg["service_description"])
+            service_description_bytes = base64.b64decode(json_msg["service_description"])
             service_description = pickle.loads(service_description_bytes)
             new_body["service_description"] = service_description
         elif oef_type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
-            query_bytes = base58.b58decode(json_msg["query"])
+            query_bytes = base64.b64decode(json_msg["query"])
             query = pickle.loads(query_bytes)
             new_body["query"] = query
         elif oef_type in {OEFMessage.Type.SEARCH_RESULT}:

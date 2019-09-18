@@ -29,45 +29,37 @@ pipeline {
 
                 } // static type check
 
-                stage('Unit Tests') {
+                stage('Unit Tests: Python 3.6') {
 
-                    parallel {
+                    agent {
+                        docker {
+                            image "python:3.6-alpine"
+                        }
+                    }
 
-                        stage('Python 3.6') {
+                    steps {
+                        sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
+                        sh 'pip install tox pipenv'
+                        sh 'tox -e py36'
+                    }
 
-                            agent {
-                                docker {
-                                    image "python:3.6-alpine"
-                                }
-                            }
+                }  // unit tests: python 3.6
 
-                            steps {
-                                sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
-                                sh 'pip install tox pipenv'
-                                sh 'tox -e py36'
-                            }
+                stage('Unit Tests: Python 3.7') {
 
-                        }  // python 3.6
+                    agent {
+                        docker {
+                            image "python:3.7-alpine"
+                        }
+                    }
 
-                        stage('Python 3.7') {
+                    steps {
+                        sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
+                        sh 'pip install tox pipenv'
+                        sh 'tox -e py37'
+                    }
 
-                            agent {
-                                docker {
-                                    image "python:3.7-alpine"
-                                }
-                            }
-
-                            steps {
-                                sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
-                                sh 'pip install tox pipenv'
-                                sh 'tox -e py37'
-                            }
-
-                        } // python 3.7
-
-                    }  // parallel
-
-                } // unit tests
+                } // unit tests: python 3.7
 
             } // parallel
 
