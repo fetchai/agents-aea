@@ -30,7 +30,7 @@ TEMP_PRIVATE_KEY_FILE = 'temp_private_key.pem'
 logger = logging.getLogger(__name__)
 
 
-def _create_temporary_private_key() -> str:
+def _create_temporary_private_key() -> bytes:
     """
     Create a temporary private key.
 
@@ -63,7 +63,7 @@ def _create_temporary_private_key_pem_path() -> str:
     :return: private_key_pem_path
     """
     pem = _create_temporary_private_key()
-    file = open(TEMP_PRIVATE_KEY_FILE, "w")
+    file = open(TEMP_PRIVATE_KEY_FILE, "wb")
     file.write(pem)
     file.close()
     return TEMP_PRIVATE_KEY_FILE
