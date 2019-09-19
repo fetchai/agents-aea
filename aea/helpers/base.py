@@ -36,7 +36,7 @@ def _get_module(spec):
             return module
         else:
             return None
-    except Exception as e:
+    except Exception:
         return None
 
 
