@@ -1,0 +1,3 @@
+[submodule "docker-images"]
+	path = docker-images
+	url = https://github.com/fetchai/docker-images.git

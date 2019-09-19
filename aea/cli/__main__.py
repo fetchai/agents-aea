@@ -59,7 +59,7 @@ def create(ctx: Context, agent_name):
 
         # create a config file inside it
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__)
+        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, private_key_pem_path="")
         agent_config.set_default_connection(ConnectionConfig(
             name="default-oef",
             type="oef",

@@ -471,14 +471,20 @@ class OEFConnection(Connection):
         Connect to the channel.
 
         :return: None
+        :raises ConnectionError if the connection to the OEF fails.
         """
         if self._stopped and not self._connected:
             self._stopped = False
             self._core.run_threaded()
-            assert self.channel.connect(), "Cannot connect to OEFChannel."
-            self._connected = True
-            self.out_thread = Thread(target=self._fetch)
-            self.out_thread.start()
+            try:
+                if not self.channel.connect():
+                    raise ConnectionError("Cannot connect to OEFChannel.")
+                self._connected = True
+                self.out_thread = Thread(target=self._fetch)
+                self.out_thread.start()
+            except ConnectionError as e:
+                self._core.stop()
+                raise e
 
     def disconnect(self) -> None:
         """

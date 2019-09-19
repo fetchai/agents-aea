@@ -18,3 +18,56 @@
 # ------------------------------------------------------------------------------
 
 """Miscellaneous helpers."""
+
+import builtins
+import importlib.util
+import logging
+import os
+
+logger = logging.getLogger(__name__)
+
+
+def _get_module(spec):
+    """Try to execute a module. Return None if the attempt fail."""
+    try:
+        module = importlib.util.module_from_spec(spec)
+        if spec:
+            spec.loader.exec_module(module)
+            return module
+        else:
+            return None
+    except Exception:
+        return None
+
+
+def locate(path):
+    """Locate an object by name or dotted path, importing as necessary."""
+    parts = [part for part in path.split('.') if part]
+    module, n = None, 0
+    while n < len(parts):
+        file_location = os.path.join(*parts[:n + 1])
+        spec_name = '.'.join(parts[:n + 1])
+        module_location = os.path.join(file_location, "__init__.py")
+        spec = importlib.util.spec_from_file_location(spec_name, module_location)
+        logger.debug("Trying to import {}".format(module_location))
+        nextmodule = _get_module(spec)
+        if nextmodule is None:
+            module_location = file_location + ".py"
+            spec = importlib.util.spec_from_file_location(spec_name, module_location)
+            logger.debug("Trying to import {}".format(module_location))
+            nextmodule = _get_module(spec)
+
+        if nextmodule:
+            module, n = nextmodule, n + 1
+        else:
+            break
+    if module:
+        object = module
+    else:
+        object = builtins
+    for part in parts[n:]:
+        try:
+            object = getattr(object, part)
+        except AttributeError:
+            return None
+    return object

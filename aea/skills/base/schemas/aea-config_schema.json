@@ -3,10 +3,11 @@
     "description": "Schema for the agent configuration file.",
     "additionalProperties": false,
     "type": "object",
-    "required": ["aea_version", "agent_name", "connections", "default_connection", "protocols", "skills"],
+    "required": ["aea_version", "agent_name", "private_key_pem_path", "connections", "default_connection", "protocols", "skills"],
     "properties": {
         "aea_version": {"type": "string"},
         "agent_name": {"type": "string"},
+        "private_key_pem_path": {"type": "string"},
         "connections": {
             "type": "array",
             "uniqueItems": true,

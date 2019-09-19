@@ -40,7 +40,7 @@ ROOT_DIR = os.path.join(CUR_PATH, "..")
 def pytest_addoption(parser):
     """Add options to the parser."""
     parser.addoption("--ci", action="store_true", default=False)
-    parser.addoption("--no-oef", action="store_true", default=False, help="Skip tests that require the OEF.")
+    parser.addoption("--no-integration-tests", action="store_true", default=False, help="Skip integration tests.")
 
 
 @pytest.fixture(scope="session")
@@ -175,7 +175,7 @@ def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
 @pytest.fixture(scope="session")
 def network_node(oef_addr, oef_port, pytestconfig):
     """Network node initialization."""
-    if pytestconfig.getoption("no_oef"):
+    if pytestconfig.getoption("no_integration_tests"):
         pytest.skip('skipped: no OEF running')
         return
 

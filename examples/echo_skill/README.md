@@ -16,18 +16,11 @@ This quick start explains how to create and launch an agent with the cli.
 
       cd my_first_agent
 
-- add a protocol to the agent, e.g.:
-
-      aea add protocol oef
-
-  This command will create the `my_first_agent/protocols` folder, with the `oef` protocol package inside.
-  You can find the supported protocols in `aea/protocols`.
-
 - add a skill to the agent, e.g.:
 
       aea add skill echo_skill ../examples/echo_skill
 
-  This command will create the `my_first_agent/skills` folder, with the `echo_skill` skill package inside.
+  This command will create the `my_first_agent/skills` folder, with the `echo_skill` skill package inside. It will also create the `my_first_agent/protocols` folder, with the `default` protocol package inside.
 
 - start an oef from a separate terminal:
 

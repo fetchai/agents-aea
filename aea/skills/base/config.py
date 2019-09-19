@@ -271,10 +271,11 @@ class SkillConfig(Configuration):
 class AgentConfig(Configuration):
     """Class to represent the agent configuration file."""
 
-    def __init__(self, agent_name: str = "", aea_version: str = ""):
+    def __init__(self, agent_name: str = "", aea_version: str = "", private_key_pem_path: str = ""):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name  # type: str
         self.aea_version = aea_version  # type: str
+        self.private_key_pem_path = private_key_pem_path  # type: str
         self._default_connection = None  # type: Optional[ConnectionConfig]
         self.connections = CRUDCollection[ConnectionConfig]()  # type: CRUDCollection
         self.protocols = set()  # type: Set[str]
@@ -302,6 +303,7 @@ class AgentConfig(Configuration):
         return {
             "agent_name": self.agent_name,
             "aea_version": self.aea_version,
+            "private_key_pem_path": self.private_key_pem_path,
             "default_connection": self.default_connection.name,
             "connections": [{"connection": c.json} for _, c in self.connections.read_all()],
             "protocols": sorted(self.protocols),
@@ -314,6 +316,7 @@ class AgentConfig(Configuration):
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
+            private_key_pem_path=cast(str, obj.get("private_key_pem_path")),
         )
 
         agent_config.protocols = set(cast(List[str], obj.get("protocols")))
