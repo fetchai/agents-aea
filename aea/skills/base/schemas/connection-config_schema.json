@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema for the connection configuration file.",
+    "additionalProperties": false,
+    "type": "object",
+    "required": ["name", "type", "config"],
+    "properties": {
+        "name": {"type": "string"},
+        "type": {"type": "string"},
+        "config": {"type": "object"},
+        "protocols": {
+            "type": "array",
+            "items": {"type": "string"}
+        }
+    }
+}

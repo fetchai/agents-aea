@@ -10,13 +10,7 @@
         "connections": {
             "type": "array",
             "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "required": ["connection"],
-              "properties": {
-                "connection": { "$ref": "#/definitions/connection" }
-              }
-            }
+            "items": {"type": "string"}
         },
         "default_connection": {"type": "string"},
         "protocols": {
@@ -25,18 +19,8 @@
         },
         "skills": {
             "type": "array",
+            "uniqueItems": true,
             "items": {"type": "string"}
-        }
-    },
-    "definitions": {
-        "connection": {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "type": {"type": "string"},
-                "config": {"type": "object"}
-            },
-            "required": ["name", "type", "config"]
         }
     }
 }
