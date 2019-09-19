@@ -1,9 +1,11 @@
 
 pipeline {
 
-    agent none
-        //
-        // pip install tox pipenv
+    agent {
+
+        docker 'gcr.io/organic-storm-201412/docker-tac-develop:latest'
+
+    }
 
     stages {
 
@@ -14,7 +16,6 @@ pipeline {
                 stage('Code Style Check') {
 
                     steps {
-                        sh 'pip3 install tox'
                         sh 'tox -e flake8'
                     }
 
@@ -23,8 +24,7 @@ pipeline {
                 stage('Static Type Check') {
 
                     steps {
-                        sh 'pip3 install mypy'
-                        sh 'mypy aea tests examples'
+                        sh 'tox -e mypy'
                     }
 
                 } // static type check
@@ -38,9 +38,7 @@ pipeline {
                     }
 
                     steps {
-                        sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
-                        sh 'pip install tox pipenv'
-                        sh 'tox -e py36'
+                        sh 'tox -e py36 -- --no-integration0-tests'
                     }
 
                 }  // unit tests: python 3.6
@@ -54,9 +52,7 @@ pipeline {
                     }
 
                     steps {
-                        sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
-                        sh 'pip install tox pipenv'
-                        sh 'tox -e py37'
+                        sh 'tox -e py37 --no-integration-tests'
                     }
 
                 } // unit tests: python 3.7
