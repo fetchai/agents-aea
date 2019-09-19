@@ -8,6 +8,7 @@ connections:
         addr: 127.0.0.1
         port: 10000
 default_connection: default-oef
+private_key_pem_path: ''
 protocols:
 - oef
 - default

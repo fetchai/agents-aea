@@ -19,10 +19,9 @@
 # ------------------------------------------------------------------------------
 
 """Serialization module for the default protocol."""
+import base64
 import json
 from typing import cast
-
-import base58
 
 from aea.protocols.base.message import Message
 from aea.protocols.base.serialization import Serializer
@@ -40,7 +39,8 @@ class DefaultSerializer(Serializer):
         body["type"] = str(msg_type.value)
 
         if msg_type == DefaultMessage.Type.BYTES:
-            body["content"] = base58.b58encode(msg.get("content")).decode("utf-8")
+            content = cast(bytes, msg.get("content"))
+            body["content"] = base64.b64encode(content).decode("utf-8")
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = cast(str, msg.get("error_code"))
             body["error_msg"] = cast(str, msg.get("error_msg"))
@@ -59,8 +59,8 @@ class DefaultSerializer(Serializer):
         msg_type = DefaultMessage.Type(json_body["type"])
         body["type"] = msg_type
         if msg_type == DefaultMessage.Type.BYTES:
-            content = base58.b58decode(json_body["content"].encode("utf-8"))
-            body["content"] = content
+            content = base64.b64decode(json_body["content"].encode("utf-8"))
+            body["content"] = content  # type: ignore
         elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = json_body["error_code"]
             body["error_msg"] = json_body["error_msg"]

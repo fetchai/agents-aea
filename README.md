@@ -6,6 +6,10 @@ A framework for autonomous economic agent (AEA) development
 First, install the package from [test-pypi](https://test.pypi.org/project/aea/):
 
 `
+pip install cryptography base58
+`
+
+`
 pip install -i https://test.pypi.org/simple/ aea
 `
 
@@ -66,6 +70,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 	  tox -e mypy
 
-## Use the `aea` command-line tool
+- Docs:
 
-Please check this [README](./aea/cli/README.md) if you want to use the `aea` command-line tool.
+	* `mkdocs serve` - Start the live-reloading docs server.
+	* `mkdocs build --clean` - Build the documentation site.

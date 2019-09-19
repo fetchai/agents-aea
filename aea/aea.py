@@ -36,7 +36,7 @@ class AEA(Agent):
     def __init__(self, name: str,
                  mailbox: MailBox,
                  private_key_pem_path: Optional[str] = None,
-                 timeout: float = 1.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
+                 timeout: float = 0.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
                  debug: bool = False,
                  max_reactions: int = 20,
                  directory: str = '') -> None:
@@ -60,7 +60,7 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._context = AgentContext(self.name, self.outbox)
+        self._context = AgentContext(self.name, self.crypto.public_key, self.outbox)
         self._resources = None  # type: Optional[Resources]
 
     @property
@@ -158,4 +158,5 @@ class AEA(Agent):
 
         :return: None
         """
-        self.resources.teardown()
+        if self._resources is not None:
+            self._resources.teardown()

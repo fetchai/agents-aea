@@ -1,9 +1,11 @@
 
 pipeline {
 
-    agent none
-        //
-        // pip install tox pipenv
+    agent {
+
+        docker 'gcr.io/organic-storm-201412/aea-develop:latest'
+
+    }
 
     stages {
 
@@ -14,7 +16,6 @@ pipeline {
                 stage('Code Style Check') {
 
                     steps {
-                        sh 'pip3 install tox'
                         sh 'tox -e flake8'
                     }
 
@@ -23,51 +24,26 @@ pipeline {
                 stage('Static Type Check') {
 
                     steps {
-                        sh 'pip3 install mypy'
-                        sh 'mypy aea tests examples'
+                        sh 'tox -e mypy'
                     }
 
                 } // static type check
 
-                stage('Unit Tests') {
+                stage('Unit Tests: Python 3.6') {
 
-                    parallel {
+                    steps {
+                        sh 'tox -e py36 -- --no-integration-tests'
+                    }
 
-                        stage('Python 3.6') {
+                }  // unit tests: python 3.6
 
-                            agent {
-                                docker {
-                                    image "python:3.6-alpine"
-                                }
-                            }
+                stage('Unit Tests: Python 3.7') {
 
-                            steps {
-                                sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
-                                sh 'pip install tox pipenv'
-                                sh 'tox -e py36'
-                            }
+                    steps {
+                        sh 'tox -e py37 -- --no-integration-tests'
+                    }
 
-                        }  // python 3.6
-
-                        stage('Python 3.7') {
-
-                            agent {
-                                docker {
-                                    image "python:3.7-alpine"
-                                }
-                            }
-
-                            steps {
-                                sh 'apk add --no-cache openssl-dev libffi-dev gcc musl-dev'
-                                sh 'pip install tox pipenv'
-                                sh 'tox -e py37'
-                            }
-
-                        } // python 3.7
-
-                    }  // parallel
-
-                } // unit tests
+                } // unit tests: python 3.7
 
             } // parallel
 

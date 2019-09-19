@@ -7,14 +7,14 @@ behaviours:
   - behaviour:
       class_name: GymBehaviour
       args:
-        skill_context: SkillContext
+        foo: bar  
 handler:
   class_name: GymHandler
   args:
-    skill_context: SkillContext
+    foo: bar
 tasks:
   - task:
       class_name: GymTask
       args:
-        skill_context: SkillContext
+        foo: bar
 protocol: "gym"

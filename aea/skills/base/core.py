@@ -24,6 +24,7 @@ import logging
 import os
 import pprint
 import re
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast
@@ -42,7 +43,7 @@ SkillId = str
 class AgentContext:
     """Save relevant data for the agent."""
 
-    def __init__(self, agent_name: str, outbox: OutBox):
+    def __init__(self, agent_name: str, public_key: str, outbox: OutBox):
         """
         Initialize a skill context.
 
@@ -50,6 +51,7 @@ class AgentContext:
         :param outbox: the outbox
         """
         self._agent_name = agent_name
+        self._public_key = public_key
         self._outbox = outbox
         self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
 
@@ -57,6 +59,11 @@ class AgentContext:
     def agent_name(self) -> str:
         """Get agent name."""
         return self._agent_name
+
+    @property
+    def public_key(self) -> str:
+        """Get public key."""
+        return self._public_key
 
     @property
     def outbox(self) -> OutBox:
@@ -80,6 +87,11 @@ class SkillContext:
     def agent_name(self) -> str:
         """Get agent name."""
         return self._agent_context.agent_name
+
+    @property
+    def agent_public_key(self) -> str:
+        """Get public key."""
+        return self._agent_context.public_key
 
     @property
     def outbox(self) -> OutBox:
@@ -115,13 +127,12 @@ class Behaviour(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments
         """
-        self._context = None  # type: Optional[SkillContext]
+        self._context = kwargs.pop('skill_context')  # type: SkillContext
         self._config = kwargs
 
     @property
     def context(self) -> SkillContext:
         """Get the context of the behaviour."""
-        assert self._context is not None, "SkillContext not assigned."
         return self._context
 
     @property
@@ -171,8 +182,9 @@ class Behaviour(ABC):
                 logger.warning("Behaviour '{}' cannot be found.".format(behaviour_class))
             else:
                 args = behaviour_config.args
+                assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
+                args['skill_context'] = skill_context
                 behaviour = behaviour_class(**args)
-                behaviour._context = skill_context
                 behaviours.append(behaviour)
 
         return behaviours
@@ -190,13 +202,12 @@ class Handler(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments
         """
-        self._context = None  # type: Optional[SkillContext]
+        self._context = kwargs.pop('skill_context')  # type: SkillContext
         self._config = kwargs
 
     @property
     def context(self) -> SkillContext:
         """Get the context of the handler."""
-        assert self._context is not None, "SkillContext not assigned."
         return self._context
 
     @property
@@ -246,8 +257,9 @@ class Handler(ABC):
             return None
         else:
             args = handler_config.args
+            assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
+            args['skill_context'] = skill_context
             handler = handler_class(**args)
-            handler._context = skill_context
             return handler
 
 
@@ -261,13 +273,12 @@ class Task(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments.
         """
-        self._context = None  # type: Optional[SkillContext]
+        self._context = kwargs.pop('skill_context')  # type: SkillContext
         self._config = kwargs
 
     @property
     def context(self) -> SkillContext:
         """Get the context of the task."""
-        assert self._context is not None, "SkillContext not assigned."
         return self._context
 
     @property
@@ -317,8 +328,9 @@ class Task(ABC):
                 logger.warning("Task '{}' cannot be found.".format(task_class))
             else:
                 args = task_config.args
+                assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
+                args['skill_context'] = skill_context
                 task = task_class(**args)
-                task._context = skill_context
                 tasks.append(task)
 
         return tasks
@@ -360,11 +372,13 @@ class Skill:
         if skill_config is None:
             return None
 
-        skills_spec = importlib.util.spec_from_file_location("skill_module", os.path.join(directory, "__init__.py"))
+        skills_spec = importlib.util.spec_from_file_location(skill_config.name, os.path.join(directory, "__init__.py"))
         if skills_spec is None:
             logger.warning("No skill found.")
             return None
 
+        skill_module = importlib.util.module_from_spec(skills_spec)
+        sys.modules[skills_spec.name + "_skill"] = skill_module
         skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
@@ -545,8 +559,7 @@ class HandlerRegistry(Registry):
         """
         Register a handler.
 
-        :param protocol_id: the protocol id.
-        :param skill_id: the skill id.
+        :param ids: the pair (protocol id, skill id).
         :param handler: the handler.
         :return: None
         """

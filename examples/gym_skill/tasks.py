@@ -24,8 +24,8 @@ from threading import Thread
 
 from aea.skills.base.core import Task
 
-from .helpers import ProxyEnv
-from .rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
+from gym_skill.helpers import ProxyEnv
+from gym_skill.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
 
 
 class GymTask(Task):
@@ -47,15 +47,26 @@ class GymTask(Task):
 
     def execute(self) -> None:
         """Execute the task."""
-        print("Gym Task: execute method called.")
         if not self._proxy_env.is_rl_agent_trained and not self.is_rl_agent_training:
-            self.is_rl_agent_training = True
-            self._rl_agent_training_thread.start()
+            self._start_training()
         if self._proxy_env.is_rl_agent_trained and self.is_rl_agent_training:
-            self.is_rl_agent_training = False
-            print("Training finished.")
-            self._rl_agent_training_thread.join()
+            self._stop_training()
 
     def teardown(self) -> None:
         """Teardown the task."""
         print("Gym Task: teardown method called.")
+        if self.is_rl_agent_training:
+            self._stop_training()
+
+    def _start_training(self) -> None:
+        """Start training the RL agent."""
+        print("Training starting ...")
+        self.is_rl_agent_training = True
+        self._rl_agent_training_thread.start()
+
+    def _stop_training(self) -> None:
+        """Stop training the RL agent."""
+        self.is_rl_agent_training = False
+        self._proxy_env.close()
+        self._rl_agent_training_thread.join()
+        print("Training finished.")

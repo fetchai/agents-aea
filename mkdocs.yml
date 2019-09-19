@@ -1,0 +1,8 @@
+site_name: AEA - Autonomous Economic Agent Framework
+nav:
+    - Home: index.md
+    - CLI:
+        - 'Overview': cli_overview.md
+    - Examples:
+        - 'Reinforcement Learning': ex_rl.md
+theme: readthedocs
