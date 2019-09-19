@@ -45,7 +45,6 @@ class GymHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        print("Gym handler: envelope={}".format(envelope))
         gym_msg = GymSerializer().decode(envelope.message)
         gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
         if gym_msg_performative == GymMessage.Performative.PERCEPT:
@@ -62,4 +61,4 @@ class GymHandler(Handler):
 
         :return: None
         """
-        print("Echo handler: teardown method called.")
+        print("Gym handler: teardown method called.")

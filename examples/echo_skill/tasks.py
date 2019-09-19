@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'echo' skill."""
+import time
+
 from aea.skills.base.core import Task
 
 
@@ -31,6 +33,7 @@ class EchoTask(Task):
     def execute(self) -> None:
         """Execute the task."""
         print("Echo Task: execute method called.")
+        time.sleep(1.0)
 
     def teardown(self) -> None:
         """Teardown the task."""

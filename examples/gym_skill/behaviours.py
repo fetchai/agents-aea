@@ -27,13 +27,12 @@ class GymBehaviour(Behaviour):
 
     def __init__(self, **kwargs):
         """Initialize the behaviour."""
-        print("GymBehaviour.__init__: arguments: {}".format(kwargs))
-        super().__init__(**kwargs)
+        pass
 
     def act(self) -> None:
         """Act according to the behaviour."""
-        print("Gym Behaviour: act method called.")
+        pass
 
     def teardown(self) -> None:
         """Teardown the behaviour."""
-        print("Gym Behaviour: teardown method called.")
+        pass

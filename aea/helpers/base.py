@@ -43,12 +43,12 @@ def locate(path):
     parts = [part for part in path.split('.') if part]
     module, n = None, 0
     while n < len(parts):
-        file_location = os.path.join(*parts[:n+1])
-        spec_name = '.'.join(parts[:n+1])
+        file_location = os.path.join(*parts[:n + 1])
+        spec_name = '.'.join(parts[:n + 1])
         spec = importlib.util.spec_from_file_location(spec_name, os.path.join(file_location, "__init__.py"))
         nextmodule = _get_module(spec)
         if nextmodule is None:
-            spec = importlib.util.spec_from_file_location(spec_name,  file_location + ".py")
+            spec = importlib.util.spec_from_file_location(spec_name, file_location + ".py")
             nextmodule = _get_module(spec)
 
         if nextmodule:
