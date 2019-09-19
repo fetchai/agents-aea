@@ -3,7 +3,7 @@ pipeline {
 
     agent {
 
-        docker 'gcr.io/organic-storm-201412/docker-tac-develop:latest'
+        docker 'gcr.io/organic-storm-201412/aea-develop:latest'
 
     }
 
