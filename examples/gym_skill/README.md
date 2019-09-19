@@ -16,6 +16,8 @@ A guide to create an AEA with the gym_skill.
 
       aea add skill gym ../examples/gym_skill
 
+  This command will create the `my_gym_agent/skills` folder, with the `gym_skill` skill package inside. It will also create the `my_first_agent/protocols` folder, with the `gym` protocol package inside.
+
 - Copy the gym environment to the agent directory:
 
 	    mkdir gyms
@@ -23,11 +25,13 @@ A guide to create an AEA with the gym_skill.
 
 - Add a gym connection to the `aea-config.yaml`:
 
-      - connection:
-        config:
-          env: gyms.env.BanditNArmedRandom
-        name: gym
-        type: gym
+`
+- connection:
+    config:
+      env: gyms.env.BanditNArmedRandom
+    name: gym
+    type: gym
+`
 
 - Run the agent with the 'gym' connection:
 

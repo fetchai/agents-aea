@@ -18,3 +18,50 @@
 # ------------------------------------------------------------------------------
 
 """Miscellaneous helpers."""
+
+import builtins
+import importlib.util
+import os
+
+
+def _get_module(spec):
+    """Try to execute a module. Return None if the attempt fail."""
+    try:
+        module = importlib.util.module_from_spec(spec)
+        if spec:
+            spec.loader.exec_module(module)
+            return module
+        else:
+            return None
+    except Exception as e:
+        print(e)
+        return None
+
+
+def locate(path):
+    """Locate an object by name or dotted path, importing as necessary."""
+    parts = [part for part in path.split('.') if part]
+    module, n = None, 0
+    while n < len(parts):
+        file_location = os.path.join(*parts[:n + 1])
+        spec_name = '.'.join(parts[:n + 1])
+        spec = importlib.util.spec_from_file_location(spec_name, os.path.join(file_location, "__init__.py"))
+        nextmodule = _get_module(spec)
+        if nextmodule is None:
+            spec = importlib.util.spec_from_file_location(spec_name, file_location + ".py")
+            nextmodule = _get_module(spec)
+
+        if nextmodule:
+            module, n = nextmodule, n + 1
+        else:
+            break
+    if module:
+        object = module
+    else:
+        object = builtins
+    for part in parts[n:]:
+        try:
+            object = getattr(object, part)
+        except AttributeError:
+            return None
+    return object
