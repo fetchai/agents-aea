@@ -24,13 +24,15 @@ import queue
 import threading
 from queue import Queue
 from threading import Thread
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 import gym
 
+from aea.helpers.base import locate
 from aea.mail.base import Envelope, Channel, Connection
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
+from aea.configurations.base import ConnectionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -228,3 +230,14 @@ class GymConnection(Connection):
         :return: None
         """
         self._connection = None
+
+    @classmethod
+    def from_config(cls, agent_name: str, connection_configuration: ConnectionConfig) -> 'Connection':
+        """Get the Gym connection from the connection configuration."""
+        connection_type = connection_configuration.type
+        if connection_type == "gym":
+            gym_env_package = cast(str, connection_configuration.config.get('config').get("env"))
+            gym_env = locate(gym_env_package)
+            return GymConnection(agent_name, gym_env)
+        else:
+            raise ValueError("Connection type must be 'gym', not '{}'".format(connection_type))

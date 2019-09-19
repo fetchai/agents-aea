@@ -25,7 +25,7 @@ import shutil
 import click
 
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 
 @click.group()
@@ -46,7 +46,21 @@ def connection(ctx: Context, connection_name):
         exit(-1)
 
     logger.info("Removing connection '{}'...".format(connection_name))
-    ctx.agent_config.connections.delete(connection_name)
+    connection_folder = os.path.join("connections", connection_name)
+    try:
+        shutil.rmtree(connection_folder)
+    except BaseException:
+        logger.exception("An error occurred while deleting '{}'.".format(connection_folder))
+        return
+
+    ctx.agent_config.connections.remove(connection_name)
+
+    # removing the connection to the configurations.
+    logger.debug("Removing the connection from {}".format(DEFAULT_AEA_CONFIG_FILE))
+    if connection_name in ctx.agent_config.connections:
+        ctx.agent_config.connections.remove(connection_name)
+
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @remove.command()

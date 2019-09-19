@@ -20,7 +20,7 @@
 """This module contains the handler for the 'echo' skill."""
 
 from aea.mail.base import Envelope
-from aea.skills.base.core import Handler
+from aea.skills.base import Handler
 
 
 class EchoHandler(Handler):

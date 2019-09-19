@@ -23,7 +23,7 @@ import pickle
 import pytest
 from oef.query import Gt, Eq, LtEq
 
-from aea.channels.oef import OEFObjectTranslator
+from aea.channels.oef.oef import OEFObjectTranslator
 from aea.protocols.oef.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint
 
 

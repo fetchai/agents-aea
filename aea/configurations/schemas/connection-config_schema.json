@@ -3,14 +3,13 @@
     "description": "Schema for the connection configuration file.",
     "additionalProperties": false,
     "type": "object",
-    "required": ["name", "type", "config"],
+    "required": ["name", "supported_protocols", "config"],
     "properties": {
         "name": {"type": "string"},
-        "type": {"type": "string"},
-        "config": {"type": "object"},
-        "protocols": {
+        "supported_protocols": {
             "type": "array",
             "items": {"type": "string"}
-        }
+        },
+        "config": {"type": "object"}
     }
 }

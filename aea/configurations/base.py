@@ -24,6 +24,9 @@ from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 T = TypeVar('T')
 
+Address = str
+ProtocolId = str
+
 
 class JSONSerializable(ABC):
     """Interface for JSON-serializable objects."""
@@ -95,10 +98,10 @@ class CRUDCollection(Generic[T]):
 class ConnectionConfig(Configuration):
     """Handle connection configuration."""
 
-    def __init__(self, name: str = "", type: str = "", **config):
+    def __init__(self, name: str = "", supported_protocols: Optional[List[ProtocolId]] = None, **config):
         """Initialize a connection configuration object."""
         self.name = name
-        self.type = type
+        self.supported_protocols = supported_protocols if supported_protocols is not None else []
         self.config = config
 
     @property
@@ -106,7 +109,7 @@ class ConnectionConfig(Configuration):
         """Return the JSON representation."""
         return {
             "name": self.name,
-            "type": self.type,
+            "supported_protocol": self.supported_protocols,
             "config": self.config
         }
 
@@ -114,10 +117,10 @@ class ConnectionConfig(Configuration):
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
         name = cast(str, obj.get("name"))
-        type = cast(str, obj.get("type"))
+        supported_protocols = cast(List[str], obj.get("supported_protocols"))
         return ConnectionConfig(
             name=name,
-            type=type,
+            supported_protocols=supported_protocols,
             config=obj.get("config")
         )
 
@@ -277,7 +280,7 @@ class AgentConfig(Configuration):
         self.aea_version = aea_version  # type: str
         self.private_key_pem_path = private_key_pem_path  # type: str
         self._default_connection = None  # type: Optional[ConnectionConfig]
-        self.connections = CRUDCollection[ConnectionConfig]()  # type: CRUDCollection
+        self.connections = set()  # type: Set[str]
         self.protocols = set()  # type: Set[str]
         self.skills = set()  # type: Set[str]
 
@@ -287,15 +290,15 @@ class AgentConfig(Configuration):
         assert self._default_connection is not None, "Default connection not set yet."
         return self._default_connection
 
-    def set_default_connection(self, connection: ConnectionConfig):
+    @default_connection.setter
+    def default_connection(self, connection_name: str):
         """
         Set the default connection.
 
-        :param connection: the default connection.
+        :param connection_name: the name of the default connection.
         :return: None
         """
-        self._default_connection = connection
-        self.connections.update(connection.name, connection)
+        self._default_connection = connection_name
 
     @property
     def json(self) -> Dict:
@@ -304,8 +307,8 @@ class AgentConfig(Configuration):
             "agent_name": self.agent_name,
             "aea_version": self.aea_version,
             "private_key_pem_path": self.private_key_pem_path,
-            "default_connection": self.default_connection.name,
-            "connections": [{"connection": c.json} for _, c in self.connections.read_all()],
+            "default_connection": self.default_connection,
+            "connections": sorted(self.connections),
             "protocols": sorted(self.protocols),
             "skills": sorted(self.skills)
         }
@@ -321,17 +324,10 @@ class AgentConfig(Configuration):
 
         agent_config.protocols = set(cast(List[str], obj.get("protocols")))
         agent_config.skills = set(cast(List[str], obj.get("skills")))
-
-        connections = cast(List[Dict], obj.get("connections"))
-        for c in connections:
-            connection_config = ConnectionConfig.from_json(c["connection"])
-            agent_config.connections.create(connection_config.name, connection_config)
+        agent_config.skills = set(cast(List[str], obj.get("connections")))
 
         # set default configuration
         default_connection_name = obj.get("default_connection", None)
-        if default_connection_name is not None:
-            default_connection_config = agent_config.connections.read(default_connection_name)
-            if default_connection_config is not None:
-                agent_config.set_default_connection(default_connection_config)
+        agent_config.default_connection = default_connection_name
 
         return agent_config

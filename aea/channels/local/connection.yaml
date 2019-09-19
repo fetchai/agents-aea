@@ -1,0 +1,3 @@
+name: local
+supported_protocols: ["oef"]
+config: {}

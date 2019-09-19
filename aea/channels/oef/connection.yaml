@@ -1,0 +1,5 @@
+name: oef
+supported_protocols: ["oef"]
+config:
+  addr: 127.0.0.1
+  port: 10000

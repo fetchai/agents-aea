@@ -24,9 +24,9 @@ from typing import cast
 import click
 
 from aea.aea import AEA
-from aea.channels.gym import GymConnection
-from aea.channels.local import OEFLocalConnection, LocalNode
-from aea.channels.oef import OEFConnection
+from aea.channels.gym.connection import GymConnection
+from aea.channels.local.connection import OEFLocalConnection, LocalNode
+from aea.channels.oef.connection import OEFConnection
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
 from aea.crypto.base import Crypto
 from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path

@@ -27,8 +27,8 @@ import click
 import click_log
 import jsonschema  # type: ignore
 
-from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig
-from aea.skills.base.loader import ConfigLoader
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig
+from aea.configurations.loader import ConfigLoader
 
 logger = logging.getLogger("aea")
 logger = click_log.basic_config(logger=logger)
@@ -44,6 +44,7 @@ class Context(object):
         self.config = dict()  # type: Dict
         self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
         self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
+        self.connection_loader = ConfigLoader("connection-config_schema.json", ConnectionConfig)
         self.cwd = cwd
 
     def set_config(self, key, value) -> None:

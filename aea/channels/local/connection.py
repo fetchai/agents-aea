@@ -31,6 +31,7 @@ from aea.mail.base import Envelope, Channel, Connection
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, Query
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.configurations.base import ConnectionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -282,7 +283,6 @@ class OEFLocalConnection(Connection):
 
         :param public_key: the public key used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
-        :param loop: the event loop.
         """
         super().__init__()
         self.public_key = public_key
@@ -351,3 +351,9 @@ class OEFLocalConnection(Connection):
     def stop(self):
         """Tear down the connection."""
         self._connection = None
+
+    @classmethod
+    def from_config(cls, agent_name: str, connection_configuration: ConnectionConfig) -> 'Connection':
+        """Get the Local OEF connection from the connection configuration."""
+        local_node = LocalNode()
+        return OEFLocalConnection(agent_name, local_node)
