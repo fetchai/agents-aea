@@ -97,7 +97,7 @@ def run(ctx: Context, connection_name: str):
         agent.start()
     except KeyboardInterrupt:
         logger.info("Interrupted.")
-    except Exception:
-        raise
+    except Exception as e:
+        logger.exception(e)
     finally:
         agent.stop()
