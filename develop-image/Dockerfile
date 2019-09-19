@@ -39,8 +39,8 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt install python3.7 python3-venv python3.7-venv -y
-RUN apt install tox
+RUN apt install -y python3.7 python3-venv python3.7-venv
+RUN apt install -y tox
 RUN python3.7 -m pip install -U pipenv
 
 ENV PATH="/usr/local/bin:${PATH}"
