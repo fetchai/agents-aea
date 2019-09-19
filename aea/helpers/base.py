@@ -21,7 +21,10 @@
 
 import builtins
 import importlib.util
+import logging
 import os
+
+logger = logging.getLogger(__name__)
 
 
 def _get_module(spec):
@@ -33,8 +36,7 @@ def _get_module(spec):
             return module
         else:
             return None
-    except Exception as e:
-        print(e)
+    except Exception:
         return None
 
 
@@ -45,10 +47,14 @@ def locate(path):
     while n < len(parts):
         file_location = os.path.join(*parts[:n + 1])
         spec_name = '.'.join(parts[:n + 1])
-        spec = importlib.util.spec_from_file_location(spec_name, os.path.join(file_location, "__init__.py"))
+        module_location = os.path.join(file_location, "__init__.py")
+        spec = importlib.util.spec_from_file_location(spec_name, module_location)
+        logger.debug("Trying to import {}".format(module_location))
         nextmodule = _get_module(spec)
         if nextmodule is None:
-            spec = importlib.util.spec_from_file_location(spec_name, file_location + ".py")
+            module_location = file_location + ".py"
+            spec = importlib.util.spec_from_file_location(spec_name, module_location)
+            logger.debug("Trying to import {}".format(module_location))
             nextmodule = _get_module(spec)
 
         if nextmodule:
