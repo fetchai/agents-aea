@@ -1,0 +1,7 @@
+.tox
+.pytest_cache
+build
+dist
+htmlcov
+tac.egg-info
+log*.txt
