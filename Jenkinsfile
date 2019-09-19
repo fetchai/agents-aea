@@ -31,12 +31,6 @@ pipeline {
 
                 stage('Unit Tests: Python 3.6') {
 
-                    agent {
-                        docker {
-                            image "python:3.6-alpine"
-                        }
-                    }
-
                     steps {
                         sh 'tox -e py36 -- --no-integration0-tests'
                     }
@@ -44,12 +38,6 @@ pipeline {
                 }  // unit tests: python 3.6
 
                 stage('Unit Tests: Python 3.7') {
-
-                    agent {
-                        docker {
-                            image "python:3.7-alpine"
-                        }
-                    }
 
                     steps {
                         sh 'tox -e py37 --no-integration-tests'
