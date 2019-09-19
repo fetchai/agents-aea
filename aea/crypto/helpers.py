@@ -51,7 +51,7 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
     """
     try:
         Crypto(private_key_pem_path=private_key_pem_path)
-    except:
+    except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_pem_path))
         exit(-1)
 
@@ -63,7 +63,7 @@ def _create_temporary_private_key_pem_path() -> str:
     :return: private_key_pem_path
     """
     pem = _create_temporary_private_key()
-    file = open(TEMP_PRIVATE_KEY_FILE, "wb")
+    file = open(TEMP_PRIVATE_KEY_FILE, "w")
     file.write(pem)
     file.close()
     return TEMP_PRIVATE_KEY_FILE
