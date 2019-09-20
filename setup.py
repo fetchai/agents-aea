@@ -79,6 +79,7 @@ setup(
     author=about['__author__'],
     url=about['__url__'],
     long_description=readme,
+    long_description_content_type='text/markdown',
     packages=find_packages(include=["aea*"]),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
