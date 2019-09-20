@@ -240,7 +240,6 @@ class GymConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        config = cast(dict, connection_configuration.config.get('config'))
-        gym_env_package = cast(str, config.get("env"))
+        gym_env_package = cast(str, connection_configuration.config.get('env'))
         gym_env = locate(gym_env_package)
         return GymConnection(public_key, gym_env())

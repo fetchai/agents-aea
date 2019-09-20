@@ -50,11 +50,11 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
     if connection_name not in ctx.agent_config.connections:
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
-    connection_config = ctx.connection_loader.load(open(os.path.join(AEA_DIR, "channels", connection_name, "connection.yaml")))
+    connection_config = ctx.connection_loader.load(open(os.path.join(ctx.cwd, "connections", connection_name, "connection.yaml")))
     if connection_config is None:
         raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
 
-    connection_spec = importlib.util.spec_from_file_location(connection_config.name, os.path.join(AEA_DIR, "channels", connection_config.name, "connection.py"))
+    connection_spec = importlib.util.spec_from_file_location(connection_config.name, os.path.join(ctx.cwd, "connections", connection_config.name, "connection.py"))
     if connection_spec is None:
         raise AEAConfigException("Connection '{}' not found.".format(connection_name))
 

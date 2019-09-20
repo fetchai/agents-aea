@@ -25,7 +25,7 @@ from queue import Queue
 from typing import Optional
 
 from aea.agent import Agent
-from aea.channels.gym.gym import GymConnection
+from aea.channels.gym.connection import GymConnection
 from aea.mail.base import Envelope, MailBox
 
 

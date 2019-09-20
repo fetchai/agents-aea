@@ -144,7 +144,7 @@ class ConnectionConfig(Configuration):
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
             supported_protocols=supported_protocols,
-            **obj.get("config")
+            **cast(dict, obj.get("config"))
         )
 
 
