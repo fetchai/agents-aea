@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,4 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the base components for the skills."""
+"""Implementation of the OEF connection."""

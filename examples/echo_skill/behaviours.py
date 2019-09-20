@@ -19,7 +19,7 @@
 
 """This module contains the behaviours for the 'echo' skill."""
 
-from aea.skills.base.core import Behaviour
+from aea.skills.base import Behaviour
 
 
 class EchoBehaviour(Behaviour):

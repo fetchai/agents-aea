@@ -25,7 +25,7 @@ from queue import Queue
 from typing import Any, Tuple, cast
 
 from aea.mail.base import Envelope
-from aea.skills.base.core import SkillContext
+from aea.skills.base import SkillContext
 from aea.protocols.base.message import Message
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer

@@ -29,14 +29,15 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast
 
-from aea.skills.base.config import BehaviourConfig, HandlerConfig, TaskConfig, SkillConfig
-from aea.skills.base.loader import ConfigLoader
-from aea.mail.base import OutBox, ProtocolId, Envelope
+from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SkillConfig, ProtocolId
+from aea.configurations.loader import ConfigLoader
+from aea.mail.base import OutBox, Envelope
 from aea.protocols.base.protocol import Protocol
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
+DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 SkillId = str
 
 

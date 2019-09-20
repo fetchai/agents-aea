@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,22 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the behaviours for the 'gym' skill."""
-
-from aea.skills.base import Behaviour
-
-
-class GymBehaviour(Behaviour):
-    """Gym behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialize the behaviour."""
-        pass
-
-    def act(self) -> None:
-        """Act according to the behaviour."""
-        pass
-
-    def teardown(self) -> None:
-        """Teardown the behaviour."""
-        pass
+"""Implementation of the Local OEF connection."""

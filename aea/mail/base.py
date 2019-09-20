@@ -21,16 +21,14 @@
 """Mail module abstract base classes."""
 
 import logging
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from queue import Queue
 from typing import Optional
 
 from aea.mail import base_pb2
+from aea.configurations.base import ConnectionConfig, Address, ProtocolId
 
 logger = logging.getLogger(__name__)
-
-Address = str
-ProtocolId = str
 
 
 class Envelope:
@@ -235,7 +233,7 @@ class OutBox(object):
         self._queue.put(envelope)
 
 
-class Channel:
+class Channel(ABC):
     """Abstract definition of a channel."""
 
     @abstractmethod
@@ -264,7 +262,7 @@ class Channel:
         """
 
 
-class Connection:
+class Connection(ABC):
     """Abstract definition of a connection."""
 
     channel: Channel
@@ -290,6 +288,17 @@ class Connection:
     @abstractmethod
     def send(self, envelope: Envelope):
         """Send a message."""
+
+    @classmethod
+    @abstractmethod
+    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+        """
+        Initialize a connection instance from a configuration.
+
+        :param public_key: the public key of the agent.
+        :param connection_configuration: the connection configuration.
+        :return: an instance of the concrete connection class.
+        """
 
 
 class MailBox(object):
