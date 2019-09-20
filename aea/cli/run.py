@@ -27,7 +27,6 @@ import re
 import sys
 from typing import cast
 
-from aea import AEA_DIR
 from aea.aea import AEA
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
 from aea.crypto.base import Crypto
