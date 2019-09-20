@@ -1,4 +1,4 @@
-clean: clean-build clean-pyc clean-test
+clean: clean-build clean-pyc clean-test clean-docs
 
 clean-build:
 	rm -fr build/
@@ -6,6 +6,9 @@ clean-build:
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -fr {} +
+
+clean-docs:
+	rm -fr site/
 
 clean-pyc:
 	find . -name '*.pyc' -exec rm -f {} +
