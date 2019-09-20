@@ -291,11 +291,11 @@ class Connection(ABC):
 
     @classmethod
     @abstractmethod
-    def from_config(cls, agent_name: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
         """
         Initialize a connection instance from a configuration.
 
-        :param agent_name: the agent's name.
+        :param public_key: the public key of the agent.
         :param connection_configuration: the connection configuration.
         :return: an instance of the concrete connection class.
         """

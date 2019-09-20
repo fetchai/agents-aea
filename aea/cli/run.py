@@ -18,56 +18,60 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea run' subcommand."""
+import click
+import importlib.util
+import inspect
+import os
 from pathlib import Path
+import re
+import sys
 from typing import cast
 
-import click
-
+from aea import AEA_DIR
 from aea.aea import AEA
-from aea.channels.gym.connection import GymConnection
-from aea.channels.local.connection import OEFLocalConnection, LocalNode
-from aea.channels.oef.connection import OEFConnection
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
 from aea.crypto.base import Crypto
 from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
-from aea.helpers.base import locate
+# from aea.helpers.base import locate
 from aea.mail.base import MailBox, Connection
 
 
-def _setup_connection(connection_name: str, private_key_pem_path: str, ctx: Context) -> Connection:
+def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Connection:
     """
     Set up a connection.
 
     :param connection_name: the name of the connection.
     :param ctx: the CLI context object.
-    :param private_key_pem_path: the path of the private key
+    :param public_key: the path of the public key.
     :return: a Connection object.
     :raises AEAConfigException: if the connection name provided as argument is not declared in the configuration file,
                               | or if the connection type is not supported by the framework.
     """
-    available_connections = ctx.agent_config.connections
-    available_connection_names = dict(available_connections.read_all()).keys()
-    if connection_name not in available_connection_names:
+    if connection_name not in ctx.agent_config.connections:
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
-    connection_configuration = available_connections.read(connection_name)
-    assert connection_configuration is not None, "Connection not found."
-    connection_type = connection_configuration.type
-    agent_name = cast(str, ctx.agent_config.agent_name)
-    if connection_type == "oef":
-        oef_addr = connection_configuration.config.get("addr", "127.0.0.1")
-        oef_port = connection_configuration.config.get("port", 10000)
-        return OEFConnection(agent_name, oef_addr, oef_port)
-    elif connection_type == "local":
-        local_node = LocalNode()
-        return OEFLocalConnection(agent_name, local_node)
-    elif connection_type == "gym":
-        gym_env_package = cast(str, connection_configuration.config.get('config').get("env"))
-        gym_env = locate(gym_env_package)
-        crypto = Crypto(private_key_pem_path=private_key_pem_path)
-        return GymConnection(crypto.public_key, gym_env())
-    else:
-        raise AEAConfigException("Connection type '{}' not supported.".format(connection_type))
+    connection_config = ctx.connection_loader.load(open(os.path.join(AEA_DIR, "channels", connection_name, "connection.yaml")))
+    if connection_config is None:
+        raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
+
+    connection_spec = importlib.util.spec_from_file_location(connection_config.name, os.path.join(AEA_DIR, "channels", connection_config.name, "connection.py"))
+    if connection_spec is None:
+        raise AEAConfigException("Connection '{}' not found.".format(connection_name))
+
+    connection_module = importlib.util.module_from_spec(connection_spec)
+    sys.modules[connection_spec.name + "_connection"] = connection_module
+    connection_spec.loader.exec_module(connection_module)  # type: ignore
+    classes = inspect.getmembers(connection_module, inspect.isclass)
+    connection_classes = list(filter(lambda x: re.match("\\w+Connection", x[0]), classes))
+    name_to_class = dict(connection_classes)
+    connection_class_name = cast(str, connection_config.class_name)
+    logger.debug("Processing connection {}".format(connection_class_name))
+    connection_class = name_to_class.get(connection_class_name, None)
+    if connection_class is None:
+        raise AEAConfigException("Connection class '{}' not found.".format(connection_class_name))
+
+    connection = connection_class.from_config(public_key, connection_config)
+    return connection
 
 
 @click.command()
@@ -83,9 +87,11 @@ def run(ctx: Context, connection_name: str):
         private_key_pem_path = _create_temporary_private_key_pem_path()
     else:
         _try_validate_private_key_pem_path(private_key_pem_path)
-    connection_name = ctx.agent_config.default_connection.name if connection_name is None else connection_name
+    crypto = Crypto(private_key_pem_path=private_key_pem_path)
+    public_key = crypto.public_key
+    connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     try:
-        connection = _setup_connection(connection_name, private_key_pem_path, ctx)
+        connection = _setup_connection(connection_name, public_key, ctx)
     except AEAConfigException as e:
         logger.error(str(e))
         exit(-1)

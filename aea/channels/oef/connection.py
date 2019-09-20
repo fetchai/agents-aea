@@ -512,15 +512,17 @@ class OEFConnection(Connection):
             self.channel.send(envelope)
 
     @classmethod
-    def from_config(cls, agent_name: str, connection_configuration: ConnectionConfig) -> 'OEFConnection':
-        """Get the OEF connection from the connection configuration."""
-        connection_type = connection_configuration.type
-        if connection_type == "oef":
-            oef_addr = connection_configuration.config.get("addr")
-            oef_port = connection_configuration.config.get("port")
-            return OEFConnection(agent_name, oef_addr, oef_port)
-        else:
-            raise ValueError("Connection type must be 'oef', not '{}'".format(connection_type))
+    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+        """
+        Get the OEF connection from the connection configuration.
+
+        :param public_key: the public key of the agent.
+        :param connection_configuration: the connection configuration object.
+        :return: the connection object
+        """
+        oef_addr = cast(str, connection_configuration.config.get("addr"))
+        oef_port = cast(int, connection_configuration.config.get("port"))
+        return OEFConnection(public_key, oef_addr, oef_port)
 
 
 class OEFMailBox(MailBox):

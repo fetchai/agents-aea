@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
+
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
 
@@ -98,9 +99,22 @@ class CRUDCollection(Generic[T]):
 class ConnectionConfig(Configuration):
     """Handle connection configuration."""
 
-    def __init__(self, name: str = "", supported_protocols: Optional[List[ProtocolId]] = None, **config):
+    def __init__(self,
+                 name: str = "",
+                 authors: str = "",
+                 version: str = "",
+                 license: str = "",
+                 url: str = "",
+                 class_name: str = "",
+                 supported_protocols: Optional[List[ProtocolId]] = None,
+                 **config):
         """Initialize a connection configuration object."""
         self.name = name
+        self.authors = authors
+        self.version = version
+        self.license = license
+        self.url = url
+        self.class_name = class_name
         self.supported_protocols = supported_protocols if supported_protocols is not None else []
         self.config = config
 
@@ -109,6 +123,11 @@ class ConnectionConfig(Configuration):
         """Return the JSON representation."""
         return {
             "name": self.name,
+            "authors": self.authors,
+            "version": self.version,
+            "license": self.license,
+            "url": self.url,
+            "class_name": self.class_name,
             "supported_protocol": self.supported_protocols,
             "config": self.config
         }
@@ -116,10 +135,14 @@ class ConnectionConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        name = cast(str, obj.get("name"))
         supported_protocols = cast(List[str], obj.get("supported_protocols"))
         return ConnectionConfig(
-            name=name,
+            name=cast(str, obj.get("name")),
+            authors=cast(str, obj.get("authors")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            url=cast(str, obj.get("url")),
+            class_name=cast(str, obj.get("class_name")),
             supported_protocols=supported_protocols,
             config=obj.get("config")
         )
@@ -274,18 +297,29 @@ class SkillConfig(Configuration):
 class AgentConfig(Configuration):
     """Class to represent the agent configuration file."""
 
-    def __init__(self, agent_name: str = "", aea_version: str = "", private_key_pem_path: str = ""):
+    def __init__(self,
+                 agent_name: str = "",
+                 aea_version: str = "",
+                 authors: str = "",
+                 version: str = "",
+                 license: str = "",
+                 url: str = "",
+                 private_key_pem_path: str = ""):
         """Instantiate the agent configuration object."""
-        self.agent_name = agent_name  # type: str
-        self.aea_version = aea_version  # type: str
-        self.private_key_pem_path = private_key_pem_path  # type: str
-        self._default_connection = None  # type: Optional[ConnectionConfig]
+        self.agent_name = agent_name
+        self.aea_version = aea_version
+        self.authors = authors
+        self.version = version
+        self.license = license
+        self.url = url
+        self.private_key_pem_path = private_key_pem_path
+        self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
         self.protocols = set()  # type: Set[str]
         self.skills = set()  # type: Set[str]
 
     @property
-    def default_connection(self) -> ConnectionConfig:
+    def default_connection(self) -> str:
         """Get the default connection."""
         assert self._default_connection is not None, "Default connection not set yet."
         return self._default_connection
@@ -306,6 +340,10 @@ class AgentConfig(Configuration):
         return {
             "agent_name": self.agent_name,
             "aea_version": self.aea_version,
+            "authors": self.authors,
+            "version": self.version,
+            "license": self.license,
+            "url": self.url,
             "private_key_pem_path": self.private_key_pem_path,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
@@ -319,12 +357,16 @@ class AgentConfig(Configuration):
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
+            authors=cast(str, obj.get("authors")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            url=cast(str, obj.get("url")),
             private_key_pem_path=cast(str, obj.get("private_key_pem_path")),
         )
 
+        agent_config.connections = set(cast(List[str], obj.get("connections")))
         agent_config.protocols = set(cast(List[str], obj.get("protocols")))
         agent_config.skills = set(cast(List[str], obj.get("skills")))
-        agent_config.skills = set(cast(List[str], obj.get("connections")))
 
         # set default configuration
         default_connection_name = obj.get("default_connection", None)

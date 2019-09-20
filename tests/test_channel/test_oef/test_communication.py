@@ -23,7 +23,7 @@ import time
 import pytest
 from oef.query import Eq
 
-from aea.channels.oef.oef import OEFMailBox
+from aea.channels.oef.connection import OEFMailBox
 from aea.crypto.base import Crypto
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer

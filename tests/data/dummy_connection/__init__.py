@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the configuration modules."""
+"""This module contains a dummy connection for an AEA."""

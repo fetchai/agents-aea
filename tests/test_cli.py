@@ -104,27 +104,41 @@ def test_use_case():
 
 def test_agent_configuration_schema_is_valid_wrt_draft_07():
     """Test that the JSON schema for the agent configuration file is compliant with the specification Draft 07."""
-    agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "skills", "base", "schemas", "aea-config_schema.json")))
+    agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "aea-config_schema.json")))
     Draft7Validator.check_schema(agent_config_schema)
 
 
 def test_skill_configuration_schema_is_valid_wrt_draft_07():
-    """Test that the JSON schema for the agent configuration file is compliant with the specification Draft 07."""
-    agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "skills", "base", "schemas", "skill-config_schema.json")))
-    Draft7Validator.check_schema(agent_config_schema)
+    """Test that the JSON schema for the skill configuration file is compliant with the specification Draft 07."""
+    skill_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "skill-config_schema.json")))
+    Draft7Validator.check_schema(skill_config_schema)
+
+
+def test_connection_configuration_schema_is_valid_wrt_draft_07():
+    """Test that the JSON schema for the connection configuration file is compliant with the specification Draft 07."""
+    connection_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "connection-config_schema.json")))
+    Draft7Validator.check_schema(connection_config_schema)
 
 
 def test_validate_agent_config():
     """Test that the validation of the agent configuration file works correctly."""
-    agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "skills", "base", "schemas", "aea-config_schema.json")))
+    agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "aea-config_schema.json")))
     agent_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "aea-config.example.yaml")))
     pprint.pprint(agent_config_file)
     validate(instance=agent_config_file, schema=agent_config_schema)
 
 
 def test_validate_skill_config():
-    """Test that the validation of the agent configuration file works correctly."""
-    agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "skills", "base", "schemas", "skill-config_schema.json")))
-    agent_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_skill", "skill.yaml")))
-    pprint.pprint(agent_config_file)
-    validate(instance=agent_config_file, schema=agent_config_schema)
+    """Test that the validation of the skill configuration file works correctly."""
+    skill_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "skill-config_schema.json")))
+    skill_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_skill", "skill.yaml")))
+    pprint.pprint(skill_config_file)
+    validate(instance=skill_config_file, schema=skill_config_schema)
+
+
+def test_validate_connection_config():
+    """Test that the validation of the connection configuration file works correctly."""
+    connection_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "connection-config_schema.json")))
+    connection_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_connection", "connection.yaml")))
+    pprint.pprint(connection_config_file)
+    validate(instance=connection_config_file, schema=connection_config_schema)

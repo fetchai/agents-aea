@@ -46,7 +46,6 @@ def add(ctx: Context):
 @pass_ctx
 def connection(ctx: Context, dirpath):
     """Add a connection to the configuration file."""
-
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
     connection_configuration_filepath = Path(os.path.join(dirpath, DEFAULT_CONNECTION_CONFIG_FILE))
     if not connection_configuration_filepath.exists():
@@ -93,7 +92,7 @@ def connection(ctx: Context, dirpath):
     # add the connections to the configurations.
     logger.debug("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.connections.add(connection_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
 @add.command()

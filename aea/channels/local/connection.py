@@ -353,7 +353,12 @@ class OEFLocalConnection(Connection):
         self._connection = None
 
     @classmethod
-    def from_config(cls, agent_name: str, connection_configuration: ConnectionConfig) -> 'Connection':
-        """Get the Local OEF connection from the connection configuration."""
+    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+        """Get the Local OEF connection from the connection configuration.
+
+        :param public_key: the public key of the agent.
+        :param connection_configuration: the connection configuration object.
+        :return: the connection object
+        """
         local_node = LocalNode()
-        return OEFLocalConnection(agent_name, local_node)
+        return OEFLocalConnection(public_key, local_node)

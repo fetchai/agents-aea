@@ -40,12 +40,14 @@ def remove(ctx: Context):
 @pass_ctx
 def connection(ctx: Context, connection_name):
     """Remove a connection from the agent."""
-    all_connection_names = dict(ctx.agent_config.connections.read_all()).keys()
-    if connection_name not in all_connection_names:
+    agent_name = ctx.agent_config.agent_name
+    logger.info("Removing connection {connection_name} from the agent {agent_name}..."
+                .format(agent_name=agent_name, connection_name=connection_name))
+
+    if connection_name not in ctx.agent_config.connections:
         logger.error("Connection '{}' not found.".format(connection_name))
         exit(-1)
 
-    logger.info("Removing connection '{}'...".format(connection_name))
     connection_folder = os.path.join("connections", connection_name)
     try:
         shutil.rmtree(connection_folder)
@@ -73,10 +75,12 @@ def protocol(ctx: Context, protocol_name):
                 .format(agent_name=agent_name, protocol_name=protocol_name))
 
     if protocol_name not in ctx.agent_config.protocols:
-        logger.warning("The protocol '{}' is not supported.".format(protocol_name))
+        logger.warning("Protocol '{}' not found.".format(protocol_name))
+        exit(-1)
 
+    protocol_folder = os.path.join("protocols", protocol_name)
     try:
-        shutil.rmtree(os.path.join("protocols", protocol_name))
+        shutil.rmtree(protocol_folder)
     except BaseException:
         logger.exception("An error occurred.")
         return
@@ -99,9 +103,11 @@ def skill(ctx: Context, skill_name):
 
     if skill_name not in ctx.agent_config.skills:
         logger.warning("The skill '{}' is not supported.".format(skill_name))
+        exit(-1)
 
+    skill_folder = os.path.join("skills", skill_name)
     try:
-        shutil.rmtree(os.path.join("skills", skill_name))
+        shutil.rmtree(skill_folder)
     except BaseException:
         logger.exception("An error occurred.")
         return

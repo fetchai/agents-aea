@@ -1,0 +1,12 @@
+aea_version: 0.1.3
+agent_name: my_first_agent
+authors: ''
+connections:
+- oef
+default_connection: oef
+license: ''
+private_key_pem_path: ''
+protocols: []
+skills: []
+url: ''
+version: v1

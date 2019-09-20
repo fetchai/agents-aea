@@ -232,12 +232,15 @@ class GymConnection(Connection):
         self._connection = None
 
     @classmethod
-    def from_config(cls, agent_name: str, connection_configuration: ConnectionConfig) -> 'Connection':
-        """Get the Gym connection from the connection configuration."""
-        connection_type = connection_configuration.type
-        if connection_type == "gym":
-            gym_env_package = cast(str, connection_configuration.config.get('config').get("env"))
-            gym_env = locate(gym_env_package)
-            return GymConnection(agent_name, gym_env)
-        else:
-            raise ValueError("Connection type must be 'gym', not '{}'".format(connection_type))
+    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+        """
+        Get the Gym connection from the connection configuration.
+
+        :param public_key: the public key of the agent.
+        :param connection_configuration: the connection configuration object.
+        :return: the connection object
+        """
+        config = cast(dict, connection_configuration.config.get('config'))
+        gym_env_package = cast(str, config.get("env"))
+        gym_env = locate(gym_env_package)
+        return GymConnection(public_key, gym_env())

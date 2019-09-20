@@ -3,11 +3,17 @@
     "description": "Schema for the connection configuration file.",
     "additionalProperties": false,
     "type": "object",
-    "required": ["name", "supported_protocols", "config"],
+    "required": ["name", "authors", "version", "license", "url", "class_name", "supported_protocols", "config"],
     "properties": {
         "name": {"type": "string"},
+        "authors": {"type": "string"},
+        "version": {"type": "string"},
+        "license": {"type": "string"},
+        "url": {"type": "string"},
+        "class_name": {"type": "string"},
         "supported_protocols": {
             "type": "array",
+            "uniqueItems": true,
             "items": {"type": "string"}
         },
         "config": {"type": "object"}

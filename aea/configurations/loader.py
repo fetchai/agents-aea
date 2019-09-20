@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the parser for configuration file."""
+
 import inspect
 import json
 import os
