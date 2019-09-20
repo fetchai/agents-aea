@@ -20,7 +20,7 @@
 """This module contains the tasks for the 'echo' skill."""
 import time
 
-from aea.skills.base.core import Task
+from aea.skills.base import Task
 
 
 class EchoTask(Task):

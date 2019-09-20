@@ -46,6 +46,7 @@ from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.configurations.base import ConnectionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -509,6 +510,19 @@ class OEFConnection(Connection):
         """
         if self._connected:
             self.channel.send(envelope)
+
+    @classmethod
+    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+        """
+        Get the OEF connection from the connection configuration.
+
+        :param public_key: the public key of the agent.
+        :param connection_configuration: the connection configuration object.
+        :return: the connection object
+        """
+        oef_addr = cast(str, connection_configuration.config.get("addr"))
+        oef_port = cast(int, connection_configuration.config.get("port"))
+        return OEFConnection(public_key, oef_addr, oef_port)
 
 
 class OEFMailBox(MailBox):

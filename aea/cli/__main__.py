@@ -23,17 +23,21 @@
 import os
 import shutil
 from pathlib import Path
+from typing import cast
 
 import click
 import click_log
+from click import pass_context
 from jsonschema import ValidationError
 
 import aea
-from aea.cli.add import add
+from aea.cli.add import connection, add
 from aea.cli.common import Context, pass_ctx, logger
-from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE, ConnectionConfig, AgentConfig
 from aea.cli.remove import remove
 from aea.cli.run import run
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+
+DEFAULT_CONNECTION = "oef"
 
 
 @click.group()
@@ -47,9 +51,10 @@ def cli(ctx) -> None:
 
 @cli.command()
 @click.argument('agent_name', type=str, required=True)
-@pass_ctx
-def create(ctx: Context, agent_name):
+@pass_context
+def create(click_context, agent_name):
     """Create an agent."""
+    ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
     logger.info("Creating agent's directory in '{}'".format(path))
 
@@ -59,15 +64,16 @@ def create(ctx: Context, agent_name):
 
         # create a config file inside it
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, private_key_pem_path="")
-        agent_config.set_default_connection(ConnectionConfig(
-            name="default-oef",
-            type="oef",
-            addr="127.0.0.1",
-            port=10000
-        ))
+        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", private_key_pem_path="")
+        agent_config.default_connection = DEFAULT_CONNECTION
         ctx.agent_loader.dump(agent_config, config_file)
         logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))
+
+        logger.info("Adding default connection '{}' to the agent...".format(DEFAULT_CONNECTION))
+        ctx.agent_config = agent_config
+        # next command must be done from the agent's directory -> overwrite ctx.cwd
+        ctx.cwd = agent_config.agent_name
+        click_context.invoke(connection, dirpath=os.path.join(aea.AEA_DIR, "channels", DEFAULT_CONNECTION))
 
     except OSError:
         logger.error("Directory already exist. Aborting...")

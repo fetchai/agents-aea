@@ -30,3 +30,9 @@ Release History
 - Adds first two working skills and fixes gym examples
 - Adds docs
 - Multiple additional minor fixes and changes
+
+0.1.4 (2019-09-20)
+-------------------
+
+- Adds cli functionality to add connections
+- Multiple additional minor fixes and changes

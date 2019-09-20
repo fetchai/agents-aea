@@ -29,13 +29,21 @@ pipeline {
 
                 } // static type check
 
-                stage('Unit Tests: Python 3.6') {
+                stage('Docs') {
 
                     steps {
-                        sh 'tox -e py36 -- --no-integration-tests'
+                        sh 'tox -e docs'
                     }
 
-                }  // unit tests: python 3.6
+                } // docs
+
+//                 stage('Unit Tests: Python 3.6') {
+//
+//                     steps {
+//                         sh 'tox -e py36 -- --no-integration-tests'
+//                     }
+//
+//                 }  // unit tests: python 3.6
 
                 stage('Unit Tests: Python 3.7') {
 

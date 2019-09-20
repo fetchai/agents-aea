@@ -30,8 +30,8 @@ from click import pass_context
 from jsonschema import ValidationError
 
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.skills.base.config import DEFAULT_AEA_CONFIG_FILE
-from aea.skills.base.core import DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.skills.base import DEFAULT_SKILL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE
 
 
 @click.group()
@@ -39,6 +39,60 @@ from aea.skills.base.core import DEFAULT_SKILL_CONFIG_FILE
 def add(ctx: Context):
     """Add a resource to the agent."""
     _try_to_load_agent_config(ctx)
+
+
+@add.command()
+@click.argument('dirpath', type=str, required=True)
+@pass_ctx
+def connection(ctx: Context, dirpath):
+    """Add a connection to the configuration file."""
+    # check that the provided path points to a proper connection directory -> look for connection.yaml file.
+    connection_configuration_filepath = Path(os.path.join(dirpath, DEFAULT_CONNECTION_CONFIG_FILE))
+    if not connection_configuration_filepath.exists():
+        logger.error("Path '{}' does not exist.".format(connection_configuration_filepath))
+        exit(-1)
+        return
+
+    # try to load the connection configuration file
+    try:
+        connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
+    except ValidationError as e:
+        logger.error("Connection configuration file not valid: {}".format(str(e)))
+        exit(-1)
+        return
+
+    # check if we already have a connection with the same name
+    logger.debug("Connection already supported by the agent: {}".format(ctx.agent_config.connections))
+    connection_name = connection_configuration.name
+    if connection_name in ctx.agent_config.connections:
+        logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
+        exit(-1)
+        return
+
+    agent_name = ctx.agent_config.agent_name
+    logger.debug("Adding connection {connection_name} to the agent {agent_name}..."
+                 .format(agent_name=agent_name, connection_name=connection_name))
+
+    # copy the connection package into the agent's supported connections.
+    dirpath = str(Path(dirpath).absolute())
+    src = dirpath
+    dest = os.path.join(ctx.cwd, "connections", connection_name)
+    logger.info("Copying connection modules. src={} dst={}".format(src, dest))
+    try:
+        shutil.copytree(src, dest)
+    except Exception as e:
+        logger.error(e)
+        exit(-1)
+
+    # make the 'connections' folder a Python package.
+    connections_init_module = os.path.join(ctx.cwd, "connections", "__init__.py")
+    logger.debug("Creating {}".format(connections_init_module))
+    Path(connections_init_module).touch(exist_ok=True)
+
+    # add the connections to the configurations.
+    logger.debug("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
+    ctx.agent_config.connections.add(connection_name)
+    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
 @add.command()

@@ -79,6 +79,7 @@ setup(
     author=about['__author__'],
     url=about['__url__'],
     long_description=readme,
+    long_description_content_type='text/markdown',
     packages=find_packages(include=["aea*"]),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
@@ -100,7 +101,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     data_files=[
-        ("aea/skills/base/schemas/", glob.glob("aea/skills/base/schemas/*")),
+        ("aea/skills/base/schemas/", glob.glob("aea/skills/base/schemas/*.json")),
     ],
     license=about['__license__'],
 )

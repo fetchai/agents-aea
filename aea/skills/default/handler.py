@@ -22,11 +22,12 @@ import base64
 import logging
 from typing import Optional
 
-from aea.mail.base import ProtocolId, Envelope
+from aea.mail.base import Envelope
+from aea.configurations.base import ProtocolId
 from aea.protocols.base.protocol import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.skills.base.core import Handler
+from aea.skills.base import Handler
 
 logger = logging.getLogger(__name__)
 

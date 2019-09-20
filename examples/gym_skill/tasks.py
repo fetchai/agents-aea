@@ -22,7 +22,7 @@ from queue import Queue
 from threading import Thread
 
 
-from aea.skills.base.core import Task
+from aea.skills.base import Task
 
 from gym_skill.helpers import ProxyEnv
 from gym_skill.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS

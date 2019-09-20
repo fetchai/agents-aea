@@ -1,12 +1,11 @@
 aea_version: 0.1.1
 agent_name: myagent
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
 connections:
-- connection:
-    name: default-oef
-    type: oef
-    config:
-        addr: 127.0.0.1
-        port: 10000
+- default-oef
 default_connection: default-oef
 private_key_pem_path: ''
 protocols:

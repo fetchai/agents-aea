@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the parser for configuration file."""
+
 import inspect
 import json
 import os
@@ -26,12 +27,12 @@ from typing import TextIO, Type, TypeVar, Generic
 import yaml
 from jsonschema import validate
 
-from aea.skills.base.config import AgentConfig, SkillConfig
+from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
-T = TypeVar('T', AgentConfig, SkillConfig)
+T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig)
 
 
 class ConfigLoader(Generic[T]):

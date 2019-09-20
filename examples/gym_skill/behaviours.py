@@ -19,7 +19,7 @@
 
 """This module contains the behaviours for the 'gym' skill."""
 
-from aea.skills.base.core import Behaviour
+from aea.skills.base import Behaviour
 
 
 class GymBehaviour(Behaviour):
