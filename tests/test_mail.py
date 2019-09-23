@@ -14,10 +14,15 @@ def test_envelope_initialisaztion() :
 	message_bytes = ProtobufSerializer().encode(msg)
 	envelope = Envelope(to="Agent1", sender="Agent0", protocol_id="my_own_protocol", message=message_bytes)
 	
-	envelope.to = "Agent1"
-	envelope.sender = "Agent0"
-	envelope.protocol_id = "my_own_protocol"
-	envelope.message = b"hello"
+	envelope.to = "ChangedAgent"
+	envelope.sender = "ChangedSender"
+	envelope.protocol_id = "my_changed_protocol"
+	envelope.message = b"HelloWorld"
+
+	assert envelope.to == "ChangedAgent","Cannot set to value on Envelope"
+	assert envelope.sender == "ChangedSender", "Cannot set sender value on Envelope"
+	assert envelope.protocol_id == "my_changed_protocol","Cannot set protocol_id on Envelope "
+	assert envelope.message == b"HelloWorld", "Cannot set message on Envelope"
 	
 	assert envelope,"Cannot generate a new envelope"
 
@@ -26,12 +31,12 @@ def test_envelope_empty_receiver() :
 	msg = Message(content="hello")
 	message_bytes = ProtobufSerializer().encode(msg)
 	envelope = Envelope(to=to_adr, sender="Agent0", protocol_id="my_own_protocol", message=message_bytes)
-	assert envelope, "Passing an empty receiver. Testing try/except by passing a list as sender"
+	assert envelope, "Receiver is the correct type"
 
 def test_inbox_empty():
 	my_queue = Queue() 
 	_inbox = InBox(my_queue)
-	assert _inbox.empty(), "Must return an empty inbox"
+	assert _inbox.empty(), "Inbox is not empty"
 
 def test_inbox_nowait() : 
 	msg = Message(content="hello")
@@ -45,12 +50,14 @@ def test_inbox_nowait() :
 def test_outbox_empty() :
 	my_queue = Queue()
 	_outbox = OutBox(my_queue)
-	assert _outbox.empty(), "Checking if the outbox is empty"
+	assert _outbox.empty(), "The outbox is not empty"
 
 
-''' Testing the mailBox()'''
-#It creates a new thread for the connection ( So interupt after passing all tests)
-def test_mailBox() : 
+
+def test_mailBox() :
+	''' Testing the mailBox()'''
+	#It creates a new thread for the connection ( So interupt after passing all tests) 
+	
 	node = LocalNode()
 	public_key_1 = "mailbox1"
 	mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
