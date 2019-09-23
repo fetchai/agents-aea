@@ -69,4 +69,3 @@ def test_validate_connection_config():
     connection_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_connection", "connection.yaml")))
     pprint.pprint(connection_config_file)
     validate(instance=connection_config_file, schema=connection_config_schema)
-

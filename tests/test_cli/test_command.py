@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea` command-line tool."""
+"""This test module contains the tests for the `aea` sub-commands."""
 import filecmp
 import json
 import os
@@ -50,7 +50,6 @@ class TestCreate:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
@@ -60,7 +59,7 @@ class TestCreate:
 
     def _load_config_file(self) -> Dict:
         """Load a config file."""
-        agent_config_file = Path(self.agent_name, DEFAULT_AEA_CONFIG_FILE)
+        agent_config_file = Path(self.agent_name, DEFAULT_AEA_CONFIG_FILE)  # type: ignore
         file_pointer = open(agent_config_file, mode="r", encoding="utf-8")
         agent_config_instance = yaml.safe_load(file_pointer)
         return agent_config_instance
@@ -159,7 +158,7 @@ class TestCreate:
         assert oef_connection_dirpath.is_dir()
 
     def test_oef_connection_directory_is_equal_to_library_oef_connection(self):
-        """Check that the oef connection directory is equal to the package's one (aea.channels.oef"""
+        """Check that the oef connection directory is equal to the package's one (aea.channels.oef)."""
         oef_connection_dirpath = Path(self.agent_name, "connections", "oef")
         comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "aea", "channels", "oef")))
         assert comparison.diff_files == []
@@ -172,7 +171,6 @@ class TestCreate:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
 
 
 # def test_use_case():
