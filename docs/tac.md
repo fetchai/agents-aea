@@ -32,18 +32,10 @@ python setup.py install
 ```
 
 
-
-Install Docker and Docker Compose - for now.
-
-``` bash
-pip install docker docker-compose
-```
-
-
 Run the launch script.
 
 ``` bash
-python scripts/launch_alt.py
+python scripts/launch.py
 ```
 
 The <a href="https://github.com/facebookresearch/visdom" target="_blank">visdom</a> server is now running.
@@ -78,9 +70,9 @@ Click through to the <a href="http://localhost:8097" target="_blank">controller 
 
 
 
-## Flask installation
+## Launcher GUI
 
-
+!!!	Todo
 
 
 ## Possible gotchas
@@ -92,12 +84,6 @@ docker kill $(docker ps -q)
 # mac
 docker ps -q | xargs docker stop ; docker system prune -a
 ```
-
-!!!	Note
-	Checkout `develop` until further notice. Then run `pull` and `pullall`.
-	
-
-
 
 
 

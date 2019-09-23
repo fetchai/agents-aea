@@ -52,24 +52,15 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
 aea create my_first_agent
 ```
 
-### Add the OEF protocol
-
-``` bash
-cd my_first_agent
-aea add protocol oef
-```
-
 ### Add the echo skill 
 
 ``` bash
+cd my_first_agent
 aea add skill echo_skill ../examples/echo_skill
 ```
 
-
 ### Launch the OEF 
 
-!!!	Note
-	This step will change soon and we will run the agent on a local OEF stub instead.
 
 Open a new terminal at the repo root and launch the OEF.
 
