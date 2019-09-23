@@ -50,13 +50,12 @@ class Envelope:
         self._sender = sender
         self._protocol_id = protocol_id
         self._message = message
-        assert type(self._to) == str or self._to is None
-        try:
+        try : 
+            assert type(self._to) == str or self._to is None
             if self._to is not None and type(self._to) == str:
                 self._to.encode('utf-8')
-        except Exception:
-            assert False
-
+        except AssertionError as error : 
+            print(error)
     @property
     def to(self) -> Address:
         """Get public key of receiver."""
