@@ -9,15 +9,23 @@ First, install the package from [pypi](https://pypi.org/project/aea/):
 pip install aea
 `
 
-Then, build your agent as described in the [AEA CLI readme](../master/aea/cli/README.md)
+Then, build your agent as described in the [AEA CLI readme](../master/aea/cli/README.md) or in the [examples](../master/examples).
 
-## Dependencies
+## Install from Source
+
+## Cloning
+
+This repository contains submodules. Clone with recursive strategy:
+
+	  git clone git@github.com:fetchai/agents-aea.git --recursive && cd agents-aea
+
+### Dependencies
 
 All python specific dependencies are specified in the Pipfile (and installed via the commands specified in 'Preliminaries').
 
 Or, you can have more control on the installed dependencies by leveraging the setuptools' extras mechanism (more details later). 
 
-## Preliminaries
+### Preliminaries
 
 - Create and launch a virtual environment:
 
