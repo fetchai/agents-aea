@@ -1,4 +1,10 @@
-## Setup
+## Requirements
+
+Make sure you are running <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
+
+
+
+## Quick start
 
 Clone the repo to include submodules.
 
@@ -13,39 +19,26 @@ Create and launch a virtual environment.
 pipenv --python 3.7 && pipenv shell
 ```
 
+Install the dependencies.
+
+``` bash
+pipenv install
+```
+
 
 Install the package.
 ``` bash
 python setup.py install
 ```
 
-Error at this point.
+
+
+Install Docker and Docker Compose - for now.
 
 ``` bash
-Installed /Users/katharinemurphy/.local/share/virtualenvs/agents-tac-YBffReos/lib/python3.7/site-packages/oef-0.6.7-py3.7.egg
-Searching for aea@ git+https://github.com/fetchai/agents-aea.git@develop#egg=aea
-Reading https://pypi.org/simple/aea/
-Couldn't find index page for 'aea' (maybe misspelled?)
-Scanning index of all packages (this may take a while)
-Reading https://pypi.org/simple/
-No local packages or working download links found for aea@ git+https://github.com/fetchai/agents-aea.git@develop#egg=aea
-error: Could not find suitable distribution for Requirement.parse('aea@ git+https://github.com/fetchai/agents-aea.git@develop#egg=aea')
-(agents-tac) bash-3.2$ python setup.py install
+pip install docker docker-compose
 ```
 
-Install Docker and Docker Compose.
-
-``` bash
-pip install docker
-pip install docker-compose
-```
-
-
-Pull the OEF Docker repo.
-
-``` bash
-docker pull fetchai/oef-search:latest
-```
 
 Run the launch script.
 
@@ -53,8 +46,59 @@ Run the launch script.
 python scripts/launch_alt.py
 ```
 
+The <a href="https://github.com/facebookresearch/visdom" target="_blank">visdom</a> server is now running.
+
 The controller GUI at <a href="http://localhost:8097" target=_blank>http://localhost:8097</a> provides real time insights.
 
+In the Environment tab, make sure you have the `tac_controller` environment selected.
+
+<center>![AEA Visdom UI](assets/visdom_ui.png)</center>
 
 
-## Quick start
+## Alternative build and run - WIP
+
+In a new terminal window, clone the repo, build the sandbox, and launch it.
+
+``` bash
+git clone git@github.com:fetchai/agents-tac.git --recursive && cd agents-tac
+pipenv --python 3.7 && pipenv shell
+python setup.py install
+cd sandbox && docker-compose build
+docker-compose up
+```
+
+In a new terminal window, enter the virtual environment, and connect a template agent to the sandbox.
+
+``` bash
+pipenv shell
+python templates/v1/basic.py --name my_agent --dashboard
+```
+
+Click through to the <a href="http://localhost:8097" target="_blank">controller GUI</a>.
+
+
+
+## Flask installation
+
+
+
+
+## Possible gotchas
+
+Kill all running containers before restart.
+
+``` bash
+docker kill $(docker ps -q)
+# mac
+docker ps -q | xargs docker stop ; docker system prune -a
+```
+
+!!!	Note
+	Checkout `develop` until further notice. Then run `pull` and `pullall`.
+	
+
+
+
+
+
+<br/>

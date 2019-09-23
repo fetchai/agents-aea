@@ -1,6 +1,25 @@
 ## Setup
 
+Install the Autonomous Economic Agent framework.
 
+The following installs the basic application.
+``` bash
+pip install aea
+```
+
+The following installs the whole package.
+``` bash
+pip install aea[all]
+
+```
+
+The following installs just the cli.
+``` bash
+pip install aea[cli]
+```
+
+
+<!--
 To get started, clone the repo, start a Python environment, and install all dependencies.
 
 ``` bash
@@ -9,8 +28,8 @@ cd agents-aea/
 pipenv --python 3.7 && pipenv shell
 pip install .[all]
 ```
-
-
+-->
+<!--
 ## Alternative setup - many errors with dependencies.
 
 ``` bash
@@ -19,11 +38,16 @@ pip install cryptography base58 click click-log jsonschema pyyaml google
 # error on google, didn't fix it
 pip install -i https://test.pypi.org/simple/ aea
 ```
-
+-->
 
 ## Echo Agent demo
-### Create a new agent
+### Download the examples and scripts directories.
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
+```
 
+### Create a new agent
 ``` bash
 aea create my_first_agent
 ```
@@ -40,6 +64,7 @@ aea add protocol oef
 ``` bash
 aea add skill echo_skill ../examples/echo_skill
 ```
+
 
 ### Launch the OEF 
 
