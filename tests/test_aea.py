@@ -20,6 +20,9 @@ def test_initialiseAeA() :
 
 	assert myAea , "Agent is not inisialised"
 	assert myAea.context, "Cannot access the Agent's Context"
+	assert myAea.setup()
+
+	#assert myAea.resources()
 	
 	
 

@@ -55,7 +55,7 @@ class Envelope:
             if self._to is not None and type(self._to) == str:
                 self._to.encode('utf-8')
         except AssertionError as error : 
-            print(error)
+            logger.error(str(error))
     @property
     def to(self) -> Address:
         """Get public key of receiver."""
