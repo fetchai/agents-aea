@@ -19,19 +19,19 @@ def test_envelope_initialisaztion() :
 	envelope.protocol_id = "my_own_protocol"
 	envelope.message = b"hello"
 	
-	assert envelope
+	assert (envelope,"Cannot generate a new envelope")
 
 def test_envelope_empty_receiver() : 
 	to_adr = []
 	msg = Message(content="hello")
 	message_bytes = ProtobufSerializer().encode(msg)
 	envelope = Envelope(to=to_adr, sender="Agent0", protocol_id="my_own_protocol", message=message_bytes)
-	assert (envelope)
+	assert (envelope, "Passing an empty receiver. Testing try/except by passing a list as sender")
 
 def test_inbox_empty():
 	my_queue = Queue() 
 	_inbox = InBox(my_queue)
-	assert(_inbox.empty())
+	assert(_inbox.empty(), "Must return an empty inbox")
 
 def test_inbox_nowait() : 
 	msg = Message(content="hello")
@@ -39,25 +39,25 @@ def test_inbox_nowait() :
 	my_queue = Queue()
 	my_queue.put(message_bytes)
 	_inbox = InBox(my_queue)
-	assert(_inbox.get_nowait())
+	assert(_inbox.get_nowait(), "Check for a message on the in queue and wait for no time.")
 
 #Test thet the outbox queue is empty
 def test_outbox_empty() :
 	my_queue = Queue()
 	_outbox = OutBox(my_queue)
-	assert(_outbox.empty())
+	assert(_outbox.empty(), "Checking if the outbox is empty")
 
 
 ''' Testing the mailBox()'''
 #It creates a new thread for the connection ( So interupt after passing all tests)
 def test_mailBox() : 
 	node = LocalNode()
-
 	public_key_1 = "mailbox1"
 	mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
-	mailbox1.connect()
 	assert (mailbox1.is_connected,"Mailbox cannot connect to the specific Connection (OEFLocalConnection)")
-	mailbox1.disconnect()
+	#mailbox1.connect()
+	
+	#mailbox1.disconnect()
 
 	
 	
