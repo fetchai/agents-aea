@@ -43,9 +43,10 @@ def add(ctx: Context):
 
 @add.command()
 @click.argument('dirpath', type=str, required=True)
-@pass_ctx
-def connection(ctx: Context, dirpath):
+@pass_context
+def connection(click_context, dirpath):
     """Add a connection to the configuration file."""
+    ctx = cast(Context, click_context.obj)
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
     connection_configuration_filepath = Path(os.path.join(dirpath, DEFAULT_CONNECTION_CONFIG_FILE))
     if not connection_configuration_filepath.exists():
@@ -97,9 +98,10 @@ def connection(ctx: Context, dirpath):
 
 @add.command()
 @click.argument('protocol_name', type=str, required=True)
-@pass_ctx
-def protocol(ctx: Context, protocol_name):
+@pass_context
+def protocol(click_context, protocol_name):
     """Add a protocol to the agent."""
+    ctx = cast(Context, click_context.obj)
     agent_name = cast(str, ctx.agent_config.agent_name)
     logger.debug("Adding protocol {protocol_name} to the agent {agent_name}..."
                  .format(agent_name=agent_name, protocol_name=protocol_name))
@@ -125,13 +127,13 @@ def protocol(ctx: Context, protocol_name):
     assert protocols_module_spec.submodule_search_locations is not None, "Submodule search locations is None."
     protocols_dir = protocols_module_spec.submodule_search_locations[0]
     src = os.path.join(protocols_dir, protocol_name)
-    dest = os.path.join("protocols", protocol_name)
+    dest = os.path.join(ctx.cwd, "protocols", protocol_name)
     logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
     shutil.copytree(src, dest)
 
     # make the 'protocols' folder a Python package.
     logger.debug("Creating {}".format(os.path.join(agent_name, "protocols", "__init__.py")))
-    Path(os.path.join("protocols", "__init__.py")).touch(exist_ok=True)
+    Path(os.path.join(ctx.cwd, "protocols", "__init__.py")).touch(exist_ok=True)
 
     # add the protocol to the configurations.
     logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -175,7 +177,7 @@ def skill(click_context, skill_name, dirpath):
     # copy the skill package into the agent's supported skills.
     dirpath = str(Path(dirpath).absolute())
     src = dirpath
-    dest = os.path.join("skills", skill_name)
+    dest = os.path.join(ctx.cwd, "skills", skill_name)
     logger.info("Copying skill modules. src={} dst={}".format(src, dest))
     try:
         shutil.copytree(src, dest)
@@ -184,7 +186,7 @@ def skill(click_context, skill_name, dirpath):
         exit(-1)
 
     # make the 'skills' folder a Python package.
-    skills_init_module = os.path.join("skills", "__init__.py")
+    skills_init_module = os.path.join(ctx.cwd, "skills", "__init__.py")
     logger.debug("Creating {}".format(skills_init_module))
     Path(skills_init_module).touch(exist_ok=True)
 
