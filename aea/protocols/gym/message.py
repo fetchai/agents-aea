@@ -49,6 +49,7 @@ class GymMessage(Message):
         :param type: the type.
         """
         super().__init__(performative=GymMessage.Performative(performative), **kwargs)
+        assert self.check_consistency(), "GymMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
