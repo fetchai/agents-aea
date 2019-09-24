@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for Envelop,Mailbox,Inbox,Outbox of mail.base.py."""
+"""This module contains the tests for Envelope of mail.base.py."""
 
 from aea.mail.base import Envelope, MailBox, InBox, OutBox
 from aea.protocols.base.message import Message
@@ -30,6 +30,10 @@ def test_envelope_initialisation():
     """Testing the envelope initialisation."""
     msg = Message(content='hello')
     message_bytes = ProtobufSerializer().encode(msg)
+    assert Envelope(to="Agent1", sender="Agent0",
+                    protocol_id="my_own_protocol",
+                    message=message_bytes), "Cannot generate a new envelope"
+
     envelope = Envelope(to="Agent1", sender="Agent0",
                         protocol_id="my_own_protocol", message=message_bytes)
 
@@ -39,21 +43,11 @@ def test_envelope_initialisation():
     envelope.message = b"HelloWorld"
 
     assert envelope.to == "ChangedAgent", "Cannot set to value on Envelope"
-    assert envelope.sender == "ChangedSender", "Cannot set sender value on Envelope"
-    assert envelope.protocol_id == "my_changed_protocol", "Cannot set protocol_id on Envelope "
+    assert envelope.sender == "ChangedSender",\
+                              "Cannot set sender value on Envelope"
+    assert envelope.protocol_id == "my_changed_protocol",\
+                                   "Cannot set protocol_id on Envelope "
     assert envelope.message == b"HelloWorld", "Cannot set message on Envelope"
-
-    assert envelope, "Cannot generate a new envelope"
-
-
-def test_envelope_empty_receiver():
-    """Tests what happens when we are passing wrong type of receiver."""
-    to_adr = []
-    msg = Message(content="hello")
-    message_bytes = ProtobufSerializer().encode(msg)
-    envelope = Envelope(to=to_adr, sender="Agent0",
-                        protocol_id="my_own_protocol", message=message_bytes)
-    assert envelope, "Receiver is the correct type"
 
 
 def test_inbox_empty():
@@ -68,9 +62,54 @@ def test_inbox_nowait():
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
     my_queue = Queue()
-    my_queue.put(message_bytes)
+    envelope = Envelope(to="Agent1", sender="Agent0",
+                        protocol_id="my_own_protocol", message=message_bytes)
+    my_queue.put(envelope)
     _inbox = InBox(my_queue)
-    assert _inbox.get_nowait(), "Check for a message on the in queue and wait for no time."
+    assert _inbox.get_nowait(
+    ) == envelope, "Check for a message on the in queue and wait for no time."
+
+
+def test_inbox_get():
+    """Tests for a envelope on the in queue."""
+    msg = Message(content="hello")
+    message_bytes = ProtobufSerializer().encode(msg)
+    my_queue = Queue()
+    envelope = Envelope(to="Agent1", sender="Agent0",
+                        protocol_id="my_own_protocol", message=message_bytes)
+    my_queue.put(envelope)
+    _inbox = InBox(my_queue)
+
+    assert _inbox.get() == envelope,\
+        "Checks if the returned envelope is the same with the queued envelope."
+
+
+def test_outbox_put():
+    """Tests that an envelope is putted into the queue."""
+    msg = Message(content="hello")
+    message_bytes = ProtobufSerializer().encode(msg)
+    my_queue = Queue()
+    envelope = Envelope(to="Agent1", sender="Agent0",
+                        protocol_id="my_own_protocol", message=message_bytes)
+    my_queue.put(envelope)
+    _outbox = OutBox(my_queue)
+    _outbox.put(envelope)
+    assert _outbox.empty() is False,\
+        "Oubox must not be empty after putting an envelope"
+
+
+def test_outbox_put_message():
+    """Tests that an envelope is created from the message is in the queue."""
+    msg = Message(content="hello")
+    message_bytes = ProtobufSerializer().encode(msg)
+    my_queue = Queue()
+    envelope = Envelope(to="Agent1", sender="Agent0",
+                        protocol_id="my_own_protocol", message=message_bytes)
+    my_queue.put(envelope)
+    _outbox = OutBox(my_queue)
+    _outbox.put_message("Agent1", "Agent0", "my_own_protocol", message_bytes)
+    assert _outbox.empty() is False,\
+        "Outbox will not be empty after putting a message."
 
 
 def test_outbox_empty():
@@ -86,5 +125,6 @@ def test_mailBox():
     public_key_1 = "mailbox1"
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
     mailbox1.connect()
-    assert mailbox1.is_connected, "Mailbox cannot connect to the specific Connection (OEFLocalConnection)"
+    assert mailbox1.is_connected,\
+        "Mailbox cannot connect to the specific Connection(OEFLocalConnection)"
     mailbox1.disconnect()
