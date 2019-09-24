@@ -23,7 +23,6 @@ from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
-DEFAULT_PROTOCOL_FILES = ["message.py", "serialization.py"]
 T = TypeVar('T')
 
 Address = str
@@ -129,7 +128,7 @@ class ConnectionConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "class_name": self.class_name,
-            "supported_protocols": self.supported_protocols,
+            "supported_protocol": self.supported_protocols,
             "config": self.config
         }
 

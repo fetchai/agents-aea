@@ -35,7 +35,6 @@ from aea.cli.add import connection, add
 from aea.cli.common import Context, pass_ctx, logger
 from aea.cli.remove import remove
 from aea.cli.run import run
-from aea.cli.scaffold import scaffold
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 DEFAULT_CONNECTION = "oef"
@@ -106,7 +105,6 @@ def delete(ctx: Context, agent_name):
 
 
 cli.add_command(add)
-cli.add_command(scaffold)
 cli.add_command(remove)
 cli.add_command(run)
 

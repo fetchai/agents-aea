@@ -1,34 +1,8 @@
-site_name: Fetch.AI Developer Documentation
-site_url: https://docs.fetch.ai/
-site_description: Everything you need to know about Fetch.AI. 
-#repo_url: https://github.com/fetchai/docs // commented out to remove edit option
-#repo_name: 'GitHub'
-site_author: katharine.murphy@fetch.ai
-
-
-theme:
-  name: 'material'
-  logo:
-    icon: code
-  feature:
-    tabs: true  
-
-
-
+site_name: AEA - Autonomous Economic Agent Framework
 nav:
-
-  - Autonomous Economic Agent Framework:
-    - Welcome:
-      - "What is the AEA?": 'index.md'
-      - "Architecture": 'architecture.md'
-    - Quick start: 'quickstart.md'
-    - CLI: 'cli_overview.md'
-    - Demos:
-      - "Reinforcement Learning": 'ex_rl.md'
-      - "TAC": 'tac.md'
-
-
-
-markdown_extensions:
-  - pymdownx.superfences
-  - admonition
+    - Home: index.md
+    - CLI:
+        - 'Overview': cli_overview.md
+    - Examples:
+        - 'Reinforcement Learning': ex_rl.md
+theme: readthedocs
