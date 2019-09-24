@@ -50,12 +50,13 @@ class Envelope:
         self._sender = sender
         self._protocol_id = protocol_id
         self._message = message
-        try : 
+        try:
             assert type(self._to) == str or self._to is None
             if self._to is not None and type(self._to) == str:
                 self._to.encode('utf-8')
-        except AssertionError as error : 
+        except AssertionError as error:
             logger.error(str(error))
+
     @property
     def to(self) -> Address:
         """Get public key of receiver."""
@@ -136,7 +137,8 @@ class Envelope:
         protocol_id = envelope_pb.protocol_id
         message = envelope_pb.message
 
-        envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+        envelope = Envelope(to=to, sender=sender,
+                            protocol_id=protocol_id, message=message)
         return envelope
 
 
@@ -228,7 +230,8 @@ class OutBox(object):
         :param message: the content of the message.
         :return: None
         """
-        envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+        envelope = Envelope(to=to, sender=sender,
+                            protocol_id=protocol_id, message=message)
         self._queue.put(envelope)
 
 
