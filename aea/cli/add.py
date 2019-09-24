@@ -29,6 +29,7 @@ import click
 from click import pass_context
 from jsonschema import ValidationError
 
+from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.skills.base import DEFAULT_SKILL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE
@@ -47,7 +48,7 @@ def add(ctx: Context):
 def connection(click_context, connection_name):
     """Add a connection to the configuration file."""
     ctx = cast(Context, click_context.obj)
-    registry_path = ctx.agent_config.registry_path
+    registry_path = AEA_DIR
     agent_name = ctx.agent_config.agent_name
     logger.debug("Adding connection {} to the agent {}...".format(connection_name, agent_name))
 
@@ -144,7 +145,7 @@ def protocol(click_context, protocol_name):
 def skill(click_context, skill_name):
     """Add a skill to the agent."""
     ctx = cast(Context, click_context.obj)
-    registry_path = ctx.agent_config.registry_path
+    registry_path = AEA_DIR
     agent_name = ctx.agent_config.agent_name
     logger.debug("Adding skill {} to the agent {}...".format(skill_name, agent_name))
 
