@@ -50,12 +50,6 @@ class Envelope:
         self._sender = sender
         self._protocol_id = protocol_id
         self._message = message
-        assert type(self._to) == str or self._to is None
-        try:
-            if self._to is not None and type(self._to) == str:
-                self._to.encode('utf-8')
-        except Exception:
-            assert False
 
     @property
     def to(self) -> Address:
@@ -137,7 +131,8 @@ class Envelope:
         protocol_id = envelope_pb.protocol_id
         message = envelope_pb.message
 
-        envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+        envelope = Envelope(to=to, sender=sender,
+                            protocol_id=protocol_id, message=message)
         return envelope
 
 
@@ -155,7 +150,7 @@ class InBox(object):
 
     def empty(self) -> bool:
         """
-        Check for a message on the in queue.
+        Check for a envelope on the in queue.
 
         :return: boolean indicating whether there is a message or not
         """
@@ -163,28 +158,28 @@ class InBox(object):
 
     def get(self, block: bool = True, timeout: Optional[float] = None) -> Envelope:
         """
-        Check for a message on the in queue.
+        Check for a envelope on the in queue.
 
         :param block: if true makes it blocking.
         :param timeout: times out the block after timeout seconds.
 
-        :return: the message object.
+        :return: the envelope object.
         :raises Empty: if the attempt to get a message fails.
         """
         logger.debug("Checks for message from the in queue...")
-        msg = self._queue.get(block=block, timeout=timeout)
+        envelope = self._queue.get(block=block, timeout=timeout)
         logger.debug("Incoming message: to='{}' sender='{}' protocol_id='{}' message='{}'"
-                     .format(msg.to, msg.sender, msg.protocol_id, msg.message))
-        return msg
+                     .format(envelope.to, envelope.sender, envelope.protocol_id, envelope.message))
+        return envelope
 
     def get_nowait(self) -> Optional[Envelope]:
         """
-        Check for a message on the in queue and wait for no time.
+        Check for a envelope on the in queue and wait for no time.
 
-        :return: the message object
+        :return: the envelope object
         """
-        item = self._queue.get_nowait()
-        return item
+        envelope = self._queue.get_nowait()
+        return envelope
 
 
 class OutBox(object):
@@ -201,22 +196,22 @@ class OutBox(object):
 
     def empty(self) -> bool:
         """
-        Check for a message on the out queue.
+        Check for a envelope on the out queue.
 
-        :return: boolean indicating whether there is a message or not
+        :return: boolean indicating whether there is a envelope or not
         """
         return self._queue.empty()
 
-    def put(self, item: Envelope) -> None:
+    def put(self, envelope: Envelope) -> None:
         """
-        Put an item into the queue.
+        Put an envelope into the queue.
 
-        :param item: the message.
+        :param envelope: the envelope.
         :return: None
         """
-        logger.debug("Put a message in the queue: to='{}' sender='{}' protocol_id='{}' message='{}'..."
-                     .format(item.to, item.sender, item.protocol_id, item.message))
-        self._queue.put(item)
+        logger.debug("Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{}'..."
+                     .format(envelope.to, envelope.sender, envelope.protocol_id, envelope.message))
+        self._queue.put(envelope)
 
     def put_message(self, to: Address, sender: Address,
                     protocol_id: ProtocolId, message: bytes) -> None:
@@ -229,7 +224,8 @@ class OutBox(object):
         :param message: the content of the message.
         :return: None
         """
-        envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+        envelope = Envelope(to=to, sender=sender,
+                            protocol_id=protocol_id, message=message)
         self._queue.put(envelope)
 
 
