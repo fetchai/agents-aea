@@ -11,6 +11,7 @@
         "version": {"type": "string"},
         "license": {"type": "string"},
         "url": {"type": "string"},
+        "registry_path": {"type": "string"},
         "private_key_pem_path": {"type": "string"},
         "connections": {
             "type": "array",
