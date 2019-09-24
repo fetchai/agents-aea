@@ -138,7 +138,7 @@ def protocol(click_context, protocol_name):
     # add the protocol to the configurations.
     logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.protocols.add(protocol_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
 @add.command()
@@ -198,4 +198,4 @@ def skill(click_context, skill_name, dirpath):
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.skills.add(skill_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))

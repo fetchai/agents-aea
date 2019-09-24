@@ -76,7 +76,7 @@ def create(click_context, agent_name):
         ctx.cwd = agent_config.agent_name
 
         logger.info("Adding default connection '{}' to the agent...".format(DEFAULT_CONNECTION))
-        click_context.invoke(connection, dirpath=os.path.join(aea.AEA_DIR, "channels", DEFAULT_CONNECTION))
+        click_context.invoke(connection, dirpath=os.path.join(aea.AEA_DIR, "connections", DEFAULT_CONNECTION))
 
         logger.info("Adding default skill '{}' to the agent...".format(DEFAULT_SKILL))
         click_context.invoke(skill, skill_name=DEFAULT_SKILL, dirpath=os.path.join(aea.AEA_DIR, "skills", DEFAULT_SKILL))

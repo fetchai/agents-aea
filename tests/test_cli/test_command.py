@@ -158,9 +158,9 @@ class TestCreate:
         assert oef_connection_dirpath.is_dir()
 
     def test_oef_connection_directory_is_equal_to_library_oef_connection(self):
-        """Check that the oef connection directory is equal to the package's one (aea.channels.oef)."""
+        """Check that the oef connection directory is equal to the package's one (aea.connections.oef)."""
         oef_connection_dirpath = Path(self.agent_name, "connections", "oef")
-        comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "aea", "channels", "oef")))
+        comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "oef")))
         assert comparison.diff_files == []
 
     @classmethod
