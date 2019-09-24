@@ -17,14 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea` sub-commands."""
+"""This test module contains the tests for the `aea create` sub-command."""
 import filecmp
 import json
 import os
 import shutil
 import tempfile
+import unittest
 from pathlib import Path
 from typing import Dict
+from unittest.mock import patch
 
 import jsonschema
 import pytest
@@ -32,16 +34,11 @@ import yaml
 from click.testing import CliRunner
 
 import aea
+import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR
-
-
-def test_no_argument():
-    """Test that if we run the cli tool without arguments, it exits gracefully."""
-    runner = CliRunner()
-    result = runner.invoke(cli, [])
-    assert result.exit_code == 0
+from aea.configurations.loader import ConfigLoader
+from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR
 
 
 class TestCreate:
@@ -173,64 +170,120 @@ class TestCreate:
             pass
 
 
-# def test_use_case():
-#     """Test a common use case for the 'aea' tool."""
-#     runner = CliRunner()
-#     agent_name = "myagent"
-#     with runner.isolated_filesystem() as t:
-#         configs = dict(stdout=subprocess.PIPE)
-#
-#         # create an agent
-#         proc = subprocess.Popen(["aea", "create", agent_name], cwd=t, **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
-#
-#         # add protocol oef
-#         proc = subprocess.Popen(["aea", "add", "protocol", "oef"], cwd=os.path.join(t, agent_name), **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
-#
-#         # add protocol tac
-#         proc = subprocess.Popen(["aea", "add", "protocol", "tac"], cwd=os.path.join(t, agent_name), **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
-#
-#         # add protocol default
-#         proc = subprocess.Popen(["aea", "add", "protocol", "default"], cwd=os.path.join(t, agent_name), **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
-#
-#         # remove protocol default
-#         proc = subprocess.Popen(["aea", "remove", "protocol", "default"], cwd=os.path.join(t, agent_name), **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
-#
-#         # add dummy skill
-#         proc = subprocess.Popen(["aea", "add", "skill", "dummy_skill", os.path.join(CUR_PATH, "data", "dummy_skill")],
-#                                 cwd=os.path.join(t, agent_name), **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
-#
-#         # remove dummy skill
-#         proc = subprocess.Popen(["aea", "remove", "skill", "dummy_skill"],
-#                                 cwd=os.path.join(t, agent_name), **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
-#
-#         # add dummy skill
-#         proc = subprocess.Popen(["aea", "add", "skill", "dummy_skill", os.path.join(CUR_PATH, "data", "dummy_skill")],
-#                                 cwd=os.path.join(t, agent_name), **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
-#
-#         # run agent
-#         proc = subprocess.Popen(["aea", "run"],
-#                                 cwd=os.path.join(t, agent_name), **configs)
-#         time.sleep(2.0)
-#         proc.terminate()
-#         proc.wait(5.0)
-#
-#         # delete agent
-#         proc = subprocess.Popen(["aea", "delete", agent_name], cwd=t, **configs)
-#         proc.wait(timeout=1)
-#         assert proc.returncode == 0
+class TestCreateFailsWhenDirectoryAlreadyExists:
+    """Test that 'aea create' sub-command fails when the directory with the agent name in input already exists."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        # create a directory with the agent name -> make 'aea create fail.
+        os.mkdir(cls.agent_name)
+        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+
+    def test_exit_code_equal_to_minus_1(self):
+        """Test that the error code is equal to -1."""
+        assert self.result.exit_code == -1
+
+    def test_log_error_message(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: 'Directory already exist. Aborting...'
+        """
+        s = "Directory already exist. Aborting..."
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestCreateFailsWhenConfigFileIsNotCompliant:
+    """Test that 'aea create' sub-command fails when the generated configuration file is not compliant with the schema."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+
+        # change the serialization of the AgentConfig class so to make the parsing to fail.
+        cls.patch = patch.object(aea.configurations.base.AgentConfig, "json", return_value={"hello": "world"})
+        cls.patch.__enter__()
+
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+
+    def test_exit_code_equal_to_minus_1(self):
+        """Test that the error code is equal to -1."""
+        assert self.result.exit_code == -1
+
+    def test_agent_folder_is_not_created(self):
+        """Test that the agent folder is removed."""
+        assert not Path(self.agent_name).exists()
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestCreateFailsWhenExceptionOccurs:
+    """Test that 'aea create' sub-command fails when the generated configuration file is not compliant with the schema."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+
+        # change the serialization of the AgentConfig class so to make the parsing to fail.
+        cls.patch = patch.object(ConfigLoader, "dump", side_effect=Exception)
+        cls.patch.__enter__()
+
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+
+    def test_exit_code_equal_to_minus_1(self):
+        """Test that the error code is equal to -1."""
+        assert self.result.exit_code == -1
+
+    def test_agent_folder_is_not_created(self):
+        """Test that the agent folder is removed."""
+        assert not Path(self.agent_name).exists()
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
