@@ -43,13 +43,7 @@ def scaffold(ctx: Context):
 @click.argument('connection_name', type=str, required=True)
 @pass_ctx
 def connection(ctx: Context, connection_name: str) -> None:
-    """
-    Add a connection scaffolding to the configuration file and agent.
-
-    :param ctx: the context
-    :param connection_name: the name of the connection
-    :return: None
-    """
+    """Add a connection scaffolding to the configuration file and agent."""
     # check if we already have a connection with the same name
     logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
     if connection_name in ctx.agent_config.connections:
@@ -58,6 +52,10 @@ def connection(ctx: Context, connection_name: str) -> None:
         return
 
     try:
+        # create the 'connection' folder if it doesn't exist:
+        if not os.path.exists("connections"):
+            os.makedirs("connections")
+
         # create the connection folder
         path = Path(os.path.join("connections", connection_name))
         path.mkdir(exist_ok=True)
@@ -106,13 +104,7 @@ def connection(ctx: Context, connection_name: str) -> None:
 @click.argument('protocol_name', type=str, required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_name: str):
-    """
-    Add a protocol scaffolding to the configuration file and agent.
-
-    :param ctx: the context
-    :param protocol_name: the name of the protocol
-    :return: None
-    """
+    """Add a protocol scaffolding to the configuration file and agent."""
     # check if we already have a protocol with the same name
     logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
     if protocol_name in ctx.agent_config.protocols:
@@ -121,6 +113,10 @@ def protocol(ctx: Context, protocol_name: str):
         return
 
     try:
+        # create the 'protocols' folder if it doesn't exist:
+        if not os.path.exists("protocols"):
+            os.makedirs("protocols")
+
         # create the protocol folder
         path = Path(os.path.join("protocols", protocol_name))
         path.mkdir(exist_ok=True)
@@ -158,13 +154,7 @@ def protocol(ctx: Context, protocol_name: str):
 @click.argument('skill_name', type=str, required=True)
 @pass_ctx
 def skill(ctx: Context, skill_name: str):
-    """
-    Add a skill scaffolding to the configuration file and agent.
-
-    :param ctx: the context
-    :param skill_name: the name of the skill
-    :return: None
-    """
+    """Add a skill scaffolding to the configuration file and agent."""
     # check if we already have a skill with the same name
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
     if skill_name in ctx.agent_config.skills:

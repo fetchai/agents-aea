@@ -26,7 +26,7 @@ from aea.mail.base import Envelope
 from aea.skills.base import Handler
 
 
-class ScaffoldHandler(Handler):
+class MyScaffoldHandler(Handler):
     """This class scaffolds a handler."""
 
     SUPPORTED_PROTOCOL = ''  # type: Optional[ProtocolId]

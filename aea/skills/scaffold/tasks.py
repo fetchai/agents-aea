@@ -22,7 +22,7 @@
 from aea.skills.base import Task
 
 
-class ScaffoldTask(Task):
+class MyScaffoldTask(Task):
     """This class scaffolds a task."""
 
     def execute(self) -> None:

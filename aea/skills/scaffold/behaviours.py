@@ -22,7 +22,7 @@
 from aea.skills.base import Behaviour
 
 
-class ScaffoldBehaviour(Behaviour):
+class MyScaffoldBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
 
     def act(self) -> None:
