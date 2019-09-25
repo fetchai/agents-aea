@@ -12,5 +12,4 @@ registry_path: aea
 protocols:
 - default
 skills:
--sum
 -error
