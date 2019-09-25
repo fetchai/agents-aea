@@ -114,27 +114,23 @@ class AEA(Agent):
         """
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
-        error_handler = self.resources.handler_registry.fetch("error")
-        assert len(error_handler) == 1
-        error_handler = error_handler[0]
+        error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")
+        assert error_handler is not None, "ErrorHandler not initialized"
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
-            if error_handler is not None:
-                error_handler.send_unsupported_protocol(envelope)
+            error_handler.send_unsupported_protocol(envelope)
             return
 
         try:
             msg = protocol.serializer.decode(envelope.message)
         except Exception:
-            if error_handler is not None:
-                error_handler.send_decoding_error(envelope)
+            error_handler.send_decoding_error(envelope)
             return
 
         if not protocol.check(msg):
-            if error_handler is not None:  # pragma: no cover
-                error_handler.send_invalid_message(envelope)  # pragma: no cover
-            return  # pragma: no cover
+            error_handler.send_invalid_message(envelope)
+            return
 
         handlers = self.resources.handler_registry.fetch(protocol.id)
         if handlers is None:

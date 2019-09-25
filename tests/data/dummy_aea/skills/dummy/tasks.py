@@ -17,30 +17,24 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the error behaviours."""
+"""This module contains the tasks for the 'echo' skill."""
+from aea.skills.base import Task
 
-from aea.skills.base import Behaviour
 
-
-class ErrorBehaviour(Behaviour):
-    """This class implements the error behaviour."""
+class DummyTask(Task):
+    """Dummy task."""
 
     def __init__(self, **kwargs):
-        """Initialize the echo behaviour."""
+        """Initialize the task."""
         super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.nb_execute_called = 0
+        self.nb_teardown_called = 0
 
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        pass
+    def execute(self) -> None:
+        """Execute the task."""
+        self.nb_execute_called += 1
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        pass
+        """Teardown the task."""
+        self.nb_teardown_called += 1

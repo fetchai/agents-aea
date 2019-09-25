@@ -17,30 +17,37 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the error behaviours."""
+"""This module contains the handler for the 'echo' skill."""
 
-from aea.skills.base import Behaviour
+from aea.mail.base import Envelope
+from aea.skills.base import Handler
 
 
-class ErrorBehaviour(Behaviour):
-    """This class implements the error behaviour."""
+class DummyHandler(Handler):
+    """Echo handler."""
+
+    SUPPORTED_PROTOCOL = "default"
 
     def __init__(self, **kwargs):
-        """Initialize the echo behaviour."""
+        """Initialize the handler."""
         super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.handled_envelopes = []
+        self.nb_teardown_called = 0
 
-    def act(self) -> None:
+    def handle_envelope(self, envelope: Envelope) -> None:
         """
-        Implement the act.
+        Handle envelopes.
 
+        :param envelope: the envelope
         :return: None
         """
-        pass
+        self.handled_envelopes.append(envelope)
 
     def teardown(self) -> None:
         """
-        Implement the task teardown.
+        Teardown the handler.
 
         :return: None
         """
-        pass
+        self.nb_teardown_called += 1

@@ -15,4 +15,4 @@ tasks:
   - task:
       class_name: ErrorTask
       args: {}
-protocol: 'error'
+protocol: 'default'
