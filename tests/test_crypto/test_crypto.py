@@ -24,7 +24,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat,
     load_pem_private_key
 
 from aea.crypto.base import Crypto
-from .conftest import ROOT_DIR
+from ..conftest import ROOT_DIR
 
 
 def test_initialization_from_existing_private_key():

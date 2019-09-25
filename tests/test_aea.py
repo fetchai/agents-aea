@@ -20,22 +20,19 @@
 import os
 import time
 from threading import Thread
+from pathlib import Path
 
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.base import Crypto
-from aea.protocols.base import Message
-from aea.protocols.base import ProtobufSerializer
-
-from threading import Thread
-import time
-from pathlib import Path
 from aea.crypto.helpers import _create_temporary_private_key_pem_path
-from aea.mail.base import MailBox
+from aea.protocols.base import Message, ProtobufSerializer
+from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
+
 from tests.conftest import CUR_PATH
 
 
@@ -44,7 +41,7 @@ def test_initialise_aea():
     node = LocalNode()
     public_key_1 = "mailbox1"
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
-    myAea = AEA("Agent0", mailbox1, directory=os.path.join(CUR_PATH, "data", "aea"))
+    myAea = AEA("Agent0", mailbox1, directory=os.path.join(CUR_PATH, "data", "dummy_aea"))
     assert AEA("Agent0", mailbox1), "Agent is not inisialised"
     print(myAea.context)
     assert myAea.context == myAea._context, "Cannot access the Agent's Context"
