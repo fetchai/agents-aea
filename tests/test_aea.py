@@ -17,13 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea.aea.py."""
+import os
+import time
+from threading import Thread
 
 from aea.aea import AEA
-from aea.mail.base import MailBox, Envelope
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.crypto.helpers import _create_temporary_private_key_pem_path
 from aea.crypto.base import Crypto
 from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
@@ -31,15 +30,21 @@ from aea.protocols.base import ProtobufSerializer
 from threading import Thread
 import time
 from pathlib import Path
+from aea.crypto.helpers import _create_temporary_private_key_pem_path
+from aea.mail.base import MailBox
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
+from aea.protocols.fipa.message import FIPAMessage
+from aea.protocols.fipa.serialization import FIPASerializer
+from tests.conftest import CUR_PATH
 
 
-def test_initialiseAeA():
+def test_initialise_aea():
     """Tests the initialisation of the AeA."""
     node = LocalNode()
     public_key_1 = "mailbox1"
-    path = "/tests/aea/"
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
-    myAea = AEA("Agent0", mailbox1, directory=str(Path(".").absolute()) + path)
+    myAea = AEA("Agent0", mailbox1, directory=os.path.join(CUR_PATH, "data", "aea"))
     assert AEA("Agent0", mailbox1), "Agent is not inisialised"
     print(myAea.context)
     assert myAea.context == myAea._context, "Cannot access the Agent's Context"
@@ -48,12 +53,11 @@ def test_initialiseAeA():
         "Resources must not be None after setup"
 
 
-def test_act():
-    """Tests the act function of the AeA."""
+def test_run_aea():
+    """Test that the run of an AEA works correctly."""
     node = LocalNode()
     agent_name = "MyAgent"
-    path = "/tests/aea/"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
     mailbox = MailBox(OEFLocalConnection(public_key, node))
@@ -62,47 +66,27 @@ def test_act():
         agent_name,
         mailbox,
         private_key_pem_path=private_key_pem_path,
-        directory=str(Path(".").absolute()) + path)
+        directory=os.path.join(CUR_PATH, "data", "aea"))
     t = Thread(target=agent.start)
     t.start()
-    time.sleep(1)
 
-    behaviour = agent.resources.behaviour_registry.fetch("sum")
-    assert behaviour[0].counter > 0, "Act() wasn't called"
-    agent.stop()
-    t.join()
+    # handle proper message
+    message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    encoded_message = DefaultSerializer().encode(message)
+    agent.outbox.put_message(to=public_key, sender=public_key, protocol_id="error", message=encoded_message)
 
+    # handle message with unknown protocol
+    agent.outbox.put_message(to=public_key, sender=public_key, protocol_id="unknown_protocol", message=b"hello")
 
-def test_react():
-    """Tests income messages."""
-    node = LocalNode()
-    agent_name = "MyAgent"
-    path = "/tests/aea/"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
-    mailbox = MailBox(OEFLocalConnection(public_key, node))
+    # handle bad encoded message
+    agent.outbox.put_message(to=public_key, sender=public_key, protocol_id="error", message=b"hello")
 
-    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-    message_bytes = DefaultSerializer().encode(msg)
+    # unsupported skill for protocol oef
+    msg = FIPASerializer().encode(FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
+                                              message_id=0, dialogue_id=0, destination=public_key, target=1))
+    agent.outbox.put_message(to=public_key, sender=public_key, protocol_id="fipa", message=msg)
 
-    envelope = Envelope(
-        to="Agent1",
-        sender="Agent0",
-        protocol_id="default",
-        message=message_bytes)
-
-    agent = AEA(
-        agent_name,
-        mailbox,
-        private_key_pem_path=private_key_pem_path,
-        directory=str(Path(".").absolute()) + path)
-    t = Thread(target=agent.start)
-    t.start()
-    agent.mailbox.inbox._queue.put(envelope)
-    time.sleep(1)
-    handler = agent.resources.handler_registry.fetch('default')
-    assert handler[0].envelope == envelope, "The handler is None."
+    time.sleep(2.0)
 
     agent.stop()
     t.join()

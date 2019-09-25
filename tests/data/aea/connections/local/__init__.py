@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,24 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tasks for the 'echo' skill."""
-import time
-
-from aea.skills.base import Task
-
-
-class SumTask(Task):
-    """Echo task."""
-
-    def __init__(self, **kwargs):
-        """Initialize the task."""
-        print("EchoTask.__init__: arguments: {}".format(kwargs))
-
-    def execute(self) -> None:
-        """Execute the task."""
-        print("Echo Task: execute method called.")
-        time.sleep(1.0)
-
-    def teardown(self) -> None:
-        """Teardown the task."""
-        print("Echo Task: teardown method called.")
+"""Implementation of the Local OEF connection."""

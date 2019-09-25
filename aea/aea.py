@@ -115,6 +115,8 @@ class AEA(Agent):
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
         error_handler = self.resources.handler_registry.fetch("error")
+        assert len(error_handler) == 1
+        error_handler = error_handler[0]
         error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
@@ -130,9 +132,9 @@ class AEA(Agent):
             return
 
         if not protocol.check(msg):
-            if error_handler is not None:
-                error_handler.send_invalid_message(envelope)
-            return
+            if error_handler is not None:  # pragma: no cover
+                error_handler.send_invalid_message(envelope)  # pragma: no cover
+            return  # pragma: no cover
 
         handlers = self.resources.handler_registry.fetch(protocol.id)
         if handlers is None:

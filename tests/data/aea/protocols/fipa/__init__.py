@@ -18,4 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the OEF connection."""
+"""This module contains the support resources for the FIPA protocol."""
