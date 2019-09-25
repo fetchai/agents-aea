@@ -8,7 +8,9 @@ connections:
 - default-oef
 default_connection: default-oef
 private_key_pem_path: ''
+registry_path: aea
 protocols:
 - default
 skills:
 -sum
+-error
