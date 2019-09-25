@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a test for crypto"""
+"""This module contains a test for aea.crypto."""
