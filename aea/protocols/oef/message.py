@@ -22,7 +22,7 @@
 from enum import Enum
 from typing import Optional, List, cast
 
-from aea.protocols.base.message import Message
+from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
 
 

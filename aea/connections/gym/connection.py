@@ -28,11 +28,12 @@ from typing import Dict, Optional, cast
 
 import gym
 
+from aea.configurations.base import ConnectionConfig
+from aea.connections.base import Channel, Connection
 from aea.helpers.base import locate
-from aea.mail.base import Envelope, Channel, Connection
+from aea.mail.base import Envelope
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
-from aea.configurations.base import ConnectionConfig
 
 logger = logging.getLogger(__name__)
 

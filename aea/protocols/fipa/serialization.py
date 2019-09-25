@@ -22,8 +22,8 @@
 import pickle
 from typing import cast
 
-from aea.protocols.base.message import Message
-from aea.protocols.base.serialization import Serializer
+from aea.protocols.base import Message
+from aea.protocols.base import Serializer
 from aea.protocols.fipa import fipa_pb2
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.oef.models import Description

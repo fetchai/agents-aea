@@ -22,7 +22,7 @@
 from enum import Enum
 from typing import Dict, Optional, cast
 
-from aea.protocols.base.message import Message
+from aea.protocols.base import Message
 
 
 class TACMessage(Message):

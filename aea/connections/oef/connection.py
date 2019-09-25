@@ -40,13 +40,14 @@ from oef.query import (
 )
 from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
 
-from aea.mail.base import Channel, Connection, MailBox, Envelope
+from aea.configurations.base import ConnectionConfig
+from aea.connections.base import Channel, Connection
+from aea.mail.base import MailBox, Envelope
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-from aea.configurations.base import ConnectionConfig
 
 logger = logging.getLogger(__name__)
 

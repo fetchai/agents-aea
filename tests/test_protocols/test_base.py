@@ -19,8 +19,8 @@
 
 """This module contains the tests of the messages module."""
 from aea.mail.base import Envelope
-from aea.protocols.base.message import Message
-from aea.protocols.base.serialization import ProtobufSerializer, JSONSerializer
+from aea.protocols.base import Message
+from aea.protocols.base import ProtobufSerializer, JSONSerializer
 
 
 class TestBaseSerializations:

@@ -18,13 +18,79 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Serializer for base."""
-import json
+"""This module contains the base message and serialization definition."""
+
 from abc import abstractmethod, ABC
+from copy import copy
+import json
+from typing import Any, Dict, Optional
 
 from google.protobuf.struct_pb2 import Struct
 
-from aea.protocols.base.message import Message
+
+class Message:
+    """This class implements a message."""
+
+    def __init__(self, body: Optional[Dict] = None,
+                 **kwargs):
+        """
+        Initialize a Message object.
+
+        :param body: the dictionary of values to hold.
+        :param kwargs: any additional value to add to the body. It will overwrite the body values.
+        """
+        self._body = copy(body) if body else {}  # type: Dict[str, Any]
+        self._body.update(kwargs)
+
+    @property
+    def body(self) -> Dict:
+        """
+        Get the body of the message (in dictionary form).
+
+        :return: the body
+        """
+        return self._body
+
+    @body.setter
+    def body(self, body: Dict) -> None:
+        """
+        Set the body of hte message.
+
+        :param body: the body.
+        :return: None
+        """
+        self._body = body
+
+    def set(self, key: str, value: Any) -> None:
+        """
+        Set key and value pair.
+
+        :param key: the key.
+        :param value: the value.
+        :return: None
+        """
+        self._body[key] = value
+
+    def get(self, key: str) -> Optional[Any]:
+        """Get value for key."""
+        return self._body.get(key, None)
+
+    def unset(self, key: str) -> None:
+        """Unset valye for key."""
+        self._body.pop(key, None)
+
+    def is_set(self, key: str) -> bool:
+        """Check value is set for key."""
+        return key in self._body
+
+    def check_consistency(self) -> bool:
+        """Check that the data is consistent."""
+        return True
+
+    def __eq__(self, other):
+        """Compare with another object."""
+        return isinstance(other, Message) \
+            and self.body == other.body
 
 
 class Encoder(ABC):
@@ -107,3 +173,43 @@ class JSONSerializer(Serializer):
         """
         json_msg = json.loads(obj.decode("utf-8"))
         return Message(json_msg)
+
+
+class Protocol(ABC):
+    """
+    This class implements a specifications for a protocol.
+
+    It includes:
+    - a serializer, to encode/decode a message.
+    - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
+    """
+
+    def __init__(self, id: str, serializer: Serializer):
+        """
+        Initialize the protocol manager.
+
+        :param id: the protocol id.
+        :param serializer: the serializer.
+        """
+        self._id = id
+        self._serializer = serializer
+
+    @property
+    def id(self):
+        """Get the name."""
+        return self._id
+
+    @property
+    def serializer(self) -> Serializer:
+        """Get the serializer."""
+        return self._serializer
+
+    def check(self, msg: Message) -> bool:
+        """
+        Check whether the message belongs to the allowed messages.
+
+        :param msg: the message.
+        :return: True if the message is valid wrt the protocol, False otherwise.
+        """
+        # TODO 'check' should check the message against the protocol rules, if such rules are provided.
+        return True
