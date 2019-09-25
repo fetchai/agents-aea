@@ -102,35 +102,3 @@ def test_react():
 
     agent.stop()
     t.join()
-
-
-#def test_handle():
-#    """Tests handle method of an agent."""
-#    node = LocalNode()
-#    agent_name = "MyAgent"
-#    path = "/tests/aea/"
-#    private_key_pem_path = _create_temporary_private_key_pem_path()
-#    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-#    public_key = crypto.public_key
-#    mailbox = MailBox(OEFLocalConnection(public_key, node))
-#
-#    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-#    message_bytes = DefaultSerializer().encode(msg)
-#    envelope = Envelope(
-#        to="Agent1",
-#        sender="Agent0",
-#        protocol_id="Non_register_protocol",
-#        message=message_bytes)
-#
-#    agent = AEA(
-#        agent_name,
-#        mailbox,
-#        private_key_pem_path=private_key_pem_path,
-#        directory=str(Path(".").absolute()) + path)
-#    t = Thread(target=agent.start)
-#    t.start()
-#    agent.mailbox.inbox._queue.put(envelope)
-#    time.sleep(1)
-#    assert agent.mailbox.outbox._queue.get() is not None, "Outbox Is not None"
-#    agent.stop()
-#    t.join()
