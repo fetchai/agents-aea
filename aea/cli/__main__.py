@@ -116,4 +116,4 @@ cli.add_command(remove)
 cli.add_command(run)
 
 if __name__ == '__main__':
-    cli()
+    cli()  # pragma: no cover
