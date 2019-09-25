@@ -18,4 +18,30 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the base protocol."""
+"""Serialization for the scaffold protocol."""
+
+
+from aea.protocols.base import Message
+from aea.protocols.base import Serializer
+
+
+class MyScaffoldSerializer(Serializer):
+    """Serialization for the scaffold protocol."""
+
+    def encode(self, msg: Message) -> bytes:
+        """
+        Decode the message.
+
+        :param msg: the message object
+        :return: the bytes
+        """
+        raise NotImplementedError
+
+    def decode(self, obj: bytes) -> Message:
+        """
+        Decode the message.
+
+        :param obj: the bytes object
+        :return: the message
+        """
+        raise NotImplementedError

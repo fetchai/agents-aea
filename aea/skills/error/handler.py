@@ -24,9 +24,10 @@ from typing import Optional
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
+from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.skills.base import Handler, Protocol
+from aea.skills.base import Handler
 
 logger = logging.getLogger(__name__)
 

@@ -23,11 +23,13 @@ from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
-DEFAULT_PROTOCOL_FILES = ["message.py", "serialization.py"]
+DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
+DEFAULT_CONNECTION_CONFIG_FILE = 'connection.yaml'
 T = TypeVar('T')
 
 Address = str
 ProtocolId = str
+SkillId = str
 
 
 class JSONSerializable(ABC):
@@ -107,7 +109,7 @@ class ConnectionConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  class_name: str = "",
-                 supported_protocols: Optional[List[ProtocolId]] = None,
+                 supported_protocols: Optional[List[str]] = None,
                  **config):
         """Initialize a connection configuration object."""
         self.name = name

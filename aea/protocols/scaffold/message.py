@@ -18,42 +18,41 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the default message definition."""
+"""This module contains the scaffold message definition."""
+
 from enum import Enum
 from typing import Optional
 
 from aea.protocols.base import Message
 
 
-class DefaultMessage(Message):
-    """The Default message class."""
+class MyScaffoldMessage(Message):
+    """The scaffold message class."""
 
-    protocol_id = "default"
+    protocol_id = "my_scaffold_protocol"
 
     class Type(Enum):
-        """Default message types."""
-
-        BYTES = "bytes"
-        ERROR = "error"
+        """Scaffold Message types."""
 
         def __str__(self):
-            """Get the string representation."""
+            """Get string representation."""
             return self.value
 
-    class ErrorCode(Enum):
-        """The error codes."""
-
-        UNSUPPORTED_PROTOCOL = -10001
-        DECODING_ERROR = -10002
-        INVALID_MESSAGE = -10003
-        UNSUPPORTED_SKILL = -10004
-
-    def __init__(self, type: Optional[Type] = None,
+    def __init__(self, oef_type: Optional[Type] = None,
                  **kwargs):
         """
         Initialize.
 
-        :param type: the type.
+        :param oef_type: the type of message.
         """
-        super().__init__(type=type, **kwargs)
-        assert self.check_consistency(), "DefaultMessage initialization inconsistent."
+        super().__init__(type=oef_type, **kwargs)
+        assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."
+
+    def check_consistency(self) -> bool:
+        """Check that the data is consistent."""
+        try:
+            raise NotImplementedError
+        except (AssertionError, ValueError):
+            return False
+
+        return True

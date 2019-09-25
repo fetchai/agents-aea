@@ -23,8 +23,8 @@ from queue import Queue
 
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import Envelope, MailBox, InBox, OutBox
-from aea.protocols.base.message import Message
-from aea.protocols.base.serialization import ProtobufSerializer
+from aea.protocols.base import Message
+from aea.protocols.base import ProtobufSerializer
 
 
 def test_envelope_initialisation():
