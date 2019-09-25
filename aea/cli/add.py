@@ -19,7 +19,6 @@
 
 """Implementation of the 'aea add' subcommand."""
 
-import importlib.util
 import os
 import shutil
 from pathlib import Path
@@ -31,7 +30,7 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE
 
 
 @click.group()
@@ -47,7 +46,6 @@ def add(ctx: Context):
 def connection(click_context, connection_name):
     """Add a connection to the configuration file."""
     ctx = cast(Context, click_context.obj)
-    registry_path = AEA_DIR
     agent_name = ctx.agent_config.agent_name
     logger.debug("Adding connection {} to the agent {}...".format(connection_name, agent_name))
 
@@ -59,11 +57,17 @@ def connection(click_context, connection_name):
         return
 
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
+    # first check in aea dir
+    registry_path = ctx.agent_config.registry_path
     connection_configuration_filepath = Path(os.path.join(registry_path, "connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE))
     if not connection_configuration_filepath.exists():
-        logger.error("Path '{}' does not exist.".format(connection_configuration_filepath))
-        exit(-1)
-        return
+        # then check in registry
+        registry_path = AEA_DIR
+        connection_configuration_filepath = Path(os.path.join(registry_path, "connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE))
+        if not connection_configuration_filepath.exists():
+            logger.error("Cannot find connection: '{}'.".format(connection_name))
+            exit(-1)
+            return
 
     # try to load the connection configuration file
     try:
@@ -104,30 +108,43 @@ def protocol(click_context, protocol_name):
     agent_name = cast(str, ctx.agent_config.agent_name)
     logger.debug("Adding protocol {} to the agent {}...".format(protocol_name, agent_name))
 
-    # find the supported protocols and check if the candidate protocol is supported.
-    protocols_module_spec = importlib.util.find_spec("aea.protocols")
-    assert protocols_module_spec is not None, "Protocols module spec is None."
-    _protocols_submodules = protocols_module_spec.loader.contents()  # type: ignore
-    _protocols_submodules = filter(lambda x: not x.startswith("__") and x != "base", _protocols_submodules)
-    aea_supported_protocol = set(_protocols_submodules)
-    logger.debug("Supported protocols: {}".format(aea_supported_protocol))
-    if protocol_name not in aea_supported_protocol:
-        logger.error("Protocol '{}' not supported. Aborting...".format(protocol_name))
-        return
-
     # check if we already have a protocol with the same name
     logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
     if protocol_name in ctx.agent_config.protocols:
         logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
         return
 
-    # copy the protocol package into the agent's supported protocols.
-    assert protocols_module_spec.submodule_search_locations is not None, "Submodule search locations is None."
-    protocols_dir = protocols_module_spec.submodule_search_locations[0]
-    src = os.path.join(protocols_dir, protocol_name)
+    # check that the provided path points to a proper protocol directory -> look for protocol.yaml file.
+    # first check in aea dir
+    registry_path = ctx.agent_config.registry_path
+    protocol_configuration_filepath = Path(os.path.join(registry_path, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE))
+    if not protocol_configuration_filepath.exists():
+        # then check in registry
+        registry_path = AEA_DIR
+        protocol_configuration_filepath = Path(os.path.join(registry_path, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE))
+        if not protocol_configuration_filepath.exists():
+            logger.error("Cannot find protocol: '{}'.".format(protocol_name))
+            exit(-1)
+            return
+
+    # # try to load the connection configuration file
+    # try:
+    #     connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
+    #     logger.info("Connection supports the following protocols: {}".format(connection_configuration.supported_protocols))
+    # except ValidationError as e:
+    #     logger.error("Connection configuration file not valid: {}".format(str(e)))
+    #     exit(-1)
+    #     return
+
+    # copy the connection package into the agent's supported connections.
+    src = str(Path(os.path.join(registry_path, "protocols", protocol_name)).absolute())
     dest = os.path.join(ctx.cwd, "protocols", protocol_name)
     logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
-    shutil.copytree(src, dest)
+    try:
+        shutil.copytree(src, dest)
+    except Exception as e:
+        logger.error(e)
+        exit(-1)
 
     # make the 'protocols' folder a Python package.
     logger.debug("Creating {}".format(os.path.join(agent_name, "protocols", "__init__.py")))
@@ -157,11 +174,17 @@ def skill(click_context, skill_name):
         return
 
     # check that the provided path points to a proper skill directory -> look for skill.yaml file.
+    # first check in aea dir
+    registry_path = ctx.agent_config.registry_path
     skill_configuration_filepath = Path(os.path.join(registry_path, "skills", skill_name, DEFAULT_SKILL_CONFIG_FILE))
     if not skill_configuration_filepath.exists():
-        logger.error("Path '{}' does not exist.".format(skill_configuration_filepath))
-        exit(-1)
-        return
+        # then check in registry
+        registry_path = AEA_DIR
+        skill_configuration_filepath = Path(os.path.join(registry_path, "skills", skill_name, DEFAULT_SKILL_CONFIG_FILE))
+        if not skill_configuration_filepath.exists():
+            logger.error("Cannot find skill: '{}'.".format(skill_name))
+            exit(-1)
+            return
 
     # try to load the skill configuration file
     try:
