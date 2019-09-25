@@ -126,7 +126,7 @@ class Agent(ABC):
         elif self.mailbox.is_connected and not self.liveness.is_stopped:
             return AgentState.RUNNING
         else:
-            raise ValueError("Agent state not recognized.")
+            raise ValueError("Agent state not recognized.")  # pragma: no cover
 
     def start(self) -> None:
         """
@@ -136,7 +136,7 @@ class Agent(ABC):
         """
         assert self.mailbox is not None, "Cannot call start without mailbox instantiated."
         if not self.debug and not self.mailbox.is_connected:
-            self.mailbox.connect()
+            self.mailbox.connect()  # pragma: no cover
 
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
