@@ -126,14 +126,14 @@ class TestCreate:
         assert agent_config_instance["private_key_pem_path"] == ""
 
     def test_protocols_field_is_empty_list(self):
-        """Check that the 'protocols' field is the empty list."""
+        """Check that the 'protocols' field is a list with the 'default' protocol."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["protocols"] == []
+        assert agent_config_instance["protocols"] == ["default"]
 
     def test_skills_field_is_empty_list(self):
-        """Check that the 'skills' field is the empty list."""
+        """Check that the 'skills' field is a list with the 'error' skill."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["skills"] == []
+        assert agent_config_instance["skills"] == ["error"]
 
     def test_url_field_is_empty_string(self):
         """Check that the 'url' field is the empty string."""

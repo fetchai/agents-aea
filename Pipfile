@@ -9,25 +9,25 @@ verify_ssl = true
 name = "test-pypi"
 
 [dev-packages]
-flake8 = "*"
-pytest = "*"
 tox = "==3.7.0"
 tox-pipenv = "==1.9.0"
-pytest-cov = "*"
+flake8 = "*"
 flake8-docstrings = "*"
-pygments = "*"
-docker = "*"
+pydocstyle = "==3.0.0"
+pytest = "*"
+pytest-cov = "*"
 mypy = "*"
 mkdocs = "*"
 mkdocs-material = "*"
 pymdown-extensions = "*"
+pygments = "*"
 
 [packages]
 cryptography = "*"
 base58 = "*"
 docker = "*"
 click = "*"
-pyyaml = "*"
+pyyaml = ">=4.2b1"
 click-log = "*"
 oef = {index = "test-pypi",version = "==0.6.10"}
 colorlog = "*"

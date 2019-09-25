@@ -69,13 +69,14 @@ def connection(click_context, connection_name):
     # try to load the connection configuration file
     try:
         connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
+        logger.info("Connection supports the following protocols: {}".format(connection_configuration.supported_protocols))
     except ValidationError as e:
         logger.error("Connection configuration file not valid: {}".format(str(e)))
         exit(-1)
         return
 
     # copy the connection package into the agent's supported connections.
-    src = str(Path(registry_path).absolute())
+    src = str(Path(os.path.join(registry_path, "connections", connection_name)).absolute())
     dest = os.path.join(ctx.cwd, "connections", connection_name)
     logger.info("Copying connection modules. src={} dst={}".format(src, dest))
     try:
@@ -172,7 +173,7 @@ def skill(click_context, skill_name):
         return
 
     # copy the skill package into the agent's supported skills.
-    src = str(Path(registry_path).absolute())
+    src = str(Path(os.path.join(registry_path, "skills", skill_name)).absolute())
     dest = os.path.join(ctx.cwd, "skills", skill_name)
     logger.info("Copying skill modules. src={} dst={}".format(src, dest))
     try:
