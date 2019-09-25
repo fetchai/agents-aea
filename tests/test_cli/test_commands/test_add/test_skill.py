@@ -18,10 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add skill` sub-command."""
-import json
 import os
 import shutil
 import tempfile
+import unittest.mock
 from pathlib import Path
 
 import yaml
@@ -30,8 +30,6 @@ from jsonschema import ValidationError
 
 import aea
 import aea.cli.common
-import unittest.mock
-
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from ....conftest import ROOT_DIR

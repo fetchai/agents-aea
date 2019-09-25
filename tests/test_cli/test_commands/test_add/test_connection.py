@@ -29,9 +29,8 @@ from jsonschema import ValidationError
 
 import aea
 import aea.cli.common
-from aea.cli import cli
-from aea.configurations.loader import ConfigLoader
 import aea.configurations.base
+from aea.cli import cli
 
 
 class TestAddConnectionFailsWhenConnectionAlreadyExists:
