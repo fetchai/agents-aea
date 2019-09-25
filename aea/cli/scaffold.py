@@ -27,9 +27,8 @@ import click
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
-from aea.connections.base import DEFAULT_CONNECTION_FILE, DEFAULT_CONNECTION_CONFIG_FILE
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_PROTOCOL_FILES, ConnectionConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 
 @click.group()
@@ -52,35 +51,21 @@ def connection(ctx: Context, connection_name: str) -> None:
         return
 
     try:
-        # create the 'connection' folder if it doesn't exist:
+        # create the 'connections' folder if it doesn't exist:
         if not os.path.exists("connections"):
             os.makedirs("connections")
 
         # create the connection folder
-        path = Path(os.path.join("connections", connection_name))
-        path.mkdir(exist_ok=True)
+        dest = Path(os.path.join("connections", connection_name))
 
-        # create a config file inside the connection folder
-        config_file = open(os.path.join("connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE), "w")
-        connection_config = ConnectionConfig(name=connection_name,
-                                             authors="",
-                                             version="v1",
-                                             license="",
-                                             url="",
-                                             class_name="",
-                                             supported_protocols=[""])
-        ctx.connection_loader.dump(connection_config, config_file)
-        logger.info("Created connection config file {}".format(DEFAULT_CONNECTION_CONFIG_FILE))
-
-        # create a python file inside the connection folder
-        connection_file_module = os.path.join("connections", connection_name, DEFAULT_CONNECTION_FILE)
-        logger.info("Creating {}".format(connection_file_module))
-        Path(connection_file_module).touch(exist_ok=True)
-
-        # make the connection folder a Python package.
-        connection_init_module = os.path.join("connections", connection_name, "__init__.py")
-        logger.info("Creating {}".format(connection_init_module))
-        Path(connection_init_module).touch(exist_ok=True)
+        # copy the skill package into the agent's supported skills.
+        src = Path(os.path.join(AEA_DIR, "connections", "scaffold"))
+        logger.info("Copying connection modules. src={} dst={}".format(src, dest))
+        try:
+            shutil.copytree(src, dest)
+        except Exception as e:
+            logger.error(e)
+            exit(-1)
 
         # add the connection to the configurations.
         logger.info("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -118,19 +103,16 @@ def protocol(ctx: Context, protocol_name: str):
             os.makedirs("protocols")
 
         # create the protocol folder
-        path = Path(os.path.join("protocols", protocol_name))
-        path.mkdir(exist_ok=True)
+        dest = Path(os.path.join("protocols", protocol_name))
 
-        # create the needed python files inside the protocol folder
-        for file in DEFAULT_PROTOCOL_FILES:
-            protocol_file_module = os.path.join("protocols", protocol_name, file)
-            logger.info("Creating {}".format(protocol_file_module))
-            Path(protocol_file_module).touch(exist_ok=True)
-
-        # make the protocol folder a Python package.
-        protocol_init_module = os.path.join("protocols", protocol_name, "__init__.py")
-        logger.info("Creating {}".format(protocol_init_module))
-        Path(protocol_init_module).touch(exist_ok=True)
+        # copy the skill package into the agent's supported skills.
+        src = Path(os.path.join(AEA_DIR, "protocols", "scaffold"))
+        logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
+        try:
+            shutil.copytree(src, dest)
+        except Exception as e:
+            logger.error(e)
+            exit(-1)
 
         # add the protocol to the configurations.
         logger.info("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -163,6 +145,10 @@ def skill(ctx: Context, skill_name: str):
         return
 
     try:
+        # create the 'skills' folder if it doesn't exist:
+        if not os.path.exists("skills"):
+            os.makedirs("skills")
+
         # create the skill folder
         dest = Path(os.path.join("skills", skill_name))
 

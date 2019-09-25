@@ -31,8 +31,7 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.skills.base import DEFAULT_SKILL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
 
 
 @click.group()

@@ -27,11 +27,12 @@ from queue import Queue
 from threading import Thread
 from typing import Dict, List, Optional, cast
 
-from aea.mail.base import Envelope, Channel, Connection
+from aea.configurations.base import ConnectionConfig
+from aea.connections.base import Channel, Connection
+from aea.mail.base import Envelope
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, Query
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-from aea.configurations.base import ConnectionConfig
 
 logger = logging.getLogger(__name__)
 

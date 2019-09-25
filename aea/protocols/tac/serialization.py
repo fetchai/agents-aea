@@ -22,8 +22,8 @@
 
 from typing import Any, Dict, List, cast
 
-from aea.protocols.base.message import Message
-from aea.protocols.base.serialization import Serializer
+from aea.protocols.base import Message
+from aea.protocols.base import Serializer
 from aea.protocols.tac import tac_pb2
 from aea.protocols.tac.message import TACMessage
 

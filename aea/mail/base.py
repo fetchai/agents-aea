@@ -21,12 +21,13 @@
 """Mail module abstract base classes."""
 
 import logging
-from abc import abstractmethod, ABC
 from queue import Queue
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
+from aea.configurations.base import Address, ProtocolId
 from aea.mail import base_pb2
-from aea.configurations.base import ConnectionConfig, Address, ProtocolId
+if TYPE_CHECKING:
+    from aea.connections.base import Connection
 
 logger = logging.getLogger(__name__)
 
@@ -229,78 +230,10 @@ class OutBox(object):
         self._queue.put(envelope)
 
 
-class Channel(ABC):
-    """Abstract definition of a channel."""
-
-    @abstractmethod
-    def connect(self) -> Optional[Queue]:
-        """
-        Set up the connection.
-
-        :return: A queue or None.
-        """
-
-    @abstractmethod
-    def disconnect(self) -> None:
-        """
-        Tear down the connection.
-
-        :return: None.
-        """
-
-    @abstractmethod
-    def send(self, envelope: Envelope) -> None:
-        """
-        Send an envelope.
-
-        :param envelope: the envelope to send.
-        :return: None.
-        """
-
-
-class Connection(ABC):
-    """Abstract definition of a connection."""
-
-    channel: Channel
-
-    def __init__(self):
-        """Initialize the connection."""
-        self.in_queue = Queue()
-        self.out_queue = Queue()
-
-    @abstractmethod
-    def connect(self):
-        """Set up the connection."""
-
-    @abstractmethod
-    def disconnect(self):
-        """Tear down the connection."""
-
-    @property
-    @abstractmethod
-    def is_established(self) -> bool:
-        """Check if the connection is established."""
-
-    @abstractmethod
-    def send(self, envelope: Envelope):
-        """Send a message."""
-
-    @classmethod
-    @abstractmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
-        """
-        Initialize a connection instance from a configuration.
-
-        :param public_key: the public key of the agent.
-        :param connection_configuration: the connection configuration.
-        :return: an instance of the concrete connection class.
-        """
-
-
 class MailBox(object):
     """Abstract definition of a mailbox."""
 
-    def __init__(self, connection: Connection):
+    def __init__(self, connection: 'Connection'):
         """Initialize the mailbox."""
         self._connection = connection
 

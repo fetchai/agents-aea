@@ -29,10 +29,11 @@ from typing import cast
 
 from aea.aea import AEA
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, AEAConfigException
+from aea.connections.base import Connection
 from aea.crypto.base import Crypto
 from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
 # from aea.helpers.base import locate
-from aea.mail.base import MailBox, Connection
+from aea.mail.base import MailBox
 
 
 def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Connection:

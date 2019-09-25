@@ -29,7 +29,7 @@ This module contains the classes required for dialogue management.
 from abc import abstractmethod
 from typing import Dict, List
 
-from aea.protocols.base.message import Message
+from aea.protocols.base import Message
 
 
 class DialogueLabel:

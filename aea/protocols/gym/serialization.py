@@ -25,8 +25,8 @@ import json
 import pickle
 from typing import Any
 
-from aea.protocols.base.message import Message
-from aea.protocols.base.serialization import Serializer
+from aea.protocols.base import Message
+from aea.protocols.base import Serializer
 from aea.protocols.gym.message import GymMessage
 
 
