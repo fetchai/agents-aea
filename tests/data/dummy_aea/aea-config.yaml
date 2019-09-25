@@ -1,0 +1,14 @@
+aea_version: 0.1.4
+agent_name: dummy_aea
+authors: ''
+connections:
+- local
+default_connection: local
+license: ''
+private_key_pem_path: ''
+protocols:
+- error
+skills:
+- skill_test
+url: ''
+version: v1
