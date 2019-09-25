@@ -17,4 +17,26 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the protocols."""
+"""This package contains a scaffold of a behaviour."""
+
+from aea.skills.base import Behaviour
+
+
+class MyScaffoldBehaviour(Behaviour):
+    """This class scaffolds a behaviour."""
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        raise NotImplementedError
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        raise NotImplementedError

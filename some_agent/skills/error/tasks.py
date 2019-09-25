@@ -17,4 +17,27 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the protocols."""
+"""This package contains the implementation of the error tasks."""
+
+from aea.skills.base import Task
+
+
+class ErrorTask(Task):
+    """This class implements the error task."""
+
+    def execute(self) -> None:
+        """
+        Implement the task execution.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        pass
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        pass

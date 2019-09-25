@@ -17,4 +17,33 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the protocols."""
+"""This package contains a scaffold of a handler."""
+
+from typing import Optional
+
+from aea.configurations.base import ProtocolId
+from aea.mail.base import Envelope
+from aea.skills.base import Handler
+
+
+class MyScaffoldHandler(Handler):
+    """This class scaffolds a handler."""
+
+    SUPPORTED_PROTOCOL = ''  # type: Optional[ProtocolId]
+
+    def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Implement the reaction to an envelope.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        raise NotImplementedError
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        raise NotImplementedError

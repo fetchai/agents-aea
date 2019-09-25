@@ -17,4 +17,26 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the protocols."""
+"""This package contains the error behaviours."""
+
+from aea.skills.base import Behaviour
+
+
+class ErrorBehaviour(Behaviour):
+    """This class implements the error behaviour."""
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        pass
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        pass

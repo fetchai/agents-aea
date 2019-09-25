@@ -37,11 +37,11 @@ class SumHandler(Handler):
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Handle envelopes.
-        
+
         :param envelope: the envelope
         :return: None
         """
-        self.counter =2
+        self.counter = 2
         self.envelope = envelope
         print("SumHandler: envelope={}".format(envelope))
 

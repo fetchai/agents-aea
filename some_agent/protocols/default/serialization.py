@@ -23,7 +23,8 @@ import base64
 import json
 from typing import cast
 
-from aea.protocols.base import Message, Serializer
+from aea.protocols.base import Message
+from aea.protocols.base import Serializer
 from aea.protocols.default.message import DefaultMessage
 
 

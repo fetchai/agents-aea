@@ -1,0 +1,16 @@
+aea_version: 0.1.4
+agent_name: some_agent
+authors: ''
+connections:
+- oef
+default_connection: oef
+license: ''
+private_key_pem_path: ''
+protocols:
+- default
+registry_path: aea
+skills:
+- error
+- myskill
+url: ''
+version: v1

@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the protocols."""
+"""This module contains the implementation of the error skill."""

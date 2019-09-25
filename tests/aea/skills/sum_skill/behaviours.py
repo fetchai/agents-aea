@@ -31,8 +31,7 @@ class SumBehaviour(Behaviour):
 
     def act(self) -> None:
         """Act according to the behaviour."""
-        self.counter +=1
-
+        self.counter += 1
 
     def teardown(self) -> None:
         """Teardown the behaviour."""

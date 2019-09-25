@@ -17,4 +17,27 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the protocols."""
+"""This package contains a scaffold of a task."""
+
+from aea.skills.base import Task
+
+
+class MyScaffoldTask(Task):
+    """This class scaffolds a task."""
+
+    def execute(self) -> None:
+        """
+        Implement the task execution.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        raise NotImplementedError
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        raise NotImplementedError

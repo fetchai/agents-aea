@@ -23,8 +23,6 @@ from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.protocols.base.serialization import ProtobufSerializer
-from aea.protocols.base.message import Message
 from aea.crypto.helpers import _create_temporary_private_key_pem_path
 from aea.crypto.base import Crypto
 from threading import Thread
@@ -106,38 +104,33 @@ def test_react():
     t.join()
 
 
-def test_handle():
-    """Tests handle method of an agent"""
-    node = LocalNode()
-    agent_name = "MyAgent"
-    path = "/tests/aea/"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
-    mailbox = MailBox(OEFLocalConnection(public_key, node))
-    
-    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-    message_bytes = DefaultSerializer().encode(msg)
-    #msg = Message(content="hello")
-    #message_bytes = ProtobufSerializer().encode(msg)
-    envelope = Envelope(
-        to="Agent1",
-        sender="Agent0",
-        protocol_id= None,
-        message=message_bytes)
-
-    agent = AEA(
-        agent_name,
-        mailbox,
-        private_key_pem_path=private_key_pem_path,
-        directory=str(Path(".").absolute()) + path)
-    t = Thread(target=agent.start)
-    t.start()
-    time.sleep(1)
-    agent._resources.teardown() 
-    error_handler = agent.resources.handler_registry.fetch("default")
-    
-    assert error_handler[0].envelope == envelope, "The handler is None."
-
-    agent.stop()
-    t.join()
+#def test_handle():
+#    """Tests handle method of an agent."""
+#    node = LocalNode()
+#    agent_name = "MyAgent"
+#    path = "/tests/aea/"
+#    private_key_pem_path = _create_temporary_private_key_pem_path()
+#    crypto = Crypto(private_key_pem_path=private_key_pem_path)
+#    public_key = crypto.public_key
+#    mailbox = MailBox(OEFLocalConnection(public_key, node))
+#
+#    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+#    message_bytes = DefaultSerializer().encode(msg)
+#    envelope = Envelope(
+#        to="Agent1",
+#        sender="Agent0",
+#        protocol_id="Non_register_protocol",
+#        message=message_bytes)
+#
+#    agent = AEA(
+#        agent_name,
+#        mailbox,
+#        private_key_pem_path=private_key_pem_path,
+#        directory=str(Path(".").absolute()) + path)
+#    t = Thread(target=agent.start)
+#    t.start()
+#    agent.mailbox.inbox._queue.put(envelope)
+#    time.sleep(1)
+#    assert agent.mailbox.outbox._queue.get() is not None, "Outbox Is not None"
+#    agent.stop()
+#    t.join()
