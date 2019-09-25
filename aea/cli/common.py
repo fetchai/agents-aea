@@ -87,7 +87,7 @@ def _try_to_load_protocols(ctx: Context):
             # if protocol_config is None:
             #     exit(-1)
 
-            protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join(ctx.agent_config.registry_path, "protocols", "gym", "__init__.py"))
+            protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join(ctx.agent_config.registry_path, "protocols", protocol_name, "__init__.py"))
             if protocol_spec is None:
                 logger.warning("Protocol not found in registry.")
                 continue
