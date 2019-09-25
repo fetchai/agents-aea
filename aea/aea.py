@@ -25,7 +25,7 @@ from typing import Optional, cast
 from aea.agent import Agent
 from aea.mail.base import Envelope, MailBox
 from aea.skills.base import AgentContext, Resources
-from aea.skills.default.handler import DefaultHandler
+from aea.skills.error.handler import ErrorHandler
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class AEA(Agent):
     def __init__(self, name: str,
                  mailbox: MailBox,
                  private_key_pem_path: Optional[str] = None,
-                 timeout: float = 0.0,  # TODO we might want to set this to 0 for the aea and let the skills take care of slowing things down on a skill level
+                 timeout: float = 0.0,
                  debug: bool = False,
                  max_reactions: int = 20,
                  directory: str = '') -> None:
@@ -113,31 +113,30 @@ class AEA(Agent):
         """
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
-        # fetch the handler of the "default" protocol for error handling. TODO: change with the handler of "error" protocol.
-        default_handler = self.resources.handler_registry.fetch("default")
-        default_handler = cast(DefaultHandler, default_handler)
+        error_handler = self.resources.handler_registry.fetch("error")
+        error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
-            if default_handler is not None:
-                default_handler.send_unsupported_protocol(envelope)
+            if error_handler is not None:
+                error_handler.send_unsupported_protocol(envelope)
             return
 
         try:
             msg = protocol.serializer.decode(envelope.message)
         except Exception:
-            if default_handler is not None:
-                default_handler.send_decoding_error(envelope)
+            if error_handler is not None:
+                error_handler.send_decoding_error(envelope)
             return
 
         if not protocol.check(msg):
-            if default_handler is not None:
-                default_handler.send_invalid_message(envelope)
+            if error_handler is not None:
+                error_handler.send_invalid_message(envelope)
             return
 
         handlers = self.resources.handler_registry.fetch(protocol.id)
         if handlers is None:
-            if default_handler is not None:
-                default_handler.send_unsupported_skill(envelope, protocol)
+            if error_handler is not None:
+                error_handler.send_unsupported_skill(envelope, protocol)
             return
 
         # each handler independently acts on the message

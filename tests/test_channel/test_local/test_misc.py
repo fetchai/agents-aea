@@ -20,7 +20,7 @@
 """This module contains the tests of the local OEF node implementation."""
 import time
 
-from aea.channels.local.connection import LocalNode, OEFLocalConnection
+from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import Envelope, MailBox
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer

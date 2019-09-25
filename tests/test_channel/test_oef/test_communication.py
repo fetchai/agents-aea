@@ -23,7 +23,7 @@ import time
 import pytest
 from oef.query import Eq
 
-from aea.channels.oef.connection import OEFMailBox
+from aea.connections.oef.connection import OEFMailBox
 from aea.crypto.base import Crypto
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -269,7 +269,7 @@ class TestFIPA:
 
     def test_match_accept(self):
         """Test that a match accept can be sent correctly."""
-        # TODO since the OEF SDK doesn't support the match accept, we have to use a fixed message id!
+        # NOTE since the OEF SDK doesn't support the match accept, we have to use a fixed message id!
         match_accept = FIPAMessage(message_id=4, dialogue_id=0, target=3, performative=FIPAMessage.Performative.MATCH_ACCEPT)
         self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(match_accept))
         envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)

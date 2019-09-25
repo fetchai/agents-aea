@@ -19,7 +19,7 @@
 
 """This module contains the tests for the search feature of the local OEF node."""
 
-from aea.channels.local.connection import LocalNode, OEFLocalConnection
+from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Query, DataModel, Description
@@ -80,9 +80,10 @@ class TestSimpleSearchResult:
 
         # register a service.
         request_id = 1
+        service_id = ''
         cls.data_model = DataModel("foobar", attributes=[])
         service_description = Description({"foo": 1, "bar": "baz"}, data_model=cls.data_model)
-        register_service_request = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=request_id, service_description=service_description)
+        register_service_request = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=request_id, service_description=service_description, service_id=service_id)
         msg_bytes = OEFSerializer().encode(register_service_request)
         envelope = Envelope(to=DEFAULT_OEF, sender=cls.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         cls.mailbox1.send(envelope)
@@ -130,9 +131,10 @@ class TestFilteredSearchResult:
 
         # register 'mailbox2' as a service 'foobar'.
         request_id = 1
+        service_id = ''
         cls.data_model_foobar = DataModel("foobar", attributes=[])
         service_description = Description({"foo": 1, "bar": "baz"}, data_model=cls.data_model_foobar)
-        register_service_request = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=request_id, service_description=service_description)
+        register_service_request = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=request_id, service_description=service_description, service_id=service_id)
         msg_bytes = OEFSerializer().encode(register_service_request)
         envelope = Envelope(to=DEFAULT_OEF, sender=cls.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         cls.mailbox1.send(envelope)
@@ -140,7 +142,7 @@ class TestFilteredSearchResult:
         # register 'mailbox2' as a service 'barfoo'.
         cls.data_model_barfoo = DataModel("barfoo", attributes=[])
         service_description = Description({"foo": 1, "bar": "baz"}, data_model=cls.data_model_barfoo)
-        register_service_request = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=request_id, service_description=service_description)
+        register_service_request = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=request_id, service_description=service_description, service_id=service_id)
         msg_bytes = OEFSerializer().encode(register_service_request)
         envelope = Envelope(to=DEFAULT_OEF, sender=cls.public_key_2, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         cls.mailbox2.send(envelope)
