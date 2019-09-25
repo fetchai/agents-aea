@@ -40,7 +40,7 @@ python setup.py install
 Run the launch script.
 
 ``` bash
-python scripts/launch.py - this script errors.
+python scripts/launch.py.
 ```
 
 The <a href="https://github.com/facebookresearch/visdom" target="_blank">visdom</a> server is now running.
@@ -68,8 +68,9 @@ In a new terminal window, enter the virtual environment, and connect a template 
 
 ``` bash
 pipenv shell
-python templates/v1/basic.py --name my_agent --dashboard - this errors.
+python templates/v1/basic.py --name my_agent --dashboard.
 ```
+<!-- Issue: https://github.com/fetchai/agents-tac/issues/389 -->
 
 Click through to the <a href="http://localhost:8097" target="_blank">controller GUI</a>.
 
