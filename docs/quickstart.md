@@ -19,27 +19,6 @@ pip install aea[cli]
 ```
 
 
-<!--
-To get started, clone the repo, start a Python environment, and install all dependencies.
-
-``` bash
-git clone git@github.com:fetchai/agents-aea.git
-cd agents-aea/
-pipenv --python 3.7 && pipenv shell
-pip install .[all]
-```
--->
-<!--
-## Alternative setup - many errors with dependencies.
-
-``` bash
-pip install cryptography base58 click click-log jsonschema pyyaml google
-# error on yaml, changed to pyyaml
-# error on google, didn't fix it
-pip install -i https://test.pypi.org/simple/ aea
-```
--->
-
 ## Echo Agent demo
 ### Download the examples and scripts directories.
 ``` bash
@@ -62,7 +41,7 @@ aea add skill echo_skill ../examples/echo_skill
 ### Launch the OEF 
 
 
-Open a new terminal at the repo root and launch the OEF.
+Open a new terminal, *a directory level up*, and launch the OEF.
 
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -76,6 +55,18 @@ Go back to the other terminal and run the agent.
 aea run
 ```
 
+You will see the echo task running in the terminal window.
+
+<center>![AEA Visdom UI](assets/echo.png)</center>
+
+
+### Delete the agent
+
+When you're done, you can delete the agent.
+
+``` bash
+aea delete my_first_agent
+```
 
 
 <br />

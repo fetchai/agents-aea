@@ -1,3 +1,8 @@
+TAC has its own repo. 
+
+Follow the instructions below to build and run the TAC demo.
+
+
 ## Requirements
 
 Make sure you are running <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
@@ -35,7 +40,7 @@ python setup.py install
 Run the launch script.
 
 ``` bash
-python scripts/launch.py
+python scripts/launch.py - this script errors.
 ```
 
 The <a href="https://github.com/facebookresearch/visdom" target="_blank">visdom</a> server is now running.
@@ -63,7 +68,7 @@ In a new terminal window, enter the virtual environment, and connect a template 
 
 ``` bash
 pipenv shell
-python templates/v1/basic.py --name my_agent --dashboard
+python templates/v1/basic.py --name my_agent --dashboard - this errors.
 ```
 
 Click through to the <a href="http://localhost:8097" target="_blank">controller GUI</a>.
