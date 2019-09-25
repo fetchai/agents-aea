@@ -56,3 +56,4 @@ class DefaultMessage(Message):
         :param type: the type.
         """
         super().__init__(type=type, **kwargs)
+        assert self.check_consistency(), "DefaultMessage initialization inconsistent."

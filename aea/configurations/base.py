@@ -305,6 +305,7 @@ class AgentConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
+                 registry_path: str = "",
                  private_key_pem_path: str = ""):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
@@ -313,6 +314,7 @@ class AgentConfig(Configuration):
         self.version = version
         self.license = license
         self.url = url
+        self.registry_path = registry_path
         self.private_key_pem_path = private_key_pem_path
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
@@ -345,6 +347,7 @@ class AgentConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "url": self.url,
+            "registry_path": self.registry_path,
             "private_key_pem_path": self.private_key_pem_path,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
@@ -362,6 +365,7 @@ class AgentConfig(Configuration):
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
+            registry_path=cast(str, obj.get("registry_path")),
             private_key_pem_path=cast(str, obj.get("private_key_pem_path")),
         )
 

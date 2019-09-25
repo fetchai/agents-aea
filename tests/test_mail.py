@@ -19,11 +19,12 @@
 
 """This module contains the tests for Envelope of mail.base.py."""
 
+from queue import Queue
+
+from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import Envelope, MailBox, InBox, OutBox
 from aea.protocols.base.message import Message
-from aea.channels.local.connection import LocalNode, OEFLocalConnection
 from aea.protocols.base.serialization import ProtobufSerializer
-from queue import Queue
 
 
 def test_envelope_initialisation():

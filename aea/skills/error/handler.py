@@ -22,18 +22,17 @@ import base64
 import logging
 from typing import Optional
 
-from aea.mail.base import Envelope
 from aea.configurations.base import ProtocolId
-from aea.protocols.base.protocol import Protocol
+from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.skills.base import Handler
+from aea.skills.base import Handler, Protocol
 
 logger = logging.getLogger(__name__)
 
 
-class DefaultHandler(Handler):
-    """This class implements the default handler."""
+class ErrorHandler(Handler):
+    """This class implements the error handler."""
 
     SUPPORTED_PROTOCOL = 'default'  # type: Optional[ProtocolId]
 
@@ -44,7 +43,7 @@ class DefaultHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        pass  # TODO: this could be the ping method? > no, then on error from other agent causes endless loop; just print out the response and raise a warning?
+        pass
 
     def teardown(self) -> None:
         """
@@ -66,7 +65,6 @@ class DefaultHandler(Handler):
                                error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
                                error_msg="Unsupported protocol.",
                                error_data={"protocol_id": envelope.protocol_id})
-        # TODO: outbox not available in handler yet
         self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_name, protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
 

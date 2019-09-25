@@ -82,6 +82,7 @@ class TACMessage(Message):
         :param tac_type: the type of TAC message.
         """
         super().__init__(type=tac_type, **kwargs)
+        assert self.check_consistency(), "TACMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
