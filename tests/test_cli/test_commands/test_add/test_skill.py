@@ -76,7 +76,6 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         s = "A skill with name '{}' already exists. Aborting...".format(self.skill_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
-
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
@@ -118,7 +117,6 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         """
         s = "Cannot find skill: '{}'.".format(self.skill_name)
         self.mocked_logger_error.assert_called_once_with(s)
-
 
     @classmethod
     def teardown_class(cls):
@@ -221,7 +219,6 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         """
         s = "[Errno 17] File exists: './skills/{}'".format(self.skill_name)
         self.mocked_logger_error.assert_called_once_with(s)
-
 
     @classmethod
     def teardown_class(cls):

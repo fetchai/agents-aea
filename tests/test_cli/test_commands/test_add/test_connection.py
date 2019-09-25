@@ -67,7 +67,6 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         s = "A connection with name '{}' already exists. Aborting...".format(self.connection_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
-
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
@@ -109,7 +108,6 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         """
         s = "Cannot find connection: '{}'.".format(self.connection_name)
         self.mocked_logger_error.assert_called_once_with(s)
-
 
     @classmethod
     def teardown_class(cls):

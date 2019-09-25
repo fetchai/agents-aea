@@ -65,7 +65,6 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         s = "A protocol with name '{}' already exists. Aborting...".format(self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
-
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
@@ -107,7 +106,6 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         """
         s = "Cannot find protocol: '{}'.".format(self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
-
 
     @classmethod
     def teardown_class(cls):
@@ -152,7 +150,6 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         """
         s = "[Errno 17] File exists: './protocols/{}'".format(self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
-
 
     @classmethod
     def teardown_class(cls):
