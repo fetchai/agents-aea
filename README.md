@@ -35,9 +35,9 @@ Or, you can have more control on the installed dependencies by leveraging the se
 
       pip install .[all]
 
-- To install only specific extra dependencies, e.g. `cli` and `oef-protocol`:
+- To install only specific extra dependencies, e.g. `cli`:
 
-      pip install .[cli,oef-channel]
+      pip install .[cli]
 
 ## Contribute
 
