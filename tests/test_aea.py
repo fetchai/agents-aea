@@ -112,22 +112,19 @@ def test_handle():
     """Tests handle method of an agent."""
     node = LocalNode()
     agent_name = "MyAgent"
-    path = "/tests/aea/"
+    path = "/tests/data/dummy_aea/"
     private_key_pem_path = _create_temporary_private_key_pem_path()
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
-#   msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-#   message_bytes = DefaultSerializer().encode(msg)
-
-    msg = Message(message="hello")
-    message_bytes = ProtobufSerializer().encode(msg)
+    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    message_bytes = DefaultSerializer().encode(msg)
 
     envelope = Envelope(
-        to=public_key,
-        sender="Agent0",
-        protocol_id="Unknown_protocol_id",
+        to="Agent1",
+        sender=public_key,
+        protocol_id="unknown_protocl",
         message=message_bytes)
 
     agent = AEA(
@@ -137,7 +134,9 @@ def test_handle():
         directory=str(Path(".").absolute()) + path)
     t = Thread(target=agent.start)
     t.start()
-    agent.outbox.put(envelope)
-    time.sleep(1)
+    agent.mailbox.inbox._queue.put(envelope)
+    env = agent.mailbox.outbox._queue.get(block=block, timeout=1)
+    assert env.protocol_id == "error", "The envelope is not the expected protocol"
+
     agent.stop()
     t.join()
