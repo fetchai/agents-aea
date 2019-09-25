@@ -18,7 +18,7 @@ This quick start explains how to create and launch an agent with the cli.
 
 - add a skill to the agent, e.g.:
 
-      aea add skill echo_skill ../examples/echo_skill
+      aea add skill echo_skill
 
   This command will create the `my_first_agent/skills` folder, with the `echo_skill` skill package inside. It will also create the `my_first_agent/protocols` folder, with the `default` protocol package inside.
 
