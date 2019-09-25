@@ -29,6 +29,7 @@ import click
 from click import pass_context
 from jsonschema import ValidationError
 
+from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.skills.base import DEFAULT_SKILL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE
@@ -42,13 +43,24 @@ def add(ctx: Context):
 
 
 @add.command()
-@click.argument('dirpath', type=str, required=True)
+@click.argument('connection_name', type=str, required=True)
 @pass_context
-def connection(click_context, dirpath):
+def connection(click_context, connection_name):
     """Add a connection to the configuration file."""
     ctx = cast(Context, click_context.obj)
+    registry_path = AEA_DIR
+    agent_name = ctx.agent_config.agent_name
+    logger.debug("Adding connection {} to the agent {}...".format(connection_name, agent_name))
+
+    # check if we already have a connection with the same name
+    logger.debug("Connection already supported by the agent: {}".format(ctx.agent_config.connections))
+    if connection_name in ctx.agent_config.connections:
+        logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
+        exit(-1)
+        return
+
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
-    connection_configuration_filepath = Path(os.path.join(dirpath, DEFAULT_CONNECTION_CONFIG_FILE))
+    connection_configuration_filepath = Path(os.path.join(registry_path, "connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE))
     if not connection_configuration_filepath.exists():
         logger.error("Path '{}' does not exist.".format(connection_configuration_filepath))
         exit(-1)
@@ -57,26 +69,14 @@ def connection(click_context, dirpath):
     # try to load the connection configuration file
     try:
         connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
+        logger.info("Connection supports the following protocols: {}".format(connection_configuration.supported_protocols))
     except ValidationError as e:
         logger.error("Connection configuration file not valid: {}".format(str(e)))
         exit(-1)
         return
 
-    # check if we already have a connection with the same name
-    logger.debug("Connection already supported by the agent: {}".format(ctx.agent_config.connections))
-    connection_name = connection_configuration.name
-    if connection_name in ctx.agent_config.connections:
-        logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
-        exit(-1)
-        return
-
-    agent_name = ctx.agent_config.agent_name
-    logger.debug("Adding connection {connection_name} to the agent {agent_name}..."
-                 .format(agent_name=agent_name, connection_name=connection_name))
-
     # copy the connection package into the agent's supported connections.
-    dirpath = str(Path(dirpath).absolute())
-    src = dirpath
+    src = str(Path(os.path.join(registry_path, "connections", connection_name)).absolute())
     dest = os.path.join(ctx.cwd, "connections", connection_name)
     logger.info("Copying connection modules. src={} dst={}".format(src, dest))
     try:
@@ -103,8 +103,7 @@ def protocol(click_context, protocol_name):
     """Add a protocol to the agent."""
     ctx = cast(Context, click_context.obj)
     agent_name = cast(str, ctx.agent_config.agent_name)
-    logger.debug("Adding protocol {protocol_name} to the agent {agent_name}..."
-                 .format(agent_name=agent_name, protocol_name=protocol_name))
+    logger.debug("Adding protocol {} to the agent {}...".format(protocol_name, agent_name))
 
     # find the supported protocols and check if the candidate protocol is supported.
     protocols_module_spec = importlib.util.find_spec("aea.protocols")
@@ -138,19 +137,18 @@ def protocol(click_context, protocol_name):
     # add the protocol to the configurations.
     logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.protocols.add(protocol_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
 @add.command()
 @click.argument('skill_name', type=str, required=True)
-@click.argument('dirpath', type=str, required=True)
 @pass_context
-def skill(click_context, skill_name, dirpath):
+def skill(click_context, skill_name):
     """Add a skill to the agent."""
     ctx = cast(Context, click_context.obj)
+    registry_path = AEA_DIR
     agent_name = ctx.agent_config.agent_name
-    logger.debug("Adding skill {skill_name} to the agent {agent_name}..."
-                 .format(agent_name=agent_name, skill_name=skill_name))
+    logger.debug("Adding skill {} to the agent {}...".format(skill_name, agent_name))
 
     # check if we already have a skill with the same name
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
@@ -160,7 +158,7 @@ def skill(click_context, skill_name, dirpath):
         return
 
     # check that the provided path points to a proper skill directory -> look for skill.yaml file.
-    skill_configuration_filepath = Path(os.path.join(dirpath, DEFAULT_SKILL_CONFIG_FILE))
+    skill_configuration_filepath = Path(os.path.join(registry_path, "skills", skill_name, DEFAULT_SKILL_CONFIG_FILE))
     if not skill_configuration_filepath.exists():
         logger.error("Path '{}' does not exist.".format(skill_configuration_filepath))
         exit(-1)
@@ -175,8 +173,7 @@ def skill(click_context, skill_name, dirpath):
         return
 
     # copy the skill package into the agent's supported skills.
-    dirpath = str(Path(dirpath).absolute())
-    src = dirpath
+    src = str(Path(os.path.join(registry_path, "skills", skill_name)).absolute())
     dest = os.path.join(ctx.cwd, "skills", skill_name)
     logger.info("Copying skill modules. src={} dst={}".format(src, dest))
     try:
@@ -198,4 +195,4 @@ def skill(click_context, skill_name, dirpath):
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.skills.add(skill_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))

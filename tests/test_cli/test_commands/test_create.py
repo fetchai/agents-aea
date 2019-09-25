@@ -123,14 +123,14 @@ class TestCreate:
         assert agent_config_instance["private_key_pem_path"] == ""
 
     def test_protocols_field_is_empty_list(self):
-        """Check that the 'protocols' field is the empty list."""
+        """Check that the 'protocols' field is a list with the 'default' protocol."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["protocols"] == []
+        assert agent_config_instance["protocols"] == ["default"]
 
     def test_skills_field_is_empty_list(self):
-        """Check that the 'skills' field is the empty list."""
+        """Check that the 'skills' field is a list with the 'error' skill."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["skills"] == []
+        assert agent_config_instance["skills"] == ["error"]
 
     def test_url_field_is_empty_string(self):
         """Check that the 'url' field is the empty string."""
@@ -155,9 +155,9 @@ class TestCreate:
         assert oef_connection_dirpath.is_dir()
 
     def test_oef_connection_directory_is_equal_to_library_oef_connection(self):
-        """Check that the oef connection directory is equal to the package's one (aea.channels.oef)."""
+        """Check that the oef connection directory is equal to the package's one (aea.connections.oef)."""
         oef_connection_dirpath = Path(self.agent_name, "connections", "oef")
-        comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "aea", "channels", "oef")))
+        comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "oef")))
         assert comparison.diff_files == []
 
     @classmethod

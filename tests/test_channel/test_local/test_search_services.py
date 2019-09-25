@@ -19,7 +19,7 @@
 
 """This module contains the tests for the search feature of the local OEF node."""
 
-from aea.channels.local.connection import LocalNode, OEFLocalConnection
+from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Query, DataModel, Description

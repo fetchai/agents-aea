@@ -22,7 +22,7 @@
 import time
 from typing import Any, Tuple
 
-from aea.channels.gym.connection import GymConnection, DEFAULT_GYM
+from aea.connections.gym.connection import GymConnection, DEFAULT_GYM
 from aea.mail.base import Envelope, MailBox
 from aea.protocols.gym.message import GymMessage
 from aea.protocols.gym.serialization import GymSerializer
