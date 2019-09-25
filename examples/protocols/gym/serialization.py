@@ -27,7 +27,7 @@ from typing import Any
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from aea.protocols.gym.message import GymMessage
+from gym_protocol.message import GymMessage
 
 
 class GymSerializer(Serializer):
