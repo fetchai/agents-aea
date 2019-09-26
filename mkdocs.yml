@@ -21,10 +21,18 @@ nav:
     - Welcome:
       - "What is the AEA?": 'index.md'
       - "Architecture": 'architecture.md'
-    - Quick start: 'quickstart.md'
-    - CLI: 'cli_overview.md'
+      - "Version": 'version.md'
+    - AEA quick start: 'quickstart.md'
+    - Get developing:
+      - "Protocol": 'protocol.md'
+      - "Skill": 'skill.md'
+      - "Scaffolding": 'scaffolding.md'
+      - "CLI commands": 'cli_overview.md'
+    - Integration:
+      - "Integrate with third parties": 'integration.md'
     - Demos:
-      - "Reinforcement Learning": 'ex_rl.md'
+      - "AEA gym skill": 'gym-skill.md'
+      - "Gym efficiency demo": 'gym-plugin.md'
       - "TAC": 'tac.md'
 
 
@@ -32,3 +40,6 @@ nav:
 markdown_extensions:
   - pymdownx.superfences
   - admonition
+
+extra_css:
+    - css/my-styles.css
