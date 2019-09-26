@@ -18,23 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Training a multi armed bandit rl agent using the aea framework."""
-
-from gyms.env import BanditNArmedRandom
-from proxy.env import ProxyEnv
-from rl.agent import RLAgent
-
-if __name__ == "__main__":
-    NB_GOODS = 10
-    NB_PRICES_PER_GOOD = 100
-    NB_STEPS = 4000
-
-    # Use any gym.Env compatible environment:
-    gym_env = BanditNArmedRandom(nb_bandits=NB_GOODS, nb_prices_per_bandit=NB_PRICES_PER_GOOD)
-
-    # Pass the gym environment to a proxy environment:
-    proxy_env = ProxyEnv(gym_env)
-
-    # Use any RL agent compatible with the gym environment and call the fit method:
-    rl_agent = RLAgent(nb_goods=NB_GOODS)
-    rl_agent.fit(env=proxy_env, nb_steps=NB_STEPS)
+"""This module contains the protocol registry for the AEA framework."""
