@@ -20,6 +20,7 @@
 """This module contains the tests for the FIPA protocol."""
 import base64
 import json
+from unittest import mock
 
 from aea.mail.base import Envelope
 from aea.protocols.fipa.message import FIPAMessage
@@ -68,17 +69,56 @@ def test_fipa_propose_serialization():
     assert p1[1].values == p2[1].values
 
 
-def test_fipa_message_consistency():
-    """Tests the consistency of a messge."""
-    public_key = "publicKey"
-    myPerformative = FIPAMessage.Performative.ACCEPT
-    assert myPerformative.__str__() == "accept",\
-        "The string representation of Performative must be accept"
+def test_fipa_accept_serialization():
+    """Test that the serialization for the 'fipa' protocol works."""
+    msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
+    msg_bytes = FIPASerializer().encode(msg)
+    envelope = Envelope(to="receiver", sender="sender", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope == actual_envelope
+
+    actual_msg = FIPASerializer().decode(actual_envelope.message)
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
+def test_performative_not_recognized():
+    """Test that if a performative is not recognized, the consistency check fails (returns False)."""
     msg = FIPAMessage(
-        performative=FIPAMessage.Performative.UNKNOWN,
+        performative=FIPAMessage.Performative.ACCEPT,
         message_id=0,
         dialogue_id=0,
-        destination=public_key,
+        destination="publicKey",
         target=1)
-    assert msg.consistent is False
-#    msg_bytes = FIPASerializer().encode(msg)
+
+    with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
+        mock_performative_enum.ACCEPT.value = "unknown"
+        assert not msg.check_consistency()
+
+
+def test_performative_string_value():
+    """Test the string value of the performatives."""
+    assert str(FIPAMessage.Performative.CFP) == "cfp"
+    assert str(FIPAMessage.Performative.PROPOSE) == "propose"
+    assert str(FIPAMessage.Performative.DECLINE) == "decline"
+    assert str(FIPAMessage.Performative.ACCEPT) == "accept"
+    assert str(FIPAMessage.Performative.MATCH_ACCEPT) == "match_accept"
+
+
+# def test_fipa_message_consistency():
+#     """Tests the consistency of a messge."""
+#     public_key = "publicKey"
+#     myPerformative = FIPAMessage.Performative.ACCEPT
+#     assert myPerformative.__str__() == "accept",\
+#         "The string representation of Performative must be accept"
+#     msg = FIPAMessage(
+#         performative=FIPAMessage.Performative.UNKNOWN,
+#         message_id=0,
+#         dialogue_id=0,
+#         destination=public_key,
+#         target=1)
+#     assert msg.consistent is False
+# #    msg_bytes = FIPASerializer().encode(msg)

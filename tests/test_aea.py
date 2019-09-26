@@ -18,21 +18,18 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea.aea.py."""
 import os
+import time
+from pathlib import Path
+from threading import Thread
 
 from aea.aea import AEA
+from aea.connections.local.connection import LocalNode, OEFLocalConnection
+from aea.crypto.base import Crypto
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.crypto.helpers import _create_temporary_private_key_pem_path
-from aea.crypto.base import Crypto
-
-import time
-from threading import Thread
-from pathlib import Path
-
 from .conftest import CUR_PATH
 
 
