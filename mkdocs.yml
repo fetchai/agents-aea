@@ -19,22 +19,22 @@ nav:
 
   - Autonomous Economic Agent Framework:
     - Welcome:
-      - "What is the AEA?": 'aea/index.md'
-      - "Architecture": 'aea/architecture.md'
-      - "Version": 'aea/version.md'
-    - AEA quick start: 'aea/quickstart.md'
+      - "What is the AEA?": 'index.md'
+      - "Architecture": 'architecture.md'
+      - "Version": 'version.md'
+    - AEA quick start: 'quickstart.md'
     - Get developing:
-      - "Connection": 'aea/connection.md'
-      - "Protocol": 'aea/protocol.md'
-      - "Skill": 'aea/skill.md'
-      - "Scaffolding": 'aea/scaffolding.md'
-      - "CLI commands": 'aea/cli_overview.md'
+      - "Connection": 'connection.md'
+      - "Protocol": 'protocol.md'
+      - "Skill": 'skill.md'
+      - "Scaffolding": 'scaffolding.md'
+      - "CLI commands": 'cli_overview.md'
     - Integration:
-      - "Integrate with third parties": 'aea/integration.md'
+      - "Integrate with third parties": 'integration.md'
     - Demos:
-      - "AEA gym skill": 'aea/gym-skill.md'
-      - "Gym efficiency demo": 'aea/gym-plugin.md'
-      - "TAC": 'aea/tac.md'
+      - "AEA gym skill": 'gym-skill.md'
+      - "Gym efficiency demo": 'gym-plugin.md'
+      - "TAC": 'tac.md'
 
 
 
