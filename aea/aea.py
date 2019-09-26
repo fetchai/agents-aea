@@ -128,9 +128,9 @@ class AEA(Agent):
             error_handler.send_decoding_error(envelope)
             return
 
-        if not protocol.check(msg):
-            error_handler.send_invalid_message(envelope)
-            return
+        if not protocol.check(msg):                         # pragma: no cover
+            error_handler.send_invalid_message(envelope)    # pragma: no cover
+            return                                          # pragma: no cover
 
         handlers = self.resources.handler_registry.fetch(protocol.id)
         if handlers is None:

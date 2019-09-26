@@ -22,12 +22,14 @@ from aea.aea import AEA
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+from aea.protocols.fipa.message import FIPAMessage
+from aea.protocols.fipa.serialization import FIPASerializer
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.helpers import _create_temporary_private_key_pem_path
 from aea.crypto.base import Crypto
 
-from threading import Thread
 import time
+from threading import Thread
 from pathlib import Path
 
 
@@ -99,8 +101,10 @@ def test_react():
     t.start()
     agent.mailbox.inbox._queue.put(envelope)
     time.sleep(1)
-    handler = agent.resources.handler_registry.fetch_by_skill('default', "dummy")
-    assert envelope in handler.handled_envelopes, "The envelope is not inside the handled_envelopes."
+    handler = agent.resources\
+        .handler_registry.fetch_by_skill('default', "dummy")
+    assert envelope in handler.handled_envelopes,\
+        "The envelope is not inside the handled_envelopes."
     agent.stop()
     t.join()
 
@@ -121,7 +125,7 @@ def test_handle():
     envelope = Envelope(
         to="Agent1",
         sender=public_key,
-        protocol_id="unknown_protocl",
+        protocol_id="unknown_protocol",
         message=message_bytes)
 
     agent = AEA(
@@ -133,6 +137,37 @@ def test_handle():
     t.start()
     agent.mailbox.inbox._queue.put(envelope)
     env = agent.mailbox.outbox._queue.get(block=True, timeout=1)
-    assert env.protocol_id == "error", "The envelope is not the expected protocol"
+    assert env.protocol_id == "default",\
+        "The envelope is not the expected protocol (Unsupported protocol)"
+
+#   DECODING ERROR
+    msg = "hello".encode("utf-8")
+    envelope = Envelope(
+        to=public_key,
+        sender=public_key,
+        protocol_id='default',
+        message=msg)
+    agent.mailbox.inbox._queue.put(envelope)
+#   UNSUPPORTED SKILL
+    msg = FIPASerializer().encode(
+        FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
+                    message_id=0,
+                    dialogue_id=0,
+                    destination=public_key,
+                    target=1))
+    envelope = Envelope(
+        to=public_key,
+        sender=public_key,
+        protocol_id="fipa",
+        message=msg)
+    agent.mailbox.inbox._queue.put(envelope)
     agent.stop()
     t.join()
+
+#   unsupported skill for protocol oef
+#   msg = FIPASerializer().encode(\
+#   FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
+#           message_id=0, dialogue_id=0, destination=public_key, target=1))
+#    agent.outbox.put_message(to=public_key, sender=public_key,\
+#    protocol_id="fipa", message=msg)
+#    env = agent.mailbox.outbox._queue.get(block=True, timeout=1)

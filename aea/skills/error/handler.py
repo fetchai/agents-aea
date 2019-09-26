@@ -67,11 +67,7 @@ class ErrorHandler(Handler):
                                error_msg="Unsupported protocol.",
                                error_data={"protocol_id": envelope.protocol_id})
         self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
-<<<<<<< HEAD
                                         protocol_id=DefaultMessage.protocol_idl,
-=======
-                                        protocol_id=DefaultMessage.protocol_id,
->>>>>>> db212094d1aaa949607df7769ac9c8f9e643674c
                                         message=DefaultSerializer().encode(reply))
 
     def send_decoding_error(self, envelope: Envelope) -> None:
