@@ -25,10 +25,6 @@ from aea.skills.base import Behaviour
 class ErrorBehaviour(Behaviour):
     """This class implements the error behaviour."""
 
-    def __init__(self, **kwargs):
-        """Initialize the echo behaviour."""
-        super().__init__(**kwargs)
-
     def act(self) -> None:
         """
         Implement the act.

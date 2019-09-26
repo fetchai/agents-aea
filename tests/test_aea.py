@@ -101,7 +101,6 @@ def test_react():
     time.sleep(1)
     handler = agent.resources.handler_registry.fetch_by_skill('default', "dummy")
     assert envelope in handler.handled_envelopes, "The envelope is not inside the handled_envelopes."
-
     agent.stop()
     t.join()
 
