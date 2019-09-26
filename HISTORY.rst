@@ -36,3 +36,11 @@ Release History
 
 - Adds cli functionality to add connections
 - Multiple additional minor fixes and changes
+
+0.1.5 (2019-09-26)
+-------------------
+
+- Adds scaffolding command to the CLI tool
+- Extended docs
+- Increased test coverage
+- Multiple additional minor fixes and changes
