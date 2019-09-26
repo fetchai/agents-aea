@@ -20,12 +20,19 @@
 
 """This contains the proxy agent class."""
 
+import sys
+
+from aea.helpers.base import locate
+
+sys.modules["gym_connection"] = locate("packages.connections.gym")
+sys.modules["gym_protocol"] = locate("packages.protocols.gym")
+
 import gym
 from queue import Queue
 from typing import Optional
 
 from aea.agent import Agent
-from aea.connections.gym.connection import GymConnection
+from gym_connection.connection import GymConnection
 from aea.mail.base import Envelope, MailBox
 
 

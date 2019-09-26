@@ -20,10 +20,11 @@
 
 """Training a multi armed bandit rl agent using the aea framework."""
 
+
+
 from gyms.env import BanditNArmedRandom
 from proxy.env import ProxyEnv
 from rl.agent import RLAgent
-
 
 if __name__ == "__main__":
     NB_GOODS = 10

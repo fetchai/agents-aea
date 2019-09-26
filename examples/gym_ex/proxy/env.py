@@ -20,6 +20,13 @@
 
 """This contains the proxy gym environment."""
 
+import sys
+
+from aea.helpers.base import locate
+
+sys.modules["gym_connection"] = locate("packages.connections.gym")
+sys.modules["gym_protocol"] = locate("packages.protocols.gym")
+
 import gym
 from queue import Queue
 from threading import Thread
