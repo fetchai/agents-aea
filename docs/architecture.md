@@ -2,9 +2,45 @@
 !!!	Note	
 	Work in progress.
 
+## Design principles
+
+* Accessibility: easy to use.
+* Modularity: encourages module creation and sharing.
+* Openness: easily extensible with third party libraries.
+* Conciseness: conceptually simple.
+* Value-driven: drives immediate value for some use case.
+* Low entry barriers: leverages existing languages and protocols.
+* Safety: safe for the user (economically).
+* Goal alignment: seamless facilitation of user preferences and goals.
+
+<br />
+
+
+## Architecture diagram
+
+<center>![The AEA Framework Architecture](assets/framework-architecture.png)</center>
 
 
 ## Core components
+
+### Connections
+
+A connection allows the AEA to connect to an external service which has a Python SDK or API. A connection wraps an external SDK or API.
+
+### Skill
+
+A skill can encapsulate any code and ideally delivers economic value to the AEA. Each skill has at most a single Handler and potentially multiple Behaviours and Tasks. The Handler is responsible for dealing with messages of the protocol type for which this skill is registered, as such it encapsulates `reactions`. A Behaviour encapsulates `actions`, that is sequences of interactions with other agents initiated by the AEA. Finally, a Task encapsulates background work which is internal to the AEA.
+
+### Protocol
+
+Protocols define how messages are represented and encoded for transport. They also define the rules to which messages have to adhere in a message sequence. For instance, a protocol might have a message of type START and FINISH. Then the rules could prescribe that a message of type FINISH must be preceded by a message of type START.
+
+
+### Mailbox
+
+TBC.
+
+### Envelope
 
 The `Envelope` is the core object which agents use to communicate with each other. An `Envelope` has four attributes:
 
@@ -16,17 +52,33 @@ The `Envelope` is the core object which agents use to communicate with each othe
 
 * `message`: is a `bytes` field to hold the message in serialized form.
 
-### Protocols
 
-Protocols define how messages are represented and encoded for transport. They also define the rules to which messages have to adhere in a message sequence. For instance, a protocol might have a message of type START and FINISH. Then the rules could prescribe that a message of type FINISH must be preceded by a message of type START.
+### MainLoop
 
-### Connections
+TBC.
 
-A connection allows the AEA to connect to an external service which has a Python SDK or API. A connection wraps an external SDK or API.
+### ProtocolMessage
 
-### Skills
+TBC. 
 
-A skill can encapsulate any code and ideally delivers economic value to the AEA. Each skill has at most a single Handler and potentially multiple Behaviours and Tasks. The Handler is responsible for dealing with messages of the protocol type for which this skill is registered, as such it encapsulates `reactions`. A Behaviour encapsulates `actions`, that is sequences of interactions with other agents initiated by the AEA. Finally, a Task encapsulates background work which is internal to the AEA.
+### Director
+
+TBC. 
+
+### Orchestrator
+
+TBC.
+
+## Resources 
+### HanderRegistry 
+TBC.
+### BehaviourRegistry
+TBC.
+### TaskRegistry
+TBC.
+### ProtocolRegistry
+TBC.
+
 
 
 ## File structure

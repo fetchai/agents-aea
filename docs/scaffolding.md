@@ -37,3 +37,6 @@ aea scaffold connection new_connection
 After running the above commands, you will have the fully constructured file system required by the AEA.
 
 <center>![The echo call and response log](assets/full-scaffold.png)</center>
+
+
+<br />
