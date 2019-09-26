@@ -1,4 +1,28 @@
-## Setup
+## Preliminaries
+
+Create and cd into a new working directory.
+
+``` bash
+mkdir aea/
+cd aea/
+```
+
+Check you have `pipenv`.
+
+``` bash
+which pipenv
+```
+
+If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target=_blank>here</a>.
+
+Once installed, create a new environment and open it.
+
+``` bash
+pipenv --python 3.7 && pipenv shell
+```
+
+
+## Installation
 
 Install the Autonomous Economic Agent framework.
 
@@ -19,27 +43,6 @@ pip install aea[cli]
 ```
 
 
-<!--
-To get started, clone the repo, start a Python environment, and install all dependencies.
-
-``` bash
-git clone git@github.com:fetchai/agents-aea.git
-cd agents-aea/
-pipenv --python 3.7 && pipenv shell
-pip install .[all]
-```
--->
-<!--
-## Alternative setup - many errors with dependencies.
-
-``` bash
-pip install cryptography base58 click click-log jsonschema pyyaml google
-# error on yaml, changed to pyyaml
-# error on google, didn't fix it
-pip install -i https://test.pypi.org/simple/ aea
-```
--->
-
 ## Echo Agent demo
 ### Download the examples and scripts directories.
 ``` bash
@@ -56,13 +59,13 @@ aea create my_first_agent
 
 ``` bash
 cd my_first_agent
-aea add skill echo_skill ../examples/echo_skill
+aea add skill echo
 ```
 
 ### Launch the OEF 
 
 
-Open a new terminal at the repo root and launch the OEF.
+Open a new terminal and launch the OEF.
 
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -76,6 +79,18 @@ Go back to the other terminal and run the agent.
 aea run
 ```
 
+You will see the echo task running in the terminal window.
+
+<center>![The echo call and response log](assets/echo.png)</center>
+
+
+### Delete the agent
+
+When you're done, you can delete the agent.
+
+``` bash
+aea delete my_first_agent
+```
 
 
 <br />
