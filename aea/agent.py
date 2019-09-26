@@ -126,7 +126,7 @@ class Agent(ABC):
         elif self.mailbox.is_connected and not self.liveness.is_stopped:
             return AgentState.RUNNING
         else:
-            raise ValueError("Agent state not recognized.")
+            raise ValueError("Agent state not recognized.")  # pragma: no cover
 
     def start(self) -> None:
         """
