@@ -81,7 +81,7 @@ aea run
 
 You will see the echo task running in the terminal window.
 
-<center>![AEA Visdom UI](assets/echo.png)</center>
+<center>![The echo call and response log](assets/echo.png)</center>
 
 
 ### Delete the agent

@@ -3,14 +3,18 @@ The AEA is a framework for autonomous economic agent (AEA) development. It gives
 The framework is super modular, easily extensible, and highly composable. It is ideal for Reinforcement Learning scenarios. 
 
 
-## Open source platform
+## Our vision
 
-!!!	Todo
+Fetch.AI intends the AEA framework to have two focused commercial roles.
 
+### Open source company
 
-## Platform for start ups
+We want to build infrastructure with which external parties build their own solutions.
 
-!!!	Todo
+### Platform for start ups
+
+By operating as a platform for start ups, we hope to solve the chicken-or-egg problem through incentive schemes.
+
 
 
 ## Agents
