@@ -69,4 +69,4 @@ class GymTask(Task):
         self.is_rl_agent_training = False
         self._proxy_env.close()
         self._rl_agent_training_thread.join()
-        print("Training finished.")
+        print("Training finished. You can exit now via CTRL+C.")

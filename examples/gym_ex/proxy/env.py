@@ -26,9 +26,9 @@ from threading import Thread
 from typing import Any, Tuple, cast
 
 from aea.mail.base import Envelope
-from aea.protocols.base.message import Message
-from aea.protocols.gym.message import GymMessage
-from aea.protocols.gym.serialization import GymSerializer
+from aea.protocols.base import Message
+from gym_protocol.message import GymMessage
+from gym_protocol.serialization import GymSerializer
 
 from .agent import ProxyAgent
 

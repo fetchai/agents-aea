@@ -25,6 +25,7 @@ from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = 'connection.yaml'
+DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
 T = TypeVar('T')
 
 Address = str
