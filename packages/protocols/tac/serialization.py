@@ -24,8 +24,8 @@ from typing import Any, Dict, List, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from aea.protocols.tac import tac_pb2
-from aea.protocols.tac.message import TACMessage
+from tac_protocol import tac_pb2
+from tac_protocol.message import TACMessage  # type: ignore
 
 
 def _from_dict_to_pairs(d):
