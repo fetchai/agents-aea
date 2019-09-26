@@ -16,4 +16,71 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests for aea.agent.py."""
+
+"""This module contains the tests of the agent module."""
+
+import time
+from threading import Thread
+
+from aea.agent import Agent, AgentState
+from aea.connections.local.connection import LocalNode, OEFLocalConnection
+from aea.crypto.base import Crypto
+from aea.mail.base import MailBox, InBox, OutBox
+
+
+class DummyAgent(Agent):
+    """A dummy agent for testing."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize the agent."""
+        super().__init__(*args, **kwargs)
+
+    def setup(self) -> None:
+        """Set up the agent."""
+        pass
+
+    def act(self) -> None:
+        """Act."""
+        pass
+
+    def react(self) -> None:
+        """React to events."""
+        pass
+
+    def update(self) -> None:
+        """Update the state of the agent."""
+        pass
+
+    def teardown(self) -> None:
+        """Tear down the agent."""
+        pass
+
+
+def test_run_agent():
+    """Test that we can set up and then run the agent."""
+    agent_name = "dummyagent"
+    agent = DummyAgent(agent_name)
+    mailbox = MailBox(OEFLocalConnection("mypbk", LocalNode()))
+    agent.mailbox = mailbox
+    assert agent.name == agent_name
+    assert isinstance(agent.crypto, Crypto)
+    assert agent.agent_state == AgentState.INITIATED,\
+        "Agent state must be 'initiated'"
+
+    agent.mailbox.connect()
+    assert agent.agent_state == AgentState.CONNECTED,\
+        "Agent state must be 'connected'"
+
+    assert isinstance(agent.inbox, InBox)
+    assert isinstance(agent.outbox, OutBox)
+
+    agent_thread = Thread(target=agent.start)
+    agent_thread.start()
+    time.sleep(1)
+
+    assert agent.agent_state == AgentState.RUNNING,\
+        "Agent state must be 'running'"
+
+    agent.stop()
+    agent.mailbox.disconnect()
+    agent_thread.join()
