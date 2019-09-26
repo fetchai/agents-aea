@@ -66,3 +66,19 @@ def test_fipa_propose_serialization():
     p2 = expected_msg.get("proposal")
     assert p1[0].values == p2[0].values
     assert p1[1].values == p2[1].values
+
+
+def test_fipa_message_consistency():
+    """Tests the consistency of a messge."""
+    public_key = "publicKey"
+    myPerformative = FIPAMessage.Performative.ACCEPT
+    assert myPerformative.__str__() == "accept",\
+        "The string representation of Performative must be accept"
+    msg = FIPAMessage(
+        performative=FIPAMessage.Performative.UNKNOWN,
+        message_id=0,
+        dialogue_id=0,
+        destination=public_key,
+        target=1)
+    assert msg.consistent is False
+#    msg_bytes = FIPASerializer().encode(msg)

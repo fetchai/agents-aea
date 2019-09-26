@@ -38,21 +38,21 @@ class MyScaffoldMessage(Message):
             """Get string representation."""
             return self.value
 
-    def __init__(self, oef_type: Optional[Type] = None,
-                 **kwargs):
+    def __init__(self, oef_type: Optional[Type] = None, **kwargs):
         """
         Initialize.
 
         :param oef_type: the type of message.
         """
         super().__init__(type=oef_type, **kwargs)
-        assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."
+        self.consistent = self.check_consistency()
+#       assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             raise NotImplementedError
-        except (AssertionError, ValueError):
+        except (AssertionError, ValueError, NotImplementedError):
             return False
 
         return True

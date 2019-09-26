@@ -16,4 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests for aea.aea.py."""
+
+"""This module contains the tests for the Scaffold protocol."""
+
+from aea.protocols.scaffold.message import MyScaffoldMessage
+
+
+def test_scaffold_message():
+    """Testing the creation of a scaffold message."""
+    msg = MyScaffoldMessage()
+    assert msg.consistent is False, "NotImplementedError"
