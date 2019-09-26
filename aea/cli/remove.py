@@ -53,16 +53,13 @@ def connection(ctx: Context, connection_name):
         shutil.rmtree(connection_folder)
     except BaseException:
         logger.exception("An error occurred while deleting '{}'.".format(connection_folder))
-        return
-
-    ctx.agent_config.connections.remove(connection_name)
+        exit(-1)
 
     # removing the connection to the configurations.
     logger.debug("Removing the connection from {}".format(DEFAULT_AEA_CONFIG_FILE))
     if connection_name in ctx.agent_config.connections:
         ctx.agent_config.connections.remove(connection_name)
-
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+        ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @remove.command()
@@ -75,7 +72,7 @@ def protocol(ctx: Context, protocol_name):
                 .format(agent_name=agent_name, protocol_name=protocol_name))
 
     if protocol_name not in ctx.agent_config.protocols:
-        logger.warning("Protocol '{}' not found.".format(protocol_name))
+        logger.error("Protocol '{}' not found.".format(protocol_name))
         exit(-1)
 
     protocol_folder = os.path.join("protocols", protocol_name)
@@ -83,13 +80,13 @@ def protocol(ctx: Context, protocol_name):
         shutil.rmtree(protocol_folder)
     except BaseException:
         logger.exception("An error occurred.")
-        return
+        exit(-1)
 
     # removing the protocol to the configurations.
     logger.debug("Removing the protocol from {}".format(DEFAULT_AEA_CONFIG_FILE))
     if protocol_name in ctx.agent_config.protocols:
         ctx.agent_config.protocols.remove(protocol_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+        ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @remove.command()
@@ -102,7 +99,7 @@ def skill(ctx: Context, skill_name):
                 .format(agent_name=agent_name, skill_name=skill_name))
 
     if skill_name not in ctx.agent_config.skills:
-        logger.warning("The skill '{}' is not supported.".format(skill_name))
+        logger.error("The skill '{}' is not supported.".format(skill_name))
         exit(-1)
 
     skill_folder = os.path.join("skills", skill_name)
@@ -110,10 +107,10 @@ def skill(ctx: Context, skill_name):
         shutil.rmtree(skill_folder)
     except BaseException:
         logger.exception("An error occurred.")
-        return
+        exit(-1)
 
     # removing the protocol to the configurations.
     logger.debug("Removing the skill from {}".format(DEFAULT_AEA_CONFIG_FILE))
     if skill_name in ctx.agent_config.skills:
         ctx.agent_config.skills.remove(skill_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+        ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))

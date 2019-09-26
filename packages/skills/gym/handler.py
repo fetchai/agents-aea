@@ -22,8 +22,8 @@ from typing import cast
 
 from aea.mail.base import Envelope
 from aea.skills.base import Handler
-from aea.protocols.gym.message import GymMessage
-from aea.protocols.gym.serialization import GymSerializer
+from gym_protocol.message import GymMessage
+from gym_protocol.serialization import GymSerializer
 
 from gym_skill.tasks import GymTask
 

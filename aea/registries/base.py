@@ -197,7 +197,7 @@ class HandlerRegistry(Registry):
         """
         protocol_id, skill_id = ids
         if protocol_id in self._handlers.keys():
-            logger.warning("Another handler also registered against protocol id '{}'".format(protocol_id))
+            logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
         if protocol_id not in self._handlers.keys():
             self._handlers[protocol_id] = {}
         self._handlers[protocol_id][skill_id] = handler

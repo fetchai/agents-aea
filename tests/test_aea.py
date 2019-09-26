@@ -25,8 +25,6 @@ from aea.protocols.default.serialization import DefaultSerializer
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.helpers import _create_temporary_private_key_pem_path
 from aea.crypto.base import Crypto
-from aea.protocols.base import Message
-from aea.protocols.base import ProtobufSerializer
 
 from threading import Thread
 import time
@@ -135,8 +133,7 @@ def test_handle():
     t = Thread(target=agent.start)
     t.start()
     agent.mailbox.inbox._queue.put(envelope)
-    env = agent.mailbox.outbox._queue.get(block=block, timeout=1)
+    env = agent.mailbox.outbox._queue.get(block=True, timeout=1)
     assert env.protocol_id == "error", "The envelope is not the expected protocol"
-
     agent.stop()
     t.join()
