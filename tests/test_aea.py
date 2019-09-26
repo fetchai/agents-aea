@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea.aea.py."""
+import os
 
 from aea.aea import AEA
 from aea.mail.base import MailBox, Envelope
@@ -31,6 +32,8 @@ from aea.crypto.base import Crypto
 import time
 from threading import Thread
 from pathlib import Path
+
+from .conftest import CUR_PATH
 
 
 def test_initialiseAeA():
@@ -53,7 +56,7 @@ def test_act():
     node = LocalNode()
     agent_name = "MyAgent"
     path = "/tests/data/dummy_aea/"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
     mailbox = MailBox(OEFLocalConnection(public_key, node))
@@ -78,7 +81,7 @@ def test_react():
     node = LocalNode()
     agent_name = "MyAgent"
     path = "/tests/data/dummy_aea/"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
     mailbox = MailBox(OEFLocalConnection(public_key, node))
@@ -114,7 +117,7 @@ def test_handle():
     node = LocalNode()
     agent_name = "MyAgent"
     path = "/tests/data/dummy_aea/"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
     mailbox = MailBox(OEFLocalConnection(public_key, node))
