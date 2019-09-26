@@ -18,4 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the OEF connection."""
+"""Package registry for the AEA framework."""

@@ -51,8 +51,10 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         result = cls.runner.invoke(cli, ["create", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
+        # add connection first time
         result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
         assert result.exit_code == 0
+        # add connection again
         cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
 
     def test_exit_code_equal_to_minus_1(self):

@@ -23,16 +23,17 @@ from aea.mail.base import Envelope
 from aea.skills.base import Handler
 
 
-class SumHandler(Handler):
-    """Sum handler."""
+class DummyHandler(Handler):
+    """Echo handler."""
 
     SUPPORTED_PROTOCOL = "default"
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        print("SumHandler.__init__: arguments: {}".format(kwargs))
-        self.counter = 0
-        self.envelope = None
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.handled_envelopes = []
+        self.nb_teardown_called = 0
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """
@@ -41,9 +42,7 @@ class SumHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        self.counter = 2
-        self.envelope = envelope
-        print("SumHandler: envelope={}".format(envelope))
+        self.handled_envelopes.append(envelope)
 
     def teardown(self) -> None:
         """
@@ -51,5 +50,4 @@ class SumHandler(Handler):
 
         :return: None
         """
-        print("SumHandler: teardown method called.")
-        pass
+        self.nb_teardown_called += 1

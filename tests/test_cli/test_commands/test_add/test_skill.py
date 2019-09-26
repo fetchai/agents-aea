@@ -45,23 +45,22 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_name = "gym"
+        cls.skill_name = "error"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        # this also by default adds the oef connection and error skill
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
-        config.registry_path = os.path.join(ROOT_DIR, "examples")
+        config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        result = cls.runner.invoke(cli, ["add", "skill", cls.skill_name])
-        assert result.exit_code == 0
-
+        # add the error skill again
         cls.result = cls.runner.invoke(cli, ["add", "skill", cls.skill_name])
 
     def test_exit_code_equal_to_minus_1(self):
@@ -138,7 +137,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_name = "gym"
+        cls.skill_name = "echo"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
@@ -149,7 +148,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
 
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
-        config.registry_path = os.path.join(ROOT_DIR, "examples")
+        config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
@@ -191,7 +190,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_name = "gym"
+        cls.skill_name = "echo"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
@@ -202,7 +201,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
 
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
-        config.registry_path = os.path.join(ROOT_DIR, "examples")
+        config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         Path("skills", cls.skill_name).mkdir(parents=True, exist_ok=True)

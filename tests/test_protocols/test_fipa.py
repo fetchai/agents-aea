@@ -66,8 +66,3 @@ def test_fipa_propose_serialization():
     p2 = expected_msg.get("proposal")
     assert p1[0].values == p2[0].values
     assert p1[1].values == p2[1].values
-
-def test_fipa_check_consistency():
-    query = base64.b64encode(json.dumps({"foo": "bar"}).encode("utf-8"))
-    msg = FIPAMessage(message_id="", dialogue_id="", target="", performative=FIPAMessage.Performative.CFP, query=query)
-    assert msg.check_consistency(),"There is no consistency"

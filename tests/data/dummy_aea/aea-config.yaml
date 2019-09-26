@@ -1,15 +1,17 @@
 aea_version: 0.1.4
 agent_name: Agent0
 authors: Fetch.AI Limited
-version: v1
-license: Apache 2.0
-url: ""
 connections:
-- default-oef
-default_connection: default-oef
+- local
+default_connection: local
+license: Apache 2.0
 private_key_pem_path: ''
-registry_path: aea
 protocols:
+- fipa
 - default
+registry_path: aea
 skills:
--error
+- error
+- dummy
+url: ''
+version: v1

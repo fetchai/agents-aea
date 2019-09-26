@@ -17,22 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the behaviours for the 'sum' skill."""
-
-from aea.skills.base import Behaviour
-
-
-class SumBehaviour(Behaviour):
-    """Echo behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialize the echo behaviour."""
-        self.counter = 0
-
-    def act(self) -> None:
-        """Act according to the behaviour."""
-        self.counter += 1
-
-    def teardown(self) -> None:
-        """Teardown the behaviour."""
-        pass
+"""This module contains a dummy skill for an AEA."""

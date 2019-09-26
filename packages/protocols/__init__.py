@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,4 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the sum skill."""
+"""This module contains the protocol registry for the AEA framework."""

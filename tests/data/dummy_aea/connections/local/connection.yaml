@@ -1,10 +1,8 @@
-name: oef
+name: local
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
-class_name: OEFConnection
+class_name: OEFLocalConnection
 supported_protocols: ["oef"]
-config:
-  addr: 127.0.0.1
-  port: 10000
+config: {}
