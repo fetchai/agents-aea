@@ -229,6 +229,20 @@ class HandlerRegistry(Registry):
             # TODO: introduce a controller class which intelligently selects the appropriate handler.
             return list(result.values())
 
+    def fetch_by_skill(self, protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]:
+        """
+        Fetch the handler for the protocol_id and skill id.
+
+        :param protocol_id: the protocol id
+        :param skill_id: the skill id
+        :return: the handler registered for the protocol_id and skill_id
+        """
+        result = self._handlers.get(protocol_id, None)
+        if result is None:
+            return None
+        else:
+            return result.get(skill_id, None)
+
     def fetch_all(self) -> Optional[List[Handler]]:
         """Fetch all the handlers."""
         if self._handlers.values() is None:
