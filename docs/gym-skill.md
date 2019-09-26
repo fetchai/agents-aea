@@ -3,7 +3,7 @@ The AEA gym skill demonstrates how a custom Reinforcement Learning agent may be 
 
 ## Demo instructions
 
-Make sure you have done the `aea` pip install. Instructions are <a href="../quickstart" target=_blank>here</a>.
+Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
 
 Create and launch a virtual environment.
 
@@ -11,11 +11,18 @@ Create and launch a virtual environment.
 pipenv --python 3.7 && pipenv shell
 ```
 
+Install the gym library.
+
+``` bash
+pip install gym
+```
+
 Then, download the examples and channels directory.
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/examples
-svn export https://github.com/fetchai/agents-aea.git/trunk/aea/channels
 ```
+
+
 
 
 ### Create the agent

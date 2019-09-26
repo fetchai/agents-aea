@@ -8,7 +8,6 @@ Follow the instructions below to build and run the TAC demo.
 Make sure you are running <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
 
 
-
 ## Quick start
 
 Clone the repo to include submodules.
@@ -16,6 +15,14 @@ Clone the repo to include submodules.
 ``` bash
 git clone git@github.com:fetchai/agents-tac.git --recursive && cd agents-tac
 ```
+
+Check you have `pipenv`.
+
+``` bash
+which pipenv
+```
+
+If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target=_blank>here</a>.
 
 
 Create and launch a virtual environment.
@@ -37,10 +44,10 @@ python setup.py install
 ```
 
 
-Run the launch script.
+Run the launch script. This may take a while.
 
 ``` bash
-python scripts/launch.py.
+python scripts/launch.py
 ```
 
 The <a href="https://github.com/facebookresearch/visdom" target="_blank">visdom</a> server is now running.
@@ -68,7 +75,7 @@ In a new terminal window, enter the virtual environment, and connect a template 
 
 ``` bash
 pipenv shell
-python templates/v1/basic.py --name my_agent --dashboard.
+python templates/v1/basic.py --name my_agent --dashboard
 ```
 <!-- Issue: https://github.com/fetchai/agents-tac/issues/389 -->
 
@@ -83,10 +90,15 @@ Click through to the <a href="http://localhost:8097" target="_blank">controller 
 
 ## Possible gotchas
 
-Kill all running containers before restart.
+Stop all running containers before restart.
 
 ``` bash
-docker kill $(docker ps -q)
+docker stop $(docker ps -q)
+```
+
+To remove all images, run the following command.
+
+``` bash
 # mac
 docker ps -q | xargs docker stop ; docker system prune -a
 ```

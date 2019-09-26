@@ -1,4 +1,28 @@
-## Setup
+## Preliminaries
+
+Create and cd into a new working directory.
+
+``` bash
+mkdir aea/
+cd aea/
+```
+
+Check you have `pipenv`.
+
+``` bash
+which pipenv
+```
+
+If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target=_blank>here</a>.
+
+Once installed, create a new environment and open it.
+
+``` bash
+pipenv --python 3.7 && pipenv shell
+```
+
+
+## Installation
 
 Install the Autonomous Economic Agent framework.
 
@@ -35,13 +59,13 @@ aea create my_first_agent
 
 ``` bash
 cd my_first_agent
-aea add skill echo_skill ../examples/echo_skill
+aea add skill echo
 ```
 
 ### Launch the OEF 
 
 
-Open a new terminal, *a directory level up*, and launch the OEF.
+Open a new terminal and launch the OEF.
 
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
