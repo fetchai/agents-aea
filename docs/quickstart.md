@@ -44,10 +44,11 @@ pip install aea[cli]
 
 
 ## Echo Agent demo
-### Download the examples and scripts directories.
+### Download the examples, scripts, and packages directories.
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 ### Create a new agent

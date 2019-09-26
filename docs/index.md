@@ -1,4 +1,4 @@
-The AEA is a framework for autonomous economic agent (AEA) development. It gives developers a quick and efficient way to build autonomous economic agents. 
+The AEA framework is an ecosystem for autonomous economic agent (AEA) development. It gives developers a quick and efficient way to build autonomous economic agents. 
 
 The framework is super modular, easily extensible, and highly composable. It is ideal for reinforcement learning scenarios. 
 
