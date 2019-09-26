@@ -56,7 +56,7 @@ class TestRemoveSkill:
 
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
-        config.registry_path = os.path.join(ROOT_DIR, "examples")
+        config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         result = cls.runner.invoke(cli, ["add", "skill", cls.skill_name])
@@ -150,7 +150,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
 
         # change default registry path
         config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
-        config.registry_path = os.path.join(ROOT_DIR, "examples")
+        config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         result = cls.runner.invoke(cli, ["add", "skill", cls.skill_name])
