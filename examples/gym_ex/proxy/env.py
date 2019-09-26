@@ -24,9 +24,6 @@ import sys
 
 from aea.helpers.base import locate
 
-sys.modules["gym_connection"] = locate("packages.connections.gym")
-sys.modules["gym_protocol"] = locate("packages.protocols.gym")
-
 import gym
 from queue import Queue
 from threading import Thread
@@ -34,10 +31,13 @@ from typing import Any, Tuple, cast
 
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
-from gym_protocol.message import GymMessage
-from gym_protocol.serialization import GymSerializer
 
-from .agent import ProxyAgent
+sys.modules["gym_connection"] = locate("packages.connections.gym")
+sys.modules["gym_protocol"] = locate("packages.protocols.gym")
+from gym_protocol.message import GymMessage  # noqa: E402
+from gym_protocol.serialization import GymSerializer  # noqa: E402
+
+from .agent import ProxyAgent  # noqa: E402
 
 Action = Any
 Observation = Any
