@@ -31,7 +31,6 @@ from aea.helpers.base import locate
 from aea.mail.base import Envelope, MailBox
 
 sys.modules["gym_connection"] = locate("packages.connections.gym")
-sys.modules["gym_protocol"] = locate("packages.protocols.gym")
 from gym_connection.connection import GymConnection  # noqa: E402
 
 
