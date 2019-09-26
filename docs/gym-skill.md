@@ -1,12 +1,19 @@
-The AEA Gym Skill demonstrates how a custom Reinforcement Learning agent may be embedded into an Autonomous Economic Agent.
+The AEA gym skill demonstrates how a custom Reinforcement Learning agent may be embedded into an Autonomous Economic Agent.
 
 
 ## Demo instructions
 
-Make sure you have followed the Quick Start setup instructions <a href="../quickstart" target=_blank>here</a>, including downloading the `examples` and `scripts` directories.
+Make sure you have done the `aea` pip install. Instructions are <a href="../quickstart" target=_blank>here</a>.
 
-Then, download the channels directory.
+Create and launch a virtual environment.
+
 ``` bash
+pipenv --python 3.7 && pipenv shell
+```
+
+Then, download the examples and channels directory.
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/aea/channels
 ```
 
@@ -21,15 +28,7 @@ aea create my_gym_agent
 ### Add the gym skill 
 ``` bash
 cd my_gym_agent
-aea add skill gym ../examples/gym_skill
-```
-
-
-### Launch the OEF 
-If it is not already running, open a new terminal, *a directory level up*, and launch the OEF.
-
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+aea add skill gym 
 ```
 
 
@@ -42,7 +41,7 @@ cp -a ../examples/gym_ex/gyms/. gyms/
 
 ### Add a gym connection
 ``` bash
-aea add connection ../channels/gym
+aea add connection gym
 ```
 
 
@@ -61,9 +60,9 @@ aea run --connection gym
 ```
 
 <!--
-You will see the echo task running in the terminal window.
+You will see...
 
-<center>![AEA Visdom UI](assets/echo.png)</center>
+<center>![AEA Visdom UI](assets/***.png)</center>
 -->
 
 
