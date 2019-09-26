@@ -14,9 +14,7 @@ A guide to create an AEA with the gym_skill.
 
 - Add the 'gym' skill:
 
-      aea add skill gym ../examples/gym_skill
-
-  This command will create the `my_gym_agent/skills` folder, with the `gym_skill` skill package inside. It will also create the `my_first_agent/protocols` folder, with the `gym` protocol package inside.
+      aea add skill gym
 
 - Copy the gym environment to the agent directory:
 
@@ -25,7 +23,7 @@ A guide to create an AEA with the gym_skill.
 
 - Add a gym connection:
 
-      aea add connection ../aea/channels/gym
+      aea add connection gym
 
 - Update the connection config `my_gym_agent/connections/gym/connection.yaml`:
 

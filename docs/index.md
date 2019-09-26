@@ -1,71 +1,36 @@
-# AEA - Autonomous Economic Agent Framework
+The AEA is a framework for autonomous economic agent (AEA) development. It gives developers a quick and efficient way to build autonomous economic agents. 
 
-The AEA framework allows you to quickly assemble autonomous economic agents. Through its modularity AEAs are easily extenable and highly composable.
+The framework is super modular, easily extensible, and highly composable. It is ideal for Reinforcement Learning scenarios. 
 
-## Quickstart
 
-`
-pip install -i https://test.pypi.org/simple/ aea
-`
+## Our vision
 
-1. create a new AEA project
+Fetch.AI intends the AEA framework to have two focused commercial roles.
 
-`
-aea create my_first_agent
-`
+### Open source company
 
-2. CD into the project folder and add the echo skill to the agent
+We want to build infrastructure with which external parties build their own solutions.
 
-`
-aea add skill echo
-`
+### Platform for start ups
 
-3. run the agent on a local network
+By operating as a platform for start ups, we hope to solve the chicken-or-egg problem through incentive schemes.
 
-`
-aea run
-`
 
-## AEA file structure
 
-An agent is structured in a directory with a configuration file, a directory with skills, a directory with protocols, a directory with connections and a main logic file that is used when running aea run.
+## Agents
 
-agentName/                                     | The root of the agent
----------------------------------------------- | -----------------------------------------------------------------
-agent.yml                                      | YAML configuration of the agent
-connections/                                   | Directory containing all the supported connections
-  connection1/                                 | Connection 1
-  ...                                          | ...
-  connectionN/                                 | Connection N
-protocols/                                     | Directory containing all supported protocols
-  protocol1/                                   | Protocol 1
-  ...                                          | ...
-  protocolK/                                   | Protocol K
-skills/                                        | Directory containing all the skill components
-  skill1/                                      | Skill 1
-  ...                                          | ...
-  skillN/                                      | Skill L
+An autonomous economic agent (AEA) is an intelligent agent whose goal is to generate economic value for its owner. Their super powers lie in their ability to autonomously acquire new skills.
 
-## AEA Core Components
+AEAs achieve their goals with the help of the OEF and the Fetch.AI Ledger. 
 
-The `Envelope` is the core object which agents use to communicate with each other. An `Envelope` has four attributes:
+Third party systems, such as Ethereum, may also allow AEA integration.
 
-* `to`: defines the destination address
 
-* `sender`: defines the sender address
 
-* `protocol_id`: defines the protocol_id
+!!!	Note
+	Work in progress.
 
-* `message`: is a `bytes` field to hold the message in serialized form.
 
-### AEA Protocols
+<br />
 
-Protocols define how messages are represented and encoded for transport. They also define the rules to which messages have to adhere in a message sequence. For instance, a protocol might have a message of type START and FINISH. Then the rules could prescribe that a message of type FINISH must be preceded by a message of type START.
 
-### AEA Connections
-
-A connection allows the AEA to connect to an external service which has a Python SDK or API. A connection wraps an external SDK or API.
-
-### AEA Skills
-
-A skill can encapsulate any code and ideally delivers economic value to the AEA. Each skill has at most a single Handler and potentially multiple Behaviours and Tasks. The Handler is responsible for dealing with messages of the protocol type for which this skill is registered, as such it encapsulates `reactions`. A Behaviour encapsulates `actions`, that is sequences of interactions with other agents initiated by the AEA. Finally, a Task encapsulates background work which is internal to the AEA.

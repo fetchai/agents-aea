@@ -10,7 +10,7 @@ This quick start explains how to create and launch an agent with the cli.
     
       aea create my_first_agent
  
-  a directory named `my_first_agent` will be created.
+  This command will create a directory named `my_first_agent`. It will further create the `my_first_agent/skills` folder, with the `error` skill package inside. It will also create the `my_first_agent/protocols` folder, with the `default` protocol package inside. Finally, it will create the `my_first_agent/connections` folder, with the `oef` connection package inside.
 
 - enter into the agent's directory:
 
@@ -18,9 +18,9 @@ This quick start explains how to create and launch an agent with the cli.
 
 - add a skill to the agent, e.g.:
 
-      aea add skill echo_skill ../examples/echo_skill
+      aea add skill echo
 
-  This command will create the `my_first_agent/skills` folder, with the `echo_skill` skill package inside. It will also create the `my_first_agent/protocols` folder, with the `default` protocol package inside.
+  This command will add the `echo` skill package to the `my_first_agent/skills` folder.
 
 - start an oef from a separate terminal:
 

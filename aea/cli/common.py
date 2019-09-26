@@ -19,8 +19,11 @@
 
 """Implementation of the common utils of the aea cli."""
 
+import importlib.util
 import logging
+import os
 from pathlib import Path
+import sys
 from typing import Dict
 
 import click
@@ -74,6 +77,26 @@ def _try_to_load_agent_config(ctx: Context):
     except jsonschema.exceptions.ValidationError:
         logger.error("Agent configuration file '{}' is invalid. Please check the documentation."
                      "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
+
+
+def _try_to_load_protocols(ctx: Context):
+    try:
+        for protocol_name in ctx.agent_config.protocols:
+            logger.debug("Processing protocol {}".format(protocol_name))
+            # protocol_config = ctx.protocol_loader.load(open(os.path.join(directory, DEFAULT_PROTOCOL_CONFIG_FILE)))
+            # if protocol_config is None:
+            #     exit(-1)
+
+            protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join(ctx.agent_config.registry_path, "protocols", protocol_name, "__init__.py"))
+            if protocol_spec is None:
+                logger.warning("Protocol not found in registry.")
+                continue
+
+            protocol_module = importlib.util.module_from_spec(protocol_spec)
+            sys.modules[protocol_spec.name + "_protocol"] = protocol_module
+    except FileNotFoundError:
+        logger.error("Protocols not found in registry")
+        exit(-1)
 
 
 class AEAConfigException(Exception):

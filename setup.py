@@ -33,15 +33,20 @@ def get_aea_extras() -> Dict[str, List[str]]:
     """Parse extra dependencies from aea channels and protocols."""
     result = {}
 
-    # parse channel dependencies
-    channel_module = importlib.import_module("aea.channels")
-    channel_dependencies = {k.split("_")[0] + "-channel": v for k, v in vars(channel_module).items() if re.match(".+_dependencies", k)}
+    # parse connections dependencies
+    channel_module = importlib.import_module("aea.connections")
+    channel_dependencies = {k.split("_")[0] + "-connection": v for k, v in vars(channel_module).items() if re.match(".+_dependencies", k)}
     result.update(channel_dependencies)
 
     # parse protocols dependencies
     protocols_module = importlib.import_module("aea.protocols")
     protocols_dependencies = {k.split("_")[0] + "-protocol": v for k, v in vars(protocols_module).items() if re.match(".+_dependencies", k)}
     result.update(protocols_dependencies)
+
+    # parse skills dependencies
+    skills_module = importlib.import_module("aea.skills")
+    skills_dependencies = {k.split("_")[0] + "-skill": v for k, v in vars(protocols_module).items() if re.match(".+_dependencies", k)}
+    result.update(skills_dependencies)
 
     return result
 

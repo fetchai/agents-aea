@@ -36,6 +36,11 @@ logger = logging.getLogger(__name__)
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 
+CONFIGURATION_SCHEMA_DIR = os.path.join(ROOT_DIR, "aea", "configurations", "schemas")
+AGENT_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "aea-config_schema.json")
+SKILL_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "skill-config_schema.json")
+CONNECTION_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "connection-config_schema.json")
+
 
 def pytest_addoption(parser):
     """Add options to the parser."""

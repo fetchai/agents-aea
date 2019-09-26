@@ -1,8 +1,45 @@
-site_name: AEA - Autonomous Economic Agent Framework
+site_name: Fetch.AI Developer Documentation
+site_url: https://docs.fetch.ai/
+site_description: Everything you need to know about Fetch.AI. 
+#repo_url: https://github.com/fetchai/docs // commented out to remove edit option
+#repo_name: 'GitHub'
+site_author: katharine.murphy@fetch.ai
+
+
+theme:
+  name: 'material'
+  logo:
+    icon: code
+  feature:
+    tabs: true  
+
+
+
 nav:
-    - Home: index.md
-    - CLI:
-        - 'Overview': cli_overview.md
-    - Examples:
-        - 'Reinforcement Learning': ex_rl.md
-theme: readthedocs
+
+  - Autonomous Economic Agent Framework:
+    - Welcome:
+      - "What is the AEA?": 'index.md'
+      - "Architecture": 'architecture.md'
+      - "Version": 'version.md'
+    - AEA quick start: 'quickstart.md'
+    - Get developing:
+      - "Protocol": 'protocol.md'
+      - "Skill": 'skill.md'
+      - "Scaffolding": 'scaffolding.md'
+      - "CLI commands": 'cli_overview.md'
+    - Integration:
+      - "Integrate with third parties": 'integration.md'
+    - Demos:
+      - "AEA gym skill": 'gym-skill.md'
+      - "Gym efficiency demo": 'gym-plugin.md'
+      - "TAC": 'tac.md'
+
+
+
+markdown_extensions:
+  - pymdownx.superfences
+  - admonition
+
+extra_css:
+    - css/my-styles.css

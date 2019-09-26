@@ -23,10 +23,14 @@ from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
+DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
+DEFAULT_CONNECTION_CONFIG_FILE = 'connection.yaml'
+DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
 T = TypeVar('T')
 
 Address = str
 ProtocolId = str
+SkillId = str
 
 
 class JSONSerializable(ABC):
@@ -106,7 +110,7 @@ class ConnectionConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  class_name: str = "",
-                 supported_protocols: Optional[List[ProtocolId]] = None,
+                 supported_protocols: Optional[List[str]] = None,
                  **config):
         """Initialize a connection configuration object."""
         self.name = name
@@ -128,7 +132,7 @@ class ConnectionConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "class_name": self.class_name,
-            "supported_protocol": self.supported_protocols,
+            "supported_protocols": self.supported_protocols,
             "config": self.config
         }
 
@@ -304,6 +308,7 @@ class AgentConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
+                 registry_path: str = "",
                  private_key_pem_path: str = ""):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
@@ -312,6 +317,7 @@ class AgentConfig(Configuration):
         self.version = version
         self.license = license
         self.url = url
+        self.registry_path = registry_path
         self.private_key_pem_path = private_key_pem_path
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
@@ -344,6 +350,7 @@ class AgentConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "url": self.url,
+            "registry_path": self.registry_path,
             "private_key_pem_path": self.private_key_pem_path,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
@@ -361,6 +368,7 @@ class AgentConfig(Configuration):
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
+            registry_path=cast(str, obj.get("registry_path")),
             private_key_pem_path=cast(str, obj.get("private_key_pem_path")),
         )
 

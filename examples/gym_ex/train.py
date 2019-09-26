@@ -24,7 +24,6 @@ from gyms.env import BanditNArmedRandom
 from proxy.env import ProxyEnv
 from rl.agent import RLAgent
 
-
 if __name__ == "__main__":
     NB_GOODS = 10
     NB_PRICES_PER_GOOD = 100
