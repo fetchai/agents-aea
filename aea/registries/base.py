@@ -235,7 +235,7 @@ class HandlerRegistry(Registry):
 
         :param protocol_id: the protocol id
         :param skill_id: the skill id
-        :return: the list of handlers registered for the protocol_id
+        :return: the handler registered for the protocol_id and skill_id
         """
         result = self._handlers.get(protocol_id, None)
         if result is None:
