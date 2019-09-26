@@ -18,7 +18,7 @@ If you don't have it, install it. Instructions are <a href="https://pypi.org/pro
 Once installed, create a new environment and open it.
 
 ``` bash
-pipenv --python 3.7 && pipenv shell
+touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
 
@@ -44,10 +44,11 @@ pip install aea[cli]
 
 
 ## Echo Agent demo
-### Download the examples and scripts directories.
+### Download the examples, scripts, and packages directories.
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 ### Create a new agent

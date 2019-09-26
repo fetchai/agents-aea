@@ -24,6 +24,7 @@ nav:
       - "Version": 'version.md'
     - AEA quick start: 'quickstart.md'
     - Get developing:
+      - "Connection": 'connection.md'
       - "Protocol": 'protocol.md'
       - "Skill": 'skill.md'
       - "Scaffolding": 'scaffolding.md'
