@@ -21,6 +21,7 @@
 import base64
 import json
 from unittest import mock
+import pytest
 
 from aea.mail.base import Envelope
 from aea.protocols.fipa.message import FIPAMessage
@@ -108,17 +109,16 @@ def test_performative_string_value():
     assert str(FIPAMessage.Performative.MATCH_ACCEPT) == "match_accept"
 
 
-# def test_fipa_message_consistency():
-#     """Tests the consistency of a messge."""
-#     public_key = "publicKey"
-#     myPerformative = FIPAMessage.Performative.ACCEPT
-#     assert myPerformative.__str__() == "accept",\
-#         "The string representation of Performative must be accept"
-#     msg = FIPAMessage(
-#         performative=FIPAMessage.Performative.UNKNOWN,
-#         message_id=0,
-#         dialogue_id=0,
-#         destination=public_key,
-#         target=1)
-#     assert msg.consistent is False
-# #    msg_bytes = FIPASerializer().encode(msg)
+def test_serialisation_fipa():
+    """Tests the serialisation of a fipa message."""
+    with pytest.raises(ValueError):
+        msg = FIPAMessage(
+            performative=FIPAMessage.Performative.CFP,
+            message_id=0,
+            dialogue_id=0,
+            destination="publicKey",
+            target=1)
+#        msg_bytes = FIPASerializer().encode(msg)
+        with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
+            mock_performative_enum.CFP.query = []
+            assert not FIPASerializer().encode(msg), "Raises Value Error"
