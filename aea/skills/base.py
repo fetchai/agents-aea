@@ -29,40 +29,10 @@ from typing import Optional, List, Dict, Any, cast
 
 from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SkillConfig, ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
+from aea.context.base import AgentContext
 from aea.mail.base import OutBox, Envelope
 
 logger = logging.getLogger(__name__)
-
-
-class AgentContext:
-    """Save relevant data for the agent."""
-
-    def __init__(self, agent_name: str, public_key: str, outbox: OutBox):
-        """
-        Initialize a skill context.
-
-        :param agent_name: the agent's name
-        :param outbox: the outbox
-        """
-        self._agent_name = agent_name
-        self._public_key = public_key
-        self._outbox = outbox
-        self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
-
-    @property
-    def agent_name(self) -> str:
-        """Get agent name."""
-        return self._agent_name
-
-    @property
-    def public_key(self) -> str:
-        """Get public key."""
-        return self._public_key
-
-    @property
-    def outbox(self) -> OutBox:
-        """Get outbox."""
-        return self._outbox
 
 
 class SkillContext:
@@ -362,7 +332,8 @@ class Skill:
         :return: the Skill object. None if the parsing failed.
         """
         # check if there is the config file. If not, then return None.
-        skill_config = agent_context.skill_loader.load(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
+        skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
+        skill_config = skill_loader.load(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
         if skill_config is None:
             return None
 

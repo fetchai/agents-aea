@@ -1,0 +1,20 @@
+name: ''
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: GoodsRegisterAndSearchBehaviour
+      args:
+        foo: bar
+handler:
+  class_name: FIPANegotiationHandler
+  args:
+    foo: bar
+tasks:
+  - task:
+      class_name: MyScaffoldTask
+      args:
+        foo: bar
+protocol: ''

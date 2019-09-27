@@ -23,9 +23,10 @@ from pathlib import Path
 from typing import Optional, cast
 
 from aea.agent import Agent
+from aea.context.base import AgentContext
+from aea.decision_maker.base import DecisionMaker
 from aea.mail.base import Envelope, MailBox
 from aea.registries.base import Resources
-from aea.skills.base import AgentContext
 from aea.skills.error.handler import ErrorHandler
 
 logger = logging.getLogger(__name__)
@@ -61,8 +62,14 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._context = AgentContext(self.name, self.crypto.public_key, self.outbox)
+        self._decision_maker = DecisionMaker(self.max_reactions, self.outbox)
+        self._context = AgentContext(self.name, self.crypto.public_key, self.outbox, self.decision_maker.queue)
         self._resources = None  # type: Optional[Resources]
+
+    @property
+    def decision_maker(self) -> DecisionMaker:
+        """Get decision maker."""
+        return self._decision_maker
 
     @property
     def context(self) -> AgentContext:
@@ -149,6 +156,7 @@ class AEA(Agent):
         """
         for task in self.resources.task_registry.fetch_all():
             task.execute()
+        self.decision_maker.execute()
 
     def teardown(self) -> None:
         """
