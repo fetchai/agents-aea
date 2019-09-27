@@ -63,8 +63,8 @@ class FIPAMessage(Message):
                          target=target,
                          performative=FIPAMessage.Performative(performative),
                          **kwargs)
-        self.consistent = self.check_consistency()
-#        assert self.check_consistency(), "FIPAMessage initialization inconsistent."
+#        self.consistent = self.check_consistency()
+        assert self.check_consistency(), "FIPAMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
