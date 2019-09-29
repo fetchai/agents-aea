@@ -20,9 +20,11 @@
 """This module contains the tests for the Scaffold protocol."""
 
 from aea.protocols.scaffold.message import MyScaffoldMessage
+import pytest
 
 
 def test_scaffold_message():
     """Testing the creation of a scaffold message."""
-    msg = MyScaffoldMessage()
-    assert msg.consistent is False, "NotImplementedError"
+    with pytest.raises(NotImplementedError):
+        msg = MyScaffoldMessage()
+        assert not msg.check_consistency(), "Not Implemented Error"

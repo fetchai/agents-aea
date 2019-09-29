@@ -45,14 +45,13 @@ class MyScaffoldMessage(Message):
         :param oef_type: the type of message.
         """
         super().__init__(type=oef_type, **kwargs)
-        self.consistent = self.check_consistency()
-#       assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."
+        assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             raise NotImplementedError
-        except (AssertionError, ValueError, NotImplementedError):
+        except (AssertionError, ValueError):
             return False
 
         return True

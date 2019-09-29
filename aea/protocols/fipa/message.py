@@ -39,7 +39,6 @@ class FIPAMessage(Message):
         ACCEPT = "accept"
         MATCH_ACCEPT = "match_accept"
         DECLINE = "decline"
-        UNKNOWN = "unknown"
 
         def __str__(self):
             """Get string representation."""
@@ -63,7 +62,6 @@ class FIPAMessage(Message):
                          target=target,
                          performative=FIPAMessage.Performative(performative),
                          **kwargs)
-#        self.consistent = self.check_consistency()
         assert self.check_consistency(), "FIPAMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:

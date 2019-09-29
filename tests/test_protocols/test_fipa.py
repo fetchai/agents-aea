@@ -32,9 +32,16 @@ from aea.protocols.oef.models import Description
 def test_fipa_cfp_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
     query = base64.b64encode(json.dumps({"foo": "bar"}).encode("utf-8"))
-    msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=query)
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=0,
+                      performative=FIPAMessage.Performative.CFP,
+                      query=query)
     msg_bytes = FIPASerializer().encode(msg)
-    envelope = Envelope(to="receiver", sender="sender", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to="receiver",
+                        sender="sender",
+                        protocol_id=FIPAMessage.protocol_id,
+                        message=msg_bytes)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -49,12 +56,19 @@ def test_fipa_cfp_serialization():
 def test_fipa_propose_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
     proposal = [
-        Description({"foo1": 1, "bar1": 2}),  # DataModel("dm_bar", [AttributeSchema("foo1", int, True), AttributeSchema("bar1", int, True)]))
+        Description({"foo1": 1, "bar1": 2}),
         Description({"foo2": 1, "bar2": 2}),
     ]
-    msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.PROPOSE, proposal=proposal)
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=0,
+                      performative=FIPAMessage.Performative.PROPOSE,
+                      proposal=proposal)
     msg_bytes = FIPASerializer().encode(msg)
-    envelope = Envelope(to="receiver", sender="sender", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to="receiver",
+                        sender="sender",
+                        protocol_id=FIPAMessage.protocol_id,
+                        message=msg_bytes)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -72,9 +86,15 @@ def test_fipa_propose_serialization():
 
 def test_fipa_accept_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
-    msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=0,
+                      performative=FIPAMessage.Performative.ACCEPT)
     msg_bytes = FIPASerializer().encode(msg)
-    envelope = Envelope(to="receiver", sender="sender", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to="receiver",
+                        sender="sender",
+                        protocol_id=FIPAMessage.protocol_id,
+                        message=msg_bytes)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -87,7 +107,7 @@ def test_fipa_accept_serialization():
 
 
 def test_performative_not_recognized():
-    """Test that if a performative is not recognized, the consistency check fails (returns False)."""
+    """Tests an unknown Performative."""
     msg = FIPAMessage(
         performative=FIPAMessage.Performative.ACCEPT,
         message_id=0,
@@ -95,22 +115,29 @@ def test_performative_not_recognized():
         destination="publicKey",
         target=1)
 
-    with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
+    with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
+            as mock_performative_enum:
         mock_performative_enum.ACCEPT.value = "unknown"
-        assert not msg.check_consistency()
+        assert not msg.check_consistency(),\
+            "We expect that the check_consistency will return False"
 
 
 def test_performative_string_value():
     """Test the string value of the performatives."""
-    assert str(FIPAMessage.Performative.CFP) == "cfp"
-    assert str(FIPAMessage.Performative.PROPOSE) == "propose"
-    assert str(FIPAMessage.Performative.DECLINE) == "decline"
-    assert str(FIPAMessage.Performative.ACCEPT) == "accept"
-    assert str(FIPAMessage.Performative.MATCH_ACCEPT) == "match_accept"
+    assert str(FIPAMessage.Performative.CFP) == "cfp",\
+        "The str vlue must be cfp"
+    assert str(FIPAMessage.Performative.PROPOSE) == "propose",\
+        "The str vlue must be propose"
+    assert str(FIPAMessage.Performative.DECLINE) == "decline",\
+        "The str vlue must be decline"
+    assert str(FIPAMessage.Performative.ACCEPT) == "accept",\
+        "The str vlue must be accept"
+    assert str(FIPAMessage.Performative.MATCH_ACCEPT) == "match_accept",\
+        "The str vlue must be match_accept"
 
 
 def test_serialisation_fipa():
-    """Tests the serialisation of a fipa message."""
+    """Tests a Value Error flag for wrong CFP quert."""
     with pytest.raises(ValueError):
         msg = FIPAMessage(
             performative=FIPAMessage.Performative.CFP,
@@ -118,7 +145,7 @@ def test_serialisation_fipa():
             dialogue_id=0,
             destination="publicKey",
             target=1)
-#        msg_bytes = FIPASerializer().encode(msg)
-        with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
+        with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
+                as mock_performative_enum:
             mock_performative_enum.CFP.query = []
             assert not FIPASerializer().encode(msg), "Raises Value Error"
