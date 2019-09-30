@@ -13,6 +13,7 @@ pip install gym
 
 Then, download the examples and packages directory.
 ``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
