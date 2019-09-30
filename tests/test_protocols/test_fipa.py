@@ -147,5 +147,8 @@ def test_serialisation_fipa():
             target=1)
         with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
                 as mock_performative_enum:
-            mock_performative_enum.CFP.query = []
-            assert not FIPASerializer().encode(msg), "Raises Value Error"
+            mock_performative_enum.CFP.value = "unknown"
+            assert FIPASerializer().encode(msg), "Raises Value Error"
+    with pytest.raises(ValueError):
+        msg.set("query", "Hello")
+        assert FIPASerializer().encode(msg), "Query type is Supported!"

@@ -41,35 +41,16 @@ def test_oef_type_string_value():
 
 def test_oef_message_consistency():
     """Tests the consistency of an OEFMessage."""
-    foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
+    foo_datamodel = DataModel("foo", [Attribute("bar", int,
+                                                True, "A bar attribute.")])
     msg = OEFMessage(
         oef_type=OEFMessage.Type.SEARCH_AGENTS,
         id=2,
         query=Query([Constraint("bar", Eq(1))], model=foo_datamodel)
     )
-    assert msg.check_consistency()
-    with mock.patch("aea.protocols.oef.message.OEFMessage.Type") as mock_type_enum:
+    assert msg.check_consistency(), "We expect the consistency to return TRUE"
+    with mock.patch("aea.protocols.oef.message.OEFMessage.Type")\
+            as mock_type_enum:
         mock_type_enum.SEARCH_AGENTS.value = "unknown"
-        assert not msg.check_consistency()
-
-# def test_oef_message_OEF_ERROR():
-#     """Tests the OEF_ERROR msg."""
-#     foo_datamodel = DataModel("boo", [Attribute("far", int, False, "A far attribute.")])
-#     msg = OEFMessage(oef_type = OEFMessage.Type.OEF_ERROR,
-#                     id = 23,
-#                     query = Query([], model=foo_datamodel)
-#     )
-#     with mock.patch("aea.protocols.oef.message.OEFMessage.OEF_ERROR_Operation") as mock_type_enum:
-#         mock_type_enum.register_service = 0
-#         assert not msg.check_consistency()
-
-# def test_oef_message_OEF_DIALOGUE_ERROR():
-#     """Tests the OEF_DIALOGUE_ERROR msg"""
-#     foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
-#     msg = OEFMessage(
-#         oef_type=OEFMessage.Type.DIALOGUE_ERROR,
-#         id=2,
-#         query=Query([Constraint("bar", Eq(1))],
-#         model=foo_datamodel)
-#     )
-#     assert msg.check_consistency()
+        assert not msg.check_consistency(),\
+            "Expect the consistency to return False"
