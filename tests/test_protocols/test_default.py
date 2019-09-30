@@ -22,6 +22,12 @@
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
+from unittest import mock
+import pytest
+import base64
+import json
+from typing import cast
+
 
 def test_default_bytes_serialization():
     """Test that the serialization for the 'simple' protocol works for the BYTES message."""
@@ -29,6 +35,13 @@ def test_default_bytes_serialization():
     msg_bytes = DefaultSerializer().encode(expected_msg)
     actual_msg = DefaultSerializer().decode(msg_bytes)
     assert expected_msg == actual_msg
+
+    with pytest.raises(ValueError):
+        with mock.patch("aea.protocols.default.message.DefaultMessage.Type")\
+                as mock_type_enum:
+            mock_type_enum.BYTES.value = "unknown"
+            assert DefaultSerializer().encode(expected_msg),\
+                ""
 
 
 def test_default_error_serialization():
@@ -38,3 +51,24 @@ def test_default_error_serialization():
     actual_msg = DefaultSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
+
+    msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    with pytest.raises(ValueError):
+        with mock.patch("aea.protocols.default.message.DefaultMessage.Type")\
+                as mock_type_enum:
+            mock_type_enum.BYTES.value = "unknown"
+            body = {}  # Dict[str, Any]
+            msg_type = DefaultMessage.Type(msg.get("type"))
+            body["type"] = str(msg_type.value)
+            content = cast(bytes, msg.get("content"))
+            body["content"] = base64.b64encode(content).decode("utf-8")
+            bytes_msg = json.dumps(body).encode("utf-8")
+            assert DefaultSerializer().decode(bytes_msg), "Type is recognized!"
+
+
+def test_default_message_str_values():
+    """Tests the returned string values of default Message."""
+    assert str(DefaultMessage.Type.BYTES) == "bytes",\
+        "DefaultMessage.Type.BYTES must be bytes"
+    assert str(DefaultMessage.Type.ERROR) == "error",\
+        "DefaultMessage.Type.ERROR must be error"

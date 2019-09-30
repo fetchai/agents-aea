@@ -36,7 +36,7 @@ class MyScaffoldMessage(Message):
 
         def __str__(self):
             """Get string representation."""
-            return self.value
+            return self.value   # pragma: no cover
 
     def __init__(self, oef_type: Optional[Type] = None, **kwargs):
         """
@@ -52,6 +52,6 @@ class MyScaffoldMessage(Message):
         try:
             raise NotImplementedError
         except (AssertionError, ValueError):
-            return False
+            return False  # pragma: no cover
 
-        return True
+        return True     # pragma: no cover
