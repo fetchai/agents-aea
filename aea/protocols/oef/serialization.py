@@ -90,7 +90,8 @@ class OEFSerializer(Serializer):
             new_body["agents"] = list(json_msg["agents"])
         elif oef_type in {OEFMessage.Type.OEF_ERROR}:
             operation = json_msg["operation"]
-            new_body["operation"] = OEFMessage.OEFErrorOperation(operation)
+#           TODO:// REVIEW HERE!
+            new_body["operation"] = OEFMessage.OEFErrorOperation(int(operation))
 
         oef_message = OEFMessage(oef_type=oef_type, body=new_body)
         return oef_message

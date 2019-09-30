@@ -25,18 +25,26 @@ from unittest import mock
 
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import DataModel, Attribute, Query, Constraint
+from aea.protocols.oef.serialization import OEFSerializer
 from oef.query import Eq
 
 
 def test_oef_type_string_value():
     """Test the string value of the type."""
-    assert str(OEFMessage.Type.REGISTER_SERVICE) == "register_service"
-    assert str(OEFMessage.Type.UNREGISTER_SERVICE) == "unregister_service"
-    assert str(OEFMessage.Type.SEARCH_SERVICES) == "search_services"
-    assert str(OEFMessage.Type.SEARCH_AGENTS) == "search_agents"
-    assert str(OEFMessage.Type.OEF_ERROR) == "oef_error"
-    assert str(OEFMessage.Type.DIALOGUE_ERROR) == "dialogue_error"
-    assert str(OEFMessage.Type.SEARCH_RESULT) == "search_result"
+    assert str(OEFMessage.Type.REGISTER_SERVICE) == "register_service",\
+        "The string representation is different than register_service"
+    assert str(OEFMessage.Type.UNREGISTER_SERVICE) == "unregister_service",\
+        "The string representation is different than unregister_service"
+    assert str(OEFMessage.Type.SEARCH_SERVICES) == "search_services",\
+        "The string representation is different than search_services"
+    assert str(OEFMessage.Type.SEARCH_AGENTS) == "search_agents",\
+        "The string representation is different than search_agents"
+    assert str(OEFMessage.Type.OEF_ERROR) == "oef_error",\
+        "The string representation is different than oef_error"
+    assert str(OEFMessage.Type.DIALOGUE_ERROR) == "dialogue_error",\
+        "The string representation is different than dialogue_error"
+    assert str(OEFMessage.Type.SEARCH_RESULT) == "search_result",\
+        "The string representation is different than search_result"
 
 
 def test_oef_message_consistency():
@@ -54,3 +62,19 @@ def test_oef_message_consistency():
         mock_type_enum.SEARCH_AGENTS.value = "unknown"
         assert not msg.check_consistency(),\
             "Expect the consistency to return False"
+
+
+def test_oef_message_OEFError():
+    """Tests the OEF_ERROR type of message."""
+    msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
+                     operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
+
+    assert OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
+                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS),\
+        "Expects an oef message Error!"
+    msg_bytes = OEFSerializer().encode(msg)
+    assert len(msg_bytes) > 0,\
+        "Expects the length of bytes not to be Empty"
+    deserialized_msg = OEFSerializer().decode(msg_bytes)
+    assert msg == deserialized_msg,\
+        "Expected the deserialized_msg to me equals to msg"
