@@ -27,6 +27,7 @@ from aea.mail.base import Envelope
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.models import Description
+from aea.protocols.fipa import fipa_pb2
 
 
 def test_fipa_cfp_serialization():
@@ -137,7 +138,7 @@ def test_performative_string_value():
 
 
 def test_serialisation_fipa():
-    """Tests a Value Error flag for wrong CFP quert."""
+    """Tests a Value Error flag for wrong CFP query."""
     with pytest.raises(ValueError):
         msg = FIPAMessage(
             performative=FIPAMessage.Performative.CFP,
@@ -152,3 +153,37 @@ def test_serialisation_fipa():
     with pytest.raises(ValueError):
         msg.set("query", "Hello")
         assert FIPASerializer().encode(msg), "Query type is Supported!"
+    with pytest.raises(ValueError):
+        cfp_msg = FIPAMessage(message_id=0,
+                              dialogue_id=0,
+                              target=0,
+                              performative=FIPAMessage.Performative.CFP,
+                              query=b"hello")
+        cfp_msg.set("query", "hello")
+        fipa_msg = fipa_pb2.FIPAMessage()
+        fipa_msg.message_id = cfp_msg.get("id")
+        fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
+        fipa_msg.target = cfp_msg.get("target")
+        performative = fipa_pb2.FIPAMessage.CFP()
+        fipa_msg.cfp.CopyFrom(performative)
+        fipa_bytes = fipa_msg.SerializeToString()
+        assert FIPASerializer().decode(fipa_bytes),\
+            "The encoded message is a valid FIPA message."
+    with pytest.raises(ValueError):
+        cfp_msg = FIPAMessage(message_id=0,
+                              dialogue_id=0,
+                              target=0,
+                              performative=FIPAMessage.Performative.CFP,
+                              query=b"hello")
+        with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
+                as mock_performative_enum:
+            mock_performative_enum.CFP.value = "unknown"
+            fipa_msg = fipa_pb2.FIPAMessage()
+            fipa_msg.message_id = cfp_msg.get("id")
+            fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
+            fipa_msg.target = cfp_msg.get("target")
+            performative = fipa_pb2.FIPAMessage.CFP()
+            fipa_msg.cfp.CopyFrom(performative)
+            fipa_bytes = fipa_msg.SerializeToString()
+            assert FIPASerializer().decode(fipa_bytes),\
+                "The encoded message is a FIPA message"
