@@ -1,6 +1,6 @@
 
-!!!	Note	
-	Work in progress.
+!!! Note  
+  Work in progress.
 
 ## Design principles
 
@@ -23,33 +23,13 @@
 
 ## Core components
 
-### Protocol
-
-Protocols define how messages are represented and encoded for transport. They also define the rules to which messages have to adhere in a message sequence. 
-
-For instance, a protocol may contain messages of type `START` and `FINISH`. From there, the rules could prescribe that a message of type `FINISH` must be preceded by a message of type `START`.
-
-The `Message` class in the `protocols/base.py` module provides an abstract class with all the functionality a derived Protocol message class requires for a custom skill, such as basic message generating and management functions and serialisation details.
-
-### Connection
-
-A connection wraps an external SDK or API and manages the messaging. It allows the agent to connect to an external service which has a Python SDK or API. 
-
-### Skill
-
-Skills deliver economic value to the AEA by allowing an agent to encapsulate and call any kind of code. It encapsulates Handlers, Behaviours, and Tasks.
-
-* Handler: each skill has a single Handler which is responsible for the registered protocol messaging. By understanding the requirements contained in Envelopes, the Handler reacts appropriately to message requests.
-* Behaviour: one or more Behaviours encapsulate sequences of actions that cause interactions with other agents initiated by the framework. 
-* Task: one or more Tasks encapsulate background work internal to the agent.
-
 ### MailBox
 
 A MailBox contains InBox and OutBox queues which manage Envelopes.
 
 ### Envelope
 
-An Envelope is the core object which agents use to communicate with each other. It has four attribute parameters:
+An Envelope is the core object which agents use to communicate with each other. It is a vehicle for messages. It has four attribute parameters:
 
 * `to`: defines the destination address.
 
@@ -59,7 +39,41 @@ An Envelope is the core object which agents use to communicate with each other. 
 
 * `message`: is a bytes field which holds the message in serialized form.
 
-The Envelope encodes and decodes messages.
+
+
+### Protocol
+
+Protocols define how messages are represented and encoded for transport. They also define the rules to which messages have to adhere in a message sequence. 
+
+For instance, a protocol may contain messages of type `START` and `FINISH`. From there, the rules could prescribe that a message of type `FINISH` must be preceded by a message of type `START`.
+
+The `Message` class in the `protocols/base.py` module provides an abstract class with all the functionality a derived Protocol message class requires for a custom protocol, such as basic message generating and management functions and serialisation details.
+
+A number of protocols come packages with the AEA framework.
+
+* `oef`
+* `default`
+* `fipa`
+
+### Connection
+
+A connection wraps an external SDK or API and manages the messaging. It allows the agent to connect to an external service which has a Python SDK or API. 
+
+The module `connections/base.py` contains two abstract classes which define a `Channel` and a `Connection`. A `Connection` contains one `Channel`.
+
+The framework provides a number of default connections.
+
+* `local`: implements a local node.
+* `oef`: wraps the OEF SDK.
+
+### Skill
+
+Skills deliver economic value to the AEA by allowing an agent to encapsulate and call any kind of code. It encapsulates Handlers, Behaviours, and Tasks.
+
+* Handler: each skill has a single Handler which is responsible for the registered protocol messaging. Handlers implement reactive behaviour; by understanding the requirements contained in Envelopes, the Handler reacts appropriately to message requests. 
+* Behaviour: one or more Behaviours encapsulate sequences of actions that cause interactions with other agents initiated by the framework. Behaviours implement proactive behaviour.
+* Task: one or more Tasks encapsulate background work internal to the agent.
+
 
 
 ## Agent 
@@ -74,9 +88,7 @@ The `_run_main_loop()` function in the `Agent` class performs a series of activi
 
 ## Resources 
 
-The `Resources` class implements all resources for an agent. These come in the form of registries.
-
-The specific classes are in the `registries/base.py` module.
+Registries hold Resources. There is one Registry for each type of Resource. The specific classes are in the `registries/base.py` module.
 
 * ProtocolRegistry.
 * HandlerRegistry. 
@@ -88,7 +100,7 @@ The specific classes are in the `registries/base.py` module.
 
 !!! TODO 
 
-## Orchestrator
+## Filter
 
 !!! TODO 
 

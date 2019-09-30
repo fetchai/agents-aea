@@ -28,7 +28,7 @@ AEA users are:
 
 By operating as a platform for start ups, we envisage the AEA framework to be in a continuous growth pattern.
 
-With start up grants, similar to those Ethereum offers, we will kickstart solutions while testing product-problem fit and identifying our user base.
+With start up grants, similar to those Ethereum offers, we will kick start solutions while testing product-problem fit and identifying our user base.
 
 Both successes and failures allow us to conceive new hypotheses and so offer enhanced business opportunities.
 
