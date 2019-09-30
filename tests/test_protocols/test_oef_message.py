@@ -78,3 +78,12 @@ def test_oef_message_OEFError():
     deserialized_msg = OEFSerializer().decode(msg_bytes)
     assert msg == deserialized_msg,\
         "Expected the deserialized_msg to me equals to msg"
+
+
+def test_oef_message_DialogeError():
+    """Tests the OEFMEssage of type DialogueError."""
+    assert OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR,
+                      id=0,
+                      dialogue_id=1,
+                      origin="myKey"),\
+        "Could not create the message of type DialogueError"
