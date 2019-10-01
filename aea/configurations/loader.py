@@ -27,12 +27,12 @@ from typing import TextIO, Type, TypeVar, Generic
 import yaml
 from jsonschema import validate
 
-from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig
+from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
-T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig)
+T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig)
 
 
 class ConfigLoader(Generic[T]):

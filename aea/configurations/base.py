@@ -152,6 +152,45 @@ class ConnectionConfig(Configuration):
         )
 
 
+class ProtocolConfig(Configuration):
+    """Handle protocol configuration."""
+
+    def __init__(self,
+                 name: str = "",
+                 authors: str = "",
+                 version: str = "",
+                 license: str = "",
+                 url: str = ""):
+        """Initialize a connection configuration object."""
+        self.name = name
+        self.authors = authors
+        self.version = version
+        self.license = license
+        self.url = url
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "name": self.name,
+            "authors": self.authors,
+            "version": self.version,
+            "license": self.license,
+            "url": self.url
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        return ProtocolConfig(
+            name=cast(str, obj.get("name")),
+            authors=cast(str, obj.get("authors")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            url=cast(str, obj.get("url"))
+        )
+
+
 class HandlerConfig(Configuration):
     """Handle a skill handler configuration."""
 
@@ -289,7 +328,7 @@ class SkillConfig(Configuration):
             skill_config.behaviours.create(behaviour_config.class_name, behaviour_config)
 
         for t in obj.get("tasks"):  # type: ignore
-            task_config = BehaviourConfig.from_json(t["task"])
+            task_config = TaskConfig.from_json(t["task"])
             skill_config.tasks.create(task_config.class_name, task_config)
 
         handler = HandlerConfig.from_json(obj.get("handler"))  # type: ignore

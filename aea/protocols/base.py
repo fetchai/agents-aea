@@ -27,6 +27,8 @@ from typing import Any, Dict, Optional
 
 from google.protobuf.struct_pb2 import Struct
 
+from aea.configurations.base import ProtocolConfig
+
 
 class Message:
     """This class implements a message."""
@@ -184,15 +186,17 @@ class Protocol(ABC):
     - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
     """
 
-    def __init__(self, id: str, serializer: Serializer):
+    def __init__(self, id: str, serializer: Serializer, config: ProtocolConfig):
         """
         Initialize the protocol manager.
 
         :param id: the protocol id.
         :param serializer: the serializer.
+        :param config: the protocol configurations.
         """
         self._id = id
         self._serializer = serializer
+        self._config = config
 
     @property
     def id(self):
@@ -203,6 +207,11 @@ class Protocol(ABC):
     def serializer(self) -> Serializer:
         """Get the serializer."""
         return self._serializer
+
+    @property
+    def config(self) -> ProtocolConfig:
+        """Get the serializer."""
+        return self._config
 
     def check(self, msg: Message) -> bool:
         """
