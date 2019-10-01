@@ -6,19 +6,19 @@ All the commands must be executed from the parent directory, if not stated other
 
 We recommend using the following command for building:
 
-    ./deploy-image/scripts/docker-build-img.sh -t aea-deploy:latest -- 
+    ./deploy-image/scripts/docker-build-img.sh \
+        -t aea-deploy:latest \
+        --build-arg AGENT_REPO_URL=https://github.com/username/repo.git --
     
-
-To pass immediate parameters to the `docker build` command:
-
-    ./deploy-image/scripts/docker-build-img.sh arg1 arg2 --    
 
 E.g.:
 
-    ./deploy-image/scripts/docker-build-img.sh --squash --cpus 4 --compress --    
+    ./deploy-image/scripts/docker-build-img.sh \
+        -t aea-deploy:latest \
+        --build-arg AGENT_REPO_URL=https://github.com/fetchai/echo_agent.git --    
 
 
 ## Run
 
-    docker run -it aea-develop:latest 
+    docker run -it aea-deploy:latest 
  
