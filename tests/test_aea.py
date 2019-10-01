@@ -163,11 +163,3 @@ def test_handle():
     agent.mailbox.inbox._queue.put(envelope)
     agent.stop()
     t.join()
-
-#   unsupported skill for protocol oef
-#   msg = FIPASerializer().encode(\
-#   FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
-#           message_id=0, dialogue_id=0, destination=public_key, target=1))
-#    agent.outbox.put_message(to=public_key, sender=public_key,\
-#    protocol_id="fipa", message=msg)
-#    env = agent.mailbox.outbox._queue.get(block=True, timeout=1)

@@ -58,8 +58,6 @@ class OEFMessage(Message):
 
         OTHER = 10000
 
-#       Changed here so I can store the int representation of the Error Operation
-#       TODO:// REVIEW HERE!
         def __str__(self):
             """Get string representation."""
             return str(self.value)
