@@ -210,7 +210,7 @@ class Protocol(ABC):
 
     @property
     def config(self) -> ProtocolConfig:
-        """Get the serializer."""
+        """Get the configuration."""
         return self._config
 
     def check(self, msg: Message) -> bool:

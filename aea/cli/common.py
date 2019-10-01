@@ -30,7 +30,8 @@ import click
 import click_log
 import jsonschema  # type: ignore
 
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
+    DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 
 logger = logging.getLogger("aea")
@@ -48,6 +49,7 @@ class Context(object):
         self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
         self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         self.connection_loader = ConfigLoader("connection-config_schema.json", ConnectionConfig)
+        self.protocol_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
         self.cwd = cwd
 
     def set_config(self, key, value) -> None:
@@ -83,9 +85,10 @@ def _try_to_load_protocols(ctx: Context):
     try:
         for protocol_name in ctx.agent_config.protocols:
             logger.debug("Processing protocol {}".format(protocol_name))
-            # protocol_config = ctx.protocol_loader.load(open(os.path.join(directory, DEFAULT_PROTOCOL_CONFIG_FILE)))
-            # if protocol_config is None:
-            #     exit(-1)
+            protocol_config = ctx.protocol_loader.load(open(os.path.join("protocols", DEFAULT_PROTOCOL_CONFIG_FILE)))
+            if protocol_config is None:
+                logger.debug("Protocol configuration file for protocl {} not found.".format(protocol_name))
+                exit(-1)
 
             protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join(ctx.agent_config.registry_path, "protocols", protocol_name, "__init__.py"))
             if protocol_spec is None:

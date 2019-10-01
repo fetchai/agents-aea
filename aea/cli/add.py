@@ -20,6 +20,7 @@
 """Implementation of the 'aea add' subcommand."""
 
 import os
+import pprint
 import shutil
 from pathlib import Path
 from typing import cast
@@ -123,16 +124,16 @@ def protocol(click_context, protocol_name):
             logger.error("Cannot find protocol: '{}'.".format(protocol_name))
             exit(-1)
 
-    # # try to load the connection configuration file
-    # try:
-    #     connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
-    #     logger.info("Connection supports the following protocols: {}".format(connection_configuration.supported_protocols))
-    # except ValidationError as e:
-    #     logger.error("Connection configuration file not valid: {}".format(str(e)))
-    #     exit(-1)
-    #     return
+    # try to load the protocol configuration file
+    try:
+        protocol_configuration = ctx.protocol_loader.load(open(str(protocol_configuration_filepath)))
+        logger.info("Protocol loaded: {}".format(pprint.pformat(protocol_configuration.json)))
+    except ValidationError as e:
+        logger.error("Protocol configuration file not valid: {}".format(str(e)))
+        exit(-1)
+        return
 
-    # copy the connection package into the agent's supported connections.
+    # copy the protocol package into the agent's supported connections.
     src = str(Path(os.path.join(registry_path, "protocols", protocol_name)).absolute())
     dest = os.path.join(ctx.cwd, "protocols", protocol_name)
     logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
