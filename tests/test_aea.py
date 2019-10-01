@@ -17,20 +17,20 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea.aea.py."""
+import os
+import time
+from pathlib import Path
+from threading import Thread
 
 from aea.aea import AEA
+from aea.connections.local.connection import LocalNode, OEFLocalConnection
+from aea.crypto.base import Crypto
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.crypto.helpers import _create_temporary_private_key_pem_path
-from aea.crypto.base import Crypto
-
-import time
-from threading import Thread
-from pathlib import Path
+from .conftest import CUR_PATH
 
 from .conftest import CUR_PATH
 
@@ -53,7 +53,8 @@ def test_act():
     """Tests the act function of the AeA."""
     node = LocalNode()
     agent_name = "MyAgent"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
+    path = "/tests/data/dummy_aea/"
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
     mailbox = MailBox(OEFLocalConnection(public_key, node))
@@ -77,7 +78,8 @@ def test_react():
     """Tests income messages."""
     node = LocalNode()
     agent_name = "MyAgent"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
+    path = "/tests/data/dummy_aea/"
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
     mailbox = MailBox(OEFLocalConnection(public_key, node))
@@ -112,7 +114,8 @@ def test_handle():
     """Tests handle method of an agent."""
     node = LocalNode()
     agent_name = "MyAgent"
-    private_key_pem_path = _create_temporary_private_key_pem_path()
+    path = "/tests/data/dummy_aea/"
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
     mailbox = MailBox(OEFLocalConnection(public_key, node))
@@ -161,11 +164,3 @@ def test_handle():
     agent.mailbox.inbox._queue.put(envelope)
     agent.stop()
     t.join()
-
-#   unsupported skill for protocol oef
-#   msg = FIPASerializer().encode(\
-#   FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
-#           message_id=0, dialogue_id=0, destination=public_key, target=1))
-#    agent.outbox.put_message(to=public_key, sender=public_key,\
-#    protocol_id="fipa", message=msg)
-#    env = agent.mailbox.outbox._queue.get(block=True, timeout=1)
