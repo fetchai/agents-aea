@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 class FIPANegotiationHandler(Handler):
     """This class implements the fipa negotiation handler."""
 
-    SUPPORTED_PROTOCOL = 'fipa'  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """
@@ -50,23 +50,22 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         fipa_msg = FIPASerializer().decode(envelope.message)
-        fipa_msg_performative = FIPAMessage.Performative(fipa_msg.get("performative"))
+        fipa_msg_performative = fipa_msg.get("performative")  # FIPAMessage.Performative(fipa_msg.get("performative"))
 
-        logger.debug("Handling FIPAMessage of performative={}".format(fipa_msg_performative))
-        if self.dialogues.is_belonging_to_registered_dialogue(fipa_msg, envelope.sender):
-            dialogue = self.context.dialogues.get_dialogue(fipa_msg, envelope.sender)
+        logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
+        if self.context.dialogues.is_belonging_to_registered_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key):
+            dialogue = self.context.dialogues.get_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key)
             dialogue.incoming_extend([fipa_msg])
-        elif self.dialogues.is_permitted_for_new_dialogue(fipa_msg, envelope.sender):
-            # services = json.loads(message.get("query").decode('utf-8'))
-            # is_seller = services['description'] == TAC_DEMAND_DATAMODEL_NAME
+        elif self.context.dialogues.is_permitted_for_new_dialogue(fipa_msg, envelope.sender):
             dialogue = self.context.dialogues.create_opponent_initiated(fipa_msg, envelope.sender)
         else:
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
-            msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b'This message belongs to an unidentified dialogue.')
-            msg_bytes = DefaultSerializer().encode(msg)
+            default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b'This message belongs to an unidentified dialogue.')
+            msg_bytes = DefaultSerializer().encode(default_msg)
             self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
             return
 
+        logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name, fipa_msg_performative))
         if fipa_msg_performative == FIPAMessage.Performative.CFP:
             response = self.on_cfp(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.PROPOSE:
@@ -85,25 +84,24 @@ class FIPANegotiationHandler(Handler):
 
         :return: None
         """
-        # pop all pending transactions
-        # reset dialogues
-        # reset game instance
-        raise NotImplementedError
+        self.context.dialogues.reset()
 
-    def on_cfp(self, cfp: Message, dialogue: Dialogue) -> Envelope:
+    def on_cfp(self, cfp: FIPAMessage, dialogue: Dialogue) -> Envelope:
         """
         Handle a CFP.
 
-        :param cfp: the message containing the CFP
+        :param cfp: the fipa message containing the CFP
         :param dialogue: the dialogue
 
         :return: a Propose or a Decline
         """
-        goods_description = self.context.game_instance.get_service_description(is_supply=dialogue.is_seller)
+        self.context.strategy
+        get_goods_quantities_description
+        own_service_description = self.context.game_instance.get_own_service_description(is_supply=dialogue.is_seller)
         new_msg_id = cfp.get("id") + 1
         decline = False
         cfp_services = json.loads(cfp.get("query").decode('utf-8'))
-        if not self.context.game_instance.is_matching(cfp_services, goods_description):
+        if not is_compatible(cfp_services, goods_description):
             decline = True
             logger.debug("[{}]: Current holdings do not satisfy CFP query.".format(self.context.agent_name))
         else:
@@ -196,15 +194,15 @@ class FIPANegotiationHandler(Handler):
                      .format(self.agent_name, decline.get("id"), decline.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, decline.get("target")))
         target = decline.get("target")
         if target == 1:
-            self.context.game_instance.stats_manager.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
+            self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         elif target == 2:
-            self.context.game_instance.stats_manager.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
+            self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
             transaction = self.context.game_instance.transaction_manager.pop_pending_proposal(dialogue.dialogue_label, target)
             if self.context.game_instance.strategy.is_world_modeling:
                 self.context.game_instance.world_state.update_on_declined_propose(transaction)
         elif target == 3:
-            self.context.game_instance.stats_manager.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
-            transaction = self.context.game_instance.transaction_manager.pop_pending_initial_acceptance(dialogue.dialogue_label, target)
+            self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
+            transaction = self.context.transaction_manager.pop_pending_initial_acceptance(dialogue.dialogue_label, target)
             self.context.game_instance.transaction_manager.pop_locked_tx(transaction.transaction_id)
         return None
 

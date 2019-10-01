@@ -171,6 +171,46 @@ class Dialogue(BaseDialogue):
         return result
 
 
+class DialogueStats(object):
+    """Class to handle statistics on the negotiation."""
+
+    def __init__(self) -> None:
+        """Initialize a StatsManager."""
+        self._self_initiated = {EndState.SUCCESSFUL: 0,
+                                EndState.DECLINED_CFP: 0,
+                                EndState.DECLINED_PROPOSE: 0,
+                                EndState.DECLINED_ACCEPT: 0}  # type: Dict[EndState, int]
+        self._other_initiated = {EndState.SUCCESSFUL: 0,
+                                 EndState.DECLINED_CFP: 0,
+                                 EndState.DECLINED_PROPOSE: 0,
+                                 EndState.DECLINED_ACCEPT: 0}  # type: Dict[EndState, int]
+
+
+    @property
+    def self_initiated(self) -> Dict[EndState, int]:
+        """Get the stats dictionary on self initiated dialogues."""
+        return self._self_initiated
+
+    @property
+    def other_initiated(self) -> Dict[EndState, int]:
+        """Get the stats dictionary on other initiated dialogues."""
+        return self._other_initiated
+
+    def add_dialogue_endstate(self, end_state: EndState, is_self_initiated: bool) -> None:
+        """
+        Add dialogue endstate stats.
+
+        :param end_state: the end state of the dialogue
+        :param is_self_initiated: whether the dialogue is initiated by the agent or the opponent
+
+        :return: None
+        """
+        if is_self_initiated:
+            self._self_initiated[end_state] += 1
+        else:
+            self._other_initiated[end_state] += 1
+
+
 class Dialogues(BaseDialogues):
     """The dialogues class keeps track of all dialogues."""
 
@@ -183,6 +223,7 @@ class Dialogues(BaseDialogues):
         BaseDialogues.__init__(self)
         self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, Dialogue]
         self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogue_stats = DialogueStats()
 
     @property
     def dialogues_as_seller(self) -> Dict[DialogueLabel, Dialogue]:
@@ -194,35 +235,39 @@ class Dialogues(BaseDialogues):
         """Get dictionary of dialogues in which the agent acts as a buyer."""
         return self._dialogues_as_buyer
 
-    def is_permitted_for_new_dialogue(self, message: Message, known_pbks: List[str], sender: Address) -> bool:
+    @property
+    def dialogue_stats(self) -> DialogueStats:
+        """Get the dialogue statistics."""
+        return self._dialogue_stats
+
+    def is_permitted_for_new_dialogue(self, fipa_msg: FIPAMessage, sender: Address) -> bool:
         """
-        Check whether an agent message is permitted for a new dialogue.
+        Check whether a fipa message is permitted for a new dialogue.
 
         That is, the message has to
-        - be a CFP,
-        - have the correct msg id and message target, and
-        - be from a known public key.
+        - be a CFP, and
+        - have the correct msg id and message target.
 
-        :param message: the agent message
-        :param known_pbks: the list of known public keys
+        :param message: the fipa message
+        :param sender: the sender
 
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
-        msg_id = message.get("id")
-        target = message.get("target")
-        performative = message.get("performative")
+        msg_id = fipa_msg.get("id")
+        target = fipa_msg.get("target")
+        performative = fipa_msg.get("performative")
 
         result = performative == FIPAMessage.Performative.CFP \
-            and msg_id == STARTING_MESSAGE_ID\
-            and target == STARTING_MESSAGE_TARGET \
-            and (sender in known_pbks)
+            and msg_id == STARTING_MESSAGE_ID \
+            and target == STARTING_MESSAGE_TARGET
         return result
 
-    def is_belonging_to_registered_dialogue(self, message: Message, agent_pbk: Address, sender: Address) -> bool:
+    def is_belonging_to_registered_dialogue(self, message: Message, sender: Address, agent_pbk: Address) -> bool:
         """
         Check whether an agent message is part of a registered dialogue.
 
-        :param message: the agent message
+        :param message: the fipa message
+        :param sender: the sender
         :param agent_pbk: the public key of the agent
 
         :return: boolean indicating whether the message belongs to a registered dialogue
@@ -257,11 +302,12 @@ class Dialogues(BaseDialogues):
                 result = self_initiated_dialogue.is_expecting_accept_decline()
         return result
 
-    def get_dialogue(self, message: Message, sender: Address, agent_pbk: Address) -> Dialogue:
+    def get_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> Dialogue:
         """
         Retrieve dialogue.
 
-        :param message: the agent message
+        :param fipa_msg: the fipa message
+        :param sender_pbk: the sender public key
         :param agent_pbk: the public key of the agent
 
         :return: the dialogue
@@ -311,18 +357,21 @@ class Dialogues(BaseDialogues):
         result = self._create(dialogue_label, is_seller)
         return result
 
-    def create_opponent_initiated(self, dialogue_opponent_pbk: Address, dialogue_id: int, is_seller: bool) -> Dialogue:
+    def create_opponent_initiated(self, fipa_msg: FIPAMessage, sender: Address) -> Dialogue:
         """
         Save an opponent initiated dialogue.
 
-        :param dialogue_opponent_pbk: the pbk of the agent with which the dialogue is kept.
-        :param dialogue_id: the id of the dialogue
-        :param is_seller: boolean indicating the agent role
+        :param fipa_msg: the fipa message
+        :param sender: the pbk of the sender
 
         :return: the created dialogue
         """
-        dialogue_starter_pbk = dialogue_opponent_pbk
+        dialogue_starter_pbk = sender
+        dialogue_opponent_pbk = sender
+        dialogue_id = fipa_msg.get("dialogue_id")
         dialogue_label = DialogueLabel(dialogue_id, dialogue_opponent_pbk, dialogue_starter_pbk)
+        services = json.loads(fipa_msg.get("query").decode('utf-8'))
+        is_seller = services['description'] == DEMAND_DATAMODEL_NAME
         result = self._create(dialogue_label, is_seller)
         return result
 
@@ -345,3 +394,13 @@ class Dialogues(BaseDialogues):
             self._dialogues_as_buyer.update({dialogue_label: dialogue})
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
+
+    def reset(self) -> None:
+        """
+        Reset the dialogues.
+
+        :return: None
+        """
+        self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogue_stats = DialogueStats()
