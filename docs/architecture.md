@@ -1,6 +1,6 @@
 
-!!!	Note	
-	Work in progress.
+!!! Note  
+    Work in progress.
 
 ## Design principles
 
@@ -23,67 +23,99 @@
 
 ## Core components
 
-### Connections
+### MailBox
 
-A connection allows the AEA to connect to an external service which has a Python SDK or API. A connection wraps an external SDK or API.
-
-### Skill
-
-A skill can encapsulate any code and ideally delivers economic value to the AEA. Each skill has at most a single Handler and potentially multiple Behaviours and Tasks. The Handler is responsible for dealing with messages of the protocol type for which this skill is registered, as such it encapsulates `reactions`. A Behaviour encapsulates `actions`, that is sequences of interactions with other agents initiated by the AEA. Finally, a Task encapsulates background work which is internal to the AEA.
-
-### Protocol
-
-Protocols define how messages are represented and encoded for transport. They also define the rules to which messages have to adhere in a message sequence. For instance, a protocol might have a message of type START and FINISH. Then the rules could prescribe that a message of type FINISH must be preceded by a message of type START.
-
-
-### Mailbox
-
-TBC.
+A MailBox contains InBox and OutBox queues which manage Envelopes.
 
 ### Envelope
 
-The `Envelope` is the core object which agents use to communicate with each other. An `Envelope` has four attributes:
+An Envelope is the core object which agents use to communicate with each other. It is a vehicle for messages. It has four attribute parameters:
 
-* `to`: defines the destination address
+* `to`: defines the destination address.
 
-* `sender`: defines the sender address
+* `sender`: defines the sender address.
 
-* `protocol_id`: defines the protocol_id
+* `protocol_id`: defines the id of the protocol.
 
-* `message`: is a `bytes` field to hold the message in serialized form.
+* `message`: is a bytes field which holds the message in serialized form.
 
 
-### MainLoop
 
-TBC.
+### Protocol
 
-### ProtocolMessage
+Protocols define how messages are represented and encoded for transport. They also define the rules to which messages have to adhere in a message sequence. 
 
-TBC. 
+For instance, a protocol may contain messages of type `START` and `FINISH`. From there, the rules could prescribe that a message of type `FINISH` must be preceded by a message of type `START`.
 
-### Director
+The `Message` class in the `protocols/base.py` module provides an abstract class with all the functionality a derived Protocol message class requires for a custom protocol, such as basic message generating and management functions and serialisation details.
 
-TBC. 
+A number of protocols come packaged up with the AEA framework.
 
-### Orchestrator
+* `default`: this protocol provides a bare bones implementation for an AEA protocol which includes a `DefaultMessage` class and a `DefaultSerialization` class with functions for managing serialisation. Use this protocol as a starting point for building custom protocols.
+* `oef`: this protocol provides the AEA protocol implementation for communication with the OEF including an `OEFMessage` class for hooking up to OEF services and search agents. Utility classes are available in the `models.py` module which provides OEF specific requirements such as classes needed to perform querying on the OEF such as `ConstraintExpr`, `Query`, `And`, and `Or`, to name a few.
+* `fipa`: this protocol provides classes and functions needed for AEA agent communication via the FIPA Agent Communication Language. For example, the `FIPAMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, etc. Protobuf configuration is also available.
 
-TBC.
+### Connection
+
+A connection wraps an external SDK or API and manages the messaging. It allows the agent to connect to an external service which has a Python SDK or API. 
+
+The module `connections/base.py` contains two abstract classes which define a `Channel` and a `Connection`. A `Connection` contains one `Channel`.
+
+The framework provides a number of default connections.
+
+* `local`: implements a local node.
+* `oef`: wraps the OEF SDK.
+
+### Skill
+
+Skills deliver economic value to the AEA by allowing an agent to encapsulate and call any kind of code. It encapsulates Handlers, Behaviours, and Tasks.
+
+* Handler: each skill has a single Handler which is responsible for the registered protocol messaging. Handlers implement reactive behaviour; by understanding the requirements contained in Envelopes, the Handler reacts appropriately to message requests. 
+* Behaviour: one or more Behaviours encapsulate sequences of actions that cause interactions with other agents initiated by the framework. Behaviours implement proactive behaviour.
+* Task: one or more Tasks encapsulate background work internal to the agent.
+
+
+
+## Agent 
+
+### Main loop
+
+The `_run_main_loop()` function in the `Agent` class performs a series of activities while the `Agent` state is not stopped.
+
+* `act()`: this function calls the `act()` function of all registered Behaviours.
+* `react()`: this function grabs all Envelopes waiting in the InBox queue and calls the `handle()` function on them.
+* `update()`: this function loops through all the Tasks and executes them.
 
 ## Resources 
-### HanderRegistry 
-TBC.
-### BehaviourRegistry
-TBC.
-### TaskRegistry
-TBC.
-### ProtocolRegistry
-TBC.
+
+Registries hold Resources. There is one Registry for each type of Resource. The specific classes are in the `registries/base.py` module.
+
+* ProtocolRegistry.
+* HandlerRegistry. 
+* BehaviourRegistry.
+* TaskRegistry.
+
+
+## Director
+
+!!! TODO 
+
+## Filter
+
+!!! TODO 
+
 
 
 
 ## File structure
 
-An agent is structured in a directory with a configuration file, a directory with skills, a directory with protocols, a directory with connections and a main logic file that is used when running aea run.
+The file structure of an agent is fixed.
+
+The top level directory has the agent's name. Below is a `yaml` configuration file, then directories containing the connections, protocols, and skills, and a file containing the private key of the agent.
+
+The developer can create new directories where necessary but the core structure must remain the same.
+
+The CLI tool provides a way to scaffold out the required directory structure for new agents. See the instructions for that <a href="../scaffolding/" target=_blank>here</a>.
 
 ``` bash
 agentName/
