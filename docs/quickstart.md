@@ -1,5 +1,7 @@
 ## Preliminaries
 
+Make sure you are running desktop <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
+
 Create and cd into a new working directory.
 
 ``` bash
@@ -18,7 +20,7 @@ If you don't have it, install it. Instructions are <a href="https://pypi.org/pro
 Once installed, create a new environment and open it.
 
 ``` bash
-pipenv --python 3.7 && pipenv shell
+touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
 
@@ -26,7 +28,7 @@ pipenv --python 3.7 && pipenv shell
 
 Install the Autonomous Economic Agent framework.
 
-The following installs the basic application.
+The following installs the basic application without the cli. If in doubt, install `aea[all]`.
 ``` bash
 pip install aea
 ```
@@ -37,17 +39,22 @@ pip install aea[all]
 
 ```
 
-The following installs just the cli.
+The following only installs the cli.
 ``` bash
 pip install aea[cli]
 ```
 
 
-## Echo Agent demo
-### Download the examples and scripts directories.
+## Echo skill demo
+
+The echo skill is a simple demo that prints logs from the agent's main loop as it calls registered `Task` and `Behaviour` code.
+
+
+
+### Download the examples, scripts, and packages directories.
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 ### Create a new agent
@@ -62,21 +69,18 @@ cd my_first_agent
 aea add skill echo
 ```
 
-### Launch the OEF 
-
-
-Open a new terminal and launch the OEF.
+### Add a local connection
 
 ``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+aea add connection local
 ```
 
 ### Run the agent locally
 
-Go back to the other terminal and run the agent.
+Run the agent with the connection.
 
 ``` bash
-aea run
+aea run --connection local
 ```
 
 You will see the echo task running in the terminal window.
