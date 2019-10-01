@@ -1,6 +1,6 @@
 
 !!! Note  
-  Work in progress.
+    Work in progress.
 
 ## Design principles
 
@@ -49,11 +49,11 @@ For instance, a protocol may contain messages of type `START` and `FINISH`. From
 
 The `Message` class in the `protocols/base.py` module provides an abstract class with all the functionality a derived Protocol message class requires for a custom protocol, such as basic message generating and management functions and serialisation details.
 
-A number of protocols come packages with the AEA framework.
+A number of protocols come packaged up with the AEA framework.
 
-* `oef`
-* `default`
-* `fipa`
+* `default`: this protocol provides a bare bones implementation for an AEA protocol which includes a `DefaultMessage` class and a `DefaultSerialization` class with functions for managing serialisation. Use this protocol as a starting point for building custom protocols.
+* `oef`: this protocol provides the AEA protocol implementation for communication with the OEF including an `OEFMessage` class for hooking up to OEF services and search agents. Utility classes are available in the `models.py` module which provides OEF specific requirements such as classes needed to perform querying on the OEF such as `ConstraintExpr`, `Query`, `And`, and `Or`, to name a few.
+* `fipa`: this protocol provides classes and functions needed for AEA agent communication via the FIPA Agent Communication Language. For example, the `FIPAMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, etc. Protobuf configuration is also available.
 
 ### Connection
 
