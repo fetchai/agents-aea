@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,8 +17,26 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the protocol registry for the AEA framework."""
-from typing import List
+"""This package contains a scaffold of a behaviour."""
 
-gym_dependencies = []  # type: List[str]
-tac_dependencies = ["protobuf"]  # type: List[str]
+from aea.skills.base import Behaviour
+
+
+class MyScaffoldBehaviour(Behaviour):
+    """This class scaffolds a behaviour."""
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover

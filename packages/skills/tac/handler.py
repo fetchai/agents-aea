@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,8 +17,33 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the protocol registry for the AEA framework."""
-from typing import List
+"""This package contains a scaffold of a handler."""
 
-gym_dependencies = []  # type: List[str]
-tac_dependencies = ["protobuf"]  # type: List[str]
+from typing import Optional
+
+from aea.configurations.base import ProtocolId
+from aea.mail.base import Envelope
+from aea.skills.base import Handler
+
+
+class MyScaffoldHandler(Handler):
+    """This class scaffolds a handler."""
+
+    SUPPORTED_PROTOCOL = ''  # type: Optional[ProtocolId]
+
+    def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Implement the reaction to an envelope.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover

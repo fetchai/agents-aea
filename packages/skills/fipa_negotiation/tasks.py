@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,8 +17,29 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the protocol registry for the AEA framework."""
-from typing import List
+"""This package contains a scaffold of a task."""
 
-gym_dependencies = []  # type: List[str]
-tac_dependencies = ["protobuf"]  # type: List[str]
+from aea.skills.base import Task
+
+
+class MyScaffoldTask(Task):
+    """This class scaffolds a task."""
+
+    def execute(self) -> None:
+        """
+        Implement the task execution.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        raise NotImplementedError
+        # clean up transactions
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        raise NotImplementedError
+        # pop all pending transactions
