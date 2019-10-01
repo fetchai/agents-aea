@@ -29,7 +29,7 @@ from jsonschema import validate
 
 from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig
 
-_CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))
+_CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
 T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig)

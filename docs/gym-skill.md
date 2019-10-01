@@ -5,21 +5,16 @@ The AEA gym skill demonstrates how a custom Reinforcement Learning agent may be 
 
 Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
 
-Create and launch a virtual environment.
-
-``` bash
-pipenv --python 3.7 && pipenv shell
-```
-
 Install the gym library.
 
 ``` bash
 pip install gym
 ```
 
-Then, download the examples and channels directory.
+Then, download the examples and packages directory.
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 
@@ -66,19 +61,18 @@ env: gyms.env.BanditNArmedRandom
 aea run --connection gym
 ```
 
-<!--
-You will see...
+You will see the gym training logs.
 
-<center>![AEA Visdom UI](assets/***.png)</center>
--->
+
+<center>![AEA Visdom UI](assets/gym-training.png)</center>
 
 
 ### Delete the agent
 
-When you're done, you can delete the agent.
+When you're done, you can go up a level and delete the agent.
 
 ``` bash
-aea delete my_first_agent
+aea delete my_gym_agent
 ```
 
 

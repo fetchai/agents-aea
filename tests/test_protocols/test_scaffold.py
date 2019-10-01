@@ -17,26 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a behaviour."""
+"""This module contains the tests for the Scaffold protocol."""
 
-from aea.skills.base import Behaviour
+from aea.protocols.scaffold.message import MyScaffoldMessage
+import pytest
 
 
-class MyScaffoldBehaviour(Behaviour):
-    """This class scaffolds a behaviour."""
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
+def test_scaffold_message():
+    """Testing the creation of a scaffold message."""
+    with pytest.raises(NotImplementedError):
+        msg = MyScaffoldMessage()
+        assert not msg.check_consistency(), "Not Implemented Error"

@@ -32,7 +32,7 @@ class MyScaffoldTask(Task):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def teardown(self) -> None:
         """
@@ -40,4 +40,4 @@ class MyScaffoldTask(Task):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover

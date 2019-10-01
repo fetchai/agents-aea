@@ -33,7 +33,7 @@ from oef.agents import AsyncioCore, OEFAgent
 
 logger = logging.getLogger(__name__)
 
-CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 
 CONFIGURATION_SCHEMA_DIR = os.path.join(ROOT_DIR, "aea", "configurations", "schemas")

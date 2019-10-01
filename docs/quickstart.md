@@ -1,5 +1,7 @@
 ## Preliminaries
 
+Make sure you are running desktop <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
+
 Create and cd into a new working directory.
 
 ``` bash
@@ -46,7 +48,6 @@ pip install aea[cli]
 ## Echo skill demo
 
 The echo skill is a simple demo that prints logs from the agent's main loop as it calls registered `Task` and `Behaviour` code.
-
 
 
 ### Download the examples, scripts, and packages directories.

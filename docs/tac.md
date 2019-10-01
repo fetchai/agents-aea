@@ -59,7 +59,7 @@ In the Environment tab, make sure you have the `tac_controller` environment sele
 <center>![AEA Visdom UI](assets/visdom_ui.png)</center>
 
 
-## Alternative build and run - WIP
+## Alternative build and run
 
 In a new terminal window, clone the repo, build the sandbox, and launch it.
 
