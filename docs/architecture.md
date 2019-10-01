@@ -111,7 +111,7 @@ Registries hold Resources. There is one Registry for each type of Resource. The 
 
 The file structure of an agent is fixed.
 
-The top level directory has the agent's name. Below is a `yaml` configuration file, then directories containing the connections, protocols, and skills, and a security certification file.
+The top level directory has the agent's name. Below is a `yaml` configuration file, then directories containing the connections, protocols, and skills, and a file containing the private key of the agent.
 
 The developer can create new directories where necessary but the core structure must remain the same.
 
