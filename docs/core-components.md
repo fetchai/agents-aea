@@ -78,7 +78,7 @@ The `Filter` routes messages to the correct `Handler` via the `Resource` compone
 
 The `Resource` component is made up of Registries which contain Resources. There is one Registry for each type of Resource. 
 
-Message Envelopes travel through the `Filter` which directs them to the correct `Registry`.
+Message Envelopes travel through the `Filter` which fetches the correct `Handler` from the `Registry`.
 
 Specific `Registry` classes are in the `registries/base.py` module.
 
