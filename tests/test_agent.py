@@ -78,9 +78,10 @@ def test_run_agent():
     agent_thread.start()
     time.sleep(1)
 
-    assert agent.agent_state == AgentState.RUNNING,\
-        "Agent state must be 'running'"
-
-    agent.stop()
-    agent.mailbox.disconnect()
-    agent_thread.join()
+    try:
+        assert agent.agent_state == AgentState.RUNNING,\
+            "Agent state must be 'running'"
+    finally:
+        agent.stop()
+        agent.mailbox.disconnect()
+        agent_thread.join()
