@@ -51,7 +51,6 @@ def test_act():
     """Tests the act function of the AeA."""
     node = LocalNode()
     agent_name = "MyAgent"
-    path = "/tests/data/dummy_aea/"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
@@ -78,7 +77,6 @@ def test_react():
     """Tests income messages."""
     node = LocalNode()
     agent_name = "MyAgent"
-    path = "/tests/data/dummy_aea/"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
@@ -116,7 +114,6 @@ def test_handle():
     """Tests handle method of an agent."""
     node = LocalNode()
     agent_name = "MyAgent"
-    path = "/tests/data/dummy_aea/"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
