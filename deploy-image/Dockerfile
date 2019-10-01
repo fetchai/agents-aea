@@ -14,4 +14,13 @@ RUN pip install --upgrade pip
 RUN pip install protobuf colorlog graphviz
 RUN pip install aea[all]
 
-CMD ["/bin/bash"]
+COPY ./packages /home/packages
+WORKDIR home
+
+RUN rm myagent -rf && \
+    aea create myagent &&\
+    cd myagent &&\
+    aea add skill echo
+
+WORKDIR /home/myagent
+CMD ["/usr/local/bin/aea", "run"]

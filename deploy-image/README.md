@@ -4,7 +4,9 @@ All the commands must be executed from the parent directory, if not stated other
 
 ## Build
 
-    ./deploy-image/scripts/docker-build-img.sh
+We recommend using the following command for building:
+
+    ./deploy-image/scripts/docker-build-img.sh -t aea-deploy:latest -- 
     
 
 To pass immediate parameters to the `docker build` command:
@@ -18,8 +20,5 @@ E.g.:
 
 ## Run
 
-    ./deploy-image/scripts/docker-run.sh -- /bin/bash
+    docker run -it aea-develop:latest 
  
-As before, to pass params to the `docker run` command:
-
-    ./deploy-image/scripts/docker-run.sh -p 8080:80 -- /bin/bash
