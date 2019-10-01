@@ -25,7 +25,7 @@ from enum import Enum
 from typing import Dict, Type, Union, Optional, List, Any
 
 
-ATTRIBUTE_TYPES = Union[float, str, bool, int]
+ATTRIBUTE_TYPES = Type[Union[float, str, bool, int]]
 
 
 class JSONSerializable(ABC):
@@ -237,13 +237,13 @@ class ConstraintType:
         elif self.type == ConstraintTypes.GREATER_THAN_EQ:
             return self.value >= value
         elif self.type == ConstraintTypes.WITHIN:
-            low = value[0]
-            high = value[1]
-            return low <= self.value <= high
+            low = self.value[0]
+            high = self.value[1]
+            return low <= value <= high
         elif self.type == ConstraintTypes.IN:
-            return self.value in value
+            return value in self.value
         elif self.type == ConstraintTypes.NOT_IN:
-            return self.value not in value
+            return value not in self.value
         else:
             raise ValueError("Constraint type not recognized.")
 
