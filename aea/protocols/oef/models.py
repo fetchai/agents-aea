@@ -125,7 +125,8 @@ class Description:
 
 
 class ConstraintTypes(Enum):
-    """Types of constraint"""
+    """Types of constraint."""
+
     EQUAL = "=="
     NOT_EQUAL = "!="
     LESS_THAN = "<"
@@ -216,6 +217,7 @@ class ConstraintType:
     def check(self, value: ATTRIBUTE_TYPES) -> bool:
         """
         Check if an attribute value satisfies the constraint.
+
         The implementation depends on the constraint type.
 
         :param value: the value to check.
@@ -429,6 +431,7 @@ class Query:
     def check(self, description: Description) -> bool:
         """
         Check if a description satisfies the constraints of the query.
+
         The constraints are interpreted as conjunction.
 
         :param description: the description to check.
