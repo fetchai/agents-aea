@@ -8,4 +8,4 @@
 
 5. Build and run your agent using <a href="../quickstart/" target=_blank>the quick start guide</a>. 
 
-6. CLI tool <a href="../quickstart/" target=_blank>How To Guide</a>. 
+6. CLI tool <a href="../cli-how-to/" target=_blank>how to guide</a>. 
