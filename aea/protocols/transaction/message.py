@@ -18,8 +18,15 @@
 #
 # ------------------------------------------------------------------------------
 
+"""The transaction message module."""
+
+from typing import Dict
 
 from aea.protocols.base import Message
+
+TransactionId = str
+Address = str
+
 
 class TransactionMessage(Message):
     """The transaction message class."""
@@ -75,57 +82,6 @@ class TransactionMessage(Message):
             return False
         return True
 
-    # def to_dict(self) -> Dict[str, Any]:
-    #     """From object to dictionary."""
-    #     return {
-    #         "transaction_id": self.transaction_id,
-    #         "is_sender_buyer": self.is_sender_buyer,
-    #         "counterparty": self.counterparty,
-    #         "amount": self.amount,
-    #         "quantities_by_good_pbk": self.quantities_by_good_pbk,
-    #         "sender": self.sender
-    #     }
-
-    # @classmethod
-    # def from_dict(cls, d: Dict[str, Any]) -> 'Transaction':
-    #     """Return a class instance from a dictionary."""
-    #     return cls(
-    #         transaction_id=d["transaction_id"],
-    #         is_sender_buyer=d["is_sender_buyer"],
-    #         counterparty=d["counterparty"],
-    #         amount=d["amount"],
-    #         quantities_by_good_pbk=d["quantities_by_good_pbk"],
-    #         sender=d["sender"]
-    #     )
-
-    # @classmethod
-    # def from_proposal(cls, proposal: Description, transaction_id: TransactionId,
-    #                   is_sender_buyer: bool, counterparty: Address, sender: Address) -> 'Transaction':
-    #     """
-    #     Create a transaction from a proposal.
-
-    #     :param proposal: the proposal
-    #     :param transaction_id: the transaction id
-    #     :param is_sender_buyer: whether the sender is the buyer
-    #     :param counterparty: the counterparty public key
-    #     :param sender: the sender public key
-    #     :return: Transaction
-    #     """
-    #     data = copy.deepcopy(proposal.values)
-    #     price = data.pop("price")
-    #     quantity_by_good_pbk = {key: value for key, value in data.items()}
-    #     return Transaction(transaction_id, is_sender_buyer, counterparty, price, quantity_by_good_pbk, sender)
-
-    # @classmethod
-    # def from_message(cls, message: TACMessage, sender: Address) -> 'Transaction':
-    #     """
-    #     Create a transaction from a proposal.
-
-    #     :param message: the message
-    #     :return: Transaction
-    #     """
-    #     return Transaction(message.get("transaction_id"), message.get("is_sender_buyer"), message.get("counterparty"), message.get("amount"), message.get("quantities_by_good_pbk"), sender)
-
     def matches(self, other: 'TransactionMessage') -> bool:
         """
         Check if the transaction matches with another (mirroring) transaction.
@@ -133,15 +89,13 @@ class TransactionMessage(Message):
         :param other: the other transaction to match.
         :return: True if the two
         """
-        result = True
-        result = result and self.get("transaction_id") == other.get("transaction_id")
-        result = result and self.get("sender") == other.get("counterparty")
-        result = result and self.get("counterparty") == other.get("sender")
-        result = result and self.get("is_sender_buyer") != other.get("is_sender_buyer")
-        result = result and self.get("amount") == other.get("amount")
-        result = result and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk")
-
-        return result
+        return isinstance(other, 'TransactionMessage') \
+            and self.get("transaction_id") == other.get("transaction_id") \
+            and self.get("sender") == other.get("counterparty") \
+            and self.get("counterparty") == other.get("sender") \
+            and self.get("is_sender_buyer") != other.get("is_sender_buyer") \
+            and self.get("amount") == other.get("amount") \
+            and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk")
 
     def __eq__(self, other: 'TransactionMessage') -> bool:
         """
@@ -150,10 +104,10 @@ class TransactionMessage(Message):
         :param other: the other transaction to match.
         :return: True if the two
         """
-        return isinstance(other, TransactionManager) \
+        return isinstance(other, 'TransactionMessage') \
             and self.get("transaction_id") == other.get("transaction_id") \
             and self.get("sender") == other.get("sender") \
             and self.get("counterparty") == other.get("counterparty") \
             and self.get("is_sender_buyer") == other.get("is_sender_buyer") \
             and self.get("amount") == other.get("amount") \
-            and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk") \
+            and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk")

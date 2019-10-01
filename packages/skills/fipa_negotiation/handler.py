@@ -69,7 +69,7 @@ class FIPANegotiationHandler(Handler):
         if fipa_msg_performative == FIPAMessage.Performative.CFP:
             response = self.on_cfp(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.PROPOSE:
-            responses = self.on_propose(fipa_msg, dialogue)
+            response = self.on_propose(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.DECLINE:
             response = self.on_decline(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.ACCEPT:

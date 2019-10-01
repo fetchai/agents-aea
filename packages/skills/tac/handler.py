@@ -17,29 +17,33 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
+"""This package contains a scaffold of a handler."""
 
-from aea.skills.base import Task
+from typing import Optional
+
+from aea.configurations.base import ProtocolId
+from aea.mail.base import Envelope
+from aea.skills.base import Handler
 
 
-class MyScaffoldTask(Task):
-    """This class scaffolds a task."""
+class MyScaffoldHandler(Handler):
+    """This class scaffolds a handler."""
 
-    def execute(self) -> None:
+    SUPPORTED_PROTOCOL = ''  # type: Optional[ProtocolId]
+
+    def handle_envelope(self, envelope: Envelope) -> None:
         """
-        Implement the task execution.
+        Implement the reaction to an envelope.
 
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError
-        # clean up transactions
+        raise NotImplementedError  # pragma: no cover
 
     def teardown(self) -> None:
         """
-        Implement the task teardown.
+        Implement the handler teardown.
 
         :return: None
         """
-        raise NotImplementedError
-        # pop all pending transactions
+        raise NotImplementedError  # pragma: no cover

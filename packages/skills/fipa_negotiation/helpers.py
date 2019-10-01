@@ -19,11 +19,13 @@
 # ------------------------------------------------------------------------------
 
 """This class contains the helpers for FIPA negotiation."""
+from typing import Any, Dict, List, Union
 
-from aea.protocols.oef.models import Description
+from aea.protocols.oef.models import Attribute, DataModel, Description
 
 SUPPLY_DATAMODEL_NAME = "supply"
 DEMAND_DATAMODEL_NAME = "demand"
+
 
 def build_datamodel(good_pbk_to_quantities: Dict[str, int], is_supply: bool) -> DataModel:
     """
@@ -42,6 +44,7 @@ def build_datamodel(good_pbk_to_quantities: Dict[str, int], is_supply: bool) -> 
     data_model = DataModel(description, attributes)
     return data_model
 
+
 def build_goods_quantities_description(good_pbk_to_quantities: Dict[str, int], is_supply: bool) -> Description:
     """
     Get the service description (good quantities supplied or demanded and their price).
@@ -54,6 +57,7 @@ def build_goods_quantities_description(good_pbk_to_quantities: Dict[str, int], i
     data_model = build_datamodel(good_pbk_to_quantities, is_supply=is_supply)
     desc = Description(good_pbk_to_quantities, data_model=data_model)
     return desc
+
 
 def is_compatible(self, cfp_services: Dict[str, Union[bool, List[Any]]], goods_description: Description) -> bool:
     """

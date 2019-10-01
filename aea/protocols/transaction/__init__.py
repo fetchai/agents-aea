@@ -17,3 +17,5 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+"""The transaction message module."""

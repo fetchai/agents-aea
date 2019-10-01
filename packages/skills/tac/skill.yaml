@@ -5,11 +5,11 @@ license: Apache 2.0
 url: ""
 behaviours:
   - behaviour:
-      class_name: GoodsRegisterAndSearchBehaviour
+      class_name: MyScaffoldBehaviour
       args:
         foo: bar
 handler:
-  class_name: FIPANegotiationHandler
+  class_name: MyScaffoldHandler
   args:
     foo: bar
 tasks:
@@ -17,13 +17,4 @@ tasks:
       class_name: MyScaffoldTask
       args:
         foo: bar
-shared_classes:
-  - one:
-    class_name: Search
-    args:
-      foo: bar
-  - two:
-    class_name: Strategy
-    args:
-      foo: bar
 protocol: ''

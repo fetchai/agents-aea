@@ -27,6 +27,7 @@ This module contains the classes required for dialogue management.
 """
 
 from enum import Enum
+import json
 import logging
 from typing import Any, Dict, List, Optional
 
@@ -36,6 +37,8 @@ from aea.helpers.dialogue.base import Dialogues as BaseDialogues
 from aea.mail.base import Address
 from aea.protocols.base.message import Message
 from aea.protocols.fipa.message import FIPAMessage
+
+from fipa_negotiation_skill.helpers import DEMAND_DATAMODEL_NAME
 
 Action = Any
 logger = logging.getLogger(__name__)
@@ -176,27 +179,26 @@ class DialogueStats(object):
 
     def __init__(self) -> None:
         """Initialize a StatsManager."""
-        self._self_initiated = {EndState.SUCCESSFUL: 0,
-                                EndState.DECLINED_CFP: 0,
-                                EndState.DECLINED_PROPOSE: 0,
-                                EndState.DECLINED_ACCEPT: 0}  # type: Dict[EndState, int]
-        self._other_initiated = {EndState.SUCCESSFUL: 0,
-                                 EndState.DECLINED_CFP: 0,
-                                 EndState.DECLINED_PROPOSE: 0,
-                                 EndState.DECLINED_ACCEPT: 0}  # type: Dict[EndState, int]
-
+        self._self_initiated = {Dialogue.EndState.SUCCESSFUL: 0,
+                                Dialogue.EndState.DECLINED_CFP: 0,
+                                Dialogue.EndState.DECLINED_PROPOSE: 0,
+                                Dialogue.EndState.DECLINED_ACCEPT: 0}  # type: Dict[Dialogue.EndState, int]
+        self._other_initiated = {Dialogue.EndState.SUCCESSFUL: 0,
+                                 Dialogue.EndState.DECLINED_CFP: 0,
+                                 Dialogue.EndState.DECLINED_PROPOSE: 0,
+                                 Dialogue.EndState.DECLINED_ACCEPT: 0}  # type: Dict[Dialogue.EndState, int]
 
     @property
-    def self_initiated(self) -> Dict[EndState, int]:
+    def self_initiated(self) -> Dict[Dialogue.EndState, int]:
         """Get the stats dictionary on self initiated dialogues."""
         return self._self_initiated
 
     @property
-    def other_initiated(self) -> Dict[EndState, int]:
+    def other_initiated(self) -> Dict[Dialogue.EndState, int]:
         """Get the stats dictionary on other initiated dialogues."""
         return self._other_initiated
 
-    def add_dialogue_endstate(self, end_state: EndState, is_self_initiated: bool) -> None:
+    def add_dialogue_endstate(self, end_state: Dialogue.EndState, is_self_initiated: bool) -> None:
         """
         Add dialogue endstate stats.
 
@@ -312,10 +314,10 @@ class Dialogues(BaseDialogues):
 
         :return: the dialogue
         """
-        dialogue_id = message.get("dialogue_id")
+        dialogue_id = fipa_msg.get("dialogue_id")
         opponent = sender
-        target = message.get("target")
-        performative = message.get("performative")
+        target = fipa_msg.get("target")
+        performative = fipa_msg.get("performative")
         self_initiated_dialogue_label = DialogueLabel(dialogue_id, opponent, agent_pbk)
         other_initiated_dialogue_label = DialogueLabel(dialogue_id, opponent, opponent)
         if performative == FIPAMessage.Performative.PROPOSE and target == PROPOSE_TARGET and self_initiated_dialogue_label in self.dialogues:

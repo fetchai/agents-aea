@@ -17,6 +17,26 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the context."""
+"""This package contains a scaffold of a behaviour."""
 
-SkillContext
+from aea.skills.base import Behaviour
+
+
+class MyScaffoldBehaviour(Behaviour):
+    """This class scaffolds a behaviour."""
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover

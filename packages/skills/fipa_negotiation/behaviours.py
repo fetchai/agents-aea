@@ -18,10 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a behaviour."""
+import datetime
 import logging
+from typing import Optional
 
 from aea.skills.base import Behaviour
 from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.models import Description
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF, DEFAULT_MSG_ID
 
 logger = logging.getLogger(__name__)
@@ -30,18 +33,28 @@ logger = logging.getLogger(__name__)
 class GoodsRegisterAndSearchBehaviour(Behaviour):
     """This class implements the goods register and search behaviour."""
 
+    def __init__(self, **kwargs):
+        """Initialize the behaviour."""
+        self.services_interval = kwargs.pop('services_interval')  # type: int
+        super().__init__(**kwargs)
+        self.active = True
+        self._last_update_time = datetime.datetime.now()
+        self._last_search_time = datetime.datetime.now()
+        self._registered_goods_demanded_description = None  # type: Optional[Description]
+        self._registered_goods_supplied_description = None  # type: Optional[Description]
+
     def act(self) -> None:
         """
         Implement the act.
 
         :return: None
         """
-        if self.context.game_instance.game_phase == GamePhase.GAME:
-            if self.context.game_instance.is_time_to_update_services():
-                self.unregister_service()
-                self.register_service()
-            if self.context.game_instance.is_time_to_search_services():
-                self.search_services()
+        if self.active:
+            if self._is_time_to_update_services():
+                self._unregister_service()
+                self._register_service()
+            if self._is_time_to_search_services():
+                self._search_services()
 
     def teardown(self) -> None:
         """
@@ -49,24 +62,24 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        self.unregister_service()
+        self._unregister_service()
 
-    def unregister_service(self) -> None:
+    def _unregister_service(self) -> None:
         """
         Unregister service from OEF Service Directory.
 
         :return: None
         """
-        if self.context.game_instance.goods_demanded_description is not None:
-            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self.context.game_instance.goods_demanded_description, service_id="")
+        if self.registered_goods_demanded_description is not None:
+            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self.registered_goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto.public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        if self.game_instance.goods_supplied_description is not None:
-            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self.context.game_instance.goods_supplied_description, service_id="")
+            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        if self.registered_goods_supplied_description is not None:
+            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self.registered_goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
-    def register_service(self) -> None:
+    def _register_service(self) -> None:
         """
         Register to the OEF Service Directory.
 
@@ -77,22 +90,22 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        if self.context.game_instance.strategy.is_registering_as_seller:
-            logger.debug("[{}]: Updating service directory as seller with goods supplied.".format(self.agent_name))
-            goods_supplied_description = self.context.game_instance.get_service_description(is_supply=True)
-            self.context.game_instance.goods_supplied_description = goods_supplied_description
+        if self.context.strategy.is_registering_as_seller:
+            logger.debug("[{}]: Updating service directory as seller with goods supplied.".format(self.context.agent_name))
+            goods_supplied_description = self.context.strategy.get_service_description(is_supply=True)
+            self.registered_goods_supplied_description = goods_supplied_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        if self.context.game_instance.strategy.is_registering_as_buyer:
-            logger.debug("[{}]: Updating service directory as buyer with goods demanded.".format(self.agent_name))
-            goods_demanded_description = self.context.game_instance.get_service_description(is_supply=False)
-            self.context.game_instance.goods_demanded_description = goods_demanded_description
+        if self.context.strategy.is_registering_as_buyer:
+            logger.debug("[{}]: Updating service directory as buyer with goods demanded.".format(self.context.agent_name))
+            goods_demanded_description = self.context.strategy.get_service_description(is_supply=False)
+            self.registered_goods_demanded_description = goods_demanded_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
-    def search_services(self) -> None:
+    def _search_services(self) -> None:
         """
         Search on OEF Service Directory.
 
@@ -103,29 +116,51 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        if self.context.game_instance.strategy.is_searching_for_sellers:
-            query = self.context.game_instance.build_services_query(is_searching_for_sellers=True)
+        if self.context.strategy.is_searching_for_sellers:
+            query = self.context.strategy.build_services_query(is_searching_for_sellers=True)
             if query is None:
                 logger.warning("[{}]: Not searching the OEF for sellers because the agent demands no goods.".format(self.context.agent_name))
                 return None
             else:
                 logger.debug("[{}]: Searching for sellers which match the demand of the agent.".format(self.context.agent_name))
-                search_id = self.context.game_instance.search.get_next_id()
-                self.context.game_instance.search.ids_for_sellers.add(search_id)
+                search_id = self.context.search.get_next_id(is_searching_for_sellers=True)
 
                 msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
                 msg_bytes = OEFSerializer().encode(msg)
                 self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        if self.context.game_instance.strategy.is_searching_for_buyers:
-            query = self.context.game_instance.build_services_query(is_searching_for_sellers=False)
+        if self.context.strategy.is_searching_for_buyers:
+            query = self.context.strategy.build_services_query(is_searching_for_sellers=False)
             if query is None:
                 logger.warning("[{}]: Not searching the OEF for buyers because the agent supplies no goods.".format(self.context.agent_name))
                 return None
             else:
-                logger.debug("[{}]: Searching for buyers which match the supply of the agent.".format(self.agent_name))
-                search_id = self.context.game_instance.search.get_next_id()
-                self.context.game_instance.search.ids_for_buyers.add(search_id)
+                logger.debug("[{}]: Searching for buyers which match the supply of the agent.".format(self.context.agent_name))
+                search_id = self.context.search.get_next_id(is_searching_for_sellers=False)
 
                 msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
                 msg_bytes = OEFSerializer().encode(msg)
-                self.mailbox.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto.public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+
+    def _is_time_to_update_services(self) -> bool:
+        """
+        Check if the agent should update the service directory.
+
+        :return: bool indicating the action
+        """
+        now = datetime.datetime.now()
+        result = now - self.last_update_time > self.services_interval
+        if result:
+            self.last_update_time = now
+        return result
+
+    def _is_time_to_search_services(self) -> bool:
+        """
+        Check if the agent should search the service directory.
+
+        :return: bool indicating the action
+        """
+        now = datetime.datetime.now()
+        result = now - self.last_search_time > self.services_interval
+        if result:
+            self._last_search_time = now
+        return result

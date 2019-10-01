@@ -32,8 +32,7 @@ class MyScaffoldTask(Task):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError
-        # clean up transactions
+        raise NotImplementedError  # pragma: no cover
 
     def teardown(self) -> None:
         """
@@ -41,5 +40,4 @@ class MyScaffoldTask(Task):
 
         :return: None
         """
-        raise NotImplementedError
-        # pop all pending transactions
+        raise NotImplementedError  # pragma: no cover
