@@ -20,8 +20,12 @@ nav:
   - Autonomous Economic Agent Framework:
     - Welcome:
       - "What is the AEA framework?": 'index.md'
-      - "Architecture": 'architecture.md'
       - "Version": 'version.md'
+    - Architecture:
+      - "Design principles": 'design-principles.md'
+      - "Architectural diagram": 'diagram.md'
+      - "Core components": 'core-components.md'
+      - "File structure": 'file-structure.md'
     - AEA quick start: 'quickstart.md'
     - Developer guide:
       - "Step by step": 'steps.md'
