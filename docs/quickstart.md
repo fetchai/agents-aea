@@ -1,5 +1,7 @@
 ## Preliminaries
 
+Make sure you are running desktop <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
+
 Create and cd into a new working directory.
 
 ``` bash
@@ -26,7 +28,7 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 
 Install the Autonomous Economic Agent framework.
 
-The following installs the basic application.
+The following installs the basic application without the cli. If in doubt, install `aea[all]`.
 ``` bash
 pip install aea
 ```
@@ -37,7 +39,7 @@ pip install aea[all]
 
 ```
 
-The following installs just the cli.
+The following only installs the cli.
 ``` bash
 pip install aea[cli]
 ```
@@ -46,7 +48,6 @@ pip install aea[cli]
 ## Echo Agent demo
 ### Download the examples, scripts, and packages directories.
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
