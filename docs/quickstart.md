@@ -1,7 +1,5 @@
 ## Preliminaries
 
-Make sure you are running desktop <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
-
 Create and cd into a new working directory.
 
 ``` bash
