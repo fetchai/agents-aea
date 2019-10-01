@@ -32,8 +32,6 @@ from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from .conftest import CUR_PATH
 
-from .conftest import CUR_PATH
-
 
 def test_initialiseAeA():
     """Tests the initialisation of the AeA."""
@@ -53,7 +51,6 @@ def test_act():
     """Tests the act function of the AeA."""
     node = LocalNode()
     agent_name = "MyAgent"
-    path = "/tests/data/dummy_aea/"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
@@ -65,20 +62,21 @@ def test_act():
         private_key_pem_path=private_key_pem_path,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
-    t.start()
-    time.sleep(1)
+    try:
+        t.start()
+        time.sleep(1)
 
-    behaviour = agent.resources.behaviour_registry.fetch("dummy")
-    assert behaviour[0].nb_act_called > 0, "Act() wasn't called"
-    agent.stop()
-    t.join()
+        behaviour = agent.resources.behaviour_registry.fetch("dummy")
+        assert behaviour[0].nb_act_called > 0, "Act() wasn't called"
+    finally:
+        agent.stop()
+        t.join()
 
 
 def test_react():
     """Tests income messages."""
     node = LocalNode()
     agent_name = "MyAgent"
-    path = "/tests/data/dummy_aea/"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
@@ -99,22 +97,23 @@ def test_react():
         private_key_pem_path=private_key_pem_path,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
-    t.start()
-    agent.mailbox.inbox._queue.put(envelope)
-    time.sleep(1)
-    handler = agent.resources\
-        .handler_registry.fetch_by_skill('default', "dummy")
-    assert envelope in handler.handled_envelopes,\
-        "The envelope is not inside the handled_envelopes."
-    agent.stop()
-    t.join()
+    try:
+        t.start()
+        agent.mailbox.inbox._queue.put(envelope)
+        time.sleep(1)
+        handler = agent.resources \
+            .handler_registry.fetch_by_skill('default', "dummy")
+        assert envelope in handler.handled_envelopes, \
+            "The envelope is not inside the handled_envelopes."
+    finally:
+        agent.stop()
+        t.join()
 
 
 def test_handle():
     """Tests handle method of an agent."""
     node = LocalNode()
     agent_name = "MyAgent"
-    path = "/tests/data/dummy_aea/"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
     public_key = crypto.public_key
@@ -135,32 +134,34 @@ def test_handle():
         private_key_pem_path=private_key_pem_path,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
-    t.start()
-    agent.mailbox.inbox._queue.put(envelope)
-    env = agent.mailbox.outbox._queue.get(block=True, timeout=5.0)
-    assert env.protocol_id == "default",\
-        "The envelope is not the expected protocol (Unsupported protocol)"
+    try:
+        t.start()
+        agent.mailbox.inbox._queue.put(envelope)
+        env = agent.mailbox.outbox._queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default", \
+            "The envelope is not the expected protocol (Unsupported protocol)"
 
-#   DECODING ERROR
-    msg = "hello".encode("utf-8")
-    envelope = Envelope(
-        to=public_key,
-        sender=public_key,
-        protocol_id='default',
-        message=msg)
-    agent.mailbox.inbox._queue.put(envelope)
-#   UNSUPPORTED SKILL
-    msg = FIPASerializer().encode(
-        FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
-                    message_id=0,
-                    dialogue_id=0,
-                    destination=public_key,
-                    target=1))
-    envelope = Envelope(
-        to=public_key,
-        sender=public_key,
-        protocol_id="fipa",
-        message=msg)
-    agent.mailbox.inbox._queue.put(envelope)
-    agent.stop()
-    t.join()
+        #   DECODING ERROR
+        msg = "hello".encode("utf-8")
+        envelope = Envelope(
+            to=public_key,
+            sender=public_key,
+            protocol_id='default',
+            message=msg)
+        agent.mailbox.inbox._queue.put(envelope)
+        #   UNSUPPORTED SKILL
+        msg = FIPASerializer().encode(
+            FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
+                        message_id=0,
+                        dialogue_id=0,
+                        destination=public_key,
+                        target=1))
+        envelope = Envelope(
+            to=public_key,
+            sender=public_key,
+            protocol_id="fipa",
+            message=msg)
+        agent.mailbox.inbox._queue.put(envelope)
+    finally:
+        agent.stop()
+        t.join()
