@@ -32,19 +32,19 @@ from oef.query import Eq
 def test_oef_type_string_value():
     """Test the string value of the type."""
     assert str(OEFMessage.Type.REGISTER_SERVICE) == "register_service",\
-        "The string representation is different than register_service"
+        "The string representation must be register_service"
     assert str(OEFMessage.Type.UNREGISTER_SERVICE) == "unregister_service",\
-        "The string representation is different than unregister_service"
+        "The string representation must be unregister_service"
     assert str(OEFMessage.Type.SEARCH_SERVICES) == "search_services",\
-        "The string representation is different than search_services"
+        "The string representation must be search_services"
     assert str(OEFMessage.Type.SEARCH_AGENTS) == "search_agents",\
-        "The string representation is different than search_agents"
+        "The string representation must be search_agents"
     assert str(OEFMessage.Type.OEF_ERROR) == "oef_error",\
-        "The string representation is different than oef_error"
+        "The string representation must be oef_error"
     assert str(OEFMessage.Type.DIALOGUE_ERROR) == "dialogue_error",\
-        "The string representation is different than dialogue_error"
+        "The string representation must be dialogue_error"
     assert str(OEFMessage.Type.SEARCH_RESULT) == "search_result",\
-        "The string representation is different than search_result"
+        "The string representation must be search_result"
 
 
 def test_oef_message_consistency():

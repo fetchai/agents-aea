@@ -63,7 +63,8 @@ def test_default_error_serialization():
             content = cast(bytes, msg.get("content"))
             body["content"] = base64.b64encode(content).decode("utf-8")
             bytes_msg = json.dumps(body).encode("utf-8")
-            assert DefaultSerializer().decode(bytes_msg), "Type is recognized!"
+            returned_msg = DefaultSerializer().decode(bytes_msg)
+            assert msg != returned_msg, "Messages must be different"
 
 
 def test_default_message_str_values():

@@ -54,7 +54,6 @@ class TestTranslator:
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
         data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
         description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
-#        my_description = iter(description_foobar)
         oef_description = OEFObjectTranslator.to_oef_description(description_foobar)
         expected_description = OEFObjectTranslator.from_oef_description(oef_description)
         actual_description = description_foobar
