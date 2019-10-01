@@ -45,7 +45,11 @@ pip install aea[cli]
 ```
 
 
-## Echo Agent demo
+## Echo skill demo
+
+The echo skill is a simple demo that prints logs from the agent's main loop as it calls registered `Task` and `Behaviour` code.
+
+
 ### Download the examples, scripts, and packages directories.
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
@@ -64,21 +68,18 @@ cd my_first_agent
 aea add skill echo
 ```
 
-### Launch the OEF 
-
-
-Open a new terminal and launch the OEF.
+### Add a local connection
 
 ``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+aea add connection local
 ```
 
 ### Run the agent locally
 
-Go back to the other terminal and run the agent.
+Run the agent with the connection.
 
 ``` bash
-aea run
+aea run --connection local
 ```
 
 You will see the echo task running in the terminal window.
