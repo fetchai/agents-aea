@@ -38,7 +38,7 @@ class MyScaffoldHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def teardown(self) -> None:
         """
@@ -46,4 +46,4 @@ class MyScaffoldHandler(Handler):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover

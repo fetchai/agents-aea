@@ -58,6 +58,10 @@ class OEFMessage(Message):
 
         OTHER = 10000
 
+        def __str__(self):
+            """Get string representation."""
+            return str(self.value)
+
     def __init__(self, oef_type: Optional[Type] = None,
                  **kwargs):
         """

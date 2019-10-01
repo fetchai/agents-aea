@@ -78,7 +78,7 @@ class FIPAMessage(Message):
             elif performative == FIPAMessage.Performative.ACCEPT \
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
                     or performative == FIPAMessage.Performative.DECLINE:
-                pass
+                pass  # pragma: no cover
             else:
                 raise ValueError("Performative not recognized.")
 
