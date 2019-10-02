@@ -18,10 +18,136 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a class representing the game."""
+from enum import Enum
+import logging
+from typing import Dict, List, Optional
 
-game.controller_pbk
+from aea.protocols.oef.models import Query, Constraint, GtEq
 
-game._game_phase
+from tac_protocol.message import TACMessage
+
+Address = str
+
+logger = logging.getLogger(__name__)
+
+
+class GamePhase(Enum):
+    """This class defines the TAC game stages."""
+
+    PRE_GAME = 'pre_game'
+    GAME_SETUP = 'game_setup'
+    GAME = 'game'
+    POST_GAME = 'post_game'
+
+
+class GameConfiguration:
+    """Class containing the game configuration of a TAC instance."""
+
+    def __init__(self,
+                 version_id: str,
+                 nb_agents: int,
+                 nb_goods: int,
+                 tx_fee: float,
+                 agent_pbk_to_name: Dict[Address, str],
+                 good_pbk_to_name: Dict[Address, str],
+                 controller_pbk: Address):
+        """
+        Instantiate a game configuration.
+
+        :param version_id: the version of the game.
+        :param nb_agents: the number of agents.
+        :param nb_goods: the number of goods.
+        :param tx_fee: the fee for a transaction.
+        :param agent_pbk_to_name: a dictionary mapping agent public keys to agent names (as strings).
+        :param good_pbk_to_name: a dictionary mapping good public keys to good names (as strings).
+        :param controller_pbk: the public key of the controller
+        """
+        self._version_id = version_id
+        self._nb_agents = nb_agents
+        self._nb_goods = nb_goods
+        self._tx_fee = tx_fee
+        self._agent_pbk_to_name = agent_pbk_to_name
+        self._good_pbk_to_name = good_pbk_to_name
+        self._controller_pbk = controller_pbk
+
+        self._check_consistency()
+
+    @property
+    def version_id(self) -> str:
+        """Agent number of a TAC instance."""
+        return self._version_id
+
+    @property
+    def nb_agents(self) -> int:
+        """Agent number of a TAC instance."""
+        return self._nb_agents
+
+    @property
+    def nb_goods(self) -> int:
+        """Good number of a TAC instance."""
+        return self._nb_goods
+
+    @property
+    def tx_fee(self) -> float:
+        """Transaction fee for the TAC instance."""
+        return self._tx_fee
+
+    @property
+    def agent_pbk_to_name(self) -> Dict[Address, str]:
+        """Map agent public keys to names."""
+        return self._agent_pbk_to_name
+
+    @property
+    def good_pbk_to_name(self) -> Dict[Address, str]:
+        """Map good public keys to names."""
+        return self._good_pbk_to_name
+
+    @property
+    def agent_pbks(self) -> List[Address]:
+        """List of agent public keys."""
+        return list(self._agent_pbk_to_name.keys())
+
+    @property
+    def agent_names(self):
+        """List of agent names."""
+        return list(self._agent_pbk_to_name.values())
+
+    @property
+    def good_pbks(self) -> List[Address]:
+        """List of good public keys."""
+        return list(self._good_pbk_to_name.keys())
+
+    @property
+    def good_names(self) -> List[str]:
+        """List of good names."""
+        return list(self._good_pbk_to_name.values())
+
+    def _check_consistency(self):
+        """
+        Check the consistency of the game configuration.
+
+        :return: None
+        :raises: AssertionError: if some constraint is not satisfied.
+        """
+        assert self.version_id is not None, "A version id must be set."
+        assert self.tx_fee >= 0, "Tx fee must be non-negative."
+        assert self.nb_agents > 1, "Must have at least two agents."
+        assert self.nb_goods > 1, "Must have at least two goods."
+        assert len(self.agent_pbks) == self.nb_agents, "There must be one public key for each agent."
+        assert len(set(self.agent_names)) == self.nb_agents, "Agents' names must be unique."
+        assert len(self.good_pbks) == self.nb_goods, "There must be one public key for each good."
+        assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
+
+
+class Game:
+    """This class deals with the game."""
+
+    def __init__(self, expected_version_id: str, expected_controller_pbk: Optional[Address] = None):
+        """Instantiate the game class."""
+        self._expected_version_id = expected_version_id
+        self._game_phase = GamePhase.PRE_GAME
+        self._expected_controller_pbk = expected_controller_pbk
+        self._game_configuration = None  # type: Optional[GameConfiguration]
 
     @property
     def expected_version_id(self) -> str:
@@ -33,41 +159,62 @@ game._game_phase
         """Get the game phase."""
         return self._game_phase
 
+    @property
+    def expected_controller_pbk(self) -> Address:
+        """Get the expected controller pbk."""
+        assert self._expected_controller_pbk is not None, "Expected controller public key not assigned!"
+        return self._expected_controller_pbk
 
-            @property
+    @property
     def game_configuration(self) -> GameConfiguration:
         """Get the game configuration."""
         assert self._game_configuration is not None, "Game configuration not assigned!"
         return self._game_configuration
 
-    def init(self, game_data: GameData, agent_pbk: Address) -> None:
+    def init(self, tac_message: TACMessage, controller_pbk: Address) -> None:
         """
         Populate data structures with the game data.
 
-        :param game_data: the game instance data
-        :param agent_pbk: the public key of the agent
+        :param tac_message: the tac message with the game instance data
+        :param controller_pbk: the public key of the controller
 
         :return: None
         """
-        # TODO: extend TAC messages to include reference to version id; then replace below with assert
-        game_data.version_id = self.expected_version_id
-        self._game_configuration = GameConfiguration(game_data.version_id, game_data.nb_agents, game_data.nb_goods, game_data.tx_fee,
-                                                     game_data.agent_pbk_to_name, game_data.good_pbk_to_name)
-        self._initial_agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
-        self._agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
-        if self.strategy.is_world_modeling:
-            opponent_pbks = self.game_configuration.agent_pbks
-            opponent_pbks.remove(agent_pbk)
-            self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
+        assert tac_message.type == TACMessage.Type.GAME_DATA, "Wrong TACMessage for initialization of TAC game."
+        assert controller_pbk == self.expected_controller_pbk, "TACMessage from unexpected controller."
+        assert tac_message.get("version_id") == self.expected_version_id, "TACMessage for unexpected game."
+        self._game_configuration = GameConfiguration(tac_message.get("version_id"),
+                                                     tac_message.get("nb_agents"),
+                                                     tac_message.get("nb_goods"),
+                                                     tac_message.get("tx_fee"),
+                                                     tac_message.get("agent_pbk_to_name"),
+                                                     tac_message.get("good_pbk_to_name"),
+                                                     controller_pbk)
 
+    def update_expected_controller_pbk(self, controller_pbk: Address):
+        """
+        Overwrite the expected controller pbk.
 
-        # game_data = GameData(sender,
-        #                      tac_message.get("money"),
-        #                      tac_message.get("endowment"),
-        #                      tac_message.get("utility_params"),
-        #                      tac_message.get("nb_agents"),
-        #                      tac_message.get("nb_goods"),
-        #                      tac_message.get("tx_fee"),
-        #                      tac_message.get("agent_pbk_to_name"),
-        #                      tac_message.get("good_pbk_to_name"),
-        #                      tac_message.get("version_id"))
+        :param controller_pbk: the public key of the controller
+
+        :return: None
+        """
+        logger.warning("TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.")
+        self._expected_controller_pbk = controller_pbk
+
+    def update_game_phase(self, game_phase: GamePhase) -> None:
+        """
+        Update the game phase.
+
+        :param game_phase: the game phase
+        """
+        self._game_phase = game_phase
+
+    def get_game_query(self) -> Query:
+        """
+        Get the query for the TAC game.
+
+        :return: the query
+        """
+        query = Query([Constraint("version", GtEq(self.expected_version_id))])
+        return query

@@ -42,9 +42,9 @@ def build_goods_datamodel(good_pbks: List[str], currency: str, is_supply: bool) 
 
     :return: the data model.
     """
-    goods_quantities_attributes = [Attribute(good_pbk, int, False)
+    goods_quantities_attributes = [Attribute(good_pbk, Type(int), False)
                                    for good_pbk in good_pbks]
-    price_attribute = Attribute(currency, float, False)
+    price_attribute = Attribute(currency, Type(float), False)
     description = SUPPLY_DATAMODEL_NAME if is_supply else DEMAND_DATAMODEL_NAME
     attributes = goods_quantities_attributes + [price_attribute]
     data_model = DataModel(description, attributes)
@@ -60,7 +60,7 @@ def build_goods_description(good_pbk_to_quantities: Dict[str, int], is_supply: b
 
     :return: the description to advertise on the Service Directory.
     """
-    data_model = build_goods_datamodel(good_pbks=good_pbk_to_quantities.keys(), currency='FET', is_supply=is_supply)
+    data_model = build_goods_datamodel(good_pbks=list(good_pbk_to_quantities.keys()), currency='FET', is_supply=is_supply)
     desc = Description(good_pbk_to_quantities, data_model=data_model)
     return desc
 

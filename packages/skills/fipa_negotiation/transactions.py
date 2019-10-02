@@ -25,9 +25,9 @@ import logging
 from collections import defaultdict, deque
 from typing import Dict, Tuple, Deque
 
-from aea.protocol.transaction import TransactionMessage, TransactionId
+from aea.protocols.transaction.message import TransactionMessage, TransactionId
 
-from fipa_negotiation_skill.dialogue import DialogueLabel
+from fipa_negotiation_skill.dialogues import DialogueLabel
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class Transactions(object):
 
             # extract dialogue label and message id
             transaction_id = next_item
-            logger.debug("[{}]: Removing transaction: {}".format(self.context.agent_name, transaction_id))
+            logger.debug("Removing transaction: {}".format(transaction_id))
 
             # remove (safely) the associated pending proposal (if present)
             self._locked_txs.pop(transaction_id, None)
@@ -185,11 +185,9 @@ class Transactions(object):
 
     def reset(self) -> None:
         """Reset the class."""
-        self._pending_proposals = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
-        self._pending_initial_acceptances = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
-
-        self._locked_txs = {}  # type: Dict[TransactionId, TransactionMessage]
-        self._locked_txs_as_buyer = {}  # type: Dict[TransactionId, TransactionMessage]
-        self._locked_txs_as_seller = {}  # type: Dict[TransactionId, TransactionMessage]
-
-        self._last_update_for_transactions = deque()  # type: Deque[Tuple[datetime.datetime, TransactionId]]
+        self._pending_proposals = defaultdict(lambda: {})
+        self._pending_initial_acceptances = defaultdict(lambda: {})
+        self._locked_txs = {}
+        self._locked_txs_as_buyer = {}
+        self._locked_txs_as_seller = {}
+        self._last_update_for_transactions = deque()

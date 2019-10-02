@@ -41,6 +41,14 @@ class OEFHandler(Handler):
 
     SUPPORTED_PROTOCOL = OEFMessage.ProtocolId
 
+    def setup(self) -> None:
+        """
+        Implement the handler setup.
+
+        :return: None
+        """
+        pass
+
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Implement the reaction to an envelope.
@@ -113,7 +121,7 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        if self.game_instance.game_phase != GamePhase.PRE_GAME:
+        if self.context.game.game_phase != GamePhase.PRE_GAME:
             logger.debug("[{}]: Ignoring controller search result, the agent is already competing.".format(self.context.agent_name))
             return
 
@@ -138,11 +146,11 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        self.context.game.controller_pbk = controller_pbk
-        self.context.game._game_phase = GamePhase.GAME_SETUP
+        self.context.game.update_expected_controller_pbk(controller_pbk)
+        self.context.game.update_game_phase(GamePhase.GAME_SETUP)
         tac_msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name=self.agent_name)
         tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=self.game_instance.controller_pbk, sender=self.crypto.public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
     def _rejoin_tac(self, controller_pbk: Address) -> None:
         """
@@ -152,17 +160,25 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        self.context.game.controller_pbk = controller_pbk
-        self.context.game._game_phase = GamePhase.GAME_SETUP
+        self.context.game.update_expected_controller_pbk(controller_pbk)
+        self.context.game.update_game_phase(GamePhase.GAME_SETUP)
         tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
         tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=self.game_instance.controller_pbk, sender=self.crypto.public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
 
 class TACHandler(Handler):
     """This class handles oef messages."""
 
     SUPPORTED_PROTOCOL = TACMessage.ProtocolId
+
+    def setup(self) -> None:
+        """
+        Implement the handler setup.
+
+        :return: None
+        """
+        pass
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """
@@ -176,7 +192,7 @@ class TACHandler(Handler):
 
         logger.debug("[{}]: Handling controller response. type={}".format(self.agent_name, tac_msg_type))
         try:
-            if envelope.sender != self.context.game.controller_pbk:
+            if envelope.sender != self.context.game.expected_controller_pbk:
                 raise ValueError("The sender of the message is not the controller agent we registered with.")
 
             if tac_msg_type == TACMessage.Type.TAC_ERROR:
@@ -208,32 +224,22 @@ class TACHandler(Handler):
         """
         pass
 
-    def _on_state_update(self, tac_message: TACMessage, controller_pbk: Address) -> None:
+    def _on_tac_error(self, tac_message: TACMessage, controller_pbk: Address) -> None:
         """
-        Update the game instance with a State Update from the controller.
+        Handle 'on tac error' event emitted by the controller.
 
-        :param tac_message: the state update
-        :param controller_pbk: the public key of the controller
+        :param error: the error object
 
         :return: None
         """
-        self.init(tac_message.get("initial_state"), controller_pbk)
-        self.context.game.update_game_phase(GamePhase.GAME)
-        # for tx in message.get("transactions"):
-        #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))
+        error_code = TACMessage.ErrorCode(tac_message.get("error_code"))
+        logger.error("[{}]: Received error from the controller. error_msg={}".format(self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)))
+        if error_code == TACMessage.ErrorCode.TRANSACTION_NOT_VALID:
+            start_idx_of_tx_id = len("Error in checking transaction: ")
+            transaction_id = tac_message.get("error_msg")[start_idx_of_tx_id:]
+            logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id))
 
-    def _on_dialogue_error(self, tac_message: TACMessage, sender: Address) -> None:
-        """
-        Handle dialogue error event emitted by the controller.
-
-        :param message: the dialogue error message
-        :param sender: the address of the sender
-
-        :return: None
-        """
-        logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name, tac_message.get("details"), sender))
-
-    def _on_start(self, tac_message: TACMessage, sender: Address) -> None:
+    def _on_start(self, tac_message: TACMessage, controller_pbk: Address) -> None:
         """
         Handle the 'start' event emitted by the controller.
 
@@ -242,10 +248,19 @@ class TACHandler(Handler):
         :return: None
         """
         logger.debug("[{}]: Received start event from the controller. Starting to compete...".format(self.context.agent_name))
-        self.context.game.init(tac_message)
+        self.context.game.init(tac_message, controller_pbk)
         self.context.game.update_game_phase(GamePhase.GAME)
 
-    def _on_transaction_confirmed(self, message: TACMessage, sender: Address) -> None:
+    def _on_cancelled(self) -> None:
+        """
+        Handle the cancellation of the competition from the TAC controller.
+
+        :return: None
+        """
+        logger.debug("[{}]: Received cancellation from the controller.".format(self.context.agent_name))
+        self.context.game.update_game_phase(GamePhase.POST_GAME)
+
+    def _on_transaction_confirmed(self, message: TACMessage, controller_pbk: Address) -> None:
         """
         Handle 'on transaction confirmed' event emitted by the controller.
 
@@ -259,42 +274,43 @@ class TACHandler(Handler):
             self._request_state_update()
             return
 
+        # self.context.transaction_queue =
         # transaction = self.game_instance.transaction_manager.pop_locked_tx(message.get("transaction_id"))
         # self.game_instance.agent_state.update(transaction, self.game_instance.game_configuration.tx_fee)
         # dialogue_label = dialogue_label_from_transaction_id(self.crypto.public_key, message.get("transaction_id"))
         # self.game_instance.stats_manager.add_dialogue_endstate(EndState.SUCCESSFUL, self.crypto.public_key == dialogue_label.dialogue_starter_pbk)
 
-    def _on_cancelled(self) -> None:
+    def _on_state_update(self, tac_message: TACMessage, controller_pbk: Address) -> None:
         """
-        Handle the cancellation of the competition from the TAC controller.
+        Update the game instance with a State Update from the controller.
+
+        :param tac_message: the state update
+        :param controller_pbk: the public key of the controller
 
         :return: None
         """
-        logger.debug("[{}]: Received cancellation from the controller.".format(self.context.agent_name))
-        self.context.game.update_game_phase(GamePhase.POST_GAME)
+        self.init(tac_message, controller_pbk)
+        self.context.game.update_game_phase(GamePhase.GAME)
+        # # for tx in message.get("transactions"):
+        # #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))
+        # self.context.state_update_queue =
+        # self._initial_agent_state = AgentStateUpdate(game_data.money, game_data.endowment, game_data.utility_params)
+        # self._agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
+        # # if self.strategy.is_world_modeling:
+        # #     opponent_pbks = self.game_configuration.agent_pbks
+        # #     opponent_pbks.remove(agent_pbk)
+        # #     self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
 
-    def _on_tac_error(self, tac_message: TACMessage, sender: Address) -> None:
+    def _on_dialogue_error(self, tac_message: TACMessage, controller_pbk: Address) -> None:
         """
-        Handle 'on tac error' event emitted by the controller.
+        Handle dialogue error event emitted by the controller.
 
-        :param error: the error object
+        :param message: the dialogue error message
+        :param controller_pbk: the address of the controller
 
         :return: None
         """
-        error_code = TACMessage.ErrorCode(tac_message.get("error_code"))
-        logger.error("[{}]: Received error from the controller. error_msg={}".format(self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)))
-        if error_code == TACMessage.ErrorCode.TRANSACTION_NOT_VALID:
-            # if error in checking transaction, remove it from the pending transactions.
-            start_idx_of_tx_id = len("Error in checking transaction: ")
-            transaction_id = tac_message.get("error_msg")[start_idx_of_tx_id:]
-            logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id))
-        elif error_code == TACMessage.ErrorCode.TRANSACTION_NOT_MATCHING or \
-                error_code == TACMessage.ErrorCode.AGENT_PBK_ALREADY_REGISTERED or \
-                error_code == TACMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED or \
-                error_code == TACMessage.ErrorCode.AGENT_NOT_REGISTERED or \
-                error_code == TACMessage.ErrorCode.REQUEST_NOT_VALID or \
-                error_code == TACMessage.ErrorCode.GENERIC_ERROR:
-            pass
+        logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name, tac_message.get("details"), controller_pbk))
 
     def _request_state_update(self) -> None:
         """

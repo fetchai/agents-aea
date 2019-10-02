@@ -20,7 +20,7 @@
 
 """The transaction message module."""
 
-from typing import Dict
+from typing import Dict, cast
 
 from aea.protocols.base import Message
 
@@ -73,9 +73,11 @@ class TransactionMessage(Message):
             assert self.is_set("is_sender_buyer")
             assert self.is_set("amount")
             amount = self.get("amount")
-            assert amount >= 0
+            cast(float, amount)
+            assert amount >= 0.0
             assert self.is_set("quantities_by_good_pbk")
             quantities_by_good_pbk = self.get("quantities_by_good_pbk")
+            cast(Dict[str, int], quantities_by_good_pbk)
             assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
             assert all(quantity >= 0 for quantity in quantities_by_good_pbk.values())
         except (AssertionError, KeyError):
