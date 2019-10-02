@@ -28,8 +28,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast
 
-import yaml
-
 from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.protocols.base import Protocol
