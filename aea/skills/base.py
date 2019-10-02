@@ -63,10 +63,10 @@ class SkillContext:
         return self._agent_context.outbox
 
     @property
-    def handler(self) -> Optional['Handler']:
-        """Get handler of the skill."""
+    def handlers(self) -> Optional[List['Handler']]:
+        """Get handlers of the skill."""
         assert self._skill is not None, "Skill not initialized."
-        return self._skill.handler
+        return self._skill.handlers
 
     @property
     def behaviours(self) -> Optional[List['Behaviour']]:
@@ -197,15 +197,16 @@ class Handler(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, handler_config: HandlerConfig, skill_context: SkillContext) -> Optional['Handler']:
+    def parse_module(cls, path: str, handler_configs: List[HandlerConfig], skill_context: SkillContext) -> Optional['Handler']:
         """
         Parse the handler module.
 
         :param path: path to the Python module containing the Handler class.
-        :param handler_config: the handler configuration.
+        :param handler_configs: the list of handler configurations.
         :param skill_context: the skill context
         :return: an handler, or None if the parsing fails.
         """
+        handlers = []
         handler_spec = importlib.util.spec_from_file_location("handler", location=path)
         handler_module = importlib.util.module_from_spec(handler_spec)
         handler_spec.loader.exec_module(handler_module)  # type: ignore
@@ -213,18 +214,20 @@ class Handler(ABC):
         handler_classes = list(filter(lambda x: re.match("\\w+Handler", x[0]), classes))
 
         name_to_class = dict(handler_classes)
-        handler_class_name = cast(str, handler_config.class_name)
-        logger.debug("Processing handler {}".format(handler_class_name))
-        handler_class = name_to_class.get(handler_class_name, None)
-        if handler_class is None:
-            logger.warning("Handler '{}' cannot be found.".format(handler_class_name))
-            return None
-        else:
-            args = handler_config.args
-            assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-            args['skill_context'] = skill_context
-            handler = handler_class(**args)
-            return handler
+        for handler_config in handler_configs:
+            handler_class_name = cast(str, handler_config.class_name)
+            logger.debug("Processing handler {}".format(handler_class_name))
+            handler_class = name_to_class.get(handler_class_name, None)
+            if handler_class is None:
+                logger.warning("Handler '{}' cannot be found.".format(handler_class_name))
+            else:
+                args = handler_config.args
+                assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
+                args['skill_context'] = skill_context
+                handler = handler_class(**args)
+                handlers.append(handler)
+
+        return handlers
 
 
 class Task(ABC):
@@ -305,20 +308,20 @@ class Skill:
 
     def __init__(self, config: SkillConfig,
                  skill_context: SkillContext,
-                 handler: Optional[Handler],
+                 handlers: Optional[List[Handler]],
                  behaviours: Optional[List[Behaviour]],
                  tasks: Optional[List[Task]]):
         """
         Initialize a skill.
 
         :param config: the skill configuration.
-        :param handler: the handler to handle incoming envelopes.
+        :param handlers: the list of handlers to handle incoming envelopes.
         :param behaviours: the list of behaviours that defines the proactive component of the agent.
         :param tasks: the list of tasks executed at every iteration of the main loop.
         """
         self.config = config
         self.skill_context = skill_context
-        self.handler = handler
+        self.handlers = handlers
         self.behaviours = behaviours
         self.tasks = tasks
 
@@ -349,13 +352,14 @@ class Skill:
 
         skill_context = SkillContext(agent_context)
 
-        handler = Handler.parse_module(os.path.join(directory, "handler.py"), skill_config.handler, skill_context)
+        handler_configurations = list(dict(skill_config.handlers.read_all()).values())
+        handlers = Handler.parse_module(os.path.join(directory, "handler.py"), handler_configurations, skill_context)
         behaviours_configurations = list(dict(skill_config.behaviours.read_all()).values())
         behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations, skill_context)
         tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
         tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
 
-        skill = Skill(skill_config, skill_context, handler, behaviours, tasks)
+        skill = Skill(skill_config, skill_context, handlers, behaviours, tasks)
         skill_context._skill = skill
 
         return skill

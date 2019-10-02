@@ -26,7 +26,6 @@ from typing import Optional
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.skills.base import Handler
-from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
@@ -67,15 +66,15 @@ class FIPANegotiationHandler(Handler):
 
         logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name, fipa_msg_performative))
         if fipa_msg_performative == FIPAMessage.Performative.CFP:
-            response = self.on_cfp(fipa_msg, dialogue)
+            response = self._on_cfp(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.PROPOSE:
-            response = self.on_propose(fipa_msg, dialogue)
+            response = self._on_propose(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.DECLINE:
-            response = self.on_decline(fipa_msg, dialogue)
+            response = self._on_decline(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.ACCEPT:
-            response = self.on_accept(fipa_msg, dialogue)
+            response = self._on_accept(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.MATCH_ACCEPT:
-            response = self.on_match_accept(fipa_msg, dialogue)
+            response = self._on_match_accept(fipa_msg, dialogue)
         self.context.outbox.put(response)
 
     def teardown(self) -> None:
@@ -86,7 +85,7 @@ class FIPANegotiationHandler(Handler):
         """
         self.context.dialogues.reset()
 
-    def on_cfp(self, cfp: FIPAMessage, dialogue: Dialogue) -> Envelope:
+    def _on_cfp(self, cfp: FIPAMessage, dialogue: Dialogue) -> Envelope:
         """
         Handle a CFP.
 
@@ -95,17 +94,15 @@ class FIPANegotiationHandler(Handler):
 
         :return: a Propose or a Decline
         """
-        self.context.strategy
-        get_goods_quantities_description
-        own_service_description = self.context.game_instance.get_own_service_description(is_supply=dialogue.is_seller)
+        own_service_description = self.context.strategy.get_own_service_description(is_supply=dialogue.is_seller)
         new_msg_id = cfp.get("id") + 1
         decline = False
         cfp_services = json.loads(cfp.get("query").decode('utf-8'))
-        if not is_compatible(cfp_services, goods_description):
+        if not self.context.strategy.is_compatible(cfp_services, goods_description): #operate on object instead?
             decline = True
             logger.debug("[{}]: Current holdings do not satisfy CFP query.".format(self.context.agent_name))
         else:
-            proposal = self.context.game_instance.generate_proposal(cfp_services, dialogue.is_seller)
+            proposal = self.context.strategy.generate_proposal(cfp_services, dialogue.is_seller)
             if proposal is None:
                 decline = True
                 logger.debug("[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(self.context.agent_name))
@@ -121,17 +118,18 @@ class FIPANegotiationHandler(Handler):
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=cfp.get("dialogue_id"), performative=FIPAMessage.Performative.DECLINE, target=cfp.get("id"))
             dialogue.outgoing_extend([msg])
             msg_bytes = FIPASerializer().encode(msg)
-            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.crypto.public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-            self.context.game_instance.stats_manager.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
+            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+            self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         else:
             proposal = cast(Description, proposal)
             transaction_id = generate_transaction_id(self.crypto.public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
-            transaction = Transaction.from_proposal(proposal=proposal,
-                                                    transaction_id=transaction_id,
-                                                    is_sender_buyer=not dialogue.is_seller,
-                                                    counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
-                                                    sender=self.crypto.public_key)
-            self.context.game_instance.transaction_manager.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction)
+            transaction = TransactionMessage(transaction_id=transaction_id,
+                                             sender=self.context.agent_public_key,
+                                             counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
+                                             is_sender_buyer=not dialogue.is_seller,
+                                             amount=proposal.amount,
+                                             quantities_by_good_pbkproposal=proposal)
+            self.context.transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction)
             logger.debug("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk,
                                                                   pprint.pformat({
                                                                       "msg_id": new_msg_id,
@@ -146,7 +144,7 @@ class FIPANegotiationHandler(Handler):
             result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         return result
 
-    def on_propose(self, propose: Message, dialogue: Dialogue) -> Envelope:
+    def _on_propose(self, propose: FIPAMessage, dialogue: Dialogue) -> Envelope:
         """
         Handle a Propose.
 
@@ -182,7 +180,7 @@ class FIPANegotiationHandler(Handler):
             self.context.game_instance.stats_manager.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
         return result
 
-    def on_decline(self, decline: Message, dialogue: Dialogue) -> None:
+    def _on_decline(self, decline: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle a Decline.
 
@@ -206,7 +204,7 @@ class FIPANegotiationHandler(Handler):
             self.context.game_instance.transaction_manager.pop_locked_tx(transaction.transaction_id)
         return None
 
-    def on_accept(self, accept: Message, dialogue: Dialogue) -> Envelope:
+    def _on_accept(self, accept: FIPAMessage, dialogue: Dialogue) -> Envelope:
         """
         Handle an Accept.
 
@@ -243,7 +241,7 @@ class FIPANegotiationHandler(Handler):
             self.context.game_instance.stats_manager.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
         return result
 
-    def on_match_accept(self, match_accept: Message, dialogue: Dialogue) -> None:
+    def _on_match_accept(self, match_accept: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle a matching Accept.
 

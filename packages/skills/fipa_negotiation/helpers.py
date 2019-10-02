@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This class contains the helpers for FIPA negotiation."""
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, cast
 
 from aea.protocols.oef.models import Attribute, DataModel, Description
 
@@ -27,25 +27,26 @@ SUPPLY_DATAMODEL_NAME = "supply"
 DEMAND_DATAMODEL_NAME = "demand"
 
 
-def build_datamodel(good_pbk_to_quantities: Dict[str, int], is_supply: bool) -> DataModel:
+def build_goods_datamodel(good_pbks: List[str], is_supply: bool) -> DataModel:
     """
-    Build a data model for supply and demand (i.e. for offered or requested goods).
+    Build a data model for supply and demand of goods (i.e. for offered or requested goods).
 
-    :param good_pbk_to_quantities: a dictionary mapping the public keys of the goods to the quantities.
+    :param good_pbks: a list of public keys (i.e. identifiers) of the relevant goods.
     :param is_supply: Boolean indicating whether it is a supply or demand data model
 
     :return: the data model.
     """
     goods_quantities_attributes = [Attribute(good_pbk, int, False)
-                                   for good_pbk in good_pbk_to_quantities.keys()]
-    price_attribute = Attribute("price", float, False)
+                                   for good_pbk in good_pbks]
+    fet_attribute = Attribute("FET", float, False)  # the price attribute
     description = SUPPLY_DATAMODEL_NAME if is_supply else DEMAND_DATAMODEL_NAME
     attributes = goods_quantities_attributes + [price_attribute]
     data_model = DataModel(description, attributes)
     return data_model
 
+generate_transaction_id
 
-def build_goods_quantities_description(good_pbk_to_quantities: Dict[str, int], is_supply: bool) -> Description:
+def build_goods_description(good_pbk_to_quantities: Dict[str, int], is_supply: bool) -> Description:
     """
     Get the service description (good quantities supplied or demanded and their price).
 
@@ -54,7 +55,7 @@ def build_goods_quantities_description(good_pbk_to_quantities: Dict[str, int], i
 
     :return: the description to advertise on the Service Directory.
     """
-    data_model = build_datamodel(good_pbk_to_quantities, is_supply=is_supply)
+    data_model = build_goods_datamodel(good_pbk_to_quantities.keys(), is_supply=is_supply)
     desc = Description(good_pbk_to_quantities, data_model=data_model)
     return desc
 

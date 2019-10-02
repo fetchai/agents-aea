@@ -226,7 +226,7 @@ class HandlerRegistry(Registry):
         if result is None:
             return None
         else:
-            # TODO: introduce a controller class which intelligently selects the appropriate handler.
+            # TODO: introduce a filter class which intelligently selects the appropriate handler.
             return list(result.values())
 
     def fetch_by_skill(self, protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]:
@@ -439,9 +439,9 @@ class Resources(object):
         """Add a skill to the set of resources."""
         skill_id = skill.config.name
         self._skills[skill_id] = skill
-        if skill.handler is not None:
+        if skill.handlers is not None:
             protocol_id = skill.config.protocol
-            self.handler_registry.register((protocol_id, skill_id), cast(Handler, skill.handler))
+            self.handler_registry.register((protocol_id, skill_id), cast(List[Handler], skill.handlers))
         if skill.behaviours is not None:
             self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], skill.behaviours))
         if skill.tasks is not None:

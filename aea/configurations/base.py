@@ -247,7 +247,7 @@ class SkillConfig(Configuration):
         self.license = license
         self.url = url
         self.protocol = protocol
-        self.handler = HandlerConfig()
+        self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
         self.tasks = CRUDCollection[TaskConfig]()
 
@@ -261,7 +261,7 @@ class SkillConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "protocol": self.protocol,
-            "handler": self.handler.json,
+            "handlers": [{"handler": h.json} for _, h in self.handlers.read_all()],
             "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
             "tasks": [{"task": t.json} for _, t in self.tasks.read_all()],
         }
@@ -292,8 +292,9 @@ class SkillConfig(Configuration):
             task_config = BehaviourConfig.from_json(t["task"])
             skill_config.tasks.create(task_config.class_name, task_config)
 
-        handler = HandlerConfig.from_json(obj.get("handler"))  # type: ignore
-        skill_config.handler = handler
+        for h in obj.get("handlers"):  # type: ignore
+            handler_config = HandlerConfig.from_json(t["handler"])
+            skill_config.handlers.create(handler_config.class_name, handler_config)
 
         return skill_config
 

@@ -18,36 +18,35 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a class to manage transactions the agent has committed to at varying degrees."""
+"""This module contains a class to manage transactions."""
 
 import datetime
 import logging
 from collections import defaultdict, deque
 from typing import Dict, Tuple, Deque
 
-from tac.agents.participant.v1.base.dialogues import DialogueLabel
-from tac.platform.game.base import Transaction, TransactionId
+from aea.protocol.transaction import TransactionMessage, TransactionId
+
+from fipa_negotiation_skill.dialogue import DialogueLabel
 
 logger = logging.getLogger(__name__)
 
 MESSAGE_ID = int
-TRANSACTION_ID = str
 
 
-class TransactionManager(object):
+class Transactions(object):
     """Class to handle pending transaction proposals/acceptances and locked transactions."""
 
     def __init__(self) -> None:
-        """Initialize a TransactionManager."""
+        """Initialize the transactions."""
+        self.pending_proposals = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
+        self.pending_initial_acceptances = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
 
-        self.pending_proposals = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, Transaction]]
-        self.pending_initial_acceptances = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, Transaction]]
+        self.locked_txs = {}  # type: Dict[TransactionId, TransactionMessage]
+        self.locked_txs_as_buyer = {}  # type: Dict[TransactionId, TransactionMessage]
+        self.locked_txs_as_seller = {}  # type: Dict[TransactionId, TransactionMessage]
 
-        self.locked_txs = {}  # type: Dict[TRANSACTION_ID, Transaction]
-        self.locked_txs_as_buyer = {}  # type: Dict[TRANSACTION_ID, Transaction]
-        self.locked_txs_as_seller = {}  # type: Dict[TRANSACTION_ID, Transaction]
-
-        self._last_update_for_transactions = deque()  # type: Deque[Tuple[datetime.datetime, TRANSACTION_ID]]
+        self._last_update_for_transactions = deque()  # type: Deque[Tuple[datetime.datetime, TransactionId]]
 
     def cleanup_pending_transactions(self) -> None:
         """
@@ -93,7 +92,7 @@ class TransactionManager(object):
         now = datetime.datetime.now()
         self._last_update_for_transactions.append((now, transaction_id))
 
-    def add_pending_proposal(self, dialogue_label: DialogueLabel, proposal_id: int, transaction: Transaction) -> None:
+    def add_pending_proposal(self, dialogue_label: DialogueLabel, proposal_id: int, transaction: TransactionMessage) -> None:
         """
         Add a proposal (in the form of a transaction) to the pending list.
 
@@ -107,7 +106,7 @@ class TransactionManager(object):
         assert dialogue_label not in self.pending_proposals and proposal_id not in self.pending_proposals[dialogue_label]
         self.pending_proposals[dialogue_label][proposal_id] = transaction
 
-    def pop_pending_proposal(self, dialogue_label: DialogueLabel, proposal_id: int) -> Transaction:
+    def pop_pending_proposal(self, dialogue_label: DialogueLabel, proposal_id: int) -> TransactionMessage:
         """
         Remove a proposal (in the form of a transaction) from the pending list.
 
@@ -121,7 +120,7 @@ class TransactionManager(object):
         transaction = self.pending_proposals[dialogue_label].pop(proposal_id)
         return transaction
 
-    def add_pending_initial_acceptance(self, dialogue_label: DialogueLabel, proposal_id: int, transaction: Transaction) -> None:
+    def add_pending_initial_acceptance(self, dialogue_label: DialogueLabel, proposal_id: int, transaction: TransactionMessage) -> None:
         """
         Add an acceptance (in the form of a transaction) to the pending list.
 
@@ -135,7 +134,7 @@ class TransactionManager(object):
         assert dialogue_label not in self.pending_initial_acceptances and proposal_id not in self.pending_initial_acceptances[dialogue_label]
         self.pending_initial_acceptances[dialogue_label][proposal_id] = transaction
 
-    def pop_pending_initial_acceptance(self, dialogue_label: DialogueLabel, proposal_id: int) -> Transaction:
+    def pop_pending_initial_acceptance(self, dialogue_label: DialogueLabel, proposal_id: int) -> TransactionMessage:
         """
         Remove an acceptance (in the form of a transaction) from the pending list.
 
@@ -149,7 +148,7 @@ class TransactionManager(object):
         transaction = self.pending_initial_acceptances[dialogue_label].pop(proposal_id)
         return transaction
 
-    def add_locked_tx(self, transaction: Transaction, as_seller: bool) -> None:
+    def add_locked_tx(self, transaction: TransactionMessage, as_seller: bool) -> None:
         """
         Add a lock (in the form of a transaction).
 
@@ -168,7 +167,7 @@ class TransactionManager(object):
         else:
             self.locked_txs_as_buyer[transaction_id] = transaction
 
-    def pop_locked_tx(self, transaction_id: TransactionId) -> Transaction:
+    def pop_locked_tx(self, transaction_id: TransactionId) -> TransactionMessage:
         """
         Remove a lock (in the form of a transaction).
 

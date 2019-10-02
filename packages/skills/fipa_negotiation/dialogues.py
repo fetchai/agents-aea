@@ -264,20 +264,20 @@ class Dialogues(BaseDialogues):
             and target == STARTING_MESSAGE_TARGET
         return result
 
-    def is_belonging_to_registered_dialogue(self, message: Message, sender: Address, agent_pbk: Address) -> bool:
+    def is_belonging_to_registered_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> bool:
         """
         Check whether an agent message is part of a registered dialogue.
 
-        :param message: the fipa message
+        :param fipa_msg: the fipa message
         :param sender: the sender
         :param agent_pbk: the public key of the agent
 
         :return: boolean indicating whether the message belongs to a registered dialogue
         """
-        dialogue_id = message.get("dialogue_id")
+        dialogue_id = fipa_msg.get("dialogue_id")
         opponent = sender
-        target = message.get("target")
-        performative = message.get("performative")
+        target = fipa_msg.get("target")
+        performative = fipa_msg.get("performative")
         self_initiated_dialogue_label = DialogueLabel(dialogue_id, opponent, agent_pbk)
         other_initiated_dialogue_label = DialogueLabel(dialogue_id, opponent, opponent)
         result = False

@@ -11,7 +11,17 @@
         "license": {"type": "string"},
         "url": {"type": "string"},
         "protocol": {"type": "string"},
-        "handler": {"$ref": "#/definitions/handler"},
+        "handlers": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required": ["handler"],
+              "properties": {
+                "handler": { "$ref": "#/definitions/handler" }
+              }
+            }
+        },
         "behaviours": {
             "type": "array",
             "uniqueItems": true,

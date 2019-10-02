@@ -20,10 +20,10 @@ tasks:
 shared_classes:
   - one:
     class_name: Search
-    args:
-      foo: bar
   - two:
     class_name: Strategy
-    args:
-      foo: bar
+  - three:
+    class_name: Dialogues
+  - four:
+    class_name: Transactions
 protocol: ''
