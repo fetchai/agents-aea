@@ -7,18 +7,11 @@ All the commands must be executed from the parent directory, if not stated other
 We recommend using the following command for building:
 
     ./deploy-image/scripts/docker-build-img.sh \
-        -t aea-deploy:latest \
-        --build-arg AGENT_REPO_URL=https://github.com/username/repo.git --
-    
-
-E.g.:
-
-    ./deploy-image/scripts/docker-build-img.sh \
-        -t aea-deploy:latest \
-        --build-arg AGENT_REPO_URL=https://github.com/fetchai/echo_agent.git --    
-
+        -t aea-deploy:latest --
 
 ## Run
 
-    docker run -it aea-deploy:latest 
- 
+    docker run --env AGENT_REPO_URL=https://github.com/fetchai/echo_agent.git aea-deploy:latest
+
+## TODO
+We need to add support for setting the connection endpoints for OEF/Ledger so they can be used a deploytime. I would suggest these are set as environment variables if possible.
