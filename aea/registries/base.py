@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -34,6 +35,8 @@ from aea.protocols.base import Protocol
 from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext
 
 logger = logging.getLogger(__name__)
+
+PACKAGE_NAME_REGEX = re.compile("^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE)
 
 
 class Registry(ABC):
@@ -135,7 +138,7 @@ class ProtocolRegistry(Registry):
             logger.warning("No protocol found.")
             return
 
-        protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))  # type: ignore
+        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), protocols_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following protocol package: {}".format(protocols_packages))
         for protocol_name in protocols_packages:
             try:
