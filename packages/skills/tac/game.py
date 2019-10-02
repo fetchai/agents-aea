@@ -17,36 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a handler."""
+"""This package contains a class representing the game."""
 
-from typing import Optional
+game.controller_pbk
 
-from aea.configurations.base import ProtocolId
-from aea.mail.base import Envelope
-from aea.skills.base import Handler
-
-
-class MyScaffoldHandler(Handler):
-    """This class scaffolds a handler."""
-
-    SUPPORTED_PROTOCOL = ''  # type: Optional[ProtocolId]
-
-    def handle_envelope(self, envelope: Envelope) -> None:
-        """
-        Implement the reaction to an envelope.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
+game._game_phase
 
     @property
     def expected_version_id(self) -> str:
@@ -58,7 +33,8 @@ class MyScaffoldHandler(Handler):
         """Get the game phase."""
         return self._game_phase
 
-    @property
+
+            @property
     def game_configuration(self) -> GameConfiguration:
         """Get the game configuration."""
         assert self._game_configuration is not None, "Game configuration not assigned!"
@@ -84,16 +60,14 @@ class MyScaffoldHandler(Handler):
             opponent_pbks.remove(agent_pbk)
             self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
 
-    def on_state_update(self, message: TACMessage, agent_pbk: Address) -> None:
-        """
-        Update the game instance with a State Update from the controller.
 
-        :param state_update: the state update
-        :param agent_pbk: the public key of the agent
-
-        :return: None
-        """
-        self.init(message.get("initial_state"), agent_pbk)
-        self._game_phase = GamePhase.GAME
-        for tx in message.get("transactions"):
-            self.agent_state.update(tx, message.get("initial_state").get("tx_fee"))
+        # game_data = GameData(sender,
+        #                      tac_message.get("money"),
+        #                      tac_message.get("endowment"),
+        #                      tac_message.get("utility_params"),
+        #                      tac_message.get("nb_agents"),
+        #                      tac_message.get("nb_goods"),
+        #                      tac_message.get("tx_fee"),
+        #                      tac_message.get("agent_pbk_to_name"),
+        #                      tac_message.get("good_pbk_to_name"),
+        #                      tac_message.get("version_id"))

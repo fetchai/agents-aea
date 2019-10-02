@@ -64,6 +64,12 @@ class Dialogue(BaseDialogue):
         DECLINED_PROPOSE = 2
         DECLINED_ACCEPT = 3
 
+    class AgentRole(Enum):
+        """This class defines the aegtn's role in the dialogue."""
+
+        SELLER = 'seller'
+        BUYET = 'buyer'
+
     def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
         """
         Initialize a dialogue label.
@@ -75,7 +81,7 @@ class Dialogue(BaseDialogue):
         """
         BaseDialogue.__init__(self, dialogue_label=dialogue_label)
         self._is_seller = is_seller
-        self._role = 'seller' if is_seller else 'buyer'
+        self._role = Dialogue.AgentRole.SELLER if is_seller else Dialogue.AgentRole.BUYER
         self._outgoing_messages = []  # type: List[Message]
         self._outgoing_messages_controller = []  # type: List[Message]
         self._incoming_messages = []  # type: List[Message]
@@ -95,23 +101,23 @@ class Dialogue(BaseDialogue):
         """Get role of agent in dialogue."""
         return self._role
 
-    def outgoing_extend(self, messages: List[Message]) -> None:
+    def outgoing_extend(self, message: Message) -> None:
         """
         Extend the list of messages which keeps track of outgoing messages.
 
-        :param messages: a list of messages to be added
+        :param message: a message to be added
         :return: None
         """
-        self._outgoing_messages.extend(messages)
+        self._outgoing_messages.extend([message])
 
-    def incoming_extend(self, messages: List[Message]) -> None:
+    def incoming_extend(self, message: Message) -> None:
         """
         Extend the list of messages which keeps track of incoming messages.
 
-        :param messages: a list of messages to be added
+        :param messages: a message to be added
         :return: None
         """
-        self._incoming_messages.extend(messages)
+        self._incoming_messages.extend([message])
 
     def is_expecting_propose(self) -> bool:
         """

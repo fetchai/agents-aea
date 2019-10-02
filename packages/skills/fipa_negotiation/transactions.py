@@ -37,14 +37,15 @@ MESSAGE_ID = int
 class Transactions(object):
     """Class to handle pending transaction proposals/acceptances and locked transactions."""
 
-    def __init__(self) -> None:
+    def __init__(self, pending_transaction_timeout: int) -> None:
         """Initialize the transactions."""
-        self.pending_proposals = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
-        self.pending_initial_acceptances = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
+        self._pending_proposals = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
+        self._pending_initial_acceptances = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
+        self._pending_transaction_timeout = pending_transaction_timeout
 
-        self.locked_txs = {}  # type: Dict[TransactionId, TransactionMessage]
-        self.locked_txs_as_buyer = {}  # type: Dict[TransactionId, TransactionMessage]
-        self.locked_txs_as_seller = {}  # type: Dict[TransactionId, TransactionMessage]
+        self._locked_txs = {}  # type: Dict[TransactionId, TransactionMessage]
+        self._locked_txs_as_buyer = {}  # type: Dict[TransactionId, TransactionMessage]
+        self._locked_txs_as_seller = {}  # type: Dict[TransactionId, TransactionMessage]
 
         self._last_update_for_transactions = deque()  # type: Deque[Tuple[datetime.datetime, TransactionId]]
 
@@ -55,7 +56,7 @@ class Transactions(object):
         :return: None
         """
         queue = self._last_update_for_transactions
-        timeout = datetime.timedelta(0, self.pending_transaction_timeout)
+        timeout = datetime.timedelta(0, self._pending_transaction_timeout)
 
         if len(queue) == 0:
             return
@@ -69,17 +70,73 @@ class Transactions(object):
 
             # extract dialogue label and message id
             transaction_id = next_item
-            logger.debug("[{}]: Removing transaction: {}".format(self.agent_name, transaction_id))
+            logger.debug("[{}]: Removing transaction: {}".format(self.context.agent_name, transaction_id))
 
             # remove (safely) the associated pending proposal (if present)
-            self.locked_txs.pop(transaction_id, None)
-            self.locked_txs_as_buyer.pop(transaction_id, None)
-            self.locked_txs_as_seller.pop(transaction_id, None)
+            self._locked_txs.pop(transaction_id, None)
+            self._locked_txs_as_buyer.pop(transaction_id, None)
+            self._locked_txs_as_seller.pop(transaction_id, None)
 
             # check the next transaction, if present
             if len(queue) == 0:
                 break
             next_date, next_item = queue[0]
+
+    def add_pending_proposal(self, dialogue_label: DialogueLabel, proposal_id: int, transaction_msg: TransactionMessage) -> None:
+        """
+        Add a proposal (in the form of a transaction) to the pending list.
+
+        :param dialogue_label: the dialogue label associated with the proposal
+        :param proposal_id: the message id of the proposal
+        :param transaction_msg: the transaction message
+        :raise AssertionError: if the pending proposal is already present.
+
+        :return: None
+        """
+        assert dialogue_label not in self._pending_proposals and proposal_id not in self._pending_proposals[dialogue_label]
+        self._pending_proposals[dialogue_label][proposal_id] = transaction_msg
+
+    def pop_pending_proposal(self, dialogue_label: DialogueLabel, proposal_id: int) -> TransactionMessage:
+        """
+        Remove a proposal (in the form of a transaction) from the pending list.
+
+        :param dialogue_label: the dialogue label associated with the proposal
+        :param proposal_id: the message id of the proposal
+        :raise AssertionError: if the pending proposal is not present.
+
+        :return: the transaction message
+        """
+        assert dialogue_label in self._pending_proposals and proposal_id in self._pending_proposals[dialogue_label]
+        transaction_msg = self._pending_proposals[dialogue_label].pop(proposal_id)
+        return transaction_msg
+
+    def add_pending_initial_acceptance(self, dialogue_label: DialogueLabel, proposal_id: int, transaction_msg: TransactionMessage) -> None:
+        """
+        Add an acceptance (in the form of a transaction) to the pending list.
+
+        :param dialogue_label: the dialogue label associated with the proposal
+        :param proposal_id: the message id of the proposal
+        :param transaction_msg: the transaction message
+        :raise AssertionError: if the pending acceptance is already present.
+
+        :return: None
+        """
+        assert dialogue_label not in self._pending_initial_acceptances and proposal_id not in self._pending_initial_acceptances[dialogue_label]
+        self._pending_initial_acceptances[dialogue_label][proposal_id] = transaction_msg
+
+    def pop_pending_initial_acceptance(self, dialogue_label: DialogueLabel, proposal_id: int) -> TransactionMessage:
+        """
+        Remove an acceptance (in the form of a transaction) from the pending list.
+
+        :param dialogue_label: the dialogue label associated with the proposal
+        :param proposal_id: the message id of the proposal
+        :raise AssertionError: if the pending acceptance is not present.
+
+        :return: the transaction message
+        """
+        assert dialogue_label in self._pending_initial_acceptances and proposal_id in self._pending_initial_acceptances[dialogue_label]
+        transaction_msg = self._pending_initial_acceptances[dialogue_label].pop(proposal_id)
+        return transaction_msg
 
     def _register_transaction_with_time(self, transaction_id: TransactionId) -> None:
         """
@@ -92,80 +149,24 @@ class Transactions(object):
         now = datetime.datetime.now()
         self._last_update_for_transactions.append((now, transaction_id))
 
-    def add_pending_proposal(self, dialogue_label: DialogueLabel, proposal_id: int, transaction: TransactionMessage) -> None:
-        """
-        Add a proposal (in the form of a transaction) to the pending list.
-
-        :param dialogue_label: the dialogue label associated with the proposal
-        :param proposal_id: the message id of the proposal
-        :param transaction: the transaction
-        :raise AssertionError: if the pending proposal is already present.
-
-        :return: None
-        """
-        assert dialogue_label not in self.pending_proposals and proposal_id not in self.pending_proposals[dialogue_label]
-        self.pending_proposals[dialogue_label][proposal_id] = transaction
-
-    def pop_pending_proposal(self, dialogue_label: DialogueLabel, proposal_id: int) -> TransactionMessage:
-        """
-        Remove a proposal (in the form of a transaction) from the pending list.
-
-        :param dialogue_label: the dialogue label associated with the proposal
-        :param proposal_id: the message id of the proposal
-        :raise AssertionError: if the pending proposal is not present.
-
-        :return: the transaction
-        """
-        assert dialogue_label in self.pending_proposals and proposal_id in self.pending_proposals[dialogue_label]
-        transaction = self.pending_proposals[dialogue_label].pop(proposal_id)
-        return transaction
-
-    def add_pending_initial_acceptance(self, dialogue_label: DialogueLabel, proposal_id: int, transaction: TransactionMessage) -> None:
-        """
-        Add an acceptance (in the form of a transaction) to the pending list.
-
-        :param dialogue_label: the dialogue label associated with the proposal
-        :param proposal_id: the message id of the proposal
-        :param transaction: the transaction
-        :raise AssertionError: if the pending acceptance is already present.
-
-        :return: None
-        """
-        assert dialogue_label not in self.pending_initial_acceptances and proposal_id not in self.pending_initial_acceptances[dialogue_label]
-        self.pending_initial_acceptances[dialogue_label][proposal_id] = transaction
-
-    def pop_pending_initial_acceptance(self, dialogue_label: DialogueLabel, proposal_id: int) -> TransactionMessage:
-        """
-        Remove an acceptance (in the form of a transaction) from the pending list.
-
-        :param dialogue_label: the dialogue label associated with the proposal
-        :param proposal_id: the message id of the proposal
-        :raise AssertionError: if the pending acceptance is not present.
-
-        :return: the transaction
-        """
-        assert dialogue_label in self.pending_initial_acceptances and proposal_id in self.pending_initial_acceptances[dialogue_label]
-        transaction = self.pending_initial_acceptances[dialogue_label].pop(proposal_id)
-        return transaction
-
-    def add_locked_tx(self, transaction: TransactionMessage, as_seller: bool) -> None:
+    def add_locked_tx(self, transaction_msg: TransactionMessage, as_seller: bool) -> None:
         """
         Add a lock (in the form of a transaction).
 
-        :param transaction: the transaction
+        :param transaction_msg: the transaction message
         :param as_seller: whether the agent is a seller or not
         :raise AssertionError: if the transaction is already present.
 
         :return: None
         """
-        transaction_id = transaction.transaction_id
-        assert transaction_id not in self.locked_txs
+        transaction_id = transaction_msg.transaction_id
+        assert transaction_id not in self._locked_txs
         self._register_transaction_with_time(transaction_id)
-        self.locked_txs[transaction_id] = transaction
+        self._locked_txs[transaction_id] = transaction_msg
         if as_seller:
-            self.locked_txs_as_seller[transaction_id] = transaction
+            self._locked_txs_as_seller[transaction_id] = transaction_msg
         else:
-            self.locked_txs_as_buyer[transaction_id] = transaction
+            self._locked_txs_as_buyer[transaction_id] = transaction_msg
 
     def pop_locked_tx(self, transaction_id: TransactionId) -> TransactionMessage:
         """
@@ -176,8 +177,19 @@ class Transactions(object):
 
         :return: the transaction
         """
-        assert transaction_id in self.locked_txs
-        transaction = self.locked_txs.pop(transaction_id)
-        self.locked_txs_as_buyer.pop(transaction_id, None)
-        self.locked_txs_as_seller.pop(transaction_id, None)
-        return transaction
+        assert transaction_id in self._locked_txs
+        transaction_msg = self._locked_txs.pop(transaction_id)
+        self._locked_txs_as_buyer.pop(transaction_id, None)
+        self._locked_txs_as_seller.pop(transaction_id, None)
+        return transaction_msg
+
+    def reset(self) -> None:
+        """Reset the class."""
+        self._pending_proposals = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
+        self._pending_initial_acceptances = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
+
+        self._locked_txs = {}  # type: Dict[TransactionId, TransactionMessage]
+        self._locked_txs_as_buyer = {}  # type: Dict[TransactionId, TransactionMessage]
+        self._locked_txs_as_seller = {}  # type: Dict[TransactionId, TransactionMessage]
+
+        self._last_update_for_transactions = deque()  # type: Deque[Tuple[datetime.datetime, TransactionId]]

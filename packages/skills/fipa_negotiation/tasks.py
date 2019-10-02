@@ -22,8 +22,8 @@
 from aea.skills.base import Task
 
 
-class MyScaffoldTask(Task):
-    """This class scaffolds a task."""
+class TransactionCleanUpTask(Task):
+    """This class implements the cleanup of the transactions class."""
 
     def execute(self) -> None:
         """
@@ -32,8 +32,7 @@ class MyScaffoldTask(Task):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError
-        # clean up transactions
+        self.context.transactions.cleanup_pending_transactions()
 
     def teardown(self) -> None:
         """
@@ -41,5 +40,4 @@ class MyScaffoldTask(Task):
 
         :return: None
         """
-        raise NotImplementedError
-        # pop all pending transactions
+        self.context.transactions.reset()

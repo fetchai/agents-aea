@@ -7,16 +7,12 @@ behaviours:
   - behaviour:
       class_name: GoodsRegisterAndSearchBehaviour
       args:
-        foo: bar
-handler:
+        services_interval: 5
+handlers:
   class_name: FIPANegotiationHandler
-  args:
-    foo: bar
 tasks:
   - task:
-      class_name: MyScaffoldTask
-      args:
-        foo: bar
+      class_name: TransactionCleanUpTask
 shared_classes:
   - one:
     class_name: Search
@@ -26,4 +22,6 @@ shared_classes:
     class_name: Dialogues
   - four:
     class_name: Transactions
-protocol: ''
+    args:
+      pending_transaction_timeout: 30
+protocol: ['oef', 'fipa']

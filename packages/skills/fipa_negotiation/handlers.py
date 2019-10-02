@@ -21,7 +21,7 @@
 
 import logging
 import pprint
-from typing import Optional
+from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
@@ -30,8 +30,11 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
+from aea.protocols.oef.models import Query
+from aea.protocols.transaction.message import TransactionMessage
 
 from fipa_negotiation_skill.dialogues import Dialogue
+from fipa_negotiation_skill.helpers import generate_transaction_id
 
 logger = logging.getLogger(__name__)
 
@@ -54,9 +57,10 @@ class FIPANegotiationHandler(Handler):
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
         if self.context.dialogues.is_belonging_to_registered_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key):
             dialogue = self.context.dialogues.get_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key)
-            dialogue.incoming_extend([fipa_msg])
+            dialogue.incoming_extend(fipa_msg)
         elif self.context.dialogues.is_permitted_for_new_dialogue(fipa_msg, envelope.sender):
             dialogue = self.context.dialogues.create_opponent_initiated(fipa_msg, envelope.sender)
+            dialogue.incoming_extend(fipa_msg)
         else:
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
             default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b'This message belongs to an unidentified dialogue.')
@@ -97,13 +101,14 @@ class FIPANegotiationHandler(Handler):
         own_service_description = self.context.strategy.get_own_service_description(is_supply=dialogue.is_seller)
         new_msg_id = cfp.get("id") + 1
         decline = False
-        cfp_services = json.loads(cfp.get("query").decode('utf-8'))
-        if not self.context.strategy.is_compatible(cfp_services, goods_description): #operate on object instead?
+        cfp_query = cfp.get("query")
+        cfp_query = cast(Query, cfp_query)
+        if not cfp_query.check(own_service_description):
             decline = True
             logger.debug("[{}]: Current holdings do not satisfy CFP query.".format(self.context.agent_name))
         else:
-            proposal = self.context.strategy.generate_proposal(cfp_services, dialogue.is_seller)
-            if proposal is None:
+            proposal_description = self.context.strategy.generate_proposal_description_for_query(cfp_query, dialogue.is_seller)
+            if proposal_description is None:
                 decline = True
                 logger.debug("[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(self.context.agent_name))
 
@@ -116,30 +121,28 @@ class FIPANegotiationHandler(Handler):
                                                                       "target": cfp.get("target")
                                                                   })))
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=cfp.get("dialogue_id"), performative=FIPAMessage.Performative.DECLINE, target=cfp.get("id"))
-            dialogue.outgoing_extend([msg])
+            dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
             result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
             self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         else:
-            proposal = cast(Description, proposal)
-            transaction_id = generate_transaction_id(self.crypto.public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
-            transaction = TransactionMessage(transaction_id=transaction_id,
-                                             sender=self.context.agent_public_key,
-                                             counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
-                                             is_sender_buyer=not dialogue.is_seller,
-                                             amount=proposal.amount,
-                                             quantities_by_good_pbkproposal=proposal)
-            self.context.transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction)
+            transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
+            transaction_msg = TransactionMessage(transaction_id=transaction_id,
+                                                 sender=self.context.agent_public_key,
+                                                 counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
+                                                 is_sender_buyer=not dialogue.is_seller,
+                                                 description=proposal_description)
+            self.context.transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
             logger.debug("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk,
                                                                   pprint.pformat({
                                                                       "msg_id": new_msg_id,
                                                                       "dialogue_id": cfp.get("dialogue_id"),
                                                                       "origin": dialogue.dialogue_label.dialogue_opponent_pbk,
                                                                       "target": cfp.get("id"),
-                                                                      "propose": proposal.values
+                                                                      "propose": proposal_description.values
                                                                   })))
-            msg = FIPAMessage(performative=FIPAMessage.Performative.PROPOSE, message_id=new_msg_id, dialogue_id=cfp.get("dialogue_id"), target=cfp.get("id"), proposal=[proposal])
-            dialogue.outgoing_extend([msg])
+            msg = FIPAMessage(performative=FIPAMessage.Performative.PROPOSE, message_id=new_msg_id, dialogue_id=cfp.get("dialogue_id"), target=cfp.get("id"), proposal=[proposal_description])
+            dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
             result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         return result
@@ -153,28 +156,26 @@ class FIPANegotiationHandler(Handler):
         :return: an Accept or a Decline in an envelope
         """
         logger.debug("[{}]: on propose as {}.".format(self.agent_name, dialogue.role))
-        proposal = propose.get("proposal")[0]
+        proposal_description = propose.get("proposal")[0]
         transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
-        transaction = Transaction.from_proposal(proposal=proposal,
-                                                transaction_id=transaction_id,
-                                                is_sender_buyer=not dialogue.is_seller,
-                                                counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
-                                                sender=self.context.agent_public_key)
+        transaction_msg = TransactionMessage(transaction_id=transaction_id,
+                                             sender=self.context.agent_public_key,
+                                             counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
+                                             is_sender_buyer=not dialogue.is_seller,
+                                             description=proposal_description)
         new_msg_id = propose.get("id") + 1
-        is_profitable_transaction, propose_log_msg = self.context.game_instance.is_profitable_transaction(transaction, dialogue)
-        logger.debug(propose_log_msg)
-        if is_profitable_transaction:
+        if self.context.strategy.is_profitable_transaction(transaction_msg, dialogue):
             logger.debug("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))
-            self.context.game_instance.transaction_manager.add_locked_tx(transaction, as_seller=dialogue.is_seller)
-            self.context.game_instance.transaction_manager.add_pending_initial_acceptance(dialogue.dialogue_label, new_msg_id, transaction)
+            self.context.transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
+            self.context.transactions.add_pending_initial_acceptance(dialogue.dialogue_label, new_msg_id, transaction_msg)
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=propose.get("dialogue_id"), target=propose.get("id"), performative=FIPAMessage.Performative.ACCEPT)
-            dialogue.outgoing_extend([msg])
+            dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
             result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         else:
             logger.debug("[{}]: Declining propose (as {})".format(self.context.agent_name, dialogue.role))
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=propose.get("dialogue_id"), target=propose.get("id"), performative=FIPAMessage.Performative.DECLINE)
-            dialogue.outgoing_extend([msg])
+            dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
             result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
             self.context.game_instance.stats_manager.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
@@ -189,19 +190,19 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         logger.debug("[{}]: on_decline: msg_id={}, dialogue_id={}, origin={}, target={}"
-                     .format(self.agent_name, decline.get("id"), decline.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, decline.get("target")))
+                     .format(self.context.agent_name, decline.get("id"), decline.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, decline.get("target")))
         target = decline.get("target")
         if target == 1:
             self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         elif target == 2:
             self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
-            transaction = self.context.game_instance.transaction_manager.pop_pending_proposal(dialogue.dialogue_label, target)
-            if self.context.game_instance.strategy.is_world_modeling:
-                self.context.game_instance.world_state.update_on_declined_propose(transaction)
+            transaction_msg = self.context.transactions.pop_pending_proposal(dialogue.dialogue_label, target)
+            if self.context.strategy.is_world_modeling:
+                self.context.strategy.world_state.update_on_declined_propose(transaction_msg)
         elif target == 3:
             self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
-            transaction = self.context.transaction_manager.pop_pending_initial_acceptance(dialogue.dialogue_label, target)
-            self.context.game_instance.transaction_manager.pop_locked_tx(transaction.transaction_id)
+            transaction_msg = self.context.transaction_manager.pop_pending_initial_acceptance(dialogue.dialogue_label, target)
+            self.context.transactions.pop_locked_tx(transaction_msg.transaction_id)
         return None
 
     def _on_accept(self, accept: FIPAMessage, dialogue: Dialogue) -> Envelope:
@@ -218,27 +219,24 @@ class FIPANegotiationHandler(Handler):
         logger.debug("[{}]: on_accept: msg_id={}, dialogue_id={}, origin={}, target={}"
                      .format(self.context.agent_name, accept.get("id"), accept.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, accept.get("target")))
         new_msg_id = accept.get("id") + 1
-        transaction = self.context.game_instance.transaction_manager.pop_pending_proposal(dialogue.dialogue_label, accept.get("target"))
-        is_profitable_transaction, accept_log_msg = self.context.game_instance.is_profitable_transaction(transaction, dialogue)
-        logger.debug(accept_log_msg)
-        if is_profitable_transaction:
-            if self.context.game_instance.strategy.is_world_modeling:
-                self.context.game_instance.world_state.update_on_initial_accept(transaction)
+        transaction_msg = self.context.game_instance.transaction_manager.pop_pending_proposal(dialogue.dialogue_label, accept.get("target"))
+        if self.context.strategy.is_profitable_transaction(transaction_msg, dialogue):
+            if self.context.strategy.is_world_modeling:
+                self.context.strategy.world_state.update_on_initial_accept(transaction_msg)
             logger.debug("[{}]: Locking the current state (as {}).".format(self.context.agent_name, dialogue.role))
-            self.context.game_instance.transaction_manager.add_locked_tx(transaction, as_seller=dialogue.is_seller)
-            self.context.transaction_queue.put(transaction)
+            self.context.transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
+            self.context.transaction_queue.put(transaction_msg)
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=accept.get("dialogue_id"), target=accept.get("id"), performative=FIPAMessage.Performative.MATCH_ACCEPT)
-            dialogue.outgoing_extend([msg])
+            dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
             result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         else:
-            logger.debug("[{}]: Decline the accept (as {}).".format(self.agent_name, dialogue.role))
-
+            logger.debug("[{}]: Decline the accept (as {}).".format(self.context.agent_name, dialogue.role))
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=accept.get("dialogue_id"), target=accept.get("id"), performative=FIPAMessage.Performative.DECLINE)
-            dialogue.outgoing_extend([msg])
+            dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
             result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-            self.context.game_instance.stats_manager.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
+            self.context.dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
         return result
 
     def _on_match_accept(self, match_accept: FIPAMessage, dialogue: Dialogue) -> None:
@@ -254,6 +252,6 @@ class FIPANegotiationHandler(Handler):
         #     and match_accept.get("target") in self.game_instance.transaction_manager.pending_initial_acceptances[dialogue.dialogue_label]
         logger.debug("[{}]: on_match_accept: msg_id={}, dialogue_id={}, origin={}, target={}"
                      .format(self.context.agent_name, match_accept.get("id"), match_accept.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, match_accept.get("target")))
-        transaction = self.context.game_instance.transaction_manager.pop_pending_initial_acceptance(dialogue.dialogue_label, match_accept.get("target"))
-        self.context.transaction_queue.put(transaction)
+        transaction_msg = self.context.transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, match_accept.get("target"))
+        self.context.transaction_queue.put(transaction_msg)
         return None

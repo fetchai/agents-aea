@@ -17,27 +17,31 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
+"""This package contains a class representing the search state."""
 
-from aea.skills.base import Task
+from typing import Set
 
 
-class MyScaffoldTask(Task):
-    """This class scaffolds a task."""
+class Search:
+    """This class deals with the search state."""
 
-    def execute(self) -> None:
+    def __init__(self):
+        """Instantiate the search class."""
+        self._id = 0
+        self.ids_for_tac = set()  # type: Set[int]
+
+    @property
+    def id(self) -> int:
+        """Get the search id."""
+        return self._id
+
+    def get_next_id(self) -> int:
         """
-        Implement the task execution.
+        Generate the next search id and stores it.
 
-        :param envelope: the envelope
-        :return: None
+        :return: a search id
         """
-        raise NotImplementedError  # pragma: no cover
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        raise NotImplementedError  # pragma: no cover
+        self._id += 1
+        self.ids_for_tac.add(self._id)
+        return self._id
+        # TODO: we need to make sure dialogue and search ids are unique across skills;

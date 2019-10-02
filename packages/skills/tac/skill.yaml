@@ -5,16 +5,18 @@ license: Apache 2.0
 url: ""
 behaviours:
   - behaviour:
-      class_name: MyScaffoldBehaviour
-      args:
-        foo: bar
-handler:
-  class_name: MyScaffoldHandler
-  args:
-    foo: bar
-tasks:
-  - task:
-      class_name: MyScaffoldTask
-      args:
-        foo: bar
-protocol: ''
+      class_name: TACBehaviour
+handlers:
+  - handler:
+    class_name: OEFHandler
+  - handler:
+    class_name: TACHandler
+tasks: []
+shared_classes:
+  - one:
+    class_name: Search
+  - two:
+    class_name: Game
+    args:
+      expected_version_id: 1
+protocols: ['oef', 'tac']

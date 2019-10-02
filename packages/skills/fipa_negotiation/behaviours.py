@@ -35,7 +35,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
     def __init__(self, **kwargs):
         """Initialize the behaviour."""
-        self.services_interval = kwargs.pop('services_interval')  # type: int
+        self._services_interval = kwargs.pop('services_interval')  # type: int
         super().__init__(**kwargs)
         self.active = True
         self._last_update_time = datetime.datetime.now()
@@ -74,10 +74,12 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self.registered_goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            self.registered_goods_demanded_description = None
         if self.registered_goods_supplied_description is not None:
             msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self.registered_goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            self.registered_goods_supplied_description = None
 
     def _register_service(self) -> None:
         """
@@ -92,14 +94,14 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         """
         if self.context.strategy.is_registering_as_seller:
             logger.debug("[{}]: Updating service directory as seller with goods supplied.".format(self.context.agent_name))
-            goods_supplied_description = self.context.strategy.get_service_description(is_supply=True)
+            goods_supplied_description = self.context.strategy.get_own_service_description(is_supply=True)
             self.registered_goods_supplied_description = goods_supplied_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         if self.context.strategy.is_registering_as_buyer:
             logger.debug("[{}]: Updating service directory as buyer with goods demanded.".format(self.context.agent_name))
-            goods_demanded_description = self.context.strategy.get_service_description(is_supply=False)
+            goods_demanded_description = self.context.strategy.get_own_service_description(is_supply=False)
             self.registered_goods_demanded_description = goods_demanded_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
@@ -117,7 +119,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         :return: None
         """
         if self.context.strategy.is_searching_for_sellers:
-            query = self.context.strategy.build_services_query(is_searching_for_sellers=True)
+            query = self.context.strategy.get_own_services_query(is_searching_for_sellers=True)
             if query is None:
                 logger.warning("[{}]: Not searching the OEF for sellers because the agent demands no goods.".format(self.context.agent_name))
                 return None
@@ -129,7 +131,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 msg_bytes = OEFSerializer().encode(msg)
                 self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         if self.context.strategy.is_searching_for_buyers:
-            query = self.context.strategy.build_services_query(is_searching_for_sellers=False)
+            query = self.context.strategy.get_own_services_query(is_searching_for_sellers=False)
             if query is None:
                 logger.warning("[{}]: Not searching the OEF for buyers because the agent supplies no goods.".format(self.context.agent_name))
                 return None
@@ -148,7 +150,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         :return: bool indicating the action
         """
         now = datetime.datetime.now()
-        result = now - self.last_update_time > self.services_interval
+        result = now - self.last_update_time > self._services_interval
         if result:
             self.last_update_time = now
         return result
@@ -160,7 +162,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         :return: bool indicating the action
         """
         now = datetime.datetime.now()
-        result = now - self.last_search_time > self.services_interval
+        result = now - self.last_search_time > self._services_interval
         if result:
             self._last_search_time = now
         return result
