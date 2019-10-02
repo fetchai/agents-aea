@@ -15,6 +15,16 @@ An `Envelope` is the core object with which agents communicate. It is a vehicle 
 * `message`: is a bytes field which holds the message in serialized form.
 
 
+### Skill
+
+Skills deliver economic value to the AEA by allowing agents to encapsulate and call any kind of code. They encapsulate the abstract base classes `Handler`, `Behaviour`, and `Task`.
+
+* `Handler`: each skill has a single `Handler` which is responsible for the registered protocol messaging. Handlers implement reactive behaviour. By understanding the requirements contained in an `Envelope`, the `Handler` reacts appropriately to message requests. 
+* `Behaviour`: one or more `Behaviours` encapsulate sequences of actions that cause interactions with other agents initiated by the framework. Behaviours implement proactive behaviour.
+* `Task`: one or more Tasks encapsulate background work internal to the agent.
+
+
+
 
 ### Protocol
 
@@ -40,14 +50,6 @@ The framework provides a number of default connections.
 
 * `local`: implements a local node.
 * `oef`: wraps the OEF SDK.
-
-### Skill
-
-Skills deliver economic value to the AEA by allowing agents to encapsulate and call any kind of code. It encapsulates the abstract base classes `Handler`, `Behaviour`, and `Task`.
-
-* `Handler`: each skill has a single `Handler` which is responsible for the registered protocol messaging. Handlers implement reactive behaviour; by understanding the requirements contained in Envelopes, the Handler reacts appropriately to message requests. 
-* `Behaviour`: one or more Behaviours encapsulate sequences of actions that cause interactions with other agents initiated by the framework. Behaviours implement proactive behaviour.
-* `Task`: one or more Tasks encapsulate background work internal to the agent.
 
 
 

@@ -1,4 +1,4 @@
-The AEA framework is an ecosystem for autonomous economic agent (AEA) development. 
+The AEA framework is a Python ecosystem for autonomous economic agent (AEA) development. 
 
 It equips developers with a quick and efficient set of tools for building autonomous economic agents. 
 
