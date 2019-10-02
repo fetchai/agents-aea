@@ -3,7 +3,17 @@
     "description": "Schema for the skill configuration file.",
     "additionalProperties": false,
     "type": "object",
-    "required": ["name", "authors", "version", "license", "url", "protocol", "handler", "behaviours", "tasks"],
+    "required": [
+        "name",
+        "authors",
+        "version",
+        "license",
+        "url",
+        "protocol",
+        "handler",
+        "behaviours",
+        "tasks"
+    ],
     "properties": {
         "name": {"type": "string"},
         "authors": {"type": "string"},
@@ -32,6 +42,14 @@
               "properties": {
                 "task": { "$ref": "#/definitions/task" }
               }
+            }
+        },
+        "dependencies": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_]([a-zA-Z0-9-_])*((~=|==|>=|<=|!=|<|>)(\\d+)\\.(\\d+)(\\.(\\d+))?([ab](\\d+))?)?$"
             }
         }
     },

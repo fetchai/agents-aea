@@ -45,7 +45,7 @@ def get_aea_extras() -> Dict[str, List[str]]:
 
     # parse skills dependencies
     skills_module = importlib.import_module("aea.skills")
-    skills_dependencies = {k.split("_")[0] + "-skill": v for k, v in vars(protocols_module).items() if re.match(".+_dependencies", k)}
+    skills_dependencies = {k.split("_")[0] + "-skill": v for k, v in vars(skills_module).items() if re.match(".+_dependencies", k)}
     result.update(skills_dependencies)
 
     return result

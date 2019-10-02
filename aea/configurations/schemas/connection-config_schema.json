@@ -25,6 +25,14 @@
             "uniqueItems": true,
             "items": {"type": "string"}
         },
-        "config": {"type": "object"}
+        "config": {"type": "object"},
+        "dependencies": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_]([a-zA-Z0-9-_])*((~=|==|>=|<=|!=|<|>)(\\d+)\\.(\\d+)(\\.(\\d+))?([ab](\\d+))?)?$"
+            }
+        }
     }
 }

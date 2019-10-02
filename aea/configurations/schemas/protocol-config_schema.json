@@ -15,6 +15,14 @@
         "authors": {"type": "string"},
         "version": {"type": "string"},
         "license": {"type": "string"},
-        "url": {"type": "string"}
+        "url": {"type": "string"},
+        "dependencies": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_]([a-zA-Z0-9-_])*((~=|==|>=|<=|!=|<|>)(\\d+)\\.(\\d+)(\\.(\\d+))?([ab](\\d+))?)?$"
+            }
+        }
     }
 }

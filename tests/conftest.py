@@ -40,6 +40,7 @@ CONFIGURATION_SCHEMA_DIR = os.path.join(ROOT_DIR, "aea", "configurations", "sche
 AGENT_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "aea-config_schema.json")
 SKILL_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "skill-config_schema.json")
 CONNECTION_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "connection-config_schema.json")
+PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "protocol-config_schema.json")
 
 
 def pytest_addoption(parser):
