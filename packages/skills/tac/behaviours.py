@@ -19,8 +19,8 @@
 
 """This package contains a scaffold of a behaviour."""
 
-from aea.protocols.oef.message import OEFMessage, DEFAULT_OEF
-from aea.protocols.oef.serialization import OEFSerializer
+from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
 
 from tac_skill.game import GamePhase

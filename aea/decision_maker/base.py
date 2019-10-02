@@ -22,15 +22,17 @@
 import copy
 import math
 from queue import Queue
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 from aea.mail.base import OutBox, Envelope
 from aea.protocols.base import Message
-from aea.protocols.transaction import TransactionMessage
-from aea.protocols.state_update import StateUpdateMessage
+from aea.protocols.transaction.message import TransactionMessage
+from aea.protocols.state_update.message import StateUpdateMessage
 
 CurrencyEndowment = Dict[str, float]  # a map from identifier to quantity
+CurrencyHoldings = Dict[str, float]
 GoodEndowment = Dict[str, int]   # a map from identifier to quantity
+GoodHoldings = Dict[str, int]
 UtilityParams = Dict[str, float]   # a map from identifier to quantity
 ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
@@ -65,37 +67,37 @@ class Preferences:
         """Get utility parameter for each good."""
         return self._quantity_shift
 
-    def logarithmic_utility(self, good_bundle: Dict[str, int]) -> float:
+    def logarithmic_utility(self, good_holdings: GoodHoldings) -> float:
         """
         Compute agent's utility given her utility function params and a good bundle.
 
-        :param good_bundle: a bundle of goods (dictionary) with the identifier (key) and quantity (value) for each good
+        :param good_holdings: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
         :return: utility value
         """
         goodwise_utility = [self.utility_params[good_pbk] * math.log(quantity + self.quantity_shift) if quantity + self.quantity_shift > 0 else -10000
-                            for good_pbk, quantity in good_bundle.items()]
+                            for good_pbk, quantity in good_holdings.items()]
         return sum(goodwise_utility)
 
-    def linear_utility(self, currency_bundle: Dict[str, int]) -> float:
+    def linear_utility(self, currency_holdings: CurrencyHoldings) -> float:
         """
         Compute agent's utility given her utility function params and a currency bundle.
 
-        :param currency_bundle: a bundle of currencies (dictionary) with the identifier (key) and quantity (value) for each good
+        :param currency_holdings: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
         :return: utility value
         """
-        currencywise_utility = [self.exchange_params[currency_pbk] for currency_pbk, quantity in currency_bundle.items()]
+        currencywise_utility = [self.exchange_params[currency_pbk] for currency_pbk, quantity in currency_holdings.items()]
         return sum(currencywise_utility)
 
-    def get_score(self, good_bundle: Dict[str, int], currency_bundle: Dict[str, float]) -> float:
+    def get_score(self, good_holdings: GoodHoldings, currency_holdings: CurrencyHoldings) -> float:
         """
-        Compute the score of the current state.
+        Compute the score given the good and currency holdings.
 
-        The score is computed as the sum of all the utilities for the good holdings
-        with positive quantity plus the money left.
+        :param good_holdings: the good holdings
+        :param currency_holdings: the currency holdings
         :return: the score.
         """
-        goods_score = self.logarithmic_utility(good_bundle)
-        currency_score = self.linear_utility(currency_bundle)
+        goods_score = self.logarithmic_utility(good_holdings)
+        currency_score = self.linear_utility(currency_holdings)
         score = goods_score + currency_score
         return score
 
@@ -114,12 +116,12 @@ class OwnershipState:
         self._good_holdings = copy.copy(good_endowment)
 
     @property
-    def currency_holdings(self):
+    def currency_holdings(self) -> CurrencyHoldings:
         """Get currency holdings in this state."""
         return copy.copy(self._currency_holdings)
 
     @property
-    def good_holdings(self):
+    def good_holdings(self) -> GoodHoldings:
         """Get good holdings in this state."""
         return copy.copy(self._good_holdings)
 
@@ -131,16 +133,20 @@ class OwnershipState:
         or enough holdings if it is a seller.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        currency_pbk = tx_message.get("currency_pbk")
+        currency_pbk = tx_message.get("currency")
+        currency_pbk = cast(str, currency_pbk)
         if tx_message.get("is_sender_buyer"):
-            # check if we have the money.
-            result = self.currency_holdings[currency_pbk] >= tx_message.get("amount") + tx_message.get("fee_buyer")
+            # check if we have the money to cover amount and tx fee.
+            result = self.currency_holdings[currency_pbk] >= cast(float, tx_message.get("amount")) + cast(float, tx_message.get("sender_tx_fee"))
         else:
             # check if we have the goods.
             result = True
             quantities_by_good_pbk = tx_message.get("quantities_by_good_pbk")
+            quantities_by_good_pbk = cast(Dict[str, int], quantities_by_good_pbk)
             for good_pbk, quantity in quantities_by_good_pbk.items():
-                result = result and (self.current_holdings[good_pbk] >= quantity)
+                result = result and (self.currency_holdings[good_pbk] >= quantity)
+            # check if we have the money to cover tx fee.
+            result = self.currency_holdings[currency_pbk] + cast(float, tx_message.get("amount")) >= cast(float, tx_message.get("sender_tx_fee"))
         return result
 
     def apply(self, transactions: List[TransactionMessage]) -> 'OwnershipState':
@@ -164,15 +170,17 @@ class OwnershipState:
         :param tx_fee: the transaction fee.
         :return: None
         """
-        currency_pbk = tx_message.get("currency_pbk")
+        currency_pbk = tx_message.get("currency")
+        currency_pbk = cast(str, currency_pbk)
         if tx_message.get("is_sender_buyer"):
-            diff = tx_message.get("amount") + tx_message.get("fee_buyer")
+            diff = cast(float, tx_message.get("amount")) + cast(float, tx_message.get("sender_tx_fee"))
             self._currency_holdings[currency_pbk] -= diff
         else:
-            diff = tx_message.get("amount") - tx_message.get("fee_buyer")
+            diff = cast(float, tx_message.get("amount")) - cast(float, tx_message.get("sender_tx_fee"))
             self._currency_holdings[currency_pbk] += diff
 
         quantities_by_good_pbk = tx_message.get("quantities_by_good_pbk")
+        quantities_by_good_pbk = cast(Dict[str, int], quantities_by_good_pbk)
         for good_pbk, quantity in quantities_by_good_pbk.items():
             quantity_delta = quantity if tx_message.get("is_sender_buyer") else -quantity
             self._good_holdings[good_pbk] += quantity_delta
@@ -240,20 +248,20 @@ class DecisionMaker:
         :param message: the message
         :return: None
         """
-        if type(message) == TransactionMessage:
+        if isinstance(message, TransactionMessage):
             self._handle_tx_message(message)
-        elif type(message) == StateUpdateMessage:
+        elif isinstance(message, StateUpdateMessage):
             self._handle_state_update_message(message)
 
     def _handle_tx_message(self, tx_message: TransactionMessage) -> None:
         """
-        Handle a transaction messae.
+        Handle a transaction message.
 
         :param tx_message: the transaction message
         :return: None
         """
-        score_diff = self._get_score_diff_from_transaction
-        if score_diff >= 0:
+        score_diff = self._get_score_diff_from_transaction(tx_message)
+        if score_diff >= 0.0:
             envelope = Envelope()
             self.outbox.put(envelope)
 
@@ -264,16 +272,25 @@ class DecisionMaker:
         :param tx: a transaction object.
         :return: the score.
         """
-        current_score = self.get_score(good_bundle=tx_message.good_bundle)
-        new_state = self.apply([tx_message])
-        new_score = new_state.get_score()
+        current_score = self.preferences.get_score(good_holdings=self.ownership_state.good_holdings,
+                                                   currency_holdings=self.ownership_state.currency_holdings)
+        new_ownership_state = self.ownership_state.apply([tx_message])
+        new_score = self.preferences.get_score(good_holdings=new_ownership_state.good_holdings,
+                                               currency_holdings=new_ownership_state.currency_holdings)
         return new_score - current_score
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
         """
-        Handle a transaction messae.
+        Handle a state update message.
 
         :param state_update_message: the state update message
         :return: None
         """
-        pass
+        assert self._ownership_state is None, "OwnershipState already initialized."
+        assert self._preferences is None, "Preferences already initialized."
+        currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
+        good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
+        self._ownership_state = OwnershipState(currency_endowment=currency_endowment, good_endowment=good_endowment)
+        utility_params = cast(UtilityParams, state_update_message.get("utility_params"))
+        exchange_params = cast(ExchangeParams, state_update_message.get("exchange_params"))
+        self._preferences = Preferences(exchange_params=exchange_params, utility_params=utility_params)

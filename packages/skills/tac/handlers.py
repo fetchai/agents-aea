@@ -20,15 +20,15 @@
 """This package contains a scaffold of a handler."""
 
 import logging
-from typing import List
+from typing import List, cast
 
 from aea.mail.base import Envelope
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer
-from aea.protocols.tac.message import TACMessage
-from aea.protocols.tac.serialization import TACSerializer
 from aea.skills.base import Handler
 
+from tac_protocol.message import TACMessage
+from tac_protocol.serialization import TACSerializer
 from tac_skill.game import GamePhase
 
 Address = str
@@ -39,7 +39,11 @@ logger = logging.getLogger(__name__)
 class OEFHandler(Handler):
     """This class handles oef messages."""
 
-    SUPPORTED_PROTOCOL = OEFMessage.ProtocolId
+    SUPPORTED_PROTOCOL = OEFMessage.protocol_id
+
+    def __init__(self, **kwargs):
+        """Initialize the echo behaviour."""
+        self._rejoin = False
 
     def setup(self) -> None:
         """
@@ -60,6 +64,7 @@ class OEFHandler(Handler):
         oef_type = oef_message.get("type")
 
         logger.debug("[{}]: Handling OEF message. type={}".format(self.context.agent_name, oef_type))
+        oef_message = cast(OEFMessage, oef_message)
         if oef_type == OEFMessage.Type.SEARCH_RESULT:
             self._on_search_result(oef_message)
         elif oef_type == OEFMessage.Type.OEF_ERROR:
@@ -107,11 +112,12 @@ class OEFHandler(Handler):
         """
         search_id = search_result.get("id")
         agents = search_result.get("agents")
+        agents = cast(List[str], agents)
         logger.debug("[{}]: on search result: {} {}".format(self.context.agent_name, search_id, agents))
         if search_id in self.context.search.ids_for_tac:
             self._on_controller_search_result(agents)
         else:
-            logger.debug("[{}]: Unknown search id: search_id={}".format(self.agent_name, search_id))
+            logger.debug("[{}]: Unknown search id: search_id={}".format(self.context.agent_name, search_id))
 
     def _on_controller_search_result(self, agent_pbks: List[Address]) -> None:
         """
@@ -129,7 +135,7 @@ class OEFHandler(Handler):
             logger.debug("[{}]: Couldn't find the TAC controller. Retrying...".format(self.context.agent_name))
         elif len(agent_pbks) > 1:
             logger.error("[{}]: Found more than one TAC controller. Stopping...".format(self.context.agent_name))
-        elif self.rejoin:
+        elif self._rejoin:
             logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
             controller_pbk = agent_pbks[0]
             self._rejoin_tac(controller_pbk)
@@ -148,7 +154,7 @@ class OEFHandler(Handler):
         """
         self.context.game.update_expected_controller_pbk(controller_pbk)
         self.context.game.update_game_phase(GamePhase.GAME_SETUP)
-        tac_msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name=self.agent_name)
+        tac_msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
         tac_bytes = TACSerializer().encode(tac_msg)
         self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
@@ -170,7 +176,7 @@ class OEFHandler(Handler):
 class TACHandler(Handler):
     """This class handles oef messages."""
 
-    SUPPORTED_PROTOCOL = TACMessage.ProtocolId
+    SUPPORTED_PROTOCOL = TACMessage.protocol_id
 
     def setup(self) -> None:
         """
@@ -190,7 +196,7 @@ class TACHandler(Handler):
         tac_msg = TACSerializer().decode(envelope.message)
         tac_msg_type = TACMessage.Type(tac_msg.get("type"))
 
-        logger.debug("[{}]: Handling controller response. type={}".format(self.agent_name, tac_msg_type))
+        logger.debug("[{}]: Handling controller response. type={}".format(self.context.agent_name, tac_msg_type))
         try:
             if envelope.sender != self.context.game.expected_controller_pbk:
                 raise ValueError("The sender of the message is not the controller agent we registered with.")
@@ -211,7 +217,7 @@ class TACHandler(Handler):
                     self._on_cancelled()
                 elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
                     self._on_state_update(tac_msg, envelope.sender)
-            elif self.game_instance.game_phase == GamePhase.POST_GAME:
+            elif self.context.game.game_phase == GamePhase.POST_GAME:
                 raise ValueError("We do not expect a controller agent message in the post game phase.")
         except ValueError as e:
             logger.warning(str(e))
@@ -268,11 +274,11 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.debug("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.agent_name, message.get("transaction_id")))
-        if message.get("transaction_id") not in self.game_instance.transaction_manager.locked_txs:
-            logger.debug("[{}]: transaction not found - ask the controller an update of the state.".format(self.agent_name))
-            self._request_state_update()
-            return
+        logger.debug("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.get("transaction_id")))
+        # if message.get("transaction_id") not in self.transactions.locked_txs:
+        #     logger.debug("[{}]: transaction not found - ask the controller an update of the state.".format(self.context.agent_name))
+        #     self._request_state_update()
+        #     return
 
         # self.context.transaction_queue =
         # transaction = self.game_instance.transaction_manager.pop_locked_tx(message.get("transaction_id"))
@@ -289,7 +295,7 @@ class TACHandler(Handler):
 
         :return: None
         """
-        self.init(tac_message, controller_pbk)
+        self.context.game.init(tac_message, controller_pbk)
         self.context.game.update_game_phase(GamePhase.GAME)
         # # for tx in message.get("transactions"):
         # #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))

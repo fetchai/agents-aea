@@ -27,7 +27,7 @@ from aea.mail.base import OutBox
 class AgentContext:
     """Save relevant data for the agent."""
 
-    def __init__(self, agent_name: str, public_key: str, outbox: OutBox, decision_maker_queue: Queue):
+    def __init__(self, agent_name: str, public_key: str, outbox: OutBox, decision_maker_message_queue: Queue):
         """
         Initialize an agent context.
 
@@ -39,7 +39,7 @@ class AgentContext:
         self._agent_name = agent_name
         self._public_key = public_key
         self._outbox = outbox
-        self._decision_maker_queue = decision_maker_queue
+        self._decision_maker_message_queue = decision_maker_message_queue
 
     @property
     def agent_name(self) -> str:
@@ -57,6 +57,6 @@ class AgentContext:
         return self._outbox
 
     @property
-    def decision_maker_queue(self) -> Queue:
+    def decision_maker_message_queue(self) -> Queue:
         """Get decision maker queue."""
-        return self._decision_maker_queue
+        return self._decision_maker_message_queue

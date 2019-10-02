@@ -25,6 +25,7 @@ import os
 import re
 import sys
 from abc import ABC, abstractmethod
+from queue import Queue
 from typing import Optional, List, Dict, Any, cast
 
 from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SkillConfig, ProtocolId, DEFAULT_SKILL_CONFIG_FILE
@@ -61,6 +62,11 @@ class SkillContext:
     def outbox(self) -> OutBox:
         """Get outbox."""
         return self._agent_context.outbox
+
+    @property
+    def decision_maker_message_queue(self) -> Queue:
+        """Get message queue of decision maker."""
+        return self._agent_context.decision_maker_message_queue
 
     @property
     def handlers(self) -> Optional[List['Handler']]:
@@ -197,7 +203,7 @@ class Handler(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, handler_configs: List[HandlerConfig], skill_context: SkillContext) -> Optional['Handler']:
+    def parse_module(cls, path: str, handler_configs: List[HandlerConfig], skill_context: SkillContext) -> List['Handler']:
         """
         Parse the handler module.
 

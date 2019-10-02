@@ -27,9 +27,8 @@ This module contains the classes required for dialogue management.
 """
 
 from enum import Enum
-import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
@@ -377,9 +376,10 @@ class Dialogues(BaseDialogues):
         dialogue_starter_pbk = sender
         dialogue_opponent_pbk = sender
         dialogue_id = fipa_msg.get("dialogue_id")
+        dialogue_id = cast(int, dialogue_id)
         dialogue_label = DialogueLabel(dialogue_id, dialogue_opponent_pbk, dialogue_starter_pbk)
-        services = json.loads(fipa_msg.get("query").decode('utf-8'))
-        is_seller = services['description'] == DEMAND_DATAMODEL_NAME
+        query = fipa_msg.get("query")
+        is_seller = query.model.name == DEMAND_DATAMODEL_NAME
         result = self._create(dialogue_label, is_seller)
         return result
 
@@ -409,6 +409,6 @@ class Dialogues(BaseDialogues):
 
         :return: None
         """
-        self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, Dialogue]
-        self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogues_as_seller = {}
+        self._dialogues_as_buyer = {}
         self._dialogue_stats = DialogueStats()

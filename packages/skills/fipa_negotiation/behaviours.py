@@ -25,7 +25,9 @@ from typing import Optional
 from aea.skills.base import Behaviour
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF, DEFAULT_MSG_ID
+from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+
+DEFAULT_MSG_ID = 1
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +40,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         self._services_interval = kwargs.pop('services_interval')  # type: int
         super().__init__(**kwargs)
         self.active = True
-        self._last_update_time = datetime.datetime.now()
-        self._last_search_time = datetime.datetime.now()
+        self._last_update_time = datetime.datetime.now()  # type: datetime.datetime
+        self._last_search_time = datetime.datetime.now()  # type: datetime.datetime
         self._registered_goods_demanded_description = None  # type: Optional[Description]
         self._registered_goods_supplied_description = None  # type: Optional[Description]
 
@@ -70,16 +72,16 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        if self.registered_goods_demanded_description is not None:
-            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self.registered_goods_demanded_description, service_id="")
+        if self._registered_goods_demanded_description is not None:
+            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self._registered_goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-            self.registered_goods_demanded_description = None
-        if self.registered_goods_supplied_description is not None:
-            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self.registered_goods_supplied_description, service_id="")
+            self._registered_goods_demanded_description = None
+        if self._registered_goods_supplied_description is not None:
+            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self._registered_goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-            self.registered_goods_supplied_description = None
+            self._registered_goods_supplied_description = None
 
     def _register_service(self) -> None:
         """
@@ -95,14 +97,14 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         if self.context.strategy.is_registering_as_seller:
             logger.debug("[{}]: Updating service directory as seller with goods supplied.".format(self.context.agent_name))
             goods_supplied_description = self.context.strategy.get_own_service_description(is_supply=True)
-            self.registered_goods_supplied_description = goods_supplied_description
+            self._registered_goods_supplied_description = goods_supplied_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         if self.context.strategy.is_registering_as_buyer:
             logger.debug("[{}]: Updating service directory as buyer with goods demanded.".format(self.context.agent_name))
             goods_demanded_description = self.context.strategy.get_own_service_description(is_supply=False)
-            self.registered_goods_demanded_description = goods_demanded_description
+            self._registered_goods_demanded_description = goods_demanded_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
@@ -150,9 +152,10 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         :return: bool indicating the action
         """
         now = datetime.datetime.now()
-        result = now - self.last_update_time > self._services_interval
+        diff = now - self._last_update_time
+        result = diff.total_seconds() > self._services_interval
         if result:
-            self.last_update_time = now
+            self._last_update_time = now
         return result
 
     def _is_time_to_search_services(self) -> bool:
@@ -162,7 +165,8 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         :return: bool indicating the action
         """
         now = datetime.datetime.now()
-        result = now - self.last_search_time > self._services_interval
+        diff = now - self._last_search_time
+        result = diff.total_seconds() > self._services_interval
         if result:
             self._last_search_time = now
         return result
