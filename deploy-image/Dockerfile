@@ -21,4 +21,3 @@ WORKDIR /home/myagent
 
 COPY deploy-image/entrypoint.sh /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
-#CMD ["/usr/local/bin/aea", "run"]
