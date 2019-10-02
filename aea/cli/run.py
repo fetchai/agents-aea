@@ -18,21 +18,20 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea run' subcommand."""
-import subprocess
-
-import click
 import importlib.util
 import inspect
 import os
-from pathlib import Path
 import re
+import subprocess
 import sys
+from pathlib import Path
 from typing import cast
 
-import pip
+import click
 
 from aea.aea import AEA
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, _try_to_load_protocols, AEAConfigException
+from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, _try_to_load_protocols, \
+    AEAConfigException
 from aea.connections.base import Connection
 from aea.crypto.base import Crypto
 from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
