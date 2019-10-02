@@ -58,22 +58,6 @@ def test_validate_agent_config():
     validate(instance=agent_config_file, schema=agent_config_schema)
 
 
-def test_validate_skill_config():
-    """Test that the validation of the skill configuration file works correctly."""
-    skill_config_schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
-    skill_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_skill", "skill.yaml")))
-    pprint.pprint(skill_config_file)
-    validate(instance=skill_config_file, schema=skill_config_schema)
-
-
-def test_validate_connection_config():
-    """Test that the validation of the connection configuration file works correctly."""
-    connection_config_schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
-    connection_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_connection", "connection.yaml")))
-    pprint.pprint(connection_config_file)
-    validate(instance=connection_config_file, schema=connection_config_schema)
-
-
 class TestProtocolsSchema:
     """Test that the protocol configuration files provided by the framework are compliant to the schema."""
 
@@ -111,8 +95,9 @@ class TestConnectionsSchema:
                                  os.path.join(ROOT_DIR, "aea", "connections", "oef"),
                                  os.path.join(ROOT_DIR, "aea", "connections", "scaffold"),
                                  os.path.join(ROOT_DIR, "packages", "connections", "gym"),
+                                 os.path.join(CUR_PATH, "data", "dummy_connection")
                              ])
-    def test_validate_protocol_config(self, connection_path):
+    def test_validate_connection_config(self, connection_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
         connection_config_file = yaml.safe_load(open(os.path.join(connection_path, DEFAULT_CONNECTION_CONFIG_FILE)))
         validate(instance=connection_config_file, schema=self.connection_config_schema)
@@ -132,8 +117,9 @@ class TestSkillsSchema:
                                  os.path.join(ROOT_DIR, "aea", "skills", "scaffold"),
                                  os.path.join(ROOT_DIR, "packages", "skills", "echo"),
                                  os.path.join(ROOT_DIR, "packages", "skills", "gym"),
+                                 os.path.join(CUR_PATH, "data", "dummy_skill")
                              ])
-    def test_validate_protocol_config(self, skill_path):
+    def test_validate_skill_config(self, skill_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
         skill_config_file = yaml.safe_load(open(os.path.join(skill_path, DEFAULT_SKILL_CONFIG_FILE)))
         validate(instance=skill_config_file, schema=self.skill_config_schema)

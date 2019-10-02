@@ -15,8 +15,3 @@ skills:
 - dummy
 url: ''
 version: v1
-dependencies:
-  - dep1==1.0.0
-  - dep2~=1.1.2
-  - dep3>=1.10.11a1
-  - dep4<=1.11.12b2
