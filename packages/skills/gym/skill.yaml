@@ -18,3 +18,5 @@ tasks:
       args:
         foo: bar
 protocol: "gym"
+dependencies:
+  - gym

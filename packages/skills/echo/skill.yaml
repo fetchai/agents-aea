@@ -20,3 +20,4 @@ tasks:
         foo: bar
         bar: foo
 protocol: "default"
+dependencies: []
