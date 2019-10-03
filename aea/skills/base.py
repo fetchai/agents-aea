@@ -31,6 +31,7 @@ from typing import Optional, List, Dict, Any, cast
 from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SkillConfig, ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
+from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox, Envelope
 
 logger = logging.getLogger(__name__)
@@ -67,6 +68,16 @@ class SkillContext:
     def decision_maker_message_queue(self) -> Queue:
         """Get message queue of decision maker."""
         return self._agent_context.decision_maker_message_queue
+
+    @property
+    def ownership_state(self) -> OwnershipState:
+        """Get ownership state."""
+        return self._agent_context.ownership_state
+
+    @property
+    def preferences(self) -> Preferences:
+        """Get preferences."""
+        return self._agent_context.preferences
 
     @property
     def handlers(self) -> Optional[List['Handler']]:

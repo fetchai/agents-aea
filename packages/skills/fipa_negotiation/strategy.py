@@ -20,13 +20,18 @@
 
 """This module contains the abstract class defining an agent's strategy for the TAC."""
 
-from abc import abstractmethod
 from enum import Enum
-from typing import List, Set, Optional
+import random
+from typing import Dict, Optional
 
-from aea.protocols.oef.models import Description
+from aea.decision_maker.base import OwnershipState, Preferences
+from aea.protocols.oef.models import Query, Description
+from aea.protocols.transaction.message import TransactionMessage
 
-from tac.agents.participant.v1.base.states import WorldState
+from fipa_negotiation_skill.helpers import build_goods_description, build_goods_query
+
+
+ROUNDING_ADJUSTMENT = 0.01
 
 
 class RegisterAs(Enum):
@@ -95,23 +100,72 @@ class Strategy:
         """Check if the agent searches for buyers on the OEF."""
         return self._search_for == SearchFor.BUYERS or self._search_for == SearchFor.BOTH
 
+    def get_own_service_description(self, ownership_state_after_locks: OwnershipState, is_supply: bool) -> Description:
+        """
+        Get the description of the supplied goods (as a seller), or the demanded goods (as a buyer).
 
-    def get_own_service_description(self, is_supply: bool) -> Description:
-        pass
+        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
+        :param is_supply: Boolean indicating whether it is supply or demand.
 
-    def get_own_services_query(self, is_searching_for_sellers: bool) -> Query:
-        pass
+        :return: the description (to advertise on the Service Directory).
+        """
+        good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.good_holdings) if is_supply else self._demanded_goods(ownership_state_after_locks.good_holdings)
+        desc = build_goods_description(good_pbk_to_quantities=good_pbk_to_quantities, is_supply=is_supply)
+        return desc
 
-    def generate_proposal_description_for_query(query: Query, is_seller: bool) -> Optional[Description]:
+    def _supplied_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
+        """
+        Generate a dictionary of quantities which are supplied.
+
+        :param good_holdings: a dictionary of current good holdings
+        :return: a dictionary of quantities supplied
+        """
+        supply = {}
+        for good_pbk, quantity in good_holdings:
+            supply[good_pbk] = quantity - 1 if quantity > 1 else 0
+        return supply
+
+    def _demanded_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
+        """
+        Generate a dictionary of quantities which are demanded.
+
+        :param good_holdings: a dictionary of current good holdings
+        :return: a dictionary of quantities supplied
+        """
+        demand = {}
+        for good_pbk, quantity in good_holdings:
+            demand[good_pbk] = 1
+        return demand
+
+    def get_own_services_query(self, ownership_state_after_locks: OwnershipState, is_searching_for_sellers: bool) -> Query:
+        """
+        Build a query to search for services.
+
+        In particular, build the query to look for agents
+            - which supply the agent's demanded goods (i.e. sellers), or
+            - which demand the agent's supplied goods (i.e. buyers).
+
+        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
+        :param is_searching_for_sellers: Boolean indicating whether the search is for sellers or buyers.
+
+        :return: the Query, or None.
+        """
+        good_pbk_to_quantities = self._demanded_goods(ownership_state_after_locks.good_holdings) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.good_holdings)
+        query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), is_searching_for_sellers=is_searching_for_sellers)
+        return query
+
+    def get_proposal_for_query(self, query: Query, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: float) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
 
-        :param query: the query
+        :param query: the query for which to build the proposal
+        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
         :is_seller: whether the agent making the proposal is a seller or not
+        :tx_fee: the transaction fee
 
         :return: a description
         """
-        candidate_proposals = self._generate_candidate_proposals(is_seller)
+        candidate_proposals = self._generate_candidate_proposals(ownership_state_after_locks, is_seller)
         proposals = []
         for proposal in candidate_proposals:
             if not query.check(proposal): continue
@@ -121,55 +175,45 @@ class Strategy:
         else:
             return random.choice(proposals)
 
-    def _generate_candidate_proposals(self, is_seller: bool, tx_fee: float):
+    def _generate_candidate_proposals(self, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: float):
         """
         Generate proposals from the agent in the role of seller/buyer.
 
+        :param preferences: the preferences of the agent
+        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
         :param is_seller: the bool indicating whether the agent is a seller.
 
         :return: a list of proposals in Description form
         """
-        quantities = self._supplied_good_pbks_to_quantities() if is_seller else self._demanded_good_pbks_to_quantities()
+        good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.good_holdings) if is_seller else self._demanded_goods(ownership_state_after_locks.good_holdings)
         share_of_tx_fee = round(tx_fee / 2.0, 2)
-        rounding_adjustment = 0.01
+        nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities}
         proposals = []
-        for good_id, good_pbk in zip(range(len(quantities)), good_pbks):
-            if is_seller and quantities[good_id] == 0: continue
-            proposal = [0] * len(quantities)
-            proposal[good_id] = 1
-            desc = get_goods_quantities_description(good_pbks, proposal, is_supply=is_seller)
-            delta_holdings = [i * -1 for i in proposal] if is_seller else proposal
+        for good_pbk, quantity in good_pbk_to_quantities:
+            if is_seller and quantity == 0: continue
+            proposal_dict = nil_proposal_dict
+            proposal_dict[good_pbk] = 1
+            proposal = build_goods_description(good_pbk_to_quantities=proposal_dict, is_supply=is_seller)
+            delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict} if is_seller else proposal_dict
+            marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state_after_locks, delta_good_holdings)
             switch = -1 if is_seller else 1
-            marginal_utility_from_delta_holdings = marginal_utility(utility_params, current_holdings, delta_holdings) * switch
+            breakeven_price = round(marginal_utility_from_delta_good_holdings, 2) * switch
             if self.is_world_modeling:
-                assert world_state is not None, "Need to provide world state if is_world_modeling=True."
-                desc.values["price"] = world_state.expected_price(good_pbk, round(marginal_utility_from_delta_holdings, 2), is_seller, share_of_tx_fee)
+                pass
+                # assert self.world_state is not None, "Need to provide world state if is_world_modeling=True."
+                # proposal.values["price"] = world_state.expected_price(good_pbk, round(marginal_utility_from_delta_holdings, 2), is_seller, share_of_tx_fee)
             else:
                 if is_seller:
-                    desc.values["price"] = round(marginal_utility_from_delta_holdings, 2) + share_of_tx_fee + rounding_adjustment
+                    proposal.values["price"] = breakeven_price + share_of_tx_fee + ROUNDING_ADJUSTMENT
                 else:
-                    desc.values["price"] = round(marginal_utility_from_delta_holdings, 2) - share_of_tx_fee - rounding_adjustment
-            if not desc.values["price"] > 0: continue
-            proposals.append(desc)
+                    proposal.values["price"] = breakeven_price - share_of_tx_fee - ROUNDING_ADJUSTMENT
+            proposal.values["seller_tx_fee"] = share_of_tx_fee
+            proposal.values["buyer_tx_fee"] = share_of_tx_fee
+            if not proposal.values["price"] > 0: continue
+            proposals.append(proposal)
         return proposals
 
-    def _supplied_good_pbks_to_quantities(self) -> Dict[str, int]:
-        """
-        Generate the dictionary of goods and quantities supplied by the agent
-
-        :return: a dictionary of goods and quantities
-        """
-        # projected
-
-    def _demanded_good_pbks_to_quantities(self) -> Dict[str, int]:
-        """
-        Generate the dictionary of goods and quantities demanded by the agent
-
-        :return: a dictionary of goods and quantities
-        """
-        # projected
-
-    def is_profitable_transaction(self, transaction_msg: TransactionMessage, dialogue: Dialogue) -> Tuple[bool, str]:
+    def is_profitable_transaction(self, preferences: Preferences, ownership_state_after_locks: OwnershipState, transaction_msg: TransactionMessage) -> bool:
         """
         Check if a transaction is profitable.
 
@@ -178,172 +222,16 @@ class Strategy:
         - check if the transaction is consistent with the locks (enough money/holdings)
         - check that we gain score.
 
-        :param transaction: the transaction
-        :param dialogue: the dialogue
+        :param preferences: the preferences of the agent
+        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
+        :param transaction_msg: the transaction_msg
 
         :return: True if the transaction is good (as stated above), False otherwise.
         """
-        state_after_locks = self.state_after_locks(dialogue.is_seller)
-
-        if not state_after_locks.check_transaction_is_consistent(transaction, self.game_configuration.tx_fee):
-            message = "[{}]: the proposed transaction is not consistent with the state after locks.".format(self.agent_name)
-            return False, message
-        proposal_delta_score = state_after_locks.get_score_diff_from_transaction(transaction, self.game_configuration.tx_fee)
-
-        result = self.strategy.is_acceptable_proposal(proposal_delta_score)
-        message = "[{}]: is good proposal for {}? {}: tx_id={}, delta_score={}, amount={}".format(self.agent_name, dialogue.role, result, transaction.transaction_id, proposal_delta_score, transaction.amount)
-        return result, message
-
-    def is_acceptable_proposal(self, proposal_delta_score: float) -> bool:
-        """
-        Determine whether a proposal is acceptable to the agent.
-
-        :param proposal_delta_score: the difference in score the proposal causes
-
-        :return: a boolean indicating whether the proposal is acceptable or not
-        """
-        result = proposal_delta_score >= 0
-        return result
-
-    def get_service_description(self, is_supply: bool) -> Description:
-        """
-        Get the description of the supplied goods (as a seller), or the demanded goods (as a buyer).
-
-        :param is_supply: Boolean indicating whether it is supply or demand.
-
-        :return: the description (to advertise on the Service Directory).
-        """
-        desc = get_goods_quantities_description(self.game_configuration.good_pbks,
-                                                self.get_goods_quantities(is_supply),
-                                                is_supply=is_supply)
-        return desc
-
-    def build_services_query(self, is_searching_for_sellers: bool) -> Optional[Query]:
-        """
-        Build a query to search for services.
-
-        In particular, build the query to look for agents
-            - which supply the agent's demanded goods (i.e. sellers), or
-            - which demand the agent's supplied goods (i.e. buyers).
-
-        :param is_searching_for_sellers: Boolean indicating whether the search is for sellers or buyers.
-
-        :return: the Query, or None.
-        """
-        good_pbks = self.get_goods_pbks(is_supply=not is_searching_for_sellers)
-
-        res = None if len(good_pbks) == 0 else build_query(good_pbks, is_searching_for_sellers)
-        return res
-
-    def build_services_dict(self, is_supply: bool) -> Optional[Dict[str, Sequence[str]]]:
-        """
-        Build a dictionary containing the services demanded/supplied.
-
-        :param is_supply: Boolean indicating whether the services are demanded or supplied.
-
-        :return: a Dict.
-        """
-        good_pbks = self.get_goods_pbks(is_supply=is_supply)
-
-        res = None if len(good_pbks) == 0 else build_dict(good_pbks, is_supply)
-        return res
-
-    def is_matching(self, cfp_services: Dict[str, Union[bool, List[Any]]], goods_description: Description) -> bool:
-        """
-        Check for a match between the CFP services and the goods description.
-
-        :param cfp_services: the services associated with the cfp.
-        :param goods_description: a description of the goods.
-
-        :return: Bool
-        """
-        services = cfp_services['services']
-        services = cast(List[Any], services)
-        if cfp_services['description'] is goods_description.data_model.name:
-            # The call for proposal description and the goods model name cannot be the same for trading agent pairs.
+        if not ownership_state_after_locks.check_transaction_is_consistent(transaction_msg):
             return False
-        for good_pbk in goods_description.data_model.attributes_by_name.keys():
-            if good_pbk not in services: continue
+        proposal_delta_score = preferences.get_score_diff_from_transaction(ownership_state_after_locks, transaction_msg)
+        if proposal_delta_score >= 0:
             return True
-        return False
-
-    def get_goods_pbks(self, is_supply: bool) -> Set[str]:
-        """
-        Wrap the function which determines supplied and demanded good public keys.
-
-        :param is_supply: Boolean indicating whether it is referencing the supplied or demanded public keys.
-
-        :return: a list of good public keys
-        """
-        state_after_locks = self.state_after_locks(is_seller=is_supply)
-        good_pbks = self.strategy.supplied_good_pbks(self.game_configuration.good_pbks, state_after_locks.current_holdings) if is_supply else self.strategy.demanded_good_pbks(self.game_configuration.good_pbks, state_after_locks.current_holdings)
-        return good_pbks
-
-    def get_goods_quantities(self, is_supply: bool) -> List[int]:
-        """
-        Wrap the function which determines supplied and demanded good quantities.
-
-        :param is_supply: Boolean indicating whether it is referencing the supplied or demanded quantities.
-
-        :return: the vector of good quantities offered/requested.
-        """
-        state_after_locks = self.state_after_locks(is_seller=is_supply)
-        quantities = self.strategy.supplied_good_quantities(state_after_locks.current_holdings) if is_supply else self.strategy.demanded_good_quantities(state_after_locks.current_holdings)
-        return quantities
-
-    def state_after_locks(self, is_seller: bool) -> AgentState:
-        """
-        Apply all the locks to the current state of the agent.
-
-        This assumes, that all the locked transactions will be successful.
-
-        :param is_seller: Boolean indicating the role of the agent.
-
-        :return: the agent state with the locks applied to current state
-        """
-        assert self._agent_state is not None, "Agent state not assigned!"
-        transactions = list(self.transaction_manager.locked_txs_as_seller.values()) if is_seller \
-            else list(self.transaction_manager.locked_txs_as_buyer.values())
-        state_after_locks = self._agent_state.apply(transactions, self.game_configuration.tx_fee)
-        return state_after_locks
-
-    def supplied_good_quantities(self, current_holdings: List[int]) -> List[int]:
-        """
-        Generate a list of quantities which are supplied.
-
-        :param current_holdings: a list of current good holdings
-        :return: a list of quantities
-        """
-        return [quantity - 1 for quantity in current_holdings]
-
-    def supplied_good_pbks(self, good_pbks: List[str], current_holdings: List[int]) -> Set[str]:
-        """
-        Generate a set of good public keys which are supplied.
-
-        :param good_pbks: a list of good public keys
-        :param current_holdings: a list of current good holdings
-
-        :return: a set of public keys
-        """
-        return {good_pbk for good_pbk, quantity in zip(good_pbks, current_holdings) if quantity > 1}
-
-    def demanded_good_quantities(self, current_holdings: List[int]) -> List[int]:
-        """
-        Generate a list of quantities which are demanded.
-
-        :param current_holdings: a list of current good holdings
-
-        :return: a list of quantities
-        """
-        return [1 for _ in current_holdings]
-
-    def demanded_good_pbks(self, good_pbks: List[str], current_holdings: List[int]) -> Set[str]:
-        """
-        Generate a set of good public keys which are demanded.
-
-        :param good_pbks: a list of good public keys
-        :param current_holdings: a list of current good holdings
-
-        :return: a set of public keys
-        """
-        return {good_pbk for good_pbk, quantity in zip(good_pbks, current_holdings)}
+        else:
+            return False

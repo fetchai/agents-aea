@@ -63,7 +63,12 @@ class AEA(Agent):
 
         self.mailbox = mailbox
         self._decision_maker = DecisionMaker(self.max_reactions, self.outbox)
-        self._context = AgentContext(self.name, self.crypto.public_key, self.outbox, self.decision_maker.message_queue)
+        self._context = AgentContext(self.name,
+                                     self.crypto.public_key,
+                                     self.outbox,
+                                     self.decision_maker.message_queue,
+                                     self.decision_maker.ownership_state,
+                                     self.decision_maker.preferences)
         self._resources = None  # type: Optional[Resources]
 
     @property

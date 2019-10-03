@@ -39,69 +39,6 @@ ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 QUANTITY_SHIFT = 100
 
 
-class Preferences:
-    """Class to represent the preferences."""
-
-    def __init__(self, utility_params: UtilityParams, exchange_params: ExchangeParams):
-        """
-        Instantiate an agent preference object.
-
-        :param utility_params: the utility params for every asset.
-        """
-        self._utility_params = utility_params
-        self._exchange_params = exchange_params
-        self._quantity_shift = QUANTITY_SHIFT
-
-    @property
-    def utility_params(self) -> UtilityParams:
-        """Get utility parameter for each good."""
-        return self._utility_params
-
-    @property
-    def exchange_params(self) -> ExchangeParams:
-        """Get exchange parameter for each currency."""
-        return self._exchange_params
-
-    @property
-    def quantity_shift(self) -> int:
-        """Get utility parameter for each good."""
-        return self._quantity_shift
-
-    def logarithmic_utility(self, good_holdings: GoodHoldings) -> float:
-        """
-        Compute agent's utility given her utility function params and a good bundle.
-
-        :param good_holdings: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
-        :return: utility value
-        """
-        goodwise_utility = [self.utility_params[good_pbk] * math.log(quantity + self.quantity_shift) if quantity + self.quantity_shift > 0 else -10000
-                            for good_pbk, quantity in good_holdings.items()]
-        return sum(goodwise_utility)
-
-    def linear_utility(self, currency_holdings: CurrencyHoldings) -> float:
-        """
-        Compute agent's utility given her utility function params and a currency bundle.
-
-        :param currency_holdings: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
-        :return: utility value
-        """
-        currencywise_utility = [self.exchange_params[currency_pbk] for currency_pbk, quantity in currency_holdings.items()]
-        return sum(currencywise_utility)
-
-    def get_score(self, good_holdings: GoodHoldings, currency_holdings: CurrencyHoldings) -> float:
-        """
-        Compute the score given the good and currency holdings.
-
-        :param good_holdings: the good holdings
-        :param currency_holdings: the currency holdings
-        :return: the score.
-        """
-        goods_score = self.logarithmic_utility(good_holdings)
-        currency_score = self.linear_utility(currency_holdings)
-        score = goods_score + currency_score
-        return score
-
-
 class OwnershipState:
     """Represent the ownership state of an agent."""
 
@@ -190,6 +127,81 @@ class OwnershipState:
         return OwnershipState(self.currency_holdings, self.good_holdings)
 
 
+class Preferences:
+    """Class to represent the preferences."""
+
+    def __init__(self, utility_params: UtilityParams, exchange_params: ExchangeParams):
+        """
+        Instantiate an agent preference object.
+
+        :param utility_params: the utility params for every asset.
+        """
+        self._utility_params = utility_params
+        self._exchange_params = exchange_params
+        self._quantity_shift = QUANTITY_SHIFT
+
+    @property
+    def utility_params(self) -> UtilityParams:
+        """Get utility parameter for each good."""
+        return self._utility_params
+
+    @property
+    def exchange_params(self) -> ExchangeParams:
+        """Get exchange parameter for each currency."""
+        return self._exchange_params
+
+    def logarithmic_utility(self, good_holdings: GoodHoldings) -> float:
+        """
+        Compute agent's utility given her utility function params and a good bundle.
+
+        :param good_holdings: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
+        :return: utility value
+        """
+        goodwise_utility = [self.utility_params[good_pbk] * math.log(quantity + self._quantity_shift) if quantity + self._quantity_shift > 0 else -10000
+                            for good_pbk, quantity in good_holdings.items()]
+        return sum(goodwise_utility)
+
+    def linear_utility(self, currency_holdings: CurrencyHoldings) -> float:
+        """
+        Compute agent's utility given her utility function params and a currency bundle.
+
+        :param currency_holdings: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
+        :return: utility value
+        """
+        currencywise_utility = [self.exchange_params[currency_pbk] for currency_pbk, quantity in currency_holdings.items()]
+        return sum(currencywise_utility)
+
+    def get_score(self, good_holdings: GoodHoldings, currency_holdings: CurrencyHoldings) -> float:
+        """
+        Compute the score given the good and currency holdings.
+
+        :param good_holdings: the good holdings
+        :param currency_holdings: the currency holdings
+        :return: the score.
+        """
+        goods_score = self.logarithmic_utility(good_holdings)
+        currency_score = self.linear_utility(currency_holdings)
+        score = goods_score + currency_score
+        return score
+
+    def marginal_utility(self) -> float:
+        pass
+
+    def get_score_diff_from_transaction(self, ownership_state: OwnershipState, tx_message: TransactionMessage) -> float:
+        """
+        Simulate a transaction and get the resulting score (taking into account the fee).
+
+        :param tx_message: a transaction object.
+        :return: the score.
+        """
+        current_score = self.get_score(good_holdings=ownership_state.good_holdings,
+                                       currency_holdings=ownership_state.currency_holdings)
+        new_ownership_state = ownership_state.apply([tx_message])
+        new_score = self.get_score(good_holdings=new_ownership_state.good_holdings,
+                                   currency_holdings=new_ownership_state.currency_holdings)
+        return new_score - current_score
+
+
 class DecisionMaker:
     """This class implements the decision maker."""
 
@@ -260,24 +272,10 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        score_diff = self._get_score_diff_from_transaction(tx_message)
+        score_diff = self.preferences.get_score_diff_from_transaction(self.ownership_state, tx_message)
         if score_diff >= 0.0:
             envelope = Envelope()
             self.outbox.put(envelope)
-
-    def _get_score_diff_from_transaction(self, tx_message: TransactionMessage) -> float:
-        """
-        Simulate a transaction and get the resulting score (taking into account the fee).
-
-        :param tx: a transaction object.
-        :return: the score.
-        """
-        current_score = self.preferences.get_score(good_holdings=self.ownership_state.good_holdings,
-                                                   currency_holdings=self.ownership_state.currency_holdings)
-        new_ownership_state = self.ownership_state.apply([tx_message])
-        new_score = self.preferences.get_score(good_holdings=new_ownership_state.good_holdings,
-                                               currency_holdings=new_ownership_state.currency_holdings)
-        return new_score - current_score
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
         """

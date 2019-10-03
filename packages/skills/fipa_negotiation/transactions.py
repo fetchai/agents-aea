@@ -25,6 +25,7 @@ import logging
 from collections import defaultdict, deque
 from typing import Dict, Tuple, Deque
 
+from aea.decision_maker.base import OwnershipState
 from aea.protocols.transaction.message import TransactionMessage, TransactionId
 
 from fipa_negotiation_skill.dialogues import DialogueLabel
@@ -182,6 +183,20 @@ class Transactions(object):
         self._locked_txs_as_buyer.pop(transaction_id, None)
         self._locked_txs_as_seller.pop(transaction_id, None)
         return transaction_msg
+
+    def ownership_state_after_locks(self, ownership_state: OwnershipState, is_seller: bool) -> OwnershipState:
+        """
+        Apply all the locks to the current ownership state of the agent.
+
+        This assumes, that all the locked transactions will be successful.
+
+        :param is_seller: Boolean indicating the role of the agent.
+
+        :return: the agent state with the locks applied to current state
+        """
+        transaction_msgs = list(self.locked_txs_as_seller.values()) if is_seller else list(self.locked_txs_as_buyer.values())
+        ownershio_state_after_locks = ownership_state.apply(transaction_msgs)
+        return ownershio_state_after_locks
 
     def reset(self) -> None:
         """Reset the class."""

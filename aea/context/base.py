@@ -21,13 +21,19 @@
 
 from queue import Queue
 
+from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
 
 
 class AgentContext:
-    """Save relevant data for the agent."""
+    """Provide read access to relevant data of the agent for the skills."""
 
-    def __init__(self, agent_name: str, public_key: str, outbox: OutBox, decision_maker_message_queue: Queue):
+    def __init__(self, agent_name: str,
+                 public_key: str,
+                 outbox: OutBox,
+                 decision_maker_message_queue: Queue,
+                 ownership_state: OwnershipState,
+                 preferences: Preferences):
         """
         Initialize an agent context.
 
@@ -35,11 +41,15 @@ class AgentContext:
         :param public_key: the public key of the agent
         :param outbox: the outbox
         :param decision_maker_queue: the (in) queue of the decision maker
+        :param ownership_state: the ownership state of the agent
+        :param preferences: the preferences of the agent
         """
         self._agent_name = agent_name
         self._public_key = public_key
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
+        self._ownership_state = ownership_state
+        self._preferences = preferences
 
     @property
     def agent_name(self) -> str:
@@ -60,3 +70,13 @@ class AgentContext:
     def decision_maker_message_queue(self) -> Queue:
         """Get decision maker queue."""
         return self._decision_maker_message_queue
+
+    @property
+    def ownership_state(self) -> OwnershipState:
+        """Get the ownership state of the agent."""
+        return self._ownership_state
+
+    @property
+    def preferences(self) -> Preferences:
+        """Get the preferences of the agent."""
+        return self._preferences
