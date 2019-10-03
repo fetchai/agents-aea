@@ -24,5 +24,3 @@ from aea.skills.base import SharedClass
 
 class MySharedClass(SharedClass):
     """This class scaffolds a shared class."""
-
-    raise NotImplementedError  # pragma: no cover

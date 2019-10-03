@@ -10,4 +10,5 @@ handlers:
       args:
         foo: bar
 tasks: []
+shared_classes: []
 protocols: ['default']

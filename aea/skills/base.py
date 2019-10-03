@@ -99,6 +99,7 @@ class SkillContext:
         return self._skill.tasks
 
     def __getattr__(self, item) -> Any:
+        """Get attribute."""
         return super().__getattribute__(item)
 
 

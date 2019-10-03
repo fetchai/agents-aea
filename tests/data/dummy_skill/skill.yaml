@@ -21,6 +21,7 @@ tasks:
       args:
         task_arg_1: 1
         task_arg_2: "2"
+shared_classes: []
 protocols: ["default"]
 dependencies:
   - dep1==1.0.0

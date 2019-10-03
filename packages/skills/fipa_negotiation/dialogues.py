@@ -32,7 +32,6 @@ from typing import Any, Dict, Optional, cast, TYPE_CHECKING
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
-from aea.helpers.dialogue.base import Dialogues as BaseDialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.fipa.message import FIPAMessage
@@ -197,7 +196,7 @@ class DialogueStats(object):
             self._other_initiated[end_state] += 1
 
 
-class Dialogues(BaseDialogues, SharedClass):
+class Dialogues(SharedClass):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
@@ -206,11 +205,17 @@ class Dialogues(BaseDialogues, SharedClass):
 
         :return: None
         """
-        BaseDialogues.__init__(self)
         SharedClass.__init__(self, **kwargs)
+        self._dialogues = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogue_id = 0
         self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, Dialogue]
         self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, Dialogue]
         self._dialogue_stats = DialogueStats()
+
+    @property
+    def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
+        """Get dictionary of dialogues in which the agent is engaged in."""
+        return self._dialogues
 
     @property
     def dialogues_as_seller(self) -> Dict[DialogueLabel, Dialogue]:
@@ -226,6 +231,15 @@ class Dialogues(BaseDialogues, SharedClass):
     def dialogue_stats(self) -> DialogueStats:
         """Get the dialogue statistics."""
         return self._dialogue_stats
+
+    def _next_dialogue_id(self) -> int:
+        """
+        Increment the id and returns it.
+
+        :return: the next id
+        """
+        self._dialogue_id += 1
+        return self._dialogue_id
 
     def is_permitted_for_new_dialogue(self, fipa_msg: Message, sender: Address) -> bool:
         """

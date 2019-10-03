@@ -126,7 +126,7 @@ class Strategy(SharedClass):
         :return: a dictionary of quantities supplied
         """
         supply = {}  # type: Dict[str, int]
-        for good_pbk, quantity in good_holdings:
+        for good_pbk, quantity in good_holdings.items():
             supply[good_pbk] = quantity - 1 if quantity > 1 else 0
         return supply
 
@@ -138,7 +138,7 @@ class Strategy(SharedClass):
         :return: a dictionary of quantities supplied
         """
         demand = {}  # type: Dict[str, int]
-        for good_pbk, quantity in good_holdings:
+        for good_pbk in good_holdings.keys():
             demand[good_pbk] = 1
         return demand
 
@@ -200,7 +200,7 @@ class Strategy(SharedClass):
             proposal_dict[good_pbk] = 1
             proposal = build_goods_description(good_pbk_to_quantities=proposal_dict, is_supply=is_seller)
             if is_seller:
-                delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict}  # type: Dict[str, int]
+                delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict.items()}  # type: Dict[str, int]
             else:
                 delta_good_holdings = proposal_dict
             marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state_after_locks, delta_good_holdings)

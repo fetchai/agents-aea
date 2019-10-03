@@ -24,7 +24,7 @@ import math
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
-from aea.mail.base import OutBox, Envelope
+from aea.mail.base import OutBox  # , Envelope
 from aea.protocols.base import Message
 from aea.protocols.transaction.message import TransactionMessage
 from aea.protocols.state_update.message import StateUpdateMessage
@@ -295,8 +295,9 @@ class DecisionMaker:
         """
         score_diff = self.preferences.get_score_diff_from_transaction(self.ownership_state, tx_message)
         if score_diff >= 0.0:
-            envelope = Envelope()
-            self.outbox.put(envelope)
+            pass  # TODO: implement tx flow
+            # envelope = Envelope()
+            # self.outbox.put(envelope)
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
         """
