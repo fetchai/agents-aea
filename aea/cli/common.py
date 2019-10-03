@@ -22,16 +22,16 @@
 import importlib.util
 import logging
 import os
-from pathlib import Path
 import sys
-from typing import Dict
+from pathlib import Path
+from typing import Dict, List, cast
 
 import click
 import click_log
 import jsonschema  # type: ignore
 
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
-    DEFAULT_PROTOCOL_CONFIG_FILE
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 
 logger = logging.getLogger("aea")
@@ -62,6 +62,32 @@ class Context(object):
         """
         self.config[key] = value
         logger.debug('  config[%s] = %s' % (key, value))
+
+    def get_dependencies(self) -> List[str]:
+        """Aggregate the dependencies from every component.
+
+        :return a list of dependency version specification. e.g. ["gym >= 1.0.0"]
+        """
+        dependencies = []  # type: List[str]
+        for protocol_id in self.agent_config.protocols:
+            path = str(Path("protocols", protocol_id, DEFAULT_PROTOCOL_CONFIG_FILE))
+            protocol_config = self.protocol_loader.load(open(path))
+            deps = cast(List[str], protocol_config.dependencies)
+            dependencies.extend(deps)
+
+        for connection_id in self.agent_config.connections:
+            path = str(Path("connections", connection_id, DEFAULT_CONNECTION_CONFIG_FILE))
+            connection_config = self.connection_loader.load(open(path))
+            deps = cast(List[str], connection_config.dependencies)
+            dependencies.extend(deps)
+
+        for skill_id in self.agent_config.skills:
+            path = str(Path("skills", skill_id, DEFAULT_SKILL_CONFIG_FILE))
+            skill_config = self.skill_loader.load(open(path))
+            deps = cast(List[str], skill_config.dependencies)
+            dependencies.extend(deps)
+
+        return sorted(set(dependencies))
 
 
 pass_ctx = click.make_pass_decorator(Context)
