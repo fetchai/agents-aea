@@ -98,6 +98,9 @@ class SkillContext:
         assert self._skill is not None, "Skill not initialized."
         return self._skill.tasks
 
+    def __getattr__(self, item) -> Any:
+        return super().__getattribute__(item)
+
 
 class Behaviour(ABC):
     """This class implements an abstract behaviour."""
