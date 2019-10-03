@@ -101,10 +101,11 @@ def test_react():
         t.start()
         agent.mailbox.inbox._queue.put(envelope)
         time.sleep(1)
-        handler = agent.resources \
+        handlers = agent.resources \
             .handler_registry.fetch_by_skill('default', "dummy")
-        assert envelope in handler.handled_envelopes, \
-            "The envelope is not inside the handled_envelopes."
+        for hdlr in handlers:
+            assert envelope in hdlr.handled_envelopes, \
+                "The envelope is not inside the handled_envelopes."
     finally:
         agent.stop()
         t.join()

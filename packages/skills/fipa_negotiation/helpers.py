@@ -19,9 +19,10 @@
 # ------------------------------------------------------------------------------
 
 """This class contains the helpers for FIPA negotiation."""
-from typing import Dict, List, TYPE_CHECKING
+from typing import Dict, List, TYPE_CHECKING, cast
 
-from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or
+from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
+    ConstraintExpr
 
 if TYPE_CHECKING:
     from packages.skills.fipa_negotiation.dialogues import DialogueLabel
@@ -90,11 +91,12 @@ def build_goods_query(good_pbks: List[str], is_searching_for_sellers: bool) -> Q
     """
     data_model = build_goods_datamodel(good_pbks, currency='FET', is_supply=is_searching_for_sellers)
     constraints = [Constraint(good_pbk, ConstraintType(">=", 1)) for good_pbk in good_pbks]
+    constraint_expr = cast(List[ConstraintExpr], constraints)
 
     if len(good_pbks) > 1:
-        constraints = [Or(constraints)]
+        constraint_expr = [Or(constraint_expr)]
 
-    query = Query(constraints, model=data_model)
+    query = Query(constraint_expr, model=data_model)
     return query
 
 

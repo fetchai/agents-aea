@@ -25,7 +25,7 @@ from enum import Enum
 from typing import Dict, Type, Union, Optional, List, Any
 
 
-ATTRIBUTE_TYPES = Type[Union[float, str, bool, int]]
+ATTRIBUTE_TYPES = Union[float, str, bool, int]
 
 
 class JSONSerializable(ABC):

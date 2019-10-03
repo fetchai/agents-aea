@@ -199,7 +199,7 @@ class Strategy:
             proposal = build_goods_description(good_pbk_to_quantities=proposal_dict, is_supply=is_seller)
             if is_seller:
                 delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict}  # type: Dict[str, int]
-            else
+            else:
                 delta_good_holdings = proposal_dict
             marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state_after_locks, delta_good_holdings)
             switch = -1 if is_seller else 1

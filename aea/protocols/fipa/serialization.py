@@ -48,6 +48,8 @@ class FIPASerializer(Serializer):
                 performative.nothing.CopyFrom(nothing)
             elif type(query) == Query:
                 query = pickle.dumps(query)
+                performative.query_bytes = query
+            elif type(query) == bytes:
                 performative.bytes = query
             else:
                 raise ValueError("Query type not supported: {}".format(type(query)))
@@ -89,8 +91,10 @@ class FIPASerializer(Serializer):
             query_type = fipa_pb.cfp.WhichOneof("query")
             if query_type == "nothing":
                 query = None
+            elif query_type == "query_bytes":
+                query = pickle.loads(fipa_pb.cfp.query_bytes)
             elif query_type == "bytes":
-                query = pickle.loads(fipa_pb.cfp.bytes)
+                query = fipa_pb.cfp.bytes
             else:
                 raise ValueError("Query type not recognized.")
 
