@@ -55,6 +55,17 @@
               }
             }
         },
+        "shared_classes": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required": ["shared_class"],
+              "properties": {
+                "task": { "$ref": "#/definitions/shared_class" }
+              }
+            }
+        },
         "dependencies": {
             "type": "array",
             "uniqueItems": true,
@@ -79,6 +90,14 @@
             }
         },
         "handler": {
+            "type": "object",
+            "required": ["class_name", "args"],
+            "properties": {
+                "class_name": {"type": "string"},
+                "args": {"type": "object"}
+            }
+        },
+        "shared_class": {
             "type": "object",
             "required": ["class_name", "args"],
             "properties": {

@@ -279,6 +279,32 @@ class TaskConfig(Configuration):
         )
 
 
+class SharedClassConfig(Configuration):
+    """Handle a skill shared class configuration."""
+
+    def __init__(self, class_name: str = "", **args):
+        """Initialize a shared class configuration."""
+        self.class_name = class_name
+        self.args = args
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "class_name": self.class_name,
+            "args": self.args
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        class_name = cast(str, obj.get("class_name"))
+        return TaskConfig(
+            class_name=class_name,
+            args=obj.get("args")
+        )
+
+
 class SkillConfig(Configuration):
     """Class to represent a skill configuration file."""
 
@@ -301,6 +327,7 @@ class SkillConfig(Configuration):
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
         self.tasks = CRUDCollection[TaskConfig]()
+        self.shared_classes = CRUDCollection[SharedClassConfig]()
 
     @property
     def json(self) -> Dict:
@@ -316,6 +343,7 @@ class SkillConfig(Configuration):
             "handlers": [{"handler": h.json} for _, h in self.handlers.read_all()],
             "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
             "tasks": [{"task": t.json} for _, t in self.tasks.read_all()],
+            "shared_classes": [{"shared_class": s.json} for _, s in self.shared_classes.read_all()],
         }
 
     @classmethod
@@ -349,6 +377,10 @@ class SkillConfig(Configuration):
         for h in obj.get("handlers"):  # type: ignore
             handler_config = HandlerConfig.from_json(h["handler"])
             skill_config.handlers.create(handler_config.class_name, handler_config)
+
+        for s in obj.get("shared_classes"):  # type: ignore
+            shared_class_config = SharedClassConfig.from_json(s["shared_class"])
+            skill_config.shared_classes.create(shared_class_config.class_name, shared_class_config)
 
         return skill_config
 

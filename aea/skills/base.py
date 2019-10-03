@@ -28,7 +28,7 @@ from abc import ABC, abstractmethod
 from queue import Queue
 from typing import Optional, List, Dict, Any, cast
 
-from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SkillConfig, ProtocolId, DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
 from aea.decision_maker.base import OwnershipState, Preferences
@@ -320,6 +320,63 @@ class Task(ABC):
         return tasks
 
 
+class SharedClass(ABC):
+    """This class implements an abstract shared class."""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize a task.
+
+        :param skill_context: the skill context
+        :param kwargs: keyword arguments.
+        """
+        self._context = kwargs.pop('skill_context')  # type: SkillContext
+        self._config = kwargs
+
+    @property
+    def context(self) -> SkillContext:
+        """Get the context of the task."""
+        return self._context
+
+    @property
+    def config(self) -> Dict[Any, Any]:
+        """Get the config of the task."""
+        return self._config
+
+    @classmethod
+    def parse_module(cls, path: str, shared_classes_configs: List[SharedClassConfig], skill_context: SkillContext) -> List['SharedClass']:
+        """
+        Parse the tasks module.
+
+        :param path: path to the Python skill module.
+        :param shared_classes_configs: a list of shared class configurations.
+        :param skill_context: the skill context
+        :return: a list of SharedClass.
+        """
+        shared_classes = []
+        shared_class_spec = importlib.util.spec_from_file_location("tasks", location=path)
+        shared_class_module = importlib.util.module_from_spec(shared_class_spec)
+        shared_class_spec.loader.exec_module(shared_class_module)  # type: ignore
+        classes = inspect.getmembers(task_module, inspect.isclass)
+        tasks_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
+
+        name_to_class = dict(tasks_classes)
+        for task_config in shared_classes_configs:
+            task_class_name = task_config.class_name
+            logger.debug("Processing task {}".format(task_class_name))
+            shared_class = name_to_class.get(task_class_name, None)
+            if shared_class is None:
+                logger.warning("SharedClass '{}' cannot be found.".format(shared_class))
+            else:
+                args = task_config.args
+                assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
+                args['skill_context'] = skill_context
+                task = task_class(**args)
+                tasks.append(task)
+
+        return tasks
+
+
 class Skill:
     """This class implements a skill."""
 
@@ -327,7 +384,8 @@ class Skill:
                  skill_context: SkillContext,
                  handlers: Optional[List[Handler]],
                  behaviours: Optional[List[Behaviour]],
-                 tasks: Optional[List[Task]]):
+                 tasks: Optional[List[Task]],
+                 shared_classes: Optional[List[SharedClass]]):
         """
         Initialize a skill.
 
@@ -335,12 +393,14 @@ class Skill:
         :param handlers: the list of handlers to handle incoming envelopes.
         :param behaviours: the list of behaviours that defines the proactive component of the agent.
         :param tasks: the list of tasks executed at every iteration of the main loop.
+        :param shared_classes: the list of classes shared across tasks, behaviours and
         """
         self.config = config
         self.skill_context = skill_context
         self.handlers = handlers
         self.behaviours = behaviours
         self.tasks = tasks
+        self.shared_classes = shared_classes
 
     @classmethod
     def from_dir(cls, directory: str, agent_context: AgentContext) -> Optional['Skill']:
@@ -375,8 +435,10 @@ class Skill:
         behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations, skill_context)
         tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
         tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
+        shared_classes_configurations = list(dict(skill_config.shared_classes.read_all()).values())
+        shared_classes = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
 
-        skill = Skill(skill_config, skill_context, handlers, behaviours, tasks)
+        skill = Skill(skill_config, skill_context, handlers, behaviours, tasks, shared_classes)
         skill_context._skill = skill
 
         return skill

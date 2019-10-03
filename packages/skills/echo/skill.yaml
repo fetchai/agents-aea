@@ -20,5 +20,6 @@ tasks:
       args:
         foo: bar
         bar: foo
+shared_classes: []
 protocols: ["default"]
 dependencies: []

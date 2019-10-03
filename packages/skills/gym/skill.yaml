@@ -14,6 +14,7 @@ tasks:
       class_name: GymTask
       args:
         foo: bar
+shared_classes: []
 protocols: ["gym"]
 dependencies:
   - gym

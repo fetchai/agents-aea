@@ -18,4 +18,9 @@ tasks:
       class_name: MyScaffoldTask
       args:
         foo: bar
+shared_classes:
+  - shared_class:
+      class_name: MySharedClass
+      args:
+        foo: bar
 protocols: []

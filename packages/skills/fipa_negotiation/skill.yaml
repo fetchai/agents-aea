@@ -11,18 +11,22 @@ behaviours:
 handlers:
   - handler:
       class_name: FIPANegotiationHandler
+      args:
+        foo: bar
 tasks:
   - task:
       class_name: TransactionCleanUpTask
+      args:
+        foo: bar
 shared_classes:
-  - one:
-    class_name: Search
-  - two:
-    class_name: Strategy
-  - three:
-    class_name: Dialogues
-  - four:
-    class_name: Transactions
-    args:
-      pending_transaction_timeout: 30
+  - shared_class:
+      class_name: Search
+  - shared_class:
+      class_name: Strategy
+  - shared_class:
+      class_name: Dialogues
+  - shared_class:
+      class_name: Transactions
+      args:
+        pending_transaction_timeout: 30
 protocols: ['oef', 'fipa']

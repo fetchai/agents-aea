@@ -13,10 +13,10 @@ handlers:
     class_name: TACHandler
 tasks: []
 shared_classes:
-  - one:
-    class_name: Search
-  - two:
-    class_name: Game
-    args:
-      expected_version_id: 1
+  - shared_class:
+      class_name: Search
+  - shared_class:
+      class_name: Game
+      args:
+        expected_version_id: 1
 protocols: ['oef', 'tac']

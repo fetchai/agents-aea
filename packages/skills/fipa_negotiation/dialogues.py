@@ -92,7 +92,7 @@ class Dialogue(BaseDialogue):
         return self._is_seller
 
     @property
-    def role(self) -> Dialogue.AgentRole:
+    def role(self) -> 'Dialogue'.AgentRole:
         """Get role of agent in dialogue."""
         return self._role
 
