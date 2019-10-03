@@ -468,7 +468,7 @@ class Skill:
         if skill_config is None:
             return None
 
-        skills_spec = importlib.util.spec_from_file_location(skill_config.name, os.path.join(directory, "__init__.py"))
+        skills_spec = importlib.util.spec_from_file_location(str(skill_config.name), os.path.join(directory, "__init__.py"))
         if skills_spec is None:
             logger.warning("No skill found.")
             return None

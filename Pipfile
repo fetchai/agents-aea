@@ -21,6 +21,7 @@ mkdocs = "*"
 mkdocs-material = "*"
 pymdown-extensions = "*"
 pygments = "*"
+python-jsonschema-objects = "*"
 
 [packages]
 cryptography = "*"

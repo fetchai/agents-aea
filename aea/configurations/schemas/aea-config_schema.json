@@ -1,4 +1,5 @@
 {
+    "title": "Agent Configuration Schema",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "description": "Schema for the agent configuration file.",
     "additionalProperties": false,

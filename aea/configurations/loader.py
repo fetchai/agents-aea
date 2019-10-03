@@ -22,19 +22,24 @@
 import inspect
 import json
 import os
+import re
 from pathlib import Path
 from typing import TextIO, Type, TypeVar, Generic
 
 import jsonschema
+import python_jsonschema_objects as pjs
 import yaml
 from jsonschema import Draft7Validator
-
-from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
-T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig)
+definitions = json.load(open(str(Path(_SCHEMAS_DIR, "definitions.json"))))
+store = {
+    "definitions.json": definitions
+}
+
+T = TypeVar('T')
 
 
 class ConfigLoader(Generic[T]):
@@ -43,9 +48,23 @@ class ConfigLoader(Generic[T]):
     def __init__(self, schema_filename: str, configuration_type: Type[T]):
         """Initialize the parser for configuration files."""
         self.schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
-        self.resolver = jsonschema.RefResolver("file://{}/".format(Path(_SCHEMAS_DIR).absolute()), self.schema)
+        # self.resolver = jsonschema.RefResolver("file://{}/".format(Path(_SCHEMAS_DIR).absolute()), self.schema)
+        # self.resolver = jsonschema.RefResolver("{}}".format(Path(_SCHEMAS_DIR).absolute()), self.schema)
+        self.resolver = jsonschema.RefResolver("SkillConfigurationSchema", self.schema, store=store)
         self.validator = Draft7Validator(self.schema, resolver=self.resolver)
         self.configuration_type = configuration_type  # type: Type[T]
+
+        self.builder = pjs.ObjectBuilder(self.schema, resolver=self.resolver)
+        self.ns = self.builder.build_classes()
+        # get the class of the 'root' schema
+        # the name of the class should contain 'ConfigurationSchema' -> see the "$id" field in the schemas
+        config_class_names = list(filter(
+            lambda x: re.match("|".join(["{}ConfigurationSchema".format(s)
+                                         for s in ["Protocol", "Connection", "Skill", "Agent"]]),
+                               x),
+            dir(self.ns)))
+        assert len(config_class_names) == 1
+        self.config_class = getattr(self.ns, config_class_names[0])  # type: Type
 
     def load(self, fp: TextIO) -> T:
         """
@@ -57,7 +76,13 @@ class ConfigLoader(Generic[T]):
         """
         configuration_file_json = yaml.safe_load(fp)
         self.validator.validate(instance=configuration_file_json)
-        return self.configuration_type.from_json(configuration_file_json)
+
+        configuration_obj = self.config_class(**configuration_file_json)
+
+        # just compatibility with the Configuration abs class.
+        configuration_obj.__dict__["json"] = configuration_obj.for_json()
+
+        return configuration_obj
 
     def dump(self, configuration: T, fp: TextIO) -> None:
         """Dump a configuration.
@@ -66,6 +91,6 @@ class ConfigLoader(Generic[T]):
         :param fp: the file pointer to the configuration file
         :return: None
         """
-        result = configuration.json
+        result = configuration.for_json()
         self.validator.validate(instance=result)
         yaml.safe_dump(result, fp)

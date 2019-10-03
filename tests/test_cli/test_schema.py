@@ -115,9 +115,12 @@ class TestSkillsSchema:
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
+        def_schema = json.load(open(str(Path(CONFIGURATION_SCHEMA_DIR, "definitions.json"))))
+        store = {
+            "definitions.json": def_schema
+        }
         cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
-        cls.validator = Draft7Validator(cls.schema, resolver=cls.resolver)
+        cls.resolver = jsonschema.RefResolver("SkillConfigurationSchema", cls.schema, store=store)
 
     @pytest.mark.parametrize("skill_path",
                              [
@@ -128,6 +131,6 @@ class TestSkillsSchema:
                                  os.path.join(CUR_PATH, "data", "dummy_skill")
                              ])
     def test_validate_skill_config(self, skill_path):
-        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        skill_config_file = yaml.safe_load(open(os.path.join(skill_path, DEFAULT_SKILL_CONFIG_FILE)))
-        self.validator.validate(instance=skill_config_file)
+        """Test that the validation of the protocol configuration file in aea/skills works correctly."""
+        connection_config_file = yaml.safe_load(open(os.path.join(skill_path, DEFAULT_SKILL_CONFIG_FILE)))
+        validate(instance=connection_config_file, schema=self.schema, resolver=self.resolver)
