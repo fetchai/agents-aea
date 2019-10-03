@@ -1,6 +1,6 @@
 ## Scaffold generator
 
-The scaffold generator builds out the entire directory structure required for creating an agent.
+The scaffold generator builds out the directory structure required when adding new skills, protocols, and connections to the agent.
 
 For example, create a new AEA project.
 

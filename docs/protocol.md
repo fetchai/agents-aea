@@ -79,7 +79,7 @@ class OEFErrorOperation(Enum):
 
     OTHER = 10000
 ```
-A `model.py` module is provided by the `oef` protocol which includes classes and methods commonly required by OEF agents. These includes a class for serialising json and classes for implementing the OEF query language such as `Attribute`, `Query`, etc. 
+A `models.py` module is provided by the `oef` protocol which includes classes and methods commonly required by OEF agents. These includes a class for serialising json and classes for implementing the OEF query language such as `Attribute`, `Query`, etc. 
 
 ### Launch an `oef`
 

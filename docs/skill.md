@@ -11,7 +11,7 @@ The skill has a `context` object which is shared by all `Handler`, `Behaviour`, 
 
 This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill.
 
-For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as a `MailBox` for putting messages into.
+For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
 
 ``` python
 self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
@@ -19,24 +19,26 @@ self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_pu
 
 ## What to code
 
-Each of the skill classes has two methods that must be implemented. All of them include a `teardown()` method which the developer must implement. Then there is a specific method for each class that the framework requires.
+Each of the skill classes has three methods that must be implemented. All of them include a `setup()` and `teardown()` method which the developer must implement. 
 
-### `handler.py`
+Then there is a specific method that the framework requires for each class.
 
-At the current time, each skill has exactly one `Handler` class.
+### `handlers.py`
+
+There can be one or more `Handler` class per skill.
+
+`Handler` classes can receive `Envelope` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol.
 
 * `handle_envelope(self, Envelope)`: is where the skill receives a message contained within an `Envelope` and decides what to do with it.
+
 
 !!!	Todo
 	For example.
 
-!!!	Note
-	Handlers only deal with incoming messages. Outbound messages do not need handling.
-
 
 ### `behaviours.py`
 
-Conceptually, a `Behaviour`  class is where the developer codes the business logic that interacts with other agents in the framework.
+Conceptually, a `Behaviour`  class contains the business logic specific to initial actions initiated by the agent rather than reactions to other events.
 
 There can be one or more `Behaviour` classes per skill. The developer subclasses abstract class `Behaviour` to create a new `Behaviour`.
 
@@ -58,12 +60,38 @@ There can be one or more `Task` classes per skill. The developer subclasses abst
 	For example.
 
 
-### `shared.py`
+### Skill config
 
-This class will allow communication with new custom classes. 
+Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
 
-!!!	Note
-	Coming soon.
+It also details the protocol type.
+
+In the future, this file will point to shared modules which allow agent communication with custom classes.
+
+``` json
+name: echo
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: EchoBehaviour
+      args:
+        foo: bar
+handler:
+  class_name: EchoHandler
+  args:
+    foo: bar
+    bar: foo
+tasks:
+  - task:
+      class_name: EchoTask
+      args:
+        foo: bar
+        bar: foo
+protocol: "default"
+```
 
 
 ## Error skill

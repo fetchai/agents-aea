@@ -27,13 +27,14 @@ config:
 
 The developer is left to implement the methods of both `Connection` and `Channel` classes dependent on the protocol type. 
 
-We'll demonstrate implementations from the `oef` connection as an example.
+<!--We'll demonstrate implementations from the `oef` connection as an example.-->
 
 
 ## `Channel`
 
 
 ### `send(self, envelope: Envelope) `
+<!--
 ``` python
 def send(self, envelope: Envelope) -> None:
     if envelope.protocol_id == "default":
@@ -48,23 +49,28 @@ def send(self, envelope: Envelope) -> None:
     	logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
         raise ValueError("Cannot send message.")
 ```
+-->
 ### `connect(self) -> Optional[Queue]`
-
+<!--
 `Channel.connect() not implemented in oef`
-
+-->
 ### `disconnect(self)`
+<!--
 `Channel.disconnect() not implemented in oef`
-
+-->
 
 ## `Connection`
+
 ### `is_established(self)`
+<!--
 ``` python
 @property
 def is_established(self) -> bool:
     return self._connected
 ```
-
+-->
 ### `connect(self)`
+<!--
 ``` python
 def connect(self) -> None:
  	if self._stopped and not self._connected:
@@ -80,8 +86,9 @@ def connect(self) -> None:
             self._core.stop()
             raise e
 ```
-
+-->
 ### `disconnect(self)`
+<!--
 ``` python
 def disconnect(self) -> None:
 assert self.out_thread is not None, "Call connect before disconnect."
@@ -93,15 +100,17 @@ assert self.out_thread is not None, "Call connect before disconnect."
         self._core.stop()
         self._stopped = True
 ```
-
+-->
 ### `send(self, envelope: Envelope)`
+<!--
 ``` python
 def send(self, envelope: Envelope):
     if self._connected:
     	self.channel.send(envelope)
 ```
-
+-->
 ### `from_config(cls, public_key: str, connection_configuration: ConnectionConfig)`
+<!--
 ``` python
 @classmethod
    	def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
@@ -109,7 +118,7 @@ def send(self, envelope: Envelope):
         oef_port = cast(int, connection_configuration.config.get("port"))
         return OEFConnection(public_key, oef_addr, oef_port)
 ```
-
+-->
 
 
 
@@ -118,7 +127,7 @@ def send(self, envelope: Envelope):
 An `Envelope` wraps messages. It travels from `OutBox` to agent and back to `InBox` in the `MailBox` via a protocol connection.
 
 Construct an `Envelope` object with the `to`, `sender`, `protocol_id`, and `message` parameters.
-
+<!--
 ``` python
 def __init__(self, to: Address, sender: Address, protocol_id: ProtocolId, message: bytes):
         """
@@ -133,7 +142,7 @@ def __init__(self, to: Address, sender: Address, protocol_id: ProtocolId, messag
         self._protocol_id = protocol_id
         self._message = message
 ```
-
+-->
 
 <br />
 
