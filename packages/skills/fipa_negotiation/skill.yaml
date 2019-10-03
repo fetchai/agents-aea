@@ -9,7 +9,8 @@ behaviours:
       args:
         services_interval: 5
 handlers:
-  class_name: FIPANegotiationHandler
+  - handler:
+      class_name: FIPANegotiationHandler
 tasks:
   - task:
       class_name: TransactionCleanUpTask
@@ -24,4 +25,4 @@ shared_classes:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocol: ['oef', 'fipa']
+protocols: ['oef', 'fipa']

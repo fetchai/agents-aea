@@ -8,16 +8,17 @@ behaviours:
       class_name: EchoBehaviour
       args:
         foo: bar
-handler:
-  class_name: EchoHandler
-  args:
-    foo: bar
-    bar: foo
+handlers:
+  - handler:
+      class_name: EchoHandler
+      args:
+        foo: bar
+        bar: foo
 tasks:
   - task:
       class_name: EchoTask
       args:
         foo: bar
         bar: foo
-protocol: "default"
+protocols: ["default"]
 dependencies: []

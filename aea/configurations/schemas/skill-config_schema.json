@@ -9,10 +9,7 @@
         "version",
         "license",
         "url",
-        "protocol",
-        "handler",
-        "behaviours",
-        "tasks"
+        "protocols"
     ],
     "properties": {
         "name": {"type": "string"},
@@ -20,7 +17,11 @@
         "version": {"type": "string"},
         "license": {"type": "string"},
         "url": {"type": "string"},
-        "protocol": {"type": "string"},
+        "protocols": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string"}
+        },
         "handlers": {
             "type": "array",
             "uniqueItems": true,

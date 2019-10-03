@@ -288,7 +288,7 @@ class SkillConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
-                 protocol: str = "",
+                 protocols: str = "",
                  dependencies: Optional[List[str]] = None):
         """Initialize a skill configuration."""
         self.name = name
@@ -296,7 +296,7 @@ class SkillConfig(Configuration):
         self.version = version
         self.license = license
         self.url = url
-        self.protocol = protocol
+        self.protocols = protocols
         self.dependencies = dependencies
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
@@ -311,7 +311,7 @@ class SkillConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "url": self.url,
-            "protocol": self.protocol,
+            "protocols": self.protocols,
             "dependencies": self.dependencies,
             "handlers": [{"handler": h.json} for _, h in self.handlers.read_all()],
             "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
@@ -326,7 +326,7 @@ class SkillConfig(Configuration):
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
         url = cast(str, obj.get("url"))
-        protocol = cast(str, obj.get("protocol"))
+        protocols = cast(str, obj.get("protocols"))
         dependencies = cast(List[str], obj.get("dependencies", []))
         skill_config = SkillConfig(
             name=name,
@@ -334,7 +334,7 @@ class SkillConfig(Configuration):
             version=version,
             license=license,
             url=url,
-            protocol=protocol,
+            protocols=protocols,
             dependencies=dependencies
         )
 
@@ -347,7 +347,7 @@ class SkillConfig(Configuration):
             skill_config.tasks.create(task_config.class_name, task_config)
 
         for h in obj.get("handlers"):  # type: ignore
-            handler_config = HandlerConfig.from_json(t["handler"])
+            handler_config = HandlerConfig.from_json(h["handler"])
             skill_config.handlers.create(handler_config.class_name, handler_config)
 
         return skill_config

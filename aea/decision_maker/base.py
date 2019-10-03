@@ -42,24 +42,32 @@ QUANTITY_SHIFT = 100
 class OwnershipState:
     """Represent the ownership state of an agent."""
 
-    def __init__(self, currency_endowment: CurrencyEndowment, good_endowment: GoodEndowment):
+    def __init__(self):
+        """Instantiate an ownership state object."""
+        self._currency_holdings = None  # type: CurrencyHoldings
+        self._good_holdings = None  # type: GoodHoldings
+
+    def init(self, currency_endowment: CurrencyEndowment, good_endowment: GoodEndowment):
         """
         Instantiate an ownership state object.
 
         :param currency_endowment: the currency endowment of the agent in this state.
         :param good_endowment: the good endowment of the agent in this state.
         """
+        # TODO: raise warning
         self._currency_holdings = copy.copy(currency_endowment)
         self._good_holdings = copy.copy(good_endowment)
 
     @property
     def currency_holdings(self) -> CurrencyHoldings:
         """Get currency holdings in this state."""
+        assert self._currency_holdings is not None, "CurrencyHoldings not set!"
         return copy.copy(self._currency_holdings)
 
     @property
     def good_holdings(self) -> GoodHoldings:
         """Get good holdings in this state."""
+        assert self._good_holdings is not None, "GoodHoldings not set!"
         return copy.copy(self._good_holdings)
 
     def check_transaction_is_consistent(self, tx_message: TransactionMessage) -> bool:
@@ -130,12 +138,20 @@ class OwnershipState:
 class Preferences:
     """Class to represent the preferences."""
 
-    def __init__(self, utility_params: UtilityParams, exchange_params: ExchangeParams):
+    def __init__(self):
+        """Instantiate an agent preference object."""
+        self._utility_params = None  # type: UtilityParams
+        self._exchange_params = None  # type: ExchangeParams
+        self._quantity_shift = QUANTITY_SHIFT
+
+    def init(self, utility_params: UtilityParams, exchange_params: ExchangeParams):
         """
         Instantiate an agent preference object.
 
         :param utility_params: the utility params for every asset.
+        :param exchange_params: the exchange params.
         """
+        # TODO: raise warning
         self._utility_params = utility_params
         self._exchange_params = exchange_params
         self._quantity_shift = QUANTITY_SHIFT
@@ -143,11 +159,13 @@ class Preferences:
     @property
     def utility_params(self) -> UtilityParams:
         """Get utility parameter for each good."""
+        assert self._utility_params is not None, "UtilityParams not set!"
         return self._utility_params
 
     @property
     def exchange_params(self) -> ExchangeParams:
         """Get exchange parameter for each currency."""
+        assert self._exchange_params is not None, "ExchangeParams not set!"
         return self._exchange_params
 
     def logarithmic_utility(self, good_holdings: GoodHoldings) -> float:
@@ -220,8 +238,8 @@ class DecisionMaker:
         self.max_reactions = max_reactions
         self._outbox = outbox
         self._message_queue = Queue()  # type: Queue
-        self._ownership_state = None  # type: Optional[OwnershipState]
-        self._preferences = None  # type: Optional[Preferences]
+        self._ownership_state = OwnershipState()
+        self._preferences = Preferences()
 
     @property
     def message_queue(self) -> Queue:
@@ -236,13 +254,11 @@ class DecisionMaker:
     @property
     def ownership_state(self) -> OwnershipState:
         """Get ownership state."""
-        assert self._ownership_state is not None, "OwnershipState not set!"
         return self._ownership_state
 
     @property
     def preferences(self) -> Preferences:
         """Get preferences."""
-        assert self._preferences is not None, "Preferences not set!"
         return self._preferences
 
     def execute(self) -> None:

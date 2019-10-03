@@ -447,8 +447,8 @@ class Resources(object):
         skill_id = skill.config.name
         self._skills[skill_id] = skill
         if skill.handlers is not None:
-            protocol_id = skill.config.protocol
-            self.handler_registry.register((protocol_id, skill_id), cast(List[Handler], skill.handlers))
+            for protocol_id in skill.config.protocols:
+                self.handler_registry.register((protocol_id, skill_id), cast(List[Handler], skill.handlers))
         if skill.behaviours is not None:
             self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], skill.behaviours))
         if skill.tasks is not None:

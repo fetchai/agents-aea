@@ -27,7 +27,7 @@ from aea.context.base import AgentContext
 from aea.decision_maker.base import DecisionMaker
 from aea.mail.base import Envelope, MailBox
 from aea.registries.base import Resources
-from aea.skills.error.handler import ErrorHandler
+from aea.skills.error.handlers import ErrorHandler
 
 logger = logging.getLogger(__name__)
 

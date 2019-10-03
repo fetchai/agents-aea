@@ -8,13 +8,14 @@ behaviours:
       class_name: MyScaffoldBehaviour
       args:
         foo: bar
-handler:
-  class_name: MyScaffoldHandler
-  args:
-    foo: bar
+handlers:
+  - handler:
+      class_name: MyScaffoldHandler
+      args:
+        foo: bar
 tasks:
   - task:
       class_name: MyScaffoldTask
       args:
         foo: bar
-protocol: ''
+protocols: []
