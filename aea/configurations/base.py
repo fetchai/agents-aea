@@ -111,6 +111,7 @@ class ConnectionConfig(Configuration):
                  url: str = "",
                  class_name: str = "",
                  supported_protocols: Optional[List[str]] = None,
+                 dependencies: Optional[List[str]] = None,
                  **config):
         """Initialize a connection configuration object."""
         self.name = name
@@ -120,6 +121,7 @@ class ConnectionConfig(Configuration):
         self.url = url
         self.class_name = class_name
         self.supported_protocols = supported_protocols if supported_protocols is not None else []
+        self.dependencies = dependencies if dependencies is not None else []
         self.config = config
 
     @property
@@ -133,13 +135,15 @@ class ConnectionConfig(Configuration):
             "url": self.url,
             "class_name": self.class_name,
             "supported_protocols": self.supported_protocols,
+            "dependencies": self.dependencies,
             "config": self.config
         }
 
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        supported_protocols = cast(List[str], obj.get("supported_protocols"))
+        supported_protocols = cast(List[str], obj.get("supported_protocols", []))
+        dependencies = cast(List[str], obj.get("dependencies", []))
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             authors=cast(str, obj.get("authors")),
@@ -148,7 +152,52 @@ class ConnectionConfig(Configuration):
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
             supported_protocols=supported_protocols,
+            dependencies=dependencies,
             **cast(dict, obj.get("config"))
+        )
+
+
+class ProtocolConfig(Configuration):
+    """Handle protocol configuration."""
+
+    def __init__(self,
+                 name: str = "",
+                 authors: str = "",
+                 version: str = "",
+                 license: str = "",
+                 url: str = "",
+                 dependencies: Optional[List[str]] = None):
+        """Initialize a connection configuration object."""
+        self.name = name
+        self.authors = authors
+        self.version = version
+        self.license = license
+        self.url = url
+        self.dependencies = dependencies
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "name": self.name,
+            "authors": self.authors,
+            "version": self.version,
+            "license": self.license,
+            "url": self.url,
+            "dependencies": self.dependencies
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        dependencies = cast(List[str], obj.get("dependencies", []))
+        return ProtocolConfig(
+            name=cast(str, obj.get("name")),
+            authors=cast(str, obj.get("authors")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            url=cast(str, obj.get("url")),
+            dependencies=dependencies
         )
 
 
@@ -239,7 +288,8 @@ class SkillConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
-                 protocol: str = ""):
+                 protocol: str = "",
+                 dependencies: Optional[List[str]] = None):
         """Initialize a skill configuration."""
         self.name = name
         self.authors = authors
@@ -247,6 +297,7 @@ class SkillConfig(Configuration):
         self.license = license
         self.url = url
         self.protocol = protocol
+        self.dependencies = dependencies
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
         self.tasks = CRUDCollection[TaskConfig]()
@@ -261,6 +312,7 @@ class SkillConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "protocol": self.protocol,
+            "dependencies": self.dependencies,
             "handlers": [{"handler": h.json} for _, h in self.handlers.read_all()],
             "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
             "tasks": [{"task": t.json} for _, t in self.tasks.read_all()],
@@ -275,13 +327,15 @@ class SkillConfig(Configuration):
         license = cast(str, obj.get("license"))
         url = cast(str, obj.get("url"))
         protocol = cast(str, obj.get("protocol"))
+        dependencies = cast(List[str], obj.get("dependencies", []))
         skill_config = SkillConfig(
             name=name,
             authors=authors,
             version=version,
             license=license,
             url=url,
-            protocol=protocol
+            protocol=protocol,
+            dependencies=dependencies
         )
 
         for b in obj.get("behaviours"):  # type: ignore
@@ -289,7 +343,7 @@ class SkillConfig(Configuration):
             skill_config.behaviours.create(behaviour_config.class_name, behaviour_config)
 
         for t in obj.get("tasks"):  # type: ignore
-            task_config = BehaviourConfig.from_json(t["task"])
+            task_config = TaskConfig.from_json(t["task"])
             skill_config.tasks.create(task_config.class_name, task_config)
 
         for h in obj.get("handlers"):  # type: ignore

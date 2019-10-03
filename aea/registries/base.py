@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -28,11 +29,14 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast
 
-from aea.configurations.base import ProtocolId, SkillId
+from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.loader import ConfigLoader
 from aea.protocols.base import Protocol
 from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext
 
 logger = logging.getLogger(__name__)
+
+PACKAGE_NAME_REGEX = re.compile("^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE)
 
 
 class Registry(ABC):
@@ -134,7 +138,7 @@ class ProtocolRegistry(Registry):
             logger.warning("No protocol found.")
             return
 
-        protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))  # type: ignore
+        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), protocols_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following protocol package: {}".format(protocols_packages))
         for protocol_name in protocols_packages:
             try:
@@ -171,8 +175,11 @@ class ProtocolRegistry(Registry):
                      .format(serializer_class=serializer_class, protocol_name=protocol_name))
         serializer = serializer_class()
 
+        config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
+        protocol_config = config_loader.load(open(Path(directory, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
+
         # instantiate the protocol manager.
-        protocol = Protocol(protocol_name, serializer)
+        protocol = Protocol(protocol_name, serializer, protocol_config)
         self.register((protocol_name, None), protocol)
 
 

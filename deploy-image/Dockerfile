@@ -17,17 +17,7 @@ RUN pip install aea[all]
 COPY ./packages /home/packages
 WORKDIR home
 
-ARG AGENT_REPO_URL=""
-
-RUN if [ -z ${AGENT_REPO_URL+x} ] ; then\
-        rm myagent -rf &&\
-        aea create myagent &&\
-        cd myagent &&\
-        aea add skill echo;\
-    else \
-        echo "cloning $AGENT_REPO_URL inside '$(pwd)/myagent'" &&\
-        git clone $AGENT_REPO_URL myagent;\
-    fi
-
 WORKDIR /home/myagent
-CMD ["/usr/local/bin/aea", "run"]
+
+COPY deploy-image/entrypoint.sh /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]

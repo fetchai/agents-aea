@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "Schema for the connection configuration file.",
+    "description": "Schema for the protocol configuration file.",
     "additionalProperties": false,
     "type": "object",
     "required": [
@@ -8,10 +8,7 @@
         "authors",
         "version",
         "license",
-        "url",
-        "class_name",
-        "supported_protocols",
-        "config"
+        "url"
     ],
     "properties": {
         "name": {"type": "string"},
@@ -19,13 +16,6 @@
         "version": {"type": "string"},
         "license": {"type": "string"},
         "url": {"type": "string"},
-        "class_name": {"type": "string"},
-        "supported_protocols": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {"type": "string"}
-        },
-        "config": {"type": "object"},
         "dependencies": {
             "type": "array",
             "uniqueItems": true,

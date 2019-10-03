@@ -22,11 +22,14 @@ import json
 import os
 import pprint
 
+import pytest
 import yaml
 from jsonschema import validate, Draft7Validator  # type: ignore
 
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
+    DEFAULT_SKILL_CONFIG_FILE
 from ..conftest import CUR_PATH, ROOT_DIR, AGENT_CONFIGURATION_SCHEMA, SKILL_CONFIGURATION_SCHEMA, \
-    CONNECTION_CONFIGURATION_SCHEMA
+    CONNECTION_CONFIGURATION_SCHEMA, PROTOCOL_CONFIGURATION_SCHEMA
 
 
 def test_agent_configuration_schema_is_valid_wrt_draft_07():
@@ -55,17 +58,68 @@ def test_validate_agent_config():
     validate(instance=agent_config_file, schema=agent_config_schema)
 
 
-def test_validate_skill_config():
-    """Test that the validation of the skill configuration file works correctly."""
-    skill_config_schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
-    skill_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_skill", "skill.yaml")))
-    pprint.pprint(skill_config_file)
-    validate(instance=skill_config_file, schema=skill_config_schema)
+class TestProtocolsSchema:
+    """Test that the protocol configuration files provided by the framework are compliant to the schema."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.protocol_config_schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
+
+    @pytest.mark.parametrize("protocol_path",
+                             [
+                                 os.path.join(ROOT_DIR, "aea", "protocols", "default"),
+                                 os.path.join(ROOT_DIR, "aea", "protocols", "fipa"),
+                                 os.path.join(ROOT_DIR, "aea", "protocols", "oef"),
+                                 os.path.join(ROOT_DIR, "aea", "protocols", "scaffold"),
+                                 os.path.join(ROOT_DIR, "packages", "protocols", "gym"),
+                                 os.path.join(ROOT_DIR, "packages", "protocols", "tac"),
+                             ])
+    def test_validate_protocol_config(self, protocol_path):
+        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
+        protocol_config_file = yaml.safe_load(open(os.path.join(protocol_path, DEFAULT_PROTOCOL_CONFIG_FILE)))
+        validate(instance=protocol_config_file, schema=self.protocol_config_schema)
 
 
-def test_validate_connection_config():
-    """Test that the validation of the connection configuration file works correctly."""
-    connection_config_schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
-    connection_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "dummy_connection", "connection.yaml")))
-    pprint.pprint(connection_config_file)
-    validate(instance=connection_config_file, schema=connection_config_schema)
+class TestConnectionsSchema:
+    """Test that the connection configuration files provided by the framework are compliant to the schema."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.connection_config_schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
+
+    @pytest.mark.parametrize("connection_path",
+                             [
+                                 os.path.join(ROOT_DIR, "aea", "connections", "local"),
+                                 os.path.join(ROOT_DIR, "aea", "connections", "oef"),
+                                 os.path.join(ROOT_DIR, "aea", "connections", "scaffold"),
+                                 os.path.join(ROOT_DIR, "packages", "connections", "gym"),
+                                 os.path.join(CUR_PATH, "data", "dummy_connection")
+                             ])
+    def test_validate_connection_config(self, connection_path):
+        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
+        connection_config_file = yaml.safe_load(open(os.path.join(connection_path, DEFAULT_CONNECTION_CONFIG_FILE)))
+        validate(instance=connection_config_file, schema=self.connection_config_schema)
+
+
+class TestSkillsSchema:
+    """Test that the skill configuration files provided by the framework are compliant to the schema."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.skill_config_schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
+
+    @pytest.mark.parametrize("skill_path",
+                             [
+                                 os.path.join(ROOT_DIR, "aea", "skills", "error"),
+                                 os.path.join(ROOT_DIR, "aea", "skills", "scaffold"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "echo"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "gym"),
+                                 os.path.join(CUR_PATH, "data", "dummy_skill")
+                             ])
+    def test_validate_skill_config(self, skill_path):
+        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
+        skill_config_file = yaml.safe_load(open(os.path.join(skill_path, DEFAULT_SKILL_CONFIG_FILE)))
+        validate(instance=skill_config_file, schema=self.skill_config_schema)
