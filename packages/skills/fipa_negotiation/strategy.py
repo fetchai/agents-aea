@@ -22,13 +22,16 @@
 
 from enum import Enum
 import random
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.protocols.oef.models import Query, Description
 from aea.protocols.transaction.message import TransactionMessage
 
-from fipa_negotiation_skill.helpers import build_goods_description, build_goods_query
+if TYPE_CHECKING:
+    from packages.skills.fipa_negotiation.helpers import build_goods_description, build_goods_query
+else:
+    from fipa_negotiation_skill.helpers import build_goods_description, build_goods_query
 
 
 ROUNDING_ADJUSTMENT = 0.01
@@ -120,7 +123,7 @@ class Strategy:
         :param good_holdings: a dictionary of current good holdings
         :return: a dictionary of quantities supplied
         """
-        supply = {}
+        supply = {}  # type: Dict[str, int]
         for good_pbk, quantity in good_holdings:
             supply[good_pbk] = quantity - 1 if quantity > 1 else 0
         return supply
@@ -132,7 +135,7 @@ class Strategy:
         :param good_holdings: a dictionary of current good holdings
         :return: a dictionary of quantities supplied
         """
-        demand = {}
+        demand = {}  # type: Dict[str, int]
         for good_pbk, quantity in good_holdings:
             demand[good_pbk] = 1
         return demand
@@ -154,7 +157,7 @@ class Strategy:
         query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), is_searching_for_sellers=is_searching_for_sellers)
         return query
 
-    def get_proposal_for_query(self, query: Query, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: float) -> Optional[Description]:
+    def get_proposal_for_query(self, query: Query, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: float) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
 
@@ -165,7 +168,7 @@ class Strategy:
 
         :return: a description
         """
-        candidate_proposals = self._generate_candidate_proposals(ownership_state_after_locks, is_seller)
+        candidate_proposals = self._generate_candidate_proposals(preferences, ownership_state_after_locks, is_seller, tx_fee)
         proposals = []
         for proposal in candidate_proposals:
             if not query.check(proposal): continue
@@ -187,14 +190,14 @@ class Strategy:
         """
         good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.good_holdings) if is_seller else self._demanded_goods(ownership_state_after_locks.good_holdings)
         share_of_tx_fee = round(tx_fee / 2.0, 2)
-        nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities}
+        nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities}  # type: Dict[str, int]
         proposals = []
         for good_pbk, quantity in good_pbk_to_quantities:
             if is_seller and quantity == 0: continue
             proposal_dict = nil_proposal_dict
             proposal_dict[good_pbk] = 1
             proposal = build_goods_description(good_pbk_to_quantities=proposal_dict, is_supply=is_seller)
-            delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict} if is_seller else proposal_dict
+            delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict} if is_seller else proposal_dict  # type: Dict[str, int]
             marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state_after_locks, delta_good_holdings)
             switch = -1 if is_seller else 1
             breakeven_price = round(marginal_utility_from_delta_good_holdings, 2) * switch

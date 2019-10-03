@@ -21,7 +21,7 @@
 
 import logging
 import pprint
-from typing import List, Optional, cast
+from typing import List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
@@ -33,8 +33,12 @@ from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.models import Query, Description
 from aea.protocols.transaction.message import TransactionMessage
 
-from fipa_negotiation_skill.dialogues import Dialogue
-from fipa_negotiation_skill.helpers import generate_transaction_id
+if TYPE_CHECKING:
+    from packages.skills.fipa_negotiation.dialogues import Dialogue
+    from packages.skills.fipa_negotiation.helpers import generate_transaction_id
+else:
+    from fipa_negotiation_skill.dialogues import Dialogue
+    from fipa_negotiation_skill.helpers import generate_transaction_id
 
 logger = logging.getLogger(__name__)
 
@@ -130,8 +134,12 @@ class FIPANegotiationHandler(Handler):
             transaction_msg = TransactionMessage(transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
+                                                 currency='FET',
+                                                 amount=proposal_description.values['amount'],
                                                  is_sender_buyer=not dialogue.is_seller,
-                                                 description=proposal_description)
+                                                 sender_tx_fee=1,
+                                                 counterparty_tx_fee=1,
+                                                 quantities_by_good_pbk=proposal_description.values['description'])
             self.context.transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
             logger.debug("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk,
                                                                   pprint.pformat({
@@ -163,8 +171,12 @@ class FIPANegotiationHandler(Handler):
             transaction_msg = TransactionMessage(transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
+                                                 currency='FET',
+                                                 amount=proposal_description.values['amount'],
                                                  is_sender_buyer=not dialogue.is_seller,
-                                                 description=proposal_description)
+                                                 sender_tx_fee=1,
+                                                 counterparty_tx_fee=1,
+                                                 quantities_by_good_pbk=proposal_description.values['description'])
             new_msg_id = cast(int, propose.get("id")) + 1
             if self.context.strategy.is_profitable_transaction(transaction_msg, dialogue):
                 logger.debug("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))

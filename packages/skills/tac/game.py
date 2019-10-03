@@ -20,11 +20,14 @@
 """This package contains a class representing the game."""
 from enum import Enum
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
-from aea.protocols.oef.models import Query, Constraint, GtEq
+from aea.protocols.oef.models import Query, Constraint, ConstraintType
 
-from tac_protocol.message import TACMessage
+if TYPE_CHECKING:
+    from packages.protocols.tac.message import TACMessage
+else:
+    from tac_protocol.message import TACMessage
 
 Address = str
 
@@ -180,15 +183,15 @@ class Game:
 
         :return: None
         """
-        assert tac_message.type == TACMessage.Type.GAME_DATA, "Wrong TACMessage for initialization of TAC game."
+        assert tac_message.get("type") == TACMessage.Type.GAME_DATA, "Wrong TACMessage for initialization of TAC game."
         assert controller_pbk == self.expected_controller_pbk, "TACMessage from unexpected controller."
         assert tac_message.get("version_id") == self.expected_version_id, "TACMessage for unexpected game."
-        self._game_configuration = GameConfiguration(tac_message.get("version_id"),
-                                                     tac_message.get("nb_agents"),
-                                                     tac_message.get("nb_goods"),
-                                                     tac_message.get("tx_fee"),
-                                                     tac_message.get("agent_pbk_to_name"),
-                                                     tac_message.get("good_pbk_to_name"),
+        self._game_configuration = GameConfiguration(cast(str, tac_message.get("version_id")),
+                                                     cast(int, tac_message.get("nb_agents")),
+                                                     cast(int, tac_message.get("nb_goods")),
+                                                     cast(float, tac_message.get("tx_fee")),
+                                                     cast(Dict[str, str], tac_message.get("agent_pbk_to_name")),
+                                                     cast(Dict[str, str], tac_message.get("good_pbk_to_name")),
                                                      controller_pbk)
 
     def update_expected_controller_pbk(self, controller_pbk: Address):
@@ -216,5 +219,5 @@ class Game:
 
         :return: the query
         """
-        query = Query([Constraint("version", GtEq(self.expected_version_id))])
+        query = Query([Constraint("version", ConstraintType("==", self.expected_version_id))])
         return query

@@ -23,12 +23,15 @@
 import datetime
 import logging
 from collections import defaultdict, deque
-from typing import Dict, Tuple, Deque
+from typing import Dict, Tuple, Deque, cast, TYPE_CHECKING
 
 from aea.decision_maker.base import OwnershipState
 from aea.protocols.transaction.message import TransactionMessage, TransactionId
 
-from fipa_negotiation_skill.dialogues import DialogueLabel
+if TYPE_CHECKING:
+    from packages.skills.fipa_negotiation.dialogues import DialogueLabel
+else:
+    from fipa_negotiation_skill.dialogues import DialogueLabel
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +163,7 @@ class Transactions(object):
 
         :return: None
         """
-        transaction_id = transaction_msg.transaction_id
+        transaction_id = cast(TransactionId, transaction_msg.get("transaction_id"))
         assert transaction_id not in self._locked_txs
         self._register_transaction_with_time(transaction_id)
         self._locked_txs[transaction_id] = transaction_msg
@@ -194,7 +197,7 @@ class Transactions(object):
 
         :return: the agent state with the locks applied to current state
         """
-        transaction_msgs = list(self.locked_txs_as_seller.values()) if is_seller else list(self.locked_txs_as_buyer.values())
+        transaction_msgs = list(self._locked_txs_as_seller.values()) if is_seller else list(self._locked_txs_as_buyer.values())
         ownershio_state_after_locks = ownership_state.apply(transaction_msgs)
         return ownershio_state_after_locks
 

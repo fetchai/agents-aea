@@ -18,12 +18,16 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a behaviour."""
+from typing import TYPE_CHECKING
 
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
 
-from tac_skill.game import GamePhase
+if TYPE_CHECKING:
+    from packages.skills.tac.game import GamePhase
+else:
+    from tac_skill.game import GamePhase
 
 
 class TACBehaviour(Behaviour):

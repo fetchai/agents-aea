@@ -20,16 +20,22 @@
 """This package contains a scaffold of a handler."""
 
 import logging
-from typing import List, cast
+from typing import List, cast, TYPE_CHECKING
 
 from aea.mail.base import Envelope
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer
 from aea.skills.base import Handler
 
-from tac_protocol.message import TACMessage
-from tac_protocol.serialization import TACSerializer
-from tac_skill.game import GamePhase
+if TYPE_CHECKING:
+    from packages.protocols.tac.message import TACMessage
+    from packages.protocols.tac.serialization import TACSerializer
+    from packages.skills.tac.game import GamePhase
+else:
+    from tac_protocol.message import TACMessage
+    from tac_protocol.serialization import TACSerializer
+    from tac_skill.game import GamePhase
+
 
 Address = str
 
@@ -195,6 +201,7 @@ class TACHandler(Handler):
         """
         tac_msg = TACSerializer().decode(envelope.message)
         tac_msg_type = TACMessage.Type(tac_msg.get("type"))
+        tac_msg = cast(TACMessage, tac_msg)
 
         logger.debug("[{}]: Handling controller response. type={}".format(self.context.agent_name, tac_msg_type))
         try:
@@ -242,7 +249,7 @@ class TACHandler(Handler):
         logger.error("[{}]: Received error from the controller. error_msg={}".format(self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)))
         if error_code == TACMessage.ErrorCode.TRANSACTION_NOT_VALID:
             start_idx_of_tx_id = len("Error in checking transaction: ")
-            transaction_id = tac_message.get("error_msg")[start_idx_of_tx_id:]
+            transaction_id = cast(str, tac_message.get("error_msg"))[start_idx_of_tx_id:]
             logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id))
 
     def _on_start(self, tac_message: TACMessage, controller_pbk: Address) -> None:

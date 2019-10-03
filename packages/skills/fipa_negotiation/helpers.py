@@ -19,11 +19,14 @@
 # ------------------------------------------------------------------------------
 
 """This class contains the helpers for FIPA negotiation."""
-from typing import Dict, List
+from typing import Dict, List, TYPE_CHECKING
 
-from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint
+from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or
 
-from fipa_negotiation_skill.dialogues import DialogueLabel
+if TYPE_CHECKING:
+    from packages.skills.fipa_negotiation.dialogues import DialogueLabel
+else:
+    from fipa_negotiation_skill.dialogues import DialogueLabel
 
 Address = str
 TransactionId = str
@@ -85,8 +88,8 @@ def build_goods_query(good_pbks: List[str], is_searching_for_sellers: bool) -> Q
 
     :return: the query
     """
-    data_model = build_goods_datamodel(good_pbks, is_supply=is_searching_for_sellers)
-    constraints = [Constraint(good_pbk, GtEq(1)) for good_pbk in good_pbks]
+    data_model = build_goods_datamodel(good_pbks, currency='FET', is_supply=is_searching_for_sellers)
+    constraints = [Constraint(good_pbk, ConstraintType(">=", 1)) for good_pbk in good_pbks]
 
     if len(good_pbks) > 1:
         constraints = [Or(constraints)]
@@ -120,8 +123,8 @@ def dialogue_label_from_transaction_id(agent_pbk: Address, transaction_id: Trans
     :param transaction_id: the transaction id
     :return: a dialogue label
     """
-    buyer_pbk, seller_pbk, dialogue_id, dialogue_starter_pbk = transaction_id.split('_')
-    dialogue_id = int(dialogue_id)
+    buyer_pbk, seller_pbk, dialogue_id_str, dialogue_starter_pbk = transaction_id.split('_')
+    dialogue_id = int(dialogue_id_str)
     if agent_pbk == buyer_pbk:
         dialogue_opponent_pbk = seller_pbk
     else:

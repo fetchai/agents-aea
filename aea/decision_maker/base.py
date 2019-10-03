@@ -184,7 +184,12 @@ class Preferences:
         score = goods_score + currency_score
         return score
 
-    def marginal_utility(self) -> float:
+    def marginal_utility(self, ownership_state: OwnershipState, delta_good_holdings: GoodHoldings) -> float:
+        """
+        Compute the marginal utility.
+
+        :return: the marginal utility score
+        """
         pass
 
     def get_score_diff_from_transaction(self, ownership_state: OwnershipState, tx_message: TransactionMessage) -> float:
