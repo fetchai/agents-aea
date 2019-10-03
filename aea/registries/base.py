@@ -192,7 +192,7 @@ class HandlerRegistry(Registry):
 
         :return: None
         """
-        self._handlers = {}  # type: Dict[ProtocolId, Dict[SkillId, List[Handler]]]
+        self._handlers = {}  # type: Dict[ProtocolId, Dict[SkillId, Handler]]
 
     def register(self, ids: Tuple[None, SkillId], handlers: List[Handler]) -> None:
         """
@@ -207,7 +207,7 @@ class HandlerRegistry(Registry):
             protocol_id = cast(str, handler.SUPPORTED_PROTOCOL)
             if protocol_id in self._handlers.keys():
                 logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
-            self._handlers.setdefault(protocol_id, {}).setdefault(skill_id, []).extend(handlers)
+            self._handlers.setdefault(protocol_id, {})[skill_id] = handler
 
     def unregister(self, skill_id: SkillId) -> None:
         """
@@ -234,9 +234,9 @@ class HandlerRegistry(Registry):
             return None
         else:
             # TODO: introduce a filter class which intelligently selects the appropriate handler.
-            return [h for handlers in result.values() for h in handlers]
+            return [handler for handler in result.values()]
 
-    def fetch_by_skill(self, protocol_id: ProtocolId, skill_id: SkillId) -> Optional[List[Handler]]:
+    def fetch_by_skill(self, protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]:
         """
         Fetch the handler for the protocol_id and skill id.
 
@@ -257,8 +257,8 @@ class HandlerRegistry(Registry):
         else:
             result = []
             for skill_id_to_handler_dict in self._handlers.values():
-                for handlers in skill_id_to_handler_dict.values():
-                    result.extend(handlers)
+                for handler in skill_id_to_handler_dict.values():
+                    result.append(handler)
             return result
 
     def teardown(self) -> None:
@@ -269,9 +269,8 @@ class HandlerRegistry(Registry):
         """
         if self._handlers.values() is not None:
             for skill_id_to_handler_dict in self._handlers.values():
-                for handlers in skill_id_to_handler_dict.values():
-                    for hdlr in handlers:
-                        hdlr.teardown()
+                for handler in skill_id_to_handler_dict.values():
+                    handler.teardown()
         self._handlers = {}
 
 

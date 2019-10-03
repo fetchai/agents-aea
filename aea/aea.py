@@ -126,11 +126,9 @@ class AEA(Agent):
         """
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
-        handlers = self.resources.handler_registry.fetch_by_skill("default", "error")
-        assert handlers is not None, "ErrorHandler not initialized"
-        assert len(handlers) == 1
-        error_handler = handlers[0]
+        error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")
         error_handler = cast(ErrorHandler, error_handler)
+        assert error_handler is not None, "ErrorHandler not initialized"
 
         if protocol is None:
             error_handler.send_unsupported_protocol(envelope)
