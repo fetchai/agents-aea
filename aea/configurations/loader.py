@@ -27,7 +27,7 @@ from typing import TextIO, Type, TypeVar, Generic
 
 import jsonschema
 import yaml
-from jsonschema import validate, Draft7Validator
+from jsonschema import Draft7Validator
 
 from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig
 
