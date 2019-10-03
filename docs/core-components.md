@@ -19,7 +19,7 @@ An `Envelope` is the core object with which agents communicate. It is a vehicle 
 
 Skills deliver economic value to the AEA by allowing agents to encapsulate and call any kind of code. They encapsulate the abstract base classes `Handler`, `Behaviour`, and `Task`.
 
-* `Handler`: each skill has a single `Handler` which is responsible for the registered protocol messaging. Handlers implement reactive behaviour. By understanding the requirements contained in an `Envelope`, the `Handler` reacts appropriately to message requests. 
+* `Handler`: each skill has one or more `Handler` objects responsible for the registered protocol messaging. Handlers implement reactive behaviour. By understanding the requirements contained in an `Envelope`, the `Handler` reacts appropriately to message requests. 
 * `Behaviour`: one or more `Behaviours` encapsulate sequences of actions that cause interactions with other agents initiated by the framework. Behaviours implement proactive behaviour.
 * `Task`: one or more Tasks encapsulate background work internal to the agent.
 

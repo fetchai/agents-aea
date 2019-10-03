@@ -124,9 +124,15 @@ def send(self, envelope: Envelope):
 
 ## Envelope
 
-An `Envelope` wraps messages. It travels from `OutBox` to agent and back to `InBox` in the `MailBox` via a protocol connection.
+An `Envelope` wraps messages. It travels from `OutBox` to another agent. `Envelope` objects sent from other agents arrive in the `InBox` via a protocol connection.
 
-Construct an `Envelope` object with the `to`, `sender`, `protocol_id`, and `message` parameters.
+An `Envelope` objects has four instance variables.
+
+* `to`: an `Address` object defining the recipient agent.
+* `sender`: an `Address` object defining the sender agent.
+* `protocol_id`: the id of the protocol.
+* `message`: the message in bytes.
+
 <!--
 ``` python
 def __init__(self, to: Address, sender: Address, protocol_id: ProtocolId, message: bytes):
@@ -143,6 +149,15 @@ def __init__(self, to: Address, sender: Address, protocol_id: ProtocolId, messag
         self._message = message
 ```
 -->
+
+## Launching connections
+
+### `oef`
+
+* Run a launcher script such as <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/oef/launch.py" target=_blank>this one</a> which pulls and runs an `oef` docker image.
+* Connect directly to a running `oef` via a given `URL:PORT`.
+
+### tbc
 
 <br />
 

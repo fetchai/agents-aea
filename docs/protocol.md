@@ -81,10 +81,7 @@ class OEFErrorOperation(Enum):
 ```
 A `models.py` module is provided by the `oef` protocol which includes classes and methods commonly required by OEF agents. These includes a class for serialising json and classes for implementing the OEF query language such as `Attribute`, `Query`, etc. 
 
-### Launch an `oef`
 
-* Run a launcher script such as <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/oef/launch.py" target=_blank>this one</a> which pulls and runs an `oef` docker image.
-* Connect directly to a running `oef` via a given `URL:PORT`.
 
 
 ## `fipa` protocol

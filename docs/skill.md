@@ -68,7 +68,7 @@ It also details the protocol type.
 
 In the future, this file will point to shared modules which allow agent communication with custom classes.
 
-``` json
+``` yaml
 name: echo
 authors: Fetch.AI Limited
 version: 0.1.0
@@ -87,6 +87,12 @@ handler:
 tasks:
   - task:
       class_name: EchoTask
+      args:
+        foo: bar
+        bar: foo
+dependencies:
+  - dependency:
+      class_name: EchoDependency
       args:
         foo: bar
         bar: foo
