@@ -23,7 +23,7 @@ from enum import Enum
 from typing import Optional, Union
 
 from aea.protocols.base import Message
-from aea.protocols.oef.models import Description
+from aea.protocols.oef.models import Description, Query
 
 
 class FIPAMessage(Message):
@@ -71,7 +71,7 @@ class FIPAMessage(Message):
             performative = FIPAMessage.Performative(self.get("performative"))
             if performative == FIPAMessage.Performative.CFP:
                 query = self.get("query")
-                assert isinstance(query, dict) or isinstance(query, bytes) or query is None
+                assert isinstance(query, Query) or isinstance(query, bytes) or query is None
             elif performative == FIPAMessage.Performative.PROPOSE:
                 proposal = self.get("proposal")
                 assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore

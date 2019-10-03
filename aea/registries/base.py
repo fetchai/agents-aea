@@ -194,7 +194,7 @@ class HandlerRegistry(Registry):
         """
         self._handlers = {}  # type: Dict[ProtocolId, Dict[SkillId, Handler]]
 
-    def register(self, ids: Tuple[ProtocolId, SkillId], handler: Handler) -> None:
+    def register(self, ids: Tuple[None, SkillId], handlers: List[Handler]) -> None:
         """
         Register a handler.
 
@@ -202,12 +202,14 @@ class HandlerRegistry(Registry):
         :param handler: the handler.
         :return: None
         """
-        protocol_id, skill_id = ids
-        if protocol_id in self._handlers.keys():
-            logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
-        if protocol_id not in self._handlers.keys():
-            self._handlers[protocol_id] = {}
-        self._handlers[protocol_id][skill_id] = handler
+        skill_id = ids[1]
+        for handler in handlers:
+            protocol_id = handler.SUPPORTED_PROTOCOL
+            if protocol_id in self._handlers.keys():
+                logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
+            if protocol_id not in self._handlers.keys():
+                self._handlers[protocol_id] = {}
+            self._handlers[protocol_id][skill_id] = handler
 
     def unregister(self, skill_id: SkillId) -> None:
         """
@@ -447,8 +449,7 @@ class Resources(object):
         skill_id = skill.config.name
         self._skills[skill_id] = skill
         if skill.handlers is not None:
-            for protocol_id in skill.config.protocols:
-                self.handler_registry.register((protocol_id, skill_id), cast(List[Handler], skill.handlers))
+            self.handler_registry.register((None, skill_id), cast(List[Handler], skill.handlers))
         if skill.behaviours is not None:
             self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], skill.behaviours))
         if skill.tasks is not None:
