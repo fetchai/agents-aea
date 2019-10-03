@@ -25,6 +25,7 @@ import os
 import re
 import sys
 from abc import ABC, abstractmethod
+from pathlib import Path
 from queue import Queue
 from typing import Optional, List, Dict, Any, cast
 
@@ -353,28 +354,45 @@ class SharedClass(ABC):
         :param skill_context: the skill context
         :return: a list of SharedClass.
         """
+        instances = []
         shared_classes = []
-        shared_class_spec = importlib.util.spec_from_file_location("tasks", location=path)
-        shared_class_module = importlib.util.module_from_spec(shared_class_spec)
-        shared_class_spec.loader.exec_module(shared_class_module)  # type: ignore
-        classes = inspect.getmembers(task_module, inspect.isclass)
-        tasks_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
 
-        name_to_class = dict(tasks_classes)
-        for task_config in shared_classes_configs:
-            task_class_name = task_config.class_name
-            logger.debug("Processing task {}".format(task_class_name))
+        shared_classes_names = set(config.class_name for config in shared_classes_configs)
+
+        # get all Python modules except the standard ones
+        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "skill.yaml", "__init__.py"])
+        modules = set(filter(lambda x: not re.match(ignore_regex, x.name), Path().iterdir()))
+
+        for module in modules:
+            shared_class_spec = importlib.util.spec_from_file_location(module, location=path)
+            shared_class_module = importlib.util.module_from_spec(shared_class_spec)
+            shared_class_spec.loader.exec_module(shared_class_module)  # type: ignore
+            classes = inspect.getmembers(shared_class_module, inspect.isclass)
+            shared_classes = list(
+                filter(
+                    lambda x:
+                        all(re.match(shared, x[0]) for shared in shared_classes_names)
+                        and
+                        SharedClass in inspect.getmro(x[1]),
+                    classes)
+            )
+            shared_classes.extend(shared_classes)
+
+        name_to_class = dict(shared_classes)
+        for shared_class_config in shared_classes_configs:
+            task_class_name = shared_class_config.class_name
+            logger.debug("Processing shared class {}".format(task_class_name))
             shared_class = name_to_class.get(task_class_name, None)
             if shared_class is None:
                 logger.warning("SharedClass '{}' cannot be found.".format(shared_class))
             else:
-                args = task_config.args
+                args = shared_class_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
                 args['skill_context'] = skill_context
-                task = task_class(**args)
-                tasks.append(task)
+                shared_class_instance = shared_class(**args)
+                instances.append(shared_class_instance)
 
-        return tasks
+        return instances
 
 
 class Skill:

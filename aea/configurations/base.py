@@ -299,7 +299,7 @@ class SharedClassConfig(Configuration):
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
         class_name = cast(str, obj.get("class_name"))
-        return TaskConfig(
+        return SharedClassConfig(
             class_name=class_name,
             args=obj.get("args")
         )
