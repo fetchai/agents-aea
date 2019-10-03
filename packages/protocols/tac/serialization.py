@@ -20,12 +20,17 @@
 
 """Serialization for the TAC protocol."""
 
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, cast, TYPE_CHECKING
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from tac_protocol import tac_pb2
-from tac_protocol.message import TACMessage  # type: ignore
+
+if TYPE_CHECKING:
+    from packages.protocols.tac import tac_pb2
+    from packages.protocols.tac.message import TACMessage
+else:
+    from tac_protocol import tac_pb2
+    from tac_protocol.message import TACMessage
 
 
 def _from_dict_to_pairs(d):
