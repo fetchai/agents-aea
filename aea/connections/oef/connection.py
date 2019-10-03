@@ -226,7 +226,7 @@ class OEFChannel(OEFAgent, Channel):
         """
         try:
             query = pickle.loads(query)
-        except:
+        except Exception:
             pass
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
