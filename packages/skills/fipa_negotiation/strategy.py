@@ -197,7 +197,10 @@ class Strategy:
             proposal_dict = nil_proposal_dict
             proposal_dict[good_pbk] = 1
             proposal = build_goods_description(good_pbk_to_quantities=proposal_dict, is_supply=is_seller)
-            delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict} if is_seller else proposal_dict  # type: Dict[str, int]
+            if is_seller:
+                delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict}  # type: Dict[str, int]
+            else
+                delta_good_holdings = proposal_dict
             marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state_after_locks, delta_good_holdings)
             switch = -1 if is_seller else 1
             breakeven_price = round(marginal_utility_from_delta_good_holdings, 2) * switch

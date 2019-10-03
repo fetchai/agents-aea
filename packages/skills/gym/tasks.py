@@ -20,12 +20,17 @@
 """This module contains the tasks for the 'gym' skill."""
 from queue import Queue
 from threading import Thread
+from typing import TYPE_CHECKING
 
 
 from aea.skills.base import Task
 
-from gym_skill.helpers import ProxyEnv
-from gym_skill.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
+if TYPE_CHECKING:
+    from packages.skills.gym.helpers import ProxyEnv
+    from packages.skills.gym.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
+else:
+    from gym_skill.helpers import ProxyEnv
+    from gym_skill.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
 
 
 class GymTask(Task):

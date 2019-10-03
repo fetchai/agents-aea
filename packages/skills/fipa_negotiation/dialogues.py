@@ -92,9 +92,9 @@ class Dialogue(BaseDialogue):
         return self._is_seller
 
     @property
-    def role(self) -> str:
+    def role(self) -> Dialogue.AgentRole:
         """Get role of agent in dialogue."""
-        return Dialogue.AgentRole(self._role)
+        return self._role
 
     def is_expecting_propose(self) -> bool:
         """

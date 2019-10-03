@@ -204,7 +204,7 @@ class HandlerRegistry(Registry):
         """
         skill_id = ids[1]
         for handler in handlers:
-            protocol_id = handler.SUPPORTED_PROTOCOL
+            protocol_id = cast(str, handler.SUPPORTED_PROTOCOL)
             if protocol_id in self._handlers.keys():
                 logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
             if protocol_id not in self._handlers.keys():
