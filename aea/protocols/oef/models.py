@@ -247,6 +247,9 @@ class ConstraintType:
         else:
             raise ValueError("Constraint type not recognized.")
 
+    def __eq__(self, other):
+        """Check equality with another object."""
+        return isinstance(other, ConstraintType) and self.value == other.value and self.type == other.type
 
 class ConstraintExpr(ABC):
     """Implementation of the constraint language to query the OEF node."""
