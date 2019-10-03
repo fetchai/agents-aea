@@ -64,7 +64,7 @@ aea run --connection gym
 You will see the gym training logs.
 
 
-<center>![AEA Visdom UI](assets/gym-training.png)</center>
+<center>![AEA gym training logs](assets/gym-training.png)</center>
 
 
 ### Delete the agent

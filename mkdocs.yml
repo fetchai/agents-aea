@@ -29,10 +29,10 @@ nav:
     - AEA quick start: 'quickstart.md'
     - Developer guide:
       - "Step by step": 'steps.md'
-      - "Scaffolding": 'scaffolding.md'
-      - "Connection": 'connection.md'
-      - "Protocol": 'protocol.md'
       - "Skill": 'skill.md'
+      - "Protocol": 'protocol.md'
+      - "Connection": 'connection.md'
+      - "Scaffolding": 'scaffolding.md'
       - CLI:
          - "CLI tool": 'cli-how-to.md'
          - "Commands": 'cli-commands.md'
@@ -41,6 +41,7 @@ nav:
     - Demos:
       - "AEA gym skill": 'gym-skill.md'
       - "Gym efficiency demo": 'gym-plugin.md'
+      - "FIPA skill": 'fipa-skill.md'
       - "TAC skill": 'tac-skill.md'
       - "Transport app skill": 'transport.md'
       - "Buy/sell game skill": 'buy-sell.md'
