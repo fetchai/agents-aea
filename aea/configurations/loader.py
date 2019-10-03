@@ -67,5 +67,5 @@ class ConfigLoader(Generic[T]):
         :return: None
         """
         result = configuration.json
-        self.validator.validate(instance=result, schema=self.schema)
+        self.validator.validate(instance=result)
         yaml.safe_dump(result, fp)
