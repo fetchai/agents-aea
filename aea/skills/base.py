@@ -225,7 +225,7 @@ class Handler(ABC):
         :return: an handler, or None if the parsing fails.
         """
         handlers = []
-        handler_spec = importlib.util.spec_from_file_location("handler", location=path)
+        handler_spec = importlib.util.spec_from_file_location("handlers", location=path)
         handler_module = importlib.util.module_from_spec(handler_spec)
         handler_spec.loader.exec_module(handler_module)  # type: ignore
         classes = inspect.getmembers(handler_module, inspect.isclass)
@@ -360,29 +360,30 @@ class SharedClass(ABC):
         shared_classes_names = set(config.class_name for config in shared_classes_configs)
 
         # get all Python modules except the standard ones
-        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "skill.yaml", "__init__.py"])
-        modules = set(filter(lambda x: not re.match(ignore_regex, x.name), Path().iterdir()))
+        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "skill.yaml", "__.*"])
+        module_paths = set(map(str, filter(lambda x: not re.match(ignore_regex, x.name), Path(path).iterdir())))
 
-        for module in modules:
-            shared_class_spec = importlib.util.spec_from_file_location(module, location=path)
+        for module_path in module_paths:
+            module_name = module_path.replace(".py", "")
+            shared_class_spec = importlib.util.spec_from_file_location(module_name, location=module_path)
             shared_class_module = importlib.util.module_from_spec(shared_class_spec)
             shared_class_spec.loader.exec_module(shared_class_module)  # type: ignore
             classes = inspect.getmembers(shared_class_module, inspect.isclass)
-            shared_classes = list(
+            filtered_classes = list(
                 filter(
                     lambda x:
-                        all(re.match(shared, x[0]) for shared in shared_classes_names)
+                        any(re.match(shared, x[0]) for shared in shared_classes_names)
                         and
                         SharedClass in inspect.getmro(x[1]),
                     classes)
             )
-            shared_classes.extend(shared_classes)
+            shared_classes.extend(filtered_classes)
 
         name_to_class = dict(shared_classes)
         for shared_class_config in shared_classes_configs:
-            task_class_name = shared_class_config.class_name
-            logger.debug("Processing shared class {}".format(task_class_name))
-            shared_class = name_to_class.get(task_class_name, None)
+            shared_class_name = shared_class_config.class_name
+            logger.debug("Processing shared class {}".format(shared_class_name))
+            shared_class = name_to_class.get(shared_class_name, None)
             if shared_class is None:
                 logger.warning("SharedClass '{}' cannot be found.".format(shared_class))
             else:
@@ -391,7 +392,7 @@ class SharedClass(ABC):
                 args['skill_context'] = skill_context
                 shared_class_instance = shared_class(**args)
                 instances.append(shared_class_instance)
-
+                setattr(skill_context, shared_class_name.lower(), shared_class_instance)
         return instances
 
 
@@ -441,7 +442,7 @@ class Skill:
             return None
 
         skill_module = importlib.util.module_from_spec(skills_spec)
-        sys.modules[skills_spec.name + "_skill"] = skill_module
+        sys.modules[skill_config.name + "_skill"] = skill_module
         skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
@@ -454,9 +455,9 @@ class Skill:
         tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
         tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
         shared_classes_configurations = list(dict(skill_config.shared_classes.read_all()).values())
-        shared_classes = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
+        shared_classes_instances = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
 
-        skill = Skill(skill_config, skill_context, handlers, behaviours, tasks, shared_classes)
+        skill = Skill(skill_config, skill_context, handlers, behaviours, tasks, shared_classes_instances)
         skill_context._skill = skill
 
         return skill

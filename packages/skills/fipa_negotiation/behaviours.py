@@ -37,7 +37,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
     def __init__(self, **kwargs):
         """Initialize the behaviour."""
-        self._services_interval = kwargs.pop('services_interval')  # type: int
+        self._services_interval = kwargs.pop('services_interval', 5)  # type: int
         super().__init__(**kwargs)
         self.active = True
         self._last_update_time = datetime.datetime.now()  # type: datetime.datetime

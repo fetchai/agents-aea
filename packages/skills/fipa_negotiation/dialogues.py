@@ -37,6 +37,7 @@ from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.oef.models import Query
+from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
     from packages.skills.fipa_negotiation.helpers import DEMAND_DATAMODEL_NAME
@@ -73,7 +74,7 @@ class Dialogue(BaseDialogue):
         SELLER = 'seller'
         BUYER = 'buyer'
 
-    def __init__(self, dialogue_label: DialogueLabel, is_seller: bool) -> None:
+    def __init__(self, dialogue_label: DialogueLabel, is_seller: bool, **kwargs) -> None:
         """
         Initialize a dialogue label.
 
@@ -92,7 +93,7 @@ class Dialogue(BaseDialogue):
         return self._is_seller
 
     @property
-    def role(self) -> 'Dialogue'.AgentRole:
+    def role(self) -> 'Dialogue.AgentRole':
         """Get role of agent in dialogue."""
         return self._role
 
@@ -196,16 +197,17 @@ class DialogueStats(object):
             self._other_initiated[end_state] += 1
 
 
-class Dialogues(BaseDialogues):
+class Dialogues(BaseDialogues, SharedClass):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Initialize dialogues.
 
         :return: None
         """
         BaseDialogues.__init__(self)
+        SharedClass.__init__(self, **kwargs)
         self._dialogues_as_seller = {}  # type: Dict[DialogueLabel, Dialogue]
         self._dialogues_as_buyer = {}  # type: Dict[DialogueLabel, Dialogue]
         self._dialogue_stats = DialogueStats()

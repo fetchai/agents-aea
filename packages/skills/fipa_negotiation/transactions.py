@@ -27,6 +27,7 @@ from typing import Dict, Tuple, Deque, cast, TYPE_CHECKING
 
 from aea.decision_maker.base import OwnershipState
 from aea.protocols.transaction.message import TransactionMessage, TransactionId
+from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
     from packages.skills.fipa_negotiation.dialogues import DialogueLabel
@@ -38,11 +39,12 @@ logger = logging.getLogger(__name__)
 MESSAGE_ID = int
 
 
-class Transactions(object):
+class Transactions(SharedClass):
     """Class to handle pending transaction proposals/acceptances and locked transactions."""
 
-    def __init__(self, pending_transaction_timeout: int) -> None:
+    def __init__(self, pending_transaction_timeout: int, **kwargs) -> None:
         """Initialize the transactions."""
+        super().__init__(**kwargs)
         self._pending_proposals = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
         self._pending_initial_acceptances = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
         self._pending_transaction_timeout = pending_transaction_timeout

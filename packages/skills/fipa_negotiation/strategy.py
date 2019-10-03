@@ -27,6 +27,7 @@ from typing import Dict, Optional, TYPE_CHECKING
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.protocols.oef.models import Query, Description
 from aea.protocols.transaction.message import TransactionMessage
+from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
     from packages.skills.fipa_negotiation.helpers import build_goods_description, build_goods_query
@@ -53,10 +54,10 @@ class SearchFor(Enum):
     BOTH = 'both'
 
 
-class Strategy:
+class Strategy(SharedClass):
     """This class defines an abstract strategy for the agent."""
 
-    def __init__(self, register_as: RegisterAs = RegisterAs.BOTH, search_for: SearchFor = SearchFor.BOTH, is_world_modeling: bool = False) -> None:
+    def __init__(self, register_as: RegisterAs = RegisterAs.BOTH, search_for: SearchFor = SearchFor.BOTH, is_world_modeling: bool = False, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -66,6 +67,7 @@ class Strategy:
 
         :return: None
         """
+        super().__init__(**kwargs)
         self._register_as = register_as
         self._search_for = search_for
         self._is_world_modeling = is_world_modeling

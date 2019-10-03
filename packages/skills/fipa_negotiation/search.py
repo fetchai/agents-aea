@@ -21,12 +21,15 @@
 
 from typing import Set
 
+from aea.skills.base import SharedClass
 
-class Search:
+
+class Search(SharedClass):
     """This class deals with the search state."""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """Instantiate the search class."""
+        super().__init__(**kwargs)
         self._id = 0
         self.ids_for_sellers = set()  # type: Set[int]
         self.ids_for_buyers = set()  # type: Set[int]

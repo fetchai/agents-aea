@@ -301,7 +301,7 @@ class SharedClassConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return SharedClassConfig(
             class_name=class_name,
-            args=obj.get("args")
+            **obj.get("args", {})
         )
 
 
