@@ -372,9 +372,7 @@ class SharedClass(ABC):
             filtered_classes = list(
                 filter(
                     lambda x:
-                        any(re.match(shared, x[0]) for shared in shared_classes_names)
-                        and
-                        SharedClass in inspect.getmro(x[1]),
+                        any(re.match(shared, x[0]) for shared in shared_classes_names) and SharedClass in inspect.getmro(x[1]),
                     classes)
             )
             shared_classes.extend(filtered_classes)
