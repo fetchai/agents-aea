@@ -38,7 +38,7 @@ class FIPAHandler(Handler):
     SUPPORTED_PROTOCOL = 'fipa'  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
-        """Initiliase the handler"""
+        """Initiliase the handler."""
         super().__init__(**kwargs)
         self.maxPrice = 2
         self.message_id = 1
@@ -122,7 +122,7 @@ class OEFHandler(Handler):
         self.agents = []
 
     def setup(self) -> None:
-        """Setup the handler """
+        """Call to setup the handler."""
         pass
 
     def handle_envelope(self, envelope: Envelope) -> None:
@@ -165,6 +165,7 @@ class DefaultHandler(Handler):
     SUPPORTED_PROTOCOL = 'default'  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
+        """Call to setup the handler."""
         pass
 
     def handle_envelope(self, envelope: Envelope) -> None:
@@ -177,7 +178,7 @@ class DefaultHandler(Handler):
         print("I am receiving data !!!! ")
         msg = DefaultSerializer().decode(envelope.message)
         json_data = msg.get("content")
-        if json_data != None:
+        if json_data is not None:
             pp = pprint.PrettyPrinter(indent=4)
             pp.pprint(json_data.decode())
         else:

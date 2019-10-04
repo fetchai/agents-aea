@@ -29,7 +29,7 @@ class MyBuyBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
 
     def __init__(self, **kwargs):
-        """Initialise the class"""
+        """Initialise the class."""
         super().__init__(**kwargs)
         self.request_id = 0
 

@@ -33,7 +33,9 @@ else:
 
 class MyScaffoldBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
+
     def __init__(self, **kwargs):
+        """Initialise the behaviour."""
         super().__init__(**kwargs)
         self.registered = False
         self.data_model = WEATHER_STATION_DATAMODEL()
@@ -46,8 +48,6 @@ class MyScaffoldBehaviour(Behaviour):
         :return: None
         """
         pass
-
-
 
     def act(self) -> None:
         """
