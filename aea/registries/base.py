@@ -79,6 +79,14 @@ class Registry(ABC):
         """
 
     @abstractmethod
+    def setup(self) -> None:
+        """
+        Set up registry.
+
+        :return: None
+        """
+
+    @abstractmethod
     def teardown(self) -> None:
         """
         Teardown the registry.
@@ -145,6 +153,14 @@ class ProtocolRegistry(Registry):
                 self._add_protocol(directory, protocol_name)
             except Exception:
                 logger.exception("Not able to add protocol {}.".format(protocol_name))
+
+    def setup(self) -> None:
+        """
+        Teardown the registry.
+
+        :return: None
+        """
+        pass
 
     def teardown(self) -> None:
         """
@@ -261,6 +277,17 @@ class HandlerRegistry(Registry):
                     result.append(handler)
             return result
 
+    def setup(self) -> None:
+        """
+        Set up the handlers in the registry.
+
+        :return: None
+        """
+        if self._handlers.values() is not None:
+            for skill_id_to_handler_dict in self._handlers.values():
+                for handler in skill_id_to_handler_dict.values():
+                    handler.setup()
+
     def teardown(self) -> None:
         """
         Teardown the registry.
@@ -318,6 +345,16 @@ class BehaviourRegistry(Registry):
     def fetch_all(self) -> List[Behaviour]:
         """Fetch all the behaviours."""
         return [b for skill_behaviours in self._behaviours.values() for b in skill_behaviours]
+
+    def setup(self) -> None:
+        """
+        Set up the behaviours in the registry.
+
+        :return: None
+        """
+        for behaviours in self._behaviours.values():
+            for behaviour in behaviours:
+                behaviour.setup()
 
     def teardown(self) -> None:
         """
@@ -379,6 +416,16 @@ class TaskRegistry(Registry):
         :return: a list of tasks.
         """
         return [t for skill_tasks in self._tasks.values() for t in skill_tasks]
+
+    def setup(self) -> None:
+        """
+        Set up the tasks in the registry.
+
+        :return: None
+        """
+        for tasks in self._tasks.values():
+            for task in tasks:
+                task.setup()
 
     def teardown(self) -> None:
         """
@@ -460,6 +507,15 @@ class Resources(object):
         self.handler_registry.unregister(skill_id)
         self.behaviour_registry.unregister(skill_id)
         self.task_registry.unregister(skill_id)
+
+    def setup(self):
+        """
+        Set up the resources.
+
+        :return: None
+        """
+        for r in self._registries:
+            r.setup()
 
     def teardown(self):
         """

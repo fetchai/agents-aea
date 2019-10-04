@@ -31,6 +31,14 @@ else:
 class TransactionCleanUpTask(Task):
     """This class implements the cleanup of the transactions class."""
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def execute(self) -> None:
         """
         Implement the task execution.

@@ -25,6 +25,14 @@ from aea.skills.base import Behaviour
 class ErrorBehaviour(Behaviour):
     """This class implements the error behaviour."""
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def act(self) -> None:
         """
         Implement the act.

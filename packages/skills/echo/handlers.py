@@ -32,6 +32,10 @@ class EchoHandler(Handler):
         """Initialize the handler."""
         print("EchoHandler.__init__: arguments: {}".format(kwargs))
 
+    def setup(self) -> None:
+        """Set up the handler."""
+        print("Echo Handler: setup method called.")
+
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Handle envelopes.

@@ -31,6 +31,14 @@ class DummyTask(Task):
         self.nb_execute_called = 0
         self.nb_teardown_called = 0
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def execute(self) -> None:
         """Execute the task."""
         self.nb_execute_called += 1

@@ -30,6 +30,10 @@ class EchoTask(Task):
         """Initialize the task."""
         print("EchoTask.__init__: arguments: {}".format(kwargs))
 
+    def setup(self) -> None:
+        """Set up the task."""
+        print("Echo Task: setup method called.")
+
     def execute(self) -> None:
         """Execute the task."""
         print("Echo Task: execute method called.")
