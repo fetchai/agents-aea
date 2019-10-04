@@ -20,19 +20,12 @@
 """This package contains a scaffold of a behaviour."""
 import datetime
 import logging
-from typing import Optional, cast, TYPE_CHECKING
+from typing import Optional
 
 from aea.skills.base import Behaviour
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-
-if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.search import Search
-    from packages.skills.fipa_negotiation.strategy import Strategy
-else:
-    from fipa_negotiation_skill.search import Search
-    from fipa_negotiation_skill.strategy import Strategy
 
 DEFAULT_MSG_ID = 1
 
@@ -100,17 +93,16 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_registering_as_seller:
+        if self.context.strategy.is_registering_as_seller:
             logger.debug("[{}]: Updating service directory as seller with goods supplied.".format(self.context.agent_name))
-            goods_supplied_description = strategy.get_own_service_description(is_supply=True)
+            goods_supplied_description = self.context.strategy.get_own_service_description(is_supply=True)
             self._registered_goods_supplied_description = goods_supplied_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        if strategy.is_registering_as_buyer:
+        if self.context.strategy.is_registering_as_buyer:
             logger.debug("[{}]: Updating service directory as buyer with goods demanded.".format(self.context.agent_name))
-            goods_demanded_description = strategy.get_own_service_description(is_supply=False)
+            goods_demanded_description = self.context.strategy.get_own_service_description(is_supply=False)
             self._registered_goods_demanded_description = goods_demanded_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
@@ -127,29 +119,26 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_searching_for_sellers:
-            query = strategy.get_own_services_query(is_searching_for_sellers=True)
+        if self.context.strategy.is_searching_for_sellers:
+            query = self.context.strategy.get_own_services_query(is_searching_for_sellers=True)
             if query is None:
                 logger.warning("[{}]: Not searching the OEF for sellers because the agent demands no goods.".format(self.context.agent_name))
                 return None
             else:
                 logger.debug("[{}]: Searching for sellers which match the demand of the agent.".format(self.context.agent_name))
-                search = cast(Search, self.context.search)
-                search_id = search.get_next_id(is_searching_for_sellers=True)
+                search_id = self.context.search.get_next_id(is_searching_for_sellers=True)
 
                 msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
                 msg_bytes = OEFSerializer().encode(msg)
                 self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        if strategy.is_searching_for_buyers:
-            query = strategy.get_own_services_query(is_searching_for_sellers=False)
+        if self.context.strategy.is_searching_for_buyers:
+            query = self.context.strategy.get_own_services_query(is_searching_for_sellers=False)
             if query is None:
                 logger.warning("[{}]: Not searching the OEF for buyers because the agent supplies no goods.".format(self.context.agent_name))
                 return None
             else:
                 logger.debug("[{}]: Searching for buyers which match the supply of the agent.".format(self.context.agent_name))
-                search = cast(Search, self.context.search)
-                search_id = search.get_next_id(is_searching_for_sellers=False)
+                search_id = self.context.search.get_next_id(is_searching_for_sellers=False)
 
                 msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
                 msg_bytes = OEFSerializer().encode(msg)

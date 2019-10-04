@@ -18,14 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a task."""
-from typing import cast, TYPE_CHECKING
 
 from aea.skills.base import Task
-
-if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.transactions import Transactions
-else:
-    from fipa_negotiation_skill.transactions import Transactions
 
 
 class TransactionCleanUpTask(Task):
@@ -38,8 +32,7 @@ class TransactionCleanUpTask(Task):
         :param envelope: the envelope
         :return: None
         """
-        transactions = cast(Transactions, self.context.transactions)
-        transactions.cleanup_pending_transactions()
+        self.context.transactions.cleanup_pending_transactions()
 
     def teardown(self) -> None:
         """
@@ -47,5 +40,4 @@ class TransactionCleanUpTask(Task):
 
         :return: None
         """
-        transactions = cast(Transactions, self.context.transactions)
-        transactions.reset()
+        self.context.transactions.reset()

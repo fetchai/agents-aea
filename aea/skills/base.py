@@ -71,14 +71,19 @@ class SkillContext:
         return self._agent_context.decision_maker_message_queue
 
     @property
-    def ownership_state(self) -> OwnershipState:
+    def agent_ownership_state(self) -> OwnershipState:
         """Get ownership state."""
         return self._agent_context.ownership_state
 
     @property
-    def preferences(self) -> Preferences:
+    def agent_preferences(self) -> Preferences:
         """Get preferences."""
         return self._agent_context.preferences
+
+    @property
+    def agent_is_ready_to_pursuit_goals(self) -> bool:
+        """Get the goal pursuit readiness."""
+        return self._agent_context.is_ready_to_pursuit_goals
 
     @property
     def handlers(self) -> Optional[List['Handler']]:

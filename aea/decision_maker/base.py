@@ -20,6 +20,7 @@
 """This module contains the decision maker class."""
 
 import copy
+import logging
 import math
 from queue import Queue
 from typing import Dict, List, Optional, cast
@@ -38,6 +39,8 @@ ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
 QUANTITY_SHIFT = 100
 
+logger = logging.getLogger(__name__)
+
 
 class OwnershipState:
     """Represent the ownership state of an agent."""
@@ -54,7 +57,7 @@ class OwnershipState:
         :param currency_endowment: the currency endowment of the agent in this state.
         :param good_endowment: the good endowment of the agent in this state.
         """
-        # TODO: raise warning
+        logger.warning("Careful! OwnershipState is being updated!")
         self._currency_holdings = copy.copy(currency_endowment)
         self._good_holdings = copy.copy(good_endowment)
 
@@ -151,10 +154,9 @@ class Preferences:
         :param utility_params: the utility params for every asset.
         :param exchange_params: the exchange params.
         """
-        # TODO: raise warning
+        logger.warning("Careful! Preferences are being updated!")
         self._utility_params = utility_params
         self._exchange_params = exchange_params
-        self._quantity_shift = QUANTITY_SHIFT
 
     @property
     def utility_params(self) -> UtilityParams:
@@ -240,6 +242,7 @@ class DecisionMaker:
         self._message_queue = Queue()  # type: Queue
         self._ownership_state = OwnershipState()
         self._preferences = Preferences()
+        self._is_ready_to_pursuit_goals = False
 
     @property
     def message_queue(self) -> Queue:
@@ -260,6 +263,11 @@ class DecisionMaker:
     def preferences(self) -> Preferences:
         """Get preferences."""
         return self._preferences
+
+    @property
+    def is_ready_to_pursuit_goals(self) -> bool:
+        """Get readiness of agent to pursuit its goals."""
+        return self._is_ready_to_pursuit_goals
 
     def execute(self) -> None:
         """
@@ -310,7 +318,7 @@ class DecisionMaker:
         assert self._preferences is None, "Preferences already initialized."
         currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
         good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
-        self._ownership_state = OwnershipState(currency_endowment=currency_endowment, good_endowment=good_endowment)
+        self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
         utility_params = cast(UtilityParams, state_update_message.get("utility_params"))
         exchange_params = cast(ExchangeParams, state_update_message.get("exchange_params"))
-        self._preferences = Preferences(exchange_params=exchange_params, utility_params=utility_params)
+        self.preferences.init(exchange_params=exchange_params, utility_params=utility_params)

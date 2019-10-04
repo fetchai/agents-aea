@@ -33,7 +33,8 @@ class AgentContext:
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
-                 preferences: Preferences):
+                 preferences: Preferences,
+                 is_ready_to_pursuit_goals: bool):
         """
         Initialize an agent context.
 
@@ -43,6 +44,7 @@ class AgentContext:
         :param decision_maker_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
         :param preferences: the preferences of the agent
+        :param is_ready_to_pursuit_goals: whether the agent is ready to pursuit its goals
         """
         self._agent_name = agent_name
         self._public_key = public_key
@@ -50,6 +52,7 @@ class AgentContext:
         self._decision_maker_message_queue = decision_maker_message_queue
         self._ownership_state = ownership_state
         self._preferences = preferences
+        self._is_ready_to_pursuit_goals = is_ready_to_pursuit_goals
 
     @property
     def agent_name(self) -> str:
@@ -80,3 +83,8 @@ class AgentContext:
     def preferences(self) -> Preferences:
         """Get the preferences of the agent."""
         return self._preferences
+
+    @property
+    def is_ready_to_pursuit_goals(self) -> bool:
+        """Get the goal pursuit readiness."""
+        return self._is_ready_to_pursuit_goals

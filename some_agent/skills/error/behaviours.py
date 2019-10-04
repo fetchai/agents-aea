@@ -17,29 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
-from typing import cast, TYPE_CHECKING
+"""This package contains the error behaviours."""
 
-from aea.skills.base import Task
-
-if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.transactions import Transactions
-else:
-    from fipa_negotiation_skill.transactions import Transactions
+from aea.skills.base import Behaviour
 
 
-class TransactionCleanUpTask(Task):
-    """This class implements the cleanup of the transactions class."""
+class ErrorBehaviour(Behaviour):
+    """This class implements the error behaviour."""
 
-    def execute(self) -> None:
+    def act(self) -> None:
         """
-        Implement the task execution.
+        Implement the act.
 
-        :param envelope: the envelope
         :return: None
         """
-        transactions = cast(Transactions, self.context.transactions)
-        transactions.cleanup_pending_transactions()
+        pass
 
     def teardown(self) -> None:
         """
@@ -47,5 +39,4 @@ class TransactionCleanUpTask(Task):
 
         :return: None
         """
-        transactions = cast(Transactions, self.context.transactions)
-        transactions.reset()
+        pass
