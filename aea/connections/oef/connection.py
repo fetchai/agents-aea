@@ -165,7 +165,7 @@ class OEFObjectTranslator:
 
     @classmethod
     def from_oef_constraint_type(cls, constraint_type: OEFConstraintType) -> ConstraintType:
-        """From our constraint type to OEF constraint type."""
+        """From OEF constraint type to our constraint type."""
         if isinstance(constraint_type, Eq):
             return ConstraintType(ConstraintTypes.EQUAL, constraint_type.value)
         elif isinstance(constraint_type, NotEq):
