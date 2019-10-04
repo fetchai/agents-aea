@@ -17,35 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
+"""This package contains a scaffold of a shared class."""
 
-from aea.skills.base import Task
+from aea.skills.base import SharedClass
 
 
-class MyScaffoldTask(Task):
-    """This class scaffolds a task."""
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        pass
-
-    def execute(self) -> None:
-        """
-        Implement the task execution.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        pass
+class MySharedClass(SharedClass):
+    """This class scaffolds a shared class."""

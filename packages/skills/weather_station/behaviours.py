@@ -19,12 +19,11 @@
 
 """This package contains a scaffold of a behaviour."""
 
-from typing import TYPE_CHECKING
-
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
+from typing import TYPE_CHECKING
+from aea.protocols.oef.models import Description
+from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 if TYPE_CHECKING:
     from packages.skills.weather_station.weather_station_dataModel import WEATHER_STATION_DATAMODEL
@@ -32,16 +31,30 @@ else:
     from weather_station_skill.weather_station_dataModel import WEATHER_STATION_DATAMODEL
 
 
-class MyWeatherBehaviour(Behaviour):
+class MyScaffoldBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
     def __init__(self, **kwargs):
-        super().__init__(self, **kwargs)
+        super().__init__(**kwargs)
         self.registered = False
         self.data_model = WEATHER_STATION_DATAMODEL()
         self.scheme = {'country': "UK", 'city': "Cambridge"}
 
     def setup(self) -> None:
-        """Implement the setup for the handler."""
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
         if not self.registered:
             desc = Description(self.scheme, data_model=self.data_model)
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
@@ -54,14 +67,8 @@ class MyWeatherBehaviour(Behaviour):
                                             protocol_id=OEFMessage.protocol_id,
                                             message=msg_bytes)
             print("I am registered!")
+            print("My public key is : {}".format(self.context.agent_public_key))
             self.registered = True
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
 
     def teardown(self) -> None:
         """
