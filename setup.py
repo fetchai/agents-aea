@@ -34,9 +34,9 @@ def get_aea_extras() -> Dict[str, List[str]]:
     result = {}
 
     # parse connections dependencies
-    channel_module = importlib.import_module("aea.connections")
-    channel_dependencies = {k.split("_")[0] + "-connection": v for k, v in vars(channel_module).items() if re.match(".+_dependencies", k)}
-    result.update(channel_dependencies)
+    connection_module = importlib.import_module("aea.connections")
+    connection_dependencies = {k.split("_")[0] + "-connection": v for k, v in vars(connection_module).items() if re.match(".+_dependencies", k)}
+    result.update(connection_dependencies)
 
     # parse protocols dependencies
     protocols_module = importlib.import_module("aea.protocols")

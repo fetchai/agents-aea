@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the search feature of the local OEF node."""
+import time
 
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import MailBox, Envelope
@@ -139,6 +140,8 @@ class TestFilteredSearchResult:
         envelope = Envelope(to=DEFAULT_OEF, sender=cls.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         cls.mailbox1.send(envelope)
 
+        time.sleep(2.0)
+
         # register 'mailbox2' as a service 'barfoo'.
         cls.data_model_barfoo = DataModel("barfoo", attributes=[])
         service_description = Description({"foo": 1, "bar": "baz"}, data_model=cls.data_model_barfoo)
@@ -159,7 +162,7 @@ class TestFilteredSearchResult:
         self.mailbox1.send(envelope)
 
         # check the result
-        response_envelope = self.mailbox1.inbox.get(block=True, timeout=2.0)
+        response_envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.to == self.public_key_1
         assert response_envelope.sender == DEFAULT_OEF

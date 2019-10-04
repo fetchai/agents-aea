@@ -9,10 +9,7 @@
         "version",
         "license",
         "url",
-        "protocol",
-        "handler",
-        "behaviours",
-        "tasks"
+        "protocols"
     ],
     "properties": {
         "name": {"type": "string"},
@@ -20,8 +17,22 @@
         "version": {"type": "string"},
         "license": {"type": "string"},
         "url": {"type": "string"},
-        "protocol": {"type": "string"},
-        "handler": {"$ref": "#/definitions/handler"},
+        "protocols": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string"}
+        },
+        "handlers": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required": ["handler"],
+              "properties": {
+                "handler": { "$ref": "#/definitions/handler" }
+              }
+            }
+        },
         "behaviours": {
             "type": "array",
             "uniqueItems": true,
@@ -41,6 +52,17 @@
               "required": ["task"],
               "properties": {
                 "task": { "$ref": "#/definitions/task" }
+              }
+            }
+        },
+        "shared_classes": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required": ["shared_class"],
+              "properties": {
+                "task": { "$ref": "#/definitions/shared_class" }
               }
             }
         },
@@ -68,6 +90,14 @@
             }
         },
         "handler": {
+            "type": "object",
+            "required": ["class_name", "args"],
+            "properties": {
+                "class_name": {"type": "string"},
+                "args": {"type": "object"}
+            }
+        },
+        "shared_class": {
             "type": "object",
             "required": ["class_name", "args"],
             "properties": {

@@ -279,6 +279,32 @@ class TaskConfig(Configuration):
         )
 
 
+class SharedClassConfig(Configuration):
+    """Handle a skill shared class configuration."""
+
+    def __init__(self, class_name: str = "", **args):
+        """Initialize a shared class configuration."""
+        self.class_name = class_name
+        self.args = args
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "class_name": self.class_name,
+            "args": self.args
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        class_name = cast(str, obj.get("class_name"))
+        return SharedClassConfig(
+            class_name=class_name,
+            **obj.get("args", {})
+        )
+
+
 class SkillConfig(Configuration):
     """Class to represent a skill configuration file."""
 
@@ -288,7 +314,7 @@ class SkillConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
-                 protocol: str = "",
+                 protocols: str = "",
                  dependencies: Optional[List[str]] = None):
         """Initialize a skill configuration."""
         self.name = name
@@ -296,11 +322,12 @@ class SkillConfig(Configuration):
         self.version = version
         self.license = license
         self.url = url
-        self.protocol = protocol
+        self.protocols = protocols
         self.dependencies = dependencies
-        self.handler = HandlerConfig()
+        self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
         self.tasks = CRUDCollection[TaskConfig]()
+        self.shared_classes = CRUDCollection[SharedClassConfig]()
 
     @property
     def json(self) -> Dict:
@@ -311,11 +338,12 @@ class SkillConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "url": self.url,
-            "protocol": self.protocol,
+            "protocols": self.protocols,
             "dependencies": self.dependencies,
-            "handler": self.handler.json,
+            "handlers": [{"handler": h.json} for _, h in self.handlers.read_all()],
             "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
             "tasks": [{"task": t.json} for _, t in self.tasks.read_all()],
+            "shared_classes": [{"shared_class": s.json} for _, s in self.shared_classes.read_all()],
         }
 
     @classmethod
@@ -326,7 +354,7 @@ class SkillConfig(Configuration):
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
         url = cast(str, obj.get("url"))
-        protocol = cast(str, obj.get("protocol"))
+        protocols = cast(str, obj.get("protocols"))
         dependencies = cast(List[str], obj.get("dependencies", []))
         skill_config = SkillConfig(
             name=name,
@@ -334,7 +362,7 @@ class SkillConfig(Configuration):
             version=version,
             license=license,
             url=url,
-            protocol=protocol,
+            protocols=protocols,
             dependencies=dependencies
         )
 
@@ -346,8 +374,13 @@ class SkillConfig(Configuration):
             task_config = TaskConfig.from_json(t["task"])
             skill_config.tasks.create(task_config.class_name, task_config)
 
-        handler = HandlerConfig.from_json(obj.get("handler"))  # type: ignore
-        skill_config.handler = handler
+        for h in obj.get("handlers"):  # type: ignore
+            handler_config = HandlerConfig.from_json(h["handler"])
+            skill_config.handlers.create(handler_config.class_name, handler_config)
+
+        for s in obj.get("shared_classes"):  # type: ignore
+            shared_class_config = SharedClassConfig.from_json(s["shared_class"])
+            skill_config.shared_classes.create(shared_class_config.class_name, shared_class_config)
 
         return skill_config
 

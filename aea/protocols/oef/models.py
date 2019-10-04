@@ -25,7 +25,7 @@ from enum import Enum
 from typing import Dict, Type, Union, Optional, List, Any
 
 
-ATTRIBUTE_TYPES = Type[Union[float, str, bool, int]]
+ATTRIBUTE_TYPES = Union[float, str, bool, int]
 
 
 class JSONSerializable(ABC):
@@ -246,6 +246,10 @@ class ConstraintType:
             return value not in self.value
         else:
             raise ValueError("Constraint type not recognized.")
+
+    def __eq__(self, other):
+        """Check equality with another object."""
+        return isinstance(other, ConstraintType) and self.value == other.value and self.type == other.type
 
 
 class ConstraintExpr(ABC):

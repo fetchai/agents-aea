@@ -9,18 +9,20 @@ behaviours:
       args:
         behaviour_arg_1: 1
         behaviour_arg_2: "2"
-handler:
-  class_name: DummyHandler
-  args:
-    handler_arg_1: 1
-    handler_arg_2: "2"
+handlers:
+  - handler:
+      class_name: DummyHandler
+      args:
+        handler_arg_1: 1
+        handler_arg_2: "2"
 tasks:
   - task:
       class_name: DummyTask
       args:
         task_arg_1: 1
         task_arg_2: "2"
-protocol: "default"
+shared_classes: []
+protocols: ["default"]
 dependencies:
   - dep1==1.0.0
   - dep2~=1.1.2

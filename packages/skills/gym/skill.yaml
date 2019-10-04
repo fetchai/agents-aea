@@ -3,20 +3,18 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
-behaviours:
-  - behaviour:
-      class_name: GymBehaviour
+behaviours: []
+handlers:
+  - handler:
+      class_name: GymHandler
       args:
-        foo: bar  
-handler:
-  class_name: GymHandler
-  args:
-    foo: bar
+        foo: bar
 tasks:
   - task:
       class_name: GymTask
       args:
         foo: bar
-protocol: "gym"
+shared_classes: []
+protocols: ["gym"]
 dependencies:
   - gym

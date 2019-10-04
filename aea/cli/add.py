@@ -20,7 +20,6 @@
 """Implementation of the 'aea add' subcommand."""
 
 import os
-import pprint
 import shutil
 from pathlib import Path
 from typing import cast
@@ -127,7 +126,7 @@ def protocol(click_context, protocol_name):
     # try to load the protocol configuration file
     try:
         protocol_configuration = ctx.protocol_loader.load(open(str(protocol_configuration_filepath)))
-        logger.info("Protocol loaded: {}".format(pprint.pformat(protocol_configuration.json)))
+        logger.info("Protocol available: {}".format(protocol_configuration.name))
     except ValidationError as e:
         logger.error("Protocol configuration file not valid: {}".format(str(e)))
         exit(-1)
@@ -203,9 +202,10 @@ def skill(click_context, skill_name):
     Path(skills_init_module).touch(exist_ok=True)
 
     # check for not supported protocol, and add it.
-    if skill_configuration.protocol not in ctx.agent_config.protocols:
-        logger.info("Adding protocol '{}' to the agent...".format(skill_configuration.protocol))
-        click_context.invoke(protocol, protocol_name=skill_configuration.protocol)
+    for protocol_name in skill_configuration.protocols:
+        if protocol_name not in ctx.agent_config.protocols:
+            logger.info("Adding protocol '{}' to the agent...".format(protocol_name))
+            click_context.invoke(protocol, protocol_name=protocol_name)
 
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
