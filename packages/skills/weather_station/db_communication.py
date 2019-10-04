@@ -19,39 +19,48 @@
 
 """This package contains the Database Communication for the weather agent."""
 
-import sqlite3
 import datetime
+import sqlite3
+from typing import Dict, cast
 
 
-class Db_communication:
+class DBCommunication:
+    """A class to communicate with a database."""
 
-    source = None
+    def __init__(self, source: str):
+        """
+        Initialize the database communication.
 
-    def __init__(self, source):
+        :param source: the source
+        """
         self.source = source
 
-    def db_connection(self):
-        con = sqlite3.connect('weather_fake.db')
-        print(con)
+    def db_connection(self) -> sqlite3.Connection:
+        """
+        Get db connection.
+
+        :return: the db connection
+        """
+        con = sqlite3.connect(self.source)
         return con
 
-    def specific_dates(self, start, end):
-        con = self.db_connection()
-        print(con)
-        cur = con.cursor()
-        print(start)
-        print(end)
-        if type(start) is str:
-            start = datetime.datetime.strptime(start, '%d/%m/%Y')
-            start = start.strftime('%s')
-        if type(end) is str:
-            end = datetime.datetime.strptime(end, '%d/%m/%Y')
-            end = end.strftime('%s')
-        print(start , end)
-        command = ("SELECT * FROM data WHERE idx BETWEEN ? AND ?", str(start), str(end),)
-        cur.execute(command)
-        data = cur.fetchall()
+    def get_data_for_specific_dates(self, start_date: str, end_date: str) -> Dict[str, int]:
+        """
+        Get data for specific dates.
 
+        :param start_date: the start date
+        :param end_date: the end date
+        :return: the data
+        """
+        con = self.db_connection()
+        cur = con.cursor()
+        start_dt = datetime.datetime.strptime(start_date, '%d/%m/%Y')
+        start = start_dt.strftime('%s')
+        end_dt = datetime.datetime.strptime(end_date, '%d/%m/%Y')
+        end = end_dt.strftime('%s')
+        command = ("SELECT * FROM data WHERE idx BETWEEN ? AND ?", str(start), str(end),)
+        cur.execute(command)  # type: ignore
+        data = cast(Dict[str, int], cur.fetchall())
         cur.close()
         con.close()
         return data

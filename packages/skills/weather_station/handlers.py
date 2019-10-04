@@ -34,9 +34,11 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
-    from packages.skills.weather_station.db_communication import Db_communication
+    from packages.skills.weather_station.dummy_weather_station_data import DB_SOURCE
+    from packages.skills.weather_station.db_communication import DBCommunication
 else:
-    from weather_station_skill.db_communication import Db_communication
+    from weather_station_skill.dummy_weather_station_data import DB_SOURCE
+    from weather_station_skill.db_communication import DBCommunication
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +55,7 @@ class MyWeatherHandler(Handler):
         """Initialise the behaviour."""
         super().__init__(**kwargs)
         self.fet_price = 0.002
-        self.db = Db_communication("fake")
+        self.db = DBCommunication(DB_SOURCE)
         self.fetched_data = []
 
     def setup(self) -> None:
@@ -98,7 +100,7 @@ class MyWeatherHandler(Handler):
         """
         new_message_id = message_id + 1
         new_target = message_id
-        fetched_data = self.db.specific_dates(DATE_ONE, DATE_TWO)
+        fetched_data = self.db.get_data_for_specific_dates(DATE_ONE, DATE_TWO)
 
         if len(fetched_data) >= 1:
             self.fetched_data = fetched_data

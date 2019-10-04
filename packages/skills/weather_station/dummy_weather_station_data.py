@@ -1,19 +1,42 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
 
-import time
-import sqlite3
+"""This package contains dummy weather station data."""
+
 import datetime
 import random
+import sqlite3
+import time
+from typing import Dict, Union
+
+DB_SOURCE = 'dummy_weather_station_data.db'
 
 
-#  Checking if the database exists#
-con = sqlite3.connect('weather_fake.db')
+# Checking if the database exists
+con = sqlite3.connect(DB_SOURCE)
 cur = con.cursor()
 
 cur.close()
 con.commit()
 con.close()
-###############################
 
+# Create a table if it doesn't exist'
 command = (''' CREATE TABLE IF NOT EXISTS data (
                                  abs_pressure REAL,
                                  delay REAL,
@@ -27,8 +50,7 @@ command = (''' CREATE TABLE IF NOT EXISTS data (
                                  wind_dir REAL,
                                  wind_gust REAL)''')
 
-
-con = sqlite3.connect('weather_fake.db')
+con = sqlite3.connect(DB_SOURCE)
 cur = con.cursor()
 cur.execute(command)
 cur.close()
@@ -38,44 +60,47 @@ if con is not None:
 
 
 class Forecast():
+    """Represents a whether forecast."""
 
-    def addData(self, tagged_data):
+    def add_data(self, tagged_data: Dict[str, Union[int, datetime.datetime]]) -> None:
+        """
+        Add data to the forecast.
+
+        :param tagged_data: the data dictionary
+        :return: None
+        """
         con = sqlite3.connect('weather_fake.db')
         cur = con.cursor()
         command = ('''INSERT INTO data(abs_pressure,
-                                        delay,
-                                        hum_in,
-                                        hum_out,
-                                        idx,
-                                        rain,
-                                        temp_in,
-                                        temp_out,
-                                        wind_ave,
-                                        wind_dir,
-                                        wind_gust) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (tagged_data['abs_pressure'],
-                                                                                                          tagged_data['delay'],
-                                                                                                          tagged_data['hum_in'],
-                                                                                                          tagged_data['hum_out'],
-                                                                                                          datetime.datetime.now().strftime('%s'),
-                                                                                                          tagged_data['rain'],
-                                                                                                          tagged_data['temp_in'],
-                                                                                                          tagged_data['temp_out'],
-                                                                                                          tagged_data['wind_ave'],
-                                                                                                          tagged_data['wind_dir'],
-                                                                                                          tagged_data['wind_gust']))
-        con.commit()
+                                       delay,
+                                       hum_in,
+                                       hum_out,
+                                       idx,
+                                       rain,
+                                       temp_in,
+                                       temp_out,
+                                       wind_ave,
+                                       wind_dir,
+                                       wind_gust) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (tagged_data['abs_pressure'],
+                                                                                               tagged_data['delay'],
+                                                                                               tagged_data['hum_in'],
+                                                                                               tagged_data['hum_out'],
+                                                                                               datetime.datetime.now().strftime('%s'),
+                                                                                               tagged_data['rain'],
+                                                                                               tagged_data['temp_in'],
+                                                                                               tagged_data['temp_out'],
+                                                                                               tagged_data['wind_ave'],
+                                                                                               tagged_data['wind_dir'],
+                                                                                               tagged_data['wind_gust']))
+        cur.execute(command)  # type: ignore
         cur.close()
+        con.commit()
         con.close()
 
-        m_time = datetime.datetime.now().strftime('%s')
-        print(m_time)
-        print(time.ctime(int(m_time)))
-        print(tagged_data['idx'])
-
-    def main(self):
-
+    def generate(self):
+        """Generate weather data."""
         while True:
-            dict_of_data = {}
+            dict_of_data = {}  # type: Dict[str, Union[int, datetime.datetime]]
             dict_of_data['abs_pressure'] = random.randrange(1022.0, 1025, 1)
             dict_of_data['delay'] = random.randint(2, 7)
             dict_of_data['hum_in'] = random.randrange(33.0, 40.0, 1)
@@ -87,11 +112,10 @@ class Forecast():
             dict_of_data['wind_ave'] = random.randrange(0, 10, 1)
             dict_of_data['wind_dir'] = random.randrange(0, 14, 1)
             dict_of_data['wind_gust'] = random.randrange(1, 7, 1)
-            print(dict_of_data)
-            self.addData(dict_of_data)
+            self.add_data(dict_of_data)
             time.sleep(5)
 
 
 if __name__ == '__main__':
     a = Forecast()
-    a.main()
+    a.generate()
