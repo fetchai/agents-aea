@@ -20,7 +20,7 @@
 """This package contains a scaffold of a handler."""
 
 import pprint
-from typing import Optional
+from typing import Optional, cast, List
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
@@ -29,6 +29,7 @@ from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer
+from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 
 
@@ -62,11 +63,11 @@ class FIPAHandler(Handler):
         """
         msg = FIPASerializer().decode(envelope.message)
         msg_performative = FIPAMessage.Performative(msg.get('performative'))
-
+        proposals = cast(List[Description], msg.get("proposal"))
         if msg_performative == FIPAMessage.Performative.PROPOSE:
-            print(len(msg.get("proposal")))
-            if len(msg.get("proposal")) > 0:
-                for item in msg.get("proposal"):
+
+            if proposals is not []:
+                for item in proposals:
                     print(item.values)
                     if "Price" in item.values.keys():
                         if item.values["Price"] < self.maxPrice:
@@ -134,8 +135,9 @@ class OEFHandler(Handler):
         """
         msg = OEFSerializer().decode(envelope.message)
         mytype = OEFMessage.Type(msg.get("type"))
+
         if mytype is OEFMessage.Type.SEARCH_RESULT:
-            self.agents = msg.get("agents")
+            self.agents = cast(List[str], msg.get("agents"))
             print(len(self.agents))
             for agent in self.agents:
                 msg = FIPAMessage(message_id=self.message_id,

@@ -8,13 +8,20 @@ behaviours:
       class_name: MyWeatherBehaviour
       args:
         foo: bar
-handler:
-  class_name: MyWeatherHandler
-  args:
-    foo: bar
+handlers:
+  - handler:
+      class_name: MyWeatherHandler
+      args:
+        handler_arg_1: 1
+        handler_arg_2: "2"
 tasks:
   - task:
       class_name: MyWeatherTask
       args:
         foo: bar
-protocol: 'fipa'
+shared_classes: []
+protocols: ['fipa']
+dependencies:
+  - psycopg2=="*"
+
+

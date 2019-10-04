@@ -1,4 +1,4 @@
-name: ''
+name: weather_client
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
@@ -26,7 +26,5 @@ tasks:
       class_name: MyScaffoldTask
       args:
         foo: bar
-
 shared_classes: []
-
 protocols: ['fipa','default','oef']

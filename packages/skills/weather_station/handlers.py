@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 else:
     from weather_station_skill.db_communication import Db_communication
 
+
 class MyScaffoldHandler(Handler):
     """This class scaffolds a handler."""
 

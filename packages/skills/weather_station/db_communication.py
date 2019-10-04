@@ -19,7 +19,7 @@
 
 """This package contains the Database Communication for the weather agent."""
 
-import psycopg2
+import psycopg2  # type: ignore
 import datetime
 
 
