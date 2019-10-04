@@ -1,7 +1,5 @@
 ## Preliminaries
 
-Make sure you are running desktop <a href="https://docs.docker.com/install/" target=_blank>Docker</a> and <a href="https://docs.docker.com/compose/install/" target=_blank>Docker Compose</a>.
-
 Create and cd into a new working directory.
 
 ``` bash
@@ -28,26 +26,34 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 
 Install the Autonomous Economic Agent framework.
 
-The following installs the basic application without the cli. If in doubt, install `aea[all]`.
+<!--
+
+The following installs the basic application without the cli.
 ``` bash
 pip install aea
 ```
+-->
 
-The following installs the whole package.
+The following installs the entire AEA package which includes the cli too.
+
 ``` bash
 pip install aea[all]
 
 ```
 
-The following only installs the cli.
+However, you can run this demo by installing the AEA cli alone.
+
 ``` bash
 pip install aea[cli]
+
 ```
+
 
 
 ## Echo skill demo
 
 The echo skill is a simple demo that prints logs from the agent's main loop as it calls registered `Task` and `Behaviour` code.
+
 
 
 ### Download the examples, scripts, and packages directories.
