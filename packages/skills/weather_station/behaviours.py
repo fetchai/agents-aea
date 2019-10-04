@@ -19,6 +19,8 @@
 
 """This package contains a scaffold of a behaviour."""
 
+import logging
+
 from aea.skills.base import Behaviour
 from typing import TYPE_CHECKING
 from aea.protocols.oef.models import Description
@@ -26,9 +28,13 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 if TYPE_CHECKING:
-    from packages.skills.weather_station.weather_station_dataModel import WEATHER_STATION_DATAMODEL
+    from packages.skills.weather_station.weather_station_dataModel import WEATHER_STATION_DATAMODEL, SCHEME, SERVICE_ID
 else:
-    from weather_station_skill.weather_station_dataModel import WEATHER_STATION_DATAMODEL
+    from weather_station_skill.weather_station_dataModel import WEATHER_STATION_DATAMODEL, SCHEME, SERVICE_ID
+
+logger = logging.getLogger(__name__)
+
+REGISTER_ID = 1
 
 
 class MyWeatherBehaviour(Behaviour):
@@ -39,7 +45,7 @@ class MyWeatherBehaviour(Behaviour):
         super().__init__(**kwargs)
         self.registered = False
         self.data_model = WEATHER_STATION_DATAMODEL()
-        self.scheme = {'country': "UK", 'city': "Cambridge"}
+        self.scheme = SCHEME
 
     def setup(self) -> None:
         """
@@ -58,16 +64,15 @@ class MyWeatherBehaviour(Behaviour):
         if not self.registered:
             desc = Description(self.scheme, data_model=self.data_model)
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
-                             id=1,
+                             id=REGISTER_ID,
                              service_description=desc,
-                             service_id="WeatherData")
+                             service_id=SERVICE_ID)
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF,
                                             sender=self.context.agent_public_key,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=msg_bytes)
-            print("I am registered!")
-            print("My public key is : {}".format(self.context.agent_public_key))
+            logger.info("[{}]: registered! My public key is : {}".format(self.context.agent_name, self.context.agent_public_key))
             self.registered = True
 
     def teardown(self) -> None:

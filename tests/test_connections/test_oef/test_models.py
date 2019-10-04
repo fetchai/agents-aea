@@ -21,10 +21,9 @@
 import pickle
 
 import pytest
-from oef.query import Gt, Eq, LtEq
 
 from aea.connections.oef.connection import OEFObjectTranslator
-from aea.protocols.oef.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint
+from aea.protocols.oef.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint, ConstraintType
 
 
 class TestTranslator:
@@ -68,10 +67,10 @@ class TestTranslator:
         query = Query([
             And([
                 Or([
-                    Not(Constraint("foo", Gt(1))),
-                    Not(Constraint("bar", Eq("baz")))
+                    Not(Constraint("foo", ConstraintType("==", 1))),
+                    Not(Constraint("bar", ConstraintType("==", "baz")))
                 ]),
-                Constraint("foo", LtEq(2)),
+                Constraint("foo", ConstraintType("<", 2)),
             ])
         ], data_model_foobar)
 
@@ -122,10 +121,10 @@ class TestPickable:
         query = Query([
             And([
                 Or([
-                    Not(Constraint("foo", Gt(1))),
-                    Not(Constraint("bar", Eq("baz")))
+                    Not(Constraint("foo", ConstraintType("==", 1))),
+                    Not(Constraint("bar", ConstraintType("==", "baz")))
                 ]),
-                Constraint("foo", LtEq(2)),
+                Constraint("foo", ConstraintType("<", 2)),
             ])
         ],
             data_model_foobar)

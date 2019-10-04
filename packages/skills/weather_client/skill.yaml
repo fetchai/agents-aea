@@ -23,7 +23,7 @@ handlers:
         foo: bar
 tasks:
   - task:
-      class_name: MyScaffoldTask
+      class_name: EmptyTask
       args:
         foo: bar
 shared_classes: []
