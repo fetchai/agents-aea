@@ -24,6 +24,7 @@ from aea.protocols.oef.models import DataModel, Attribute
 
 class WEATHER_STATION_DATAMODEL (DataModel):
     """Data model for the weather Agent."""
+
     def __init__(self):
         """Initialise the dataModel."""
         self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)

@@ -23,7 +23,7 @@ import psycopg2
 import datetime
 
 
-class Db_communication():
+class Db_communication:
     """Contains the functionality for communicating with the db."""
 
     def __init__(self, source):

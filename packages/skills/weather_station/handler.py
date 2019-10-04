@@ -19,21 +19,19 @@
 
 """This package contains a scaffold of a handler."""
 
+import json
+import time
 from typing import Optional
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
-from aea.skills.base import Handler
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.fipa.message import FIPAMessage
+from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.models import Description
-
+from aea.skills.base import Handler
 from .db_communication import Db_communication
-
-import json
-import time
 
 
 class MyWeatherHandler(Handler):

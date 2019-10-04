@@ -19,11 +19,11 @@
 
 """This package contains a scaffold of a behaviour."""
 
+from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.models import Description
+from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
 from .weather_station_dataModel import WEATHER_STATION_DATAMODEL
-from aea.protocols.oef.models import Description
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 
 class MyWeatherBehaviour(Behaviour):
@@ -34,9 +34,7 @@ class MyWeatherBehaviour(Behaviour):
         super().__init__(**kwargs)
         self.registered = False
         self.data_model = WEATHER_STATION_DATAMODEL()
-        self.scheme = {}
-        self.scheme['country'] = "UK"
-        self.scheme['city'] = "Cambridge"
+        self.scheme = {'country': "UK", 'city': "Cambridge"}
 
     def act(self) -> None:
         """
