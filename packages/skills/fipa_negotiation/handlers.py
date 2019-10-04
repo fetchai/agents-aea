@@ -31,7 +31,7 @@ from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.models import Query, Description
-from aea.protocols.transaction.message import TransactionMessage
+from aea.decision_maker.messages.transaction import TransactionMessage
 
 if TYPE_CHECKING:
     from packages.skills.fipa_negotiation.dialogues import Dialogue, Dialogues

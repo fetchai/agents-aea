@@ -21,8 +21,10 @@
 
 from typing import Set
 
+from aea.skills.base import SharedClass
 
-class Search:
+
+class Search(SharedClass):
     """This class deals with the search state."""
 
     def __init__(self):

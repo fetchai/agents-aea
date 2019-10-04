@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The state update message module."""
+"""This module contains the decision maker messaging modules."""
