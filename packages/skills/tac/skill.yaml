@@ -6,15 +6,23 @@ url: ""
 behaviours:
   - behaviour:
       class_name: TACBehaviour
+      args:
+        foo: bar
 handlers:
   - handler:
-    class_name: OEFHandler
+      class_name: OEFHandler
+      args:
+        foo: bar
   - handler:
-    class_name: TACHandler
+      class_name: TACHandler
+      args:
+        foo: bar
 tasks: []
 shared_classes:
   - shared_class:
       class_name: Search
+      args:
+        foo: bar
   - shared_class:
       class_name: Game
       args:
