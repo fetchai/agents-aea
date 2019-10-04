@@ -1,0 +1,16 @@
+certifi = "==2019.3.9"
+chardet = "*"
+ecdsa = "*"
+idna = "*"
+libusb1 = "*"
+protobuf = "*"
+psycopg2 = "*"
+pytz = "*"
+pywws = "*"
+requests = "*"
+six = "*"
+tzlocal = "*"
+urllib3 = "*"
+fetchai-ledger-api = {editable = true,git = "https://github.com/fetchai/ledger-api-py"}
+flake8 = "*"
+aea = {extras = ["all"],version = "*"}
