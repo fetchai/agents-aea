@@ -8,7 +8,8 @@ The CLI tool provides a way to scaffold out the required directory structure for
 
 ``` bash
 agentName/
-  agent.yml       YAML configuration of the agent
+  aea-config.yaml YAML configuration of the agent
+  priv.pem        The private key file
   connections/    Directory containing all the supported connections
     connection1/  First connection
     ...           ...
