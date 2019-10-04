@@ -19,9 +19,10 @@
 
 """This package contains a scaffold of a handler."""
 
-from typing import Optional, TYPE_CHECKING
+import logging
 import json
 import time
+from typing import Any, Dict, List, Optional, Union, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
@@ -37,11 +38,16 @@ if TYPE_CHECKING:
 else:
     from weather_station_skill.db_communication import Db_communication
 
+logger = logging.getLogger(__name__)
+
+DATE_ONE = "3/10/2019"
+DATE_TWO = "4/10/2019"
+
 
 class MyScaffoldHandler(Handler):
     """This class scaffolds a handler."""
 
-    SUPPORTED_PROTOCOL = 'fipa'  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
@@ -49,9 +55,6 @@ class MyScaffoldHandler(Handler):
         self.fet_price = 0.002
         self.db = Db_communication("fake")
         self.fetched_data = []
-        self.message_id = 1
-        self.target = 0
-        self.dialogue_id = 1
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -65,12 +68,15 @@ class MyScaffoldHandler(Handler):
         :return: None
         """
         msg = FIPASerializer().decode(envelope.message)
+        msg = cast(FIPAMessage, msg)
         msg_performative = FIPAMessage.Performative(msg.get('performative'))
+        message_id = cast(int, msg.get('message_id'))
+        dialogue_id = cast(int, msg.get('dialogue_id'))
 
         if msg_performative == FIPAMessage.Performative.CFP:
-            self.handle_CFP(msg, envelope.sender)
+            self.handle_cfp(msg, envelope.sender, message_id, dialogue_id)
         elif msg_performative == FIPAMessage.Performative.ACCEPT:
-            self.handle_ACCEPT(envelope.sender)
+            self.handle_accept(envelope.sender)
 
     def teardown(self) -> None:
         """
@@ -80,20 +86,29 @@ class MyScaffoldHandler(Handler):
         """
         pass
 
-    def handle_CFP(self, msg, sender):
-        """Handle the CFP calls."""
-        fetched_data = self.db.specific_dates("3/10/2019", "4/10/2019")
+    def handle_cfp(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int) -> None:
+        """
+        Handle the CFP calls.
+
+        :param msg: the message
+        :param sender: the sender
+        :param message_id: the message id
+        :param dialogue_id: the dialogue id
+        :return: None
+        """
+        new_message_id = message_id + 1
+        new_target = message_id
+        fetched_data = self.db.specific_dates(DATE_ONE, DATE_TWO)
 
         if len(fetched_data) >= 1:
             self.fetched_data = fetched_data
-            totalPrice = self.fet_price * len(fetched_data)
+            total_price = self.fet_price * len(fetched_data)
             proposal = [Description({"Rows": len(fetched_data),
-                                     "Price": totalPrice})]
-            print("[{}]: Sending propose at price: {}".format(
-                sender, totalPrice))
-            proposal_msg = FIPAMessage(message_id=self.message_id,
-                                       dialogue_id=self.dialogue_id,
-                                       target=self.target,
+                                     "Price": total_price})]
+            logger.info("[{}]: sending sender={} a proposal at price: {}".format(self.context.agent_name, sender, total_price))
+            proposal_msg = FIPAMessage(message_id=new_message_id,
+                                       dialogue_id=dialogue_id,
+                                       target=new_target,
                                        performative=FIPAMessage.Performative.PROPOSE,
                                        proposal=proposal)
             self.context.outbox.put_message(to=sender,
@@ -101,18 +116,22 @@ class MyScaffoldHandler(Handler):
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(proposal_msg))
         else:
-            decline_msg = FIPAMessage(message_id=self.message_id,
-                                      dialogue_id=self.dialogue_id,
-                                      target=self.target,
+            decline_msg = FIPAMessage(message_id=new_message_id,
+                                      dialogue_id=dialogue_id,
+                                      target=new_target,
                                       performative=FIPAMessage.Performative.DECLINE)
             self.context.outbox.put_message(to=sender,
                                             sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(decline_msg))
 
-    def handle_ACCEPT(self, sender):
-        """Handle the Accept Calls."""
-        command = {}
+    def handle_accept(self, sender: str) -> None:
+        """Handle the Accept Calls.
+
+        :param sender: the sender
+        :return: None
+        """
+        command = {}  # type: Dict[str, Union[str, List[Any]]]
         command['Command'] = "success"
         command['fetched_data'] = []
         counter = 0
@@ -129,7 +148,7 @@ class MyScaffoldHandler(Handler):
             dict_of_data['wind_ave'] = items[8]
             dict_of_data['wind_dir'] = items[9]
             dict_of_data['wind_gust'] = items[10]
-            command['fetched_data'].append(dict_of_data)
+            command['fetched_data'].append(dict_of_data)  # type: ignore
             counter += 1
             if counter == 10:
                 break
