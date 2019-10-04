@@ -24,9 +24,8 @@
 from unittest import mock
 
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import DataModel, Attribute, Query, Constraint
+from aea.protocols.oef.models import DataModel, Attribute, Query, Constraint, ConstraintType
 from aea.protocols.oef.serialization import OEFSerializer
-from oef.query import Eq
 
 
 def test_oef_type_string_value():
@@ -54,7 +53,7 @@ def test_oef_message_consistency():
     msg = OEFMessage(
         oef_type=OEFMessage.Type.SEARCH_AGENTS,
         id=2,
-        query=Query([Constraint("bar", Eq(1))], model=foo_datamodel)
+        query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel)
     )
     assert msg.check_consistency(), "We expect the consistency to return TRUE"
     with mock.patch("aea.protocols.oef.message.OEFMessage.Type")\
