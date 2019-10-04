@@ -24,6 +24,8 @@ from aea.protocols.oef.models import Query, Constraint, ConstraintType
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from aea.skills.base import Behaviour
 
+REQUEST_ID = 1
+
 
 class MyBuyBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
@@ -31,14 +33,13 @@ class MyBuyBehaviour(Behaviour):
     def __init__(self, **kwargs):
         """Initialise the class."""
         super().__init__(**kwargs)
-        self.request_id = 0
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
         search_query_empty_model = Query([Constraint("country",
                                                      ConstraintType("==", "UK"))], model=None)
         search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
-                                    id=self.request_id,
+                                    id=REQUEST_ID,
                                     query=search_query_empty_model)
 
         self.context.outbox.put_message(to=DEFAULT_OEF,
