@@ -29,6 +29,10 @@ class EchoBehaviour(Behaviour):
         """Initialize the echo behaviour."""
         print("EchoBehaviour.__init__: arguments: {}".format(kwargs))
 
+    def setup(self) -> None:
+        """Set up the behaviour."""
+        print("Echo Behaviour: setup method called.")
+
     def act(self) -> None:
         """Act according to the behaviour."""
         print("Echo Behaviour: act method called.")

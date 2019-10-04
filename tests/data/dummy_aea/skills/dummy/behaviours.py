@@ -32,6 +32,14 @@ class DummyBehaviour(Behaviour):
         self.nb_act_called = 0
         self.nb_teardown_called = 0
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def act(self) -> None:
         """Act according to the behaviour."""
         self.nb_act_called += 1

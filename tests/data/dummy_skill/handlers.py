@@ -35,6 +35,14 @@ class DummyHandler(Handler):
         self.handled_envelopes = []
         self.nb_teardown_called = 0
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Handle envelopes.

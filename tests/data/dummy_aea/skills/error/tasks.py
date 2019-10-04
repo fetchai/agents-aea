@@ -25,6 +25,14 @@ from aea.skills.base import Task
 class ErrorTask(Task):
     """This class implements the error task."""
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def execute(self) -> None:
         """
         Implement the task execution.

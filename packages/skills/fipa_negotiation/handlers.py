@@ -52,6 +52,14 @@ class FIPANegotiationHandler(Handler):
 
     SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Dispatch envelope to relevant handler and respond.

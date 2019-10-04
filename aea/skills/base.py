@@ -132,6 +132,14 @@ class Behaviour(ABC):
         return self._config
 
     @abstractmethod
+    def setup(self) -> None:
+        """
+        Implement the behaviour setup.
+
+        :return: None
+        """
+
+    @abstractmethod
     def act(self) -> None:
         """
         Implement the behaviour.
@@ -216,6 +224,14 @@ class Handler(ABC):
         """
 
     @abstractmethod
+    def setup(self) -> None:
+        """
+        Implement the behaviour setup.
+
+        :return: None
+        """
+
+    @abstractmethod
     def teardown(self) -> None:
         """
         Implement the handler teardown.
@@ -284,6 +300,14 @@ class Task(ABC):
     def execute(self) -> None:
         """
         Run the task logic.
+
+        :return: None
+        """
+
+    @abstractmethod
+    def setup(self) -> None:
+        """
+        Implement the behaviour setup.
 
         :return: None
         """

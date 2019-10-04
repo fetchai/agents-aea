@@ -50,6 +50,10 @@ class GymTask(Task):
         """Get the queue."""
         return self._proxy_env.queue
 
+    def setup(self) -> None:
+        """Set up the task."""
+        print("Gym task: setup method called.")
+
     def execute(self) -> None:
         """Execute the task."""
         if not self._proxy_env.is_rl_agent_trained and not self.is_rl_agent_training:

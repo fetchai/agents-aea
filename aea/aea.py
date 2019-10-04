@@ -95,6 +95,8 @@ class AEA(Agent):
         :return: None
         """
         self._resources = Resources.from_resource_dir(self._directory, self.context)
+        assert self._resources is not None, "No resources initialized. Error in setup."
+        self._resources.setup()
 
     def act(self) -> None:
         """

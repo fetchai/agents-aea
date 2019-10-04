@@ -25,6 +25,14 @@ from aea.skills.base import Task
 class MyScaffoldTask(Task):
     """This class scaffolds a task."""
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
     def execute(self) -> None:
         """
         Implement the task execution.

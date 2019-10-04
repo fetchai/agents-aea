@@ -53,6 +53,14 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         self._registered_goods_demanded_description = None  # type: Optional[Description]
         self._registered_goods_supplied_description = None  # type: Optional[Description]
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def act(self) -> None:
         """
         Implement the act.

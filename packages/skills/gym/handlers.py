@@ -43,6 +43,10 @@ class GymHandler(Handler):
         print("GymHandler.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
 
+    def setup(self) -> None:
+        """Set up the handler."""
+        print("Gym handler: setup method called.")
+
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Handle envelopes.
