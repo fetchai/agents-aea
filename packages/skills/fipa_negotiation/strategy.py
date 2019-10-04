@@ -26,7 +26,7 @@ from typing import Dict, Optional, TYPE_CHECKING
 
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.protocols.oef.models import Query, Description
-from aea.protocols.transaction.message import TransactionMessage
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:

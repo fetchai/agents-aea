@@ -73,65 +73,39 @@ This class deals with finalising negotiation proposals between agents.
 ## Demo instructions
 
 !!!	Warn
-	FIPA skill demo has not been tested so instructions below will be incorrect.
+	Fipa negotiation skill is not fully developed.
 
 
 Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
 
-Install the fipa library.
-
-``` bash
-pip install fipa
-```
 
 Then, download the examples and packages directory.
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
-
-
-
 ### Create the agent
-In the root directory, create the gym agent.
+In the root directory, create the fipa agent.
 ``` bash
 aea create my_fipa_agent
 ```
 
 
-### Add the gym skill 
+### Add the fipa skill 
 ``` bash
 cd my_fipa_agent
-aea add skill fipa
+aea add skill fipa_negotiation
 ```
 
-
-### Copy the fipa environment to the agent directory
+### Add the local connection
 ``` bash
-mkdir fipas
-cp -a ../examples/fipa/fipas/. fipas/
+aea add connection local
 ```
 
-
-### Add a gym connection
-``` bash
-aea add connection fipa
-```
-
-
-### Update the connection config
-``` bash
-nano connections/fipa/connection.yaml
-env: ???
-```
-
-
-
-### Run the agent with the gym connection
+### Run the agent with the default connection
 
 ``` bash
-aea run --connection fipa
+aea run --connection local
 ```
 
 You will see the fipa logs.

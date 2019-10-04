@@ -25,10 +25,10 @@ import math
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
+from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.mail.base import OutBox  # , Envelope
 from aea.protocols.base import Message
-from aea.protocols.transaction.message import TransactionMessage
-from aea.protocols.state_update.message import StateUpdateMessage
 
 CurrencyEndowment = Dict[str, float]  # a map from identifier to quantity
 CurrencyHoldings = Dict[str, float]
