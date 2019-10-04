@@ -21,7 +21,6 @@
 import pickle
 
 import pytest
-from oef.query import Gt, Eq, LtEq
 
 from aea.connections.oef.connection import OEFObjectTranslator
 from aea.protocols.oef.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint, ConstraintType

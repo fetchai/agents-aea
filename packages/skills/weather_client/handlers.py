@@ -24,6 +24,7 @@ from typing import Optional, cast, List
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 class FIPAHandler(Handler):
     """This class scaffolds a handler."""
 
-    SUPPORTED_PROTOCOL = 'fipa'  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initiliase the handler."""
@@ -129,7 +130,7 @@ class FIPAHandler(Handler):
 class OEFHandler(Handler):
     """This class scaffolds a handler."""
 
-    SUPPORTED_PROTOCOL = 'oef'  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
         """Initialise the oef handler."""
@@ -178,7 +179,7 @@ class OEFHandler(Handler):
 class DefaultHandler(Handler):
     """This class scaffolds a handler."""
 
-    SUPPORTED_PROTOCOL = 'default'  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """Call to setup the handler."""
