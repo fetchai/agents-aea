@@ -23,6 +23,7 @@ import logging
 from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.protocols.oef.models import Query, Constraint, ConstraintType
+from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
     from packages.protocols.tac.message import TACMessage
@@ -142,7 +143,7 @@ class GameConfiguration:
         assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
 
 
-class Game:
+class Game(SharedClass):
     """This class deals with the game."""
 
     def __init__(self, expected_version_id: str, expected_controller_pbk: Optional[Address] = None):

@@ -3,7 +3,7 @@
 
 <ul>
 	<li>We recommended you build an AEA project with the cli tool as mentioned in the <a href="../quickstart/" target=_blank>quick start</a> guide. See information on the CLI tool <a href="../cli-how-to/" target=_blank>here</a>.</li>
-	<li>Using the cli <code>fetch</code> command, pull in an already built project and run as normal.</li>
+	<!--<li>Using the cli <code>fetch</code> command, pull in an already built project and run as normal.</li>-->
 	<li>The last option is to install the AEA without the cli tool with <code>pip install aea</code> and, from there, import classes directly.</li>
 </ul>
 

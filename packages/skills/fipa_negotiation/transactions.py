@@ -26,7 +26,7 @@ from collections import defaultdict, deque
 from typing import Dict, Tuple, Deque, cast, TYPE_CHECKING
 
 from aea.decision_maker.base import OwnershipState
-from aea.protocols.transaction.message import TransactionMessage, TransactionId
+from aea.decision_maker.messages.transaction import TransactionMessage, TransactionId
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
