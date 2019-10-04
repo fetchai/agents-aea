@@ -23,11 +23,15 @@ import base64
 import copy
 import json
 import pickle
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from gym_protocol.message import GymMessage
+
+if TYPE_CHECKING:
+    from packages.protocols.gym.message import GymMessage
+else:
+    from gym_protocol.message import GymMessage
 
 
 class GymSerializer(Serializer):

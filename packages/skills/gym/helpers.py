@@ -22,13 +22,18 @@
 from abc import ABC, abstractmethod
 import gym
 from queue import Queue
-from typing import Any, Tuple, cast
+from typing import Any, Tuple, cast, TYPE_CHECKING
 
 from aea.mail.base import Envelope
 from aea.skills.base import SkillContext
 from aea.protocols.base import Message
-from gym_protocol.message import GymMessage
-from gym_protocol.serialization import GymSerializer
+
+if TYPE_CHECKING:
+    from packages.protocols.gym.message import GymMessage
+    from packages.protocols.gym.serialization import GymSerializer
+else:
+    from gym_protocol.message import GymMessage
+    from gym_protocol.serialization import GymSerializer
 
 Action = Any
 Observation = Any

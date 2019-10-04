@@ -22,17 +22,19 @@
 import inspect
 import json
 import os
+from pathlib import Path
 from typing import TextIO, Type, TypeVar, Generic
 
+import jsonschema
 import yaml
-from jsonschema import validate
+from jsonschema import Draft7Validator
 
-from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig
+from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
-T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig)
+T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig)
 
 
 class ConfigLoader(Generic[T]):
@@ -41,6 +43,8 @@ class ConfigLoader(Generic[T]):
     def __init__(self, schema_filename: str, configuration_type: Type[T]):
         """Initialize the parser for configuration files."""
         self.schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
+        self.resolver = jsonschema.RefResolver("file://{}/".format(Path(_SCHEMAS_DIR).absolute()), self.schema)
+        self.validator = Draft7Validator(self.schema, resolver=self.resolver)
         self.configuration_type = configuration_type  # type: Type[T]
 
     def load(self, fp: TextIO) -> T:
@@ -52,7 +56,7 @@ class ConfigLoader(Generic[T]):
         :raises
         """
         configuration_file_json = yaml.safe_load(fp)
-        validate(instance=configuration_file_json, schema=self.schema)
+        self.validator.validate(instance=configuration_file_json)
         return self.configuration_type.from_json(configuration_file_json)
 
     def dump(self, configuration: T, fp: TextIO) -> None:
@@ -63,5 +67,5 @@ class ConfigLoader(Generic[T]):
         :return: None
         """
         result = configuration.json
-        validate(instance=result, schema=self.schema)
+        self.validator.validate(instance=result)
         yaml.safe_dump(result, fp)

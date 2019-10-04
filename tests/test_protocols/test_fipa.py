@@ -18,19 +18,17 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the FIPA protocol."""
-import base64
-import json
 from unittest import mock
 
 from aea.mail.base import Envelope
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Description
+from aea.protocols.oef.models import Description, Query, Constraint, ConstraintType
 
 
 def test_fipa_cfp_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
-    query = base64.b64encode(json.dumps({"foo": "bar"}).encode("utf-8"))
+    query = Query(Constraint('something', ConstraintType('>', 1)))
     msg = FIPAMessage(message_id=0,
                       dialogue_id=0,
                       target=0,

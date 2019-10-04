@@ -17,37 +17,31 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'echo' skill."""
+"""This package contains a class representing the search state."""
 
-from aea.mail.base import Envelope
-from aea.skills.base import Handler
+from typing import Set
 
 
-class DummyHandler(Handler):
-    """Echo handler."""
+class Search:
+    """This class deals with the search state."""
 
-    SUPPORTED_PROTOCOL = "default"
+    def __init__(self):
+        """Instantiate the search class."""
+        self._id = 0
+        self.ids_for_tac = set()  # type: Set[int]
 
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-        self.kwargs = kwargs
-        self.handled_envelopes = []
-        self.nb_teardown_called = 0
+    @property
+    def id(self) -> int:
+        """Get the search id."""
+        return self._id
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def get_next_id(self) -> int:
         """
-        Handle envelopes.
+        Generate the next search id and stores it.
 
-        :param envelope: the envelope
-        :return: None
+        :return: a search id
         """
-        self.handled_envelopes.append(envelope)
-
-    def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
-        self.nb_teardown_called += 1
+        self._id += 1
+        self.ids_for_tac.add(self._id)
+        return self._id
+        # TODO: we need to make sure dialogue and search ids are unique across skills;

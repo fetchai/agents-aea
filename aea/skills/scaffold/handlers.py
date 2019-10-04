@@ -31,6 +31,14 @@ class MyScaffoldHandler(Handler):
 
     SUPPORTED_PROTOCOL = ''  # type: Optional[ProtocolId]
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Implement the reaction to an envelope.

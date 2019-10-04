@@ -90,7 +90,6 @@ class Dialogue:
         self._dialogue_label = dialogue_label
         self._is_self_initiated = dialogue_label.dialogue_opponent_pbk is not dialogue_label.dialogue_starter_pbk
         self._outgoing_messages = []  # type: List[Message]
-        self._outgoing_messages_controller = []  # type: List[Message]
         self._incoming_messages = []  # type: List[Message]
 
     @property
@@ -103,24 +102,23 @@ class Dialogue:
         """Check whether the agent initiated the dialogue."""
         return self._is_self_initiated
 
-    def outgoing_extend(self, messages: List['Message']) -> None:
+    def outgoing_extend(self, message: 'Message') -> None:
         """
         Extend the list of messages which keeps track of outgoing messages.
 
-        :param messages: a list of messages to be added
+        :param message: a message to be added
         :return: None
         """
-        for message in messages:
-            self._outgoing_messages.extend([message])
+        self._outgoing_messages.extend([message])
 
-    def incoming_extend(self, messages: List['Message']) -> None:
+    def incoming_extend(self, message: 'Message') -> None:
         """
         Extend the list of messages which keeps track of incoming messages.
 
-        :param messages: a list of messages to be added
+        :param messages: a message to be added
         :return: None
         """
-        self._incoming_messages.extend(messages)
+        self._incoming_messages.extend([message])
 
 
 class Dialogues:
@@ -141,33 +139,35 @@ class Dialogues:
         return self._dialogues
 
     @abstractmethod
-    def is_permitted_for_new_dialogue(self, msg: Message, known_pbks: List[str]) -> bool:
+    def is_permitted_for_new_dialogue(self, msg: Message, sender: str) -> bool:
         """
         Check whether an agent message is permitted for a new dialogue.
 
         :param msg: the agent message
-        :param known_pbks: the list of known public keys
+        :param sender: the address of the sender
 
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
 
     @abstractmethod
-    def is_belonging_to_registered_dialogue(self, msg: Message, agent_pbk: str) -> bool:
+    def is_belonging_to_registered_dialogue(self, msg: Message, sender: str, agent_pbk: str) -> bool:
         """
         Check whether an agent message is part of a registered dialogue.
 
         :param msg: the agent message
+        :param sender: the address of the sender
         :param agent_pbk: the public key of the agent
 
         :return: boolean indicating whether the message belongs to a registered dialogue
         """
 
     @abstractmethod
-    def get_dialogue(self, msg: Message, agent_pbk: str) -> Dialogue:
+    def get_dialogue(self, msg: Message, sender: str, agent_pbk: str) -> Dialogue:
         """
         Retrieve dialogue.
 
         :param msg: the agent message
+        :param sender: the address of the sender
         :param agent_pbk: the public key of the agent
 
         :return: the dialogue

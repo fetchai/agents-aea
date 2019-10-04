@@ -17,37 +17,43 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'echo' skill."""
+"""This package contains a scaffold of a task."""
+from typing import cast, TYPE_CHECKING
 
-from aea.mail.base import Envelope
-from aea.skills.base import Handler
+from aea.skills.base import Task
+
+if TYPE_CHECKING:
+    from packages.skills.fipa_negotiation.transactions import Transactions
+else:
+    from fipa_negotiation_skill.transactions import Transactions
 
 
-class DummyHandler(Handler):
-    """Echo handler."""
+class TransactionCleanUpTask(Task):
+    """This class implements the cleanup of the transactions class."""
 
-    SUPPORTED_PROTOCOL = "default"
-
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-        self.kwargs = kwargs
-        self.handled_envelopes = []
-        self.nb_teardown_called = 0
-
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def setup(self) -> None:
         """
-        Handle envelopes.
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def execute(self) -> None:
+        """
+        Implement the task execution.
 
         :param envelope: the envelope
         :return: None
         """
-        self.handled_envelopes.append(envelope)
+        transactions = cast(Transactions, self.context.transactions)
+        transactions.cleanup_pending_transactions()
 
     def teardown(self) -> None:
         """
-        Teardown the handler.
+        Implement the task teardown.
 
         :return: None
         """
-        self.nb_teardown_called += 1
+        transactions = cast(Transactions, self.context.transactions)
+        transactions.reset()

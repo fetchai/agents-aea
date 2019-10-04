@@ -224,6 +224,10 @@ class OEFChannel(OEFAgent, Channel):
         :param query: the query.
         :return: None
         """
+        try:
+            query = pickle.loads(query)
+        except Exception:
+            pass
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
                           target=target,
@@ -383,6 +387,8 @@ class OEFChannel(OEFAgent, Channel):
         if performative == FIPAMessage.Performative.CFP:
             query = fipa_message.get("query")
             query = b"" if query is None else query
+            if type(query) == Query:
+                query = pickle.dumps(query)
             self.send_cfp(id, dialogue_id, destination, target, query)
         elif performative == FIPAMessage.Performative.PROPOSE:
             proposal = cast(List[Description], fipa_message.get("proposal"))

@@ -12,10 +12,11 @@ Command  | Description
 `run {using [connection, ...]}`  | Run the agent on the Fetch.AI network with default or specified connections.
 `-v DEBUG run` | Run with debugging.
 `deploy {using [connection, ...]}`  | Deploy the agent to a server and run it on the Fetch.AI network with default or specified connections.
-`delete [name]`  | Delete an aea project.
+`delete [name]`  | Delete an aea project. See below for disabling a resource.
 
 
-
+!!!	Tip
+	You can also disable a resource without deleting it by removing the entry from the configuration but leaving the package in the skills namespace.
 
 
 

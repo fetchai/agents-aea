@@ -1,11 +1,115 @@
-## How?
+An agent developer writes skill code that the framework can call.
+
+When you add a skill with the cli, a directory is created which includes modules for the `Behaviour,` `Task`, and `Handler` classes.
+
+
+
+
+## Context
+
+The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context has a link to the agent context also.
+
+This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill.
+
+For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
+
+``` python
+self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
+``` 
+
+## What to code
+
+Each of the skill classes has three methods that must be implemented. All of them include a `setup()` and `teardown()` method which the developer must implement. 
+
+Then there is a specific method that the framework requires for each class.
+
+### `handlers.py`
+
+There can be one or more `Handler` class per skill.
+
+`Handler` classes can receive `Envelope` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol.
+
+* `handle_envelope(self, Envelope)`: is where the skill receives a message contained within an `Envelope` and decides what to do with it.
+
 
 !!!	Todo
+	For example.
 
-## Why?
+
+### `behaviours.py`
+
+Conceptually, a `Behaviour`  class contains the business logic specific to initial actions initiated by the agent rather than reactions to other events.
+
+There can be one or more `Behaviour` classes per skill. The developer subclasses abstract class `Behaviour` to create a new `Behaviour`.
+
+* `act(self)`: is how the framework calls the `Behaviour` code. 
 
 !!!	Todo
+	For example.
 
-## Example
+
+### `tasks.py`
+
+Conceptually, a `Task` is where the developer codes any internal tasks the agent requires.
+
+There can be one or more `Task` classes per skill. The developer subclasses abstract class `Task` to create a new `Task`.
+
+* `execute(self)`: is how the framework calls a `Task`. 
 
 !!!	Todo
+	For example.
+
+
+### Skill config
+
+Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
+
+It also details the protocol type.
+
+In the future, this file will point to shared modules which allow agent communication with custom classes.
+
+``` yaml
+name: echo
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: EchoBehaviour
+      args:
+        foo: bar
+handler:
+  class_name: EchoHandler
+  args:
+    foo: bar
+    bar: foo
+tasks:
+  - task:
+      class_name: EchoTask
+      args:
+        foo: bar
+        bar: foo
+dependencies:
+  - dependency:
+      class_name: EchoDependency
+      args:
+        foo: bar
+        bar: foo
+protocol: "default"
+```
+
+
+## Error skill
+
+All top level AEA `skills` directories receive a default `error` skill that contains error handling code for a number of scenarios.
+
+* Received envelopes with unsupported protocols 
+* Received envelopes with unsupported skills.
+* Envelopes with decoding errors.
+* Invalid messages with respect to the registered protocol.
+
+The error skill relies on the `default` protocol which provides error codes for the above.
+
+
+<br />

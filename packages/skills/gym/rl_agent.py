@@ -21,9 +21,13 @@
 
 import numpy as np
 import random
-from typing import Any, Dict
+from typing import Any, Dict, TYPE_CHECKING
 
-from .helpers import RLAgent, ProxyEnv
+if TYPE_CHECKING:
+    from packages.skills.gym.helpers import RLAgent, ProxyEnv
+else:
+    from gym_skill.helpers import RLAgent, ProxyEnv
+
 
 NB_STEPS = 4000
 NB_GOODS = 10

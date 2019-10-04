@@ -26,7 +26,7 @@ from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 from aea.protocols.fipa import fipa_pb2
 from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.oef.models import Description
+from aea.protocols.oef.models import Description, Query
 
 
 class FIPASerializer(Serializer):
@@ -46,6 +46,9 @@ class FIPASerializer(Serializer):
             if query is None or query == b"":
                 nothing = fipa_pb2.FIPAMessage.CFP.Nothing()  # type: ignore
                 performative.nothing.CopyFrom(nothing)
+            elif type(query) == Query:
+                query = pickle.dumps(query)
+                performative.query_bytes = query
             elif type(query) == bytes:
                 performative.bytes = query
             else:
@@ -88,6 +91,8 @@ class FIPASerializer(Serializer):
             query_type = fipa_pb.cfp.WhichOneof("query")
             if query_type == "nothing":
                 query = None
+            elif query_type == "query_bytes":
+                query = pickle.loads(fipa_pb.cfp.query_bytes)
             elif query_type == "bytes":
                 query = fipa_pb.cfp.bytes
             else:

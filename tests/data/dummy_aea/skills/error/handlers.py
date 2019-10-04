@@ -37,6 +37,14 @@ class ErrorHandler(Handler):
 
     SUPPORTED_PROTOCOL = 'default'  # type: Optional[ProtocolId]
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Implement the reaction to an envelope.

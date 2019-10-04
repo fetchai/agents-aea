@@ -10,6 +10,7 @@ message FIPAMessage{
         oneof query{
             bytes bytes = 2;
             Nothing nothing = 3;
+            bytes query_bytes = 4;
         }
     }
     message Propose{
