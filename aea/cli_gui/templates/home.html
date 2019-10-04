@@ -13,74 +13,57 @@
 </head>
 <body>
     <div class="container">
-       <h1 class="banner">Fetch.AI AEA CLI REST API</h1>
-        <div class="section editor">
-            <div class="agents">
-                <table>
-                    <caption>Local Agents</caption>
-                    <thead>
-                        <tr>
-                            <th>Agent id</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+        <h1 class="banner">Fetch.AI AEA CLI REST API</h1>
+        <div class="split left">
+            <div class="section editor">
+                <label for="localAgentsCreateId">Create Agent id
+                    <input id="localAgentsCreateId" type="text" />
+                </label>
+                <button id="localAgentsCreate">Create Agent</button>
+                <br>
+                <br>
+                <div class="localAgents">
+                    <table>
+                        <caption>Local Agents</caption>
+                        <thead>
+                            <tr>
+                                <th>Agent id</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3>Selected Agent: <div id="localAgentsSelectionId" style="display: inline">NONE</div></h3>
+                </div>
+                <button id="localAgentsDelete">Delete Agent</button>
             </div>
-            <label for="createAgentId">Create Agent ID
-                <input id="createAgentId" type="text" />
-            </label>
-            <button id="createAgent">Create Agent</button>
-
-<!--            <label for="selectedAgentId">Delected Agent ID-->
-<!--                <input id="selectedAgentId" type="text" />-->
-<!--            </label>-->
-            <div>
-            <h3>Selected Agent: <div id="selectedAgentId" style="display: inline">NONE</div></h3>
+            <div class="error"></div>
+        </div>
+        <div class="split right">
+            <div class="section editor">
+                <div class="registeredProtocols">
+                    <table>
+                        <caption>Registered Protocols</caption>
+                        <thead>
+                            <tr>
+                                <th>Protocol id</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                <h3>Selected Protocol: <div id="registeredProtocolsSelectionId" style="display: inline">NONE</div></h3>
+                </div>
+                <button id="registeredProtocolsFetch"><< Fetch Protocol</button>
             </div>
-            <button id="deleteAgent">Delete Agent</button>
-<!--            <br>-->
-<!--            <br>-->
-<!--            <br>-->
-<!--            <br>-->
-<!--            <br>-->
-<!--            <br>-->
-<!--            <br>-->
-<!--            <br>-->
-<!--            <br>-->
-<!--            <br>-->
-
-
-<!--            <label for="fname">First Name-->
-<!--                <input id="fname" type="text" />-->
-<!--            </label>-->
-<!--            <br />-->
-<!--            <label for="lname">Last Name-->
-<!--                <input id="lname" type="text" />-->
-<!--            </label>-->
-<!--            <br />-->
-<!--            <button id="create">Create</button>-->
-<!--            <button id="update">Update</button>-->
-<!--            <button id="delete">Delete</button>-->
-<!--            <button id="reset">Reset</button>-->
-<!--        </div>-->
-<!--        <div class="people">-->
-<!--            <table>-->
-<!--                <caption>People</caption>-->
-<!--                <thead>-->
-<!--                    <tr>-->
-<!--                        <th>First Name</th>-->
-<!--                        <th>Last Name</th>-->
-<!--                        <th>Update Time</th>-->
-<!--                    </tr>-->
-<!--                </thead>-->
-<!--                <tbody>-->
-<!--                </tbody>-->
-<!--            </table>-->
         </div>
-        <div class="error">
-        </div>
+
     </div>
 </body>
 <script src="static/js/home.js"></script>

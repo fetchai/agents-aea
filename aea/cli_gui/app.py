@@ -25,6 +25,13 @@ def is_agent_dir(dir_name):
         return os.path.isfile(os.path.join(dir_name, "aea-config.yaml"))
 
 
+def is_protocol_dir(dir_name):
+    if not os.path.isdir(dir_name):
+        return False
+    else:
+        return os.path.isfile(os.path.join(dir_name, "protocol.yaml"))
+
+
 def get_agents():
     agent_dir = os.path.join(os.getcwd(), args.agent_dir)
 
@@ -33,21 +40,36 @@ def get_agents():
 
     agent_list = []
 
-
-    # Iterate over the list of filepaths & test if they are aea project directories
     for path in file_list:
         if is_agent_dir(path):
             head, tail = os.path.split(path)
-            agent_list.append({"agentId": tail, "description": "placeholder description"})
+            agent_list.append({"id": tail, "description": "placeholder description"})
 
     return agent_list
+
+
+def get_registered_protocols():
+    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
+    protocols_dir = os.path.join(agent_dir, "packages/protocols")
+
+    # Get a list of all the directories paths that ends with .txt from in specified directory
+    file_list = glob.glob(os.path.join(protocols_dir, '*'))
+
+    protocol_list = []
+
+    for path in file_list:
+        if is_protocol_dir(path):
+            head, tail = os.path.split(path)
+            protocol_list.append({"id": tail, "description": "placeholder description"})
+
+    return protocol_list
 
 
 def create_agent(agent_id):
     old_cwd = os.getcwd()
     os.chdir(args.agent_dir)
     ret = subprocess.call(["aea", "create", agent_id])
-    print("creating agent: {}".format(os.path.join(os.getcwd(), agent_id)))
+    print("ret ={} ".format(ret))
     os.chdir(old_cwd)
 
     if ret == 0:

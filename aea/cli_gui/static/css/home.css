@@ -17,7 +17,7 @@ body, .ui-btn {
 }
 
 .editor {
-    width: 50%;
+    width: 80%;
     margin-left: auto;
     margin-right: auto;
     padding: 5px;
@@ -39,7 +39,7 @@ button {
 }
 
 .people {
-    width: 50%;
+    width: 80%;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 5px;
@@ -74,7 +74,7 @@ td {
 }
 
 .error {
-    width: 50%;
+    width: 80%;
     margin-left: auto;
     margin-right: auto;
     padding: 5px;
@@ -82,4 +82,40 @@ td {
     border-radius: 3px;
     background-color: #fbb;
     visibility: hidden;
+}
+
+/* Split the screen in half */
+.split {
+  height: 90%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  top: 1;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Control the left side */
+.left {
+  left: 0;
+}
+
+/* Control the right side */
+.right {
+  right: 0;
+}
+
+/* If you want the content centered horizontally and vertically */
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* Style the image inside the centered container, if needed */
+.centered img {
+  width: 150px;
+  border-radius: 50%;
 }

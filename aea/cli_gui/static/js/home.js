@@ -6,6 +6,16 @@
 // Create the namespace instance
 let ns = {};
 
+let elements = [{"location": "local", "type": "agents"},
+                {"location": "registered", "type": "protocols"}]
+
+
+
+function makeCombineName(element){
+    return element["location"] + element["type"].slice(0, 1).toUpperCase() + element["type"].slice(1) ;
+}
+
+
 // Create the model instance
 ns.model = (function() {
     'use strict';
@@ -14,123 +24,55 @@ ns.model = (function() {
 
     // Return the API
     return {
-        read_local_agents: function() {
+        readData: function(element) {
             let ajax_options = {
                 type: 'GET',
-                url: 'api/agents',
+                url: 'api/' + element["type"],
                 accepts: 'application/json',
                 dataType: 'json'
             };
             $.ajax(ajax_options)
             .done(function(data) {
-                $event_pump.trigger('model_local_agents_read_success', [data]);
+                $event_pump.trigger('model_' + makeCombineName(element) + 'ReadSuccess', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        read: function() {
-            let ajax_options = {
-                type: 'GET',
-                url: 'api/people',
-                accepts: 'application/json',
-                dataType: 'json'
-            };
-            $.ajax(ajax_options)
-            .done(function(data) {
-                $event_pump.trigger('model_read_success', [data]);
-            })
-            .fail(function(xhr, textStatus, errorThrown) {
-                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-            })
-        },
-        createAgent: function(agentId) {
+        createItem: function(element, id) {
             let ajax_options = {
                 type: 'POST',
-                url: 'api/agents',
+                url: 'api/' + element["type"],
                 accepts: 'application/json',
                 contentType: 'application/json',
                 dataType: 'json',
-                data: JSON.stringify(agentId)
+                data: JSON.stringify(id)
             };
             $.ajax(ajax_options)
             .done(function(data) {
-                $event_pump.trigger('model_create_agent_success', [data]);
+                $event_pump.trigger('model_' + makeCombineName(element) + 'CreateSuccess', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        deleteAgent: function(agentId) {
+
+        deleteItem: function(element, id) {
             let ajax_options = {
                 type: 'DELETE',
-                url: 'api/agents/' + agentId,
+                url: 'api/' + element["type"] +'/' + id,
                 accepts: 'application/json',
                 contentType: 'plain/text'
             };
             $.ajax(ajax_options)
             .done(function(data) {
-                $event_pump.trigger('model_delete_agent_success', [data]);
+                $event_pump.trigger('model_' + makeCombineName(element) + 'DeleteSuccess', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        create: function(fname, lname) {
-            let ajax_options = {
-                type: 'POST',
-                url: 'api/people',
-                accepts: 'application/json',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'fname': fname,
-                    'lname': lname
-                })
-            };
-            $.ajax(ajax_options)
-            .done(function(data) {
-                $event_pump.trigger('model_create_success', [data]);
-            })
-            .fail(function(xhr, textStatus, errorThrown) {
-                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-            })
-        },
-        update: function(fname, lname) {
-            let ajax_options = {
-                type: 'PUT',
-                url: 'api/people/' + lname,
-                accepts: 'application/json',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    'fname': fname,
-                    'lname': lname
-                })
-            };
-            $.ajax(ajax_options)
-            .done(function(data) {
-                $event_pump.trigger('model_update_success', [data]);
-            })
-            .fail(function(xhr, textStatus, errorThrown) {
-                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-            })
-        },
-        delete: function(lname) {
-            let ajax_options = {
-                type: 'DELETE',
-                url: 'api/agents/' + lname,
-                accepts: 'application/json',
-                contentType: 'plain/text'
-            };
-            $.ajax(ajax_options)
-            .done(function(data) {
-                $event_pump.trigger('model_delete_success', [data]);
-            })
-            .fail(function(xhr, textStatus, errorThrown) {
-                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
-            })
-        }
+
     };
 }());
 
@@ -138,58 +80,34 @@ ns.model = (function() {
 ns.view = (function() {
     'use strict';
 
-    let $fname = $('#fname'),
-        $lname = $('#lname'),
-        $selectedAgentId = $('#selectedAgentId'),
-        $createAgentId = $('#createAgentId');
 
     // return the API
     return {
-        reset: function() {
-            $lname.val('');
-            $fname.val('').focus();
+
+        setCreateId: function(tag, id) {
+            $('#'+tag+'CreateId').html(id);
         },
-        update_editor: function(fname, lname) {
-            $lname.val(lname);
-            $fname.val(fname).focus();
+
+        setSelectedId: function(tag, id) {
+            $('#'+tag+'SelectionId').html(id);
         },
-        setSelectedAgentId(agentId){
-            $selectedAgentId.html(agentId);
-        },
-        setCreateAgentId(agentId){
-            $createAgentId.val(agentId);
-        },
-        update_selected_agent: function(agentId) {
-            $selectedAgentId.html(agentId);
-        },
-        build_people_table: function(people) {
+
+        build_table: function(data, tableName) {
             let rows = ''
 
             // clear the table
-            $('.people table > tbody').empty();
+            $('.' + tableName + ' table > tbody').empty();
 
             // did we get a people array?
-            if (people) {
-                for (let i=0, l=people.length; i < l; i++) {
-                    rows += `<tr><td class="fname">${people[i].fname}</td><td class="lname">${people[i].lname}</td><td>${people[i].timestamp}</td></tr>`;
+            if (tableName) {
+                for (let i=0, l=data.length; i < l; i++) {
+                    rows += `<tr><td class="id">${data[i].id}</td><td class="description">${data[i].description}</td></tr>`;
                 }
-                $('.people table > tbody').append(rows);
+                $('.' + tableName + ' table > tbody').append(rows);
             }
         },
-        build_local_agents_table: function(agents) {
-            let rows = ''
 
-            // clear the table
-            $('.agents table > tbody').empty();
 
-            // did we get a people array?
-            if (agents) {
-                for (let i=0, l=agents.length; i < l; i++) {
-                    rows += `<tr><td class="agentId">${agents[i].agentId}</td><td class="description">${agents[i].description}</td></tr>`;
-                }
-                $('.agents table > tbody').append(rows);
-            }
-        },
         error: function(error_msg) {
             $('.error')
                 .text(error_msg)
@@ -207,164 +125,79 @@ ns.controller = (function(m, v) {
 
     let model = m,
         view = v,
-        $event_pump = $('body'),
-        $fname = $('#fname'),
-        $lname = $('#lname'),
-        $createAgentId = $('#createAgentId'),
-        $selectedAgentId = $('#selectedAgentId');
+        $event_pump = $('body');
 
     // Get the data from the model after the controller is done initializing
     setTimeout(function() {
-        model.read();
-        model.read_local_agents();
+        for (var i = 0; i < elements.length; ++i){
+            model.readData(elements[i]);
+        }
     }, 100)
 
-    // Validate input
-    function validate(fname, lname) {
-        return fname !== "" && lname !== "";
-    }
-
-    function validateAgentId(agentId){
+    function validateId(agentId){
         return agentId != "" && agentId != "NONE";
     }
 
-    // Create our event handlers
-    $('#create').click(function(e) {
-        let fname = $fname.val(),
-            lname = $lname.val();
+    // Go through each of the element types setting up cal back and table building functions on the
+    // Items which exist
+    for (var i = 0; i < elements.length; i++) {
+        let element = elements[i]
+        let combineName = makeCombineName(element)
+         $('#' + combineName + 'Create').click(function(e){
+            let id =$('#' + combineName + 'CreateId').val();
 
-        e.preventDefault();
+            e.preventDefault();
 
-        if (validate(fname, lname)) {
-            model.create(fname, lname)
-        } else {
-            alert('Problem with first or last name input');
-        }
-    });
-
-    $('#update').click(function(e) {
-        let fname = $fname.val(),
-            lname = $lname.val();
-
-        e.preventDefault();
-
-        if (validate(fname, lname)) {
-            model.update(fname, lname)
-        } else {
-            alert('Problem with first or last name input');
-        }
-        e.preventDefault();
-    });
+            if (validateId(id)){
+                model.createItem(element, id)
+            } else {
+                alert('Error: Problem with id');
+            }
+        });
 
 
-    $('#delete').click(function(e) {
-        let lname = $lname.val();
+        $('#' + combineName + 'Delete').click(function(e) {
+            let id =$('#' + combineName + 'SelectionId').html();
 
-        e.preventDefault();
+            e.preventDefault();
 
-        if (validate('placeholder', lname)) {
-            model.delete(lname)
-        } else {
-            alert('Problem with first or last name input');
-        }
-        e.preventDefault();
-    });
-
-    $('#reset').click(function() {
-        view.reset();
-    });
-
-    $('#createAgent').click(function(e){
-        let agentId = $createAgentId.val();
-
-        e.preventDefault();
-
-        if (validateAgentId(agentId)){
-            model.createAgent(agentId)
-        } else {
-            alert('Error: Problem with agent id');
-        }
-    });
+            if (validateId(id)) {
+                model.deleteItem(element, id)
+            } else {
+                alert('Error: Problem with selected id');
+            }
+            e.preventDefault();
+        });
 
 
-    $('#deleteAgent').click(function(e) {
-        let agentId = $selectedAgentId.html();
+        $('.' + combineName + ' table > tbody ').on('click', 'tr', function(e) {
+            let $target = $(e.target),
+                id,
+                description;
 
-        e.preventDefault();
+            id = $target
+                .parent()
+                .find('td.id')
+                .text();
 
-        if (validateAgentId(agentId)) {
-            model.deleteAgent(agentId)
-        } else {
-            alert('Error: Problem with selected agent id');
-        }
-        e.preventDefault();
-    });
+            view.setSelectedId(combineName, id);
+        });
+        // Handle the model events
+        $event_pump.on('model_'+ combineName + 'ReadSuccess', function(e, data) {
+            view.build_table(data, combineName);
+        });
 
+        $event_pump.on('model_'+ combineName + 'CreateSuccess', function(e, data) {
+            model.readData(element);
+            view.setSelectedId(combineName, data)
+            view.setCreateId(combineName, "")
+        });
 
-     $('.agents table > tbody ').on('click', 'tr', function(e) {
-        let $target = $(e.target),
-            agentId,
-            description;
-
-        agentId = $target
-            .parent()
-            .find('td.agentId')
-            .text();
-
-        view.update_selected_agent(agentId);
-    });
-
-    $('.people table > tbody ').on('dblclick', 'tr', function(e) {
-        let $target = $(e.target),
-            fname,
-            lname;
-
-        fname = $target
-            .parent()
-            .find('td.fname')
-            .text();
-
-        lname = $target
-            .parent()
-            .find('td.lname')
-            .text();
-
-        view.update_editor(fname, lname);
-    });
-
-    // Handle the model events
-    $event_pump.on('model_read_success', function(e, data) {
-        view.build_people_table(data);
-        view.reset();
-    });
-
-    $event_pump.on('model_local_agents_read_success', function(e, data) {
-        view.build_local_agents_table(data);
-        view.reset();
-    });
-
-    $event_pump.on('model_create_success', function(e, data) {
-        model.read();
-    });
-
-    $event_pump.on('model_update_success', function(e, data) {
-        model.read();
-    });
-
-    $event_pump.on('model_delete_success', function(e, data) {
-        model.read();
-    });
-
-    $event_pump.on('model_create_agent_success', function(e, data) {
-        model.read_local_agents();
-        view.setSelectedAgentId(data)
-        view.setCreateAgentId("")
-    });
-
-    $event_pump.on('model_delete_agent_success', function(e, data) {
-        model.read_local_agents();
-        view.setSelectedAgentId("NONE")
-    });
+        $event_pump.on('model_'+ combineName + 'DeleteSuccess', function(e, data) {
+            model.readData(element);
+            view.setSelectedId(combineName, "NONE")
+        });
+    }
 
 
     $event_pump.on('model_error', function(e, xhr, textStatus, errorThrown) {
@@ -372,6 +205,6 @@ ns.controller = (function(m, v) {
         view.error(error_msg);
         console.log(error_msg);
     })
-}(ns.model, ns.view));
+}(ns.model, ns.view ));
 
 
