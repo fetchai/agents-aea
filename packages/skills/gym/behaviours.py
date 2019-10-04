@@ -29,6 +29,10 @@ class GymBehaviour(Behaviour):
         """Initialize the behaviour."""
         pass
 
+    def setup(self) -> None:
+        """Implement the behaviour setup."""
+        pass
+
     def act(self) -> None:
         """Act according to the behaviour."""
         pass
