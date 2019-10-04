@@ -30,11 +30,13 @@ from aea.skills.base import Handler
 if TYPE_CHECKING:
     from packages.protocols.tac.message import TACMessage
     from packages.protocols.tac.serialization import TACSerializer
-    from packages.skills.tac.game import GamePhase
+    from packages.skills.tac.game import Game, GamePhase
+    from packages.skills.tac.search import Search
 else:
     from tac_protocol.message import TACMessage
     from tac_protocol.serialization import TACSerializer
-    from tac_skill.game import GamePhase
+    from tac_skill.game import Game, GamePhase
+    from tac_skill.search import Search
 
 
 Address = str
@@ -116,11 +118,12 @@ class OEFHandler(Handler):
 
         :return: None
         """
+        search = cast(Search, self.context.search)
         search_id = search_result.get("id")
         agents = search_result.get("agents")
         agents = cast(List[str], agents)
         logger.debug("[{}]: on search result: {} {}".format(self.context.agent_name, search_id, agents))
-        if search_id in self.context.search.ids_for_tac:
+        if search_id in search.ids_for_tac:
             self._on_controller_search_result(agents)
         else:
             logger.debug("[{}]: Unknown search id: search_id={}".format(self.context.agent_name, search_id))
@@ -133,7 +136,8 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        if self.context.game.game_phase != GamePhase.PRE_GAME:
+        game = cast(Game, self.context.game)
+        if game.game_phase != GamePhase.PRE_GAME:
             logger.debug("[{}]: Ignoring controller search result, the agent is already competing.".format(self.context.agent_name))
             return
 
@@ -158,8 +162,9 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        self.context.game.update_expected_controller_pbk(controller_pbk)
-        self.context.game.update_game_phase(GamePhase.GAME_SETUP)
+        game = cast(Game, self.context.game)
+        game.update_expected_controller_pbk(controller_pbk)
+        game.update_game_phase(GamePhase.GAME_SETUP)
         tac_msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
         tac_bytes = TACSerializer().encode(tac_msg)
         self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
@@ -172,8 +177,9 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        self.context.game.update_expected_controller_pbk(controller_pbk)
-        self.context.game.update_game_phase(GamePhase.GAME_SETUP)
+        game = cast(Game, self.context.game)
+        game.update_expected_controller_pbk(controller_pbk)
+        game.update_game_phase(GamePhase.GAME_SETUP)
         tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
         tac_bytes = TACSerializer().encode(tac_msg)
         self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
@@ -202,29 +208,29 @@ class TACHandler(Handler):
         tac_msg = TACSerializer().decode(envelope.message)
         tac_msg_type = TACMessage.Type(tac_msg.get("type"))
         tac_msg = cast(TACMessage, tac_msg)
-
+        game = cast(Game, self.context.game)
         logger.debug("[{}]: Handling controller response. type={}".format(self.context.agent_name, tac_msg_type))
         try:
-            if envelope.sender != self.context.game.expected_controller_pbk:
+            if envelope.sender != game.expected_controller_pbk:
                 raise ValueError("The sender of the message is not the controller agent we registered with.")
 
             if tac_msg_type == TACMessage.Type.TAC_ERROR:
                 self._on_tac_error(tac_msg, envelope.sender)
-            elif self.context.game.game_phase == GamePhase.PRE_GAME:
+            elif game.game_phase == GamePhase.PRE_GAME:
                 raise ValueError("We do not expect a controller agent message in the pre game phase.")
-            elif self.context.game.game_phase == GamePhase.GAME_SETUP:
+            elif game.game_phase == GamePhase.GAME_SETUP:
                 if tac_msg_type == TACMessage.Type.GAME_DATA:
                     self._on_start(tac_msg, envelope.sender)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
-            elif self.context.game.game_phase == GamePhase.GAME:
+            elif game.game_phase == GamePhase.GAME:
                 if tac_msg_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
                     self._on_transaction_confirmed(tac_msg, envelope.sender)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
                 elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
                     self._on_state_update(tac_msg, envelope.sender)
-            elif self.context.game.game_phase == GamePhase.POST_GAME:
+            elif game.game_phase == GamePhase.POST_GAME:
                 raise ValueError("We do not expect a controller agent message in the post game phase.")
         except ValueError as e:
             logger.warning(str(e))
@@ -261,8 +267,9 @@ class TACHandler(Handler):
         :return: None
         """
         logger.debug("[{}]: Received start event from the controller. Starting to compete...".format(self.context.agent_name))
-        self.context.game.init(tac_message, controller_pbk)
-        self.context.game.update_game_phase(GamePhase.GAME)
+        game = cast(Game, self.context.game)
+        game.init(tac_message, controller_pbk)
+        game.update_game_phase(GamePhase.GAME)
 
     def _on_cancelled(self) -> None:
         """
@@ -271,7 +278,8 @@ class TACHandler(Handler):
         :return: None
         """
         logger.debug("[{}]: Received cancellation from the controller.".format(self.context.agent_name))
-        self.context.game.update_game_phase(GamePhase.POST_GAME)
+        game = cast(Game, self.context.game)
+        game.update_game_phase(GamePhase.POST_GAME)
 
     def _on_transaction_confirmed(self, message: TACMessage, controller_pbk: Address) -> None:
         """
@@ -302,8 +310,9 @@ class TACHandler(Handler):
 
         :return: None
         """
-        self.context.game.init(tac_message, controller_pbk)
-        self.context.game.update_game_phase(GamePhase.GAME)
+        game = cast(Game, self.context.game)
+        game.init(tac_message, controller_pbk)
+        game.update_game_phase(GamePhase.GAME)
         # # for tx in message.get("transactions"):
         # #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))
         # self.context.state_update_queue =
@@ -333,4 +342,5 @@ class TACHandler(Handler):
         """
         tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
         tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=self.context.game.controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        game = cast(Game, self.context.game)
+        self.context.outbox.put_message(to=game.expected_controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)

@@ -18,16 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a behaviour."""
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
 
 if TYPE_CHECKING:
-    from packages.skills.tac.game import GamePhase
+    from packages.skills.tac.game import Game, GamePhase
+    from packages.skills.tac.search import Search
 else:
-    from tac_skill.game import GamePhase
+    from tac_skill.game import Game, GamePhase
+    from tac_skill.search import Search
 
 
 class TACBehaviour(Behaviour):
@@ -47,7 +49,8 @@ class TACBehaviour(Behaviour):
 
         :return: None
         """
-        if self.context.game.game_phase == GamePhase.PRE_GAME:
+        game = cast(Game, self.context.game)
+        if game.game_phase == GamePhase.PRE_GAME:
             self._search_for_tac()
 
     def teardown(self) -> None:
@@ -67,9 +70,11 @@ class TACBehaviour(Behaviour):
 
         :return: None
         """
-        query = self.context.game.get_game_query()
-        search_id = self.context.search.get_next_id()
-        self.context.search.ids_for_tac.add(search_id)
+        game = cast(Game, self.context.game)
+        search = cast(Search, self.context.search)
+        query = game.get_game_query()
+        search_id = search.get_next_id()
+        search.ids_for_tac.add(search_id)
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
         msg_bytes = OEFSerializer().encode(msg)
         self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)

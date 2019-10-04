@@ -79,11 +79,11 @@ class Strategy(SharedClass):
         """Check if the world is modeled by the agent."""
         return self._is_world_modeling
 
-    # @property
-    # def world_state(self) -> WorldState:
-    #     """Get the world state."""
-    #     assert self._is_world_modeling, "World state is not modeled!"
-    #     return self._world_state
+    @property
+    def world_state(self) -> None:
+        """Get the world state."""
+        assert self._is_world_modeling, "World state is not modeled!"
+        return self._world_state
 
     @property
     def is_registering_as_seller(self) -> bool:

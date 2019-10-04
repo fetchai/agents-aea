@@ -60,6 +60,7 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         fipa_msg = FIPASerializer().decode(envelope.message)
+        fipa_msg = cast(FIPAMessage, fipa_msg)
         fipa_msg_performative = fipa_msg.get("performative")  # FIPAMessage.Performative(fipa_msg.get("performative"))
 
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
@@ -109,16 +110,18 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        own_service_description = strategy.get_own_service_description(is_supply=dialogue.is_seller)
+        transactions = cast(Transactions, self.context.transactions)
+        ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=dialogue.is_seller)
+        own_service_description = strategy.get_own_service_description(ownership_state_after_locks, is_supply=dialogue.is_seller)
         new_msg_id = cast(int, cfp.get("id")) + 1
-        decline = False
         cfp_query = cfp.get("query")
         cfp_query = cast(Query, cfp_query)
+        decline = False
         if not cfp_query.check(own_service_description):
             decline = True
             logger.debug("[{}]: Current holdings do not satisfy CFP query.".format(self.context.agent_name))
         else:
-            proposal_description = strategy.generate_proposal_description_for_query(cfp_query, dialogue.is_seller)
+            proposal_description = strategy.get_proposal_for_query(cfp_query, self.context.preferences, ownership_state_after_locks, is_seller=dialogue.is_seller, tx_fee=1.0)
             if proposal_description is None:
                 decline = True
                 logger.debug("[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(self.context.agent_name))
@@ -138,6 +141,7 @@ class FIPANegotiationHandler(Handler):
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         else:
+            assert proposal_description is not None
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
@@ -189,7 +193,8 @@ class FIPANegotiationHandler(Handler):
             new_msg_id = cast(int, propose.get("id")) + 1
             strategy = cast(Strategy, self.context.strategy)
             transactions = cast(Transactions, self.context.transactions)
-            if strategy.is_profitable_transaction(transaction_msg, dialogue):
+            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=dialogue.is_seller)
+            if strategy.is_profitable_transaction(self.context.preferences, ownership_state_after_locks, transaction_msg):
                 logger.debug("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))
                 transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
                 transactions.add_pending_initial_acceptance(dialogue.dialogue_label, new_msg_id, transaction_msg)
@@ -203,7 +208,8 @@ class FIPANegotiationHandler(Handler):
                 dialogue.outgoing_extend(msg)
                 msg_bytes = FIPASerializer().encode(msg)
                 result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-                transactions.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
+                dialogues = cast(Dialogues, self.context.dialogues)
+                dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
         self.context.outbox.put(result)
 
     def _on_decline(self, decline: FIPAMessage, dialogue: Dialogue) -> None:
@@ -226,12 +232,13 @@ class FIPANegotiationHandler(Handler):
             transaction_msg = transactions.pop_pending_proposal(dialogue.dialogue_label, target)
             strategy = cast(Strategy, self.context.strategy)
             if strategy.is_world_modeling:
-                strategy.world_state.update_on_declined_propose(transaction_msg)
+                pass  # TODO
+                # strategy.world_state.update_on_declined_propose(transaction_msg)
         elif target == 3:
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
             transactions = cast(Transactions, self.context.transactions)
             transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, target)
-            transactions.pop_locked_tx(transaction_msg.transaction_id)
+            transactions.pop_locked_tx(transaction_msg)
 
     def _on_accept(self, accept: FIPAMessage, dialogue: Dialogue) -> None:
         """
@@ -247,11 +254,13 @@ class FIPANegotiationHandler(Handler):
         logger.debug("[{}]: on_accept: msg_id={}, dialogue_id={}, origin={}, target={}"
                      .format(self.context.agent_name, accept.get("id"), accept.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, accept.get("target")))
         new_msg_id = cast(int, accept.get("id")) + 1
-        transaction_msg = transactions.pop_pending_proposal(dialogue.dialogue_label, accept.get("target"))
+        transaction_msg = transactions.pop_pending_proposal(dialogue.dialogue_label, cast(int, accept.get("target")))
         strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_profitable_transaction(transaction_msg, dialogue):
+        ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=dialogue.is_seller)
+        if strategy.is_profitable_transaction(self.context.preferences, ownership_state_after_locks, transaction_msg):
             if strategy.is_world_modeling:
-                strategy.world_state.update_on_initial_accept(transaction_msg)
+                pass  # TODO
+                # strategy.world_state.update_on_initial_accept(transaction_msg)
             logger.debug("[{}]: Locking the current state (as {}).".format(self.context.agent_name, dialogue.role))
             transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
             self.context.decision_maker_message_queue.put(transaction_msg)

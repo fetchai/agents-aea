@@ -55,6 +55,16 @@ class Transactions(SharedClass):
 
         self._last_update_for_transactions = deque()  # type: Deque[Tuple[datetime.datetime, TransactionId]]
 
+    @property
+    def pending_proposals(self) -> Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]:
+        """Get the pending proposals."""
+        return self._pending_proposals
+
+    @property
+    def pending_initial_acceptances(self) -> Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]:
+        """Get the pending initial acceptances."""
+        return self._pending_initial_acceptances
+
     def cleanup_pending_transactions(self) -> None:
         """
         Remove all the pending messages (i.e. either proposals or acceptances) that have been stored for an amount of time longer than the timeout.
@@ -174,15 +184,16 @@ class Transactions(SharedClass):
         else:
             self._locked_txs_as_buyer[transaction_id] = transaction_msg
 
-    def pop_locked_tx(self, transaction_id: TransactionId) -> TransactionMessage:
+    def pop_locked_tx(self, transaction_msg: TransactionMessage) -> TransactionMessage:
         """
         Remove a lock (in the form of a transaction).
 
-        :param transaction_id: the transaction id
+        :param transaction_msg: the transaction message
         :raise AssertionError: if the transaction with the given transaction id has not been found.
 
         :return: the transaction
         """
+        transaction_id = cast(TransactionId, transaction_msg.get("transaction_id"))
         assert transaction_id in self._locked_txs
         transaction_msg = self._locked_txs.pop(transaction_id)
         self._locked_txs_as_buyer.pop(transaction_id, None)
