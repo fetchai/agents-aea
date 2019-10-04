@@ -28,9 +28,9 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 if TYPE_CHECKING:
-    from packages.skills.weather_station.weather_station_dataModel import WEATHER_STATION_DATAMODEL, SCHEME, SERVICE_ID
+    from packages.skills.weather_station.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME, SERVICE_ID
 else:
-    from weather_station_skill.weather_station_dataModel import WEATHER_STATION_DATAMODEL, SCHEME, SERVICE_ID
+    from weather_station_skill.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME, SERVICE_ID
 
 logger = logging.getLogger(__name__)
 
