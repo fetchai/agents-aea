@@ -20,7 +20,7 @@
 """This package contains a scaffold of a behaviour."""
 
 from aea.skills.base import Behaviour
-from service_skill.weather_station_dataModel import WEATHER_STATION_DATAMODEL
+from .weather_station_dataModel import WEATHER_STATION_DATAMODEL
 from aea.protocols.oef.models import Description
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF

@@ -24,12 +24,10 @@ from aea.protocols.oef.models import DataModel, Attribute
 
 class WEATHER_STATION_DATAMODEL (DataModel):
     """Data model for the weather Agent."""
-
-    ATTRIBUTE_COUNTRY = Attribute("country", str, True, "Country")
-    ATTRIBUTE_CITY = Attribute("city", str, True, "City")
-
     def __init__(self):
         """Initialise the dataModel."""
+        self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)
+        self.ATTRIBUTE_CITY = Attribute("city", str, True)
+
         super().__init__("weatherStation_datamodel", [self.ATTRIBUTE_COUNTRY,
-                                                      self.ATTRIBUTE_CITY],
-                         "A localizable weather agent")
+                                                      self.ATTRIBUTE_CITY])

@@ -30,7 +30,7 @@ from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.oef.models import Description
 
-from service_skill.db_communication import Db_communication
+from .db_communication import Db_communication
 
 import json
 import time
