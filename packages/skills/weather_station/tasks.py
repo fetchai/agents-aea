@@ -24,6 +24,9 @@ from aea.skills.base import Task
 
 class MyWeatherTask(Task):
     """This class scaffolds a task."""
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
 
     def execute(self) -> None:
         """

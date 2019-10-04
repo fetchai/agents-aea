@@ -45,6 +45,13 @@ class MyWeatherHandler(Handler):
         self.fet_price = 0.002
         self.db = Db_communication("fake")
         self.fetched_data = []
+        self.message_id = 1
+        self.target = 0
+        self.dialogue_id = 1
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """
@@ -87,8 +94,9 @@ class MyWeatherHandler(Handler):
                                      "Price": totalPrice})]
             print("[{}]: Sending propose at price: {}".format(
                 sender, totalPrice))
-            proposal_msg = FIPAMessage(message_id=1, dialogue_id=1,
-                                       target=0,
+            proposal_msg = FIPAMessage(message_id=self.message_id,
+                                       dialogue_id=self.dialogue_id,
+                                       target=self.target,
                                        performative=FIPAMessage.Performative.PROPOSE,
                                        proposal=proposal)
             self.context.outbox.put_message(to=sender,
