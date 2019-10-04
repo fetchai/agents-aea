@@ -1,0 +1,99 @@
+openapi: "3.0.2"
+info:
+  title: "AEA CLI REST API"
+  description: "The REST API for the Fetch.AI AEA Command line interface
+    [http://fetch.ai](http://fetch.ai)
+    [https://github.com/fetchai/my_agents-aea](https://github.com/fetchai/my_agents-aea)"
+  version: "0.1"
+servers:
+- url: https://127.0.0.1
+paths:
+  /agents:
+    post:
+      tags:
+      - my_agents
+      summary: Create a new aea project
+      operationId: app.create_agent
+      parameters:
+      - in: query
+        name: agentParams
+        required: true
+        schema:
+          $ref: '#/components/schemas/AgentParams'
+      responses:
+        201:
+          description: Agent created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentFull'
+        500:
+          description: Cannot create agent
+    get:
+      tags:
+      - my_agents
+      summary: Return list of all aea projects
+      description: List of local folders under the user name (which correspond to aea projects)
+      operationId: app.get_agents
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentFull'
+        400:
+          description: Failed
+  /agents/{agentId}:
+    post:
+      tags:
+      - my_agents
+      summary: Delete an aea project
+      operationId: app.delete_agent
+      parameters:
+      - name: agentId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        201:
+          description: Agent deleted successfully
+        500:
+          description: Cannot delte agent
+components:
+  schemas:
+    AgentParams:
+      type: object
+      properties:
+        user:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+    AgentFull:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        protocols:
+          type: array
+          items:
+            type: string
+        skills:
+          type: array
+          items:
+            type: string
+        connections:
+          type: array
+          items:
+            type: string
