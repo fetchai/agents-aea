@@ -38,7 +38,7 @@ else:
     from weather_station_skill.db_communication import Db_communication
 
 
-class MyScaffoldHandler(Handler):
+class MyWeatherHandler(Handler):
     """This class scaffolds a handler."""
 
     SUPPORTED_PROTOCOL = 'fipa'  # type: Optional[ProtocolId]

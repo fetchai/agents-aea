@@ -19,32 +19,25 @@
 
 """This package contains the Database Communication for the weather agent."""
 
-import psycopg2  # type: ignore
+import sqlite3
 import datetime
 
 
 class Db_communication:
-    """Contains the functionality for communicating with the db."""
+
+    source = None
 
     def __init__(self, source):
-        """Initialize the variables for the db."""
         self.source = source
 
     def db_connection(self):
-        """Connect to the database."""
-        con = None
-        print(self.source)
-        if self.source == "fake":
-            con = psycopg2.connect('dbname =  weather_fake')
-        else:
-            con = psycopg2.connect('dbname =  weather')
-
-        con.autocommit = True
+        con = sqlite3.connect('weather_fake.db')
+        print(con)
         return con
 
     def specific_dates(self, start, end):
-        """Search the db for the specific dates."""
         con = self.db_connection()
+        print(con)
         cur = con.cursor()
         print(start)
         print(end)
@@ -54,8 +47,9 @@ class Db_communication:
         if type(end) is str:
             end = datetime.datetime.strptime(end, '%d/%m/%Y')
             end = end.strftime('%s')
-        command = "SELECT * FROM data WHERE idx BETWEEN %s::Text AND %s::Text"
-        cur.execute(command, (float(start), float(end),))
+        print(start , end)
+        command = ("SELECT * FROM data WHERE idx BETWEEN ? AND ?", str(start), str(end),)
+        cur.execute(command)
         data = cur.fetchall()
 
         cur.close()

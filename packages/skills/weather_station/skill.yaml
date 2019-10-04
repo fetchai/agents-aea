@@ -12,8 +12,7 @@ handlers:
   - handler:
       class_name: MyWeatherHandler
       args:
-        handler_arg_1: 1
-        handler_arg_2: "2"
+        foo: bar
 tasks:
   - task:
       class_name: MyWeatherTask
@@ -21,7 +20,7 @@ tasks:
         foo: bar
 shared_classes: []
 protocols: ['fipa']
-dependencies:
-  - psycopg2=="*"
+
+
 
 

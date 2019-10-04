@@ -31,7 +31,7 @@ else:
     from weather_station_skill.weather_station_dataModel import WEATHER_STATION_DATAMODEL
 
 
-class MyScaffoldBehaviour(Behaviour):
+class MyWeatherBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
 
     def __init__(self, **kwargs):
