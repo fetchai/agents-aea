@@ -27,7 +27,7 @@ from typing import TextIO, Type, TypeVar, Generic
 
 import jsonschema
 import yaml
-from jsonschema import Draft7Validator
+from jsonschema import Draft4Validator
 
 from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig
 
@@ -44,7 +44,7 @@ class ConfigLoader(Generic[T]):
         """Initialize the parser for configuration files."""
         self.schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
         self.resolver = jsonschema.RefResolver("file://{}/".format(Path(_SCHEMAS_DIR).absolute()), self.schema)
-        self.validator = Draft7Validator(self.schema, resolver=self.resolver)
+        self.validator = Draft4Validator(self.schema, resolver=self.resolver)
         self.configuration_type = configuration_type  # type: Type[T]
 
     def load(self, fp: TextIO) -> T:

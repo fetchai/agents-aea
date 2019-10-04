@@ -26,7 +26,7 @@ from pathlib import Path
 import jsonschema
 import pytest
 import yaml
-from jsonschema import validate, Draft7Validator  # type: ignore
+from jsonschema import validate, Draft4Validator  # type: ignore
 
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
     DEFAULT_SKILL_CONFIG_FILE
@@ -37,19 +37,19 @@ from ..conftest import CUR_PATH, ROOT_DIR, AGENT_CONFIGURATION_SCHEMA, SKILL_CON
 def test_agent_configuration_schema_is_valid_wrt_draft_07():
     """Test that the JSON schema for the agent configuration file is compliant with the specification Draft 07."""
     agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "aea-config_schema.json")))
-    Draft7Validator.check_schema(agent_config_schema)
+    Draft4Validator.check_schema(agent_config_schema)
 
 
 def test_skill_configuration_schema_is_valid_wrt_draft_07():
     """Test that the JSON schema for the skill configuration file is compliant with the specification Draft 07."""
     skill_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "skill-config_schema.json")))
-    Draft7Validator.check_schema(skill_config_schema)
+    Draft4Validator.check_schema(skill_config_schema)
 
 
 def test_connection_configuration_schema_is_valid_wrt_draft_07():
     """Test that the JSON schema for the connection configuration file is compliant with the specification Draft 07."""
     connection_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "connection-config_schema.json")))
-    Draft7Validator.check_schema(connection_config_schema)
+    Draft4Validator.check_schema(connection_config_schema)
 
 
 def test_validate_agent_config():
@@ -68,7 +68,7 @@ class TestProtocolsSchema:
         """Set up the test class."""
         cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
-        cls.validator = Draft7Validator(cls.schema, resolver=cls.resolver)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
     @pytest.mark.parametrize("protocol_path",
                              [
@@ -93,7 +93,7 @@ class TestConnectionsSchema:
         """Set up the test class."""
         cls.schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
-        cls.validator = Draft7Validator(cls.schema, resolver=cls.resolver)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
     @pytest.mark.parametrize("connection_path",
                              [
@@ -117,7 +117,7 @@ class TestSkillsSchema:
         """Set up the test class."""
         cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
-        cls.validator = Draft7Validator(cls.schema, resolver=cls.resolver)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
     @pytest.mark.parametrize("skill_path",
                              [
