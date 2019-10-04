@@ -182,7 +182,7 @@ class Behaviour(ABC):
                 args = behaviour_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
                 args['skill_context'] = skill_context
-                behaviour = behaviour_class(**args)
+                behaviour = behaviour_class(skill_context=skill_context, **args)
                 behaviours.append(behaviour)
 
         return behaviours
@@ -346,8 +346,7 @@ class Task(ABC):
             else:
                 args = task_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-                args['skill_context'] = skill_context
-                task = task_class(**args)
+                task = task_class(skill_context=skill_context, **args)
                 tasks.append(task)
 
         return tasks
