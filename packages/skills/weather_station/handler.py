@@ -65,15 +65,8 @@ class MyWeatherHandler(Handler):
 
         if msg_performative == FIPAMessage.Performative.CFP:
             self.handle_CFP(msg, envelope.sender)
-        if msg_performative == FIPAMessage.Performative.ACCEPT:
+        elif msg_performative == FIPAMessage.Performative.ACCEPT:
             self.handle_ACCEPT(envelope.sender)
-        if msg_performative == FIPAMessage.Performative.PROPOSE:
-            pass
-        if msg_performative == FIPAMessage.Performative.DECLINE:
-            print("He refused!!! Make an other offer?")
-            pass
-        if msg_performative == FIPAMessage.Performative.MATCH_ACCEPT:
-            pass
 
     def teardown(self) -> None:
         """
