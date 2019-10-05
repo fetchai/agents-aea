@@ -6,14 +6,18 @@
 // Create the namespace instance
 let ns = {};
 
-let elements = [{"location": "local", "type": "agents"},
-                {"location": "registered", "type": "protocols"}]
+// Get elements passed in from python as this is how they need to be passed into the html
+// so best to have it in one place
+let elements = []
+
+{%for i in range(0, len)%}
+    elements.push({"location": "{{htmlElements[i][0]}}", "type": "{{htmlElements[i][1]}}", "combined": "{{htmlElements[i][2]}}"});
+//    console.log("htmlElements[i][0] = {{htmlElements[i][0]}} , htmlElements[i][1] = {{htmlElements[i][1]}}")
+ {% endfor %}
 
 
-
-function makeCombineName(element){
-    return element["location"] + element["type"].slice(0, 1).toUpperCase() + element["type"].slice(1) ;
-}
+// elements.push({"location": "local", "type": "agents"});
+// elements.push({"location": "registered", "type": "protocols"});
 
 
 // Create the model instance
@@ -25,6 +29,10 @@ ns.model = (function() {
     // Return the API
     return {
         readData: function(element) {
+            // This is massively hacky!
+            if (element["location"] == "local" && element["type"] != "agent"){
+                return;
+            }
             let ajax_options = {
                 type: 'GET',
                 url: 'api/' + element["type"],
@@ -33,7 +41,7 @@ ns.model = (function() {
             };
             $.ajax(ajax_options)
             .done(function(data) {
-                $event_pump.trigger('model_' + makeCombineName(element) + 'ReadSuccess', [data]);
+                $event_pump.trigger('model_' + element["combined"] + 'ReadSuccess', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -50,7 +58,7 @@ ns.model = (function() {
             };
             $.ajax(ajax_options)
             .done(function(data) {
-                $event_pump.trigger('model_' + makeCombineName(element) + 'CreateSuccess', [data]);
+                $event_pump.trigger('model_' + element["combined"] + 'CreateSuccess', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -66,7 +74,40 @@ ns.model = (function() {
             };
             $.ajax(ajax_options)
             .done(function(data) {
-                $event_pump.trigger('model_' + makeCombineName(element) + 'DeleteSuccess', [data]);
+                $event_pump.trigger('model_' + element["combined"] + 'DeleteSuccess', [data]);
+            })
+            .fail(function(xhr, textStatus, errorThrown) {
+                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+            })
+        },
+        fetchItem: function(element, agentId, itemId) {
+            let propertyName = element["type"] +  "_id"
+            let ajax_options = {
+                type: 'POST',
+                url: 'api/agent/' + agentId + '/' + element["type"],
+                accepts: 'application/json',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(itemId)
+            };
+            $.ajax(ajax_options)
+            .done(function(data) {
+                $event_pump.trigger('model_' + element["combined"] + 'FetchSuccess', [data]);
+            })
+            .fail(function(xhr, textStatus, errorThrown) {
+                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+            })
+        },
+        readLocalData: function(element, agentId) {
+            let ajax_options = {
+                type: 'GET',
+                url: 'api/agent/'+agentId+'/' + element["type"],
+                accepts: 'application/json',
+                dataType: 'json'
+            };
+            $.ajax(ajax_options)
+            .done(function(data) {
+                $event_pump.trigger('model_' + element["combined"] + 'ReadSuccess', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -142,7 +183,7 @@ ns.controller = (function(m, v) {
     // Items which exist
     for (var i = 0; i < elements.length; i++) {
         let element = elements[i]
-        let combineName = makeCombineName(element)
+        let combineName = element["combined"]
          $('#' + combineName + 'Create').click(function(e){
             let id =$('#' + combineName + 'CreateId').val();
 
@@ -169,6 +210,20 @@ ns.controller = (function(m, v) {
             e.preventDefault();
         });
 
+        $('#' + combineName + 'Fetch').click(function(e) {
+            let agentId = $('#localAgentsSelectionId').html();
+            let itemId =$('#' + combineName + 'SelectionId').html();
+
+            e.preventDefault();
+
+            if (validateId(agentId) && validateId(itemId) ) {
+                model.fetchItem(element, agentId, itemId)
+
+            } else {
+                alert('Error: Problem with one of the selected ids (either agent or ' + element['type']);
+            }
+            e.preventDefault();
+        });
 
         $('.' + combineName + ' table > tbody ').on('click', 'tr', function(e) {
             let $target = $(e.target),
@@ -181,6 +236,15 @@ ns.controller = (function(m, v) {
                 .text();
 
             view.setSelectedId(combineName, id);
+            if (combineName == "localAgents"){
+                // This should be a function, vur can't do local functions with this hacky class setup
+                for (var j = 0; j < elements.length; j++) {
+                    if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
+                        model.readLocalData(elements[j], id);
+                    }
+                }
+
+            }
         });
         // Handle the model events
         $event_pump.on('model_'+ combineName + 'ReadSuccess', function(e, data) {
@@ -191,10 +255,25 @@ ns.controller = (function(m, v) {
             model.readData(element);
             view.setSelectedId(combineName, data)
             view.setCreateId(combineName, "")
+            // This should be a function, vur can't do local functions with this hacky class setup
+            for (var j = 0; j < elements.length; j++) {
+                if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
+                    model.readLocalData(elements[j], data);
+                }
+            }
         });
 
         $event_pump.on('model_'+ combineName + 'DeleteSuccess', function(e, data) {
             model.readData(element);
+            view.setSelectedId(combineName, "NONE")
+        });
+        $event_pump.on('model_'+ combineName + 'FetchSuccess', function(e, data) {
+            // This should be a function, vur can't do local functions with this hacky class setup
+            for (var j = 0; j < elements.length; j++) {
+                if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
+                    model.readLocalData(elements[j], data);
+                }
+            }
             view.setSelectedId(combineName, "NONE")
         });
     }

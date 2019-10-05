@@ -18,6 +18,12 @@ parser.add_argument(
 args = parser.parse_args()
 
 
+elements = [['local', 'agent', 'localAgents'],
+            ['registered', 'protocol', 'registeredProtocols'],
+            ['registered', 'connection', 'registeredConections'],
+            ['registered', 'skill', 'registeredSkills'],
+            ['local', 'protocol', 'localProtocols']]
+
 def is_agent_dir(dir_name):
     if not os.path.isdir(dir_name):
         return False
@@ -31,6 +37,17 @@ def is_protocol_dir(dir_name):
     else:
         return os.path.isfile(os.path.join(dir_name, "protocol.yaml"))
 
+def is_connection_dir(dir_name):
+    if not os.path.isdir(dir_name):
+        return False
+    else:
+        return os.path.isfile(os.path.join(dir_name, "connection.yaml"))
+
+def is_skill_dir(dir_name):
+    if not os.path.isdir(dir_name):
+        return False
+    else:
+        return os.path.isfile(os.path.join(dir_name, "skill.yaml"))
 
 def get_agents():
     agent_dir = os.path.join(os.getcwd(), args.agent_dir)
@@ -55,24 +72,56 @@ def get_registered_protocols():
     # Get a list of all the directories paths that ends with .txt from in specified directory
     file_list = glob.glob(os.path.join(protocols_dir, '*'))
 
-    protocol_list = []
+    items_list = []
 
     for path in file_list:
         if is_protocol_dir(path):
             head, tail = os.path.split(path)
-            protocol_list.append({"id": tail, "description": "placeholder description"})
+            items_list.append({"id": tail, "description": "placeholder description"})
 
-    return protocol_list
+    return items_list
 
+def get_registered_connections():
+    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
+    connections_dir = os.path.join(agent_dir, "packages/connections")
+
+    # Get a list of all the directories paths that ends with .txt from in specified directory
+    file_list = glob.glob(os.path.join(connections_dir, '*'))
+
+    items_list = []
+
+    for path in file_list:
+        if is_connection_dir(path):
+            head, tail = os.path.split(path)
+            items_list.append({"id": tail, "description": "placeholder description"})
+
+    return items_list
+
+def get_registered_skills():
+    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
+    skills_dir = os.path.join(agent_dir, "packages/skills")
+
+    # Get a list of all the directories paths that ends with .txt from in specified directory
+    file_list = glob.glob(os.path.join(skills_dir, '*'))
+
+    items_list = []
+
+    for path in file_list:
+        if is_skill_dir(path):
+            head, tail = os.path.split(path)
+            items_list.append({"id": tail, "description": "placeholder description"})
+
+    return items_list
+
+def call_aea(param_list, dir):
+    old_cwd = os.getcwd()
+    os.chdir(dir)
+    ret = subprocess.call(param_list)
+    os.chdir(old_cwd)
+    return ret
 
 def create_agent(agent_id):
-    old_cwd = os.getcwd()
-    os.chdir(args.agent_dir)
-    ret = subprocess.call(["aea", "create", agent_id])
-    print("ret ={} ".format(ret))
-    os.chdir(old_cwd)
-
-    if ret == 0:
+    if call_aea(["aea", "create", agent_id], args.agent_dir) == 0:
         return agent_id, 201  # 201 (Created)
     else:
         return {"detail": "Failed to create Agent {} - a folder of this name may exist already".format(agent_id)}, 400  # 400 Bad request
@@ -80,18 +129,35 @@ def create_agent(agent_id):
 
 
 def delete_agent(agent_id):
-    old_cwd = os.getcwd()
-    os.chdir(args.agent_dir)
-    ret = subprocess.call(["aea", "delete", agent_id])
-    print("ret ={} ".format(ret))
-    os.chdir(old_cwd)
-    if ret == 0:
+    if call_aea(["aea", "delete", agent_id], args.agent_dir) == 0:
         return 'Agent {} deleted'.format(agent_id),   200  # 200 (OK)
     else:
         return {"detail": "Failed to delete Agent {} - it ay not exist".format(agent_id)}, 400  # 400 Bad request
 
 
+def fetch_item(agent_id, item_type, item_id):
+    dir = os.path.join( args.agent_dir, agent_id)
+    if call_aea(["aea", "add", item_type, item_id], dir) == 0:
+        return agent_id,   201  # 200 (OK)
+    else:
+        return {"detail": "Failed to add protocol {} to agent {}".format(item_id, agent_id)}, 400  # 400 Bad request
 
+
+
+def get_local_items(agent_id, item_type):
+    dir = os.path.join(os.path.join( args.agent_dir, agent_id), item_type+"s")
+
+    # Get a list of all the directories paths that ends with .txt from in specified directory
+    file_list = glob.glob(os.path.join(dir, '*'))
+
+    items_list = []
+
+    for path in file_list:
+        if is_protocol_dir(path):
+            head, tail = os.path.split(path)
+            items_list.append({"id": tail, "description": "placeholder description"})
+
+    return items_list
 
 
 app = connexion.FlaskApp(__name__, specification_dir='./')
@@ -101,9 +167,12 @@ app.add_api('swagger.yaml')
 @app.route('/')
 def home():
     """ This function just responds to the browser ULR:  localhost:5000/ """
-    return flask.render_template('home.html')
+    return flask.render_template('home.html', len=len(elements), htmlElements=elements)
 
-
+@app.route('/static/js/home.js')
+def homejs():
+    """ This function just responds to the browser ULR:  localhost:5000/ """
+    return flask.render_template('home.js', len=len(elements), htmlElements=elements)
 
 @app.route('/favicon.ico')
 def favicon():

@@ -35,18 +35,16 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="section editor">
                 <div>
-                    <h3>Selected Agent: <div id="localAgentsSelectionId" style="display: inline">NONE</div></h3>
+                    <h4 align="center">Selected Agent</h4>
+                    <h3> <div id="localAgentsSelectionId" align="center">NONE</div></h3>
                 </div>
                 <button id="localAgentsDelete">Delete Agent</button>
-            </div>
-            <div class="error"></div>
-        </div>
-        <div class="split right">
-            <div class="section editor">
-                <div class="registeredProtocols">
+                <div class="localProtocols">
                     <table>
-                        <caption>Registered Protocols</caption>
+                        <caption>Local Protocols</caption>
                         <thead>
                             <tr>
                                 <th>Protocol id</th>
@@ -58,10 +56,38 @@
                     </table>
                 </div>
                 <div>
-                <h3>Selected Protocol: <div id="registeredProtocolsSelectionId" style="display: inline">NONE</div></h3>
+                    <h3>Selected Agent: <div id="localProtocolsSelectionId" style="display: inline">NONE</div></h3>
                 </div>
-                <button id="registeredProtocolsFetch"><< Fetch Protocol</button>
+                <button id="localProtocolsRemove">Remove Protocol</button>
             </div>
+            <div class="error"></div>
+        </div>
+        <div class="split right">
+            {% for i in range(0, len) %}
+                {% if htmlElements[i][0] == "registered"%}
+                    <div class="section editor">
+                        <div class="{{htmlElements[i][2]}}">
+                            <table>
+                                <caption>Registered {{htmlElements[i][1]}}s</caption>
+                                <thead>
+                                    <tr>
+                                        <th>{{htmlElements[i][1]}} id</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                        <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
+                        </div>
+                        <button id="{{htmlElements[i][2]}}Fetch"><< Fetch {{htmlElements[i][1]}}</button>
+                    </div>
+                    <br>
+                {% endif %}
+            {% endfor %}
+
         </div>
 
     </div>
