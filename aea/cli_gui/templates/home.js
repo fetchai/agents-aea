@@ -266,6 +266,12 @@ ns.controller = (function(m, v) {
         $event_pump.on('model_'+ combineName + 'DeleteSuccess', function(e, data) {
             model.readData(element);
             view.setSelectedId(combineName, "NONE")
+            // This should be a function, vur can't do local functions with this hacky class setup
+            for (var j = 0; j < elements.length; j++) {
+                if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
+                    model.readLocalData(elements[j], data);
+                }
+            }
         });
         $event_pump.on('model_'+ combineName + 'FetchSuccess', function(e, data) {
             // This should be a function, vur can't do local functions with this hacky class setup
