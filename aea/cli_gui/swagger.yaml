@@ -134,6 +134,40 @@ paths:
           schema:
             type: string
 
+  /agent/{agent_id}/{item_type}/{item_id}:
+    delete:
+      operationId: app.remove_local_item
+      tags:
+      - agents
+      summary: Delete an protocoo, connectionor skill from an agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to delete
+          type: string
+          required: True
+        - name: item_type
+          in: path
+          description: type of item to remove
+          type: string
+          required: True
+        - name: item_id
+          in: path
+          description: item id to delete
+          type: string
+          required: True
+
+      responses:
+        201:
+          description: Agent deleted successfully
+          schema:
+            type: string
+
+        400:
+          description: Cannot delete agent
+          schema:
+            type: string
+
   /protocol:
     get:
       operationId: app.get_registered_protocols

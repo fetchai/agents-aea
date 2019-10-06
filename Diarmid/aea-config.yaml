@@ -1,0 +1,20 @@
+aea_version: 0.1.5
+agent_name: Diarmid
+authors: ''
+connections:
+- gym
+default_connection: oef
+license: ''
+private_key_pem_path: ''
+protocols:
+- default
+- fipa
+- oef
+- tac
+registry_path: ../packages
+skills:
+- echo
+- error
+- fipa_negotiation
+url: ''
+version: v1

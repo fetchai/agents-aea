@@ -42,23 +42,29 @@
                     <h3> <div id="localAgentsSelectionId" align="center">NONE</div></h3>
                 </div>
                 <button id="localAgentsDelete">Delete Agent</button>
-                <div class="localProtocols">
-                    <table>
-                        <caption>Local Protocols</caption>
-                        <thead>
-                            <tr>
-                                <th>Protocol id</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-                <div>
-                    <h3>Selected Agent: <div id="localProtocolsSelectionId" style="display: inline">NONE</div></h3>
-                </div>
-                <button id="localProtocolsRemove">Remove Protocol</button>
+                {% for i in range(0, len) %}
+                    {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
+
+                        <div class="{{htmlElements[i][2]}}">
+                            <table>
+                                <caption>Local {{htmlElements[i][1]}}</caption>
+                                <thead>
+                                    <tr>
+                                        <th>{{htmlElements[i][1]}} id</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
+                        </div>
+                        <button id="{{htmlElements[i][2]}}Remove">Remove {{htmlElements[i][1]}}</button>
+                    {% endif %}
+                {% endfor %}
+
             </div>
             <div class="error"></div>
         </div>

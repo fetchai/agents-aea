@@ -1,0 +1,15 @@
+aea_version: 0.1.5
+agent_name: Diar2mid
+authors: ''
+connections:
+- oef
+default_connection: oef
+license: ''
+private_key_pem_path: ''
+protocols:
+- default
+registry_path: ../packages
+skills:
+- error
+url: ''
+version: v1
