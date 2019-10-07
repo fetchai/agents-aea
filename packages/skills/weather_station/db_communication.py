@@ -68,9 +68,3 @@ class DBCommunication:
         cur.close()
         con.close()
         return data
-
-
-if __name__ == "__main__":
-    a = DBCommunication()
-    data = a.get_data_for_specific_dates("5/10/2019", "8/10/2019")
-    print(data)
