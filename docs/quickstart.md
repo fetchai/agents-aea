@@ -3,11 +3,13 @@
 Create and cd into a new working directory.
 
 ``` bash
-mkdir aea/
-cd aea/
+mkdir my_aea/
+cd my_aea/
 ```
 
-Check you have `pipenv`.
+We highly recommend using a virtual environment to ensure consistency across dependencies.
+
+Check you have [`pipenv`](https://github.com/pypa/pipenv).
 
 ``` bash
 which pipenv
@@ -41,13 +43,12 @@ pip install aea[all]
 
 ```
 
-However, you can run this demo by installing the AEA cli alone.
+However, you can run this demo by installing the base AEA inclusive the CLI extension, alone.
 
 ``` bash
 pip install aea[cli]
 
 ```
-
 
 
 ## Echo skill demo
@@ -80,9 +81,11 @@ aea add skill echo
 aea add connection local
 ```
 
-### Run the agent locally
+A local connection provides a local stub for an OEF node instance.
 
-Run the agent with the connection.
+### Run the agent
+
+Run the agent with the `local` connection.
 
 ``` bash
 aea run --connection local
