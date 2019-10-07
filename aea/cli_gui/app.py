@@ -1,22 +1,43 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""Implementation of the CLI_GUI.py."""
+
 import argparse
 import glob
 import os
 import subprocess
 
-
 import connexion
 import flask
+import os.path
+
 
 parser = argparse.ArgumentParser(description='Launch the AEA CLI GUI')
 parser.add_argument(
     '-ad',
     '--agent_dir',
-    default='./',
+    default=os.getcwd(),
     help='Location of script and package files and where agents will be created (default: my_agents)'
 )
 
-args = parser.parse_args()
-
+args = parser.parse_args()  # pragma: no cover
 
 elements = [['local', 'agent', 'localAgents'],
             ['registered', 'protocol', 'registeredProtocols'],
@@ -28,6 +49,7 @@ elements = [['local', 'agent', 'localAgents'],
 
 
 def is_agent_dir(dir_name):
+    """Check the directory of the agent."""
     if not os.path.isdir(dir_name):
         return False
     else:
@@ -35,31 +57,40 @@ def is_agent_dir(dir_name):
 
 
 def is_protocol_dir(dir_name):
+    """Check that protocol.yaml exists."""
     if not os.path.isdir(dir_name):
         return False
     else:
         return os.path.isfile(os.path.join(dir_name, "protocol.yaml"))
 
+
 def is_connection_dir(dir_name):
+    """Check that connection.yaml exists."""
     if not os.path.isdir(dir_name):
         return False
     else:
         return os.path.isfile(os.path.join(dir_name, "connection.yaml"))
 
+
 def is_skill_dir(dir_name):
+    """Check that skill.yaml exists."""
     if not os.path.isdir(dir_name):
         return False
     else:
         return os.path.isfile(os.path.join(dir_name, "skill.yaml"))
 
+
 def is_item_dir(dir_name, item_type):
+    """Check that item_type we are passing exists."""
     if not os.path.isdir(dir_name):
         return False
     else:
         return os.path.isfile(os.path.join(dir_name, item_type + ".yaml"))
 
-def get_agents():
-    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
+
+def get_agents() -> list:
+    """Get the agent list."""
+    agent_dir = os.path.join(os.getcwd())
 
     # Get a list of all the directories paths that ends with .txt from in specified directory
     file_list = glob.glob(os.path.join(agent_dir, '*'))
@@ -75,8 +106,9 @@ def get_agents():
 
 
 def get_registered_protocols():
-    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
-    protocols_dir = os.path.join(agent_dir, "packages/protocols")
+    """Get the registered protocols."""
+    work_dir = os.path.join(os.getcwd())
+    protocols_dir = os.path.join(work_dir, "packages/protocols")
 
     # Get a list of all the directories paths that ends with .txt from in specified directory
     file_list = glob.glob(os.path.join(protocols_dir, '*'))
@@ -90,9 +122,11 @@ def get_registered_protocols():
 
     return items_list
 
+
 def get_registered_connections():
-    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
-    connections_dir = os.path.join(agent_dir, "packages/connections")
+    """Get the registered connections."""
+    work_dir = os.path.join(os.getcwd())
+    connections_dir = os.path.join(work_dir, "packages/connections")
 
     # Get a list of all the directories paths that ends with .txt from in specified directory
     file_list = glob.glob(os.path.join(connections_dir, '*'))
@@ -106,9 +140,11 @@ def get_registered_connections():
 
     return items_list
 
+
 def get_registered_skills():
-    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
-    skills_dir = os.path.join(agent_dir, "packages/skills")
+    """Get the registered skills."""
+    work_dir = os.path.join(os.getcwd())
+    skills_dir = os.path.join(work_dir, "packages/skills")
 
     # Get a list of all the directories paths that ends with .txt from in specified directory
     file_list = glob.glob(os.path.join(skills_dir, '*'))
@@ -122,46 +158,56 @@ def get_registered_skills():
 
     return items_list
 
+
 def call_aea(param_list, dir):
+    """Call the cli commands."""
     old_cwd = os.getcwd()
     os.chdir(dir)
+
     ret = subprocess.call(param_list)
     os.chdir(old_cwd)
     return ret
 
+
 def create_agent(agent_id):
+    """Create the agent from GUI."""
     if call_aea(["aea", "create", agent_id], args.agent_dir) == 0:
         return agent_id, 201  # 201 (Created)
     else:
-        return {"detail": "Failed to create Agent {} - a folder of this name may exist already".format(agent_id)}, 400  # 400 Bad request
-
+        return {"detail": "Failed to create Agent {} - a folder of this name may exist already".format(
+            agent_id)}, 400  # 400 Bad request
 
 
 def delete_agent(agent_id):
+    """Delete the agent from GUI."""
     if call_aea(["aea", "delete", agent_id], args.agent_dir) == 0:
-        return 'Agent {} deleted'.format(agent_id),   200  # 200 (OK)
+        return 'Agent {} deleted'.format(agent_id), 200  # 200 (OK)
     else:
         return {"detail": "Failed to delete Agent {} - it ay not exist".format(agent_id)}, 400  # 400 Bad request
 
 
 def fetch_item(agent_id, item_type, item_id):
-    dir = os.path.join( args.agent_dir, agent_id)
+    """Fetch the items from the packages folder."""
+    dir = os.path.join(args.agent_dir, agent_id)
     if call_aea(["aea", "add", item_type, item_id], dir) == 0:
-        return agent_id,   201  # 200 (OK)
+        return agent_id, 201  # 200 (OK)
     else:
         return {"detail": "Failed to add protocol {} to agent {}".format(item_id, agent_id)}, 400  # 400 Bad request
 
-def remove_local_item(agent_id, item_type, item_id):
-    dir = os.path.join( args.agent_dir, agent_id)
-    if call_aea(["aea", "remove", item_type, item_id], dir) == 0:
-        return agent_id,   201  # 200 (OK)
-    else:
-        return {"detail": "Failed to remove protocol {} from agent {}".format(item_id, agent_id)}, 400  # 400 Bad request
 
+def remove_local_item(agent_id, item_type, item_id):
+    """Remove a local item."""
+    dir = os.path.join(args.agent_dir, agent_id)
+    if call_aea(["aea", "remove", item_type, item_id], dir) == 0:
+        return agent_id, 201  # 200 (OK)
+    else:
+        return {"detail": "Failed to remove protocol {} from agent {}".format(item_id,
+                                                                              agent_id)}, 400  # 400 Bad request
 
 
 def get_local_items(agent_id, item_type):
-    dir = os.path.join(os.path.join( args.agent_dir, agent_id), item_type+"s")
+    """Get the local items."""
+    dir = os.path.join(os.path.join(args.agent_dir, agent_id), item_type + "s")
 
     # Get a list of all the directories paths that ends with .txt from in specified directory
     file_list = glob.glob(os.path.join(dir, '*'))
@@ -182,16 +228,19 @@ app.add_api('swagger.yaml')
 
 @app.route('/')
 def home():
-    """ This function just responds to the browser ULR:  localhost:5000/ """
+    """Respond to the browser ULR:  localhost:5000/."""
     return flask.render_template('home.html', len=len(elements), htmlElements=elements)
+
 
 @app.route('/static/js/home.js')
 def homejs():
-    """ This function just responds to the browser ULR:  localhost:5000/ """
+    """Respond to the browser ULR:  localhost:5000/."""
     return flask.render_template('home.js', len=len(elements), htmlElements=elements)
+
 
 @app.route('/favicon.ico')
 def favicon():
+    """Return the favicon."""
     return flask.send_from_directory(
         os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
