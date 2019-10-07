@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 else:
     from weather_station_skill.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME, SERVICE_ID
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.weather_station_skill")
 
 REGISTER_ID = 1
 

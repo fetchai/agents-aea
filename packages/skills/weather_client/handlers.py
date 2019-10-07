@@ -37,7 +37,7 @@ MAX_PRICE = 2
 STARTING_MESSAGE_ID = 1
 STARTING_TARGET_ID = 0
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.weather_station_client")
 
 
 class FIPAHandler(Handler):
@@ -98,6 +98,7 @@ class FIPAHandler(Handler):
         """
         new_message_id = message_id + 1
         new_target_id = message_id
+        logger.info("[{}]: accepting the proposal from sender={}".format(self.context.agent_name, sender))
         msg = FIPAMessage(message_id=new_message_id,
                           dialogue_id=dialogue_id,
                           target=new_target_id,
@@ -117,6 +118,7 @@ class FIPAHandler(Handler):
         """
         new_message_id = message_id + 1
         new_target_id = message_id
+        logger.info("[{}]: declinig the proposal from sender={}".format(self.context.agent_name, sender))
         msg = FIPAMessage(message_id=new_message_id,
                           dialogue_id=dialogue_id,
                           target=new_target_id,
@@ -192,7 +194,7 @@ class DefaultHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        logger.info("[{}]: receiving data!!!".format(self.context.agent_name))
+        logger.info("[{}]: receiving data ...".format(self.context.agent_name))
         msg = DefaultSerializer().decode(envelope.message)
         json_data = msg.get("content")
         if json_data is not None:

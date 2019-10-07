@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 else:
     from weather_station_skill.db_communication import DBCommunication
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.weather_station_skill")
 
 DATE_ONE = "3/10/2019"
 DATE_TWO = "15/10/2019"
@@ -105,7 +105,7 @@ class MyWeatherHandler(Handler):
             total_price = self.fet_price * len(fetched_data)
             proposal = [Description({"Rows": len(fetched_data),
                                      "Price": total_price})]
-            logger.info("[{}]: sending sender={} a proposal at price: {}".format(self.context.agent_name, sender, total_price))
+            logger.info("[{}]: sending sender={} a proposal at price={}".format(self.context.agent_name, sender, total_price))
             proposal_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_id=dialogue_id,
                                        target=new_target,
@@ -116,6 +116,7 @@ class MyWeatherHandler(Handler):
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(proposal_msg))
         else:
+            logger.info("[{}]: declined the CFP from sender={}".format(self.context.agent_name, sender))
             decline_msg = FIPAMessage(message_id=new_message_id,
                                       dialogue_id=dialogue_id,
                                       target=new_target,
@@ -126,7 +127,8 @@ class MyWeatherHandler(Handler):
                                             message=FIPASerializer().encode(decline_msg))
 
     def handle_accept(self, sender: str) -> None:
-        """Handle the Accept Calls.
+        """
+        Handle the Accept Calls.
 
         :param sender: the sender
         :return: None
@@ -154,6 +156,7 @@ class MyWeatherHandler(Handler):
                 break
         json_data = json.dumps(command)
         json_bytes = json_data.encode("utf-8")
+        logger.info("[{}]: handling accept and sending wheather data to sender={}".format(self.context.agent_name, sender))
         data_msg = DefaultMessage(
             type=DefaultMessage.Type.BYTES, content=json_bytes)
         self.context.outbox.put_message(to=sender,
