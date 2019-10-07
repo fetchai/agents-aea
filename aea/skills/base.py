@@ -17,7 +17,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the base classes for the skills."""
-
+import glob
 import importlib.util
 import inspect
 import logging
@@ -393,10 +393,12 @@ class SharedClass(ABC):
         shared_classes_names = set(config.class_name for config in shared_classes_configs)
 
         # get all Python modules except the standard ones
-        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "skill.yaml", "__.*"])
-        module_paths = set(map(str, filter(lambda x: not re.match(ignore_regex, x.name), Path(path).iterdir())))
+        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "__.*"])
+        all_python_modules = Path(path).glob("*.py")
+        module_paths = set(map(str, filter(lambda x: not re.match(ignore_regex, x.name), all_python_modules)))
 
         for module_path in module_paths:
+            logger.debug("Trying to load module {}".format(module_path))
             module_name = module_path.replace(".py", "")
             shared_class_spec = importlib.util.spec_from_file_location(module_name, location=module_path)
             shared_class_module = importlib.util.module_from_spec(shared_class_spec)
