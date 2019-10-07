@@ -37,7 +37,7 @@ MAX_PRICE = 2
 STARTING_MESSAGE_ID = 1
 STARTING_TARGET_ID = 0
 
-logger = logging.getLogger("aea.weather_station_client")
+logger = logging.getLogger("aea.weather_client_skill")
 
 
 class FIPAHandler(Handler):
