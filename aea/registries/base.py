@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -28,11 +29,14 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast
 
-from aea.configurations.base import ProtocolId, SkillId
+from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.loader import ConfigLoader
 from aea.protocols.base import Protocol
 from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext
 
 logger = logging.getLogger(__name__)
+
+PACKAGE_NAME_REGEX = re.compile("^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE)
 
 
 class Registry(ABC):
@@ -72,6 +76,14 @@ class Registry(ABC):
         Fetch all the items.
 
         :return: the list of items.
+        """
+
+    @abstractmethod
+    def setup(self) -> None:
+        """
+        Set up registry.
+
+        :return: None
         """
 
     @abstractmethod
@@ -134,13 +146,21 @@ class ProtocolRegistry(Registry):
             logger.warning("No protocol found.")
             return
 
-        protocols_packages = list(filter(lambda x: not x.startswith("__"), protocols_spec.loader.contents()))  # type: ignore
+        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), protocols_spec.loader.contents()))  # type: ignore
         logger.debug("Processing the following protocol package: {}".format(protocols_packages))
         for protocol_name in protocols_packages:
             try:
                 self._add_protocol(directory, protocol_name)
             except Exception:
                 logger.exception("Not able to add protocol {}.".format(protocol_name))
+
+    def setup(self) -> None:
+        """
+        Teardown the registry.
+
+        :return: None
+        """
+        pass
 
     def teardown(self) -> None:
         """
@@ -171,8 +191,11 @@ class ProtocolRegistry(Registry):
                      .format(serializer_class=serializer_class, protocol_name=protocol_name))
         serializer = serializer_class()
 
+        config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
+        protocol_config = config_loader.load(open(Path(directory, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
+
         # instantiate the protocol manager.
-        protocol = Protocol(protocol_name, serializer)
+        protocol = Protocol(protocol_name, serializer, protocol_config)
         self.register((protocol_name, None), protocol)
 
 
@@ -187,20 +210,20 @@ class HandlerRegistry(Registry):
         """
         self._handlers = {}  # type: Dict[ProtocolId, Dict[SkillId, Handler]]
 
-    def register(self, ids: Tuple[ProtocolId, SkillId], handler: Handler) -> None:
+    def register(self, ids: Tuple[None, SkillId], handlers: List[Handler]) -> None:
         """
         Register a handler.
 
         :param ids: the pair (protocol id, skill id).
-        :param handler: the handler.
+        :param handlers: the list of handlers.
         :return: None
         """
-        protocol_id, skill_id = ids
-        if protocol_id in self._handlers.keys():
-            logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
-        if protocol_id not in self._handlers.keys():
-            self._handlers[protocol_id] = {}
-        self._handlers[protocol_id][skill_id] = handler
+        skill_id = ids[1]
+        for handler in handlers:
+            protocol_id = cast(str, handler.SUPPORTED_PROTOCOL)
+            if protocol_id in self._handlers.keys():
+                logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
+            self._handlers.setdefault(protocol_id, {})[skill_id] = handler
 
     def unregister(self, skill_id: SkillId) -> None:
         """
@@ -212,7 +235,7 @@ class HandlerRegistry(Registry):
         for protocol_id, skill_to_handler_dict in self._handlers.items():
             if skill_id in skill_to_handler_dict.keys():
                 self._handlers[protocol_id].pop(skill_id, None)
-            if self._handlers[protocol_id] == {}:
+            if len(self._handlers[protocol_id]) == 0:
                 self._handlers.pop(protocol_id, None)
 
     def fetch(self, protocol_id: ProtocolId) -> Optional[List[Handler]]:
@@ -226,8 +249,8 @@ class HandlerRegistry(Registry):
         if result is None:
             return None
         else:
-            # TODO: introduce a controller class which intelligently selects the appropriate handler.
-            return list(result.values())
+            # TODO: introduce a filter class which intelligently selects the appropriate handler.
+            return [handler for handler in result.values()]
 
     def fetch_by_skill(self, protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]:
         """
@@ -235,7 +258,7 @@ class HandlerRegistry(Registry):
 
         :param protocol_id: the protocol id
         :param skill_id: the skill id
-        :return: the handler registered for the protocol_id and skill_id
+        :return: the handlers registered for the protocol_id and skill_id
         """
         result = self._handlers.get(protocol_id, None)
         if result is None:
@@ -250,8 +273,20 @@ class HandlerRegistry(Registry):
         else:
             result = []
             for skill_id_to_handler_dict in self._handlers.values():
-                result.extend(list(skill_id_to_handler_dict.values()))
+                for handler in skill_id_to_handler_dict.values():
+                    result.append(handler)
             return result
+
+    def setup(self) -> None:
+        """
+        Set up the handlers in the registry.
+
+        :return: None
+        """
+        if self._handlers.values() is not None:
+            for skill_id_to_handler_dict in self._handlers.values():
+                for handler in skill_id_to_handler_dict.values():
+                    handler.setup()
 
     def teardown(self) -> None:
         """
@@ -288,7 +323,7 @@ class BehaviourRegistry(Registry):
         skill_id = ids[1]
         if skill_id in self._behaviours.keys():
             logger.warning("Behaviours already registered with skill id '{}'".format(skill_id))
-        self._behaviours[skill_id] = behaviours
+        self._behaviours.setdefault(skill_id, []).extend(behaviours)
 
     def unregister(self, skill_id: SkillId) -> None:
         """
@@ -310,6 +345,16 @@ class BehaviourRegistry(Registry):
     def fetch_all(self) -> List[Behaviour]:
         """Fetch all the behaviours."""
         return [b for skill_behaviours in self._behaviours.values() for b in skill_behaviours]
+
+    def setup(self) -> None:
+        """
+        Set up the behaviours in the registry.
+
+        :return: None
+        """
+        for behaviours in self._behaviours.values():
+            for behaviour in behaviours:
+                behaviour.setup()
 
     def teardown(self) -> None:
         """
@@ -345,7 +390,7 @@ class TaskRegistry(Registry):
         skill_id = ids[1]
         if skill_id in self._tasks.keys():
             logger.warning("Tasks already registered with skill id '{}'".format(skill_id))
-        self._tasks[skill_id] = tasks
+        self._tasks.setdefault(skill_id, []).extend(tasks)
 
     def unregister(self, skill_id: SkillId) -> None:
         """
@@ -371,6 +416,16 @@ class TaskRegistry(Registry):
         :return: a list of tasks.
         """
         return [t for skill_tasks in self._tasks.values() for t in skill_tasks]
+
+    def setup(self) -> None:
+        """
+        Set up the tasks in the registry.
+
+        :return: None
+        """
+        for tasks in self._tasks.values():
+            for task in tasks:
+                task.setup()
 
     def teardown(self) -> None:
         """
@@ -439,9 +494,8 @@ class Resources(object):
         """Add a skill to the set of resources."""
         skill_id = skill.config.name
         self._skills[skill_id] = skill
-        if skill.handler is not None:
-            protocol_id = skill.config.protocol
-            self.handler_registry.register((protocol_id, skill_id), cast(Handler, skill.handler))
+        if skill.handlers is not None:
+            self.handler_registry.register((None, skill_id), cast(List[Handler], skill.handlers))
         if skill.behaviours is not None:
             self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], skill.behaviours))
         if skill.tasks is not None:
@@ -453,6 +507,15 @@ class Resources(object):
         self.handler_registry.unregister(skill_id)
         self.behaviour_registry.unregister(skill_id)
         self.task_registry.unregister(skill_id)
+
+    def setup(self):
+        """
+        Set up the resources.
+
+        :return: None
+        """
+        for r in self._registries:
+            r.setup()
 
     def teardown(self):
         """

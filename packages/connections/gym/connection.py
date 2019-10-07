@@ -24,7 +24,7 @@ import queue
 import threading
 from queue import Queue
 from threading import Thread
-from typing import Dict, Optional, cast
+from typing import Dict, Optional, cast, TYPE_CHECKING
 
 import gym
 
@@ -32,8 +32,13 @@ from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Channel, Connection
 from aea.helpers.base import locate
 from aea.mail.base import Envelope
-from gym_protocol.message import GymMessage
-from gym_protocol.serialization import GymSerializer
+
+if TYPE_CHECKING:
+    from packages.protocols.gym.message import GymMessage
+    from packages.protocols.gym.serialization import GymSerializer
+else:
+    from gym_protocol.message import GymMessage
+    from gym_protocol.serialization import GymSerializer
 
 logger = logging.getLogger(__name__)
 

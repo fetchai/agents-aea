@@ -27,7 +27,7 @@ from typing import Optional, TYPE_CHECKING
 from aea.configurations.base import Address, ProtocolId
 from aea.mail import base_pb2
 if TYPE_CHECKING:
-    from aea.connections.base import Connection
+    from aea.connections.base import Connection  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 

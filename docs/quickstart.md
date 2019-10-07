@@ -3,11 +3,13 @@
 Create and cd into a new working directory.
 
 ``` bash
-mkdir aea/
-cd aea/
+mkdir my_aea/
+cd my_aea/
 ```
 
-Check you have `pipenv`.
+We highly recommend using a virtual environment to ensure consistency across dependencies.
+
+Check you have [`pipenv`](https://github.com/pypa/pipenv).
 
 ``` bash
 which pipenv
@@ -18,7 +20,7 @@ If you don't have it, install it. Instructions are <a href="https://pypi.org/pro
 Once installed, create a new environment and open it.
 
 ``` bash
-pipenv --python 3.7 && pipenv shell
+touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
 
@@ -26,28 +28,39 @@ pipenv --python 3.7 && pipenv shell
 
 Install the Autonomous Economic Agent framework.
 
-The following installs the basic application.
+<!--
+
+The following installs the basic application without the cli.
 ``` bash
 pip install aea
 ```
+-->
 
-The following installs the whole package.
+The following installs the entire AEA package which includes the cli too.
+
 ``` bash
 pip install aea[all]
 
 ```
 
-The following installs just the cli.
+However, you can run this demo by installing the base AEA inclusive the CLI extension, alone.
+
 ``` bash
 pip install aea[cli]
+
 ```
 
 
-## Echo Agent demo
-### Download the examples and scripts directories.
+## Echo skill demo
+
+The echo skill is a simple demo that prints logs from the agent's main loop as it calls registered `Task` and `Behaviour` code.
+
+
+
+### Download the scripts and packages directories.
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 ### Create a new agent
@@ -62,21 +75,20 @@ cd my_first_agent
 aea add skill echo
 ```
 
-### Launch the OEF 
-
-
-Open a new terminal and launch the OEF.
+### Add a local connection
 
 ``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+aea add connection local
 ```
 
-### Run the agent locally
+A local connection provides a local stub for an OEF node instance.
 
-Go back to the other terminal and run the agent.
+### Run the agent
+
+Run the agent with the `local` connection.
 
 ``` bash
-aea run
+aea run --connection local
 ```
 
 You will see the echo task running in the terminal window.

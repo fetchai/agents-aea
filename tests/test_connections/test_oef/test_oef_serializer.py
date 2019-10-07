@@ -17,33 +17,17 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a handler."""
+"""This test module contains the tests for the OEF serializer."""
 
-from typing import Optional
-
-from aea.configurations.base import ProtocolId
-from aea.mail.base import Envelope
-from aea.skills.base import Handler
+from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.serialization import OEFSerializer
+from aea.protocols.oef.models import Attribute, DataModel, Description
 
 
-class MyScaffoldHandler(Handler):
-    """This class scaffolds a handler."""
-
-    SUPPORTED_PROTOCOL = ''  # type: Optional[ProtocolId]
-
-    def handle_envelope(self, envelope: Envelope) -> None:
-        """
-        Implement the reaction to an envelope.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        raise NotImplementedError
-
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
-        raise NotImplementedError
+def test_oef_serialization():
+    """Testing the serialization of the OEF."""
+    foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
+    desc = Description({"bar": 1}, data_model=foo_datamodel)
+    msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
+    msg_bytes = OEFSerializer().encode(msg)
+    assert len(msg_bytes) > 0

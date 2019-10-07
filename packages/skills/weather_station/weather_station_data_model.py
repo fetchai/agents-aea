@@ -17,37 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'echo' skill."""
+"""This package contains the dataModel for the weather agent."""
 
-from aea.mail.base import Envelope
-from aea.skills.base import Handler
+from aea.protocols.oef.models import DataModel, Attribute
+
+SCHEME = {'country': "UK", 'city': "Cambridge"}
+SERVICE_ID = "WeatherData"
 
 
-class DummyHandler(Handler):
-    """Echo handler."""
+class WEATHER_STATION_DATAMODEL (DataModel):
+    """Data model for the weather Agent."""
 
-    SUPPORTED_PROTOCOL = "default"
+    def __init__(self):
+        """Initialise the dataModel."""
+        self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)
+        self.ATTRIBUTE_CITY = Attribute("city", str, True)
 
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-        self.kwargs = kwargs
-        self.handled_envelopes = []
-        self.nb_teardown_called = 0
-
-    def handle_envelope(self, envelope: Envelope) -> None:
-        """
-        Handle envelopes.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        self.handled_envelopes.append(envelope)
-
-    def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
-        self.nb_teardown_called += 1
+        super().__init__("weather_station_datamodel", [self.ATTRIBUTE_COUNTRY,
+                                                       self.ATTRIBUTE_CITY])

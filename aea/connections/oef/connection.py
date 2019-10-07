@@ -36,8 +36,8 @@ from oef.query import (
     And as OEFAnd,
     Or as OEFOr,
     Not as OEFNot,
-    Constraint as OEFConstraint
-)
+    Constraint as OEFConstraint,
+    ConstraintType as OEFConstraintType, Eq, NotEq, Lt, LtEq, Gt, GtEq, Range, In, NotIn)
 from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
 
 from aea.configurations.base import ConnectionConfig
@@ -46,7 +46,8 @@ from aea.mail.base import MailBox, Envelope
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint
+from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint, \
+    ConstraintType, ConstraintTypes
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
@@ -93,9 +94,35 @@ class OEFObjectTranslator:
         elif isinstance(constraint_expr, Not):
             return OEFNot(cls.to_oef_constraint_expr(constraint_expr.constraint))
         elif isinstance(constraint_expr, Constraint):
-            return OEFConstraint(constraint_expr.attribute_name, constraint_expr.constraint_type)
+            oef_constraint_type = cls.to_oef_constraint_type(constraint_expr.constraint_type)
+            return OEFConstraint(constraint_expr.attribute_name, oef_constraint_type)
         else:
             raise ValueError("Constraint expression not supported.")
+
+    @classmethod
+    def to_oef_constraint_type(cls, constraint_type: ConstraintType) -> OEFConstraintType:
+        """From our constraint type to OEF constraint type."""
+        value = constraint_type.value
+        if constraint_type.type == ConstraintTypes.EQUAL:
+            return Eq(value)
+        elif constraint_type.type == ConstraintTypes.NOT_EQUAL:
+            return NotEq(value)
+        elif constraint_type.type == ConstraintTypes.LESS_THAN:
+            return Lt(value)
+        elif constraint_type.type == ConstraintTypes.LESS_THAN_EQ:
+            return LtEq(value)
+        elif constraint_type.type == ConstraintTypes.GREATER_THAN:
+            return Gt(value)
+        elif constraint_type.type == ConstraintTypes.GREATER_THAN_EQ:
+            return GtEq(value)
+        elif constraint_type.type == ConstraintTypes.WITHIN:
+            return Range(value)
+        elif constraint_type.type == ConstraintTypes.IN:
+            return In(value)
+        elif constraint_type.type == ConstraintTypes.NOT_IN:
+            return NotIn(value)
+        else:
+            raise ValueError("Constraint type not recognized.")
 
     @classmethod
     def from_oef_description(cls, oef_desc: OEFDescription) -> Description:
@@ -131,9 +158,34 @@ class OEFObjectTranslator:
         elif isinstance(oef_constraint_expr, OEFNot):
             return Not(cls.from_oef_constraint_expr(oef_constraint_expr.constraint))
         elif isinstance(oef_constraint_expr, OEFConstraint):
-            return Constraint(oef_constraint_expr.attribute_name, oef_constraint_expr.constraint)
+            constraint_type = cls.from_oef_constraint_type(oef_constraint_expr.constraint)
+            return Constraint(oef_constraint_expr.attribute_name, constraint_type)
         else:
             raise ValueError("OEF Constraint not supported.")
+
+    @classmethod
+    def from_oef_constraint_type(cls, constraint_type: OEFConstraintType) -> ConstraintType:
+        """From OEF constraint type to our constraint type."""
+        if isinstance(constraint_type, Eq):
+            return ConstraintType(ConstraintTypes.EQUAL, constraint_type.value)
+        elif isinstance(constraint_type, NotEq):
+            return ConstraintType(ConstraintTypes.NOT_EQUAL, constraint_type.value)
+        elif isinstance(constraint_type, Lt):
+            return ConstraintType(ConstraintTypes.LESS_THAN, constraint_type.value)
+        elif isinstance(constraint_type, LtEq):
+            return ConstraintType(ConstraintTypes.LESS_THAN_EQ, constraint_type.value)
+        elif isinstance(constraint_type, Gt):
+            return ConstraintType(ConstraintTypes.GREATER_THAN, constraint_type.value)
+        elif isinstance(constraint_type, GtEq):
+            return ConstraintType(ConstraintTypes.GREATER_THAN_EQ, constraint_type.value)
+        elif isinstance(constraint_type, Range):
+            return ConstraintType(ConstraintTypes.WITHIN, constraint_type.values)
+        elif isinstance(constraint_type, In):
+            return ConstraintType(ConstraintTypes.IN, constraint_type.values)
+        elif isinstance(constraint_type, NotIn):
+            return ConstraintType(ConstraintTypes.NOT_IN, constraint_type.values)
+        else:
+            raise ValueError("Constraint type not recognized.")
 
 
 class MailStats(object):
@@ -224,6 +276,10 @@ class OEFChannel(OEFAgent, Channel):
         :param query: the query.
         :return: None
         """
+        try:
+            query = pickle.loads(query)
+        except Exception:
+            pass
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
                           target=target,
@@ -383,6 +439,8 @@ class OEFChannel(OEFAgent, Channel):
         if performative == FIPAMessage.Performative.CFP:
             query = fipa_message.get("query")
             query = b"" if query is None else query
+            if type(query) == Query:
+                query = pickle.dumps(query)
             self.send_cfp(id, dialogue_id, destination, target, query)
         elif performative == FIPAMessage.Performative.PROPOSE:
             proposal = cast(List[Description], fipa_message.get("proposal"))

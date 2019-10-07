@@ -25,6 +25,14 @@ from aea.skills.base import Task
 class MyScaffoldTask(Task):
     """This class scaffolds a task."""
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
     def execute(self) -> None:
         """
         Implement the task execution.
@@ -32,7 +40,7 @@ class MyScaffoldTask(Task):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def teardown(self) -> None:
         """
@@ -40,4 +48,4 @@ class MyScaffoldTask(Task):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover

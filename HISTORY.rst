@@ -44,3 +44,11 @@ Release History
 - Extended docs
 - Increased test coverage
 - Multiple additional minor fixes and changes
+
+0.1.6 (2019-10-04)
+-------------------
+
+- Adds several new skills
+- Extended docs on framework and skills
+- Introduces core framework components like decision maker and shared classes
+- Multiple additional minor fixes and changes

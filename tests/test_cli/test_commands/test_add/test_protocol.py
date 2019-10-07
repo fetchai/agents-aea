@@ -25,9 +25,11 @@ import unittest.mock
 from pathlib import Path
 
 from click.testing import CliRunner
+from jsonschema import ValidationError
 
 import aea
 import aea.cli.common
+import aea.configurations.base
 from aea.cli import cli
 
 
@@ -110,6 +112,54 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
+    """Test that the command 'aea add protocol' fails when the configuration file is not compliant with the schema."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.protocol_name = "oef"
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        assert result.exit_code == 0
+
+        # change the serialization of the ProtocolConfig class so to make the parsing to fail.
+        cls.patch = unittest.mock.patch.object(aea.configurations.base.ProtocolConfig, "from_json",
+                                               side_effect=ValidationError("test error message"))
+        cls.patch.__enter__()
+
+        os.chdir(cls.agent_name)
+        cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
+
+    def test_exit_code_equal_to_minus_1(self):
+        """Test that the exit code is equal to minus 1."""
+        assert self.result.exit_code == -1
+
+    def test_configuration_file_not_valid(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: 'Protocol configuration file not valid: ...'
+        """
+        self.mocked_logger_error.assert_called_once_with("Protocol configuration file not valid: test error message")
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

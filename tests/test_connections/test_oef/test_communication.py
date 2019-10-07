@@ -21,7 +21,7 @@
 import time
 
 import pytest
-from oef.query import Eq
+from unittest import mock
 
 from aea.connections.oef.connection import OEFMailBox
 from aea.crypto.base import Crypto
@@ -29,8 +29,9 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
+from aea.protocols.fipa import fipa_pb2
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description, DataModel, Attribute, Query, Constraint
+from aea.protocols.oef.models import Description, DataModel, Attribute, Query, Constraint, ConstraintType
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
 
@@ -95,13 +96,15 @@ class TestOEF:
             In this test, the query has no data model.
             """
             request_id = 1
-            search_query_empty_model = Query([Constraint("foo", Eq("bar"))], model=None)
+            search_query_empty_model = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id, query=search_query_empty_model)
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
 
             envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
-            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == request_id and search_result.get("agents") == []
+            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
+            assert search_result.get("id")
+            assert request_id and search_result.get("agents") == []
 
         def test_search_services_with_query_with_model(self):
             """Test that a search services request can be sent correctly.
@@ -110,13 +113,15 @@ class TestOEF:
             """
             request_id = 2
             data_model = DataModel("foobar", [Attribute("foo", str, True)])
-            search_query = Query([Constraint("foo", Eq("bar"))], model=data_model)
+            search_query = Query([Constraint("foo", ConstraintType("==", "bar"))], model=data_model)
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id, query=search_query)
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
 
             envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
-            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == request_id and search_result.get("agents") == []
+            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
+            assert search_result.get("id") == request_id
+            assert search_result.get("agents") == []
 
         @classmethod
         def teardown_class(cls):
@@ -141,11 +146,13 @@ class TestOEF:
             msg_bytes = OEFSerializer().encode(msg)
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=2, query=Query([Constraint("bar", Eq(1))], model=foo_datamodel))
+            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=2, query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel))
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
             envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
-            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == 2 and search_result.get("agents") == [self.crypto1.public_key]
+            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
+            assert search_result.get("id") == 2
+            assert search_result.get("agents") == [self.crypto1.public_key]
 
         @classmethod
         def teardown_class(cls):
@@ -178,11 +185,13 @@ class TestOEF:
             time.sleep(1.0)
 
             cls.request_id += 1
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=cls.request_id, query=Query([Constraint("bar", Eq(1))], model=cls.foo_datamodel))
+            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=cls.request_id, query=Query([Constraint("bar", ConstraintType("==", 1))], model=cls.foo_datamodel))
             cls.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=cls.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
             envelope = cls.mailbox1.inbox.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
-            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == cls.request_id and search_result.get("agents") == [cls.crypto1.public_key]
+            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
+            assert search_result.get("id") == cls.request_id
+            assert search_result.get("agents") == [cls.crypto1.public_key]
 
         def test_unregister_service(self):
             """Test that an unregister service request works correctly.
@@ -200,12 +209,14 @@ class TestOEF:
             time.sleep(1.0)
 
             self.request_id += 1
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=self.request_id, query=Query([Constraint("bar", Eq(1))], model=self.foo_datamodel))
+            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=self.request_id, query=Query([Constraint("bar", ConstraintType("==", 1))], model=self.foo_datamodel))
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(search_request))
 
             envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
-            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT and search_result.get("id") == self.request_id and search_result.get("agents") == []
+            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
+            assert search_result.get("id") == self.request_id
+            assert search_result.get("agents") == []
 
         @classmethod
         def teardown_class(cls):
@@ -233,7 +244,7 @@ class TestFIPA:
 
     def test_cfp(self):
         """Test that a CFP can be sent correctly."""
-        cfp_bytes = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=b"hello")
+        cfp_bytes = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP, query=Query([Constraint('something', ConstraintType('>', 1))]))
         self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key, protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_bytes))
         envelope = self.mailbox2.inbox.get(block=True, timeout=5.0)
         expected_cfp_bytes = FIPASerializer().decode(envelope.message)
@@ -283,6 +294,57 @@ class TestFIPA:
         envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
         expected_decline = FIPASerializer().decode(envelope.message)
         assert expected_decline == decline
+
+    def test_serialisation_fipa(self):
+        """Tests a Value Error flag for wrong CFP query."""
+        with pytest.raises(ValueError):
+            msg = FIPAMessage(
+                performative=FIPAMessage.Performative.CFP,
+                message_id=0,
+                dialogue_id=0,
+                destination="publicKey",
+                target=1)
+            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
+                    as mock_performative_enum:
+                mock_performative_enum.CFP.value = "unknown"
+                assert FIPASerializer().encode(msg), "Raises Value Error"
+        with pytest.raises(ValueError):
+            msg.set("query", "Hello")
+            assert FIPASerializer().encode(msg), "Query type is Supported!"
+        with pytest.raises(ValueError):
+            cfp_msg = FIPAMessage(message_id=0,
+                                  dialogue_id=0,
+                                  target=0,
+                                  performative=FIPAMessage.Performative.CFP,
+                                  query=b"hello")
+            cfp_msg.set("query", "hello")
+            fipa_msg = fipa_pb2.FIPAMessage()
+            fipa_msg.message_id = cfp_msg.get("id")
+            fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
+            fipa_msg.target = cfp_msg.get("target")
+            performative = fipa_pb2.FIPAMessage.CFP()
+            fipa_msg.cfp.CopyFrom(performative)
+            fipa_bytes = fipa_msg.SerializeToString()
+            assert FIPASerializer().decode(fipa_bytes),\
+                "The encoded message is a valid FIPA message."
+        with pytest.raises(ValueError):
+            cfp_msg = FIPAMessage(message_id=0,
+                                  dialogue_id=0,
+                                  target=0,
+                                  performative=FIPAMessage.Performative.CFP,
+                                  query=b"hello")
+            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
+                    as mock_performative_enum:
+                mock_performative_enum.CFP.value = "unknown"
+                fipa_msg = fipa_pb2.FIPAMessage()
+                fipa_msg.message_id = cfp_msg.get("id")
+                fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
+                fipa_msg.target = cfp_msg.get("target")
+                performative = fipa_pb2.FIPAMessage.CFP()
+                fipa_msg.cfp.CopyFrom(performative)
+                fipa_bytes = fipa_msg.SerializeToString()
+                assert FIPASerializer().decode(fipa_bytes),\
+                    "The encoded message is a FIPA message"
 
     @classmethod
     def teardown_class(cls):

@@ -6,15 +6,18 @@ url: ""
 behaviours:
   - behaviour:
       class_name: GymBehaviour
+      args: {}
+handlers:
+  - handler:
+      class_name: GymHandler
       args:
-        foo: bar  
-handler:
-  class_name: GymHandler
-  args:
-    foo: bar
+        foo: bar
 tasks:
   - task:
       class_name: GymTask
       args:
         foo: bar
-protocol: "gym"
+shared_classes: []
+protocols: ["gym"]
+dependencies:
+  - gym

@@ -19,21 +19,33 @@ nav:
 
   - Autonomous Economic Agent Framework:
     - Welcome:
-      - "What is the AEA?": 'index.md'
-      - "Architecture": 'architecture.md'
+      - "What is the AEA framework?": 'index.md'
       - "Version": 'version.md'
+    - Architecture:
+      - "Design principles": 'design-principles.md'
+      - "Architectural diagram": 'diagram.md'
+      - "Core components": 'core-components.md'
+      - "File structure": 'file-structure.md'
     - AEA quick start: 'quickstart.md'
-    - Get developing:
-      - "Protocol": 'protocol.md'
+    - Developer guide:
+      - "Step by step": 'steps.md'
       - "Skill": 'skill.md'
+      - "Protocol": 'protocol.md'
+      - "Connection": 'connection.md'
       - "Scaffolding": 'scaffolding.md'
-      - "CLI commands": 'cli_overview.md'
+      - CLI:
+         - "CLI tool": 'cli-how-to.md'
+         - "Commands": 'cli-commands.md'
     - Integration:
       - "Integrate with third parties": 'integration.md'
     - Demos:
-      - "AEA gym skill": 'gym-skill.md'
-      - "Gym efficiency demo": 'gym-plugin.md'
-      - "TAC": 'tac.md'
+      - "Gym demo": 'gym-plugin.md'
+      - "Gym skill": 'gym-skill.md'
+      - "Weather skills": 'weather-skills.md'
+      - "TAC external app": 'tac.md'
+      - "FIPA skill": 'fipa-skill.md'
+      - "TAC skill": 'tac-skill.md'
+
 
 
 

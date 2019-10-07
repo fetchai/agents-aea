@@ -35,7 +35,7 @@ class MyScaffoldSerializer(Serializer):
         :param msg: the message object
         :return: the bytes
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def decode(self, obj: bytes) -> Message:
         """
@@ -44,4 +44,4 @@ class MyScaffoldSerializer(Serializer):
         :param obj: the bytes object
         :return: the message
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover

@@ -9,29 +9,37 @@ However, the example decouples the RL agent from the `gym.Env` allowing them to 
 
 ### Dependencies
 
+Follow the <a href="../quickstart/#preliminaries" target=_blank>Preliminaries</a> and <a href="../quickstart/#installation" target=_blank>Installation</a> sections from the AEA quick start.
+
+### Packages
+
+Install the following packages.
+
 ``` bash
 pip install numpy gym
 ```
 
 ### Files
 
-You will have already downloaded the `examples` directory during the AEA <a href="../quickstart" target=_blank>quick start demo</a>.
+If you haven't done so already, download the `examples` and `packages` directories.
 
 ``` bash
-cd examples/gym_ex
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
+
 
 ### Run the example
 
 ``` bash
-python train.py
+python examples/gym_ex/train.py
 ```
 
 Notice the usual RL setup, i.e. the fit method of the RL agent has the typical signature and a familiar implementation. 
 
 Note how `train.py` demonstrates how easy it is to use an AEA agent as a proxy layer between an OpenAI `gym.Env` and a standard RL agent.
 
-It is just one line of code!
+It is just one line of code to introduce the proxy agent and proxy environment!
 
 ``` python
 from gyms.env import BanditNArmedRandom

@@ -1,34 +1,56 @@
-The AEA is a framework for autonomous economic agent (AEA) development. It gives developers a quick and efficient way to build autonomous economic agents. 
+The AEA framework is a Python ecosystem for autonomous economic agent (AEA) development. 
 
-The framework is super modular, easily extensible, and highly composable. It is ideal for Reinforcement Learning scenarios. 
+It equips developers with a simple to understand and efficient set of tools for building autonomous economic agents. 
+
+The framework is super modular, easily extensible, and highly composable. It is ideal for reinforcement learning scenarios. 
+
+The AEA framework attempts to make agent development as straightforward as many popular web frameworks.
 
 
 ## Our vision
 
-Fetch.AI intends the AEA framework to have two focused commercial roles.
+The AEA framework has two focused commercial roles.
 
-### Open source company
+### Open source technology
 
-We want to build infrastructure with which external parties build their own solutions.
+We are creating infrastructure for agent developers to use to build their own solutions. 
+
+AEA users are, among others:
+
+* Data scientists.
+* Machine learning experts.
+* Engineers.
+* Economists.
+* Web developers.
+* Students/Academics.
+* AI/ML/MAS Researchers.
+* Crypto passionates.
+* Indie developers.
+
 
 ### Platform for start ups
 
-By operating as a platform for start ups, we hope to solve the chicken-or-egg problem through incentive schemes.
+By operating as a platform for start ups, we envisage the AEA framework to be in a continuous growth pattern.
 
+With start up grants we will kick start solutions while testing product-problem fit and identifying our user base.
+
+<!-- Both successes and failures allow us to conceive new hypotheses and hence offer opportunities. -->
 
 
 ## Agents
 
-An autonomous economic agent (AEA) is an intelligent agent whose goal is to generate economic value for its owner. Their super powers lie in their ability to autonomously acquire new skills.
+An autonomous economic agent (AEA) is an intelligent agent whose goal is generating economic value for its owner. 
 
-AEAs achieve their goals with the help of the OEF and the Fetch.AI Ledger. 
+The AEA super power is the ability to autonomously acquire new skills.
+
+AEAs achieve their goals with the help of the Fetch.AI OEF and the Fetch.AI Ledger.
 
 Third party systems, such as Ethereum, may also allow AEA integration.
 
 
 
 !!!	Note
-	Work in progress.
+	This developer documentation is work in progress. IF you spot any errors please open an issue [here](https://github.com/fetchai/agents-aea).
 
 
 <br />

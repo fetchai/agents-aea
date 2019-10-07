@@ -32,7 +32,7 @@ from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import connection, add, skill
-from aea.cli.common import Context, pass_ctx, logger
+from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
@@ -108,6 +108,15 @@ def delete(ctx: Context, agent_name):
     except OSError:
         logger.error("An error occurred while deleting the agent directory. Aborting...")
         exit(-1)
+
+
+@cli.command()
+@pass_ctx
+def freeze(ctx: Context):
+    """Get the dependencies."""
+    _try_to_load_agent_config(ctx)
+    for d in ctx.get_dependencies():
+        print(d)
 
 
 cli.add_command(add)

@@ -123,16 +123,16 @@ def protocol(click_context, protocol_name):
             logger.error("Cannot find protocol: '{}'.".format(protocol_name))
             exit(-1)
 
-    # # try to load the connection configuration file
-    # try:
-    #     connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
-    #     logger.info("Connection supports the following protocols: {}".format(connection_configuration.supported_protocols))
-    # except ValidationError as e:
-    #     logger.error("Connection configuration file not valid: {}".format(str(e)))
-    #     exit(-1)
-    #     return
+    # try to load the protocol configuration file
+    try:
+        protocol_configuration = ctx.protocol_loader.load(open(str(protocol_configuration_filepath)))
+        logger.info("Protocol available: {}".format(protocol_configuration.name))
+    except ValidationError as e:
+        logger.error("Protocol configuration file not valid: {}".format(str(e)))
+        exit(-1)
+        return
 
-    # copy the connection package into the agent's supported connections.
+    # copy the protocol package into the agent's supported connections.
     src = str(Path(os.path.join(registry_path, "protocols", protocol_name)).absolute())
     dest = os.path.join(ctx.cwd, "protocols", protocol_name)
     logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
@@ -202,9 +202,10 @@ def skill(click_context, skill_name):
     Path(skills_init_module).touch(exist_ok=True)
 
     # check for not supported protocol, and add it.
-    if skill_configuration.protocol not in ctx.agent_config.protocols:
-        logger.info("Adding protocol '{}' to the agent...".format(skill_configuration.protocol))
-        click_context.invoke(protocol, protocol_name=skill_configuration.protocol)
+    for protocol_name in skill_configuration.protocols:
+        if protocol_name not in ctx.agent_config.protocols:
+            logger.info("Adding protocol '{}' to the agent...".format(protocol_name))
+            click_context.invoke(protocol, protocol_name=protocol_name)
 
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))

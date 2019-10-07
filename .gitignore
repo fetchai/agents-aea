@@ -109,3 +109,7 @@ venv.bak/
 */.DS_Store
 
 data/*
+temp_private_key.pem
+
+.idea/
+

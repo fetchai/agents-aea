@@ -25,13 +25,21 @@ from aea.skills.base import Behaviour
 class MyScaffoldBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
 
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
     def act(self) -> None:
         """
         Implement the act.
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def teardown(self) -> None:
         """
@@ -39,4 +47,4 @@ class MyScaffoldBehaviour(Behaviour):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
