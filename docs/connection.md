@@ -121,43 +121,30 @@ def send(self, envelope: Envelope):
 -->
 
 
+## Launching `oef` connections
 
-## Envelope
+### `oef` - local node
 
-An `Envelope` wraps messages. It travels from `OutBox` to another agent. `Envelope` objects sent from other agents arrive in the `InBox` via a protocol connection.
-
-An `Envelope` objects has four instance variables.
-
-* `to`: an `Address` object defining the recipient agent.
-* `sender`: an `Address` object defining the sender agent.
-* `protocol_id`: the id of the protocol.
-* `message`: the message in bytes.
-
-<!--
-``` python
-def __init__(self, to: Address, sender: Address, protocol_id: ProtocolId, message: bytes):
-        """
-        Initialize a Message object.
-        :param to: the public key of the receiver.
-        :param sender: the public key of the sender.
-        :param protocol_id: the protocol id.
-        :param message: the protocol-specific message
-        """
-        self._to = to
-        self._sender = sender
-        self._protocol_id = protocol_id
-        self._message = message
+Download the scripts directory:
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
 ```
--->
 
-## Launching connections
+Then, start an oef from a separate terminal:
 
-### `oef`
+``` bash
+python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+```
 
-* Run a launcher script such as <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/oef/launch.py" target=_blank>this one</a> which pulls and runs an `oef` docker image.
-* Connect directly to a running `oef` via a given `URL:PORT`.
+This pulls and runs an `oef` docker image.
 
-### tbc
+Now you can run an AEA with an `oef` connection.
+
+
+### `oef` - remote node
+
+Connect directly to a running `oef` via a given `URL:PORT`. Update the configuration of the `oef` connection in the `connection.yaml` file.
+
 
 <br />
 

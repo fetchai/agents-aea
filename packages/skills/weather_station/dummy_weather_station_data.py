@@ -20,11 +20,14 @@
 """This package contains dummy weather station data."""
 
 import datetime
+import logging
 import os.path
 import random
 import sqlite3
 import time
 from typing import Dict, Union
+
+logger = logging.getLogger("aea.weather_station_skill")
 
 my_path = os.path.dirname(__file__)
 
@@ -58,7 +61,7 @@ cur.execute(command)
 cur.close()
 con.commit()
 if con is not None:
-    print("Closed the db!")
+    logger.info("Wheather station: I closed the db after checking it is populated!")
     con.close()
 
 
@@ -96,7 +99,7 @@ class Forecast():
                      tagged_data['wind_ave'],
                      tagged_data['wind_dir'],
                      tagged_data['wind_gust']))
-        print("Added data in the db!")
+        logger.info("Wheather station: I added data in the db!")
         cur.close()
         con.commit()
         con.close()
