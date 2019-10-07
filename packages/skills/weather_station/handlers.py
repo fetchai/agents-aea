@@ -34,16 +34,14 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
-    from packages.skills.weather_station.dummy_weather_station_data import DB_SOURCE
     from packages.skills.weather_station.db_communication import DBCommunication
 else:
-    from weather_station_skill.dummy_weather_station_data import DB_SOURCE
     from weather_station_skill.db_communication import DBCommunication
 
 logger = logging.getLogger(__name__)
 
 DATE_ONE = "3/10/2019"
-DATE_TWO = "4/10/2019"
+DATE_TWO = "15/10/2019"
 
 
 class MyWeatherHandler(Handler):
@@ -55,7 +53,7 @@ class MyWeatherHandler(Handler):
         """Initialise the behaviour."""
         super().__init__(**kwargs)
         self.fet_price = 0.002
-        self.db = DBCommunication(DB_SOURCE)
+        self.db = DBCommunication()
         self.fetched_data = []
 
     def setup(self) -> None:
@@ -72,7 +70,7 @@ class MyWeatherHandler(Handler):
         msg = FIPASerializer().decode(envelope.message)
         msg = cast(FIPAMessage, msg)
         msg_performative = FIPAMessage.Performative(msg.get('performative'))
-        message_id = cast(int, msg.get('message_id'))
+        message_id = cast(int, msg.get('id'))
         dialogue_id = cast(int, msg.get('dialogue_id'))
 
         if msg_performative == FIPAMessage.Performative.CFP:
