@@ -17,7 +17,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the base classes for the skills."""
-import glob
+# import glob
 import importlib.util
 import inspect
 import logging
