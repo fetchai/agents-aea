@@ -181,7 +181,6 @@ class Behaviour(ABC):
             else:
                 args = behaviour_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-                args['skill_context'] = skill_context
                 behaviour = behaviour_class(skill_context=skill_context, **args)
                 behaviours.append(behaviour)
 
@@ -265,8 +264,7 @@ class Handler(ABC):
             else:
                 args = handler_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-                args['skill_context'] = skill_context
-                handler = handler_class(**args)
+                handler = handler_class(skill_context=skill_context, **args)
                 handlers.append(handler)
 
         return handlers
@@ -420,8 +418,7 @@ class SharedClass(ABC):
             else:
                 args = shared_class_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-                args['skill_context'] = skill_context
-                shared_class_instance = shared_class(**args)
+                shared_class_instance = shared_class(skill_context=skill_context, **args)
                 instances.append(shared_class_instance)
                 setattr(skill_context, shared_class_name.lower(), shared_class_instance)
         return instances
@@ -479,13 +476,13 @@ class Skill:
 
         skill_context = SkillContext(agent_context)
 
-        handlers_configurations = list(dict(skill_config.handlers.read_all()).values())
+        handlers_configurations = list(map(lambda x: x.handler, skill_config.handlers))
         handlers = Handler.parse_module(os.path.join(directory, "handlers.py"), handlers_configurations, skill_context)
-        behaviours_configurations = list(dict(skill_config.behaviours.read_all()).values())
+        behaviours_configurations = list(map(lambda x: x.behaviour, skill_config.behaviours))
         behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations, skill_context)
-        tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
+        tasks_configurations = list(map(lambda x: x.task, skill_config.tasks))
         tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
-        shared_classes_configurations = list(dict(skill_config.shared_classes.read_all()).values())
+        shared_classes_configurations = list(map(lambda x: x.shared_class, skill_config.shared_classes))
         shared_classes_instances = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
 
         skill = Skill(skill_config, skill_context, handlers, behaviours, tasks, shared_classes_instances)

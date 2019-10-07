@@ -63,7 +63,7 @@
               "type": "object",
               "required": ["shared_class"],
               "properties": {
-                "task": { "$ref": "#/definitions/shared_class" }
+                "shared_class": { "$ref": "#/definitions/shared_class" }
               }
             }
         },
