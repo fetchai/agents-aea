@@ -39,13 +39,13 @@ nav:
     - Integration:
       - "Integrate with third parties": 'integration.md'
     - Demos:
-      - "AEA gym skill": 'gym-skill.md'
-      - "Gym efficiency demo": 'gym-plugin.md'
+      - "Gym demo": 'gym-plugin.md'
+      - "Gym skill": 'gym-skill.md'
+      - "Weather skills": 'weather-skills.md'
+      - "TAC external app": 'tac.md'
       - "FIPA skill": 'fipa-skill.md'
       - "TAC skill": 'tac-skill.md'
-      - "Transport app skill": 'transport.md'
-      - "Buy/sell game skill": 'buy-sell.md'
-      - "TAC external app": 'tac.md'
+
 
 
 

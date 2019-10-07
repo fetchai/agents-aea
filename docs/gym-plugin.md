@@ -39,7 +39,7 @@ Notice the usual RL setup, i.e. the fit method of the RL agent has the typical s
 
 Note how `train.py` demonstrates how easy it is to use an AEA agent as a proxy layer between an OpenAI `gym.Env` and a standard RL agent.
 
-It is just one line of code!
+It is just one line of code to introduce the proxy agent and proxy environment!
 
 ``` python
 from gyms.env import BanditNArmedRandom

@@ -1,4 +1,4 @@
-In this section, we show you how to integrate the AEA with third party ledgers.
+In this section, we show you how to integrate the AEA with the Fetch.AI and third party ledgers.
 
 
 ## Fetch.AI Ledger
@@ -7,13 +7,7 @@ In this section, we show you how to integrate the AEA with third party ledgers.
 	Coming soon.
 
 
-## Ethereum
-
-!!!	Note
-	Coming soon.
-
-
-## Etc.
+## Ethereum Ledger
 
 !!!	Note
 	Coming soon.
