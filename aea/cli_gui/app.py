@@ -37,7 +37,7 @@ parser.add_argument(
     help='Location of script and package files and where agents will be created (default: my_agents)'
 )
 
-args = parser.parse_args()  # pragma: no cover
+args = None  # pragma: no cover
 
 elements = [['local', 'agent', 'localAgents'],
             ['registered', 'protocol', 'registeredProtocols'],
@@ -247,4 +247,7 @@ def favicon():
 
 # If we're running in stand alone mode, run the application
 if __name__ == '__main__':
+    args = parser.parse_args()  # pragma: no cover
     app.run(host='0.0.0.0', port=8080, debug=True)
+else:
+    args, _ = parser.parse_known_args()
