@@ -22,7 +22,10 @@ elements = [['local', 'agent', 'localAgents'],
             ['registered', 'protocol', 'registeredProtocols'],
             ['registered', 'connection', 'registeredConections'],
             ['registered', 'skill', 'registeredSkills'],
-            ['local', 'protocol', 'localProtocols']]
+            ['local', 'protocol', 'localProtocols'],
+            ['local', 'connection', 'localConnections'],
+            ['local', 'skill', 'localSkills']]
+
 
 def is_agent_dir(dir_name):
     if not os.path.isdir(dir_name):
@@ -48,6 +51,12 @@ def is_skill_dir(dir_name):
         return False
     else:
         return os.path.isfile(os.path.join(dir_name, "skill.yaml"))
+
+def is_item_dir(dir_name, item_type):
+    if not os.path.isdir(dir_name):
+        return False
+    else:
+        return os.path.isfile(os.path.join(dir_name, item_type + ".yaml"))
 
 def get_agents():
     agent_dir = os.path.join(os.getcwd(), args.agent_dir)
@@ -142,6 +151,13 @@ def fetch_item(agent_id, item_type, item_id):
     else:
         return {"detail": "Failed to add protocol {} to agent {}".format(item_id, agent_id)}, 400  # 400 Bad request
 
+def remove_local_item(agent_id, item_type, item_id):
+    dir = os.path.join( args.agent_dir, agent_id)
+    if call_aea(["aea", "remove", item_type, item_id], dir) == 0:
+        return agent_id,   201  # 200 (OK)
+    else:
+        return {"detail": "Failed to remove protocol {} from agent {}".format(item_id, agent_id)}, 400  # 400 Bad request
+
 
 
 def get_local_items(agent_id, item_type):
@@ -153,7 +169,7 @@ def get_local_items(agent_id, item_type):
     items_list = []
 
     for path in file_list:
-        if is_protocol_dir(path):
+        if is_item_dir(path, item_type):
             head, tail = os.path.split(path)
             items_list.append({"id": tail, "description": "placeholder description"})
 

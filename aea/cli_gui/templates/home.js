@@ -98,6 +98,22 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
+        removeItem: function(element, agentId, itemId) {
+            let propertyName = element["type"] +  "_id"
+            let ajax_options = {
+                type: 'DELETE',
+                url: 'api/agent/' + agentId + '/' + element["type"]+ "/" + itemId,
+                accepts: 'application/json',
+                contentType: 'plain/text'
+            };
+            $.ajax(ajax_options)
+            .done(function(data) {
+                $event_pump.trigger('model_' + element["combined"] + 'RemoveSuccess', [data]);
+            })
+            .fail(function(xhr, textStatus, errorThrown) {
+                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+            })
+        },
         readLocalData: function(element, agentId) {
             let ajax_options = {
                 type: 'GET',
@@ -224,6 +240,20 @@ ns.controller = (function(m, v) {
             }
             e.preventDefault();
         });
+        $('#' + combineName + 'Remove').click(function(e) {
+            let agentId = $('#localAgentsSelectionId').html();
+            let itemId =$('#' + combineName + 'SelectionId').html();
+
+            e.preventDefault();
+
+            if (validateId(agentId) && validateId(itemId) ) {
+                model.removeItem(element, agentId, itemId)
+
+            } else {
+                alert('Error: Problem with one of the selected ids (either agent or ' + element['type']);
+            }
+            e.preventDefault();
+        });
 
         $('.' + combineName + ' table > tbody ').on('click', 'tr', function(e) {
             let $target = $(e.target),
@@ -266,6 +296,12 @@ ns.controller = (function(m, v) {
         $event_pump.on('model_'+ combineName + 'DeleteSuccess', function(e, data) {
             model.readData(element);
             view.setSelectedId(combineName, "NONE")
+            // This should be a function, vur can't do local functions with this hacky class setup
+            for (var j = 0; j < elements.length; j++) {
+                if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
+                    model.readLocalData(elements[j], data);
+                }
+            }
         });
         $event_pump.on('model_'+ combineName + 'FetchSuccess', function(e, data) {
             // This should be a function, vur can't do local functions with this hacky class setup
@@ -276,6 +312,16 @@ ns.controller = (function(m, v) {
             }
             view.setSelectedId(combineName, "NONE")
         });
+        $event_pump.on('model_'+ combineName + 'RemoveSuccess', function(e, data) {
+            // This should be a function, vur can't do local functions with this hacky class setup
+            for (var j = 0; j < elements.length; j++) {
+                if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
+                    model.readLocalData(elements[j], data);
+                }
+            }
+            view.setSelectedId(combineName, "NONE")
+        });
+
     }
 
 
