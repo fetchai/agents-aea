@@ -69,6 +69,8 @@ class FIPAHandler(Handler):
         msg_performative = FIPAMessage.Performative(msg.get('performative'))
         proposals = cast(List[Description], msg.get("proposal"))
         message_id = cast(int, msg.get("message_id"))
+        if message_id is None:
+            message_id = 1
         dialogue_id = cast(int, msg.get("dialogue_id"))
         if msg_performative == FIPAMessage.Performative.PROPOSE:
             if proposals is not []:
