@@ -22,6 +22,10 @@ AEA users are, among others:
 * Engineers.
 * Economists.
 * Web developers.
+* Students/Academics.
+* AI/ML/MAS Researchers.
+* Crypto passionates.
+* Indie developers.
 
 
 ### Platform for start ups
