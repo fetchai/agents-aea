@@ -3,21 +3,19 @@ An agent developer writes skill code that the framework can call.
 When you add a skill with the CLI, a directory is created which includes modules for the `Behaviour,` `Task`, and `Handler` classes as well as a configuration file `skill.yaml`.
 
 
-
-
 ## Context
 
-The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context has a link to the agent context also.
+The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context has a link to the agent context also. The agent context provides read access to agent specific information like the private key of the agent, its preferences and ownership state. It also provides access to the `OutBox`.
 
-This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill.
+This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill and the agent.
 
 For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
 
 ``` python
-self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
+self.context.outbox.put_message(to=recipient, sender=self.context.agent_public_key,protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
 ``` 
 
-Importantly, however, a skill does not have access to the context of another skill or protected AEA components like the decision maker.
+Importantly, however, a skill does not have access to the context of another skill or protected AEA components like the `DecisionMaker`.
 
 
 ## What to code
@@ -30,7 +28,7 @@ Then there is a specific method that the framework requires for each class.
 
 There can be none, one or more `Handler` class per skill.
 
-`Handler` classes can receive `Envelope` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol.
+`Handler` classes can receive `Envelope` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol they require.
 
 * `handle_envelope(self, Envelope)`: is where the skill receives a message contained within an `Envelope` and decides what to do with it.
 
@@ -62,14 +60,26 @@ There can be one or more `Task` classes per skill. The developer subclasses abst
 !!!	Todo
 	For example.
 
+### Shared classes
+
+The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end the developer can subclass an abstract `SharedClass`. These shared classes are made available on the context level upon initialization of the AEA.
+
+Say, the developer has a class called `SomeClass`
+``` python
+class SomeClass(SharedClass):
+    ...
+```
+
+Then, this an instance of this class is available on the context level like so:
+``` python
+some_class = self.context.some_class
+``` 
 
 ### Skill config
 
 Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
 
-It also details the protocol type.
-
-This file also points to shared modules, modules of type `SharedClass`, which allow custom classes within the skill to be accessible in the skill context.
+It also details the protocol types used in the skill and points to shared modules, modules of type `SharedClass`, which allow custom classes within the skill to be accessible in the skill context.
 
 ``` yaml
 name: echo
@@ -101,7 +111,7 @@ dependencies:
       args:
         foo: bar
         bar: foo
-protocol: "default"
+protocols: ["default"]
 ```
 
 
@@ -110,7 +120,7 @@ protocol: "default"
 All top level AEA `skills` directories receive a default `error` skill that contains error handling code for a number of scenarios.
 
 * Received envelopes with unsupported protocols 
-* Received envelopes with unsupported skills.
+* Received envelopes with unsupported skills (i.e. protocols for which no handler is registered).
 * Envelopes with decoding errors.
 * Invalid messages with respect to the registered protocol.
 
