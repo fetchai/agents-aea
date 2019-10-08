@@ -20,6 +20,7 @@
 """This module contains the agent context class."""
 
 from queue import Queue
+from typing import Dict
 
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
@@ -29,7 +30,7 @@ class AgentContext:
     """Provide read access to relevant data of the agent for the skills."""
 
     def __init__(self, agent_name: str,
-                 public_key: {},
+                 public_key: Dict[str, str],
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
@@ -39,7 +40,7 @@ class AgentContext:
         Initialize an agent context.
 
         :param agent_name: the agent's name
-        :param public_key: the public key of the agent
+        :param public_key: the public keys of the agent
         :param outbox: the outbox
         :param decision_maker_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
@@ -60,7 +61,7 @@ class AgentContext:
         return self._agent_name
 
     @property
-    def public_key(self) -> str:
+    def public_key(self) -> Dict[str, str]:
         """Get public key."""
         return self._public_key
 

@@ -26,7 +26,7 @@ from abc import abstractmethod, ABC
 from enum import Enum
 from typing import Optional
 
-from aea.crypto.base import Crypto
+from aea.crypto.initialiser import Wallet
 from aea.mail.base import InBox, OutBox, MailBox
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ class Agent(ABC):
         :return: None
         """
         self._name = name
-        self._crypto = Crypto(private_key_pem_path=private_key_pem_path)
+        self._crypto = Wallet(private_key_pem_path=private_key_pem_path)
         self._liveness = Liveness()
         self._timeout = timeout
 
@@ -97,7 +97,7 @@ class Agent(ABC):
         return self._name
 
     @property
-    def crypto(self) -> Crypto:
+    def crypto(self) -> Wallet:
         """Get the crypto."""
         return self._crypto
 

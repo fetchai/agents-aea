@@ -23,7 +23,11 @@
 from typing import Optional
 import logging
 from fetchai.ledger.crypto import Entity, Identity, Address
+import os
+from pathlib import Path
+import inspect
 
+CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +37,16 @@ class FetchCryptoError(Exception):
 
 
 def _load_private_key_from_path(path):
-    """Load the private key from the file"""
-    with open( path, "r") as key:
+    """Load the private key from the file."""
+    with open(path, "r") as key:
         data = key.read()
         entity = Entity.from_hex(data)
         return entity
 
 
 class FetchCrypto(object):
+    """Class wrapping the Entity Generation from Fetch.AI ledger."""
+
     def __init__(self, private_key_path: Optional[str] = None):
         """Instantiate a crypto object."""
         self._entity = Entity() if private_key_path is None else self._load_private_key_from_path(private_key_path)
@@ -51,6 +57,8 @@ class FetchCrypto(object):
         self._private_key = self._entity.private_key
         self._private_key_hex = self._entity.private_key_hex
         self._private_key_bytes = self._entity.private_key_bytes
+
+        self._save_private_key()
 
     @property
     def public_key(self) -> str:
@@ -64,12 +72,19 @@ class FetchCrypto(object):
     @property
     def display_address(self) -> str:
         """
-        Return the display_address for the key pair
+        Return the display_address for the key pair.
+
         :return: a display_address str
         """
         return self._display_address
 
     def sign_transaction(self, message: bytes) -> bytes:
+        """
+        Sing a transaction to send it to the ledger.
+
+        :param message:
+        :return: Signed message in bytes
+        """
         signature = self._entity.sign(message)
         return signature
 
@@ -90,9 +105,10 @@ class FetchCrypto(object):
         except IOError as e:
             logger.exception(str(e))
 
-
-if __name__ == "__main__":
-    a = FetchCrypto()
-    print(a.display_address)
-
-
+    def _save_private_key(self) -> str:
+        path = Path("pk.txt")
+        if not path.is_fifo():
+            print(path)
+            with open(path, "w+") as file:
+                file.write(self._private_key_hex)
+        return str(path)
