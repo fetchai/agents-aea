@@ -287,6 +287,7 @@ class Controller{
                 if (e.data.el["combined"] == "localAgents"){
                     self.refreshAgentData(id)
                 }
+                self.handleButtonStates()
             });
 
             $('#' + combineName + 'Scaffold').click({el: element}, function(e){
@@ -311,24 +312,32 @@ class Controller{
                 self.view.setSelectedId(e.data.el["combined"], data)
                 self.view.setCreateId(e.data.el["combined"], "")
                 self.refreshAgentData(data)
+                self.handleButtonStates()
             });
 
             this.$event_pump.on('model_'+ combineName + 'DeleteSuccess', {el: element}, function(e, data) {
                 self.model.readData(e.data.el);
                 self.view.setSelectedId(e.data.el["combined"], "NONE")
                 self.refreshAgentData(data)
+                self.handleButtonStates()
+
             });
             this.$event_pump.on('model_'+ combineName + 'AddSuccess', {el: element}, function(e, data) {
                 self.refreshAgentData(data)
                 self.view.setSelectedId(e.data.el["combined"], "NONE")
+                self.handleButtonStates()
+
             });
             this.$event_pump.on('model_'+ combineName + 'RemoveSuccess', {el: element}, function(e, data) {
                 self.refreshAgentData(data)
                 self.view.setSelectedId(e.data.el["combined"], "NONE")
+                self.handleButtonStates()
+
             });
             this.$event_pump.on('model_'+ combineName + 'ScaffoldSuccess', {el: element}, function(e, data) {
                 self.refreshAgentData(data)
                 self.view.setScaffoldId(e.data.el["combined"], "")
+                self.handleButtonStates()
             });
         }
 
@@ -338,7 +347,54 @@ class Controller{
             self.view.error(error_msg);
             console.log(error_msg);
         })
+
+        this.handleButtonStates(this);
+
+
+        $('#localAgentsCreateId').on('input', function(e){
+            self.handleButtonStates()
+            });
+        $('#localAgentsSelectedId').on('input', function(e){
+            self.handleButtonStates()
+            });
+
+        for (var j = 0; j < elements.length; j++) {
+            $('#'+ elements[j]["combined"] + 'ScaffoldId').on('input', function(e){
+                self.handleButtonStates()});
+        }
+
     }
+
+
+    handleButtonStates(){
+        var agentCreateId = $('#localAgentsCreateId').val();
+        var agentSelectionId = $('#localAgentsSelectionId').html();
+        $('#localAgentsCreate').prop('disabled', !this.validateId(agentCreateId));
+        $('#localAgentsDelete').prop('disabled', !this.validateId(agentSelectionId));
+
+        for (var j = 0; j < elements.length; j++) {
+            if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
+                var itemSelectionId = $('#' + elements[j]["combined"] + 'SelectionId').html();
+                $('#' + elements[j]["combined"] + 'Remove').prop('disabled', !this.validateId(itemSelectionId));
+
+                var itemScaffoldId = $('#' + elements[j]["combined"] + 'ScaffoldId').val();
+                $('#' + elements[j]["combined"] + 'Scaffold').prop('disabled',
+                    !this.validateId(itemScaffoldId) ||
+                    !this.validateId(agentSelectionId));
+
+
+            }
+            if (elements[j]["location"] == "registered"){
+                var itemSelectionId = $('#' + elements[j]["combined"] + 'SelectionId').html();
+                $('#' + elements[j]["combined"] + 'Add').prop('disabled',
+                    !this.validateId(itemSelectionId) ||
+                    !this.validateId(agentSelectionId));
+            }
+        }
+
+
+    }
+
 
     // Update lists of protocols, connections and skills for the selected agent
     refreshAgentData(agentId){
