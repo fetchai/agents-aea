@@ -134,6 +134,24 @@ class Model{
             self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
         })
     }
+    scaffoldItem(element, agentId, itemId){
+        var ajax_options = {
+            type: 'POST',
+            url: 'api/agent/' + agentId + "/" + element["type"] + "/scaffold",
+            accepts: 'application/json',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(itemId)
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_' + element["combined"] + 'ScaffoldSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
 
 }
 
@@ -148,6 +166,10 @@ class View{
 
     setSelectedId(tag, id) {
         $('#'+tag+'SelectionId').html(id);
+    }
+
+    setScaffoldId(tag, id) {
+        $('#'+tag+'ScaffoldId').val(id);
     }
 
     build_table(data, tableName) {
@@ -266,6 +288,19 @@ class Controller{
                     self.refreshAgentData(id)
                 }
             });
+
+            $('#' + combineName + 'Scaffold').click({el: element}, function(e){
+                var agentId = $('#localAgentsSelectionId').html();
+                var itemId =$('#' + e.data.el["combined"] + 'ScaffoldId').val();
+
+                e.preventDefault();
+
+                if (self.validateId(agentId) && self.validateId(itemId)){
+                    self.model.scaffoldItem(e.data.el, agentId, itemId)
+                } else {
+                    alert('Error: Problem with id');
+                }
+            });
             // Handle the model events
             this.$event_pump.on('model_'+ combineName + 'ReadSuccess', {el: element}, function(e, data) {
                 self.view.build_table(data, e.data.el["combined"]);
@@ -291,7 +326,10 @@ class Controller{
                 self.refreshAgentData(data)
                 self.view.setSelectedId(e.data.el["combined"], "NONE")
             });
-
+            this.$event_pump.on('model_'+ combineName + 'ScaffoldSuccess', {el: element}, function(e, data) {
+                self.refreshAgentData(data)
+                self.view.setScaffoldId(e.data.el["combined"], "")
+            });
         }
 
 

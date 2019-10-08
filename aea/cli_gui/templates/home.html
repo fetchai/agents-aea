@@ -42,9 +42,11 @@
                     <h3> <div id="localAgentsSelectionId" align="center">NONE</div></h3>
                 </div>
                 <button id="localAgentsDelete">Delete Agent</button>
-                {% for i in range(0, len) %}
-                    {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
+            </div>
+            {% for i in range(0, len) %}
+                {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
 
+                    <div class="section editor">
                         <div class="{{htmlElements[i][2]}}">
                             <table>
                                 <caption>Local {{htmlElements[i][1]}}</caption>
@@ -62,10 +64,18 @@
                             <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
                         </div>
                         <button id="{{htmlElements[i][2]}}Remove">Remove {{htmlElements[i][1]}}</button>
-                    {% endif %}
-                {% endfor %}
+                        <br>
+                        <label for="{{htmlElements[i][2]}}ScaffoldId">Scaffold {{htmlElements[i][1]}} id
+                            <input id="{{htmlElements[i][2]}}ScaffoldId" type="text" />
+                        </label>
+                        <button id="{{htmlElements[i][2]}}Scaffold">Scaffold new {{htmlElements[i][1]}}</button>
+                        <br>
+                        <br>
+                    </div>
 
-            </div>
+                {% endif %}
+            {% endfor %}
+
             <div class="error"></div>
         </div>
         <div class="split right">

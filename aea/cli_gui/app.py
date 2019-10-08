@@ -128,7 +128,7 @@ def remove_local_item(agent_id, item_type, item_id):
     if _call_aea(["aea", "remove", item_type, item_id], agent_dir) == 0:
         return agent_id, 201  # 200 (OK)
     else:
-        return {"detail": "Failed to remove protocol {} from agent {}".format(item_id, agent_id)}, 400  # 400 Bad request
+        return {"detail": "Failed to remove {} {} from agent {}".format(item_type, item_id, agent_id)}, 400  # 400 Bad request
 
 
 def get_local_items(agent_id, item_type):
@@ -145,6 +145,16 @@ def get_local_items(agent_id, item_type):
             items_list.append({"id": tail, "description": "placeholder description"})
 
     return items_list
+
+
+
+def scaffold_item(agent_id, item_type, item_id):
+    agent_dir = os.path.join(args.agent_dir, agent_id)
+    if _call_aea(["aea", "scaffold", item_type, item_id], agent_dir) == 0:
+        return agent_id, 201  # 200 (OK)
+    else:
+        return {"detail": "Failed to scaffold a new {} in to agent {}".format(item_type, agent_id)}, 400  # 400 Bad request
+
 
 
 def _call_aea(param_list, dir):
