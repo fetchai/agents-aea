@@ -262,14 +262,8 @@ class Controller{
                     .text();
 
                 self.view.setSelectedId(e.data.el["combined"], id);
-                if (combineName == "localAgents"){
-                    // This should be a function, vur can't do local functions with this hacky class setup
-                    for (var j = 0; j < elements.length; j++) {
-                        if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
-                            self.model.readLocalData(elements[j], id);
-                        }
-                    }
-
+                if (e.data.el["combined"] == "localAgents"){
+                    self.refreshAgentData(id)
                 }
             });
             // Handle the model events
@@ -281,40 +275,20 @@ class Controller{
                 self.model.readData(e.data.el);
                 self.view.setSelectedId(e.data.el["combined"], data)
                 self.view.setCreateId(e.data.el["combined"], "")
-                // This should be a function, vur can't do local functions with this hacky class setup
-                for (var j = 0; j < elements.length; j++) {
-                    if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
-                        self.model.readLocalData(elements[j], data);
-                    }
-                }
+                self.refreshAgentData(data)
             });
 
             this.$event_pump.on('model_'+ combineName + 'DeleteSuccess', {el: element}, function(e, data) {
                 self.model.readData(e.data.el);
                 self.view.setSelectedId(e.data.el["combined"], "NONE")
-                // This should be a function, vur can't do local functions with this hacky class setup
-                for (var j = 0; j < elements.length; j++) {
-                    if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
-                        self.model.readLocalData(elements[j], data);
-                    }
-                }
+                self.refreshAgentData(data)
             });
             this.$event_pump.on('model_'+ combineName + 'AddSuccess', {el: element}, function(e, data) {
-                // This should be a function, vur can't do local functions with this hacky class setup
-                for (var j = 0; j < elements.length; j++) {
-                    if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
-                        self.model.readLocalData(elements[j], data);
-                    }
-                }
+                self.refreshAgentData(data)
                 self.view.setSelectedId(e.data.el["combined"], "NONE")
             });
             this.$event_pump.on('model_'+ combineName + 'RemoveSuccess', {el: element}, function(e, data) {
-                // This should be a function, vur can't do local functions with this hacky class setup
-                for (var j = 0; j < elements.length; j++) {
-                    if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
-                        self.model.readLocalData(elements[j], data);
-                    }
-                }
+                self.refreshAgentData(data)
                 self.view.setSelectedId(e.data.el["combined"], "NONE")
             });
 
@@ -326,6 +300,15 @@ class Controller{
             self.view.error(error_msg);
             console.log(error_msg);
         })
+    }
+
+    // Update lists of protocols, connections and skills for the selected agent
+    refreshAgentData(agentId){
+        for (var j = 0; j < elements.length; j++) {
+            if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
+                this.model.readLocalData(elements[j], agentId);
+            }
+        }
     }
 
 
