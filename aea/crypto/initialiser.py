@@ -23,8 +23,8 @@
 from typing import cast, Optional
 
 from aea.crypto.base import Crypto
-from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
 from aea.crypto.fetchai_base import FetchCrypto
+from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
 
 
 class Wallet(object):
@@ -57,7 +57,7 @@ class Wallet(object):
 
     def _setup_fetch_crypto(self):
         """Create the fetch.ai entity."""
-        fetch_crypto = FetchCrypto()
+        fetch_crypto = FetchCrypto("pk.txt")
         return fetch_crypto
 
     @property

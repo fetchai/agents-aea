@@ -23,11 +23,7 @@
 from typing import Optional
 import logging
 from fetchai.ledger.crypto import Entity, Identity, Address
-import os
 from pathlib import Path
-import inspect
-
-CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +32,12 @@ class FetchCryptoError(Exception):
     """Exception to be thrown when cryptographic signatures don't match!."""
 
 
-def _load_private_key_from_path(path):
-    """Load the private key from the file."""
-    with open(path, "r") as key:
-        data = key.read()
-        entity = Entity.from_hex(data)
-        return entity
-
-
 class FetchCrypto(object):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
     def __init__(self, private_key_path: Optional[str] = None):
         """Instantiate a crypto object."""
-        self._entity = Entity() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
         self._public_key_obj = self._entity.public_key
         self._public_key_bytes = self._entity.public_key_bytes
         self._public_key_hex = self._entity.public_key_hex
@@ -57,8 +45,6 @@ class FetchCrypto(object):
         self._private_key = self._entity.private_key
         self._private_key_hex = self._entity.private_key_hex
         self._private_key_bytes = self._entity.private_key_bytes
-
-        self._save_private_key()
 
     @property
     def public_key(self) -> str:
@@ -76,7 +62,7 @@ class FetchCrypto(object):
 
         :return: a display_address str
         """
-        return self._display_address
+        return str(self._display_address)
 
     def sign_transaction(self, message: bytes) -> bytes:
         """
@@ -88,8 +74,7 @@ class FetchCrypto(object):
         signature = self._entity.sign(message)
         return signature
 
-    @staticmethod
-    def _load_private_key_from_path(path) -> Entity:
+    def _load_private_key_from_path(self, file_name) -> Entity:
         """
         Load a private key in hex format from a file.
 
@@ -97,18 +82,26 @@ class FetchCrypto(object):
 
         :return: the Entity.
         """
+        path = Path(file_name)
+        print(path)
         try:
-            with open(path, "r") as key:
-                data = key.read()
-                entity = Entity.from_hex(data)
-                return entity
+            if path.is_file():
+                with open(path, "r") as key:
+                    data = key.read()
+                    print(data)
+                    entity = Entity.from_hex(data)
+
+            else:
+                entity = self._generate_private_key()
+
+            return entity
         except IOError as e:
             logger.exception(str(e))
 
-    def _save_private_key(self) -> str:
+    def _generate_private_key(self) -> str:
         path = Path("pk.txt")
-        if not path.is_fifo():
-            print(path)
-            with open(path, "w+") as file:
-                file.write(self._private_key_hex)
-        return str(path)
+        print(path)
+        entity = Entity()
+        with open(path, "w+") as file:
+            file.write(entity.private_key_hex)
+        return entity
