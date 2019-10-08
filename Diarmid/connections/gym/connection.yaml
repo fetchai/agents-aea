@@ -1,0 +1,11 @@
+name: gym
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+class_name: GymConnection
+supported_protocols: ["gym"]
+config:
+  env: '' # put here the dotted path to your Gym Environment class.
+dependencies:
+  - gym

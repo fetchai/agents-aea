@@ -1,0 +1,17 @@
+aea_version: 0.1.6
+agent_name: toby
+authors: ''
+connections:
+- gym
+- oef
+default_connection: oef
+license: ''
+private_key_pem_path: ''
+protocols:
+- default
+- tac
+registry_path: ../packages
+skills:
+- error
+url: ''
+version: v1
