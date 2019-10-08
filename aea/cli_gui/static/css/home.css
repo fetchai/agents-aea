@@ -1,5 +1,5 @@
 /*
- * This is the CSS stylesheet for the demo people application
+ * This is a basic placeholder CSS stylesheet for the AEA CLI GUI
  */
 
 @import url(http://fonts.googleapis.com/css?family=Roboto:400,300,500,700);
@@ -65,9 +65,6 @@ tr {
     height: 33px;
 }
 
-tr:nth-child(even) {
-    background-color: #f0f0f0
-}
 
 td {
     text-align: center;

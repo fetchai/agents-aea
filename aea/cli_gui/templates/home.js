@@ -80,7 +80,7 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        fetchItem: function(element, agentId, itemId) {
+        addItem: function(element, agentId, itemId) {
             let propertyName = element["type"] +  "_id"
             let ajax_options = {
                 type: 'POST',
@@ -92,7 +92,7 @@ ns.model = (function() {
             };
             $.ajax(ajax_options)
             .done(function(data) {
-                $event_pump.trigger('model_' + element["combined"] + 'FetchSuccess', [data]);
+                $event_pump.trigger('model_' + element["combined"] + 'AddSuccess', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -142,7 +142,7 @@ ns.view = (function() {
     return {
 
         setCreateId: function(tag, id) {
-            $('#'+tag+'CreateId').html(id);
+            $('#'+tag+'CreateId').val(id);
         },
 
         setSelectedId: function(tag, id) {
@@ -226,14 +226,14 @@ ns.controller = (function(m, v) {
             e.preventDefault();
         });
 
-        $('#' + combineName + 'Fetch').click(function(e) {
+        $('#' + combineName + 'Add').click(function(e) {
             let agentId = $('#localAgentsSelectionId').html();
             let itemId =$('#' + combineName + 'SelectionId').html();
 
             e.preventDefault();
 
             if (validateId(agentId) && validateId(itemId) ) {
-                model.fetchItem(element, agentId, itemId)
+                model.addItem(element, agentId, itemId)
 
             } else {
                 alert('Error: Problem with one of the selected ids (either agent or ' + element['type']);
@@ -303,7 +303,7 @@ ns.controller = (function(m, v) {
                 }
             }
         });
-        $event_pump.on('model_'+ combineName + 'FetchSuccess', function(e, data) {
+        $event_pump.on('model_'+ combineName + 'AddSuccess', function(e, data) {
             // This should be a function, vur can't do local functions with this hacky class setup
             for (var j = 0; j < elements.length; j++) {
                 if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){

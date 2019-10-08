@@ -1,99 +1,188 @@
-openapi: "3.0.2"
+swagger: "2.0"
 info:
-  title: "AEA CLI REST API"
-  description: "The REST API for the Fetch.AI AEA Command line interface
-    [http://fetch.ai](http://fetch.ai)
-    [https://github.com/fetchai/my_agents-aea](https://github.com/fetchai/my_agents-aea)"
-  version: "0.1"
-servers:
-- url: https://127.0.0.1
+  description: This is the swagger file that goes with our server code
+  version: "1.0.0"
+  title: Swagger Rest Article
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+
+# Paths supported by the server application
 paths:
-  /agents:
-    post:
-      tags:
-      - my_agents
-      summary: Create a new aea project
-      operationId: app.create_agent
-      parameters:
-      - in: query
-        name: agentParams
-        required: true
-        schema:
-          $ref: '#/components/schemas/AgentParams'
-      responses:
-        201:
-          description: Agent created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AgentFull'
-        500:
-          description: Cannot create agent
+  /agent:
     get:
+      operationId: app.get_agents
       tags:
-      - my_agents
+      - agents
       summary: Return list of all aea projects
       description: List of local folders under the user name (which correspond to aea projects)
-      operationId: app.get_agents
       responses:
         200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AgentFull'
-        400:
-          description: Failed
-  /agents/{agentId}:
+          description: Successfully read agent list operation
+          schema:
+            type: array
+            items:
+              type: string
     post:
+      operationId: app.create_agent
       tags:
-      - my_agents
-      summary: Delete an aea project
-      operationId: app.delete_agent
+        - People
+      summary: Creare a new AEA project (an agent)
       parameters:
-      - name: agentId
-        in: path
-        required: true
-        schema:
+        - name: agent_id
+          in: body
+          description: Person to create
+          required: True
+          schema:
+            type: string
+
+      responses:
+        201:
+          description: Successfully created person in list
+
+        400:
+          description: Cannot create agent
+          schema:
+            type: string
+
+  /agent/{agent_id}:
+    delete:
+      operationId: app.delete_agent
+      tags:
+      - agents
+      summary: Delete an aea project
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to delete
           type: string
+          required: True
       responses:
         201:
           description: Agent deleted successfully
-        500:
-          description: Cannot delte agent
-components:
-  schemas:
-    AgentParams:
-      type: object
-      properties:
-        user:
-          type: string
-        name:
-          type: string
-        version:
-          type: string
-    AgentFull:
-      type: object
-      properties:
-        id:
-          type: string
-        user:
-          type: string
-        name:
-          type: string
-        version:
-          type: string
-        protocols:
-          type: array
-          items:
+          schema:
             type: string
-        skills:
-          type: array
-          items:
+
+        400:
+          description: Cannot delete agent
+          schema:
             type: string
-        connections:
-          type: array
-          items:
+
+  /agent/{agent_id}/{item_type}:
+    post:
+      operationId: app.add_item
+      tags:
+      - agents
+      summary: Fetch a protocol from the registry to the currently selected agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to add protocol to
+          type: string
+          required: True
+        - name: item_type
+          in: path
+          description: type of item to add ("protocol", "connection" or "skill")
+          type: string
+          required: True
+        - name: item_id
+          in: body
+          description: id of protocol to add
+          schema:
             type: string
+          required: True
+      responses:
+        201:
+          description: Protocol added successfully
+          schema:
+            type: string
+
+        400:
+          description: Cannot add protocol to agent
+          schema:
+            type: string
+    get:
+      operationId: app.get_local_items
+      tags:
+      - agents
+      summary: Return list of all items if a given type supported by this agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to searh in
+          type: string
+          required: True
+        - name: item_type
+          in: path
+          description: type of item to list ("protocol", "connection" or "skill")
+          type: string
+          required: True
+
+      responses:
+        200:
+          description: Successfully read protocol list operation
+          schema:
+            type: array
+            items:
+              type: string
+        400:
+          description: Cannot find protocols in agent
+          schema:
+            type: string
+
+  /agent/{agent_id}/{item_type}/{item_id}:
+    delete:
+      operationId: app.remove_local_item
+      tags:
+      - agents
+      summary: Delete a protocol, connection or skill from an agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to delete
+          type: string
+          required: True
+        - name: item_type
+          in: path
+          description: type of item to remove
+          type: string
+          required: True
+        - name: item_id
+          in: path
+          description: item id to delete
+          type: string
+          required: True
+
+      responses:
+        201:
+          description: Agent deleted successfully
+          schema:
+            type: string
+
+        400:
+          description: Cannot delete agent
+          schema:
+            type: string
+
+  /{item_type}:
+    get:
+      operationId: app.get_registered_items
+      tags:
+        - agents
+      summary: Return list of all registered items (protocols, connections, skills)
+      parameters:
+        - name: item_type
+          in: path
+          description: type of item to remove
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read item list operation
+          schema:
+            type: array
+            items:
+              type: string
