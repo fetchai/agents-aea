@@ -147,14 +147,13 @@ def get_local_items(agent_id, item_type):
     return items_list
 
 
-
 def scaffold_item(agent_id, item_type, item_id):
+    """Scaffold a moslty empty item on an agent (either protocol, skill or connection)."""
     agent_dir = os.path.join(args.agent_dir, agent_id)
     if _call_aea(["aea", "scaffold", item_type, item_id], agent_dir) == 0:
         return agent_id, 201  # 200 (OK)
     else:
         return {"detail": "Failed to scaffold a new {} in to agent {}".format(item_type, agent_id)}, 400  # 400 Bad request
-
 
 
 def _call_aea(param_list, dir):
