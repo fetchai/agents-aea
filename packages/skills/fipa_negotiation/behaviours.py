@@ -91,12 +91,12 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         if self._registered_goods_demanded_description is not None:
             msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self._registered_goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key['default'], protocol_id=OEFMessage.protocol_id, message=msg_bytes)
             self._registered_goods_demanded_description = None
         if self._registered_goods_supplied_description is not None:
             msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=self._registered_goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key['default'], protocol_id=OEFMessage.protocol_id, message=msg_bytes)
             self._registered_goods_supplied_description = None
 
     def _register_service(self) -> None:
@@ -119,7 +119,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self._registered_goods_supplied_description = goods_supplied_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_supplied_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key['default'], protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         if strategy.is_registering_as_buyer:
             logger.debug("[{}]: Updating service directory as buyer with goods demanded.".format(self.context.agent_name))
             ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=False)
@@ -127,7 +127,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self._registered_goods_demanded_description = goods_demanded_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=DEFAULT_MSG_ID, service_description=goods_demanded_description, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key['default'], protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
     def _search_services(self) -> None:
         """
@@ -155,7 +155,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
                 msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
                 msg_bytes = OEFSerializer().encode(msg)
-                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key['default'], protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         if strategy.is_searching_for_buyers:
             ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=True)
             query = strategy.get_own_services_query(ownership_state_after_locks, is_searching_for_sellers=False)
@@ -169,7 +169,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
                 msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
                 msg_bytes = OEFSerializer().encode(msg)
-                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key['default'], protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
     def _is_time_to_update_services(self) -> bool:
         """

@@ -112,7 +112,7 @@ class MyWeatherHandler(Handler):
                                        performative=FIPAMessage.Performative.PROPOSE,
                                        proposal=proposal)
             self.context.outbox.put_message(to=sender,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_public_key['default'],
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(proposal_msg))
         else:
@@ -122,7 +122,7 @@ class MyWeatherHandler(Handler):
                                       target=new_target,
                                       performative=FIPAMessage.Performative.DECLINE)
             self.context.outbox.put_message(to=sender,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_public_key['default'],
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(decline_msg))
 
@@ -156,10 +156,10 @@ class MyWeatherHandler(Handler):
                 break
         json_data = json.dumps(command)
         json_bytes = json_data.encode("utf-8")
-        logger.info("[{}]: handling accept and sending wheather data to sender={}".format(self.context.agent_name, sender))
+        logger.info("[{}]: handling accept and sending weather data to sender={}".format(self.context.agent_name, sender))
         data_msg = DefaultMessage(
             type=DefaultMessage.Type.BYTES, content=json_bytes)
         self.context.outbox.put_message(to=sender,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_public_key['default'],
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(data_msg))

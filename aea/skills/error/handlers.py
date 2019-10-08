@@ -74,7 +74,7 @@ class ErrorHandler(Handler):
                                error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL.value,
                                error_msg="Unsupported protocol.",
                                error_data={"protocol_id": envelope.protocol_id})
-        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
+        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key['default'],
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
 
@@ -91,7 +91,7 @@ class ErrorHandler(Handler):
                                error_code=DefaultMessage.ErrorCode.DECODING_ERROR.value,
                                error_msg="Decoding error.",
                                error_data={"envelope": encoded_envelope})
-        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
+        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key['default'],
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
 
@@ -108,7 +108,7 @@ class ErrorHandler(Handler):
                                error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE.value,
                                error_msg="Invalid message.",
                                error_data={"envelope": encoded_envelope})
-        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
+        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key['default'],
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
 
@@ -126,6 +126,6 @@ class ErrorHandler(Handler):
                                error_code=DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value,
                                error_msg="Unsupported skill.",
                                error_data={"envelope": encoded_envelope})
-        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
+        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key['default'],
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))

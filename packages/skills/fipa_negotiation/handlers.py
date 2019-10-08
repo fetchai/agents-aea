@@ -73,8 +73,8 @@ class FIPANegotiationHandler(Handler):
 
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key):
-            dialogue = dialogues.get_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key)
+        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key['default']):
+            dialogue = dialogues.get_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key['default'])
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg, envelope.sender):
             dialogue = dialogues.create_opponent_initiated(fipa_msg, envelope.sender)
@@ -83,7 +83,7 @@ class FIPANegotiationHandler(Handler):
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
             default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b'This message belongs to an unidentified dialogue.')
             msg_bytes = DefaultSerializer().encode(default_msg)
-            self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
+            self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key['default'], protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
             return
 
         logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name, fipa_msg_performative))
@@ -145,14 +145,14 @@ class FIPANegotiationHandler(Handler):
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=cfp.get("dialogue_id"), performative=FIPAMessage.Performative.DECLINE, target=cfp.get("id"))
             dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
-            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key['default'], protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         else:
             assert proposal_description is not None
-            transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
+            transaction_id = generate_transaction_id(self.context.agent_public_key['default'], dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(transaction_id=transaction_id,
-                                                 sender=self.context.agent_public_key,
+                                                 sender=self.context.agent_public_key['default'],
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
                                                  currency='FET',
                                                  amount=proposal_description.values['amount'],
@@ -173,7 +173,7 @@ class FIPANegotiationHandler(Handler):
             msg = FIPAMessage(performative=FIPAMessage.Performative.PROPOSE, message_id=new_msg_id, dialogue_id=cfp.get("dialogue_id"), target=cfp.get("id"), proposal=[proposal_description])
             dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
-            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key['default'], protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         self.context.outbox.put(result)
 
     def _on_propose(self, propose: FIPAMessage, dialogue: Dialogue) -> None:
@@ -188,9 +188,9 @@ class FIPANegotiationHandler(Handler):
         proposals = cast(List[Description], propose.get("proposal"))
         for num, proposal_description in enumerate(proposals):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
-            transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
+            transaction_id = generate_transaction_id(self.context.agent_public_key['default'], dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(transaction_id=transaction_id,
-                                                 sender=self.context.agent_public_key,
+                                                 sender=self.context.agent_public_key['default'],
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
                                                  currency='FET',
                                                  amount=proposal_description.values['amount'],
@@ -209,13 +209,13 @@ class FIPANegotiationHandler(Handler):
                 msg = FIPAMessage(message_id=new_msg_id, dialogue_id=propose.get("dialogue_id"), target=propose.get("id"), performative=FIPAMessage.Performative.ACCEPT)
                 dialogue.outgoing_extend(msg)
                 msg_bytes = FIPASerializer().encode(msg)
-                result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+                result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key['default'], protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
             else:
                 logger.debug("[{}]: Declining propose (as {})".format(self.context.agent_name, dialogue.role))
                 msg = FIPAMessage(message_id=new_msg_id, dialogue_id=propose.get("dialogue_id"), target=propose.get("id"), performative=FIPAMessage.Performative.DECLINE)
                 dialogue.outgoing_extend(msg)
                 msg_bytes = FIPASerializer().encode(msg)
-                result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+                result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key['default'], protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
                 dialogues = cast(Dialogues, self.context.dialogues)
                 dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
         self.context.outbox.put(result)
@@ -275,13 +275,13 @@ class FIPANegotiationHandler(Handler):
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=accept.get("dialogue_id"), target=accept.get("id"), performative=FIPAMessage.Performative.MATCH_ACCEPT)
             dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
-            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key['default'], protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         else:
             logger.debug("[{}]: Decline the accept (as {}).".format(self.context.agent_name, dialogue.role))
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=accept.get("dialogue_id"), target=accept.get("id"), performative=FIPAMessage.Performative.DECLINE)
             dialogue.outgoing_extend(msg)
             msg_bytes = FIPASerializer().encode(msg)
-            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key['default'], protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
         self.context.outbox.put(result)

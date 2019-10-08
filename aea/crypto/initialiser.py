@@ -44,6 +44,7 @@ class Wallet(object):
 
         self.private_key_pem_path = ""
 
+
     def _setup_crypto(self, private_key_pem_path: Optional[str] = None):
         """Create the crypto object."""
         private_key_pem_path = cast(str, private_key_pem_path)

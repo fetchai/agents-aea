@@ -43,7 +43,7 @@ class MyBuyBehaviour(Behaviour):
                                     query=search_query_empty_model)
 
         self.context.outbox.put_message(to=DEFAULT_OEF,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_public_key['default'],
                                         protocol_id=OEFMessage.protocol_id,
                                         message=OEFSerializer().encode(search_request))
 

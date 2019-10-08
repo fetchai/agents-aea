@@ -69,10 +69,10 @@ class MyWeatherBehaviour(Behaviour):
                              service_id=SERVICE_ID)
             msg_bytes = OEFSerializer().encode(msg)
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_public_key['default'],
                                             protocol_id=OEFMessage.protocol_id,
                                             message=msg_bytes)
-            logger.info("[{}]: registered! My public key is : {}".format(self.context.agent_name, self.context.agent_public_key))
+            logger.info("[{}]: registered! My public key is : {}".format(self.context.agent_name, self.context.agent_public_key['default']))
             self.registered = True
 
     def teardown(self) -> None:

@@ -124,7 +124,7 @@ class ProxyEnv(gym.Env):
         self._is_rl_agent_trained = False
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key['default'], protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         self._skill_context.outbox.put(envelope)
 
@@ -137,7 +137,7 @@ class ProxyEnv(gym.Env):
         self._is_rl_agent_trained = True
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key['default'], protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         self._skill_context.outbox.put(envelope)
 
@@ -151,7 +151,7 @@ class ProxyEnv(gym.Env):
         """
         gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key['default'], protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         return envelope
 
