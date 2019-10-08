@@ -29,6 +29,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, utils
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from .fetchai_base import FetchCrypto
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +68,11 @@ class Crypto(object):
 
         :return: a public key string in base58 format
         """
-        return self._public_key_b58
+        fetch_crypt = FetchCrypto()
+        public_keys = {}
+        public_keys['default'] = self._public_key_b58
+        public_keys['fetch'] = fetch_crypt.public_key
+        return public_keys
 
     @property
     def public_key_pem(self) -> bytes:

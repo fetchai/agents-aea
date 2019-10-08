@@ -33,6 +33,7 @@ oef = {index = "test-pypi",version = "==0.6.10"}
 colorlog = "*"
 jsonschema = "*"
 protobuf = "*"
+fetchai-ledger-api = "*"
 
 [requires]
 python_version = "3.7"

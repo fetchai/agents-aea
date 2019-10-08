@@ -29,7 +29,7 @@ class AgentContext:
     """Provide read access to relevant data of the agent for the skills."""
 
     def __init__(self, agent_name: str,
-                 public_key: str,
+                 public_key: {},
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,

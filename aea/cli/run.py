@@ -91,7 +91,7 @@ def run(ctx: Context, connection_name: str):
     else:
         _try_validate_private_key_pem_path(private_key_pem_path)
     crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
+    public_key = crypto._public_key_b58
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
     try:
