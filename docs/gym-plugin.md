@@ -1,4 +1,4 @@
-The `gym_ex` example demonstrates to Reinforcement Learning developers the AEA framework's flexibility.
+The `gym_ex` example demonstrates the AEA framework's flexibility with respect to Reinforcement Learning.
 
 There is no immediate use case for this example as you can train an RL agent without the AEA proxy layer just fine (and faster). 
 
@@ -9,7 +9,7 @@ However, the example decouples the RL agent from the `gym.Env` allowing them to 
 
 ### Dependencies
 
-Follow the <a href="../quickstart/#preliminaries" target=_blank>Preliminaries</a> and <a href="../quickstart/#installation" target=_blank>Installation</a> sections from the AEA quick start.
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ### Packages
 

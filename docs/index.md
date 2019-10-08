@@ -1,10 +1,10 @@
-The AEA framework is a Python ecosystem for autonomous economic agent (AEA) development. 
+The AEA framework provides the infrastructure for creating autonomous economic agents (AEA). 
 
-It equips developers with a simple to understand and efficient set of tools for building autonomous economic agents. 
+It is a Python-based development suite which equips developers with an efficient and easy to understand set of tools for building autonomous economic agents. 
 
-The framework is super modular, easily extensible, and highly composable. It is ideal for reinforcement learning scenarios. 
+The framework is super modular, easily extensible, and highly composable. 
 
-The AEA framework attempts to make agent development as straightforward as many popular web frameworks.
+The AEA framework attempts to make agent development as straightforward as web development using popular web frameworks.
 
 
 ## Our vision
@@ -13,20 +13,19 @@ The AEA framework has two focused commercial roles.
 
 ### Open source technology
 
-We are creating infrastructure for agent developers to use to build their own solutions. 
+We are creating infrastructure for developers to build their own agent-based solutions. 
 
 AEA users are, among others:
 
-* Data scientists.
-* Machine learning experts.
-* Engineers.
-* Economists.
-* Web developers.
-* Students/Academics.
-* AI/ML/MAS Researchers.
-* Crypto passionates.
-* Indie developers.
-
+* Data scientists
+* Economists
+* Researchers (Artificial Intelligence, Machine Learning, Multi-Agent Systems)
+* Engineers
+* Machine learning experts
+* Independent developers
+* Students/Academics
+* Crypto passionates
+* Web developers
 
 ### Platform for start ups
 
@@ -50,7 +49,7 @@ Third party systems, such as Ethereum, may also allow AEA integration.
 
 
 !!!	Note
-	This developer documentation is work in progress. IF you spot any errors please open an issue [here](https://github.com/fetchai/agents-aea).
+	This developer documentation is a work in progress. If you spot any errors please open an issue [here](https://github.com/fetchai/agents-aea).
 
 
 <br />

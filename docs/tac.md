@@ -1,4 +1,4 @@
-TAC has its own repo. 
+TAC has its own repo. <!-- link to the repo -->
 
 Follow the instructions below to build and run the TAC demo.
 

@@ -4,24 +4,24 @@ The top level directory has the agent's name. Below is a `yaml` configuration fi
 
 The developer can create new directories where necessary but the core structure must remain the same.
 
-The CLI tool provides a way to scaffold out the required directory structure for new agents. See the instructions for that <a href="../scaffolding/" target=_blank>here</a>.
+The CLI tool provides a way to scaffold out the required directory structure for new agents. See the instructions for that <a href="../scaffolding/">here</a>.
 
 ``` bash
 agent_name/
-  aea-config.yaml YAML configuration of the agent
-  priv.pem        The private key file
-  connections/    Directory containing all the supported connections
-    connection_1/  First connection
-    ...           ...
-    connection_n/  nth connection
-  protocols/      Directory containing all supported protocols
-    protocol_1/    First protocol
-    ...           ...
-    protocol_k/    kth protocol 
-  skills/         Directory containing all the skill components
-    skill_1/       First skill
-    ...           ...
-    skill_n/       nth skill
+  aea-config.yaml       YAML configuration of the agent
+  priv.pem              The private key file
+  connections/          Directory containing all the supported connections
+    connection_1/       First connection
+    ...                 ...
+    connection_n/       nth connection
+  protocols/            Directory containing all supported protocols
+    protocol_1/         First protocol
+    ...                 ...
+    protocol_m/         mth protocol 
+  skills/               Directory containing all the skill components
+    skill_1/            First skill
+    ...                 ...
+    skill_k/            kth skill
 ```
 
 <br />

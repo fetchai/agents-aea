@@ -28,12 +28,12 @@ A number of protocols come packaged up with the AEA framework.
 
 * `default`: this protocol provides a bare bones implementation for an AEA protocol which includes a `DefaultMessage` class and a `DefaultSerialization` class with functions for managing serialisation. Use this protocol as a starting point for building custom protocols.
 * `oef`: this protocol provides the AEA protocol implementation for communication with the OEF including an `OEFMessage` class for hooking up to OEF services and search agents. Utility classes are available in the `models.py` module which provides OEF specific requirements such as classes needed to perform querying on the OEF such as `Description`, `Query`, and `Constraint`, to name a few.
-* `fipa`: this protocol provides classes and functions needed for AEA agent communication via the FIPA Agent Communication Language. For example, the `FIPAMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
+* `fipa`: this protocol provides classes and functions necessary for communication between AEAs via the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language. For example, the `FIPAMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
 
 ### Connection
 
-Connections wrap an external SDK or API and manage the messaging. They allow the agent to connect to an external service which has a Python SDK or API. 
+Connections wrap an external SDK or API and manage messaging. As such, they allow the agent to connect to an external service with an exposed Python SDK/API.
 
 The module `connections/base.py` contains two abstract classes which define a `Channel` and a `Connection`. A `Connection` contains one `Channel`, which acts as a bridge to the SDK or API to be wrapped. The `Channel` is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service.
 
@@ -42,13 +42,20 @@ The framework provides a number of default connections.
 * `local`: implements a local node.
 * `oef`: wraps the OEF SDK.
 
+<!-- other connections? gym? -->
+
 
 ### Skill
 
-Skills deliver economic value to the AEA by allowing agents to encapsulate and call any kind of code. A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`.
+<!-- Skills are the manifestation of the framework's extensibility. 
+A skill is an atomic capability that suggests enables the agent perform a specific  delivers economic value by allowing the agent encapsulate and call any kind of code. A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`.
+--> 
 
-* `Handler`: each skill has none, one or more `Handler` objects responsible for the registered protocol messaging. Handlers implement reactive behaviour. By understanding the requirements contained in an `Envelope`, the `Handler` reacts appropriately to message requests. Each `Handler` is responsible for one and only one protocol.
-* `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the agent. Behaviours implement proactive behaviour.
+<!-- From this, it is really not clear what skills do, and what their purpose is, what the idea behind them is, etc. --> 
+Skills deliver economic value to the AEA by letting the agent call any kind of code. A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`.
+
+* `Handler`: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement agents' reactive behaviour. By understanding the requirements <!-- which requirements?, where in the envelope?--> contained in an `Envelope`, the `Handler` reacts appropriately to the received messages. Each `Handler` is responsible for only one protocol.
+* `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the agent. Behaviours implement agents' proactiveness.
 * `Task`: none, one or more Tasks encapsulate background work internal to the agent.
 
 
@@ -67,21 +74,20 @@ The `_run_main_loop()` function in the `Agent` class performs a series of activi
 
 The `DecisionMaker` component manages global agent state updates proposed by the skills and processes the resulting ledger transactions.
 
-It is responsible for crypto-economic security and goal management and contains the preference and ownership representation of the agent.
+It is responsible for the agent's crypto-economic interactions and goal management, and it contains the preference and ownership representation of the agent.
 
 
 ## Filter
 
-The `Filter` routes messages to the correct `Handler` via the `Resource` component. It also holds a reference to the currently active `Behaviour` and `Task` instances.
+`Filter` routes messages to the correct `Handler` via `Resource`. It also holds a reference to the currently active `Behaviour` and `Task` instances.
 
-By default each `Handler`, `Behaviour` and `Task` of each skill is registered in the `Filter`. However, skills can de-register and re-register themselves.
-
+By default for every skill, each `Handler`, `Behaviour` and `Task` is registered in the `Filter`. However, note that skills can de-register and re-register themselves.
 
 ## Resource 
 
-The `Resource` component is made up of `Registries` which contain Resources (`Protocol`, `Handler`, `Behaviour`, `Task`). There is one Registry for each type of Resource. 
+The `Resource` component is made up of `Registries` for each type of resource (e.g. `Protocol`, `Handler`, `Behaviour`, `Task`). 
 
-Message Envelopes travel through the `Filter` which fetches the correct `Handler` from the `Registry`.
+Message Envelopes travel through the `Filter` which in turn fetches the correct `Handler` from the `Registry`.
 
 Specific `Registry` classes are in the `registries/base.py` module.
 
