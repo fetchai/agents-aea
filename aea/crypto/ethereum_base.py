@@ -18,33 +18,34 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Module wrapping the public and private key generation from fetch.ai ledger."""
+"""Module wrapping the public and private key generation for interacting with ethereum."""
 
 from typing import Optional
 import logging
-from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
+
+from eth_account.messages import encode_defunct
+from web3 import Web3
+from eth_account import Account
+from eth_keys import keys
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
-class FetchCryptoError(Exception):
+class EthCryptoError(Exception):
     """Exception to be thrown when cryptographic signatures don't match!."""
 
 
-class FetchCrypto(object):
+class EthCrypto(object):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
     def __init__(self, private_key_path: Optional[str] = None):
         """Instantiate a crypto object."""
-        self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        self._public_key_obj = self._entity.public_key
-        self._public_key_bytes = self._entity.public_key_bytes
-        self._public_key_hex = self._entity.public_key_hex
-        self._display_address = Address(Identity.from_hex(self._public_key_hex))
-        self._private_key = self._entity.private_key
-        self._private_key_hex = self._entity.private_key_hex
-        self._private_key_bytes = self._entity.private_key_bytes
+        self.account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        self._display_address = self.account.address
+        self._bytesRepresentation = Web3.toBytes(hexstr=self.account.privateKey.hex())
+        self._public_key = keys.PrivateKey(self._bytesRepresentation).public_key
+
 
     @property
     def public_key(self) -> str:
@@ -53,7 +54,7 @@ class FetchCrypto(object):
 
         :return: a public key string in hex format
         """
-        return self._public_key_hex
+        return self._public_key
 
     @property
     def display_address(self) -> str:
@@ -64,17 +65,7 @@ class FetchCrypto(object):
         """
         return str(self._display_address)
 
-    def sign_transaction(self, message: bytes) -> bytes:
-        """
-        Sing a transaction to send it to the ledger.
-
-        :param message:
-        :return: Signed message in bytes
-        """
-        signature = self._entity.sign(message)
-        return signature
-
-    def _load_private_key_from_path(self, file_name) -> Entity:
+    def _load_private_key_from_path(self, file_name) -> Account:
         """
         Load a private key in hex format from a file.
 
@@ -83,25 +74,43 @@ class FetchCrypto(object):
         :return: the Entity.
         """
         path = Path(file_name)
-        print(path)
         try:
             if path.is_file():
                 with open(path, "r") as key:
                     data = key.read()
-                    print(data)
-                    entity = Entity.from_hex(data)
-
+                    account = Account.from_key(data)
             else:
-                entity = self._generate_private_key()
-
-            return entity
+                account = self._generate_private_key()
+            return account
         except IOError as e:
             logger.exception(str(e))
 
-    def _generate_private_key(self) -> str:
-        path = Path("pk.txt")
+    def sign_transaction(self, message: str) -> bytes:
+        """
+        Sing a transaction to send it to the ledger.
+
+        :param message:
+        :return: Signed message in bytes
+        """
+        message = encode_defunct(text="I♥SF")
+        signature = self.account.sign_message(message)
+        return signature
+
+
+    def _generate_private_key(self) -> Account:
+        """Generate a key pair for ethereum network"""
+        path = Path("eth_pk.txt")
         print(path)
-        entity = Entity()
+        pk = Account.create()
         with open(path, "w+") as file:
-            file.write(entity.private_key_hex)
-        return entity
+            file.write(pk.privateKey.hex())
+        return pk
+
+
+if __name__ == "__main__":
+    a = EthCrypto("eth_pk.txt")
+    sign = a.sign_transaction("hello_world")
+    print(a.display_address)
+    print(a.public_key)
+    print(sign)
+

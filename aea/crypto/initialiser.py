@@ -23,7 +23,7 @@
 from typing import cast, Optional
 
 from aea.crypto.base import Crypto
-from aea.crypto.fetchai_base import FetchCrypto
+from aea.crypto.fetchai_base import FetchCryptola
 from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
 
 
@@ -43,7 +43,6 @@ class Wallet(object):
         }
 
         self.private_key_pem_path = ""
-
 
     def _setup_crypto(self, private_key_pem_path: Optional[str] = None):
         """Create the crypto object."""
