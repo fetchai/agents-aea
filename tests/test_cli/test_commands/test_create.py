@@ -20,6 +20,7 @@
 """This test module contains the tests for the `aea create` sub-command."""
 import filecmp
 import json
+import logging
 import os
 import shutil
 import tempfile
@@ -32,6 +33,7 @@ import jsonschema
 import pytest
 import yaml
 from click.testing import CliRunner
+from jsonschema import validate
 
 import aea
 import aea.cli.common
@@ -39,6 +41,9 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR
+
+_l = logging.getLogger("python_jsonschema_objects")
+_l.setLevel(logging.CRITICAL)
 
 
 class TestCreate:
@@ -223,7 +228,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
-        cls.patch = patch.object(aea.configurations.base.AgentConfig, "json", return_value={"hello": "world"})
+        cls.patch = patch("jsonschema.validators.Draft4Validator.validate", side_effect=Exception)
         cls.patch.__enter__()
 
         cls.cwd = os.getcwd()
@@ -243,7 +248,6 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
-        cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

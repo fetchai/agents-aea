@@ -29,7 +29,7 @@ from typing import TextIO, Type, TypeVar, Generic
 import jsonschema
 import python_jsonschema_objects as pjs
 import yaml
-from jsonschema import Draft7Validator
+from jsonschema import Draft4Validator
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
@@ -49,7 +49,7 @@ class ConfigLoader(Generic[T]):
         """Initialize the parser for configuration files."""
         self.schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
         self.resolver = jsonschema.RefResolver("SkillConfigurationSchema", self.schema, store=store)
-        self.validator = Draft7Validator(self.schema, resolver=self.resolver)
+        self.validator = Draft4Validator(self.schema, resolver=self.resolver)
         self.configuration_type = configuration_type  # type: Type[T]
 
         self.builder = pjs.ObjectBuilder(self.schema, resolver=self.resolver)
