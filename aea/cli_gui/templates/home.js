@@ -288,15 +288,8 @@ class Controller{
                 self.view.setSelectedId(e.data.el["combined"], id);
 
                 // Make all the cells white
-                var tableBody = $(e.target).closest(".registeredTable");
-                tableBody.children().each(function(i) {
-                    $(this).children().each(function(i) {
-                        var test = $(this);
-                        var text = test.text;
-                        var val = test.value;
-                        $(this).css("background-color", "white");
-                    })
-                });
+                var tableBody = $(e.target).closest("."+ e.data.el["combined"] +"registeredTable");
+                self.clearTable(tableBody);
 
                 // make this row (and the cells in this row) grey
                 $(this).children().each(function(i) {
@@ -351,6 +344,8 @@ class Controller{
             this.$event_pump.on('model_'+ combineName + 'AddSuccess', {el: element}, function(e, data) {
                 self.refreshAgentData(data)
                 self.view.setSelectedId(e.data.el["combined"], "NONE")
+                var tableBody = $("."+ e.data.el["combined"] +"registeredTable");
+                self.clearTable(tableBody);
                 self.handleButtonStates()
 
             });
@@ -391,18 +386,12 @@ class Controller{
 
     }
 
-    findAncestor (el, cls) {
-
-//        for ( ; el.classList == null || !el.classList.contains(cls); el = el.parent()){
-//            if (el.classList == null){
-//                console.log(el + " el.classList == null");
-//            }
-//            else{
-//                console.log(el + " el.classList.contains(cls) = " + el.classList.contains(cls));
-//            }
-//
-//        }
-//        return el;
+    clearTable (tableBody) {
+       tableBody.children().each(function(i) {
+            $(this).children().each(function(i) {
+                $(this).css("background-color", "white");
+            })
+        });
     }
 
     handleButtonStates(){

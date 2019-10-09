@@ -21,7 +21,6 @@
 
 import argparse
 import glob
-import inspect
 import os
 import subprocess
 
@@ -164,9 +163,8 @@ def _call_aea(param_list, dir):
     return ret
 
 
-CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))
-# CUR_DIR contains the string "/absolute/path/to/aea-agents/aea/cli_gui"
 
+CUR_DIR = os.path.abspath(os.path.dirname(__file__))
 app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
 app.add_api('aea_cli_rest.yaml')
 
