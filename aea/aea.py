@@ -153,9 +153,9 @@ class AEA(Agent):
                 error_handler.send_unsupported_skill(envelope, protocol)
             return
 
-        # each handler independently acts on the message
+        # TODO: add filter, currently each handler independently acts on the message
         for handler in handlers:
-            handler.handle_envelope(envelope)
+            handler.handle(msg, envelope.sender)
 
     def update(self) -> None:
         """Update the current state of the agent.

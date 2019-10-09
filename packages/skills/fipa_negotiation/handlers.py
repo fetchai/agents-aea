@@ -26,6 +26,7 @@ from typing import List, Optional, cast, TYPE_CHECKING
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.skills.base import Handler
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
@@ -60,30 +61,30 @@ class FIPANegotiationHandler(Handler):
         """
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Dispatch envelope to relevant handler and respond.
+        Dispatch message to relevant handler and respond.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        fipa_msg = FIPASerializer().decode(envelope.message)
-        fipa_msg = cast(FIPAMessage, fipa_msg)
+        fipa_msg = cast(FIPAMessage, message)
         fipa_msg_performative = fipa_msg.get("performative")  # FIPAMessage.Performative(fipa_msg.get("performative"))
 
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key):
-            dialogue = dialogues.get_dialogue(fipa_msg, envelope.sender, self.context.agent_public_key)
+        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
+            dialogue = dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key)
             dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg, envelope.sender):
-            dialogue = dialogues.create_opponent_initiated(fipa_msg, envelope.sender)
+        elif dialogues.is_permitted_for_new_dialogue(fipa_msg, sender):
+            dialogue = dialogues.create_opponent_initiated(fipa_msg, sender)
             dialogue.incoming_extend(fipa_msg)
         else:
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
             default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b'This message belongs to an unidentified dialogue.')
             msg_bytes = DefaultSerializer().encode(default_msg)
-            self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
+            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
             return
 
         logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name, fipa_msg_performative))
@@ -238,10 +239,6 @@ class FIPANegotiationHandler(Handler):
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
             transactions = cast(Transactions, self.context.transactions)
             transaction_msg = transactions.pop_pending_proposal(dialogue.dialogue_label, target)
-            strategy = cast(Strategy, self.context.strategy)
-            if strategy.is_world_modeling:
-                pass  # TODO
-                # strategy.world_state.update_on_declined_propose(transaction_msg)
         elif target == 3:
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
             transactions = cast(Transactions, self.context.transactions)
@@ -266,9 +263,6 @@ class FIPANegotiationHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=dialogue.is_seller)
         if strategy.is_profitable_transaction(self.context.preferences, ownership_state_after_locks, transaction_msg):
-            if strategy.is_world_modeling:
-                pass  # TODO
-                # strategy.world_state.update_on_initial_accept(transaction_msg)
             logger.debug("[{}]: Locking the current state (as {}).".format(self.context.agent_name, dialogue.role))
             transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
             self.context.decision_maker_message_queue.put(transaction_msg)
