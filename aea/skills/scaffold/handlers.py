@@ -22,7 +22,7 @@
 from typing import Optional
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 
@@ -39,11 +39,12 @@ class MyScaffoldHandler(Handler):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
         Implement the reaction to an envelope.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
         raise NotImplementedError  # pragma: no cover
