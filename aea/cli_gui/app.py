@@ -163,7 +163,6 @@ def _call_aea(param_list, dir):
     return ret
 
 
-
 CUR_DIR = os.path.abspath(os.path.dirname(__file__))
 app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
 app.add_api('aea_cli_rest.yaml')
