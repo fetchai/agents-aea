@@ -8,7 +8,7 @@ The AEA FIPA skill demonstrates how FIPA negotiation strategies may be embedded 
 The FIPA skill `skill.yaml` configuration file looks like this.
 
 ``` yaml
-name: ''
+name: 'fipa_negotiation'
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
@@ -19,29 +19,35 @@ behaviours:
       args:
         services_interval: 5
 handlers:
-  class_name: FIPANegotiationHandler
+  - handler:
+      class_name: FIPANegotiationHandler
+      args: {}
 tasks:
   - task:
       class_name: TransactionCleanUpTask
+      args: {}
 shared_classes:
-  - one:
-    class_name: Search
-  - two:
-    class_name: Strategy
-  - three:
-    class_name: Dialogues
-  - four:
-    class_name: Transactions
-    args:
-      pending_transaction_timeout: 30
-protocol: ['oef', 'fipa']
+  - shared_class:
+      class_name: Search
+      args: {}
+  - shared_class:
+      class_name: Strategy
+      args: {}
+  - shared_class:
+      class_name: Dialogues
+      args: {}
+  - shared_class:
+      class_name: Transactions
+      args: 
+        pending_transaction_timeout: 30
+protocols: ['oef', 'fipa']
 ```
 
 In it you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements the AEA agent register and search behaviour for the FIPA skill.
 
-The `FIPANegotiationHandler` deals with receiving `FIPAMessage` types containing FIPA negotiation terms, such as `propose`, `decline`, `accept`, etc.
+The `FIPANegotiationHandler` deals with receiving `FIPAMessage` types containing FIPA negotiation terms, such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
-The `TransactionCleanUpTask` does ...tbc.
+The `TransactionCleanUpTask` takes care of removing potential transaction of different degrees of commitment from the potential transactions list if they are unlikely to be settled.
 
 ## Shared classes
 
@@ -65,78 +71,50 @@ It also provides methods for defining what goods agents are looking for and what
 
 ### Transactions
 
-This class deals with finalising negotiation proposals between agents.
-
-
+This class deals with representing potential transactions between agents.
 
 
 ## Demo instructions
 
 !!!	Warn
-	FIPA skill demo has not been tested so instructions below will be incorrect.
+	Fipa negotiation skill is not fully developed.
 
 
 Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
 
-Install the fipa library.
-
-``` bash
-pip install fipa
-```
 
 Then, download the examples and packages directory.
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
-
-
-
 ### Create the agent
-In the root directory, create the gym agent.
+In the root directory, create the fipa agent.
 ``` bash
 aea create my_fipa_agent
 ```
 
 
-### Add the gym skill 
+### Add the fipa skill 
 ``` bash
 cd my_fipa_agent
-aea add skill fipa
+aea add skill fipa_negotiation
 ```
 
-
-### Copy the fipa environment to the agent directory
+### Add the local connection
 ``` bash
-mkdir fipas
-cp -a ../examples/fipa/fipas/. fipas/
+aea add connection local
 ```
 
-
-### Add a gym connection
-``` bash
-aea add connection fipa
-```
-
-
-### Update the connection config
-``` bash
-nano connections/fipa/connection.yaml
-env: ???
-```
-
-
-
-### Run the agent with the gym connection
+### Run the agent with the default connection
 
 ``` bash
-aea run --connection fipa
+aea run --connection local
 ```
-
-You will see the fipa logs.
 
 <!--
+You will see the fipa logs.
+
 <center>![FIPA logs](assets/gym-training.png)</center>
 -->
 
@@ -145,6 +123,7 @@ You will see the fipa logs.
 When you're done, go up a level and delete the agent.
 
 ``` bash
+cd ..
 aea delete my_fipa_agent
 ```
 

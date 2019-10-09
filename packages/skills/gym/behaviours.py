@@ -17,33 +17,26 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a class representing the search state."""
+"""This module contains the behaviours for the 'gym' skill."""
 
-from typing import Set
-
-from aea.skills.base import SharedClass
+from aea.skills.base import Behaviour
 
 
-class Search(SharedClass):
-    """This class deals with the search state."""
+class GymBehaviour(Behaviour):
+    """Gym behaviour."""
 
-    def __init__(self):
-        """Instantiate the search class."""
-        self._id = 0
-        self.ids_for_tac = set()  # type: Set[int]
+    def __init__(self, **kwargs):
+        """Initialize the behaviour."""
+        pass
 
-    @property
-    def id(self) -> int:
-        """Get the search id."""
-        return self._id
+    def setup(self) -> None:
+        """Implement the behaviour setup."""
+        pass
 
-    def get_next_id(self) -> int:
-        """
-        Generate the next search id and stores it.
+    def act(self) -> None:
+        """Act according to the behaviour."""
+        pass
 
-        :return: a search id
-        """
-        self._id += 1
-        self.ids_for_tac.add(self._id)
-        return self._id
-        # TODO: we need to make sure dialogue and search ids are unique across skills;
+    def teardown(self) -> None:
+        """Teardown the behaviour."""
+        pass

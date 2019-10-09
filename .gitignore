@@ -113,3 +113,5 @@ temp_private_key.pem
 .idea
 .idea/*
 
+.idea/
+

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,4 +17,35 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The state update message module."""
+"""This package contains a scaffold of a task."""
+
+from aea.skills.base import Task
+
+
+class MyWeatherTask(Task):
+    """This class scaffolds a task."""
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def execute(self) -> None:
+        """
+        Implement the task execution.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        pass
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        pass

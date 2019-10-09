@@ -17,33 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a class representing the search state."""
-
-from typing import Set
-
-from aea.skills.base import SharedClass
-
-
-class Search(SharedClass):
-    """This class deals with the search state."""
-
-    def __init__(self):
-        """Instantiate the search class."""
-        self._id = 0
-        self.ids_for_tac = set()  # type: Set[int]
-
-    @property
-    def id(self) -> int:
-        """Get the search id."""
-        return self._id
-
-    def get_next_id(self) -> int:
-        """
-        Generate the next search id and stores it.
-
-        :return: a search id
-        """
-        self._id += 1
-        self.ids_for_tac.add(self._id)
-        return self._id
-        # TODO: we need to make sure dialogue and search ids are unique across skills;
+"""This module contains the implementation of the default skill."""

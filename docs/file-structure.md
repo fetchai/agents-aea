@@ -7,20 +7,21 @@ The developer can create new directories where necessary but the core structure 
 The CLI tool provides a way to scaffold out the required directory structure for new agents. See the instructions for that <a href="../scaffolding/" target=_blank>here</a>.
 
 ``` bash
-agentName/
-  agent.yml       YAML configuration of the agent
+agent_name/
+  aea-config.yaml YAML configuration of the agent
+  priv.pem        The private key file
   connections/    Directory containing all the supported connections
-    connection1/  First connection
+    connection_1/  First connection
     ...           ...
-    connectionN/  nth connection
+    connection_n/  nth connection
   protocols/      Directory containing all supported protocols
-    protocol1/    First protocol
+    protocol_1/    First protocol
     ...           ...
-    protocolK/    kth protocol 
+    protocol_k/    kth protocol 
   skills/         Directory containing all the skill components
-    skill1/       First skill
+    skill_1/       First skill
     ...           ...
-    skillN/       nth skill
+    skill_n/       nth skill
 ```
 
 <br />
