@@ -65,15 +65,27 @@ def create(click_context, agent_name):
         path.mkdir(exist_ok=False)
 
         # create a config file inside it
-        config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", registry_path="../packages", private_key_pem_path="")
+        agent_config = ctx.agent_loader.ns.AgentConfigurationSchema(
+            agent_name=agent_name,
+            aea_version=aea.__version__,
+            authors="",
+            version="v1",
+            license="",
+            url="",
+            registry_path="../packages",
+            private_key_pem_path="",
+            connections=[],
+            skills=[],
+            protocols=[],
+        )
         agent_config.default_connection = DEFAULT_CONNECTION
-        ctx.agent_loader.dump(agent_config, config_file)
+        with open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w") as config_file:
+            ctx.agent_loader.dump(agent_config, config_file)
         logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))
 
         # next commands must be done from the agent's directory -> overwrite ctx.cwd
         ctx.agent_config = agent_config
-        ctx.cwd = agent_config.agent_name
+        ctx.cwd = str(agent_config.agent_name)
 
         logger.info("Adding default connection '{}' to the agent...".format(DEFAULT_CONNECTION))
         click_context.invoke(connection, connection_name=DEFAULT_CONNECTION)

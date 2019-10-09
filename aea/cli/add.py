@@ -57,7 +57,7 @@ def connection(click_context, connection_name):
 
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
     # first check in aea dir
-    registry_path = ctx.agent_config.registry_path
+    registry_path = str(ctx.agent_config.registry_path)
     connection_configuration_filepath = Path(os.path.join(registry_path, "connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE))
     if not connection_configuration_filepath.exists():
         # then check in registry
@@ -92,8 +92,9 @@ def connection(click_context, connection_name):
 
     # add the connections to the configurations.
     logger.debug("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
-    ctx.agent_config.connections.add(connection_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
+    ctx.agent_config.connections.append(connection_name)
+    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fout:
+        ctx.agent_loader.dump(ctx.agent_config, fout)
 
 
 @add.command()
@@ -102,7 +103,7 @@ def connection(click_context, connection_name):
 def protocol(click_context, protocol_name):
     """Add a protocol to the agent."""
     ctx = cast(Context, click_context.obj)
-    agent_name = cast(str, ctx.agent_config.agent_name)
+    agent_name = str(ctx.agent_config.agent_name)
     logger.debug("Adding protocol {} to the agent {}...".format(protocol_name, agent_name))
 
     # check if we already have a protocol with the same name
@@ -113,7 +114,7 @@ def protocol(click_context, protocol_name):
 
     # check that the provided path points to a proper protocol directory -> look for protocol.yaml file.
     # first check in aea dir
-    registry_path = ctx.agent_config.registry_path
+    registry_path = str(ctx.agent_config.registry_path)
     protocol_configuration_filepath = Path(os.path.join(registry_path, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE))
     if not protocol_configuration_filepath.exists():
         # then check in registry
@@ -148,8 +149,9 @@ def protocol(click_context, protocol_name):
 
     # add the protocol to the configurations.
     logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
-    ctx.agent_config.protocols.add(protocol_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
+    ctx.agent_config.protocols.append(protocol_name)
+    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fout:
+        ctx.agent_loader.dump(ctx.agent_config, fout)
 
 
 @add.command()
@@ -158,7 +160,7 @@ def protocol(click_context, protocol_name):
 def skill(click_context, skill_name):
     """Add a skill to the agent."""
     ctx = cast(Context, click_context.obj)
-    agent_name = ctx.agent_config.agent_name
+    agent_name = str(ctx.agent_config.agent_name)
     logger.debug("Adding skill {} to the agent {}...".format(skill_name, agent_name))
 
     # check if we already have a skill with the same name
@@ -169,7 +171,7 @@ def skill(click_context, skill_name):
 
     # check that the provided path points to a proper skill directory -> look for skill.yaml file.
     # first check in aea dir
-    registry_path = ctx.agent_config.registry_path
+    registry_path = str(ctx.agent_config.registry_path)
     skill_configuration_filepath = Path(os.path.join(registry_path, "skills", skill_name, DEFAULT_SKILL_CONFIG_FILE))
     if not skill_configuration_filepath.exists():
         # then check in registry
@@ -205,9 +207,10 @@ def skill(click_context, skill_name):
     for protocol_name in skill_configuration.protocols:
         if protocol_name not in ctx.agent_config.protocols:
             logger.info("Adding protocol '{}' to the agent...".format(protocol_name))
-            click_context.invoke(protocol, protocol_name=protocol_name)
+            click_context.invoke(protocol, protocol_name=str(protocol_name))
 
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
-    ctx.agent_config.skills.add(skill_name)
-    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
+    ctx.agent_config.skills.append(skill_name)
+    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fout:
+        ctx.agent_loader.dump(ctx.agent_config, fout)
