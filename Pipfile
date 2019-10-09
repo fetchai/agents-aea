@@ -34,6 +34,8 @@ colorlog = "*"
 jsonschema = "*"
 protobuf = "*"
 fetchai-ledger-api = "*"
+web3 = "*"
+eth-account = "*"
 
 [requires]
 python_version = "3.7"

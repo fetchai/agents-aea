@@ -23,7 +23,8 @@
 from typing import cast, Optional
 
 from aea.crypto.base import Crypto
-from aea.crypto.fetchai_base import FetchCryptola
+from aea.crypto.fetchai_base import FetchCrypto
+from aea.crypto.ethereum_base import EthCrypto
 from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
 
 
@@ -34,12 +35,14 @@ class Wallet(object):
         """Instantiate a wallet object."""
         self.crypto_objects = {
             "default": self._setup_crypto(private_key_pem_path),
-            "fetchai": self._setup_fetch_crypto()
+            "fetchai": self._setup_fetch_crypto(),
+            "ethereum": self._setup_ethereum_crypto()
         }
 
         self.public_keys = {
             "default": self.crypto_objects['default'].public_key,
-            "fetchai": self.crypto_objects['fetchai'].public_key
+            "fetchai": self.crypto_objects['fetchai'].public_key,
+            "ethereum": self.crypto_objects['ethereum'].public_key
         }
 
         self.private_key_pem_path = ""
@@ -59,6 +62,11 @@ class Wallet(object):
         """Create the fetch.ai entity."""
         fetch_crypto = FetchCrypto("pk.txt")
         return fetch_crypto
+
+    def _setup_ethereum_crypto(self):
+        """Create an ethereum account."""
+        ethereum_crypto = EthCrypto("eth_pk.txt")
+        return ethereum_crypto
 
     @property
     def public_key(self):

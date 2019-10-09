@@ -23,10 +23,10 @@
 from typing import Optional
 import logging
 
-from eth_account.messages import encode_defunct
-from web3 import Web3
-from eth_account import Account
-from eth_keys import keys
+from eth_account.messages import encode_defunct  # type: ignore
+from web3 import Web3       # type: ignore
+from eth_account import Account     # type: ignore
+from eth_keys import keys       # type: ignore
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,6 @@ class EthCrypto(object):
         self._display_address = self.account.address
         self._bytesRepresentation = Web3.toBytes(hexstr=self.account.privateKey.hex())
         self._public_key = keys.PrivateKey(self._bytesRepresentation).public_key
-
 
     @property
     def public_key(self) -> str:
@@ -92,25 +91,15 @@ class EthCrypto(object):
         :param message:
         :return: Signed message in bytes
         """
-        message = encode_defunct(text="I♥SF")
-        signature = self.account.sign_message(message)
+        m_message = encode_defunct(text=message)
+        signature = self.account.sign_message(m_message)
         return signature
 
-
     def _generate_private_key(self) -> Account:
-        """Generate a key pair for ethereum network"""
+        """Generate a key pair for ethereum network."""
         path = Path("eth_pk.txt")
         print(path)
         pk = Account.create()
         with open(path, "w+") as file:
             file.write(pk.privateKey.hex())
         return pk
-
-
-if __name__ == "__main__":
-    a = EthCrypto("eth_pk.txt")
-    sign = a.sign_transaction("hello_world")
-    print(a.display_address)
-    print(a.public_key)
-    print(sign)
-
