@@ -21,7 +21,6 @@ mkdocs = "*"
 mkdocs-material = "*"
 pymdown-extensions = "*"
 pygments = "*"
-python-jsonschema-objects = "*"
 
 [packages]
 cryptography = "*"
@@ -34,6 +33,7 @@ oef = {index = "test-pypi",version = "==0.6.10"}
 colorlog = "*"
 jsonschema = "*"
 protobuf = "*"
+python-jsonschema-objects = "*"
 
 [requires]
 python_version = "3.7"
