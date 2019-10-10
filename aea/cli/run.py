@@ -101,16 +101,6 @@ def run(ctx: Context, connection_name: str):
         exit(-1)
         return
 
-    logger.debug("Installing all the dependencies...")
-    for d in ctx.get_dependencies():
-        logger.debug("Installing {}...".format(d))
-        try:
-            subp = subprocess.Popen([sys.executable, "-m", "pip", "install", d])
-            subp.wait(30.0)
-        except Exception:
-            logger.error("An error occurred while installing {}. Stopping...".format(d))
-            exit(-1)
-
     mailbox = MailBox(connection)
     agent = AEA(agent_name, mailbox, private_key_pem_path=private_key_pem_path, directory=str(Path(".")))
     try:

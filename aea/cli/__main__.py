@@ -22,8 +22,10 @@
 
 import os
 import shutil
+import subprocess
+import sys
 from pathlib import Path
-from typing import cast
+from typing import cast, Optional
 
 import click
 import click_log
@@ -117,6 +119,30 @@ def freeze(ctx: Context):
     _try_to_load_agent_config(ctx)
     for d in ctx.get_dependencies():
         print(d)
+
+
+@cli.command()
+@click.option('-r', '--requirement', type=str, required=False, default=None,
+              help="Install from the given requirements file.")
+@pass_ctx
+def install(ctx: Context, requirement: Optional[str]):
+    """Get the dependencies."""
+    _try_to_load_agent_config(ctx)
+
+    if requirement:
+        dependencies = list(map(lambda x: x.strip(), open(requirement).readlines()))
+    else:
+        dependencies = ctx.get_dependencies()
+
+    logger.debug("Installing all the dependencies...")
+    for d in dependencies:
+        logger.debug("Installing {}...".format(d))
+        try:
+            subp = subprocess.Popen([sys.executable, "-m", "pip", "install", d])
+            subp.wait(30.0)
+        except Exception:
+            logger.error("An error occurred while installing {}. Stopping...".format(d))
+            exit(-1)
 
 
 cli.add_command(add)
