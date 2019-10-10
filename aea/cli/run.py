@@ -22,7 +22,6 @@ import importlib.util
 import inspect
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 from typing import cast
@@ -31,7 +30,7 @@ import click
 from click import pass_context
 
 from aea.aea import AEA
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, _try_to_load_protocols, \
+from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
     AEAConfigException
 from aea.cli.install import install
 from aea.connections.base import Connection

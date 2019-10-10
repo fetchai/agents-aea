@@ -22,10 +22,8 @@
 
 import os
 import shutil
-import subprocess
-import sys
 from pathlib import Path
-from typing import cast, Optional
+from typing import cast
 
 import click
 import click_log
