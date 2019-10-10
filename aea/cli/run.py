@@ -80,8 +80,10 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
 @click.command()
 @click.option('--connection', 'connection_name', metavar="CONN_NAME", type=str, required=False, default=None,
               help="The connection name. Must be declared in the agent's configuration file.")
+@click.option('--env', 'env_file', type=str, required=False, default=".env",
+              help="Specify an environment file (default: .env)")
 @pass_ctx
-def run(ctx: Context, connection_name: str):
+def run(ctx: Context, connection_name: str, env_file: str):
     """Run the agent."""
     _try_to_load_agent_config(ctx)
     agent_name = cast(str, ctx.agent_config.agent_name)
