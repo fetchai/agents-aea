@@ -121,31 +121,6 @@ def freeze(ctx: Context):
         print(d)
 
 
-@cli.command()
-@click.option('-r', '--requirement', type=str, required=False, default=None,
-              help="Install from the given requirements file.")
-@pass_ctx
-def install(ctx: Context, requirement: Optional[str]):
-    """Get the dependencies."""
-    _try_to_load_agent_config(ctx)
-
-    if requirement:
-        logger.debug("Installing the dependencies in '{}'...".format(requirement))
-        dependencies = list(map(lambda x: x.strip(), open(requirement).readlines()))
-    else:
-        logger.debug("Installing all the dependencies...")
-        dependencies = ctx.get_dependencies()
-
-    for d in dependencies:
-        logger.debug("Installing {}...".format(d))
-        try:
-            subp = subprocess.Popen([sys.executable, "-m", "pip", "install", d])
-            subp.wait(30.0)
-        except Exception:
-            logger.error("An error occurred while installing {}. Stopping...".format(d))
-            exit(-1)
-
-
 cli.add_command(add)
 cli.add_command(scaffold)
 cli.add_command(remove)
