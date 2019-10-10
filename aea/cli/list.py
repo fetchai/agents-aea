@@ -19,10 +19,7 @@
 
 """Implementation of the 'aea add' subcommand."""
 
-from typing import cast
-
 import click
-from click import pass_context
 
 from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config
 
@@ -30,14 +27,14 @@ from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config
 @click.group()
 @pass_ctx
 def list(ctx: Context):
-    """Add a resource to the agent."""
+    """List the installed resources."""
     _try_to_load_agent_config(ctx)
 
 
 @list.command()
 @pass_ctx
 def connections(ctx: Context):
-    """List all the available connections."""
+    """List all the installed connections."""
     for c in ctx.agent_config.connections:
         print(c)
 
@@ -45,7 +42,7 @@ def connections(ctx: Context):
 @list.command()
 @pass_ctx
 def protocols(ctx: Context):
-    """List all the available connections."""
+    """List all the installed protocols."""
     for c in ctx.agent_config.protocols:
         print(c)
 
@@ -53,6 +50,6 @@ def protocols(ctx: Context):
 @list.command()
 @pass_ctx
 def skills(ctx: Context):
-    """List all the available connections."""
+    """List all the installed skills."""
     for c in ctx.agent_config.skills:
         print(c)

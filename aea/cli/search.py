@@ -28,14 +28,14 @@ from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config
 @click.group()
 @pass_ctx
 def search(ctx: Context):
-    """Add a resource to the agent."""
+    """Search for components in the registry."""
     _try_to_load_agent_config(ctx)
 
 
 @search.command()
 @pass_ctx
 def connections(ctx: Context):
-    """List all the available connections."""
+    """List all the connections available in the registry."""
     registry_path = ctx.agent_config.registry_path
     for c in Path(registry_path).glob("connections/[!_]*"):
         print(c.name)
@@ -44,7 +44,7 @@ def connections(ctx: Context):
 @search.command()
 @pass_ctx
 def protocols(ctx: Context):
-    """List all the available connections."""
+    """List all the protocols available in the registry."""
     registry_path = ctx.agent_config.registry_path
     for c in Path(registry_path).glob("protocols/[!_]*"):
         print(c.name)
@@ -53,7 +53,7 @@ def protocols(ctx: Context):
 @search.command()
 @pass_ctx
 def skills(ctx: Context):
-    """List all the available connections."""
+    """List all the skills available in the registry."""
     registry_path = ctx.agent_config.registry_path
     for c in Path(registry_path).glob("skills/[!_]*"):
         print(c.name)
