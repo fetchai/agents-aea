@@ -33,7 +33,7 @@ from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
               help="Install from the given requirements file.")
 @pass_ctx
 def install(ctx: Context, requirement: Optional[str]):
-    """Get the dependencies."""
+    """Install the dependencies."""
     _try_to_load_agent_config(ctx)
 
     if requirement:
