@@ -223,7 +223,7 @@ class HandlerConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return HandlerConfig(
             class_name=class_name,
-            args=obj.get("args")
+            args=obj.get("args", {})
         )
 
 
@@ -249,7 +249,7 @@ class BehaviourConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return BehaviourConfig(
             class_name=class_name,
-            args=obj.get("args")
+            args=obj.get("args", {})
         )
 
 
@@ -275,7 +275,7 @@ class TaskConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return TaskConfig(
             class_name=class_name,
-            args=obj.get("args")
+            args=obj.get("args", {})
         )
 
 
@@ -314,7 +314,7 @@ class SkillConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
-                 protocols: str = "",
+                 protocols: List[str] = None,
                  dependencies: Optional[List[str]] = None):
         """Initialize a skill configuration."""
         self.name = name
@@ -322,7 +322,7 @@ class SkillConfig(Configuration):
         self.version = version
         self.license = license
         self.url = url
-        self.protocols = protocols
+        self.protocols = protocols if protocols is not None else []  # type: List[str]
         self.dependencies = dependencies
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
@@ -354,7 +354,7 @@ class SkillConfig(Configuration):
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
         url = cast(str, obj.get("url"))
-        protocols = cast(str, obj.get("protocols"))
+        protocols = cast(List[str], obj.get("protocols", []))
         dependencies = cast(List[str], obj.get("dependencies", []))
         skill_config = SkillConfig(
             name=name,
@@ -366,19 +366,19 @@ class SkillConfig(Configuration):
             dependencies=dependencies
         )
 
-        for b in obj.get("behaviours"):  # type: ignore
+        for b in obj.get("behaviours", []):  # type: ignore
             behaviour_config = BehaviourConfig.from_json(b["behaviour"])
             skill_config.behaviours.create(behaviour_config.class_name, behaviour_config)
 
-        for t in obj.get("tasks"):  # type: ignore
+        for t in obj.get("tasks", []):  # type: ignore
             task_config = TaskConfig.from_json(t["task"])
             skill_config.tasks.create(task_config.class_name, task_config)
 
-        for h in obj.get("handlers"):  # type: ignore
+        for h in obj.get("handlers", []):  # type: ignore
             handler_config = HandlerConfig.from_json(h["handler"])
             skill_config.handlers.create(handler_config.class_name, handler_config)
 
-        for s in obj.get("shared_classes"):  # type: ignore
+        for s in obj.get("shared_classes", []):  # type: ignore
             shared_class_config = SharedClassConfig.from_json(s["shared_class"])
             skill_config.shared_classes.create(shared_class_config.class_name, shared_class_config)
 

@@ -1,4 +1,4 @@
-TAC has its own repo. 
+TAC has its own <a href="https://github.com/fetchai/agents-tac" target=_blank>repo</a>. 
 
 Follow the instructions below to build and run the TAC demo.
 
