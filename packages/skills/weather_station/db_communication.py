@@ -20,20 +20,25 @@
 """This package contains the Database Communication for the weather agent."""
 
 import datetime
+import os.path
 import sqlite3
 from typing import Dict, cast
+
+my_path = os.path.dirname(__file__)
+
+DB_SOURCE = os.path.join(my_path, 'dummy_weather_station_data.db')
 
 
 class DBCommunication:
     """A class to communicate with a database."""
 
-    def __init__(self, source: str):
+    def __init__(self):
         """
         Initialize the database communication.
 
         :param source: the source
         """
-        self.source = source
+        self.source = DB_SOURCE
 
     def db_connection(self) -> sqlite3.Connection:
         """
@@ -58,8 +63,7 @@ class DBCommunication:
         start = start_dt.strftime('%s')
         end_dt = datetime.datetime.strptime(end_date, '%d/%m/%Y')
         end = end_dt.strftime('%s')
-        command = ("SELECT * FROM data WHERE idx BETWEEN ? AND ?", str(start), str(end),)
-        cur.execute(command)  # type: ignore
+        cur.execute("SELECT * FROM data WHERE idx BETWEEN ? AND ?", (str(start), str(end)))
         data = cast(Dict[str, int], cur.fetchall())
         cur.close()
         con.close()

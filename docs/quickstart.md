@@ -57,7 +57,7 @@ The echo skill is a simple demo that prints logs from the agent's main loop as i
 
 
 
-### Download the examples, scripts, and packages directories.
+### Download the scripts and packages directories.
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages

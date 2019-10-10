@@ -20,13 +20,18 @@
 """This package contains dummy weather station data."""
 
 import datetime
+import logging
+import os.path
 import random
 import sqlite3
 import time
 from typing import Dict, Union
 
-DB_SOURCE = 'dummy_weather_station_data.db'
+logger = logging.getLogger("aea.weather_station_skill")
 
+my_path = os.path.dirname(__file__)
+
+DB_SOURCE = os.path.join(my_path, 'dummy_weather_station_data.db')
 
 # Checking if the database exists
 con = sqlite3.connect(DB_SOURCE)
@@ -56,6 +61,7 @@ cur.execute(command)
 cur.close()
 con.commit()
 if con is not None:
+    logger.info("Wheather station: I closed the db after checking it is populated!")
     con.close()
 
 
@@ -69,9 +75,9 @@ class Forecast():
         :param tagged_data: the data dictionary
         :return: None
         """
-        con = sqlite3.connect('weather_fake.db')
+        con = sqlite3.connect(DB_SOURCE)
         cur = con.cursor()
-        command = ('''INSERT INTO data(abs_pressure,
+        cur.execute('''INSERT INTO data(abs_pressure,
                                        delay,
                                        hum_in,
                                        hum_out,
@@ -81,18 +87,19 @@ class Forecast():
                                        temp_out,
                                        wind_ave,
                                        wind_dir,
-                                       wind_gust) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (tagged_data['abs_pressure'],
-                                                                                               tagged_data['delay'],
-                                                                                               tagged_data['hum_in'],
-                                                                                               tagged_data['hum_out'],
-                                                                                               datetime.datetime.now().strftime('%s'),
-                                                                                               tagged_data['rain'],
-                                                                                               tagged_data['temp_in'],
-                                                                                               tagged_data['temp_out'],
-                                                                                               tagged_data['wind_ave'],
-                                                                                               tagged_data['wind_dir'],
-                                                                                               tagged_data['wind_gust']))
-        cur.execute(command)  # type: ignore
+                                       wind_gust) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (tagged_data['abs_pressure'],
+                     tagged_data['delay'],
+                     tagged_data['hum_in'],
+                     tagged_data['hum_out'],
+                     datetime.datetime.now().strftime('%s'),
+                     tagged_data['rain'],
+                     tagged_data['temp_in'],
+                     tagged_data['temp_out'],
+                     tagged_data['wind_ave'],
+                     tagged_data['wind_dir'],
+                     tagged_data['wind_gust']))
+        logger.info("Wheather station: I added data in the db!")
         cur.close()
         con.commit()
         con.close()
@@ -100,18 +107,12 @@ class Forecast():
     def generate(self):
         """Generate weather data."""
         while True:
-            dict_of_data = {}  # type: Dict[str, Union[int, datetime.datetime]]
-            dict_of_data['abs_pressure'] = random.randrange(1022.0, 1025, 1)
-            dict_of_data['delay'] = random.randint(2, 7)
-            dict_of_data['hum_in'] = random.randrange(33.0, 40.0, 1)
-            dict_of_data['hum_out'] = random.randrange(33.0, 80.0, 1)
-            dict_of_data['idx'] = datetime.datetime.now()
-            dict_of_data['rain'] = random.randrange(70.0, 74.0, 1)
-            dict_of_data['temp_in'] = random.randrange(18, 28, 1)
-            dict_of_data['temp_out'] = random.randrange(2, 20, 1)
-            dict_of_data['wind_ave'] = random.randrange(0, 10, 1)
-            dict_of_data['wind_dir'] = random.randrange(0, 14, 1)
-            dict_of_data['wind_gust'] = random.randrange(1, 7, 1)
+            dict_of_data = {'abs_pressure': random.randrange(1022.0, 1025, 1), 'delay': random.randint(2, 7),
+                            'hum_in': random.randrange(33.0, 40.0, 1), 'hum_out': random.randrange(33.0, 80.0, 1),
+                            'idx': datetime.datetime.now(), 'rain': random.randrange(70.0, 74.0, 1),
+                            'temp_in': random.randrange(18, 28, 1), 'temp_out': random.randrange(2, 20, 1),
+                            'wind_ave': random.randrange(0, 10, 1), 'wind_dir': random.randrange(0, 14, 1),
+                            'wind_gust': random.randrange(1, 7, 1)}  # type: Dict[str, Union[int, datetime.datetime]]
             self.add_data(dict_of_data)
             time.sleep(5)
 

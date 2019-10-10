@@ -17,7 +17,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the base classes for the skills."""
-
 import importlib.util
 import inspect
 import logging
@@ -33,7 +32,8 @@ from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, 
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
 from aea.decision_maker.base import OwnershipState, Preferences
-from aea.mail.base import OutBox, Envelope
+from aea.mail.base import OutBox
+from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
 
@@ -215,11 +215,12 @@ class Handler(ABC):
         return self._config
 
     @abstractmethod
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to a message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
 
@@ -393,10 +394,12 @@ class SharedClass(ABC):
         shared_classes_names = set(config.class_name for config in shared_classes_configs)
 
         # get all Python modules except the standard ones
-        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "skill.yaml", "__.*"])
-        module_paths = set(map(str, filter(lambda x: not re.match(ignore_regex, x.name), Path(path).iterdir())))
+        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "__.*"])
+        all_python_modules = Path(path).glob("*.py")
+        module_paths = set(map(str, filter(lambda x: not re.match(ignore_regex, x.name), all_python_modules)))
 
         for module_path in module_paths:
+            logger.debug("Trying to load module {}".format(module_path))
             module_name = module_path.replace(".py", "")
             shared_class_spec = importlib.util.spec_from_file_location(module_name, location=module_path)
             shared_class_module = importlib.util.module_from_spec(shared_class_spec)
@@ -479,14 +482,29 @@ class Skill:
 
         skill_context = SkillContext(agent_context)
 
-        handlers_configurations = list(dict(skill_config.handlers.read_all()).values())
-        handlers = Handler.parse_module(os.path.join(directory, "handlers.py"), handlers_configurations, skill_context)
-        behaviours_configurations = list(dict(skill_config.behaviours.read_all()).values())
-        behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations, skill_context)
-        tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
-        tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
-        shared_classes_configurations = list(dict(skill_config.shared_classes.read_all()).values())
-        shared_classes_instances = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
+        if skill_config.handlers:
+            handlers_configurations = list(dict(skill_config.handlers.read_all()).values())
+            handlers = Handler.parse_module(os.path.join(directory, "handlers.py"), handlers_configurations, skill_context)
+        else:
+            handlers = []
+
+        if skill_config.behaviours:
+            behaviours_configurations = list(dict(skill_config.behaviours.read_all()).values())
+            behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations, skill_context)
+        else:
+            behaviours = []
+
+        if skill_config.tasks:
+            tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
+            tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
+        else:
+            tasks = []
+
+        if skill_config.shared_classes:
+            shared_classes_configurations = list(dict(skill_config.shared_classes.read_all()).values())
+            shared_classes_instances = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
+        else:
+            shared_classes_instances = []
 
         skill = Skill(skill_config, skill_context, handlers, behaviours, tasks, shared_classes_instances)
         skill_context._skill = skill

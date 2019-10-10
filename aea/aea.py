@@ -130,8 +130,8 @@ class AEA(Agent):
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
         error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")
-        error_handler = cast(ErrorHandler, error_handler)
         assert error_handler is not None, "ErrorHandler not initialized"
+        error_handler = cast(ErrorHandler, error_handler)
 
         if protocol is None:
             error_handler.send_unsupported_protocol(envelope)
@@ -153,9 +153,9 @@ class AEA(Agent):
                 error_handler.send_unsupported_skill(envelope, protocol)
             return
 
-        # each handler independently acts on the message
+        # TODO: add filter, currently each handler independently acts on the message
         for handler in handlers:
-            handler.handle_envelope(envelope)
+            handler.handle(msg, envelope.sender)
 
     def update(self) -> None:
         """Update the current state of the agent.

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Application Home Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
+    <link rel="stylesheet" href="static/css/home.css">
+    <script
+      src="http://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous">
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="banner">Fetch.AI AEA CLI REST API</h1>
+        <div class="split left">
+            <div class="section editor">
+                <label for="localAgentsCreateId">Create Agent id
+                    <input id="localAgentsCreateId" type="text" />
+                </label>
+                <button id="localAgentsCreate">Create Agent</button>
+                <br>
+                <br>
+                <div class="localAgents">
+                    <table>
+                        <caption>Local Agents</caption>
+                        <thead>
+                            <tr>
+                                <th>Agent id</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody class="localAgentsregisteredTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="section editor">
+                <div>
+                    <h4 align="center">Selected Agent</h4>
+                    <h3> <div id="localAgentsSelectionId" align="center">NONE</div></h3>
+                </div>
+                <button id="localAgentsDelete">Delete Agent</button>
+            </div>
+            {% for i in range(0, len) %}
+                {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
+
+                    <div class="section editor">
+                        <div class="{{htmlElements[i][2]}}">
+                            <table>
+                                <caption>Local {{htmlElements[i][1]}}</caption>
+                                <thead>
+                                    <tr>
+                                        <th>{{htmlElements[i][1]}} id</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="{{htmlElements[i][2]}}registeredTable">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
+                        </div>
+                        <button id="{{htmlElements[i][2]}}Remove">Remove {{htmlElements[i][1]}}</button>
+                        <br>
+                        <label for="{{htmlElements[i][2]}}ScaffoldId">Scaffold {{htmlElements[i][1]}} id
+                            <input id="{{htmlElements[i][2]}}ScaffoldId" type="text" />
+                        </label>
+                        <button id="{{htmlElements[i][2]}}Scaffold">Scaffold new {{htmlElements[i][1]}}</button>
+                        <br>
+                        <br>
+                    </div>
+
+                {% endif %}
+            {% endfor %}
+
+            <div class="error"></div>
+        </div>
+        <div class="split right">
+            {% for i in range(0, len) %}
+                {% if htmlElements[i][0] == "registered"%}
+                    <div class="section editor">
+                        <div class="{{htmlElements[i][2]}}">
+                            <table>
+                                <caption>Registered {{htmlElements[i][1]}}s</caption>
+                                <thead>
+                                    <tr>
+                                        <th>{{htmlElements[i][1]}} id</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="{{htmlElements[i][2]}}registeredTable">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                        <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
+                        </div>
+                        <button id="{{htmlElements[i][2]}}Add"><< Add {{htmlElements[i][1]}}</button>
+                    </div>
+                    <br>
+                {% endif %}
+            {% endfor %}
+
+        </div>
+
+    </div>
+</body>
+<script src="static/js/home.js"></script>
+</html>

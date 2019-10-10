@@ -25,7 +25,7 @@ import time
 from typing import Any, Dict, List, Optional, Union, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
@@ -34,16 +34,14 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
-    from packages.skills.weather_station.dummy_weather_station_data import DB_SOURCE
     from packages.skills.weather_station.db_communication import DBCommunication
 else:
-    from weather_station_skill.dummy_weather_station_data import DB_SOURCE
     from weather_station_skill.db_communication import DBCommunication
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.weather_station_skill")
 
 DATE_ONE = "3/10/2019"
-DATE_TWO = "4/10/2019"
+DATE_TWO = "15/10/2019"
 
 
 class MyWeatherHandler(Handler):
@@ -55,30 +53,30 @@ class MyWeatherHandler(Handler):
         """Initialise the behaviour."""
         super().__init__(**kwargs)
         self.fet_price = 0.002
-        self.db = DBCommunication(DB_SOURCE)
+        self.db = DBCommunication()
         self.fetched_data = []
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to an message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        msg = FIPASerializer().decode(envelope.message)
-        msg = cast(FIPAMessage, msg)
-        msg_performative = FIPAMessage.Performative(msg.get('performative'))
-        message_id = cast(int, msg.get('message_id'))
-        dialogue_id = cast(int, msg.get('dialogue_id'))
+        fipa_msg = cast(FIPAMessage, message)
+        msg_performative = FIPAMessage.Performative(fipa_msg.get('performative'))
+        message_id = cast(int, fipa_msg.get('id'))
+        dialogue_id = cast(int, fipa_msg.get('dialogue_id'))
 
         if msg_performative == FIPAMessage.Performative.CFP:
-            self.handle_cfp(msg, envelope.sender, message_id, dialogue_id)
+            self.handle_cfp(fipa_msg, sender, message_id, dialogue_id)
         elif msg_performative == FIPAMessage.Performative.ACCEPT:
-            self.handle_accept(envelope.sender)
+            self.handle_accept(sender)
 
     def teardown(self) -> None:
         """
@@ -107,7 +105,7 @@ class MyWeatherHandler(Handler):
             total_price = self.fet_price * len(fetched_data)
             proposal = [Description({"Rows": len(fetched_data),
                                      "Price": total_price})]
-            logger.info("[{}]: sending sender={} a proposal at price: {}".format(self.context.agent_name, sender, total_price))
+            logger.info("[{}]: sending sender={} a proposal at price={}".format(self.context.agent_name, sender, total_price))
             proposal_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_id=dialogue_id,
                                        target=new_target,
@@ -118,6 +116,7 @@ class MyWeatherHandler(Handler):
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(proposal_msg))
         else:
+            logger.info("[{}]: declined the CFP from sender={}".format(self.context.agent_name, sender))
             decline_msg = FIPAMessage(message_id=new_message_id,
                                       dialogue_id=dialogue_id,
                                       target=new_target,
@@ -128,7 +127,8 @@ class MyWeatherHandler(Handler):
                                             message=FIPASerializer().encode(decline_msg))
 
     def handle_accept(self, sender: str) -> None:
-        """Handle the Accept Calls.
+        """
+        Handle the Accept Calls.
 
         :param sender: the sender
         :return: None
@@ -156,6 +156,7 @@ class MyWeatherHandler(Handler):
                 break
         json_data = json.dumps(command)
         json_bytes = json_data.encode("utf-8")
+        logger.info("[{}]: handling accept and sending wheather data to sender={}".format(self.context.agent_name, sender))
         data_msg = DefaultMessage(
             type=DefaultMessage.Type.BYTES, content=json_bytes)
         self.context.outbox.put_message(to=sender,

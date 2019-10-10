@@ -8,7 +8,7 @@ The AEA FIPA skill demonstrates how FIPA negotiation strategies may be embedded 
 The FIPA skill `skill.yaml` configuration file looks like this.
 
 ``` yaml
-name: ''
+name: 'fipa_negotiation'
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
@@ -19,29 +19,35 @@ behaviours:
       args:
         services_interval: 5
 handlers:
-  class_name: FIPANegotiationHandler
+  - handler:
+      class_name: FIPANegotiationHandler
+      args: {}
 tasks:
   - task:
       class_name: TransactionCleanUpTask
+      args: {}
 shared_classes:
-  - one:
-    class_name: Search
-  - two:
-    class_name: Strategy
-  - three:
-    class_name: Dialogues
-  - four:
-    class_name: Transactions
-    args:
-      pending_transaction_timeout: 30
-protocol: ['oef', 'fipa']
+  - shared_class:
+      class_name: Search
+      args: {}
+  - shared_class:
+      class_name: Strategy
+      args: {}
+  - shared_class:
+      class_name: Dialogues
+      args: {}
+  - shared_class:
+      class_name: Transactions
+      args: 
+        pending_transaction_timeout: 30
+protocols: ['oef', 'fipa']
 ```
 
 Above, you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements register and search behaviour of an AEA for the FIPA skill.
 
-The `FIPANegotiationHandler` deals with receiving `FIPAMessage` types containing FIPA negotiation terms, such as `propose`, `decline`, `accept`, etc.
+The `FIPANegotiationHandler` deals with receiving `FIPAMessage` types containing FIPA negotiation terms, such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
-The `TransactionCleanUpTask` does ...tbc.
+The `TransactionCleanUpTask` takes care of removing potential transaction of different degrees of commitment from the potential transactions list if they are unlikely to be settled.
 
 ## Shared classes
 
@@ -65,9 +71,7 @@ It also provides methods for defining what goods agents are looking for and what
 
 ### Transactions
 
-This class deals with finalising negotiation proposals between agents.
-
-
+This class deals with representing potential transactions between agents.
 
 
 ## Demo instructions
@@ -108,9 +112,9 @@ aea add connection local
 aea run --connection local
 ```
 
+<!--
 You will see the fipa logs.
 
-<!--
 <center>![FIPA logs](assets/gym-training.png)</center>
 -->
 
@@ -119,6 +123,7 @@ You will see the fipa logs.
 When you're done, go up a level and delete the agent.
 
 ``` bash
+cd ..
 aea delete my_fipa_agent
 ```
 

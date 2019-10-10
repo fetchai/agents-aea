@@ -70,7 +70,7 @@ class SomeClass(SharedClass):
     ...
 ```
 
-An instance of this class is available on the context level like so:
+Then, an instance of this class is available on the context level like so:
 ``` python
 some_class = self.context.some_class
 ``` 

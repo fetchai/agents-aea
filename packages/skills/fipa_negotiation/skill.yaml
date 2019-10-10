@@ -11,13 +11,11 @@ behaviours:
 handlers:
   - handler:
       class_name: FIPANegotiationHandler
-      args:
-        foo: bar
+      args: {}
 tasks:
   - task:
       class_name: TransactionCleanUpTask
-      args:
-        foo: bar
+      args: {}
 shared_classes:
   - shared_class:
       class_name: Search

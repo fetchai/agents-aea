@@ -17,21 +17,39 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the dataModel for the weather agent."""
+"""Implementation of the 'aea add' subcommand."""
 
-from aea.protocols.oef.models import DataModel, Attribute
+import click
 
-SCHEME = {'country': "UK", 'city': "Cambridge"}
-SERVICE_ID = "WeatherData"
+from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config
 
 
-class WEATHER_STATION_DATAMODEL (DataModel):
-    """Data model for the weather Agent."""
+@click.group()
+@pass_ctx
+def list(ctx: Context):
+    """List the installed resources."""
+    _try_to_load_agent_config(ctx)
 
-    def __init__(self):
-        """Initialise the dataModel."""
-        self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)
-        self.ATTRIBUTE_CITY = Attribute("city", str, True)
 
-        super().__init__("weather_station_datamodel", [self.ATTRIBUTE_COUNTRY,
-                                                       self.ATTRIBUTE_CITY])
+@list.command()
+@pass_ctx
+def connections(ctx: Context):
+    """List all the installed connections."""
+    for c in ctx.agent_config.connections:
+        print(c)
+
+
+@list.command()
+@pass_ctx
+def protocols(ctx: Context):
+    """List all the installed protocols."""
+    for c in ctx.agent_config.protocols:
+        print(c)
+
+
+@list.command()
+@pass_ctx
+def skills(ctx: Context):
+    """List all the installed skills."""
+    for c in ctx.agent_config.skills:
+        print(c)

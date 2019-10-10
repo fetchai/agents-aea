@@ -5,7 +5,7 @@ A `MailBox` contains `InBox` and `OutBox` queues containing `Envelopes`.
 
 ### Envelope
 
-An `Envelope` is the core object with which agents communicate. It is a vehicle for messages with four attribute parameters:
+An `Envelope` is the core object with which agents communicate. It travels from `OutBox` to another agent. `Envelope` objects sent from other agents arrive in the `InBox` via a connection. An `Envelope` is a vehicle for messages with four attribute parameters:
 
 * `to`: defines the destination address.
 

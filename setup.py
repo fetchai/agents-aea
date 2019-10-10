@@ -57,8 +57,17 @@ def get_all_extras() -> Dict:
             "click",
             "click_log",
             "PyYAML",
-            "jsonschema",
+            "jsonschema<3.0.0",
             "protobuf"
+        ],
+        "cli_gui": [
+            "click",
+            "click_log",
+            "PyYAML",
+            "jsonschema<3.0.0",
+            "protobuf",
+            "flask",
+            "connexion[swagger-ui]"
         ],
     }
     extras.update(get_aea_extras())
