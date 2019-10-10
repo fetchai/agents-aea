@@ -22,7 +22,6 @@
 
 import os
 import shutil
-from logging import FileHandler
 from pathlib import Path
 from typing import cast
 
@@ -34,9 +33,9 @@ from jsonschema import ValidationError
 import aea
 from aea.cli.add import connection, add, skill
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.cli.list import list as _list
 from aea.cli.remove import remove
 from aea.cli.run import run
-from aea.cli.list import list as _list
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
@@ -49,13 +48,9 @@ DEFAULT_SKILL = "error"
 @click.version_option('0.1.0')
 @click.pass_context
 @click_log.simple_verbosity_option(logger, default="INFO")
-@click.option('-l', '--logfile', 'log_file', type=click.Path(), required=False, default=None,
-              help="Save logs into a log file.")
-def cli(ctx, log_file: str) -> None:
+def cli(ctx) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent."""
     ctx.obj = Context(cwd=".")
-    if log_file:
-        logger.addHandler(FileHandler(log_file))
 
 
 @cli.command()
