@@ -18,41 +18,42 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea add' subcommand."""
-
-from typing import cast
+from pathlib import Path
 
 import click
-from click import pass_context
 
 from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config
 
 
 @click.group()
 @pass_ctx
-def list(ctx: Context):
+def search(ctx: Context):
     """Add a resource to the agent."""
     _try_to_load_agent_config(ctx)
 
 
-@list.command()
+@search.command()
 @pass_ctx
 def connections(ctx: Context):
     """List all the available connections."""
-    for c in ctx.agent_config.connections:
-        print(c)
+    registry_path = ctx.agent_config.registry_path
+    for c in Path(registry_path).glob("connections/[!_]*"):
+        print(c.name)
 
 
-@list.command()
+@search.command()
 @pass_ctx
 def protocols(ctx: Context):
     """List all the available connections."""
-    for c in ctx.agent_config.protocols:
-        print(c)
+    registry_path = ctx.agent_config.registry_path
+    for c in Path(registry_path).glob("protocols/[!_]*"):
+        print(c.name)
 
 
-@list.command()
+@search.command()
 @pass_ctx
 def skills(ctx: Context):
     """List all the available connections."""
-    for c in ctx.agent_config.skills:
-        print(c)
+    registry_path = ctx.agent_config.registry_path
+    for c in Path(registry_path).glob("skills/[!_]*"):
+        print(c.name)
