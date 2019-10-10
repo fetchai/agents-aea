@@ -7,6 +7,9 @@ Command  | Description
 `scaffold connection/protocol/skill [name]`  | Scaffold a new connection, protocol, or skill.
 `add connection/protocol/skill [name]`  | Add connection, protocol, or skill to agent.
 `remove connection/protocol/skill [name]` | Remove connection, protocol, or skill from agent.
+`install [-r <requirements_file>]` | Install the dependencies.
+`list protocols/connections/skills` |   List the installed resources.
+`search protocols/connections/skills` | Search for components in the registry.
 `run {using [connection, ...]}`  | Run the agent on the Fetch.AI network with default or specified connections.
 `-v DEBUG run` | Run with debugging.
 `delete [name]`  | Delete an aea project. See below for disabling a resource.
