@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the 'aea add' subcommand."""
+"""Implementation of the 'aea search' subcommand."""
 from pathlib import Path
 
 import click
