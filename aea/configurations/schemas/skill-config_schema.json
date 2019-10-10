@@ -19,11 +19,13 @@
         "url": {"type": "string"},
         "protocols": {
             "type": "array",
+            "additionalProperties": false,
             "uniqueItems": true,
             "items": {"type": "string"}
         },
         "handlers": {
             "type": "array",
+            "additionalProperties": false,
             "uniqueItems": true,
             "items": {
               "type": "object",
@@ -38,6 +40,7 @@
             "uniqueItems": true,
             "items": {
               "type": "object",
+              "additionalProperties": false,
               "required": ["behaviour"],
               "properties": {
                 "behaviour": { "$ref": "#/definitions/behaviour" }
@@ -49,6 +52,7 @@
             "uniqueItems": true,
             "items": {
               "type": "object",
+              "additionalProperties": false,
               "required": ["task"],
               "properties": {
                 "task": { "$ref": "#/definitions/task" }
@@ -60,7 +64,6 @@
             "uniqueItems": true,
             "items": {
               "type": "object",
-              "required": ["shared_class"],
               "properties": {
                 "task": { "$ref": "#/definitions/shared_class" }
               }
@@ -75,7 +78,8 @@
     "definitions": {
         "behaviour": {
             "type": "object",
-            "required": ["class_name", "args"],
+            "additionalProperties": false,
+            "required": ["class_name"],
             "properties": {
                 "class_name": {"type": "string"},
                 "args": {"type": "object"}
@@ -83,7 +87,8 @@
         },
         "task": {
             "type": "object",
-            "required": ["class_name", "args"],
+            "additionalProperties": false,
+            "required": ["class_name"],
             "properties": {
                 "class_name": {"type": "string"},
                 "args": {"type": "object"}
@@ -91,7 +96,8 @@
         },
         "handler": {
             "type": "object",
-            "required": ["class_name", "args"],
+            "additionalProperties": false,
+            "required": ["class_name"],
             "properties": {
                 "class_name": {"type": "string"},
                 "args": {"type": "object"}
@@ -99,7 +105,8 @@
         },
         "shared_class": {
             "type": "object",
-            "required": ["class_name", "args"],
+            "additionalProperties": false,
+            "required": ["class_name"],
             "properties": {
                 "class_name": {"type": "string"},
                 "args": {"type": "object"}
