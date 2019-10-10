@@ -23,13 +23,11 @@ import logging
 from typing import Optional, cast, List
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.serialization import OEFSerializer
 from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 
@@ -58,27 +56,27 @@ class FIPAHandler(Handler):
         """
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to a message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        msg = FIPASerializer().decode(envelope.message)
-        msg_performative = FIPAMessage.Performative(msg.get('performative'))
-        proposals = cast(List[Description], msg.get("proposal"))
-        message_id = cast(int, msg.get("id"))
-        dialogue_id = cast(int, msg.get("dialogue_id"))
+        msg_performative = FIPAMessage.Performative(message.get('performative'))
+        proposals = cast(List[Description], message.get("proposal"))
+        message_id = cast(int, message.get("id"))
+        dialogue_id = cast(int, message.get("dialogue_id"))
         if msg_performative == FIPAMessage.Performative.PROPOSE:
             if proposals is not []:
                 for item in proposals:
                     logger.info("[{}]: received proposal={} in dialogue={}".format(self.context.agent_name, item.values, dialogue_id))
                     if "Price" in item.values.keys():
                         if item.values["Price"] < self.max_price:
-                            self.handle_accept(envelope.sender, message_id, dialogue_id)
+                            self.handle_accept(sender, message_id, dialogue_id)
                         else:
-                            self.handle_decline(envelope.sender, message_id, dialogue_id)
+                            self.handle_decline(sender, message_id, dialogue_id)
 
     def teardown(self) -> None:
         """
@@ -143,18 +141,18 @@ class OEFHandler(Handler):
         """Call to setup the handler."""
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to a message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        msg = OEFSerializer().decode(envelope.message)
-        msg_type = OEFMessage.Type(msg.get("type"))
+        msg_type = OEFMessage.Type(message.get("type"))
 
         if msg_type is OEFMessage.Type.SEARCH_RESULT:
-            agents = cast(List[str], msg.get("agents"))
+            agents = cast(List[str], message.get("agents"))
             logger.info("[{}]: found agents={}".format(self.context.agent_name, agents))
             for agent in agents:
                 msg = FIPAMessage(message_id=STARTING_MESSAGE_ID,
@@ -187,16 +185,16 @@ class DefaultHandler(Handler):
         """Call to setup the handler."""
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to a message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
         logger.info("[{}]: receiving data ...".format(self.context.agent_name))
-        msg = DefaultSerializer().decode(envelope.message)
-        json_data = msg.get("content")
+        json_data = message.get("content")
         if json_data is not None:
             logger.info("[{}]: this is the data I got: {}".format(self.context.agent_name, json_data.decode()))
         else:

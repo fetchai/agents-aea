@@ -32,7 +32,8 @@ from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, 
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
 from aea.decision_maker.base import OwnershipState, Preferences
-from aea.mail.base import OutBox, Envelope
+from aea.mail.base import OutBox
+from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
 
@@ -214,11 +215,12 @@ class Handler(ABC):
         return self._config
 
     @abstractmethod
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to a message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
 

@@ -37,7 +37,6 @@ class MyWeatherTask(Task):
         """
         Implement the task execution.
 
-        :param envelope: the envelope
         :return: None
         """
         pass
