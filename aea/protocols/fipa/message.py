@@ -38,6 +38,8 @@ class FIPAMessage(Message):
         PROPOSE = "propose"
         ACCEPT = "accept"
         MATCH_ACCEPT = "match_accept"
+        ACCEPT_W_ADDRESS = 'accept_with_address'
+        MATCH_ACCEPT_W_ADDRESS = 'match_accept_with_address'
         DECLINE = "decline"
 
         def __str__(self):
@@ -77,7 +79,9 @@ class FIPAMessage(Message):
                 assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
             elif performative == FIPAMessage.Performative.ACCEPT \
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
-                    or performative == FIPAMessage.Performative.DECLINE:
+                    or performative == FIPAMessage.Performative.DECLINE\
+                    or performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS\
+                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
                 pass  # pragma: no cover
             else:
                 raise ValueError("Performative not recognized.")

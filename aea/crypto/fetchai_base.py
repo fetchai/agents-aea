@@ -64,6 +64,16 @@ class FetchCrypto(object):
         """
         return str(self._display_address)
 
+    @staticmethod
+    def get_address_from_public_key(public_key: str) -> Address:
+        """
+        Get the address from the public key.
+
+        :return: str
+        """
+        identity = Identity.from_hex(public_key)
+        return Address(identity)
+
     def sign_transaction(self, message: bytes) -> bytes:
         """
         Sing a transaction to send it to the ledger.
@@ -98,7 +108,7 @@ class FetchCrypto(object):
         except IOError as e:
             logger.exception(str(e))
 
-    def _generate_private_key(self) -> str:
+    def _generate_private_key(self) -> Entity:
         path = Path("pk.txt")
         print(path)
         entity = Entity()

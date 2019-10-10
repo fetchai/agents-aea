@@ -17,7 +17,16 @@ message FIPAMessage{
         repeated bytes proposal = 4;
     }
     message Accept{}
+
     message MatchAccept{}
+
+    message Accept_W_Address{
+        string address = 1;
+    }
+
+    message MatchAccept_W_Address{
+        string address = 1;
+    }
     message Decline{}
 
     int32 message_id = 1;
