@@ -104,7 +104,7 @@ class FIPAHandler(Handler):
                           target=new_target_id,
                           performative=FIPAMessage.Performative.ACCEPT)
         self.context.outbox.put_message(to=sender,
-                                        sender=self.context.agent_public_key['default'],
+                                        sender=self.context.agent_public_key,
                                         protocol_id=FIPAMessage.protocol_id,
                                         message=FIPASerializer().encode(msg))
 
@@ -124,7 +124,7 @@ class FIPAHandler(Handler):
                           target=new_target_id,
                           performative=FIPAMessage.Performative.DECLINE)
         self.context.outbox.put_message(to=sender,
-                                        sender=self.context.agent_public_key['default'],
+                                        sender=self.context.agent_public_key,
                                         protocol_id=FIPAMessage.protocol_id,
                                         message=FIPASerializer().encode(msg))
 
@@ -165,7 +165,7 @@ class OEFHandler(Handler):
                                   )
                 self.dialogue_id += 1
                 self.context.outbox.put_message(to=agent,
-                                                sender=self.context.agent_public_key['default'],
+                                                sender=self.context.agent_public_key,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(msg))
 

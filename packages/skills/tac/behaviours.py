@@ -77,4 +77,4 @@ class TACBehaviour(Behaviour):
         search.ids_for_tac.add(search_id)
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
         msg_bytes = OEFSerializer().encode(msg)
-        self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key['default'], protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)

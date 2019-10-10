@@ -85,11 +85,11 @@ def run(ctx: Context, connection_name: str):
     _try_to_load_agent_config(ctx)
     agent_name = cast(str, ctx.agent_config.agent_name)
     wallet = Wallet(private_key_pem_path=ctx.agent_config.private_key_pem_path)
-    public_key = wallet.public_keys
+    public_keys = wallet.public_keys
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
     try:
-        connection = _setup_connection(connection_name, public_key['default'], ctx)
+        connection = _setup_connection(connection_name, public_keys['default'], ctx)
     except AEAConfigException as e:
         logger.error(str(e))
         exit(-1)

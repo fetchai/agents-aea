@@ -112,7 +112,7 @@ class MyWeatherHandler(Handler):
                                        performative=FIPAMessage.Performative.PROPOSE,
                                        proposal=proposal)
             self.context.outbox.put_message(to=sender,
-                                            sender=self.context.agent_public_key['default'],
+                                            sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(proposal_msg))
         else:
@@ -122,7 +122,7 @@ class MyWeatherHandler(Handler):
                                       target=new_target,
                                       performative=FIPAMessage.Performative.DECLINE)
             self.context.outbox.put_message(to=sender,
-                                            sender=self.context.agent_public_key['default'],
+                                            sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(decline_msg))
 
@@ -160,6 +160,6 @@ class MyWeatherHandler(Handler):
         data_msg = DefaultMessage(
             type=DefaultMessage.Type.BYTES, content=json_bytes)
         self.context.outbox.put_message(to=sender,
-                                        sender=self.context.agent_public_key['default'],
+                                        sender=self.context.agent_public_key,
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(data_msg))

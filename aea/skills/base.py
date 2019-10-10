@@ -55,7 +55,7 @@ class SkillContext:
         return self._agent_context.agent_name
 
     @property
-    def agent_public_key(self) -> Dict[str, str]:
+    def agent_public_key(self) -> str:
         """Get public key."""
         return self._agent_context.public_key
 

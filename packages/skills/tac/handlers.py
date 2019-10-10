@@ -167,7 +167,7 @@ class OEFHandler(Handler):
         game.update_game_phase(GamePhase.GAME_SETUP)
         tac_msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
         tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key['default'], protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
     def _rejoin_tac(self, controller_pbk: Address) -> None:
         """
@@ -182,7 +182,7 @@ class OEFHandler(Handler):
         game.update_game_phase(GamePhase.GAME_SETUP)
         tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
         tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key['default'], protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
 
 class TACHandler(Handler):
@@ -343,4 +343,4 @@ class TACHandler(Handler):
         tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
         tac_bytes = TACSerializer().encode(tac_msg)
         game = cast(Game, self.context.game)
-        self.context.outbox.put_message(to=game.expected_controller_pbk, sender=self.context.agent_public_key['default'], protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        self.context.outbox.put_message(to=game.expected_controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
