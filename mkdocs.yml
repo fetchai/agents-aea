@@ -33,6 +33,7 @@ nav:
       - "Protocol": 'protocol.md'
       - "Connection": 'connection.md'
       - "Scaffolding": 'scaffolding.md'
+      - "Logging": 'logging.md'
       - CLI:
          - "CLI tool": 'cli-how-to.md'
          - "Commands": 'cli-commands.md'
