@@ -22,6 +22,7 @@
 
 import os
 import shutil
+from logging import FileHandler
 from pathlib import Path
 from typing import cast
 
@@ -48,9 +49,13 @@ DEFAULT_SKILL = "error"
 @click.version_option('0.1.0')
 @click.pass_context
 @click_log.simple_verbosity_option(logger, default="INFO")
-def cli(ctx) -> None:
+@click.option('-l', '--logfile', 'log_file', type=click.Path(), required=False, default=None,
+              help="Save logs into a log file.")
+def cli(ctx, log_file: str) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent."""
     ctx.obj = Context(cwd=".")
+    if log_file:
+        logger.addHandler(FileHandler(log_file))
 
 
 @cli.command()
