@@ -396,7 +396,8 @@ class AgentConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  registry_path: str = "",
-                 private_key_pem_path: str = ""):
+                 private_key_pem_path: str = "",
+                 logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
         self.aea_version = aea_version
@@ -406,10 +407,15 @@ class AgentConfig(Configuration):
         self.url = url
         self.registry_path = registry_path
         self.private_key_pem_path = private_key_pem_path
+        self.logging_config = logging_config if logging_config is not None else {}
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
         self.protocols = set()  # type: Set[str]
         self.skills = set()  # type: Set[str]
+
+        if self.logging_config == {}:
+            self.logging_config["version"] = 1
+            self.logging_config["disable_existing_loggers"] = False
 
     @property
     def default_connection(self) -> str:
@@ -439,6 +445,7 @@ class AgentConfig(Configuration):
             "url": self.url,
             "registry_path": self.registry_path,
             "private_key_pem_path": self.private_key_pem_path,
+            "logging_config": self.logging_config,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
             "protocols": sorted(self.protocols),
@@ -457,6 +464,7 @@ class AgentConfig(Configuration):
             url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
             private_key_pem_path=cast(str, obj.get("private_key_pem_path")),
+            logging_config=cast(Dict, obj.get("logging_config", {})),
         )
 
         agent_config.connections = set(cast(List[str], obj.get("connections")))
