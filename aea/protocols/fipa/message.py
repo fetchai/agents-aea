@@ -57,7 +57,7 @@ class FIPAMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(id=message_id,
+        super().__init__(message_id=message_id,
                          dialogue_id=dialogue_id,
                          target=target,
                          performative=FIPAMessage.Performative(performative),

@@ -35,7 +35,7 @@ class FIPASerializer(Serializer):
     def encode(self, msg: Message) -> bytes:
         """Encode a FIPA message into bytes."""
         fipa_msg = fipa_pb2.FIPAMessage()
-        fipa_msg.message_id = msg.get("id")
+        fipa_msg.message_id = msg.get("message_id")
         fipa_msg.dialogue_id = msg.get("dialogue_id")
         fipa_msg.target = msg.get("target")
 
