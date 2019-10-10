@@ -53,7 +53,7 @@ def connection(click_context, connection_name):
     logger.debug("Connection already supported by the agent: {}".format(ctx.agent_config.connections))
     if connection_name in ctx.agent_config.connections:
         logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
-        exit(-1)
+        exit(1)
 
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
     # first check in aea dir
@@ -65,7 +65,7 @@ def connection(click_context, connection_name):
         connection_configuration_filepath = Path(os.path.join(registry_path, "connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE))
         if not connection_configuration_filepath.exists():
             logger.error("Cannot find connection: '{}'.".format(connection_name))
-            exit(-1)
+            exit(1)
 
     # try to load the connection configuration file
     try:
@@ -73,7 +73,7 @@ def connection(click_context, connection_name):
         logger.info("Connection supports the following protocols: {}".format(connection_configuration.supported_protocols))
     except ValidationError as e:
         logger.error("Connection configuration file not valid: {}".format(str(e)))
-        exit(-1)
+        exit(1)
 
     # copy the connection package into the agent's supported connections.
     src = str(Path(os.path.join(registry_path, "connections", connection_name)).absolute())
@@ -83,7 +83,7 @@ def connection(click_context, connection_name):
         shutil.copytree(src, dest)
     except Exception as e:
         logger.error(str(e))
-        exit(-1)
+        exit(1)
 
     # make the 'connections' folder a Python package.
     connections_init_module = os.path.join(ctx.cwd, "connections", "__init__.py")
@@ -110,7 +110,7 @@ def protocol(click_context, protocol_name):
     logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
     if protocol_name in ctx.agent_config.protocols:
         logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
-        exit(-1)
+        exit(1)
 
     # check that the provided path points to a proper protocol directory -> look for protocol.yaml file.
     # first check in aea dir
@@ -122,7 +122,7 @@ def protocol(click_context, protocol_name):
         protocol_configuration_filepath = Path(os.path.join(registry_path, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE))
         if not protocol_configuration_filepath.exists():
             logger.error("Cannot find protocol: '{}'.".format(protocol_name))
-            exit(-1)
+            exit(1)
 
     # try to load the protocol configuration file
     try:
@@ -130,7 +130,7 @@ def protocol(click_context, protocol_name):
         logger.info("Protocol available: {}".format(protocol_configuration.name))
     except ValidationError as e:
         logger.error("Protocol configuration file not valid: {}".format(str(e)))
-        exit(-1)
+        exit(1)
         return
 
     # copy the protocol package into the agent's supported connections.
@@ -141,7 +141,7 @@ def protocol(click_context, protocol_name):
         shutil.copytree(src, dest)
     except Exception as e:
         logger.error(str(e))
-        exit(-1)
+        exit(1)
 
     # make the 'protocols' folder a Python package.
     logger.debug("Creating {}".format(os.path.join(agent_name, "protocols", "__init__.py")))
@@ -167,7 +167,7 @@ def skill(click_context, skill_name):
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
     if skill_name in ctx.agent_config.skills:
         logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
-        exit(-1)
+        exit(1)
 
     # check that the provided path points to a proper skill directory -> look for skill.yaml file.
     # first check in aea dir
@@ -179,14 +179,14 @@ def skill(click_context, skill_name):
         skill_configuration_filepath = Path(os.path.join(registry_path, "skills", skill_name, DEFAULT_SKILL_CONFIG_FILE))
         if not skill_configuration_filepath.exists():
             logger.error("Cannot find skill: '{}'.".format(skill_name))
-            exit(-1)
+            exit(1)
 
     # try to load the skill configuration file
     try:
         skill_configuration = ctx.skill_loader.load(open(str(skill_configuration_filepath)))
     except ValidationError as e:
         logger.error("Skill configuration file not valid: {}".format(str(e)))
-        exit(-1)
+        exit(1)
 
     # copy the skill package into the agent's supported skills.
     src = str(Path(os.path.join(registry_path, "skills", skill_name)).absolute())
@@ -196,7 +196,7 @@ def skill(click_context, skill_name):
         shutil.copytree(src, dest)
     except Exception as e:
         logger.error(str(e))
-        exit(-1)
+        exit(1)
 
     # make the 'skills' folder a Python package.
     skills_init_module = os.path.join(ctx.cwd, "skills", "__init__.py")

@@ -98,7 +98,7 @@ def run(ctx: Context, connection_name: str):
         connection = _setup_connection(connection_name, public_key, ctx)
     except AEAConfigException as e:
         logger.error(str(e))
-        exit(-1)
+        exit(1)
         return
 
     logger.debug("Installing all the dependencies...")
@@ -109,7 +109,7 @@ def run(ctx: Context, connection_name: str):
             subp.wait(30.0)
         except Exception:
             logger.error("An error occurred while installing {}. Stopping...".format(d))
-            exit(-1)
+            exit(1)
 
     mailbox = MailBox(connection)
     agent = AEA(agent_name, mailbox, private_key_pem_path=private_key_pem_path, directory=str(Path(".")))

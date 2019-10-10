@@ -18,3 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the cli tool commands."""
+
+import logging
+
+_l = logging.getLogger("python_jsonschema_objects")
+_l.setLevel(logging.CRITICAL)

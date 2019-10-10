@@ -20,7 +20,6 @@
 """This test module contains the tests for the `aea create` sub-command."""
 import filecmp
 import json
-import logging
 import os
 import shutil
 import tempfile
@@ -33,7 +32,6 @@ import jsonschema
 import pytest
 import yaml
 from click.testing import CliRunner
-from jsonschema import validate
 
 import aea
 import aea.cli.common
@@ -41,9 +39,6 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR
-
-_l = logging.getLogger("python_jsonschema_objects")
-_l.setLevel(logging.CRITICAL)
 
 
 class TestCreate:
@@ -195,9 +190,9 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         os.mkdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
 
-    def test_exit_code_equal_to_minus_1(self):
-        """Test that the error code is equal to -1."""
-        assert self.result.exit_code == -1
+    def test_exit_code_equal_to_1(self):
+        """Test that the error code is equal to 1."""
+        assert self.result.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed.
@@ -237,9 +232,9 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
 
         cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
 
-    def test_exit_code_equal_to_minus_1(self):
-        """Test that the error code is equal to -1."""
-        assert self.result.exit_code == -1
+    def test_exit_code_equal_to_1(self):
+        """Test that the error code is equal to 1."""
+        assert self.result.exit_code == 1
 
     def test_agent_folder_is_not_created(self):
         """Test that the agent folder is removed."""
@@ -274,9 +269,9 @@ class TestCreateFailsWhenExceptionOccurs:
 
         cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
 
-    def test_exit_code_equal_to_minus_1(self):
-        """Test that the error code is equal to -1."""
-        assert self.result.exit_code == -1
+    def test_exit_code_equal_to_1(self):
+        """Test that the error code is equal to 1."""
+        assert self.result.exit_code == 1
 
     def test_agent_folder_is_not_created(self):
         """Test that the agent folder is removed."""

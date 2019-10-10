@@ -21,7 +21,7 @@
 import os
 import shutil
 import tempfile
-import unittest.mock
+from unittest.mock import patch
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -44,7 +44,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
@@ -57,9 +57,9 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         # add connection again
         cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_connection_already_existing(self):
         """Test that the log error message is fixed.
@@ -90,7 +90,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.connection_name = "unknown_connection"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
@@ -99,9 +99,9 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_connection_already_existing(self):
         """Test that the log error message is fixed.
@@ -132,7 +132,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
@@ -140,16 +140,15 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         assert result.exit_code == 0
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
-        cls.patch = unittest.mock.patch.object(aea.configurations.base.ConnectionConfig, "from_json",
-                                               side_effect=ValidationError("test error message"))
+        cls.patch = patch("jsonschema.validators.Draft4Validator.validate", side_effect=ValidationError("test error message"))
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_configuration_file_not_valid(self):
         """Test that the log error message is fixed.
@@ -180,7 +179,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
@@ -191,9 +190,9 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         Path("connections", cls.connection_name).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_file_exists_error(self):
         """Test that the log error message is fixed.

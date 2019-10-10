@@ -55,9 +55,9 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_protocol_already_existing(self):
         """Test that the log error message is fixed.
@@ -97,9 +97,9 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_protocol_already_existing(self):
         """Test that the log error message is fixed.
@@ -145,9 +145,9 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_configuration_file_not_valid(self):
         """Test that the log error message is fixed.
@@ -189,9 +189,9 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         Path("protocols", cls.protocol_name).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_file_exists_error(self):
         """Test that the log error message is fixed.

@@ -21,8 +21,8 @@
 import os
 import shutil
 import tempfile
-import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
@@ -77,15 +77,15 @@ class TestDeleteFailsWhenDirectoryDoesNotExist:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # agent's directory does not exist -> command will fail.
         cls.result = cls.runner.invoke(cli, ["delete", cls.agent_name])
 
-    def test_exit_code_equal_to_minus_1(self):
-        """Test that the error code is equal to -1."""
-        assert self.result.exit_code == -1
+    def test_exit_code_equal_to_1(self):
+        """Test that the error code is equal to 1."""
+        assert self.result.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed.

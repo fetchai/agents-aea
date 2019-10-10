@@ -53,7 +53,7 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
         Crypto(private_key_pem_path=private_key_pem_path)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_pem_path))
-        exit(-1)
+        exit(1)
 
 
 def _create_temporary_private_key_pem_path() -> str:

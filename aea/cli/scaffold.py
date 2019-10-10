@@ -47,7 +47,7 @@ def connection(ctx: Context, connection_name: str) -> None:
     logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
     if connection_name in ctx.agent_config.connections:
         logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
-        exit(-1)
+        exit(1)
         return
 
     try:
@@ -65,7 +65,7 @@ def connection(ctx: Context, connection_name: str) -> None:
             shutil.copytree(src, dest)
         except Exception as e:
             logger.error(e)
-            exit(-1)
+            exit(1)
 
         # add the connection to the configurations.
         logger.info("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -74,15 +74,15 @@ def connection(ctx: Context, connection_name: str) -> None:
 
     except OSError:
         logger.error("Directory already exist. Aborting...")
-        exit(-1)
+        exit(1)
     except ValidationError as e:
         logger.error(str(e))
         shutil.rmtree(connection_name, ignore_errors=True)
-        exit(-1)
+        exit(1)
     except Exception as e:
         logger.exception(e)
         shutil.rmtree(connection_name, ignore_errors=True)
-        exit(-1)
+        exit(1)
 
 
 @scaffold.command()
@@ -94,7 +94,7 @@ def protocol(ctx: Context, protocol_name: str):
     logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
     if protocol_name in ctx.agent_config.protocols:
         logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
-        exit(-1)
+        exit(1)
         return
 
     try:
@@ -112,7 +112,7 @@ def protocol(ctx: Context, protocol_name: str):
             shutil.copytree(src, dest)
         except Exception as e:
             logger.error(e)
-            exit(-1)
+            exit(1)
 
         # add the protocol to the configurations.
         logger.info("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -121,15 +121,15 @@ def protocol(ctx: Context, protocol_name: str):
 
     except OSError:
         logger.error("Directory already exist. Aborting...")
-        exit(-1)
+        exit(1)
     except ValidationError as e:
         logger.error(str(e))
         shutil.rmtree(protocol_name, ignore_errors=True)
-        exit(-1)
+        exit(1)
     except Exception as e:
         logger.exception(e)
         shutil.rmtree(protocol_name, ignore_errors=True)
-        exit(-1)
+        exit(1)
 
 
 @scaffold.command()
@@ -141,7 +141,7 @@ def skill(ctx: Context, skill_name: str):
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
     if skill_name in ctx.agent_config.skills:
         logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
-        exit(-1)
+        exit(1)
         return
 
     try:
@@ -159,7 +159,7 @@ def skill(ctx: Context, skill_name: str):
             shutil.copytree(src, dest)
         except Exception as e:
             logger.error(e)
-            exit(-1)
+            exit(1)
 
         # add the skill to the configurations.
         logger.info("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -168,12 +168,12 @@ def skill(ctx: Context, skill_name: str):
 
     except OSError:
         logger.error("Directory already exist. Aborting...")
-        exit(-1)
+        exit(1)
     except ValidationError as e:
         logger.error(str(e))
         shutil.rmtree(skill_name, ignore_errors=True)
-        exit(-1)
+        exit(1)
     except Exception as e:
         logger.exception(e)
         shutil.rmtree(skill_name, ignore_errors=True)
-        exit(-1)
+        exit(1)
