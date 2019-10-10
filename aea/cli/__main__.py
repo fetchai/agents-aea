@@ -35,7 +35,9 @@ from aea.cli.add import connection, add, skill
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.cli.remove import remove
 from aea.cli.run import run
+from aea.cli.list import list as _list
 from aea.cli.scaffold import scaffold
+from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 DEFAULT_CONNECTION = "oef"
@@ -120,6 +122,8 @@ def freeze(ctx: Context):
 
 
 cli.add_command(add)
+cli.add_command(_list)
+cli.add_command(search)
 cli.add_command(scaffold)
 cli.add_command(remove)
 cli.add_command(run)
