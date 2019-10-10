@@ -28,7 +28,7 @@ This method decodes the byte representation of a message object.
 !!! Todo
     For example.
 
-Outside of these, the developer is free to implement the agent protocols in any way he or she sees fit.
+Outside of these, the developer is free to implement the agent protocols in any way they see fit.
 
 ### `rules.py`
 

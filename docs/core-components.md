@@ -42,19 +42,19 @@ The framework provides a number of default connections.
 * `local`: implements a local node.
 * `oef`: wraps the OEF SDK.
 
-<!-- other connections? gym? -->
-
-
 ### Skill
 
-<!-- Skills are the manifestation of the framework's extensibility. 
-A skill is an atomic capability that suggests enables the agent perform a specific  delivers economic value by allowing the agent encapsulate and call any kind of code. A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`.
---> 
+Skills are a result of the framework's extensibility. They are atomic capabilities that agents can dynamically take on board, 
+in order to expand their effectiveness in different situations. 
+A skill can be given permission to read the internal state of the the agent, and suggest action(s) to the agent according to its specific logic. 
+As such, more than one skill could exist per protocol, competing with each other in suggesting to the agent the best course of actions to take. 
 
-<!-- From this, it is really not clear what skills do, and what their purpose is, what the idea behind them is, etc. --> 
-Skills deliver economic value to the AEA by letting the agent call any kind of code. A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`.
+For instance, an agent who is playing chess, could subscribe to more than one skill, where each skill corresponds to a specific strategy for playing chess. 
+The skills could then read the internal state of the agent, including the agent's observation of the game's state, and suggest a next move to the agent.   
 
-* `Handler`: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement agents' reactive behaviour. By understanding the requirements <!-- which requirements?, where in the envelope?--> contained in an `Envelope`, the `Handler` reacts appropriately to the received messages. Each `Handler` is responsible for only one protocol.
+A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`:
+
+* `Handler`: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement agents' reactive behaviour. If the agent understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol.
 * `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the agent. Behaviours implement agents' proactiveness.
 * `Task`: none, one or more Tasks encapsulate background work internal to the agent.
 
@@ -74,7 +74,7 @@ The `_run_main_loop()` function in the `Agent` class performs a series of activi
 
 The `DecisionMaker` component manages global agent state updates proposed by the skills and processes the resulting ledger transactions.
 
-It is responsible for the agent's crypto-economic interactions and goal management, and it contains the preference and ownership representation of the agent.
+It is responsible for the agent's crypto-economic security and goal management, and it contains the preference and ownership representation of the agent.
 
 
 ## Filter

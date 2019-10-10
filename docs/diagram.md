@@ -12,8 +12,6 @@ Currently, the framework supports three types of packages which can be added to 
 
 The following figure illustrates the framework's architecture: 
 
-<!-- This figure is too small and low quality. Suggest making a vector version (svg file). Typo in the figure: "Act: calls Behaviours active on fil*t*er"
-In general the figure is difficult to understand. Change "X active" to "active X". Also would be nice to see the agent box in the figure. -->
 <center>![The AEA Framework Architecture](assets/framework-architecture.png)</center>
 
 
