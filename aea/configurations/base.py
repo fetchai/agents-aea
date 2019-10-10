@@ -322,7 +322,7 @@ class SkillConfig(Configuration):
         self.version = version
         self.license = license
         self.url = url
-        self.protocols = protocols if protocols is None else []
+        self.protocols = protocols if protocols is not None else []  # type: List[str]
         self.dependencies = dependencies
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
