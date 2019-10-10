@@ -68,7 +68,7 @@ class AgentContext:
 
     @property
     def public_key(self) -> str:
-        " Get the default public key."
+        """Get the default public key."""
         return self._public_keys['default']
 
     @property
