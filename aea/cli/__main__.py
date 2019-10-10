@@ -130,11 +130,12 @@ def install(ctx: Context, requirement: Optional[str]):
     _try_to_load_agent_config(ctx)
 
     if requirement:
+        logger.debug("Installing the dependencies in '{}'...".format(requirement))
         dependencies = list(map(lambda x: x.strip(), open(requirement).readlines()))
     else:
+        logger.debug("Installing all the dependencies...")
         dependencies = ctx.get_dependencies()
 
-    logger.debug("Installing all the dependencies...")
     for d in dependencies:
         logger.debug("Installing {}...".format(d))
         try:
