@@ -43,7 +43,7 @@ shared_classes:
 protocols: ['oef', 'fipa']
 ```
 
-In it you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements the AEA agent register and search behaviour for the FIPA skill.
+Above, you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements register and search behaviour of an AEA for the FIPA skill.
 
 The `FIPANegotiationHandler` deals with receiving `FIPAMessage` types containing FIPA negotiation terms, such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
@@ -55,13 +55,13 @@ The `shared_classes` element in the configuration `yaml` lists a number of impor
 
 ### Search
 
-This class abstracts the logic required by agents performing searches for other buyer or seller agents depending on strategy.
+This class abstracts the logic required by agents performing searches for other buying/selling agents according to strategy (see below).
 
 ### Strategy
 
 This class defines the strategy behind an agent's activities.
 
-The class is instantiated with the agent's goals, for example whether it is a buyer looking for sellers, buyers, or both.
+The class is instantiated with the agent's goals, for example whether the agent intends to buy/sell something, and is therefore looking for other sellers, buyers, or both.
 
 It also provides methods for defining what goods agents are looking for and what goods they may have to sell, for generating proposal queries, and checking whether a proposal is profitable or not.
 
@@ -80,7 +80,7 @@ This class deals with representing potential transactions between agents.
 	Fipa negotiation skill is not fully developed.
 
 
-Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
+Follow the Preliminaries and Installation instructions <a href="../quickstart">here</a>.
 
 
 Then, download the examples and packages directory.

@@ -43,7 +43,7 @@ pip install aea[all]
 
 ```
 
-However, you can run this demo by installing the base AEA inclusive the CLI extension, alone.
+However, you can run this demo by installing the base AEA, including the CLI (Command Line Interface) extension, alone.
 
 ``` bash
 pip install aea[cli]
@@ -95,10 +95,13 @@ You will see the echo task running in the terminal window.
 
 <center>![The echo call and response log](assets/echo.png)</center>
 
+### Stop the agent
+
+Stop the agent by pressing `CTRL c`
 
 ### Delete the agent
 
-When you're done, you can delete the agent.
+When you're done, you can delete the agent (first go to the parent directory via `cd ..`).
 
 ``` bash
 aea delete my_first_agent
