@@ -19,6 +19,7 @@
 
 """This contains the rl agent class."""
 
+import logging
 import numpy as np
 import random
 from typing import Any, Dict, TYPE_CHECKING
@@ -31,6 +32,8 @@ else:
 
 NB_STEPS = 4000
 NB_GOODS = 10
+
+logger = logging.getLogger("aea.gym_skill")
 
 
 class PriceBandit(object):

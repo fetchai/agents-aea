@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'gym' skill."""
+import logging
 from queue import Queue
 from threading import Thread
 from typing import TYPE_CHECKING
@@ -31,6 +32,8 @@ if TYPE_CHECKING:
 else:
     from gym_skill.helpers import ProxyEnv
     from gym_skill.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
+
+logger = logging.getLogger("aea.gym_skill")
 
 
 class GymTask(Task):
