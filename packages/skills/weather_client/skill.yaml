@@ -28,3 +28,4 @@ tasks:
         foo: bar
 shared_classes: []
 protocols: ['fipa','default','oef']
+description: "weather_station_client skill description [Fill in]"

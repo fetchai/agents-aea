@@ -26,6 +26,7 @@ import subprocess
 
 import connexion
 import flask
+import yaml
 
 
 parser = argparse.ArgumentParser(description='Launch the AEA CLI GUI')
@@ -45,6 +46,21 @@ elements = [['local', 'agent', 'localAgents'],
             ['local', 'protocol', 'localProtocols'],
             ['local', 'connection', 'localConnections'],
             ['local', 'skill', 'localSkills']]
+
+
+def read_description(dir_name, yaml_name):
+    """Return true if this directory contains an items in an AEA project i.e.  protocol, skill or connection."""
+    assert os.path.isdir(dir_name)
+    file_path = os.path.join(dir_name, yaml_name + ".yaml")
+    assert os.path.isfile(file_path)
+    with open(file_path, 'r') as stream:
+        try:
+            yaml_data = yaml.safe_load(stream)
+            if "description" in yaml_data:
+                return yaml_data["description"]
+        except yaml.YAMLError as exc:
+            print(exc)
+    return "Placeholder description"
 
 
 def is_agent_dir(dir_name):
@@ -91,7 +107,8 @@ def get_registered_items(item_type):
     for path in file_list:
         if is_item_dir(path, item_type):
             head, tail = os.path.split(path)
-            items_list.append({"id": tail, "description": "placeholder description"})
+            desc = read_description(path, item_type)
+            items_list.append({"id": tail, "description": desc})
 
     return items_list
 
@@ -141,7 +158,8 @@ def get_local_items(agent_id, item_type):
     for path in file_list:
         if is_item_dir(path, item_type):
             head, tail = os.path.split(path)
-            items_list.append({"id": tail, "description": "placeholder description"})
+            desc = read_description(path, item_type)
+            items_list.append({"id": tail, "description": desc})
 
     return items_list
 
@@ -163,33 +181,35 @@ def _call_aea(param_list, dir):
     return ret
 
 
-CUR_DIR = os.path.abspath(os.path.dirname(__file__))
-app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
-app.add_api('aea_cli_rest.yaml')
+def run():
+    """Run the flask server."""
+    CUR_DIR = os.path.abspath(os.path.dirname(__file__))
+    app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
+    app.add_api('aea_cli_rest.yaml')
 
+    @app.route('/')
+    def home():
+        """Respond to browser URL:  localhost:5000/ ."""
+        return flask.render_template('home.html', len=len(elements), htmlElements=elements)
 
-@app.route('/')
-def home():
-    """Respond to browser URL:  localhost:5000/ ."""
-    return flask.render_template('home.html', len=len(elements), htmlElements=elements)
+    @app.route('/static/js/home.js')
+    def homejs():
+        """Serve the home.js file (as it needs templating)."""
+        return flask.render_template('home.js', len=len(elements), htmlElements=elements)
 
+    @app.route('/favicon.ico')
+    def favicon():
+        """Return an icon to be displayed in the browser."""
+        return flask.send_from_directory(
+            os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-@app.route('/static/js/home.js')
-def homejs():
-    """Serve the home.js file (as it needs templating)."""
-    return flask.render_template('home.js', len=len(elements), htmlElements=elements)
-
-
-@app.route('/favicon.ico')
-def favicon():
-    """Return an icon to be displayed in the browser."""
-    return flask.send_from_directory(
-        os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    app.run(host='127.0.0.1', port=8080, debug=True)
 
 
 # If we're running in stand alone mode, run the application
 if __name__ == '__main__':
     args = parser.parse_args()  # pragma: no cover
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    run()
+
 else:
     args, _ = parser.parse_known_args()

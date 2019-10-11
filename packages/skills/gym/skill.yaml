@@ -21,3 +21,4 @@ shared_classes: []
 protocols: ["gym"]
 dependencies:
   - gym
+description: "Gym skill description [Fill in]"

@@ -14,3 +14,4 @@ tasks:
       class_name: DummyTask
 shared_classes: []
 protocols: ["default"]
+description: "dummy skill description [Fill in]"

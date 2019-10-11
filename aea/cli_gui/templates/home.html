@@ -41,43 +41,44 @@
                     <h4 align="center">Selected Agent</h4>
                     <h3> <div id="localAgentsSelectionId" align="center">NONE</div></h3>
                 </div>
+                {% for i in range(0, len) %}
+                    {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
+
+                        <div class="section ">
+                            <div class="{{htmlElements[i][2]}}">
+                                <table>
+                                    <caption><span class="localItemHeading">Local</span> {{htmlElements[i][1]}}s</caption>
+                                    <thead>
+                                        <tr>
+                                            <th>{{htmlElements[i][1]}} id</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="{{htmlElements[i][2]}}registeredTable">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
+                            </div>
+                            <button id="{{htmlElements[i][2]}}Remove">Remove {{htmlElements[i][1]}}</button>
+                            <br>
+                            <label for="{{htmlElements[i][2]}}ScaffoldId">Scaffold {{htmlElements[i][1]}} id
+                                <input id="{{htmlElements[i][2]}}ScaffoldId" type="text" />
+                            </label>
+                            <button id="{{htmlElements[i][2]}}Scaffold">Scaffold new {{htmlElements[i][1]}}</button>
+                            <br>
+                            <br>
+                        </div>
+
+                    {% endif %}
+                {% endfor %}
+
+                <div class="error"></div>
                 <button id="localAgentsDelete">Delete Agent</button>
             </div>
-            {% for i in range(0, len) %}
-                {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
-
-                    <div class="section editor">
-                        <div class="{{htmlElements[i][2]}}">
-                            <table>
-                                <caption>Local {{htmlElements[i][1]}}</caption>
-                                <thead>
-                                    <tr>
-                                        <th>{{htmlElements[i][1]}} id</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="{{htmlElements[i][2]}}registeredTable">
-                                </tbody>
-                            </table>
-                        </div>
-                        <div>
-                            <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
-                        </div>
-                        <button id="{{htmlElements[i][2]}}Remove">Remove {{htmlElements[i][1]}}</button>
-                        <br>
-                        <label for="{{htmlElements[i][2]}}ScaffoldId">Scaffold {{htmlElements[i][1]}} id
-                            <input id="{{htmlElements[i][2]}}ScaffoldId" type="text" />
-                        </label>
-                        <button id="{{htmlElements[i][2]}}Scaffold">Scaffold new {{htmlElements[i][1]}}</button>
-                        <br>
-                        <br>
-                    </div>
-
-                {% endif %}
-            {% endfor %}
-
-            <div class="error"></div>
         </div>
+
         <div class="split right">
             {% for i in range(0, len) %}
                 {% if htmlElements[i][0] == "registered"%}
@@ -105,7 +106,6 @@
             {% endfor %}
 
         </div>
-
     </div>
 </body>
 <script src="static/js/home.js"></script>

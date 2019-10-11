@@ -26,6 +26,7 @@ body, .ui-btn {
     margin-bottom: 5px;
 }
 
+
 label {
     display: inline-block;
     margin-bottom: 5px;
@@ -48,6 +49,7 @@ button {
 table {
     width: 100%;
     border-collapse: collapse;
+    text-align: center;
 }
 
 table, caption, th, td {
@@ -67,7 +69,8 @@ tr {
 
 
 td {
-    text-align: center;
+    padding-left: 5px;
+    text-align: left;
 }
 
 .error {
@@ -79,6 +82,7 @@ td {
     border-radius: 3px;
     background-color: #fbb;
     visibility: hidden;
+
 }
 
 /* Split the screen in half */

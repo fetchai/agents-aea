@@ -43,6 +43,7 @@
         },
         "logging_config": {
             "type": "object"
-        }
+        },
+        "description": {"type": "string"}
     }
 }

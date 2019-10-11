@@ -14,7 +14,7 @@ basePath: /api
 paths:
   /agent:
     get:
-      operationId: app.get_agents
+      operationId: aea.cli_gui.get_agents
       tags:
       - agents
       summary: Return list of all aea projects
@@ -27,7 +27,7 @@ paths:
             items:
               type: string
     post:
-      operationId: app.create_agent
+      operationId: aea.cli_gui.create_agent
       tags:
         - People
       summary: Creare a new AEA project (an agent)
@@ -50,7 +50,7 @@ paths:
 
   /agent/{agent_id}:
     delete:
-      operationId: app.delete_agent
+      operationId: aea.cli_gui.delete_agent
       tags:
       - agents
       summary: Delete an aea project
@@ -73,7 +73,7 @@ paths:
 
   /agent/{agent_id}/{item_type}:
     post:
-      operationId: app.add_item
+      operationId: aea.cli_gui.add_item
       tags:
       - agents
       summary: Fetch a protocol from the registry to the currently selected agent
@@ -105,7 +105,7 @@ paths:
           schema:
             type: string
     get:
-      operationId: app.get_local_items
+      operationId: aea.cli_gui.get_local_items
       tags:
       - agents
       summary: Return list of all items if a given type supported by this agent
@@ -135,7 +135,7 @@ paths:
 
   /agent/{agent_id}/{item_type}/{item_id}:
     delete:
-      operationId: app.remove_local_item
+      operationId: aea.cli_gui.remove_local_item
       tags:
       - agents
       summary: Delete a protocol, connection or skill from an agent
@@ -169,7 +169,7 @@ paths:
 
   /agent/{agent_id}/{item_type}/scaffold:
     post:
-      operationId: app.scaffold_item
+      operationId: aea.cli_gui.scaffold_item
       tags:
       - agents
       summary: Scaffold a new (mostly empty) item (either a protocol, connection or skill) on to an agent
@@ -204,7 +204,7 @@ paths:
 
   /{item_type}:
     get:
-      operationId: app.get_registered_items
+      operationId: aea.cli_gui.get_registered_items
       tags:
         - agents
       summary: Return list of all registered items (protocols, connections, skills)

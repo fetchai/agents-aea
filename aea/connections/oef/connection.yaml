@@ -11,3 +11,4 @@ config:
 dependencies:
   - colorlog
   - oef
+description: "oef connection description [Fill in]"

@@ -212,6 +212,8 @@ class Controller{
             }
         }, 100)
 
+
+
         // Go through each of the element types setting up call-back and table building functions on the
         // Items which exist
         var self = this;
@@ -230,18 +232,19 @@ class Controller{
                 }
             });
 
-
             $('#' + combineName + 'Delete').click({el: element}, function(e) {
                 var id =$('#' + e.data.el["combined"] + 'SelectionId').html();
+                if (confirm("This will completely remove agent: " + id + "'s code and is non-recoverable. Press OK to do this - otherwise press cancel")){
 
-                e.preventDefault();
+                    e.preventDefault();
 
-                if (self.validateId(id)) {
-                    self.model.deleteItem(e.data.el, id)
-                } else {
-                    alert('Error: Problem with selected id');
+                    if (self.validateId(id)) {
+                        self.model.deleteItem(e.data.el, id)
+                    } else {
+                        alert('Error: Problem with selected id');
+                    }
+                    e.preventDefault();
                 }
-                e.preventDefault();
             });
 
             $('#' + combineName + 'Add').click({el: element}, function(e) {
@@ -287,7 +290,7 @@ class Controller{
 
                 self.view.setSelectedId(e.data.el["combined"], id);
 
-                // Make all the cells white
+                // Select the appropriate row
                 var tableBody = $(e.target).closest("."+ e.data.el["combined"] +"registeredTable");
                 self.clearTable(tableBody);
 
@@ -403,7 +406,14 @@ class Controller{
         for (var j = 0; j < elements.length; j++) {
             if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
                 var itemSelectionId = $('#' + elements[j]["combined"] + 'SelectionId').html();
-                $('#' + elements[j]["combined"] + 'Remove').prop('disabled', !this.validateId(itemSelectionId));
+                var isDisabled =  !this.validateId(itemSelectionId);
+                $('#' + elements[j]["combined"] + 'Remove').prop('disabled', isDisabled);
+                if (isDisabled){
+                    $('#' + elements[j]["combined"] + 'Remove').html("Remove " + elements[j]["type"])
+                }
+                else{
+                    $('#' + elements[j]["combined"] + 'Remove').html("Remove " + itemSelectionId + " " + elements[j]["type"] + " from " + agentSelectionId + " agent")
+                }
 
                 var itemScaffoldId = $('#' + elements[j]["combined"] + 'ScaffoldId').val();
                 $('#' + elements[j]["combined"] + 'Scaffold').prop('disabled',
@@ -414,10 +424,22 @@ class Controller{
             }
             if (elements[j]["location"] == "registered"){
                 var itemSelectionId = $('#' + elements[j]["combined"] + 'SelectionId').html();
-                $('#' + elements[j]["combined"] + 'Add').prop('disabled',
-                    !this.validateId(itemSelectionId) ||
-                    !this.validateId(agentSelectionId));
+                var isDisabled =  !this.validateId(itemSelectionId) || !this.validateId(agentSelectionId);
+                $('#' + elements[j]["combined"] + 'Add').prop('disabled', isDisabled);
+                if (isDisabled){
+                    $('#' + elements[j]["combined"] + 'Add').html("<< Add " + elements[j]["type"])
+                }
+                else{
+                    $('#' + elements[j]["combined"] + 'Add').html("<< Add " + itemSelectionId + " " + elements[j]["type"] + " to " + agentSelectionId + " agent")
+                }
             }
+        }
+        if (agentSelectionId != "NONE"){
+            $('.localItemHeading').html(agentSelectionId + "'s");
+        }
+        else{
+            $('.localItemHeading').html("Local");
+
         }
 
 

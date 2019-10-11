@@ -28,3 +28,4 @@ shared_classes:
       args:
         pending_transaction_timeout: 30
 protocols: ['oef', 'fipa']
+description: "fipa skill description [Fill in]"
