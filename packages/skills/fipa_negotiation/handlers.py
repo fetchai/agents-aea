@@ -45,7 +45,7 @@ else:
     from fipa_negotiation_skill.strategy import Strategy
     from fipa_negotiation_skill.transactions import Transactions
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.fipa_negotiation_skill")
 
 
 class FIPANegotiationHandler(Handler):

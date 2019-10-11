@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 else:
     from fipa_negotiation_skill.dialogues import DialogueLabel
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.fipa_negotiation_skill")
 
 MESSAGE_ID = int
 
