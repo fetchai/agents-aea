@@ -17,34 +17,39 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
+"""Implementation of the 'aea list' subcommand."""
 
-from aea.skills.base import Task
+import click
+
+from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config
 
 
-class MyWeatherTask(Task):
-    """This class scaffolds a task."""
+@click.group()
+@pass_ctx
+def list(ctx: Context):
+    """List the installed resources."""
+    _try_to_load_agent_config(ctx)
 
-    def setup(self) -> None:
-        """
-        Implement the setup.
 
-        :return: None
-        """
-        pass
+@list.command()
+@pass_ctx
+def connections(ctx: Context):
+    """List all the installed connections."""
+    for c in ctx.agent_config.connections:
+        print(c)
 
-    def execute(self) -> None:
-        """
-        Implement the task execution.
 
-        :return: None
-        """
-        pass
+@list.command()
+@pass_ctx
+def protocols(ctx: Context):
+    """List all the installed protocols."""
+    for c in ctx.agent_config.protocols:
+        print(c)
 
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
 
-        :return: None
-        """
-        pass
+@list.command()
+@pass_ctx
+def skills(ctx: Context):
+    """List all the installed skills."""
+    for c in ctx.agent_config.skills:
+        print(c)

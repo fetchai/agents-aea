@@ -57,33 +57,18 @@ class SearchFor(Enum):
 class Strategy(SharedClass):
     """This class defines an abstract strategy for the agent."""
 
-    def __init__(self, register_as: RegisterAs = RegisterAs.BOTH, search_for: SearchFor = SearchFor.BOTH, is_world_modeling: bool = False, **kwargs) -> None:
+    def __init__(self, register_as: RegisterAs = RegisterAs.BOTH, search_for: SearchFor = SearchFor.BOTH, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
 
         :param register_as: determines whether the agent registers as seller, buyer or both
         :param search_for: determines whether the agent searches for sellers, buyers or both
-        :param is_world_modeling: determines whether the agent has a model of the world
 
         :return: None
         """
         super().__init__(**kwargs)
         self._register_as = register_as
         self._search_for = search_for
-        self._is_world_modeling = is_world_modeling
-        if is_world_modeling:
-            self._world_state = None  # TODO
-
-    @property
-    def is_world_modeling(self) -> bool:
-        """Check if the world is modeled by the agent."""
-        return self._is_world_modeling
-
-    @property
-    def world_state(self) -> None:
-        """Get the world state."""
-        assert self._is_world_modeling, "World state is not modeled!"
-        return self._world_state
 
     @property
     def is_registering_as_seller(self) -> bool:
@@ -206,15 +191,10 @@ class Strategy(SharedClass):
             marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state_after_locks, delta_good_holdings)
             switch = -1 if is_seller else 1
             breakeven_price = round(marginal_utility_from_delta_good_holdings, 2) * switch
-            if self.is_world_modeling:
-                pass
-                # assert self.world_state is not None, "Need to provide world state if is_world_modeling=True."
-                # proposal.values["price"] = world_state.expected_price(good_pbk, round(marginal_utility_from_delta_holdings, 2), is_seller, share_of_tx_fee)
+            if is_seller:
+                proposal.values["price"] = breakeven_price + share_of_tx_fee + ROUNDING_ADJUSTMENT
             else:
-                if is_seller:
-                    proposal.values["price"] = breakeven_price + share_of_tx_fee + ROUNDING_ADJUSTMENT
-                else:
-                    proposal.values["price"] = breakeven_price - share_of_tx_fee - ROUNDING_ADJUSTMENT
+                proposal.values["price"] = breakeven_price - share_of_tx_fee - ROUNDING_ADJUSTMENT
             proposal.values["seller_tx_fee"] = share_of_tx_fee
             proposal.values["buyer_tx_fee"] = share_of_tx_fee
             if not proposal.values["price"] > 0: continue

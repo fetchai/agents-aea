@@ -24,7 +24,7 @@ from typing import Optional
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
-from aea.protocols.base import Protocol
+from aea.protocols.base import Message, Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
@@ -45,12 +45,12 @@ class ErrorHandler(Handler):
         """
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
         Implement the reaction to an envelope.
 
-        :param envelope: the envelope
-        :return: None
+        :param message: the message
+        :param sender: the sender
         """
         pass
 

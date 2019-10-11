@@ -19,7 +19,7 @@
 
 """This module contains the handler for the 'echo' skill."""
 
-from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 
@@ -36,14 +36,15 @@ class EchoHandler(Handler):
         """Set up the handler."""
         print("Echo Handler: setup method called.")
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Handle envelopes.
+        Handle the message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        print("Echo Handler: envelope={}".format(envelope))
+        print("Echo Handler: message={}, sender={}".format(message, sender))
 
     def teardown(self) -> None:
         """

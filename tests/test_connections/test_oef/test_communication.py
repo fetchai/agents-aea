@@ -319,7 +319,7 @@ class TestFIPA:
                                   query=b"hello")
             cfp_msg.set("query", "hello")
             fipa_msg = fipa_pb2.FIPAMessage()
-            fipa_msg.message_id = cfp_msg.get("id")
+            fipa_msg.message_id = cfp_msg.get("message_id")
             fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
             fipa_msg.target = cfp_msg.get("target")
             performative = fipa_pb2.FIPAMessage.CFP()
@@ -337,7 +337,7 @@ class TestFIPA:
                     as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 fipa_msg = fipa_pb2.FIPAMessage()
-                fipa_msg.message_id = cfp_msg.get("id")
+                fipa_msg.message_id = cfp_msg.get("message_id")
                 fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
                 fipa_msg.target = cfp_msg.get("target")
                 performative = fipa_pb2.FIPAMessage.CFP()
