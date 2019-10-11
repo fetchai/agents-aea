@@ -431,7 +431,7 @@ class OEFChannel(OEFAgent, Channel):
         :return: None
         """
         fipa_message = FIPASerializer().decode(envelope.message)
-        id = fipa_message.get("id")
+        id = fipa_message.get("message_id")
         dialogue_id = fipa_message.get("dialogue_id")
         destination = envelope.to
         target = fipa_message.get("target")

@@ -22,16 +22,17 @@ import importlib.util
 import inspect
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 from typing import cast
 
 import click
+from click import pass_context
 
 from aea.aea import AEA
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, _try_to_load_protocols, \
     AEAConfigException, _load_env_file
+from aea.cli.install import install
 from aea.connections.base import Connection
 from aea.crypto.base import Crypto
 from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
@@ -82,9 +83,12 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
               help="The connection name. Must be declared in the agent's configuration file.")
 @click.option('--env', 'env_file', type=click.Path(), required=False, default=".env",
               help="Specify an environment file (default: .env)")
-@pass_ctx
-def run(ctx: Context, connection_name: str, env_file: str):
+@click.option('--install-deps', 'install_deps', is_flag=True, required=False, default=False,
+              help="Install all the dependencies before running the agent.")
+@pass_context
+def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     """Run the agent."""
+    ctx = cast(Context, click_context.obj)
     _try_to_load_agent_config(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
@@ -104,15 +108,11 @@ def run(ctx: Context, connection_name: str, env_file: str):
         exit(-1)
         return
 
-    logger.debug("Installing all the dependencies...")
-    for d in ctx.get_dependencies():
-        logger.debug("Installing {}...".format(d))
-        try:
-            subp = subprocess.Popen([sys.executable, "-m", "pip", "install", d])
-            subp.wait(30.0)
-        except Exception:
-            logger.error("An error occurred while installing {}. Stopping...".format(d))
-            exit(-1)
+    if install_deps:
+        if Path("requirements.txt").exists():
+            click_context.invoke(install, requirement="requirements.txt")
+        else:
+            click_context.invoke(install)
 
     mailbox = MailBox(connection)
     agent = AEA(agent_name, mailbox, private_key_pem_path=private_key_pem_path, directory=str(Path(".")))

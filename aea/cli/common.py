@@ -21,6 +21,7 @@
 
 import importlib.util
 import logging
+import logging.config
 import os
 import sys
 from pathlib import Path
@@ -99,6 +100,7 @@ def _try_to_load_agent_config(ctx: Context):
         path = Path(DEFAULT_AEA_CONFIG_FILE)
         fp = open(str(path), mode="r", encoding="utf-8")
         ctx.agent_config = ctx.agent_loader.load(fp)
+        logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         logger.error("Agent configuration file '{}' not found in the current directory. "
                      "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))

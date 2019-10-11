@@ -44,7 +44,7 @@ else:
     from fipa_negotiation_skill.helpers import DEMAND_DATAMODEL_NAME
 
 Action = Any
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.fipa_negotiation_skill")
 
 STARTING_MESSAGE_ID = 1
 STARTING_MESSAGE_TARGET = 0
@@ -255,7 +255,7 @@ class Dialogues(SharedClass):
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
         fipa_msg = cast(FIPAMessage, fipa_msg)
-        msg_id = fipa_msg.get("id")
+        msg_id = fipa_msg.get("message_id")
         target = fipa_msg.get("target")
         performative = fipa_msg.get("performative")
 
