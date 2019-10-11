@@ -19,36 +19,14 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the stub connection."""
-import datetime
 import logging
-import pickle
-from queue import Empty, Queue
+from queue import Empty
 from threading import Thread
-from typing import List, Dict, Optional, cast
-
-import oef
-from oef.agents import OEFAgent
-from oef.core import AsyncioCore
-from oef.messages import CFP_TYPES, PROPOSE_TYPES
-from oef.query import (
-    Query as OEFQuery,
-    ConstraintExpr as OEFConstraintExpr,
-    And as OEFAnd,
-    Or as OEFOr,
-    Not as OEFNot,
-    Constraint as OEFConstraint,
-    ConstraintType as OEFConstraintType, Eq, NotEq, Lt, LtEq, Gt, GtEq, Range, In, NotIn)
-from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
+from typing import Optional
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Channel, Connection
-from aea.mail.base import MailBox, Envelope
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint, \
-    ConstraintType, ConstraintTypes
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.connections.base import Connection
+from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 
