@@ -39,7 +39,7 @@ class Wallet(object):
             "ethereum": self._setup_ethereum_crypto()
         }
 
-        self.public_keys = {
+        self._public_keys = {
             "default": self.crypto_objects['default'].public_key,
             "fetchai": self.crypto_objects['fetchai'].public_key,
             "ethereum": self.crypto_objects['ethereum'].public_key
@@ -69,9 +69,9 @@ class Wallet(object):
         return ethereum_crypto
 
     @property
-    def public_key(self):
+    def public_keys(self):
         """Get the public_key dictionary."""
-        return self.public_keys
+        return self._public_keys
 
     @property
     def crypto_object(self):

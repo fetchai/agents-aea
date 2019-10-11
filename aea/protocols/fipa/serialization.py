@@ -122,7 +122,7 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.ACCEPT_W_ADDRESS:
             address = fipa_pb.accept_w_address.address
             performative_content['address'] = address
-        elif performative_id == FIPAMessage.Performative.ACCEPT_W_ADDRESS:
+        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
             address = fipa_pb.match_accept_w_address.address
             performative_content['address'] = address
         elif performative_id == FIPAMessage.Performative.DECLINE:
@@ -132,22 +132,3 @@ class FIPASerializer(Serializer):
 
         return FIPAMessage(message_id=message_id, dialogue_id=dialogue_id, target=target,
                            performative=performative, **performative_content)
-
-
-if __name__ == "__main__":
-
-    from aea.protocols.fipa.message import FIPAMessage
-
-    msg = FIPAMessage(message_id=1,
-                      dialogue_id=1,
-                      target=1,
-                      performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
-                      address = "Hello")
-
-    msg_bytes = FIPASerializer().encode(msg)
-    print(len(msg_bytes))
-    d_msg = FIPASerializer().decode(msg_bytes)
-    print(d_msg.get('address'))
-    print(msg == d_msg)
-
-

@@ -38,5 +38,7 @@ message FIPAMessage{
         Accept accept = 6;
         MatchAccept match_accept = 7;
         Decline decline = 8;
+        Accept_W_Address accept_w_address = 9;
+        MatchAccept_W_Address match_accept_w_address = 10;
     }
 }

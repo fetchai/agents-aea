@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='fetch.aea.fipa',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\nfipa.proto\x12\x0e\x66\x65tch.aea.fipa\"\xfc\x04\n\x0b\x46IPAMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64ialogue_id\x18\x02 \x01(\x05\x12\x0e\n\x06target\x18\x03 \x01(\x05\x12.\n\x03\x63\x66p\x18\x04 \x01(\x0b\x32\x1f.fetch.aea.fipa.FIPAMessage.CFPH\x00\x12\x36\n\x07propose\x18\x05 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.ProposeH\x00\x12\x34\n\x06\x61\x63\x63\x65pt\x18\x06 \x01(\x0b\x32\".fetch.aea.fipa.FIPAMessage.AcceptH\x00\x12?\n\x0cmatch_accept\x18\x07 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.MatchAcceptH\x00\x12\x36\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.DeclineH\x00\x1a}\n\x03\x43\x46P\x12\x0f\n\x05\x62ytes\x18\x02 \x01(\x0cH\x00\x12:\n\x07nothing\x18\x03 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.CFP.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x04 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1a\x1b\n\x07Propose\x12\x10\n\x08proposal\x18\x04 \x03(\x0c\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\r\n\x0bMatchAccept\x1a#\n\x10\x41\x63\x63\x65pt_W_Address\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x1a(\n\x15MatchAccept_W_Address\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x1a\t\n\x07\x44\x65\x63lineB\x0e\n\x0cperformativeb\x06proto3')
+  serialized_pb=_b('\n\nfipa.proto\x12\x0e\x66\x65tch.aea.fipa\"\x9b\x06\n\x0b\x46IPAMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64ialogue_id\x18\x02 \x01(\x05\x12\x0e\n\x06target\x18\x03 \x01(\x05\x12.\n\x03\x63\x66p\x18\x04 \x01(\x0b\x32\x1f.fetch.aea.fipa.FIPAMessage.CFPH\x00\x12\x36\n\x07propose\x18\x05 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.ProposeH\x00\x12\x34\n\x06\x61\x63\x63\x65pt\x18\x06 \x01(\x0b\x32\".fetch.aea.fipa.FIPAMessage.AcceptH\x00\x12?\n\x0cmatch_accept\x18\x07 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.MatchAcceptH\x00\x12\x36\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.DeclineH\x00\x12H\n\x10\x61\x63\x63\x65pt_w_address\x18\t \x01(\x0b\x32,.fetch.aea.fipa.FIPAMessage.Accept_W_AddressH\x00\x12S\n\x16match_accept_w_address\x18\n \x01(\x0b\x32\x31.fetch.aea.fipa.FIPAMessage.MatchAccept_W_AddressH\x00\x1a}\n\x03\x43\x46P\x12\x0f\n\x05\x62ytes\x18\x02 \x01(\x0cH\x00\x12:\n\x07nothing\x18\x03 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.CFP.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x04 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1a\x1b\n\x07Propose\x12\x10\n\x08proposal\x18\x04 \x03(\x0c\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\r\n\x0bMatchAccept\x1a#\n\x10\x41\x63\x63\x65pt_W_Address\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x1a(\n\x15MatchAccept_W_Address\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x1a\t\n\x07\x44\x65\x63lineB\x0e\n\x0cperformativeb\x06proto3')
 )
 
 
@@ -44,8 +44,8 @@ _FIPAMESSAGE_CFP_NOTHING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=489,
-  serialized_end=498,
+  serialized_start=648,
+  serialized_end=657,
 )
 
 _FIPAMESSAGE_CFP = _descriptor.Descriptor(
@@ -91,8 +91,8 @@ _FIPAMESSAGE_CFP = _descriptor.Descriptor(
       name='query', full_name='fetch.aea.fipa.FIPAMessage.CFP.query',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=382,
-  serialized_end=507,
+  serialized_start=541,
+  serialized_end=666,
 )
 
 _FIPAMESSAGE_PROPOSE = _descriptor.Descriptor(
@@ -121,8 +121,8 @@ _FIPAMESSAGE_PROPOSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=509,
-  serialized_end=536,
+  serialized_start=668,
+  serialized_end=695,
 )
 
 _FIPAMESSAGE_ACCEPT = _descriptor.Descriptor(
@@ -144,8 +144,8 @@ _FIPAMESSAGE_ACCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=538,
-  serialized_end=546,
+  serialized_start=697,
+  serialized_end=705,
 )
 
 _FIPAMESSAGE_MATCHACCEPT = _descriptor.Descriptor(
@@ -167,8 +167,8 @@ _FIPAMESSAGE_MATCHACCEPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=548,
-  serialized_end=561,
+  serialized_start=707,
+  serialized_end=720,
 )
 
 _FIPAMESSAGE_ACCEPT_W_ADDRESS = _descriptor.Descriptor(
@@ -197,8 +197,8 @@ _FIPAMESSAGE_ACCEPT_W_ADDRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=563,
-  serialized_end=598,
+  serialized_start=722,
+  serialized_end=757,
 )
 
 _FIPAMESSAGE_MATCHACCEPT_W_ADDRESS = _descriptor.Descriptor(
@@ -227,8 +227,8 @@ _FIPAMESSAGE_MATCHACCEPT_W_ADDRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=600,
-  serialized_end=640,
+  serialized_start=759,
+  serialized_end=799,
 )
 
 _FIPAMESSAGE_DECLINE = _descriptor.Descriptor(
@@ -250,8 +250,8 @@ _FIPAMESSAGE_DECLINE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=642,
-  serialized_end=651,
+  serialized_start=801,
+  serialized_end=810,
 )
 
 _FIPAMESSAGE = _descriptor.Descriptor(
@@ -317,6 +317,20 @@ _FIPAMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='accept_w_address', full_name='fetch.aea.fipa.FIPAMessage.accept_w_address', index=8,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='match_accept_w_address', full_name='fetch.aea.fipa.FIPAMessage.match_accept_w_address', index=9,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -333,7 +347,7 @@ _FIPAMESSAGE = _descriptor.Descriptor(
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=31,
-  serialized_end=667,
+  serialized_end=826,
 )
 
 _FIPAMESSAGE_CFP_NOTHING.containing_type = _FIPAMESSAGE_CFP
@@ -359,6 +373,8 @@ _FIPAMESSAGE.fields_by_name['propose'].message_type = _FIPAMESSAGE_PROPOSE
 _FIPAMESSAGE.fields_by_name['accept'].message_type = _FIPAMESSAGE_ACCEPT
 _FIPAMESSAGE.fields_by_name['match_accept'].message_type = _FIPAMESSAGE_MATCHACCEPT
 _FIPAMESSAGE.fields_by_name['decline'].message_type = _FIPAMESSAGE_DECLINE
+_FIPAMESSAGE.fields_by_name['accept_w_address'].message_type = _FIPAMESSAGE_ACCEPT_W_ADDRESS
+_FIPAMESSAGE.fields_by_name['match_accept_w_address'].message_type = _FIPAMESSAGE_MATCHACCEPT_W_ADDRESS
 _FIPAMESSAGE.oneofs_by_name['performative'].fields.append(
   _FIPAMESSAGE.fields_by_name['cfp'])
 _FIPAMESSAGE.fields_by_name['cfp'].containing_oneof = _FIPAMESSAGE.oneofs_by_name['performative']
@@ -374,6 +390,12 @@ _FIPAMESSAGE.fields_by_name['match_accept'].containing_oneof = _FIPAMESSAGE.oneo
 _FIPAMESSAGE.oneofs_by_name['performative'].fields.append(
   _FIPAMESSAGE.fields_by_name['decline'])
 _FIPAMESSAGE.fields_by_name['decline'].containing_oneof = _FIPAMESSAGE.oneofs_by_name['performative']
+_FIPAMESSAGE.oneofs_by_name['performative'].fields.append(
+  _FIPAMESSAGE.fields_by_name['accept_w_address'])
+_FIPAMESSAGE.fields_by_name['accept_w_address'].containing_oneof = _FIPAMESSAGE.oneofs_by_name['performative']
+_FIPAMESSAGE.oneofs_by_name['performative'].fields.append(
+  _FIPAMESSAGE.fields_by_name['match_accept_w_address'])
+_FIPAMESSAGE.fields_by_name['match_accept_w_address'].containing_oneof = _FIPAMESSAGE.oneofs_by_name['performative']
 DESCRIPTOR.message_types_by_name['FIPAMessage'] = _FIPAMESSAGE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

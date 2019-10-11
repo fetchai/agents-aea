@@ -38,9 +38,9 @@ class FIPAMessage(Message):
         PROPOSE = "propose"
         ACCEPT = "accept"
         MATCH_ACCEPT = "match_accept"
-        ACCEPT_W_ADDRESS = 'accept_with_address'
-        MATCH_ACCEPT_W_ADDRESS = 'match_accept_with_address'
         DECLINE = "decline"
+        ACCEPT_W_ADDRESS = "accept_w_address"
+        MATCH_ACCEPT_W_ADDRESS = "match_accept_w_address"
 
         def __str__(self):
             """Get string representation."""

@@ -109,7 +109,7 @@ class FetchCrypto(object):
             logger.exception(str(e))
 
     def _generate_private_key(self) -> Entity:
-        path = Path("pk.txt")
+        path = Path("fet_pk.txt")
         print(path)
         entity = Entity()
         with open(path, "w+") as file:
