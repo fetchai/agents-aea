@@ -70,7 +70,7 @@ class FIPASerializer(Serializer):
             performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.INFORM:
-            performative = fipa_pb2.FIPAMessage.Inform()
+            performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
             data = msg.get("data")
             data_bytes = pickle.dumps(data)
             performative.bytes = data_bytes
