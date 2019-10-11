@@ -38,13 +38,6 @@ class FetchCrypto(object):
     def __init__(self, private_key_path: Optional[str] = None):
         """Instantiate a crypto object."""
         self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        self._public_key_obj = self._entity.public_key
-        self._public_key_bytes = self._entity.public_key_bytes
-        self._public_key_hex = self._entity.public_key_hex
-        self._display_address = Address(Identity.from_hex(self._public_key_hex))
-        self._private_key = self._entity.private_key
-        self._private_key_hex = self._entity.private_key_hex
-        self._private_key_bytes = self._entity.private_key_bytes
 
     @property
     def public_key(self) -> str:
@@ -53,7 +46,16 @@ class FetchCrypto(object):
 
         :return: a public key string in hex format
         """
-        return self._public_key_hex
+        return self._entity.public_key_hex
+
+    @property
+    def private_key(self) -> str:
+        """
+        Return the private key in hex format.
+
+        :return: a public key string in hex format
+        """
+        return self._entity.private_key_hex
 
     @property
     def display_address(self) -> str:
@@ -62,7 +64,7 @@ class FetchCrypto(object):
 
         :return: a display_address str
         """
-        return str(self._display_address)
+        return str(Address(Identity.from_hex(self.public_key)))
 
     @staticmethod
     def get_address_from_public_key(public_key: str) -> Address:

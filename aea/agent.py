@@ -57,7 +57,7 @@ class Agent(ABC):
     """This class implements a template agent."""
 
     def __init__(self, name: str,
-                 private_key_paths: Dict[str, str],
+                 private_key_paths: Dict[str, str] = None,
                  timeout: float = 1.0,
                  debug: bool = False) -> None:
         """
