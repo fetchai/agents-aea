@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Extension to the OEF Python SDK."""
+"""This module contains the stub connection."""
 import datetime
 import logging
 import pickle
@@ -51,10 +51,6 @@ from aea.protocols.oef.models import Description, Attribute, DataModel, Query, C
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
-
-
-STUB_MESSSAGE_ID = 0
-STUB_DIALOGUE_ID = 0
 
 
 class StubConnection(Connection):
