@@ -32,5 +32,6 @@ message FIPAMessage{
         Accept accept = 6;
         MatchAccept match_accept = 7;
         Decline decline = 8;
+        Inform inform = 9;
     }
 }
