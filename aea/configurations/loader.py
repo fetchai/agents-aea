@@ -77,7 +77,7 @@ def _config_loader():
     envvar_matcher = re.compile(r'\${([^}^{]+)\}')
 
     def envvar_constructor(loader, node):
-        """Extract the matched value, expand env variable, and replace the match"""
+        """Extract the matched value, expand env variable, and replace the match."""
         node_value = node.value
         match = envvar_matcher.match(node_value)
         env_var = match.group()[2:-1]
@@ -91,5 +91,6 @@ def _config_loader():
 
     yaml.add_implicit_resolver('!envvar', envvar_matcher, None, SafeLoader)
     yaml.add_constructor('!envvar', envvar_constructor, SafeLoader)
+
 
 _config_loader()
