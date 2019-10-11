@@ -36,7 +36,7 @@ class TestTCP:
     def setup_class(cls):
         """Set up the test class."""
         p = Path("/tmp/aea/test_tcp/")
-        shutil.rmtree(str(p))
+        shutil.rmtree(str(p), ignore_errors=True)
         p.mkdir(parents=True)
 
         socket_path = str(Path(p, "test_socket"))

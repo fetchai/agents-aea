@@ -22,7 +22,7 @@ import asyncio
 import logging
 from asyncio import AbstractEventLoop, Task, StreamWriter, StreamReader
 from threading import Thread
-from typing import Optional, cast, Tuple
+from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
