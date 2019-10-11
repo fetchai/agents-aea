@@ -26,6 +26,7 @@ DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = 'connection.yaml'
 DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
+DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
 T = TypeVar('T')
 
 Address = str
@@ -396,7 +397,7 @@ class AgentConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  registry_path: str = "",
-                 private_key_pem_path: str = ""):
+                 private_key_paths: Dict[str, str] = DEFAULT_PRIVATE_KEY_PATHS):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
         self.aea_version = aea_version
@@ -405,7 +406,7 @@ class AgentConfig(Configuration):
         self.license = license
         self.url = url
         self.registry_path = registry_path
-        self.private_key_pem_path = private_key_pem_path
+        self.private_key_paths = private_key_paths  # type: Dict[str,str]
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
         self.protocols = set()  # type: Set[str]
@@ -438,7 +439,7 @@ class AgentConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "registry_path": self.registry_path,
-            "private_key_pem_path": self.private_key_pem_path,
+            "private_key_paths": self.private_key_paths,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
             "protocols": sorted(self.protocols),
@@ -456,7 +457,7 @@ class AgentConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
-            private_key_pem_path=cast(str, obj.get("private_key_pem_path")),
+            private_key_paths=cast(Dict[str, str], obj.get("private_key_paths"))
         )
 
         agent_config.connections = set(cast(List[str], obj.get("connections")))

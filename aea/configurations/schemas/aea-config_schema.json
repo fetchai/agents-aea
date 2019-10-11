@@ -3,7 +3,7 @@
     "description": "Schema for the agent configuration file.",
     "additionalProperties": false,
     "type": "object",
-    "required": ["aea_version", "agent_name", "authors", "version", "license", "url", "private_key_pem_path", "connections", "default_connection", "protocols", "skills"],
+    "required": ["aea_version", "agent_name", "authors", "version", "license", "url", "connections", "default_connection", "protocols", "skills"],
     "properties": {
         "aea_version": {"type": "string"},
         "agent_name": {"type": "string"},
@@ -12,7 +12,16 @@
         "license": {"type": "string"},
         "url": {"type": "string"},
         "registry_path": {"type": "string"},
-        "private_key_pem_path": {"type": "string"},
+        "private_key_paths": {
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required": ["private_key_path"],
+              "properties": {
+                "task": { "$ref": "#/definitions/private_key_path" }
+              }
+            }
+        },
         "connections": {
             "type": "array",
             "uniqueItems": true,
@@ -28,6 +37,16 @@
             "type": "array",
             "uniqueItems": true,
             "items": {"type": "string"}
+        }
+    },
+    "definitions": {
+        "private_key_path": {
+            "type": "object",
+            "required": ["ledger", "path"],
+            "properties": {
+                "ledger": {"type": "string"},
+                "path": {"type": "string"}
+            }
         }
     }
 }
