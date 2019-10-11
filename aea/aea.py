@@ -20,7 +20,7 @@
 """This module contains the implementation of an Autonomous Economic Agent."""
 import logging
 from pathlib import Path
-from typing import Optional, cast
+from typing import Optional, cast, Dict
 
 from aea.agent import Agent
 from aea.context.base import AgentContext
@@ -38,7 +38,7 @@ class AEA(Agent):
 
     def __init__(self, name: str,
                  mailbox: MailBox,
-                 private_key_pem_path: Optional[str] = None,
+                 private_key_paths: Dict[str, str],
                  timeout: float = 0.0,
                  debug: bool = False,
                  max_reactions: int = 20,
@@ -48,7 +48,7 @@ class AEA(Agent):
 
         :param name: the name of the agent
         :param mailbox: the mailbox of the agent.
-        :param private_key_pem_path: the path to the private key of the agent.
+        :param private_key_pem_path: the paths to the private keys of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
@@ -57,7 +57,7 @@ class AEA(Agent):
 
         :return: None
         """
-        super().__init__(name=name, private_key_pem_path=private_key_pem_path, timeout=timeout, debug=debug)
+        super().__init__(name=name, private_key_paths=private_key_paths, timeout=timeout, debug=debug)
 
         self.max_reactions = max_reactions
         self._directory = directory if directory else str(Path(".").absolute())

@@ -34,7 +34,6 @@ from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config,
     AEAConfigException
 from aea.connections.base import Connection
 from aea.crypto.initialiser import Wallet
-# from aea.helpers.base import locate
 from aea.mail.base import MailBox
 
 
@@ -84,7 +83,8 @@ def run(ctx: Context, connection_name: str):
     """Run the agent."""
     _try_to_load_agent_config(ctx)
     agent_name = cast(str, ctx.agent_config.agent_name)
-    wallet = Wallet(private_key_pem_path=ctx.agent_config.private_key_pem_path)
+    wallet = Wallet()
+
     public_keys = wallet.public_keys
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
@@ -106,7 +106,7 @@ def run(ctx: Context, connection_name: str):
             exit(-1)
 
     mailbox = MailBox(connection)
-    agent = AEA(agent_name, mailbox, private_key_pem_path=wallet.private_key_pem_path, directory=str(Path(".")))
+    agent = AEA(agent_name, mailbox, private_key_paths=ctx.agent_config.private_key_paths, directory=str(Path(".")))
     try:
         agent.start()
     except KeyboardInterrupt:

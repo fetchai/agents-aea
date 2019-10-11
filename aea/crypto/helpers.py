@@ -25,7 +25,7 @@ import logging
 
 from aea.crypto.base import Crypto
 
-TEMP_PRIVATE_KEY_FILE = 'temp_private_key.pem'
+TEMP_PRIVATE_KEY_FILE = 'def_pk.pem'
 
 logger = logging.getLogger(__name__)
 

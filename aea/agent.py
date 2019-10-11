@@ -24,7 +24,7 @@ import logging
 import time
 from abc import abstractmethod, ABC
 from enum import Enum
-from typing import Optional
+from typing import Optional, Dict
 
 from aea.crypto.initialiser import Wallet
 from aea.mail.base import InBox, OutBox, MailBox
@@ -57,7 +57,7 @@ class Agent(ABC):
     """This class implements a template agent."""
 
     def __init__(self, name: str,
-                 private_key_pem_path: Optional[str] = None,
+                 private_key_paths: Dict[str, str],
                  timeout: float = 1.0,
                  debug: bool = False) -> None:
         """
@@ -71,7 +71,7 @@ class Agent(ABC):
         :return: None
         """
         self._name = name
-        self._crypto = Wallet(private_key_pem_path=private_key_pem_path)
+        self._crypto = Wallet()
         self._liveness = Liveness()
         self._timeout = timeout
 

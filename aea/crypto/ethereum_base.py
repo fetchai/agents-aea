@@ -98,7 +98,6 @@ class EthCrypto(object):
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""
         path = Path("eth_pk.txt")
-        print(path)
         pk = Account.create()
         with open(path, "w+") as file:
             file.write(pk.privateKey.hex())

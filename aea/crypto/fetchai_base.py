@@ -93,12 +93,10 @@ class FetchCrypto(object):
         :return: the Entity.
         """
         path = Path(file_name)
-        print(path)
         try:
             if path.is_file():
                 with open(path, "r") as key:
                     data = key.read()
-                    print(data)
                     entity = Entity.from_hex(data)
 
             else:
@@ -110,7 +108,6 @@ class FetchCrypto(object):
 
     def _generate_private_key(self) -> Entity:
         path = Path("fet_pk.txt")
-        print(path)
         entity = Entity()
         with open(path, "w+") as file:
             file.write(entity.private_key_hex)
