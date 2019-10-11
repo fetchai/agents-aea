@@ -31,7 +31,7 @@ import click
 
 from aea.aea import AEA
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, _try_to_load_protocols, \
-    AEAConfigException
+    AEAConfigException, _load_env_file
 from aea.connections.base import Connection
 from aea.crypto.base import Crypto
 from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
@@ -86,6 +86,7 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
 def run(ctx: Context, connection_name: str, env_file: str):
     """Run the agent."""
     _try_to_load_agent_config(ctx)
+    _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
     private_key_pem_path = cast(str, ctx.agent_config.private_key_pem_path)
     if private_key_pem_path == "":

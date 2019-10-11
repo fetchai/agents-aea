@@ -6,8 +6,8 @@ url: ""
 class_name: OEFConnection
 supported_protocols: ["oef"]
 config:
-  addr: 127.0.0.1
-  port: 10000
+  addr: ${OEF_ADDR:127.0.0.1}
+  port: ${OEF_PORT:10000}
 dependencies:
   - colorlog
   - oef
