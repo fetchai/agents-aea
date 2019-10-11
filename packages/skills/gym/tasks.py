@@ -38,7 +38,7 @@ class GymTask(Task):
 
     def __init__(self, **kwargs):
         """Initialize the task."""
-        print("GymTask.__init__: arguments: {}".format(kwargs))
+        logger.info("GymTask.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
         self._rl_agent = MyRLAgent(NB_GOODS)
         self._proxy_env = ProxyEnv(self.context)
@@ -52,7 +52,7 @@ class GymTask(Task):
 
     def setup(self) -> None:
         """Set up the task."""
-        print("Gym task: setup method called.")
+        logger.info("Gym task: setup method called.")
 
     def execute(self) -> None:
         """Execute the task."""
@@ -63,13 +63,13 @@ class GymTask(Task):
 
     def teardown(self) -> None:
         """Teardown the task."""
-        print("Gym Task: teardown method called.")
+        logger.info("Gym Task: teardown method called.")
         if self.is_rl_agent_training:
             self._stop_training()
 
     def _start_training(self) -> None:
         """Start training the RL agent."""
-        print("Training starting ...")
+        logger.info("Training starting ...")
         self.is_rl_agent_training = True
         self._rl_agent_training_thread.start()
 
@@ -78,4 +78,4 @@ class GymTask(Task):
         self.is_rl_agent_training = False
         self._proxy_env.close()
         self._rl_agent_training_thread.join()
-        print("Training finished. You can exit now via CTRL+C.")
+        logger.info("Training finished. You can exit now via CTRL+C.")

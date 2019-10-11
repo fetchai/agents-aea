@@ -44,7 +44,7 @@ else:
     from fipa_negotiation_skill.helpers import DEMAND_DATAMODEL_NAME
 
 Action = Any
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.fipa_negotiation_skill")
 
 STARTING_MESSAGE_ID = 1
 STARTING_MESSAGE_TARGET = 0

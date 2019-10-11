@@ -19,8 +19,12 @@
 
 """This module contains the handler for the 'echo' skill."""
 
+import logging
+
 from aea.protocols.base import Message
 from aea.skills.base import Handler
+
+logger = logging.getLogger("aea.echo_skill")
 
 
 class EchoHandler(Handler):
@@ -30,11 +34,11 @@ class EchoHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        print("EchoHandler.__init__: arguments: {}".format(kwargs))
+        logger.info("EchoHandler.__init__: arguments: {}".format(kwargs))
 
     def setup(self) -> None:
         """Set up the handler."""
-        print("Echo Handler: setup method called.")
+        logger.info("Echo Handler: setup method called.")
 
     def handle(self, message: Message, sender: str) -> None:
         """
@@ -44,7 +48,7 @@ class EchoHandler(Handler):
         :param sender: the sender
         :return: None
         """
-        print("Echo Handler: message={}, sender={}".format(message, sender))
+        logger.info("Echo Handler: message={}, sender={}".format(message, sender))
 
     def teardown(self) -> None:
         """
@@ -52,4 +56,4 @@ class EchoHandler(Handler):
 
         :return: None
         """
-        print("Echo Handler: teardown method called.")
+        logger.info("Echo Handler: teardown method called.")
