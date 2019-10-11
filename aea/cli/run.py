@@ -30,7 +30,7 @@ import click
 from click import pass_context
 
 from aea.aea import AEA
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, _try_to_load_protocols, \
+from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
     AEAConfigException, _load_env_file
 from aea.cli.install import install
 from aea.connections.base import Connection
