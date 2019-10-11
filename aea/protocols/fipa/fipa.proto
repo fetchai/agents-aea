@@ -19,6 +19,9 @@ message FIPAMessage{
     message Accept{}
     message MatchAccept{}
     message Decline{}
+    message Inform{
+        bytes bytes = 1;
+    }
 
     int32 message_id = 1;
     int32 dialogue_id = 2;

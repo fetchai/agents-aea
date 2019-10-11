@@ -39,6 +39,7 @@ class FIPAMessage(Message):
         ACCEPT = "accept"
         MATCH_ACCEPT = "match_accept"
         DECLINE = "decline"
+        INFORM = "inform"
 
         def __str__(self):
             """Get string representation."""
@@ -67,6 +68,8 @@ class FIPAMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
+            assert self.is_set("message_id")
+            assert self.is_set("dialogue_id")
             assert self.is_set("target")
             performative = FIPAMessage.Performative(self.get("performative"))
             if performative == FIPAMessage.Performative.CFP:
@@ -79,6 +82,9 @@ class FIPAMessage(Message):
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
                     or performative == FIPAMessage.Performative.DECLINE:
                 pass  # pragma: no cover
+            elif performative == FIPAMessage.Performative.INFORM:
+                data = self.get("data")
+                assert isinstance(data, bytes)
             else:
                 raise ValueError("Performative not recognized.")
 
