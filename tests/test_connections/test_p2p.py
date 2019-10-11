@@ -66,7 +66,6 @@ class TestTCP:
         logging.debug(actual_envelope)
         assert expected_envelope == actual_envelope
 
-
     @classmethod
     def teardown_class(cls):
         """Tear down the test class."""
