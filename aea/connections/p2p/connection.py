@@ -18,4 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the TCP connection (server side)."""
+"""Base classes for P2P communication."""
+
+from .tcp_client import TCPClientConnection  # noqa: F401
+from .tcp_server import TCPServerConnection  # noqa: F401

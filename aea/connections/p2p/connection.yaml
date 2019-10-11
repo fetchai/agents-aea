@@ -3,7 +3,7 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
-class_name: TCPConnection
+class_name: TCPClientConnection  # this can be eitehr TCPClientConnection or TCPServerConnection
 supported_protocols:
   - oef
   - default
@@ -11,5 +11,5 @@ supported_protocols:
   - gym
   - tac
 config:
-  addr: 127.0.0.1
-  port: 10000
+  address: /tmp/socket
+  unix: true

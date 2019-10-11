@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the TCP connection (client side)."""
+"""Implementation of a P2P connection."""
