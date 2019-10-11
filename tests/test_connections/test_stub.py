@@ -43,16 +43,24 @@ class TestStubConnection:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.mailbox1 = MailBox(StubConnection())
+        cls.connection = StubConnection()
+        cls.mailbox1 = MailBox(cls.connection)
         cls.mailbox1.connect()
 
     def test_send_message(self):
         """Test that a default byte message can be sent correctly."""
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        envelope = Envelope(to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
-        self.mailbox1.outbox.put(envelope)
-        recv_msg = self.mailbox1.inbox.get(block=True, timeout=3.0)
-        assert recv_msg is not None
+        expected_envelope = Envelope(to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
+
+        # from mailbox to connection
+        self.mailbox1.outbox.put(expected_envelope)
+        actual_envelope = self.connection.out_queue.get(timeout=2.0)
+        assert expected_envelope == actual_envelope
+
+        # from connection to mailbox
+        self.connection.in_queue.put(expected_envelope)
+        actual_envelope = self.mailbox1.inbox.get(timeout=2.0)
+        assert expected_envelope == actual_envelope
 
     @classmethod
     def teardown_class(cls):

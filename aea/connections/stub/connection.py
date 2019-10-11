@@ -34,53 +34,25 @@ logger = logging.getLogger(__name__)
 class StubConnection(Connection):
     """A stub connection."""
 
-    def __init__(self):
-        """Initialize a stub connection."""
-        super().__init__()
-
-        self._stopped = True
-        self.out_thread = None  # type: Optional[Thread]
-
     @property
     def is_established(self) -> bool:
         """Get the connection status."""
-        return not self._stopped
-
-    def _fetch(self) -> None:
-        """
-        Fetch the messages from the outqueue and send them.
-
-        :return: None
-        """
-        while not self._stopped:
-            try:
-                msg = self.out_queue.get(block=True, timeout=1.0)
-                self.send(msg)
-            except Empty:
-                pass
+        return True
 
     def connect(self) -> None:
         """
         Connect to the channel.
 
-        :return: None
-        :raises ConnectionError if the connection to the OEF fails.
+        In this type of connection there's no channel to connect.
         """
-        if self._stopped:
-            self._stopped = False
-            self.out_thread = Thread(target=self._fetch)
-            self.out_thread.start()
 
     def disconnect(self) -> None:
         """
         Disconnect from the channel.
 
-        :return: None
+        In this type of connection there's no channel to disconnect.
         """
-        if not self._stopped:
-            self._stopped = False
-            self.out_thread.join()
-            self.out_thread = None
+        pass
 
     def send(self, envelope: Envelope):
         """
@@ -88,8 +60,7 @@ class StubConnection(Connection):
 
         :return: None
         """
-        if not self._stopped:
-            self.in_queue.put(envelope)
+        self.out_queue.put(envelope)
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
