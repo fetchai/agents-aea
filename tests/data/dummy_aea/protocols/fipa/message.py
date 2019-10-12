@@ -23,7 +23,7 @@ from enum import Enum
 from typing import Optional, Union
 
 from aea.protocols.base import Message
-from aea.protocols.oef.models import Description
+from aea.protocols.oef.models import Description, Query
 
 
 class FIPAMessage(Message):
@@ -39,6 +39,9 @@ class FIPAMessage(Message):
         ACCEPT = "accept"
         MATCH_ACCEPT = "match_accept"
         DECLINE = "decline"
+        INFORM = "inform"
+        ACCEPT_W_ADDRESS = "accept_w_address"
+        MATCH_ACCEPT_W_ADDRESS = "match_accept_w_address"
 
         def __str__(self):
             """Get string representation."""
@@ -57,7 +60,7 @@ class FIPAMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(id=message_id,
+        super().__init__(message_id=message_id,
                          dialogue_id=dialogue_id,
                          target=target,
                          performative=FIPAMessage.Performative(performative),
@@ -67,18 +70,26 @@ class FIPAMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
+            assert self.is_set("message_id")
+            assert self.is_set("dialogue_id")
             assert self.is_set("target")
             performative = FIPAMessage.Performative(self.get("performative"))
             if performative == FIPAMessage.Performative.CFP:
                 query = self.get("query")
-                assert isinstance(query, dict) or isinstance(query, bytes) or query is None
+                assert isinstance(query, Query) or isinstance(query, bytes) or query is None
             elif performative == FIPAMessage.Performative.PROPOSE:
                 proposal = self.get("proposal")
                 assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
             elif performative == FIPAMessage.Performative.ACCEPT \
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
                     or performative == FIPAMessage.Performative.DECLINE:
-                pass
+                pass  # pragma: no cover
+            elif performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS\
+                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+                assert self.is_set("address")
+            elif performative == FIPAMessage.Performative.INFORM:
+                data = self.get("data")
+                assert isinstance(data, bytes)
             else:
                 raise ValueError("Performative not recognized.")
 

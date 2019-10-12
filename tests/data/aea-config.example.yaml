@@ -7,7 +7,10 @@ url: ""
 connections:
 - default-oef
 default_connection: default-oef
-private_key_pem_path: ''
+private_key_paths:
+  private_key_path:
+    ledger: default
+    path: ''
 protocols:
 - oef
 - default

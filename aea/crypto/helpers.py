@@ -22,12 +22,69 @@
 
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
 import logging
+from pathlib import Path
 
-from aea.crypto.base import Crypto
+from fetchai.ledger.crypto import Entity  # type: ignore
+from eth_account import Account  # type: ignore
 
-TEMP_PRIVATE_KEY_FILE = 'def_pk.pem'
+from aea.crypto.base import DefaultCrypto
+from aea.crypto.wallet import SUPPORTED_CRYPTOS
+from aea.configurations.loader import ConfigLoader
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
+from aea.cli.common import Context
+
+DEFAULT_PRIVATE_KEY_FILE = 'default_private_key.pem'
+FETCHAI_PRIVATE_KEY_FILE = 'default_private_key.pem'
+ETHEREUM_PRIVATE_KEY_FILE = 'default_private_key.pem'
 
 logger = logging.getLogger(__name__)
+
+
+def _verify_or_create_private_keys(ctx: Context) -> None:
+    """
+    Verify or create private keys.
+
+    :param ctx: Context
+    """
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    fp = open(str(path), mode="r", encoding="utf-8")
+    aea_conf = agent_loader.load(fp)
+
+    for identifier in aea_conf.private_key_paths.keys():
+        if identifier not in SUPPORTED_CRYPTOS:
+            ValueError("Unsupported identifier in private key paths.")
+
+    if aea_conf.private_key_paths['default'] == "" or aea_conf.private_key_paths['default'] is None:
+        default_private_key_path = _create_temporary_private_key_pem_path()
+    else:
+        _try_validate_private_key_pem_path(aea_conf.private_key_paths['default'])
+    aea_conf.private_key_paths['default'] = default_private_key_path
+
+    if aea_conf.private_key_paths['fetchai'] == "" or aea_conf.private_key_paths['fetchai'] is None:
+        path = Path(FETCHAI_PRIVATE_KEY_FILE)
+        entity = Entity()
+        with open(path, "w+") as file:
+            file.write(entity.private_key_hex)
+        fetchai_private_key_path = FETCHAI_PRIVATE_KEY_FILE
+    else:
+        pass  # TODO
+    aea_conf.private_key_paths['fetchai'] = fetchai_private_key_path
+
+    if aea_conf.private_key_paths['ethereum'] == "" or aea_conf.private_key_paths['ethereum'] is None:
+        path = Path(FETCHAI_PRIVATE_KEY_FILE)
+        account = Account.create()
+        with open(path, "w+") as file:
+            file.write(account.privateKey.hex())
+        ethereum_private_key_path = ETHEREUM_PRIVATE_KEY_FILE
+    else:
+        pass  # TODO
+    aea_conf.private_key_paths['ethereum'] = ethereum_private_key_path
+
+    # update aea config
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    fp = open(str(path), mode="w", encoding="utf-8")
+    agent_loader.dump(aea_conf, fp)
 
 
 def _create_temporary_private_key() -> bytes:
@@ -36,7 +93,7 @@ def _create_temporary_private_key() -> bytes:
 
     :return: the private key in pem format.
     """
-    crypto = Crypto()
+    crypto = DefaultCrypto()
     pem = crypto._private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())  # type: ignore
     return pem
 
@@ -50,7 +107,7 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
     :raises: an exception if the private key is invalid.
     """
     try:
-        Crypto(private_key_pem_path=private_key_pem_path)
+        DefaultCrypto(private_key_pem_path=private_key_pem_path)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_pem_path))
         exit(-1)
@@ -63,7 +120,7 @@ def _create_temporary_private_key_pem_path() -> str:
     :return: private_key_pem_path
     """
     pem = _create_temporary_private_key()
-    file = open(TEMP_PRIVATE_KEY_FILE, "wb")
+    file = open(DEFAULT_PRIVATE_KEY_FILE, "wb")
     file.write(pem)
     file.close()
-    return TEMP_PRIVATE_KEY_FILE
+    return DEFAULT_PRIVATE_KEY_FILE
