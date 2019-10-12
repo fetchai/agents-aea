@@ -34,9 +34,7 @@ from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_l
     AEAConfigException, _load_env_file
 from aea.cli.install import install
 from aea.connections.base import Connection
-from aea.crypto.base import Crypto
-from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
-# from aea.helpers.base import locate
+from aea.crypto.initialiser import Wallet
 from aea.mail.base import MailBox
 
 
@@ -92,17 +90,13 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     _try_to_load_agent_config(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
-    private_key_pem_path = cast(str, ctx.agent_config.private_key_pem_path)
-    if private_key_pem_path == "":
-        private_key_pem_path = _create_temporary_private_key_pem_path()
-    else:
-        _try_validate_private_key_pem_path(private_key_pem_path)
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
+    wallet = Wallet()
+
+    public_keys = wallet.public_keys
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
     try:
-        connection = _setup_connection(connection_name, public_key, ctx)
+        connection = _setup_connection(connection_name, public_keys['default'], ctx)
     except AEAConfigException as e:
         logger.error(str(e))
         exit(-1)
@@ -115,7 +109,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
             click_context.invoke(install)
 
     mailbox = MailBox(connection)
-    agent = AEA(agent_name, mailbox, private_key_pem_path=private_key_pem_path, directory=str(Path(".")))
+    agent = AEA(agent_name, mailbox, private_key_paths=ctx.agent_config.private_key_paths, directory=str(Path(".")))
     try:
         agent.start()
     except KeyboardInterrupt:

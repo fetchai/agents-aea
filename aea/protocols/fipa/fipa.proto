@@ -17,7 +17,16 @@ message FIPAMessage{
         repeated bytes proposal = 1;
     }
     message Accept{}
+
     message MatchAccept{}
+
+    message Accept_W_Address{
+        string address = 1;
+    }
+
+    message MatchAccept_W_Address{
+        string address = 1;
+    }
     message Decline{}
     message Inform{
         bytes bytes = 1;
@@ -33,5 +42,7 @@ message FIPAMessage{
         MatchAccept match_accept = 7;
         Decline decline = 8;
         Inform inform = 9;
+        Accept_W_Address accept_w_address = 10;
+        MatchAccept_W_Address match_accept_w_address = 11;
     }
 }
