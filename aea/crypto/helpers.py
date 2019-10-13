@@ -34,8 +34,8 @@ from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.cli.common import Context
 
 DEFAULT_PRIVATE_KEY_FILE = 'default_private_key.pem'
-FETCHAI_PRIVATE_KEY_FILE = 'default_private_key.pem'
-ETHEREUM_PRIVATE_KEY_FILE = 'default_private_key.pem'
+FETCHAI_PRIVATE_KEY_FILE = 'fet_private_key.txt'
+ETHEREUM_PRIVATE_KEY_FILE = 'eth_private_key.txt'
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +57,9 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
 
     if aea_conf.private_key_paths['default'] == "" or aea_conf.private_key_paths['default'] is None:
         default_private_key_path = _create_temporary_private_key_pem_path()
+        aea_conf.private_key_paths['default'] = default_private_key_path
     else:
         _try_validate_private_key_pem_path(aea_conf.private_key_paths['default'])
-    aea_conf.private_key_paths['default'] = default_private_key_path
 
     if aea_conf.private_key_paths['fetchai'] == "" or aea_conf.private_key_paths['fetchai'] is None:
         path = Path(FETCHAI_PRIVATE_KEY_FILE)
@@ -67,9 +67,9 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         with open(path, "w+") as file:
             file.write(entity.private_key_hex)
         fetchai_private_key_path = FETCHAI_PRIVATE_KEY_FILE
+        aea_conf.private_key_paths['fetchai'] = fetchai_private_key_path
     else:
-        pass  # TODO
-    aea_conf.private_key_paths['fetchai'] = fetchai_private_key_path
+        _try_validate_fet_private_key_path(aea_conf.private_key_paths['fetchai'])
 
     if aea_conf.private_key_paths['ethereum'] == "" or aea_conf.private_key_paths['ethereum'] is None:
         path = Path(FETCHAI_PRIVATE_KEY_FILE)
@@ -77,9 +77,9 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         with open(path, "w+") as file:
             file.write(account.privateKey.hex())
         ethereum_private_key_path = ETHEREUM_PRIVATE_KEY_FILE
+        aea_conf.private_key_paths['ethereum'] = ethereum_private_key_path
     else:
-        pass  # TODO
-    aea_conf.private_key_paths['ethereum'] = ethereum_private_key_path
+        _try_validate_fet_private_key_path(aea_conf.private_key_paths['ethereum'])
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
@@ -110,6 +110,42 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
         DefaultCrypto(private_key_pem_path=private_key_pem_path)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_pem_path))
+        exit(-1)
+
+
+def _try_validate_fet_private_key_path(private_key_path:str) -> None:
+    """
+       Try to validate a private key.
+
+       :param private_key_path: the path to the private key.
+       :return: None
+       :raises: an exception if the private key is invalid.
+       """
+    try:
+        # TODO :Change this to match the enity.fromhex()
+        with open(private_key_path, "r") as key:
+            data = key.read()
+            entity = Entity.from_hex(data)
+    except ValueError:
+        logger.error("This is not a valid private key file: '{}'".format(private_key_path))
+        exit(-1)
+
+
+def _try_validate_ethereum_private_key_path(private_key_path:str) -> None:
+    """
+           Try to validate a private key.
+
+           :param private_key_path: the path to the private key.
+           :return: None
+           :raises: an exception if the private key is invalid.
+           """
+    try:
+        # TODO :Change this to match the Account.fromhex()
+        with open(private_key_path, "r") as key:
+            data = key.read()
+            account = Account.from_key(data)
+    except ValueError:
+        logger.error("This is not a valid private key file: '{}'".format(private_key_path))
         exit(-1)
 
 
