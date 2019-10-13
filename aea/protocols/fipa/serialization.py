@@ -60,7 +60,6 @@ class FIPASerializer(Serializer):
             p_array_bytes = [pickle.dumps(p) for p in proposal]
             performative.proposal.extend(p_array_bytes)
             fipa_msg.propose.CopyFrom(performative)
-
         elif performative_id == FIPAMessage.Performative.ACCEPT:
             performative = fipa_pb2.FIPAMessage.Accept()  # type: ignore
             fipa_msg.accept.CopyFrom(performative)
@@ -70,6 +69,12 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.DECLINE:
             performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.INFORM:
+            performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
+            data = msg.get("data")
+            data_bytes = pickle.dumps(data)
+            performative.bytes = data_bytes
+            fipa_msg.inform.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -111,6 +116,9 @@ class FIPASerializer(Serializer):
             pass
         elif performative_id == FIPAMessage.Performative.DECLINE:
             pass
+        elif performative_id == FIPAMessage.Performative.INFORM:
+            data = pickle.loads(fipa_pb.inform.bytes)
+            performative_content["data"] = data
         else:
             raise ValueError("Performative not valid: {}.".format(performative))
 

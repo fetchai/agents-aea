@@ -18,9 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'echo' skill."""
+import logging
 import time
 
 from aea.skills.base import Task
+
+logger = logging.getLogger("aea.echo_skill")
 
 
 class EchoTask(Task):
@@ -29,17 +32,17 @@ class EchoTask(Task):
     def __init__(self, **kwargs):
         """Initialize the task."""
         super().__init__(**kwargs)
-        print("EchoTask.__init__: arguments: {}".format(kwargs))
+        logger.info("EchoTask.__init__: arguments: {}".format(kwargs))
 
     def setup(self) -> None:
         """Set up the task."""
-        print("Echo Task: setup method called.")
+        logger.info("Echo Task: setup method called.")
 
     def execute(self) -> None:
         """Execute the task."""
-        print("Echo Task: execute method called.")
+        logger.info("Echo Task: execute method called.")
         time.sleep(1.0)
 
     def teardown(self) -> None:
         """Teardown the task."""
-        print("Echo Task: teardown method called.")
+        logger.info("Echo Task: teardown method called.")

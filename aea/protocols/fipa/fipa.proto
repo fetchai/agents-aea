@@ -8,17 +8,20 @@ message FIPAMessage{
         message Nothing {
         }
         oneof query{
-            bytes bytes = 2;
-            Nothing nothing = 3;
-            bytes query_bytes = 4;
+            bytes bytes = 1;
+            Nothing nothing = 2;
+            bytes query_bytes = 3;
         }
     }
     message Propose{
-        repeated bytes proposal = 4;
+        repeated bytes proposal = 1;
     }
     message Accept{}
     message MatchAccept{}
     message Decline{}
+    message Inform{
+        bytes bytes = 1;
+    }
 
     int32 message_id = 1;
     int32 dialogue_id = 2;
@@ -29,5 +32,6 @@ message FIPAMessage{
         Accept accept = 6;
         MatchAccept match_accept = 7;
         Decline decline = 8;
+        Inform inform = 9;
     }
 }

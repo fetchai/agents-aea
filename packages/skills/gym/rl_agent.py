@@ -19,6 +19,7 @@
 
 """This contains the rl agent class."""
 
+import logging
 import numpy as np
 import random
 from typing import Any, Dict, TYPE_CHECKING
@@ -31,6 +32,8 @@ else:
 
 NB_STEPS = 4000
 NB_GOODS = 10
+
+logger = logging.getLogger("aea.gym_skill")
 
 
 class PriceBandit(object):
@@ -177,5 +180,5 @@ class MyRLAgent(RLAgent):
             self._update_model(obs, reward, done, info, action)
             action_counter += 1
             if action_counter % 10 == 0:
-                print("Action: step_id='{}' action='{}' reward='{}'".format(action_counter, action, reward))
+                logger.info("Action: step_id='{}' action='{}' reward='{}'".format(action_counter, action, reward))
         proxy_env.close()

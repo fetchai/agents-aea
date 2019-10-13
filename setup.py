@@ -52,20 +52,18 @@ def get_aea_extras() -> Dict[str, List[str]]:
 
 
 def get_all_extras() -> Dict:
-    extras = {
-        "cli": [
-            "click",
-            "click_log",
-            "PyYAML",
-            "jsonschema<3.0.0",
-            "protobuf"
-        ],
-        "cli_gui": [
+    cli_deps = [
             "click",
             "click_log",
             "PyYAML",
             "jsonschema<3.0.0",
             "protobuf",
+            "python-dotenv"
+        ]
+    extras = {
+        "cli": cli_deps,
+        "cli_gui": [
+            *cli_deps,
             "flask",
             "connexion[swagger-ui]"
         ],

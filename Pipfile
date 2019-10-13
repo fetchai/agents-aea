@@ -36,6 +36,7 @@ protobuf = "*"
 flask = "*"
 "connexion[swagger-ui]" = "*"
 watchdog = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.7"

@@ -31,7 +31,7 @@ from click import pass_context
 
 from aea.aea import AEA
 from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
-    AEAConfigException
+    AEAConfigException, _load_env_file
 from aea.cli.install import install
 from aea.connections.base import Connection
 from aea.crypto.base import Crypto
@@ -81,13 +81,16 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
 @click.command()
 @click.option('--connection', 'connection_name', metavar="CONN_NAME", type=str, required=False, default=None,
               help="The connection name. Must be declared in the agent's configuration file.")
+@click.option('--env', 'env_file', type=click.Path(), required=False, default=".env",
+              help="Specify an environment file (default: .env)")
 @click.option('--install-deps', 'install_deps', is_flag=True, required=False, default=False,
               help="Install all the dependencies before running the agent.")
 @pass_context
-def run(click_context, connection_name: str, install_deps: bool):
+def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     _try_to_load_agent_config(ctx)
+    _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
     private_key_pem_path = cast(str, ctx.agent_config.private_key_pem_path)
     if private_key_pem_path == "":
