@@ -77,7 +77,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 
 
 class StubConnection(Connection):
-    """A stub connection.
+    r"""A stub connection.
 
     This connection uses two files to communicate: one for the incoming messages and
     the other for the outgoing messages. Each line contains an encoded envelope.
