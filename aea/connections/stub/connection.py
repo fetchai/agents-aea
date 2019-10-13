@@ -78,23 +78,23 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 class StubConnection(Connection):
     """A stub connection."""
 
-    def __init__(self, in_file_path: str, out_file_path: str):
+    def __init__(self, input_file_path: str, output_file_path: str):
         super().__init__()
 
-        in_file_path = Path(in_file_path)
-        out_file_path = Path(out_file_path)
-        if not in_file_path.exists():
-            in_file_path.touch()
+        input_file_path = Path(input_file_path)
+        output_file_path = Path(output_file_path)
+        if not input_file_path.exists():
+            input_file_path.touch()
 
-        self.in_file = open(in_file_path, "rb+", buffering=1)
-        self.out_file = open(out_file_path, "wb+", buffering=1)
+        self.input_file = open(input_file_path, "rb+", buffering=1)
+        self.output_file = open(output_file_path, "wb+", buffering=1)
 
         self._stopped = True
         self._observer = Observer()
         self._fetch_thread = Thread(target=self._fetch)
 
-        dir = os.path.dirname(in_file_path.absolute())
-        self._event_handler = _ConnectionFileSystemEventHandler(self, in_file_path)
+        dir = os.path.dirname(input_file_path.absolute())
+        self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
         self._observer.schedule(self._event_handler, dir)
 
     @property
@@ -103,13 +103,13 @@ class StubConnection(Connection):
         return not self._stopped
 
     def receive(self):
-        line = self.in_file.readline()
+        line = self.input_file.readline()
+        logger.debug("read line: {}".format(line))
         while len(line) > 0:
             self._process_line(line[:-1])
-            line = self.in_file.readline()
+            line = self.input_file.readline()
 
     def _process_line(self, line):
-        logger.debug("read {}".format(line))
         try:
             envelope = _decode(line, separator=SEPARATOR)
             self.in_queue.put(envelope)
@@ -169,8 +169,8 @@ class StubConnection(Connection):
         """
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
-        self.out_file.write(encoded_envelope + b"\n")
-        self.out_file.flush()
+        self.output_file.write(encoded_envelope + b"\n")
+        self.output_file.flush()
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
@@ -181,8 +181,8 @@ class StubConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        in_file = connection_configuration.config.get("in_file")
-        out_file = connection_configuration.config.get("out_file")
-        return StubConnection(in_file, out_file)
+        input_file = connection_configuration.config.get("input_file")
+        output_file = connection_configuration.config.get("output_file")
+        return StubConnection(input_file, output_file)
 
 
