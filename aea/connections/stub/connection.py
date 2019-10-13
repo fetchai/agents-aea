@@ -99,8 +99,8 @@ class StubConnection(Connection):
 
     or:
 
-        >>> fp = open("input_file", "ab+")
-        >>> fp.write(b"...\n")
+        #>>> fp = open("input_file", "ab+")
+        #>>> fp.write(b"...\n")
 
     """
 
