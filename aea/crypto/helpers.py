@@ -113,37 +113,37 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
         exit(-1)
 
 
-def _try_validate_fet_private_key_path(private_key_path:str) -> None:
+def _try_validate_fet_private_key_path(private_key_path: str) -> None:
     """
-       Try to validate a private key.
+    Try to validate a private key.
 
-       :param private_key_path: the path to the private key.
-       :return: None
-       :raises: an exception if the private key is invalid.
-       """
+    :param private_key_path: the path to the private key.
+    :return: None
+    :raises: an exception if the private key is invalid.
+    """
     try:
         # TODO :Change this to match the enity.fromhex()
         with open(private_key_path, "r") as key:
             data = key.read()
-            entity = Entity.from_hex(data)
+            Entity.from_hex(data)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_path))
         exit(-1)
 
 
-def _try_validate_ethereum_private_key_path(private_key_path:str) -> None:
+def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
     """
-           Try to validate a private key.
+    Try to validate a private key.
 
-           :param private_key_path: the path to the private key.
-           :return: None
-           :raises: an exception if the private key is invalid.
-           """
+    :param private_key_path: the path to the private key.
+    :return: None
+    :raises: an exception if the private key is invalid.
+    """
     try:
         # TODO :Change this to match the Account.fromhex()
         with open(private_key_path, "r") as key:
             data = key.read()
-            account = Account.from_key(data)
+            Account.from_key(data)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_path))
         exit(-1)
