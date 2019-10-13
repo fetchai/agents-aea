@@ -29,6 +29,8 @@ from eth_account import Account     # type: ignore
 from eth_keys import keys       # type: ignore
 from pathlib import Path
 
+from aea.crypto.base import Crypto
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,15 +38,15 @@ class EthCryptoError(Exception):
     """Exception to be thrown when cryptographic signatures don't match!."""
 
 
-class EthCrypto(object):
+class EthCrypto(Crypto):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
     def __init__(self, private_key_path: Optional[str] = None):
         """Instantiate a crypto object."""
         self.account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
         self._display_address = self.account.address
-        self._bytesRepresentation = Web3.toBytes(hexstr=self.account.privateKey.hex())
-        self._public_key = keys.PrivateKey(self._bytesRepresentation).public_key
+        self._bytes_representation = Web3.toBytes(hexstr=self.account.privateKey.hex())
+        self._public_key = keys.PrivateKey(self._bytes_representation).public_key
 
     @property
     def public_key(self) -> str:
@@ -97,8 +99,5 @@ class EthCrypto(object):
 
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""
-        path = Path("eth_pk.txt")
-        pk = Account.create()
-        with open(path, "w+") as file:
-            file.write(pk.privateKey.hex())
-        return pk
+        account = Account.create()
+        return account

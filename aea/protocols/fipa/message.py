@@ -39,6 +39,7 @@ class FIPAMessage(Message):
         ACCEPT = "accept"
         MATCH_ACCEPT = "match_accept"
         DECLINE = "decline"
+        INFORM = "inform"
         ACCEPT_W_ADDRESS = "accept_w_address"
         MATCH_ACCEPT_W_ADDRESS = "match_accept_w_address"
 
@@ -59,7 +60,7 @@ class FIPAMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(id=message_id,
+        super().__init__(message_id=message_id,
                          dialogue_id=dialogue_id,
                          target=target,
                          performative=FIPAMessage.Performative(performative),
@@ -69,6 +70,8 @@ class FIPAMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
+            assert self.is_set("message_id")
+            assert self.is_set("dialogue_id")
             assert self.is_set("target")
             performative = FIPAMessage.Performative(self.get("performative"))
             if performative == FIPAMessage.Performative.CFP:
@@ -79,10 +82,14 @@ class FIPAMessage(Message):
                 assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
             elif performative == FIPAMessage.Performative.ACCEPT \
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
-                    or performative == FIPAMessage.Performative.DECLINE\
-                    or performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS\
-                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+                    or performative == FIPAMessage.Performative.DECLINE:
                 pass  # pragma: no cover
+            elif performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS\
+                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+                assert self.is_set("address")
+            elif performative == FIPAMessage.Performative.INFORM:
+                data = self.get("data")
+                assert isinstance(data, bytes)
             else:
                 raise ValueError("Performative not recognized.")
 

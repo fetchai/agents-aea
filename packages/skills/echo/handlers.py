@@ -19,8 +19,12 @@
 
 """This module contains the handler for the 'echo' skill."""
 
-from aea.mail.base import Envelope
+import logging
+
+from aea.protocols.base import Message
 from aea.skills.base import Handler
+
+logger = logging.getLogger("aea.echo_skill")
 
 
 class EchoHandler(Handler):
@@ -30,20 +34,21 @@ class EchoHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        print("EchoHandler.__init__: arguments: {}".format(kwargs))
+        logger.info("EchoHandler.__init__: arguments: {}".format(kwargs))
 
     def setup(self) -> None:
         """Set up the handler."""
-        print("Echo Handler: setup method called.")
+        logger.info("Echo Handler: setup method called.")
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Handle envelopes.
+        Handle the message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        print("Echo Handler: envelope={}".format(envelope))
+        logger.info("Echo Handler: message={}, sender={}".format(message, sender))
 
     def teardown(self) -> None:
         """
@@ -51,4 +56,4 @@ class EchoHandler(Handler):
 
         :return: None
         """
-        print("Echo Handler: teardown method called.")
+        logger.info("Echo Handler: teardown method called.")

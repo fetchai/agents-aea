@@ -19,7 +19,7 @@
 
 """This module contains the handler for the 'echo' skill."""
 
-from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 
@@ -32,7 +32,7 @@ class DummyHandler(Handler):
         """Initialize the handler."""
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_envelopes = []
+        self.handled_messages = []
         self.nb_teardown_called = 0
 
     def setup(self) -> None:
@@ -43,14 +43,15 @@ class DummyHandler(Handler):
         """
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Handle envelopes.
+        Handle messages.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        self.handled_envelopes.append(envelope)
+        self.handled_messages.append(message)
 
     def teardown(self) -> None:
         """

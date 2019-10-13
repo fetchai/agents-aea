@@ -43,7 +43,6 @@ class TransactionCleanUpTask(Task):
         """
         Implement the task execution.
 
-        :param envelope: the envelope
         :return: None
         """
         transactions = cast(Transactions, self.context.transactions)

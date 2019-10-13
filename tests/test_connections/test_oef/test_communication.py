@@ -24,7 +24,7 @@ import pytest
 from unittest import mock
 
 from aea.connections.oef.connection import OEFMailBox
-from aea.crypto.base import Crypto
+from aea.crypto.base import DefaultCrypto
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
@@ -37,7 +37,7 @@ from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
 def test_connection(network_node):
     """Test that a mailbox can connect to the OEF."""
-    crypto = Crypto()
+    crypto = DefaultCrypto()
     mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
     mailbox.connect()
 
@@ -54,7 +54,7 @@ class TestDefault:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.crypto1 = Crypto()
+        cls.crypto1 = DefaultCrypto()
         cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
         cls.mailbox1.connect()
 
@@ -86,7 +86,7 @@ class TestOEF:
         @classmethod
         def setup_class(cls):
             """Set the test up."""
-            cls.crypto1 = Crypto()
+            cls.crypto1 = DefaultCrypto()
             cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
             cls.mailbox1.connect()
 
@@ -134,7 +134,7 @@ class TestOEF:
         @classmethod
         def setup_class(cls):
             """Set the test up."""
-            cls.crypto1 = Crypto()
+            cls.crypto1 = DefaultCrypto()
             cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
             cls.mailbox1.connect()
 
@@ -171,7 +171,7 @@ class TestOEF:
             - Register a service
             - Check that the registration worked.
             """
-            cls.crypto1 = Crypto()
+            cls.crypto1 = DefaultCrypto()
             cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
             cls.mailbox1.connect()
 
@@ -235,8 +235,8 @@ class TestFIPA:
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
-        cls.crypto1 = Crypto()
-        cls.crypto2 = Crypto()
+        cls.crypto1 = DefaultCrypto()
+        cls.crypto2 = DefaultCrypto()
         cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
         cls.mailbox2 = OEFMailBox(cls.crypto2.public_key, oef_addr="127.0.0.1", oef_port=10000)
         cls.mailbox1.connect()
@@ -319,7 +319,7 @@ class TestFIPA:
                                   query=b"hello")
             cfp_msg.set("query", "hello")
             fipa_msg = fipa_pb2.FIPAMessage()
-            fipa_msg.message_id = cfp_msg.get("id")
+            fipa_msg.message_id = cfp_msg.get("message_id")
             fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
             fipa_msg.target = cfp_msg.get("target")
             performative = fipa_pb2.FIPAMessage.CFP()
@@ -337,7 +337,7 @@ class TestFIPA:
                     as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 fipa_msg = fipa_pb2.FIPAMessage()
-                fipa_msg.message_id = cfp_msg.get("id")
+                fipa_msg.message_id = cfp_msg.get("message_id")
                 fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
                 fipa_msg.target = cfp_msg.get("target")
                 performative = fipa_pb2.FIPAMessage.CFP()

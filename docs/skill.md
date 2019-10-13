@@ -1,11 +1,11 @@
-An agent developer writes skill code that the framework can call.
+An agent developer writes skills that the framework can call.
 
 When you add a skill with the CLI, a directory is created which includes modules for the `Behaviour,` `Task`, and `Handler` classes as well as a configuration file `skill.yaml`.
 
 
 ## Context
 
-The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context has a link to the agent context also. The agent context provides read access to agent specific information like the private key of the agent, its preferences and ownership state. It also provides access to the `OutBox`.
+The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context also has a link to the agent context. The agent context provides read access to agent specific information like the private key of the agent, its preferences and ownership state. It also provides access to the `OutBox`.
 
 This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill and the agent.
 
@@ -41,7 +41,7 @@ There can be none, one or more `Handler` class per skill.
 
 Conceptually, a `Behaviour`  class contains the business logic specific to initial actions initiated by the agent rather than reactions to other events.
 
-There can be one or more `Behaviour` classes per skill. The developer subclasses abstract class `Behaviour` to create a new `Behaviour`.
+There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
 * `act(self)`: is how the framework calls the `Behaviour` code. 
 
@@ -79,7 +79,7 @@ some_class = self.context.some_class
 
 Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
 
-It also details the protocol types used in the skill and points to shared modules, modules of type `SharedClass`, which allow custom classes within the skill to be accessible in the skill context.
+It also details the protocol types used in the skill and points to shared modules, i.e. modules of type `SharedClass`, which allow custom classes within the skill to be accessible in the skill context.
 
 ``` yaml
 name: echo
@@ -117,12 +117,12 @@ protocols: ["default"]
 
 ## Error skill
 
-All top level AEA `skills` directories receive a default `error` skill that contains error handling code for a number of scenarios.
+All top level AEA `skills` directories receive a default `error` skill that contains error handling code for a number of scenarios:
 
 * Received envelopes with unsupported protocols 
-* Received envelopes with unsupported skills (i.e. protocols for which no handler is registered).
-* Envelopes with decoding errors.
-* Invalid messages with respect to the registered protocol.
+* Received envelopes with unsupported skills (i.e. protocols for which no handler is registered)
+* Envelopes with decoding errors
+* Invalid messages with respect to the registered protocol
 
 The error skill relies on the `default` protocol which provides error codes for the above.
 

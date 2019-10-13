@@ -32,7 +32,8 @@ from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, 
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
 from aea.decision_maker.base import OwnershipState, Preferences
-from aea.mail.base import OutBox, Envelope
+from aea.mail.base import OutBox
+from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
 
@@ -219,11 +220,12 @@ class Handler(ABC):
         return self._config
 
     @abstractmethod
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to a message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
 
@@ -485,14 +487,29 @@ class Skill:
 
         skill_context = SkillContext(agent_context)
 
-        handlers_configurations = list(dict(skill_config.handlers.read_all()).values())
-        handlers = Handler.parse_module(os.path.join(directory, "handlers.py"), handlers_configurations, skill_context)
-        behaviours_configurations = list(dict(skill_config.behaviours.read_all()).values())
-        behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations, skill_context)
-        tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
-        tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
-        shared_classes_configurations = list(dict(skill_config.shared_classes.read_all()).values())
-        shared_classes_instances = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
+        if skill_config.handlers:
+            handlers_configurations = list(dict(skill_config.handlers.read_all()).values())
+            handlers = Handler.parse_module(os.path.join(directory, "handlers.py"), handlers_configurations, skill_context)
+        else:
+            handlers = []
+
+        if skill_config.behaviours:
+            behaviours_configurations = list(dict(skill_config.behaviours.read_all()).values())
+            behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations, skill_context)
+        else:
+            behaviours = []
+
+        if skill_config.tasks:
+            tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
+            tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
+        else:
+            tasks = []
+
+        if skill_config.shared_classes:
+            shared_classes_configurations = list(dict(skill_config.shared_classes.read_all()).values())
+            shared_classes_instances = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
+        else:
+            shared_classes_instances = []
 
         skill = Skill(skill_config, skill_context, handlers, behaviours, tasks, shared_classes_instances)
         skill_context._skill = skill

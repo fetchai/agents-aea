@@ -35,7 +35,7 @@ class FIPASerializer(Serializer):
     def encode(self, msg: Message) -> bytes:
         """Encode a FIPA message into bytes."""
         fipa_msg = fipa_pb2.FIPAMessage()
-        fipa_msg.message_id = msg.get("id")
+        fipa_msg.message_id = msg.get("message_id")
         fipa_msg.dialogue_id = msg.get("dialogue_id")
         fipa_msg.target = msg.get("target")
 
@@ -81,6 +81,12 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.DECLINE:
             performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.INFORM:
+            performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
+            data = msg.get("data")
+            data_bytes = pickle.dumps(data)
+            performative.bytes = data_bytes
+            fipa_msg.inform.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -127,6 +133,9 @@ class FIPASerializer(Serializer):
             performative_content['address'] = address
         elif performative_id == FIPAMessage.Performative.DECLINE:
             pass
+        elif performative_id == FIPAMessage.Performative.INFORM:
+            data = pickle.loads(fipa_pb.inform.bytes)
+            performative_content["data"] = data
         else:
             raise ValueError("Performative not valid: {}.".format(performative))
 

@@ -25,6 +25,8 @@ import logging
 from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
 from pathlib import Path
 
+from aea.crypto.base import Crypto
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,7 +34,7 @@ class FetchCryptoError(Exception):
     """Exception to be thrown when cryptographic signatures don't match!."""
 
 
-class FetchCrypto(object):
+class FetchCrypto(Crypto):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
     def __init__(self, private_key_path: Optional[str] = None):
@@ -109,8 +111,5 @@ class FetchCrypto(object):
             logger.exception(str(e))
 
     def _generate_private_key(self) -> Entity:
-        path = Path("fet_pk.txt")
         entity = Entity()
-        with open(path, "w+") as file:
-            file.write(entity.private_key_hex)
         return entity

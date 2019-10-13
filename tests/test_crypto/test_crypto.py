@@ -23,7 +23,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, \
     load_pem_private_key
 
-from aea.crypto.base import Crypto
+from aea.crypto.base import DefaultCrypto
 from ..conftest import ROOT_DIR
 
 
@@ -33,7 +33,7 @@ def test_initialization_from_existing_private_key():
 
     private_key = load_pem_private_key(open(private_key_pem_path, "rb").read(), None, default_backend())
 
-    c = Crypto(private_key_pem_path=private_key_pem_path)
+    c = DefaultCrypto(private_key_pem_path=private_key_pem_path)
 
     expected_public_key = private_key.public_key().public_bytes(encoding=Encoding.PEM, format=PublicFormat.SubjectPublicKeyInfo)
     actual_public_key = c.public_key_pem

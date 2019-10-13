@@ -21,6 +21,7 @@
 
 import importlib.util
 import logging
+import logging.config
 import os
 import sys
 from pathlib import Path
@@ -29,6 +30,7 @@ from typing import Dict, List, cast
 import click
 import click_log
 import jsonschema  # type: ignore
+from dotenv import load_dotenv
 
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
     DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
@@ -98,6 +100,7 @@ def _try_to_load_agent_config(ctx: Context):
         path = Path(DEFAULT_AEA_CONFIG_FILE)
         fp = open(str(path), mode="r", encoding="utf-8")
         ctx.agent_config = ctx.agent_loader.load(fp)
+        logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         logger.error("Agent configuration file '{}' not found in the current directory. "
                      "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
@@ -126,6 +129,16 @@ def _try_to_load_protocols(ctx: Context):
         except FileNotFoundError:
             logger.error("Protocol {} not found in registry".format(protocol_name))
             exit(-1)
+
+
+def _load_env_file(env_file: str):
+    """
+    Load the content of the environment file into the process environment.
+
+    :param env_file: path to the env file.
+    :return: None.
+    """
+    load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
 class AEAConfigException(Exception):
