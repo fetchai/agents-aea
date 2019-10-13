@@ -35,6 +35,7 @@ jsonschema = "<3.0.0"
 protobuf = "*"
 flask = "*"
 "connexion[swagger-ui]" = "*"
+watchdog = "*"
 python-dotenv = "*"
 
 [requires]

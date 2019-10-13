@@ -223,7 +223,7 @@ class HandlerConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return HandlerConfig(
             class_name=class_name,
-            args=obj.get("args", {})
+            **obj.get("args", {})
         )
 
 
@@ -249,7 +249,7 @@ class BehaviourConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return BehaviourConfig(
             class_name=class_name,
-            args=obj.get("args", {})
+            **obj.get("args", {})
         )
 
 
@@ -275,7 +275,7 @@ class TaskConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return TaskConfig(
             class_name=class_name,
-            args=obj.get("args", {})
+            **obj.get("args", {})
         )
 
 
