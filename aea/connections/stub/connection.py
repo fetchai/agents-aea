@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -21,8 +20,8 @@
 """This module contains the stub connection."""
 import logging
 import os
-import time
 from pathlib import Path
+from queue import Empty
 from threading import Thread
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
@@ -63,7 +62,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
 
 
 def _decode(e: bytes, separator: bytes = SEPARATOR):
-    split = e.split(separator)
+    split = e.split(separator, maxsplit=3)
 
     if len(split) != 4:
         raise ValueError("Expected 4 values, got {}".format(len(split)))
@@ -92,6 +91,7 @@ class StubConnection(Connection):
 
         self._stopped = True
         self._observer = Observer()
+        self._fetch_thread = Thread(target=self._fetch)
 
         dir = os.path.dirname(in_file_path.absolute())
         self._event_handler = _ConnectionFileSystemEventHandler(self, in_file_path)
@@ -126,6 +126,7 @@ class StubConnection(Connection):
             self._stopped = False
             try:
                 self._observer.start()
+                self._fetch_thread.start()
             except Exception as e:
                 self._stopped = True
                 raise e
@@ -140,11 +141,25 @@ class StubConnection(Connection):
         """
         if not self._stopped:
             self._stopped = True
+            self._fetch_thread.join()
             try:
                 self._observer.stop()
             except Exception as e:
                 self._stopped = False
                 raise e
+
+    def _fetch(self) -> None:
+        """
+        Fetch the messages from the outqueue and send them.
+
+        :return: None
+        """
+        while not self._stopped:
+            try:
+                msg = self.out_queue.get(block=True, timeout=1.0)
+                self.send(msg)
+            except Empty:
+                pass
 
     def send(self, envelope: Envelope):
         """
@@ -155,6 +170,7 @@ class StubConnection(Connection):
         encoded_envelope = _encode(envelope, separator=SEPARATOR)
         logger.debug("write {}".format(encoded_envelope))
         self.out_file.write(encoded_envelope + b"\n")
+        self.out_file.flush()
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':

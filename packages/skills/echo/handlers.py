@@ -20,6 +20,7 @@
 """This module contains the handler for the 'echo' skill."""
 
 from aea.protocols.base import Message
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 
@@ -30,6 +31,7 @@ class EchoHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
+        super().__init__(**kwargs)
         print("EchoHandler.__init__: arguments: {}".format(kwargs))
 
     def setup(self) -> None:
@@ -44,7 +46,9 @@ class EchoHandler(Handler):
         :param sender: the sender
         :return: None
         """
-        print("Echo Handler: message={}, sender={}".format(message, sender))
+        print("Echo Handler: received message: {}, sender={}".format(message, sender))
+        self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id="default",
+                                        message=DefaultSerializer().encode(message))
 
     def teardown(self) -> None:
         """

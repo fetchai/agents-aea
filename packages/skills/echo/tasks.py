@@ -28,6 +28,7 @@ class EchoTask(Task):
 
     def __init__(self, **kwargs):
         """Initialize the task."""
+        super().__init__(**kwargs)
         print("EchoTask.__init__: arguments: {}".format(kwargs))
 
     def setup(self) -> None:

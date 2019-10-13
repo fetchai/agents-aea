@@ -136,6 +136,9 @@ class Envelope:
                             protocol_id=protocol_id, message=message)
         return envelope
 
+    def __str__(self):
+        return "Envelope(to={to}, sender={sender}, protocol_id={protocol_id}, message={message})"\
+            .format(to=self.to, sender=self.sender, protocol_id=self.protocol_id, message=self.message)
 
 class InBox(object):
     """A queue from where you can only consume messages."""

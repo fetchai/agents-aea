@@ -1,4 +1,4 @@
-name: oef
+name: stub
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
@@ -10,6 +10,5 @@ supported_protocols:
   - default
   - fipa
   - gym
-  - tac
 config: {}
 dependencies: []

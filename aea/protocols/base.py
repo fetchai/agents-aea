@@ -94,6 +94,9 @@ class Message:
         return isinstance(other, Message) \
             and self.body == other.body
 
+    def __str__(self):
+        return "Message(" + " ".join(map(lambda key_value: str(key_value[0]) + "=" + str(key_value[1]), self.body.items())) + ")"
+
 
 class Encoder(ABC):
     """Encoder interface."""
