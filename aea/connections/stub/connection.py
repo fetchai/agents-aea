@@ -91,7 +91,6 @@ class StubConnection(Connection):
         recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
 
     The connection detects new messages by watchdogging the input file looking for new lines.
-    At the moment, the implementation does not handle very well the case when the file gets modified.
 
     To post a message on the input file, you can use e.g.
 
@@ -102,6 +101,7 @@ class StubConnection(Connection):
         #>>> fp = open("input_file", "ab+")
         #>>> fp.write(b"...\n")
 
+    It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
     def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path]):
