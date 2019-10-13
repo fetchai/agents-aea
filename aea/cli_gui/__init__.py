@@ -20,6 +20,7 @@
 """Main app for CLI GUI."""
 
 import argparse
+from enum import Enum
 import glob
 import os
 import subprocess
@@ -47,6 +48,17 @@ elements = [['local', 'agent', 'localAgents'],
             ['local', 'connection', 'localConnections'],
             ['local', 'skill', 'localSkills']]
 
+
+class OEFProcessState(Enum):
+    """The state of execution of the OEF Node."""
+
+    NOT_STARTED = "Not started yet"
+    RUNNING = "Running"
+    STOPPING = "Stopping"
+    FINISHED = "Finished"
+    FAILED = "Failed"
+
+oef_node_name = "aea_local_oef_node"
 
 def read_description(dir_name, yaml_name):
     """Return true if this directory contains an items in an AEA project i.e.  protocol, skill or connection."""
@@ -173,6 +185,50 @@ def scaffold_item(agent_id, item_type, item_id):
         return {"detail": "Failed to scaffold a new {} in to agent {}".format(item_type, agent_id)}, 400  # 400 Bad request
 
 
+
+def start_oef_node(dummy):
+    """Start an OEF node running."""
+    flask.app.ui_is_starting = True
+
+    old_cwd = os.getcwd()
+
+    CUR_DIR = os.path.abspath(os.path.dirname(__file__))
+    os.chdir(os.path.join(CUR_DIR, "../../"))
+
+    kill_running_oef_nodes()
+
+
+    param_list = [
+        "python",
+        "scripts/oef/launch.py",
+        "--disable_stdin",
+        "--name",
+        oef_node_name,
+        "-c",
+        "./scripts/oef/launch_config.json"]
+
+    flask.app.oef_process = subprocess.Popen(param_list)
+
+    os.chdir(old_cwd)
+
+    if flask.app.oef_process is not None:
+        return "All fine {}".format(dummy), 200   # 200 (OK)
+    else:
+        return {"detail": "Failed to start OEF Node"}, 400  # 400 Bad request
+
+def get_oef_node_status():
+    """Get the status of the OEF Node."""
+    return str(get_oef_process_status()), 200  # (OK)
+
+
+def stop_oef_node():
+    """Stop an OEF node running."""
+
+    kill_running_oef_nodes()
+    flask.app.oef_process = None
+    return "All fine", 200  # 200 (OK)
+
+
 def _call_aea(param_list, dir):
     old_cwd = os.getcwd()
     os.chdir(dir)
@@ -181,10 +237,37 @@ def _call_aea(param_list, dir):
     return ret
 
 
+def get_oef_process_status() -> OEFProcessState:
+    """Return the state of the execution."""
+    if flask.app.oef_process is None:
+        return OEFProcessState.NOT_STARTED
+
+    return_code = flask.app.oef_process.poll()
+    if return_code is None:
+        if flask.app.ui_is_starting:
+            return OEFProcessState.RUNNING
+        else:
+            return OEFProcessState.STOPPING
+    elif return_code == 0:
+        return OEFProcessState.FINISHED
+    elif return_code > 0:
+        return OEFProcessState.FAILED
+    else:
+        raise ValueError("Unexpected return code.")
+
+def kill_running_oef_nodes():
+    print("In case there is an OEF node running already - kill it off!")
+    subprocess.call(['docker', 'kill', oef_node_name])
+
+
 def run():
     """Run the flask server."""
+    kill_running_oef_nodes()
     CUR_DIR = os.path.abspath(os.path.dirname(__file__))
     app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
+    flask.app.oef_process = None
+    flask.app.ui_is_starting = False
+
     app.add_api('aea_cli_rest.yaml')
 
     @app.route('/')

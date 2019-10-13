@@ -221,3 +221,61 @@ paths:
             type: array
             items:
               type: string
+
+  /oef:
+    post:
+      operationId: aea.cli_gui.start_oef_node
+      tags:
+      - oef
+      summary: Start an OEF node that our agents can communicate with
+      parameters:
+        - name: dummy
+          in: body
+          description: Seeing if this makes it work
+          schema:
+            type: string
+          required: True
+      responses:
+        201:
+          description: Start the OEF Nodoe
+          schema:
+            type: string
+
+        400:
+          description: Cannot start node
+          schema:
+            type: string
+
+    get:
+      operationId: aea.cli_gui.get_oef_node_status
+      tags:
+      - oef
+      summary: Get status info about the oef
+
+      responses:
+        201:
+          description: successfully got status data
+          schema:
+            type: string
+
+        400:
+          description: Cannot get status data
+          schema:
+            type: string
+
+    delete:
+      operationId: aea.cli_gui.stop_oef_node
+      tags:
+      - oef
+      summary: Stops an OEF node
+
+      responses:
+        201:
+          description: successfully started OEF Node
+          schema:
+            type: string
+
+        400:
+          description: Cannot stop node
+          schema:
+            type: string

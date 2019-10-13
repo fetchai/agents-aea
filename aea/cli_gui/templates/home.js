@@ -44,6 +44,23 @@ class Model{
         })
     }
 
+    readOEFStatus() {
+        var ajax_options = {
+            type: 'GET',
+            url: 'api/oef',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_OEFStatusReadSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
     createItem(element, id){
         var ajax_options = {
             type: 'POST',
@@ -152,12 +169,52 @@ class Model{
             self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
         })
     }
+    startOEFNode(){
+        var ajax_options = {
+            type: 'POST',
+            url: 'api/oef',
+            accepts: 'application/json',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify("Test dumyy")
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_StartOEFNodeSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+    stopOEFNode(){
+        var ajax_options = {
+            type: 'DELETE',
+            url: 'api/oef',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_StopOEFNodeSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
 
 }
 
 class View{
     constructor(){
         this.$event_pump = $('body');
+
+    }
+
+    setOEFStatus(status){
+        $('#oefStatus').html(status);
     }
 
     setCreateId(tag, id) {
@@ -324,6 +381,7 @@ class Controller{
                     alert('Error: Problem with id');
                 }
             });
+
             // Handle the model events
             this.$event_pump.on('model_'+ combineName + 'ReadSuccess', {el: element}, function(e, data) {
                 self.view.build_table(data, e.data.el["combined"]);
@@ -363,8 +421,26 @@ class Controller{
                 self.view.setScaffoldId(e.data.el["combined"], "")
                 self.handleButtonStates()
             });
-        }
 
+        }
+        this.$event_pump.on('model_OEFStatusReadSuccess', function(e, data) {
+            self.view.setOEFStatus(data)
+            self.handleButtonStates()
+        });
+
+
+        $('#startOEFNode').click({el: element}, function(e) {
+            e.preventDefault();
+
+            self.model.startOEFNode()
+            e.preventDefault();
+        });
+        $('#stopOEFNode').click({el: element}, function(e) {
+            e.preventDefault();
+
+            self.model.stopOEFNode()
+            e.preventDefault();
+        });
 
         this.$event_pump.on('model_error', {el: element}, function(e, xhr, textStatus, errorThrown) {
             var error_msg = textStatus + ': ' + errorThrown + ' - ' + xhr.responseJSON.detail;
@@ -377,15 +453,18 @@ class Controller{
 
         $('#localAgentsCreateId').on('input', function(e){
             self.handleButtonStates()
-            });
+        });
         $('#localAgentsSelectedId').on('input', function(e){
             self.handleButtonStates()
-            });
+        });
 
         for (var j = 0; j < elements.length; j++) {
             $('#'+ elements[j]["combined"] + 'ScaffoldId').on('input', function(e){
                 self.handleButtonStates()});
         }
+
+        this.getOEFStatus();
+
 
     }
 
@@ -442,6 +521,19 @@ class Controller{
 
         }
 
+        var isOEFStopped = $('#oefStatus').html().includes("NOT_STARTED")
+        $('#startOEFNode').prop('disabled',!isOEFStopped);
+        $('#stopOEFNode').prop('disabled', isOEFStopped);
+
+
+    }
+
+    getOEFStatus(){
+        this.model.readOEFStatus()
+        self = this
+        setTimeout(function() {
+            self.getOEFStatus()
+        }, 500)
 
     }
 

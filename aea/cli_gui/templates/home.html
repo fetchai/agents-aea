@@ -15,6 +15,8 @@
     <div class="container">
         <h1 class="banner">Fetch.AI AEA CLI REST API</h1>
         <div class="split left">
+            <h2 class="banner">Local Agents</h2>
+
             <div class="section editor">
                 <label for="localAgentsCreateId">Create Agent id
                     <input id="localAgentsCreateId" type="text" />
@@ -77,9 +79,16 @@
                 <div class="error"></div>
                 <button id="localAgentsDelete">Delete Agent</button>
             </div>
+
+            <br>
+            <br>
+            <br>
+
         </div>
 
         <div class="split right">
+            <h2 class="banner">The Registry</h2>
+
             {% for i in range(0, len) %}
                 {% if htmlElements[i][0] == "registered"%}
                     <div class="section editor">
@@ -104,8 +113,18 @@
                     <br>
                 {% endif %}
             {% endfor %}
+            <div class="section editor">
+                <h2>OEF Node</h2>
+                <button id="startOEFNode">Start OEF Node</button>
+                <button id="stopOEFNode">Stop OEF Node</button>
+                <h3 id="oefStatus">Status: NONE</h3>
+            </div>
+            <br>
+            <br>
+            <br>
 
         </div>
+
     </div>
 </body>
 <script src="static/js/home.js"></script>

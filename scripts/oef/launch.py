@@ -70,8 +70,16 @@ def launch_job(args, j):
     ]
     if args.background:
         c += ['-d']
-    else:
+    elif not args.disable_stdin:
         c += ['-it']
+    else:
+        c += ['-t']
+
+
+    if args.name:
+        c += ['--name']
+        c += [args.name]
+
     work_dir = os.path.abspath(os.path.dirname(__file__))
     project_dir = os.path.abspath(os.path.join(work_dir, '..', '..'))
     print("Work dir: ", work_dir)
@@ -111,6 +119,8 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--config', required=True, type=str, help='Publish the image to GCR')
     parser.add_argument("--sudo", required=False, action='store_true', help="Run docker as root")
     parser.add_argument("--background", required=False,  action='store_true', help="Run image in background.")
+    parser.add_argument("--disable_stdin", required=False,  action='store_true', help="Disable disable_stdin.")
+    parser.add_argument('-n', '--name', required=False, type=str, help='give thre container a name')
     parser.add_argument("--cmd", required=False, type=str, default="oef-search", help="The available commands are defined"
                                                                                     " in the config file "
                                                                                     "('cmd' dictionary) ")
