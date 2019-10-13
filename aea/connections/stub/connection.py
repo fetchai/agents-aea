@@ -23,6 +23,7 @@ import os
 from pathlib import Path
 from queue import Empty
 from threading import Thread
+from typing import Union
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
@@ -38,7 +39,7 @@ SEPARATOR = b","
 
 class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
 
-    def __init__(self, connection, file_to_observe: str):
+    def __init__(self, connection, file_to_observe: Union[str, Path]):
         self._connection = connection
         self._file_to_observe = Path(file_to_observe).absolute()
 
@@ -67,18 +68,49 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
     if len(split) != 4:
         raise ValueError("Expected 4 values, got {}".format(len(split)))
 
-    to = split[0].decode("utf-8")
-    sender = split[1].decode("utf-8")
-    protocol_id = split[2].decode("utf-8")
+    to = split[0].decode("utf-8").strip()
+    sender = split[1].decode("utf-8").strip()
+    protocol_id = split[2].decode("utf-8").strip()
     message = split[3]
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
 
 
 class StubConnection(Connection):
-    """A stub connection."""
+    r"""A stub connection.
 
-    def __init__(self, input_file_path: str, output_file_path: str):
+    This connection uses two files to communicate: one for the incoming messages and
+    the other for the outgoing messages. Each line contains an encoded envelope.
+
+    The format of each line is the following:
+
+        TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
+
+    e.g.:
+
+        recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+
+    The connection detects new messages by watchdogging the input file looking for new lines.
+    At the moment, the implementation does not handle very well the case when the file gets modified.
+
+    To post a message on the input file, you can use e.g.
+
+        echo "..." >> input_file
+
+    or:
+
+        >>> fp = open("input_file", "ab+")
+        >>> fp.write(b"...\n")
+
+    """
+
+    def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path]):
+        """
+        Initialize a stub connection.
+
+        :param input_file_path: the input file for the incoming messages.
+        :param output_file_path: the output file for the outgoing messages.
+        """
         super().__init__()
 
         input_file_path = Path(input_file_path)
@@ -102,14 +134,19 @@ class StubConnection(Connection):
         """Get the connection status."""
         return not self._stopped
 
-    def receive(self):
+    def receive(self) -> None:
+        """Receive new messages, if any."""
         line = self.input_file.readline()
         logger.debug("read line: {}".format(line))
         while len(line) > 0:
             self._process_line(line[:-1])
             line = self.input_file.readline()
 
-    def _process_line(self, line):
+    def _process_line(self, line) -> None:
+        """Process a line of the file.
+
+        Decode the line to get the envelope, and put it in the agent's inbox.
+        """
         try:
             envelope = _decode(line, separator=SEPARATOR)
             self.in_queue.put(envelope)
@@ -181,8 +218,6 @@ class StubConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        input_file = connection_configuration.config.get("input_file")
-        output_file = connection_configuration.config.get("output_file")
+        input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
+        output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
         return StubConnection(input_file, output_file)
-
-

@@ -95,6 +95,7 @@ class Message:
             and self.body == other.body
 
     def __str__(self):
+        """Get the string representation of the message."""
         return "Message(" + " ".join(map(lambda key_value: str(key_value[0]) + "=" + str(key_value[1]), self.body.items())) + ")"
 
 

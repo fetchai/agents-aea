@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -137,8 +136,10 @@ class Envelope:
         return envelope
 
     def __str__(self):
+        """Get the string representation of an envelope."""
         return "Envelope(to={to}, sender={sender}, protocol_id={protocol_id}, message={message})"\
             .format(to=self.to, sender=self.sender, protocol_id=self.protocol_id, message=self.message)
+
 
 class InBox(object):
     """A queue from where you can only consume messages."""
@@ -228,8 +229,7 @@ class OutBox(object):
         :param message: the content of the message.
         :return: None
         """
-        envelope = Envelope(to=to, sender=sender,
-                            protocol_id=protocol_id, message=message)
+        envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
         self._queue.put(envelope)
 
 

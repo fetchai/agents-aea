@@ -42,12 +42,12 @@ class EchoHandler(Handler):
         """
         Handle the message.
 
-        :param message: the message
-        :param sender: the sender
+        :param message: the message.
+        :param sender: the sender.
         :return: None
         """
         print("Echo Handler: received message: {}, sender={}".format(message, sender))
-        self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id="default",
+        self.context.outbox.put_message(to=sender, sender=self.context.agent_name, protocol_id="default",
                                         message=DefaultSerializer().encode(message))
 
     def teardown(self) -> None:

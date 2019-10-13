@@ -13,4 +13,5 @@ supported_protocols:
 config:
   input_file: "./input_file"
   output_file: "./output_file"
-dependencies: []
+dependencies:
+  - watchdog
