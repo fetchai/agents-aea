@@ -33,13 +33,13 @@ from jsonschema import ValidationError
 import aea
 from aea.cli.add import connection, add, skill
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.cli.list import list as _list
 from aea.cli.install import install
+from aea.cli.list import list as _list
 from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, DEFAULT_PRIVATE_KEY_PATHS
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 DEFAULT_CONNECTION = "oef"
 DEFAULT_SKILL = "error"
@@ -69,7 +69,7 @@ def create(click_context, agent_name):
 
         # create a config file inside it
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", registry_path="../packages", private_key_paths=DEFAULT_PRIVATE_KEY_PATHS)
+        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", registry_path="../packages")
         agent_config.default_connection = DEFAULT_CONNECTION
         ctx.agent_loader.dump(agent_config, config_file)
         logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))

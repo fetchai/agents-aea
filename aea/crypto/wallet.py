@@ -22,10 +22,13 @@
 from typing import Dict, cast
 
 from aea.crypto.base import Crypto, DefaultCrypto
-from aea.crypto.fetchai_base import FetchCrypto
 from aea.crypto.ethereum_base import EthCrypto
+from aea.crypto.fetchai_base import FetchCrypto
 
-SUPPORTED_CRYPTOS = ['default', 'fetchai', 'ethereum']
+FETCHAI = "fetchai"
+DEFAULT = "default"
+ETHEREUM = "ethereum"
+SUPPORTED_CRYPTOS = [DEFAULT, FETCHAI, ETHEREUM]
 
 
 class Wallet(object):
@@ -39,13 +42,13 @@ class Wallet(object):
         """
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
-        for identifier in private_key_paths.keys():
-            if identifier == 'default':
-                crypto_objects[identifier] = DefaultCrypto(private_key_paths['default'])
-            elif identifier == 'fetchai':
-                crypto_objects[identifier] = FetchCrypto(private_key_paths['fetchai'])
-            elif identifier == 'ethereum':
-                crypto_objects[identifier] = EthCrypto(private_key_paths['ethereum'])
+        for identifier, path in private_key_paths.items():
+            if identifier == DEFAULT:
+                crypto_objects[identifier] = DefaultCrypto(path)
+            elif identifier == FETCHAI:
+                crypto_objects[identifier] = FetchCrypto(path)
+            elif identifier == ETHEREUM:
+                crypto_objects[identifier] = EthCrypto(path)
             else:
                 ValueError("Unsupported identifier in private key paths.")
             crypto = cast(Crypto, crypto_objects.get(identifier))

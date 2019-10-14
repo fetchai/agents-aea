@@ -25,13 +25,15 @@
         "url": {"type": "string"},
         "registry_path": {"type": "string"},
         "private_key_paths": {
+            "type": "array",
+            "additionalProperties": false,
             "uniqueItems": true,
             "items": {
-              "type": "object",
-              "required": ["private_key_path"],
-              "properties": {
-                "task": { "$ref": "#/definitions/private_key_path" }
-              }
+                "type": "object",
+                "required": ["private_key_path"],
+                "properties": {
+                    "private_key_path": { "$ref": "#/definitions/private_key_path" }
+                }
             }
         },
         "connections": {
@@ -57,6 +59,7 @@
     "definitions": {
         "private_key_path": {
             "type": "object",
+            "additionalProperties": false,
             "required": ["ledger", "path"],
             "properties": {
                 "ledger": {"type": "string"},
