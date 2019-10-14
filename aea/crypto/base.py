@@ -20,6 +20,7 @@
 
 """Module wrapping the public and private key cryptography."""
 
+from abc import ABC, abstractmethod
 from typing import Optional
 
 import base58
@@ -45,7 +46,19 @@ CHOSEN_ALGORITHM_ID = b'MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE'
 CHOSEN_PBK_LENGTH = 160
 
 
-class Crypto(object):
+class Crypto(ABC):
+    """Base class for a crypto object."""
+
+    @abstractmethod
+    def public_key(self) -> str:
+        """
+        Return a public key.
+
+        :return: a public key string
+        """
+
+
+class DefaultCrypto(Crypto):
     """Class wrapping the public and private key cryptography."""
 
     def __init__(self, private_key_pem_path: Optional[str] = None):

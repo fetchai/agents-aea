@@ -86,6 +86,9 @@ class FIPAMessage(Message):
                     or performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS \
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
                 pass  # pragma: no cover
+            elif performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS\
+                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+                assert self.is_set("address")
             elif performative == FIPAMessage.Performative.INFORM:
                 data = self.get("data")
                 assert isinstance(data, bytes)

@@ -26,6 +26,7 @@ DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = 'connection.yaml'
 DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
+DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
 T = TypeVar('T')
 
 Address = str
@@ -98,6 +99,33 @@ class CRUDCollection(Generic[T]):
     def read_all(self) -> List[Tuple[str, T]]:
         """Read all the items."""
         return [(k, v) for k, v in self._items_by_id.items()]
+
+
+class PrivateKeyPathConfig(Configuration):
+    """Handle a private key path configuration."""
+
+    def __init__(self, ledger: str = "", path: str = ""):
+        """Initialize a handler configuration."""
+        self.ledger = ledger
+        self.path = path
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "ledger": self.ledger,
+            "path": self.path
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        ledger = cast(str, obj.get("ledger"))
+        path = cast(str, obj.get("path"))
+        return PrivateKeyPathConfig(
+            ledger=ledger,
+            path=path
+        )
 
 
 class ConnectionConfig(Configuration):
@@ -396,7 +424,7 @@ class AgentConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  registry_path: str = "",
-                 private_key_pem_path: str = "",
+                 private_key_paths: Dict[str, str] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
@@ -406,7 +434,11 @@ class AgentConfig(Configuration):
         self.license = license
         self.url = url
         self.registry_path = registry_path
-        self.private_key_pem_path = private_key_pem_path
+        self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
+
+        private_key_paths = private_key_paths if private_key_paths is not None else {}
+        for ledger, path in private_key_paths.items():
+            self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
@@ -444,7 +476,7 @@ class AgentConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "registry_path": self.registry_path,
-            "private_key_pem_path": self.private_key_pem_path,
+            "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
             "logging_config": self.logging_config,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
@@ -455,6 +487,11 @@ class AgentConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
+        private_key_paths = {}
+        for p in obj.get("private_key_paths", []):  # type: ignore
+            private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
+            private_key_paths[private_key_path.ledger] = private_key_path.path
+
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
@@ -463,8 +500,8 @@ class AgentConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
-            private_key_pem_path=cast(str, obj.get("private_key_pem_path")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
+            private_key_paths=cast(Dict, private_key_paths)
         )
 
         agent_config.connections = set(cast(List[str], obj.get("connections")))

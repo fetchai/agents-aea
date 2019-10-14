@@ -114,7 +114,6 @@ class FIPASerializer(Serializer):
                 query = fipa_pb.cfp.bytes
             else:
                 raise ValueError("Query type not recognized.")
-
             performative_content["query"] = query
         elif performative_id == FIPAMessage.Performative.PROPOSE:
             descriptions = []
