@@ -22,38 +22,78 @@ from pathlib import Path
 
 import click
 
-from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config
+from aea import AEA_DIR
+from aea.cli.common import Context, pass_ctx
 
 
 @click.group()
+@click.option("--registry", type=str, default=None, help="Path/URL to the registry.")
 @pass_ctx
-def search(ctx: Context):
-    """Search for components in the registry."""
-    _try_to_load_agent_config(ctx)
+def search(ctx: Context, registry):
+    """Search for components in the registry.
+
+    E.g.
+
+        aea search --registry packages/ skills
+    """
+    ctx.set_config("registry", registry)
 
 
 @search.command()
 @pass_ctx
 def connections(ctx: Context):
     """List all the connections available in the registry."""
-    registry_path = ctx.agent_config.registry_path
-    for c in Path(registry_path).glob("connections/[!_]*"):
-        print(c.name)
+    registry = ctx.config.get("registry")
+    result = set()
+    for r in Path(AEA_DIR).glob("connections/[!_]*[!.py]/"):
+        result.add(r.name)
+
+    try:
+        for r in Path(registry).glob("connections/[!_]*[!.py]/"):
+            result.add(r.name)
+    except:
+        pass
+
+    if "scaffold" in result: result.remove("scaffold")
+    for r in sorted(result):
+        print(r)
 
 
 @search.command()
 @pass_ctx
 def protocols(ctx: Context):
     """List all the protocols available in the registry."""
-    registry_path = ctx.agent_config.registry_path
-    for c in Path(registry_path).glob("protocols/[!_]*"):
-        print(c.name)
+    registry = ctx.config.get("registry")
+    result = set()
+    for r in Path(AEA_DIR).glob("protocols/[!_]*[!.py]"):
+        result.add(r.name)
+
+    try:
+        for r in Path(registry).glob("protocols/[!_]*[!.py]/"):
+            result.add(r.name)
+    except:
+        pass
+
+    if "scaffold" in result: result.remove("scaffold")
+    for r in sorted(result):
+        print(r)
 
 
 @search.command()
 @pass_ctx
 def skills(ctx: Context):
     """List all the skills available in the registry."""
-    registry_path = ctx.agent_config.registry_path
-    for c in Path(registry_path).glob("skills/[!_]*"):
-        print(c.name)
+    registry = ctx.config.get("registry")
+    result = set()
+    for e in Path(AEA_DIR).glob("skills/[!_]*[!.py]"):
+        result.add(e.name)
+
+    try:
+        for r in Path(registry).glob("skills/[!_]*[!.py]/"):
+            result.add(r.name)
+    except:
+        pass
+
+    if "scaffold" in result: result.remove("scaffold")
+    for r in sorted(result):
+        print(r)
