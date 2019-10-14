@@ -19,12 +19,11 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
-from typing import Dict, cast, Union, Tuple, List
+from typing import Dict, cast
 
-from aea.configurations.base import CRUDCollection, PrivateKeyPathConfig
 from aea.crypto.base import Crypto, DefaultCrypto
-from aea.crypto.fetchai_base import FetchCrypto
 from aea.crypto.ethereum_base import EthCrypto
+from aea.crypto.fetchai_base import FetchCrypto
 
 FETCHAI = "fetchai"
 DEFAULT = "default"
