@@ -61,6 +61,23 @@ class Model{
         })
     }
 
+    readAgentStatus(agentId) {
+        var ajax_options = {
+            type: 'GET',
+            url: 'api/agents/' + agentId + '/run',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_AgentStatusReadSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
     createItem(element, id){
         var ajax_options = {
             type: 'POST',
@@ -176,7 +193,7 @@ class Model{
             accepts: 'application/json',
             contentType: 'application/json',
             dataType: 'json',
-            data: JSON.stringify("Test dumyy")
+            data: JSON.stringify("Test dummy")
         };
         var self = this;
         $.ajax(ajax_options)
@@ -203,6 +220,38 @@ class Model{
             self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
         })
     }
+    startAgent(agentId){
+        var ajax_options = {
+            type: 'POST',
+            url: 'api/agents/' + agentId + '/run',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_StartAgentSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+    stopAgent(agentId){
+        var ajax_options = {
+            type: 'DELETE',
+            url: 'api/agents/' + agentId + '/run',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_StopAgentSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
 
 
 }
@@ -215,6 +264,25 @@ class View{
 
     setOEFStatus(status){
         $('#oefStatus').html(status);
+    }
+    setOEFTTY(tty){
+        $('#oefTTY').html(tty);
+        $('#oefTTY').scrollTop($('#oefTTY')[0].scrollHeight);
+    }
+    setOEFError(error){
+        $('#oefError').html(error);
+        $('#oefError').scrollTop($('#oefError')[0].scrollHeight);
+    }
+    setAgentStatus(status){
+        $('#agentStatus').html(status);
+    }
+    setAgentTTY(tty){
+        $('#agentTTY').html(tty);
+        $('#agentTTY').scrollTop($('#agentTTY')[0].scrollHeight);
+    }
+    setAgentError(error){
+        $('#agentError').html(error);
+        $('#agentError').scrollTop($('#agentError')[0].scrollHeight);
     }
 
     setCreateId(tag, id) {
@@ -424,9 +492,20 @@ class Controller{
 
         }
         this.$event_pump.on('model_OEFStatusReadSuccess', function(e, data) {
-            self.view.setOEFStatus(data)
+            self.view.setOEFStatus("OEF Node Status: " + data["status"])
+            self.view.setOEFTTY(data["tty"])
+            self.view.setOEFError(data["error"])
             self.handleButtonStates()
         });
+
+        this.$event_pump.on('model_AgentStatusReadSuccess', function(e, data) {
+            self.view.setAgentStatus("Agent Status: " + data["status"])
+            self.view.setAgentTTY(data["tty"])
+            self.view.setAgentError(data["error"])
+            self.handleButtonStates()
+        });
+
+
 
 
         $('#startOEFNode').click({el: element}, function(e) {
@@ -442,6 +521,31 @@ class Controller{
             e.preventDefault();
         });
 
+        $('#startAgent').click({el: element}, function(e) {
+            e.preventDefault();
+            var agentId = $('#localAgentsSelectionId').html()
+            if (self.validateId(agentId)){
+                self.model.startAgent(agentId)
+            }
+            else{
+                alert('Error: Attempting to start agent with ID: ' + agentId);
+            }
+
+            e.preventDefault();
+        });
+        $('#stopAgent').click({el: element}, function(e) {
+            e.preventDefault();
+            var agentId = $('#localAgentsSelectionId').html()
+            if (self.validateId(agentId)){
+                self.model.stopAgent(agentId)
+            }
+            else{
+                alert('Error: Attempting to stop agent with ID: ' + agentId);
+            }
+
+            e.preventDefault();
+        });
+
         this.$event_pump.on('model_error', {el: element}, function(e, xhr, textStatus, errorThrown) {
             var error_msg = textStatus + ': ' + errorThrown + ' - ' + xhr.responseJSON.detail;
             self.view.error(error_msg);
@@ -454,7 +558,7 @@ class Controller{
         $('#localAgentsCreateId').on('input', function(e){
             self.handleButtonStates()
         });
-        $('#localAgentsSelectedId').on('input', function(e){
+        $('#localAgentsSelectionId').on('input', function(e){
             self.handleButtonStates()
         });
 
@@ -464,7 +568,7 @@ class Controller{
         }
 
         this.getOEFStatus();
-
+        this.getAgentStatus();
 
     }
 
@@ -525,6 +629,11 @@ class Controller{
         $('#startOEFNode').prop('disabled',!isOEFStopped);
         $('#stopOEFNode').prop('disabled', isOEFStopped);
 
+        var agentOEFStopped = $('#agentStatus').html().includes("NOT_STARTED")
+        var hasValidAgent = this.validateId(agentSelectionId);
+        $('#startAgent').prop('disabled', !hasValidAgent || !agentOEFStopped);
+        $('#stopAgent').prop('disabled', !hasValidAgent || agentOEFStopped);
+
 
     }
 
@@ -537,6 +646,22 @@ class Controller{
 
     }
 
+    getAgentStatus(){
+        var agentId = $('#localAgentsSelectionId').html()
+        if (self.validateId(agentId)){
+            this.model.readAgentStatus(agentId)
+        }
+        else{
+            self.view.setAgentStatus("Agent Status: NONE")
+            self.view.setAgentTTY("<br><br><br><br><br>")
+            self.view.setAgentError("<br><br><br><br><br>")
+        }
+        self = this
+        setTimeout(function() {
+            self.getAgentStatus()
+        }, 500)
+
+    }
 
     // Update lists of protocols, connections and skills for the selected agent
     refreshAgentData(agentId){

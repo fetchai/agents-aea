@@ -253,7 +253,7 @@ paths:
       summary: Get status info about the oef
 
       responses:
-        201:
+        200:
           description: successfully got status data
           schema:
             type: string
@@ -270,12 +270,80 @@ paths:
       summary: Stops an OEF node
 
       responses:
-        201:
+        200:
           description: successfully started OEF Node
           schema:
             type: string
 
         400:
           description: Cannot stop node
+          schema:
+            type: string
+
+  /agents/{agent_id}/run:
+    post:
+      operationId: aea.cli_gui.start_agent
+      tags:
+      - agents
+      summary: Start an agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to run
+          type: string
+          required: True
+      responses:
+        201:
+          description: Start the OEF Nodoe
+          schema:
+            type: string
+
+        400:
+          description: Cannot start agent
+          schema:
+            type: string
+
+    get:
+      operationId: aea.cli_gui.get_agent_status
+      tags:
+      - agents
+      summary: Get status of a running agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: get status of agent
+          type: string
+          required: True
+      responses:
+        200:
+          description: successfully got status data
+          schema:
+            type: string
+
+        400:
+          description: Cannot get status data
+          schema:
+            type: string
+
+    delete:
+      operationId: aea.cli_gui.stop_agent
+      tags:
+      - agents
+      summary: Stops an agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to stop
+          type: string
+          required: True
+
+      responses:
+        200:
+          description: successfully started agent
+          schema:
+            type: string
+
+        400:
+          description: Cannot stop agent
           schema:
             type: string

@@ -1,0 +1,26 @@
+name: echo
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: EchoBehaviour
+      args:
+        foo: bar
+handlers:
+  - handler:
+      class_name: EchoHandler
+      args:
+        foo: bar
+        bar: foo
+tasks:
+  - task:
+      class_name: EchoTask
+      args:
+        foo: bar
+        bar: foo
+shared_classes: []
+protocols: ["default"]
+dependencies: []
+description: "Echo skill description [Fill in]"
