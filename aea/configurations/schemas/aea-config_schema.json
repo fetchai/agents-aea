@@ -55,7 +55,8 @@
         "logging_config": {
             "type": "object"
         },
-        "description": {"type": "string"}
+        "description": {
+            "type": "string"
         }
     },
     "definitions": {

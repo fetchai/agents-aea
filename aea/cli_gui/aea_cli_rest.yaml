@@ -30,11 +30,11 @@ paths:
       operationId: aea.cli_gui.create_agent
       tags:
         - People
-      summary: Creare a new AEA project (an agent)
+      summary: Create a new AEA project (an agent)
       parameters:
         - name: agent_id
           in: body
-          description: Person to create
+          description: Name of aea project to create
           required: True
           schema:
             type: string
@@ -280,7 +280,7 @@ paths:
           schema:
             type: string
 
-  /agents/{agent_id}/run:
+  /agent/{agent_id}/run:
     post:
       operationId: aea.cli_gui.start_agent
       tags:

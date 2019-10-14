@@ -64,7 +64,7 @@ class Model{
     readAgentStatus(agentId) {
         var ajax_options = {
             type: 'GET',
-            url: 'api/agents/' + agentId + '/run',
+            url: 'api/agent/' + agentId + '/run',
             accepts: 'application/json',
             contentType: 'plain/text'
         };
@@ -223,7 +223,7 @@ class Model{
     startAgent(agentId){
         var ajax_options = {
             type: 'POST',
-            url: 'api/agents/' + agentId + '/run',
+            url: 'api/agent/' + agentId + '/run',
             accepts: 'application/json',
             contentType: 'plain/text'
         };
@@ -239,7 +239,7 @@ class Model{
     stopAgent(agentId){
         var ajax_options = {
             type: 'DELETE',
-            url: 'api/agents/' + agentId + '/run',
+            url: 'api/agent/' + agentId + '/run',
             accepts: 'application/json',
             contentType: 'plain/text'
         };

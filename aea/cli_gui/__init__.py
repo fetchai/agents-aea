@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Main app for CLI GUI."""
+"""Key pieces of functionality for CLI GUI."""
 
 import argparse
 from enum import Enum
