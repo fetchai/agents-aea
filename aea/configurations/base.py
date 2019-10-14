@@ -487,7 +487,6 @@ class AgentConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-
         private_key_paths = {}
         for p in obj.get("private_key_paths", []):  # type: ignore
             private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])

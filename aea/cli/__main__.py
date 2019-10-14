@@ -33,13 +33,13 @@ from jsonschema import ValidationError
 import aea
 from aea.cli.add import connection, add, skill
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.cli.list import list as _list
 from aea.cli.install import install
+from aea.cli.list import list as _list
 from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, DEFAULT_PRIVATE_KEY_PATHS
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 DEFAULT_CONNECTION = "oef"
 DEFAULT_SKILL = "error"
