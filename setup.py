@@ -65,7 +65,7 @@ def get_all_extras() -> Dict:
         "cli_gui": [
             *cli_deps,
             "flask",
-            "connexion[swagger-ui]"
+            "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]"
         ],
     }
     extras.update(get_aea_extras())
