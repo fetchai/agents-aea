@@ -303,6 +303,7 @@ def start_agent(agent_id):
 
 def _read_tty(process, str_list):
     for line in io.TextIOWrapper(process.stdout, encoding="utf-8"):
+        # print(line)
         str_list.append(line)
 
     str_list.append("process terminated\n")
@@ -310,6 +311,7 @@ def _read_tty(process, str_list):
 
 def _read_error(process, str_list):
     for line in io.TextIOWrapper(process.stderr, encoding="utf-8"):
+        # print("Error:" + line)
         str_list.append(line)
 
     str_list.append("process terminated\n")
