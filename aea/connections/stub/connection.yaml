@@ -1,0 +1,17 @@
+name: stub
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+class_name: StubConnection
+supported_protocols:
+  - oef
+  - tac
+  - default
+  - fipa
+  - gym
+config:
+  input_file: "./input_file"
+  output_file: "./output_file"
+dependencies:
+  - watchdog
