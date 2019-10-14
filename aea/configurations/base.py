@@ -435,6 +435,8 @@ class AgentConfig(Configuration):
         self.url = url
         self.registry_path = registry_path
         self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
+
+        private_key_paths = private_key_paths if private_key_paths is not None else DEFAULT_PRIVATE_KEY_PATHS
         for ledger, path in private_key_paths.items():
             self.private_key_paths.create(ledger, path)
         self.logging_config = logging_config if logging_config is not None else {}
