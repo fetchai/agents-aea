@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,8 +17,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-import importlib
 import glob
+import importlib
 import os
 import re
 from typing import List, Dict
@@ -127,8 +126,9 @@ setup(
     install_requires=[
         "cryptography",
         "base58",
-        *all_extras.get("crypto", [])
-        *all_extras.get("cli", [])
+        *all_extras.get("crypto", []),
+        *all_extras.get("cli", []),
+        *all_extras.get("oef_connection", []),
     ],
     tests_require=["tox"],
     extras_require=all_extras,
