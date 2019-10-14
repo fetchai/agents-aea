@@ -39,13 +39,13 @@
         "connections": {
             "type": "array",
             "uniqueItems": true,
-            "items": {"type": "string"}
+            "items": {"$ref": "definitions.json#/definitions/resource_name"}
         },
         "default_connection": {"type": "string"},
         "protocols": {
             "type": "array",
             "uniqueItems": true,
-            "items": {"type": "string"}
+            "items": {"$ref": "definitions.json#/definitions/resource_name"}
         },
         "skills": {
             "type": "array",

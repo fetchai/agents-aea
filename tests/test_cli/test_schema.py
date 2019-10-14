@@ -56,8 +56,9 @@ def test_validate_agent_config():
     """Test that the validation of the agent configuration file works correctly."""
     agent_config_schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
     agent_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "aea-config.example.yaml")))
-    pprint.pprint(agent_config_file)
-    validate(instance=agent_config_file, schema=agent_config_schema)
+    schema_dir = Path(ROOT_DIR, "aea", "configurations", "schemas").absolute()
+    resolver = jsonschema.RefResolver("file://{}/".format(schema_dir), agent_config_schema)
+    validate(instance=agent_config_file, schema=agent_config_schema, resolver=resolver)
 
 
 class TestProtocolsSchema:
