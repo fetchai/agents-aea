@@ -29,7 +29,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat
 
 import argparse
 
-from aea.crypto.base import Crypto
+from aea.crypto.base import DefaultCrypto
 
 parser = argparse.ArgumentParser("generate_private_key", description=__doc__)
 parser.add_argument("out_file", type=str, help="Where to save the private key.")
@@ -37,7 +37,7 @@ parser.add_argument("out_file", type=str, help="Where to save the private key.")
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    crypto = Crypto()
+    crypto = DefaultCrypto()
     pem = crypto._private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())  # type: ignore
     file = open(args.out_file, "wb")
     file.write(pem)

@@ -117,10 +117,10 @@ class TestCreate:
         agent_config_instance = self._load_config_file()
         assert agent_config_instance["license"] == ""
 
-    def test_private_key_pem_path_field_is_empty_string(self):
-        """Check that the 'private_key_pem_path' is the empty string."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["private_key_pem_path"] == ""
+    # def test_private_key_pem_path_field_is_empty_string(self):
+    #     """Check that the 'private_key_pem_path' is the empty string."""
+    #     agent_config_instance = self._load_config_file()
+    #     assert agent_config_instance["private_key_pem_path"] == ""
 
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""

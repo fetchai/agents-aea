@@ -5,7 +5,10 @@ connections:
 - local
 default_connection: local
 license: Apache 2.0
-private_key_pem_path: ''
+private_key_paths:
+  private_key_path:
+    ledger: default
+    path: ''
 protocols:
 - fipa
 - default

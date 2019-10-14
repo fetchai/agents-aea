@@ -156,7 +156,7 @@ class MyWeatherHandler(Handler):
                 break
         json_data = json.dumps(command)
         json_bytes = json_data.encode("utf-8")
-        logger.info("[{}]: handling accept and sending wheather data to sender={}".format(self.context.agent_name, sender))
+        logger.info("[{}]: handling accept and sending weather data to sender={}".format(self.context.agent_name, sender))
         data_msg = DefaultMessage(
             type=DefaultMessage.Type.BYTES, content=json_bytes)
         self.context.outbox.put_message(to=sender,

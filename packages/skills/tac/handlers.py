@@ -40,7 +40,7 @@ else:
 
 Address = str
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.tac_skill")
 
 
 class OEFHandler(Handler):
