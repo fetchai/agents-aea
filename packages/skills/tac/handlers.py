@@ -50,6 +50,7 @@ class OEFHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
+        super().__init__(**kwargs)
         self._rejoin = False
 
     def setup(self) -> None:
