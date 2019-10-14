@@ -52,6 +52,7 @@ def get_aea_extras() -> Dict[str, List[str]]:
 
 
 def get_all_extras() -> Dict:
+
     cli_deps = [
             "click",
             "click_log",
@@ -60,13 +61,33 @@ def get_all_extras() -> Dict:
             "protobuf",
             "python-dotenv"
         ]
+
+    cli_gui = [
+        *cli_deps,
+        "flask",
+        "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]"
+    ]
+
+    fetch_ledger_deps = [
+        "fetchai-ledger-api"
+    ]
+
+    ethereum_deps = [
+        "web3",
+        "eth-account"
+    ]
+
+    crypto_deps = [
+        *fetch_ledger_deps,
+        *ethereum_deps
+    ]
+
     extras = {
         "cli": cli_deps,
-        "cli_gui": [
-            *cli_deps,
-            "flask",
-            "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]"
-        ],
+        "cli_gui": cli_gui,
+        "fetch": fetch_ledger_deps,
+        "ethereum": ethereum_deps,
+        "crypto": crypto_deps
     }
     extras.update(get_aea_extras())
 
