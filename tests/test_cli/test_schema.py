@@ -20,7 +20,6 @@
 """This test module contains the tests for the JSON schemas of the configuration files."""
 import json
 import os
-import pprint
 from pathlib import Path
 
 import jsonschema
@@ -54,10 +53,9 @@ def test_connection_configuration_schema_is_valid_wrt_draft_07():
 
 def test_validate_agent_config():
     """Test that the validation of the agent configuration file works correctly."""
-    agent_config_schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
     agent_config_file = yaml.safe_load(open(os.path.join(CUR_PATH, "data", "aea-config.example.yaml")))
-    schema_dir = Path(ROOT_DIR, "aea", "configurations", "schemas").absolute()
-    resolver = jsonschema.RefResolver("file://{}/".format(schema_dir), agent_config_schema)
+    agent_config_schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+    resolver = jsonschema.RefResolver("file://{}/".format(CONFIGURATION_SCHEMA_DIR), agent_config_schema)
     validate(instance=agent_config_file, schema=agent_config_schema, resolver=resolver)
 
 
