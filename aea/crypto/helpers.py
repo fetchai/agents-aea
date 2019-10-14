@@ -50,8 +50,8 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
     fp = open(str(path), mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
-
     for identifier in aea_conf.private_key_paths.keys():
+        print(identifier)
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
 
@@ -72,14 +72,14 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         _try_validate_fet_private_key_path(aea_conf.private_key_paths['fetchai'])
 
     if aea_conf.private_key_paths['ethereum'] == "" or aea_conf.private_key_paths['ethereum'] is None:
-        path = Path(FETCHAI_PRIVATE_KEY_FILE)
+        path = Path(ETHEREUM_PRIVATE_KEY_FILE)
         account = Account.create()
         with open(path, "w+") as file:
             file.write(account.privateKey.hex())
         ethereum_private_key_path = ETHEREUM_PRIVATE_KEY_FILE
         aea_conf.private_key_paths['ethereum'] = ethereum_private_key_path
     else:
-        _try_validate_fet_private_key_path(aea_conf.private_key_paths['ethereum'])
+        _try_validate_ethereum_private_key_path(aea_conf.private_key_paths['ethereum'])
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
