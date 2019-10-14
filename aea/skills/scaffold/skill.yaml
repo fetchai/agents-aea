@@ -24,3 +24,4 @@ shared_classes:
       args:
         foo: bar
 protocols: []
+description: "Scaffold skill description [Fill in]"

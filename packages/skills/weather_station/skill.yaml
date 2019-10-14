@@ -20,6 +20,6 @@ tasks:
         foo: bar
 shared_classes: []
 protocols: ['fipa']
-
+description: "weather_station skill description [Fill in]"
 
 

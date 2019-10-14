@@ -73,7 +73,8 @@
             "type": "array",
             "uniqueItems": true,
             "items": { "$ref": "definitions.json#/definitions/requirement" }
-        }
+        },
+        "description": {"type": "string"}
     },
     "definitions": {
         "behaviour": {

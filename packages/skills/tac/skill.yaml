@@ -28,3 +28,4 @@ shared_classes:
       args:
         expected_version_id: 1
 protocols: ['oef', 'tac']
+description: "tac skill description [Fill in]"

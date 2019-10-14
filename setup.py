@@ -56,7 +56,7 @@ def get_all_extras() -> Dict:
             "click",
             "click_log",
             "PyYAML",
-            "jsonschema<3.0.0",
+            "jsonschema",
             "protobuf",
             "python-dotenv"
         ]

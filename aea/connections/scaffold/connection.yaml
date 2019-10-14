@@ -7,3 +7,4 @@ class_name: MyScaffoldConnection
 supported_protocols: []
 config:
   foo: bar
+description: "default connection description [Fill in]"
