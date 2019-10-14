@@ -424,7 +424,7 @@ class AgentConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  registry_path: str = "",
-                 private_key_paths: Dict[str, str] = DEFAULT_PRIVATE_KEY_PATHS,
+                 private_key_paths: Dict[str, str] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
@@ -485,6 +485,12 @@ class AgentConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
+
+        private_key_paths = {}
+        for p in obj.get("private_key_paths", []):  # type: ignore
+            private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
+            private_key_paths[private_key_path.ledger] = private_key_path.path
+
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
@@ -494,11 +500,8 @@ class AgentConfig(Configuration):
             url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
+            private_key_paths=cast(Dict, private_key_paths)
         )
-
-        for p in obj.get("private_key_paths", []):  # type: ignore
-            private_key_path_config = PrivateKeyPathConfig.from_json(p["private_key_path"])
-            agent_config.private_key_paths.create(private_key_path_config.ledger, private_key_path_config.path)
 
         agent_config.connections = set(cast(List[str], obj.get("connections")))
         agent_config.protocols = set(cast(List[str], obj.get("protocols")))
