@@ -92,7 +92,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
     _verify_or_create_private_keys(ctx)
-    wallet = Wallet(ctx.agent_config.private_key_paths)
+    wallet = Wallet(dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()]))
 
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)

@@ -38,7 +38,8 @@ def test_initialise_AEA():
     node = LocalNode()
     public_key_1 = "mailbox1"
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
-    wallet = Wallet({'default': None})
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
     my_AEA = AEA("Agent0", mailbox1, wallet, directory=str(Path(CUR_PATH, "aea")))
     assert AEA("Agent0", mailbox1, wallet), "Agent is not initialised"
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"

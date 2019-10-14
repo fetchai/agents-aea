@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
-from typing import Dict, cast
+from typing import Dict, cast, Union, Tuple, List
 
 from aea.configurations.base import CRUDCollection, PrivateKeyPathConfig
 from aea.crypto.base import Crypto, DefaultCrypto
@@ -35,7 +35,7 @@ SUPPORTED_CRYPTOS = [DEFAULT, FETCHAI, ETHEREUM]
 class Wallet(object):
     """Store all the public keys we initialise."""
 
-    def __init__(self, private_key_paths: CRUDCollection[PrivateKeyPathConfig]):
+    def __init__(self, private_key_paths: Dict[str, str]):
         """
         Instantiate a wallet object.
 
@@ -43,13 +43,13 @@ class Wallet(object):
         """
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
-        for identifier, config in private_key_paths.read_all():
+        for identifier, path in private_key_paths.items():
             if identifier == DEFAULT:
-                crypto_objects[identifier] = DefaultCrypto(config.path)
+                crypto_objects[identifier] = DefaultCrypto(path)
             elif identifier == FETCHAI:
-                crypto_objects[identifier] = FetchCrypto(config.path)
+                crypto_objects[identifier] = FetchCrypto(path)
             elif identifier == ETHEREUM:
-                crypto_objects[identifier] = EthCrypto(config.path)
+                crypto_objects[identifier] = EthCrypto(path)
             else:
                 ValueError("Unsupported identifier in private key paths.")
             crypto = cast(Crypto, crypto_objects.get(identifier))

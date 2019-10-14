@@ -52,7 +52,6 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     fp = open(str(path), mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
-    # TODO: code below is not up to date!!!
     for identifier, value in aea_conf.private_key_paths.read_all():
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
