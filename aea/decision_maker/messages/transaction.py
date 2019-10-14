@@ -80,7 +80,7 @@ class TransactionMessage(Message):
             counterparty = self.get("counterparty")
             assert sender != counterparty
             assert self.is_set("is_sender_buyer")
-            assert self.is_set("currency")
+            assert self.is_set("currency_pbk")
             assert self.is_set("amount")
             amount = self.get("amount")
             amount = cast(float, amount)
