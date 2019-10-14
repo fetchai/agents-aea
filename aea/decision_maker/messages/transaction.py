@@ -64,7 +64,7 @@ class TransactionMessage(Message):
                          amount=amount,
                          quantities_by_good_pbk=quantities_by_good_pbk,
                          **kwargs)
-        assert self.check_consistency(), "FIPAMessage initialization inconsistent."
+        assert self.check_consistency(), "Transaction message initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """
@@ -80,7 +80,7 @@ class TransactionMessage(Message):
             counterparty = self.get("counterparty")
             assert sender != counterparty
             assert self.is_set("is_sender_buyer")
-            assert self.is_set("currency")
+            assert self.is_set("currency_pbk")
             assert self.is_set("amount")
             amount = self.get("amount")
             amount = cast(float, amount)
