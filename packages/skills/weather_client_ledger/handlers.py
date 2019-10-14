@@ -20,17 +20,11 @@
 """This package contains a scaffold of a handler."""
 import json
 import logging
-from pathlib import Path
-from typing import Optional, cast, List, Dict
+from typing import Optional, cast, List
 
-from fetchai.ledger.api import LedgerApi
-from fetchai.ledger.crypto import Identity, Address, Entity
-
-from aea.configurations.base import ProtocolId, DEFAULT_AEA_CONFIG_FILE, AgentConfig
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
@@ -234,21 +228,3 @@ class DefaultHandler(Handler):
 
         self.context.decision_maker_message_queue.put_nowait(msg)
         logger.info("[{}]: I asked the decision maker for the transaction!!!".format(self.context.agent_name))
-
-    def _transfer_tokens(self, address: Address) -> bool:
-        """
-        Transfer tokens them in order to buy data.
-
-        :param address:
-        :return:
-        """
-        try:
-            api = LedgerApi("127.0.0.1", 8100)
-            m_entity = self._generate_wealth()
-            api.sync(api.tokens.transfer(m_entity, address, 100, 20))
-            logger.info("[{}]: I transferred the tokens!!".format(self.context.agent_name))
-            return True
-        except ConnectionError:
-            return False
-
-

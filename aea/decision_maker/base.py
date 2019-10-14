@@ -305,13 +305,12 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        amount  = tx_message.get("amount")
+        amount = tx_message.get("amount")
         m_address = self.generate_address_from_public_key(self._wallet.public_keys['fetchai'])
         api = LedgerApi("127.0.0.1", 8100)
         self._generate_wealth()
-        if amount > api.tokens.balance(m_address):
-            print("DECLINE")
-        else:
+        print(api.tokens.balance(m_address))
+        if amount <= api.tokens.balance(m_address):
             m_entity = Entity.from_hex(self._wallet.crypto_objects['fetchai'].private_key)
             to = self.generate_address_from_public_key(tx_message.get("counterparty"))
             api.sync(api.tokens.transfer(m_entity, to, 100, 20))
@@ -327,8 +326,6 @@ class DecisionMaker:
         print(m_entity.public_key)
         api = LedgerApi("127.0.0.1", 8100)
         api.tokens.wealth(m_entity, 1000)
-
-
 
     def generate_address_from_public_key(self, public_key) -> Address:
         """
