@@ -101,6 +101,33 @@ class CRUDCollection(Generic[T]):
         return [(k, v) for k, v in self._items_by_id.items()]
 
 
+class PrivateKeyPathConfig(Configuration):
+    """Handle a private key path configuration."""
+
+    def __init__(self, ledger: str = "", path: str = ""):
+        """Initialize a handler configuration."""
+        self.ledger = ledger
+        self.path = path
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "ledger": self.ledger,
+            "path": self.path
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        ledger = cast(str, obj.get("ledger"))
+        path = cast(str, obj.get("path"))
+        return PrivateKeyPathConfig(
+            ledger=ledger,
+            path=path
+        )
+
+
 class ConnectionConfig(Configuration):
     """Handle connection configuration."""
 
@@ -407,7 +434,9 @@ class AgentConfig(Configuration):
         self.license = license
         self.url = url
         self.registry_path = registry_path
-        self.private_key_paths = private_key_paths  # type: Dict[str,str]
+        self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
+        for ledger, path in private_key_paths.items():
+            self.private_key_paths.create(ledger, path)
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
@@ -445,7 +474,7 @@ class AgentConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "registry_path": self.registry_path,
-            "private_key_paths": self.private_key_paths,
+            "private_key_paths": [{"private_key_path": PrivateKeyPathConfig(l, p).json} for l, p in self.private_key_paths.read_all()],
             "logging_config": self.logging_config,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
@@ -464,9 +493,12 @@ class AgentConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
-            private_key_paths=cast(Dict[str, str], obj.get("private_key_paths")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
         )
+
+        for p in obj.get("private_key_paths", []):  # type: ignore
+            private_key_path_config = PrivateKeyPathConfig.from_json(p["private_key_path"])
+            agent_config.private_key_paths.create(private_key_path_config.ledger, private_key_path_config.path)
 
         agent_config.connections = set(cast(List[str], obj.get("connections")))
         agent_config.protocols = set(cast(List[str], obj.get("protocols")))
