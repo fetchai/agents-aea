@@ -24,7 +24,7 @@ from threading import Thread
 
 from aea.agent import Agent, AgentState
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.crypto.base import Crypto
+from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, InBox, OutBox
 
 
@@ -59,11 +59,12 @@ class DummyAgent(Agent):
 def test_run_agent():
     """Test that we can set up and then run the agent."""
     agent_name = "dummyagent"
-    agent = DummyAgent(agent_name)
+    wallet = Wallet({'default': None})
+    agent = DummyAgent(agent_name, wallet)
     mailbox = MailBox(OEFLocalConnection("mypbk", LocalNode()))
     agent.mailbox = mailbox
     assert agent.name == agent_name
-    assert isinstance(agent.crypto, Crypto)
+    assert isinstance(agent.wallet, Wallet)
     assert agent.agent_state == AgentState.INITIATED,\
         "Agent state must be 'initiated'"
 

@@ -40,6 +40,8 @@ class FIPAMessage(Message):
         MATCH_ACCEPT = "match_accept"
         DECLINE = "decline"
         INFORM = "inform"
+        ACCEPT_W_ADDRESS = "accept_w_address"
+        MATCH_ACCEPT_W_ADDRESS = "match_accept_w_address"
 
         def __str__(self):
             """Get string representation."""
@@ -82,6 +84,9 @@ class FIPAMessage(Message):
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
                     or performative == FIPAMessage.Performative.DECLINE:
                 pass  # pragma: no cover
+            elif performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS\
+                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+                assert self.is_set("address")
             elif performative == FIPAMessage.Performative.INFORM:
                 data = self.get("data")
                 assert isinstance(data, bytes)
