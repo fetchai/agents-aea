@@ -102,12 +102,11 @@ def _try_to_load_agent_config(ctx: Context):
         ctx.agent_config = ctx.agent_loader.load(fp)
         logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
-        logger.error("Agent configuration file '{}' not found in the current directory. "
-                     "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
+        logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
         exit(-1)
     except jsonschema.exceptions.ValidationError:
-        logger.error("Agent configuration file '{}' is invalid. Please check the documentation."
-                     "Aborting...".format(DEFAULT_AEA_CONFIG_FILE))
+        logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
+        exit(-1)
 
 
 def _try_to_load_protocols(ctx: Context):

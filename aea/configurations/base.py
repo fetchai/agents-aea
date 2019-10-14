@@ -436,9 +436,9 @@ class AgentConfig(Configuration):
         self.registry_path = registry_path
         self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
 
-        private_key_paths = private_key_paths if private_key_paths is not None else DEFAULT_PRIVATE_KEY_PATHS
+        private_key_paths = private_key_paths if private_key_paths is not None else {}
         for ledger, path in private_key_paths.items():
-            self.private_key_paths.create(ledger, path)
+            self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
@@ -476,7 +476,7 @@ class AgentConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "registry_path": self.registry_path,
-            "private_key_paths": [{"private_key_path": PrivateKeyPathConfig(l, p).json} for l, p in self.private_key_paths.read_all()],
+            "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
             "logging_config": self.logging_config,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),

@@ -69,7 +69,7 @@ def create(click_context, agent_name):
 
         # create a config file inside it
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", registry_path="../packages", private_key_paths=DEFAULT_PRIVATE_KEY_PATHS)
+        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", registry_path="../packages")
         agent_config.default_connection = DEFAULT_CONNECTION
         ctx.agent_loader.dump(agent_config, config_file)
         logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))
