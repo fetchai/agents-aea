@@ -1,4 +1,4 @@
-name: ''
+name: scaffold_skill
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
@@ -24,3 +24,4 @@ shared_classes:
       args:
         foo: bar
 protocols: []
+description: "Scaffold skill description [Fill in]"

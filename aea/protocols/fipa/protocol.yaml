@@ -5,3 +5,4 @@ license: Apache 2.0
 url: ""
 dependencies:
   - protobuf
+description: "fipa protocol description [Fill in]"
