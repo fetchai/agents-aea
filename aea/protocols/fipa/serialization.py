@@ -66,6 +66,18 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
             performative = fipa_pb2.FIPAMessage.MatchAccept()  # type: ignore
             fipa_msg.match_accept.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.ACCEPT_W_ADDRESS:
+            performative = fipa_pb2.FIPAMessage.Accept_W_Address()  # type: ignore
+            address = msg.get("address")
+            if type(address) == str:
+                performative.address = address
+            fipa_msg.accept_w_address.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+            performative = fipa_pb2.FIPAMessage.MatchAccept_W_Address()  # type: ignore
+            address = msg.get("address")
+            if type(address) == str:
+                performative.address = address
+            fipa_msg.match_accept_w_address.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.DECLINE:
             performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
@@ -102,7 +114,6 @@ class FIPASerializer(Serializer):
                 query = fipa_pb.cfp.bytes
             else:
                 raise ValueError("Query type not recognized.")
-
             performative_content["query"] = query
         elif performative_id == FIPAMessage.Performative.PROPOSE:
             descriptions = []
@@ -114,6 +125,12 @@ class FIPASerializer(Serializer):
             pass
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
             pass
+        elif performative_id == FIPAMessage.Performative.ACCEPT_W_ADDRESS:
+            address = fipa_pb.accept_w_address.address
+            performative_content['address'] = address
+        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+            address = fipa_pb.match_accept_w_address.address
+            performative_content['address'] = address
         elif performative_id == FIPAMessage.Performative.DECLINE:
             pass
         elif performative_id == FIPAMessage.Performative.INFORM:

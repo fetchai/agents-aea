@@ -10,7 +10,7 @@
         "version",
         "license",
         "url",
-        "private_key_pem_path",
+        "private_key_paths",
         "connections",
         "default_connection",
         "protocols",
@@ -24,7 +24,18 @@
         "license": {"type": "string"},
         "url": {"type": "string"},
         "registry_path": {"type": "string"},
-        "private_key_pem_path": {"type": "string"},
+        "private_key_paths": {
+            "type": "array",
+            "additionalProperties": false,
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": ["private_key_path"],
+                "properties": {
+                    "private_key_path": { "$ref": "#/definitions/private_key_path" }
+                }
+            }
+        },
         "connections": {
             "type": "array",
             "uniqueItems": true,
@@ -43,6 +54,17 @@
         },
         "logging_config": {
             "type": "object"
+        }
+    },
+    "definitions": {
+        "private_key_path": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ledger", "path"],
+            "properties": {
+                "ledger": {"type": "string"},
+                "path": {"type": "string"}
+            }
         }
     }
 }

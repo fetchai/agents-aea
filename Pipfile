@@ -31,12 +31,15 @@ pyyaml = ">=4.2b1"
 click-log = "*"
 oef = {index = "test-pypi",version = "==0.6.10"}
 colorlog = "*"
-jsonschema = "<3.0.0"
+jsonschema = "*"
 protobuf = "*"
 flask = "*"
-"connexion[swagger-ui]" = "*"
+connexion = {git = "https://github.com/neverpanic/connexion.git", editable = true, ref = "jsonschema-3"}
 watchdog = "*"
 python-dotenv = "*"
+fetchai-ledger-api = "*"
+web3 = "*"
+eth-account = "*"
 
 [requires]
 python_version = "3.7"
