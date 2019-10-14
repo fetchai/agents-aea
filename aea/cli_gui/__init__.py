@@ -60,8 +60,10 @@ class ProcessState(Enum):
     FINISHED = "Finished"
     FAILED = "Failed"
 
+
 oef_node_name = "aea_local_oef_node"
 max_log_lines = 100
+
 
 def read_description(dir_name, yaml_name):
     """Return true if this directory contains an items in an AEA project i.e.  protocol, skill or connection."""
@@ -195,6 +197,7 @@ def _call_aea(param_list, dir):
     os.chdir(old_cwd)
     return ret
 
+
 def _call_aea_async(param_list, dir):
     old_cwd = os.getcwd()
     os.chdir(dir)
@@ -203,10 +206,9 @@ def _call_aea_async(param_list, dir):
     return ret
 
 
-
 def start_oef_node(dummy):
     """Start an OEF node running."""
-    kill_running_oef_nodes()
+    _kill_running_oef_nodes()
 
     CUR_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -225,16 +227,16 @@ def start_oef_node(dummy):
         flask.app.oef_tty = []
         flask.app.oef_error = []
 
-        tty_read_thread = threading.Thread(target=read_tty, args=(flask.app.oef_process, flask.app.oef_tty))
+        tty_read_thread = threading.Thread(target=_read_tty, args=(flask.app.oef_process, flask.app.oef_tty))
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=read_error, args=(flask.app.oef_process, flask.app.oef_error))
+        error_read_thread = threading.Thread(target=_read_error, args=(flask.app.oef_process, flask.app.oef_error))
         error_read_thread.start()
-
 
         return "All fine {}".format(dummy), 200   # 200 (OK)
     else:
         return {"detail": "Failed to start OEF Node"}, 400  # 400 Bad request
+
 
 def get_oef_node_status():
     """Get the status of the OEF Node."""
@@ -249,7 +251,6 @@ def get_oef_node_status():
         for i in range(max(0, total_num_lines - max_log_lines), total_num_lines):
             tty_str += flask.app.oef_tty[i]
 
-
         tty_str = tty_str.replace("\n", "<br>")
 
         total_num_lines = len(flask.app.oef_error)
@@ -263,15 +264,13 @@ def get_oef_node_status():
 
 def stop_oef_node():
     """Stop an OEF node running."""
-
-    kill_running_oef_nodes()
+    _kill_running_oef_nodes()
     flask.app.oef_process = None
     return "All fine", 200  # 200 (OK)
 
 
 def start_agent(agent_id):
     """Start a local agent running."""
-
     # Test if it is already running in some form
     if agent_id in flask.app.agent_processes:
         if get_process_status(flask.app.agent_processes[agent_id]) != ProcessState.RUNNING:
@@ -293,31 +292,28 @@ def start_agent(agent_id):
         flask.app.agent_tty[agent_id] = []
         flask.app.agent_error[agent_id] = []
 
-        tty_read_thread = threading.Thread(target=read_tty, args=(flask.app.agent_processes[agent_id], flask.app.agent_tty[agent_id]))
+        tty_read_thread = threading.Thread(target=_read_tty, args=(flask.app.agent_processes[agent_id], flask.app.agent_tty[agent_id]))
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=read_error, args=(flask.app.agent_processes[agent_id], flask.app.agent_error[agent_id]))
+        error_read_thread = threading.Thread(target=_read_error, args=(flask.app.agent_processes[agent_id], flask.app.agent_error[agent_id]))
         error_read_thread.start()
-
 
     return agent_id, 201  # 200 (OK)
 
 
-
-def read_tty(process, str_list):
-
+def _read_tty(process, str_list):
     for line in io.TextIOWrapper(process.stdout, encoding="utf-8"):
         str_list.append(line)
 
     str_list.append("process terminated\n")
 
 
-def read_error(process, str_list):
-
+def _read_error(process, str_list):
     for line in io.TextIOWrapper(process.stderr, encoding="utf-8"):
         str_list.append(line)
 
     str_list.append("process terminated\n")
+
 
 def get_agent_status(agent_id):
     """Get the status of the running agent Node."""
@@ -351,9 +347,9 @@ def get_agent_status(agent_id):
 
     return {"status": status_str, "tty": tty_str, "error": error_str}, 200  # (OK)
 
+
 def stop_agent(agent_id):
     """Stop agent running."""
-
     # Test if we have the process id
     if agent_id not in flask.app.agent_processes:
         return {"detail": "Agent {} is not running".format(agent_id)}, 400  # 400 Bad request
@@ -380,14 +376,15 @@ def get_process_status(process_id) -> ProcessState:
     else:
         raise ValueError("Unexpected return code.")
 
-def kill_running_oef_nodes():
+
+def _kill_running_oef_nodes():
     print("Kill off any existing OEF nodes which are running...")
     subprocess.call(['docker', 'kill', oef_node_name])
 
 
 def run():
     """Run the flask server."""
-    kill_running_oef_nodes()
+    _kill_running_oef_nodes()
     CUR_DIR = os.path.abspath(os.path.dirname(__file__))
     app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
     flask.app.oef_process = None
