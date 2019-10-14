@@ -67,20 +67,19 @@ def get_all_extras() -> Dict:
         *ethereum_deps
     ]
 
+    cli_gui = [
+        "flask",
+        "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]"
+    ]
+
     cli_deps = [
         "click",
         "click_log",
         "PyYAML",
         "jsonschema",
-        "protobuf",
         "python-dotenv",
+        *cli_gui,
         *crypto_deps
-    ]
-
-    cli_gui = [
-        *cli_deps,
-        "flask",
-        "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]"
     ]
 
     extras = {
@@ -96,6 +95,8 @@ def get_all_extras() -> Dict:
     extras["all"] = list(set(dep for e in extras.values() for dep in e))
     return extras
 
+
+all_extras = get_all_extras()
 
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}
@@ -125,10 +126,12 @@ setup(
     ],
     install_requires=[
         "cryptography",
-        "base58"
+        "base58",
+        *all_extras.get("crypto", [])
+        *all_extras.get("cli", [])
     ],
     tests_require=["tox"],
-    extras_require=get_all_extras(),
+    extras_require=all_extras,
     entry_points={
         'console_scripts': ["aea=aea.cli:cli"],
     },
