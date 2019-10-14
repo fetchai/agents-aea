@@ -1,0 +1,29 @@
+aea_version: 0.1.6
+agent_name: m_weather_agent
+authors: ''
+connections:
+- oef
+default_connection: oef
+license: ''
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths:
+- private_key_path:
+    ledger: default
+    path: default_private_key.pem
+- private_key_path:
+    ledger: fetchai
+    path: fet_private_key.txt
+- private_key_path:
+    ledger: ethereum
+    path: eth_private_key.txt
+protocols:
+- default
+- fipa
+registry_path: ../packages
+skills:
+- error
+- weather_station_ledger
+url: ''
+version: v1
