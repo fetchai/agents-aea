@@ -68,7 +68,6 @@ def get_all_extras() -> Dict:
 
     cli_deps = [
         "click",
-        "click_log",
         "PyYAML",
         "jsonschema",
         "python-dotenv",
