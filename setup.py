@@ -66,19 +66,19 @@ def get_all_extras() -> Dict:
         *ethereum_deps
     ]
 
-    cli_gui = [
-        "flask",
-        "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]"
-    ]
-
     cli_deps = [
         "click",
         "click_log",
         "PyYAML",
         "jsonschema",
         "python-dotenv",
-        *cli_gui,
         *crypto_deps
+    ]
+
+    cli_gui = [
+        "flask",
+        "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]",
+        *cli_deps
     ]
 
     extras = {
