@@ -58,7 +58,7 @@ class Wallet(object):
 
         self._crypto_objects = crypto_objects
         self._public_keys = public_keys
-        self._crypto_addresses = addresses
+        self._addresses = addresses
 
     @property
     def public_keys(self):
@@ -71,6 +71,6 @@ class Wallet(object):
         return self._crypto_objects
 
     @property
-    def crypto_addresses(self):
+    def addresses(self):
         """Get the crypt addresses."""
-        return self._crypto_addresses
+        return self._addresses

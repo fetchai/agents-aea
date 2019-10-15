@@ -74,6 +74,11 @@ class AgentContext:
         return self._addresses
 
     @property
+    def address(self) -> str:
+        """Get the defualt address."""
+        return self._addresses['default']
+
+    @property
     def public_key(self) -> str:
         """Get the default public key."""
         return self._public_keys['default']

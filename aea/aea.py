@@ -67,7 +67,7 @@ class AEA(Agent):
         self._decision_maker = DecisionMaker(self.max_reactions, self.outbox)
         self._context = AgentContext(self.name,
                                      self.wallet.public_keys,
-                                     self.wallet.crypto_addresses,
+                                     self.wallet.addresses,
                                      self.outbox,
                                      self.decision_maker.message_queue,
                                      self.decision_maker.ownership_state,

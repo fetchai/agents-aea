@@ -60,7 +60,7 @@ class EthCrypto(Crypto):
     @property
     def address(self) -> str:
         """
-        Return the display_address for the key pair.
+        Return the address for the key pair.
 
         :return: a display_address str
         """
