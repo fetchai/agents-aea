@@ -24,6 +24,9 @@ import sys
 import click
 
 
+LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+
+
 class ColorFormatter(logging.Formatter):
     """The default formatter for cli output."""
 
@@ -59,9 +62,10 @@ def simple_verbosity_option(logger=None, *names, **kwargs):
         names = ['--verbosity', '-v']
 
     kwargs.setdefault('default', 'INFO')
+    kwargs.setdefault('type', click.Choice(LOG_LEVELS, case_sensitive=False))
     kwargs.setdefault('metavar', 'LVL')
     kwargs.setdefault('expose_value', False)
-    kwargs.setdefault('help', 'Either CRITICAL, ERROR, WARNING, INFO or DEBUG')
+    kwargs.setdefault('help', 'One of {}'.format(", ".join(LOG_LEVELS)))
     kwargs.setdefault('is_eager', True)
 
     def decorator(f):

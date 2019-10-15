@@ -40,7 +40,6 @@ from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
-import aea.cli_gui
 
 DEFAULT_CONNECTION = "oef"
 DEFAULT_SKILL = "error"
@@ -48,8 +47,8 @@ DEFAULT_SKILL = "error"
 
 @click.group()
 @click.version_option('0.1.0')
-@click.pass_context
 @simple_verbosity_option(logger, default="INFO")
+@click.pass_context
 def cli(ctx) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent."""
     ctx.obj = Context(cwd=".")
@@ -127,6 +126,7 @@ def freeze(ctx: Context):
 @pass_ctx
 def gui(ctx: Context):
     """Run the CLI GUI."""
+    import aea.cli_gui
     logger.info("Running the GUI.....(press Ctrl+C to exit)")
     aea.cli_gui.run()
 
