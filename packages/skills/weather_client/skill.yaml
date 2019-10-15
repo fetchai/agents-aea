@@ -3,6 +3,7 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The weather client skill looks for weather stations to buy weather data from."
 behaviours:
   - behaviour:
       class_name: MyBuyBehaviour
@@ -28,4 +29,3 @@ tasks:
         foo: bar
 shared_classes: []
 protocols: ['fipa','default','oef']
-description: "weather_station_client skill description [Fill in]"

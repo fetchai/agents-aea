@@ -13,4 +13,3 @@ handlers:
 tasks: []
 shared_classes: []
 protocols: ['default']
-description: "Error skill description [Fill in]"

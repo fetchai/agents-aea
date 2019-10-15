@@ -3,6 +3,7 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The tac skill implements the logic for an AEA to participate in the TAC."
 behaviours:
   - behaviour:
       class_name: TACBehaviour
@@ -28,4 +29,3 @@ shared_classes:
       args:
         expected_version_id: 1
 protocols: ['oef', 'tac']
-description: "tac skill description [Fill in]"
