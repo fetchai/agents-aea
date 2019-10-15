@@ -23,8 +23,10 @@ import sys
 
 import click
 
+OFF = 100
+logging.addLevelName(OFF, "OFF")
 
-LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+LOG_LEVELS = ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "OFF"]
 
 
 class ColorFormatter(logging.Formatter):
@@ -70,12 +72,8 @@ def simple_verbosity_option(logger=None, *names, **kwargs):
 
     def decorator(f):
         def _set_level(ctx, param, value):
-            x = getattr(logging, value.upper(), None)
-            if x is None:
-                raise click.BadParameter(
-                    'Must be CRITICAL, ERROR, WARNING, INFO or DEBUG, not {}'
-                )
-            logger.setLevel(x)
+            level = logging.getLevelName(value)
+            logger.setLevel(level)
 
         return click.option(*names, callback=_set_level, **kwargs)(f)
     return decorator
