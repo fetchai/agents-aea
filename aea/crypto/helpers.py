@@ -25,7 +25,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat
 import logging
 from pathlib import Path
 
-from fetchai.ledger.crypto import Entity  # type: ignore
+from fetchai.ledger.crypto import Entity, Address, Identity  # type: ignore
 from eth_account import Account  # type: ignore
 
 from aea.crypto.base import DefaultCrypto
@@ -183,3 +183,13 @@ def _create_temporary_private_key_pem_path() -> str:
     file.write(pem)
     file.close()
     return DEFAULT_PRIVATE_KEY_FILE
+
+
+def _generate_address_from_public_key(public_key) -> Address:
+    """
+    Generate the address to send the tokens.
+
+    :param public_key:
+    :return:
+    """
+    return Address(Identity.from_hex(public_key))

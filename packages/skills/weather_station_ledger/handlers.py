@@ -24,8 +24,8 @@ import json
 import time
 from typing import Any, Dict, List, Optional, Union, cast, TYPE_CHECKING
 
-from fetchai.ledger.api import LedgerApi
-from fetchai.ledger.crypto import Address, Identity
+from fetchai.ledger.api import LedgerApi  # type: ignore
+from fetchai.ledger.crypto import Address, Identity  # type: ignore
 
 from aea.configurations.base import ProtocolId
 

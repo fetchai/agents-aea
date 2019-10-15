@@ -26,12 +26,13 @@ from queue import Queue
 from typing import Dict, List, Optional, cast
 
 from aea.crypto.wallet import Wallet
+from aea.crypto.helpers import _generate_address_from_public_key
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.mail.base import OutBox  # , Envelope
 from aea.protocols.base import Message
-from fetchai.ledger.api import LedgerApi
-from fetchai.ledger.crypto import Entity, Identity, Address
+from fetchai.ledger.api import LedgerApi    # type: ignore
+from fetchai.ledger.crypto import Entity    # type: ignore
 
 CurrencyEndowment = Dict[str, float]  # a map from identifier to quantity
 CurrencyHoldings = Dict[str, float]
@@ -305,36 +306,15 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        amount = tx_message.get("amount")
-        m_address = self.generate_address_from_public_key(self._wallet.public_keys['fetchai'])
+        amount = 0
+        m_address = _generate_address_from_public_key(self._wallet.public_keys['fetchai'])
         api = LedgerApi("127.0.0.1", 8100)
-        self._generate_wealth()
-        print(api.tokens.balance(m_address))
-        if amount <= api.tokens.balance(m_address):
+        if amount <= api.tokens.balance(m_address) and amount <= api.tokens.balance(m_address):
             m_entity = Entity.from_hex(self._wallet.crypto_objects['fetchai'].private_key)
-            to = self.generate_address_from_public_key(tx_message.get("counterparty"))
-            api.sync(api.tokens.transfer(m_entity, to, 100, 20))
-            print(api.tokens.balance(m_address))
+            to = _generate_address_from_public_key(tx_message.get("counterparty"))
+            api.sync(api.tokens.transfer(m_entity, to, 1, 1))
 
-    def _generate_wealth(self) -> None:
-        """
-        Generate tokens to be able to make a transaction.
-
-        :return:
-        """
-        m_entity = Entity.from_hex(self._wallet.crypto_objects['fetchai'].private_key)
-        print(m_entity.public_key)
-        api = LedgerApi("127.0.0.1", 8100)
-        api.tokens.wealth(m_entity, 1000)
-
-    def generate_address_from_public_key(self, public_key) -> Address:
-        """
-        Generate the address to send the tokens.
-
-        :param public_key:
-        :return:
-        """
-        return Address(Identity.from_hex(public_key))
+        # TODO: //Notify the handler that we made the transaction.
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
         """

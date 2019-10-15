@@ -25,6 +25,7 @@ from typing import Optional, cast, List
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
@@ -203,6 +204,18 @@ class DefaultHandler(Handler):
                     logger.info("[{}]: this is the data I got: {}".format(self.context.agent_name, json_data))
                 elif json_data['Command'] == "address":
                     self._create_message_for_transaction(json_data['Address'])
+                    command = {'Command': 'Transferred'}
+                    json_data = json.dumps(command)
+                    json_bytes = json_data.encode("utf-8")
+                    logger.info(
+                        "[{}]: Sending to weather station that I paid ".format(self.context.agent_name,
+                                                                               sender))
+                    data_msg = DefaultMessage(
+                        type=DefaultMessage.Type.BYTES, content=json_bytes)
+                    self.context.outbox.put_message(to=sender,
+                                                    sender=self.context.agent_public_key,
+                                                    protocol_id=DefaultMessage.protocol_id,
+                                                    message=DefaultSerializer().encode(data_msg))
         else:
             logger.info("[{}]: there is no data in the message!".format(self.context.agent_name))
 
