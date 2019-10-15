@@ -83,7 +83,7 @@ class EthCrypto(Crypto):
             else:
                 account = self._generate_private_key()
             return account
-        except IOError as e:
+        except IOError as e:        # pragma: no cover
             logger.exception(str(e))
 
     def sign_transaction(self, message: str) -> bytes:
