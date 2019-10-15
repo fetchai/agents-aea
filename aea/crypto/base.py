@@ -56,6 +56,14 @@ class Crypto(ABC):
 
         :return: a public key string
         """
+    @abstractmethod
+    def address(self) -> str:
+        """
+        Returns the address.
+
+        :return: an address string
+        """
+
 
 
 class DefaultCrypto(Crypto):
@@ -90,6 +98,15 @@ class DefaultCrypto(Crypto):
         :return: a public key bytes string
         """
         return self._public_key_pem
+
+    @property
+    def address(self) -> str:
+        """
+        Return a 219 character public key in base58 format.
+
+        :return: a public key string in base58 format
+        """
+        return self._public_key_b58
 
     @property
     def fingerprint(self) -> str:

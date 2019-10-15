@@ -42,6 +42,7 @@ class Wallet(object):
         """
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
+        addresses = {}  # type: Dict[str, str]
         for identifier, path in private_key_paths.items():
             if identifier == DEFAULT:
                 crypto_objects[identifier] = DefaultCrypto(path)
@@ -53,9 +54,11 @@ class Wallet(object):
                 ValueError("Unsupported identifier in private key paths.")
             crypto = cast(Crypto, crypto_objects.get(identifier))
             public_keys[identifier] = cast(str, crypto.public_key)
+            addresses[identifier] = cast(str, crypto.address)
 
         self._crypto_objects = crypto_objects
         self._public_keys = public_keys
+        self._crypto_addresses = addresses
 
     @property
     def public_keys(self):
@@ -66,3 +69,7 @@ class Wallet(object):
     def crypto_objects(self):
         """Get the crypto objects (key pair)."""
         return self._crypto_objects
+
+    @property
+    def crypto_addresses(self):
+        return self._crypto_addresses

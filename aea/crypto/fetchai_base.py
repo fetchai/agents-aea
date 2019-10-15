@@ -60,7 +60,7 @@ class FetchCrypto(Crypto):
         return self._entity.private_key_hex
 
     @property
-    def display_address(self) -> str:
+    def address(self) -> str:
         """
         Return the display_address for the key pair.
 

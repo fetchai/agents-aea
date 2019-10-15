@@ -58,7 +58,7 @@ class EthCrypto(Crypto):
         return self._public_key
 
     @property
-    def display_address(self) -> str:
+    def address(self) -> str:
         """
         Return the display_address for the key pair.
 
