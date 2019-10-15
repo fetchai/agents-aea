@@ -31,6 +31,7 @@ class AgentContext:
 
     def __init__(self, agent_name: str,
                  public_keys: Dict[str, str],
+                 addresses: Dict[str, str],
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
@@ -50,6 +51,7 @@ class AgentContext:
         """
         self._agent_name = agent_name
         self._public_keys = public_keys
+        self._addresses = addresses
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
         self._ownership_state = ownership_state
@@ -65,6 +67,10 @@ class AgentContext:
     def public_keys(self) -> Dict[str, str]:
         """Get public keys."""
         return self._public_keys
+    @property
+    def addresses(self) -> Dict[str, str]:
+        """Get addresses."""
+        return self._addresses
 
     @property
     def public_key(self) -> str:

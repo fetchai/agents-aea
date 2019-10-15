@@ -19,13 +19,13 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping the helpers of public and private key cryptography."""
-from typing import cast
+from typing import cast, Dict
 
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
 import logging
 from pathlib import Path
 
-from fetchai.ledger.crypto import Entity  # type: ignore
+from fetchai.ledger.crypto import Entity, Address  # type: ignore
 from eth_account import Account  # type: ignore
 
 from aea.crypto.base import DefaultCrypto
@@ -78,8 +78,15 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         fetchai_private_key_path = FETCHAI_PRIVATE_KEY_FILE
         fetchai_private_key_config = PrivateKeyPathConfig(FETCHAI, fetchai_private_key_path)
         aea_conf.private_key_paths.create(fetchai_private_key_config.ledger, fetchai_private_key_config)
+        aea_conf.addresses = cast(Dict[str, str], (FETCHAI, Address(entity).to_hex()))
     else:
+        path = Path(FETCHAI_PRIVATE_KEY_FILE)
         fetchai_private_key_config = cast(PrivateKeyPathConfig, fetchai_private_key_config)
+        with open(path, "r") as file:
+            pk = file.read()
+            entity = Entity.from_hex(pk)
+            adr = Address(entity).to_hex()
+            aea_conf.addresses = cast(Dict[str, str], (FETCHAI, adr))
         try:
             _try_validate_fet_private_key_path(fetchai_private_key_config.path)
         except FileNotFoundError:
@@ -95,6 +102,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         ethereum_private_key_path = ETHEREUM_PRIVATE_KEY_FILE
         ethereum_private_key_config = PrivateKeyPathConfig(ETHEREUM, ethereum_private_key_path)
         aea_conf.private_key_paths.create(ethereum_private_key_config.ledger, ethereum_private_key_config)
+        aea_conf.addresses = cast(Dict[str, str], (ETHEREUM, account.address))
     else:
         ethereum_private_key_config = cast(PrivateKeyPathConfig, ethereum_private_key_config)
         try:
@@ -145,7 +153,6 @@ def _try_validate_fet_private_key_path(private_key_path: str) -> None:
     :raises: an exception if the private key is invalid.
     """
     try:
-        # TODO :Change this to match the enity.fromhex()
         with open(private_key_path, "r") as key:
             data = key.read()
             Entity.from_hex(data)
@@ -163,7 +170,6 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
     :raises: an exception if the private key is invalid.
     """
     try:
-        # TODO :Change this to match the Account.fromhex()
         with open(private_key_path, "r") as key:
             data = key.read()
             Account.from_key(data)

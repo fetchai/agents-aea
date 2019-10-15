@@ -435,6 +435,7 @@ class AgentConfig(Configuration):
         self.url = url
         self.registry_path = registry_path
         self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
+        self.addresses = None #type: Dict[str, str]
 
         private_key_paths = private_key_paths if private_key_paths is not None else {}
         for ledger, path in private_key_paths.items():
