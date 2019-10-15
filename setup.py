@@ -68,7 +68,7 @@ def get_all_extras() -> Dict:
 
     cli_gui = [
         "flask",
-        "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]"
+        "connexion[swagger-ui]"
     ]
 
     cli_deps = [
@@ -129,6 +129,9 @@ setup(
         *all_extras.get("crypto", []),
         *all_extras.get("cli", []),
         *all_extras.get("oef_connection", []),
+    ],
+    dependency_links=[
+        'git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]',
     ],
     tests_require=["tox"],
     extras_require=all_extras,
