@@ -72,8 +72,8 @@ class SkillContext:
 
     @property
     def agent_address(self) -> str:
-        """ Get address"""
-        return  self._agent_context.address
+        """Get address."""
+        return self._agent_context.address
 
     @property
     def outbox(self) -> OutBox:
