@@ -26,7 +26,6 @@ from pathlib import Path
 from typing import cast
 
 import click
-import click_log
 from click import pass_context
 from jsonschema import ValidationError
 
@@ -35,6 +34,7 @@ from aea.cli.add import connection, add, skill
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, DEFAULT_REGISTRY_PATH
 from aea.cli.install import install
 from aea.cli.list import list as _list
+from aea.cli.loggers import simple_verbosity_option
 from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
@@ -49,7 +49,7 @@ DEFAULT_SKILL = "error"
 @click.group()
 @click.version_option('0.1.0')
 @click.pass_context
-@click_log.simple_verbosity_option(logger, default="INFO")
+@simple_verbosity_option(logger, default="INFO")
 def cli(ctx) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent."""
     ctx.obj = Context(cwd=".")
