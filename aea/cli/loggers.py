@@ -55,7 +55,7 @@ class ColorFormatter(logging.Formatter):
 
 
 def simple_verbosity_option(logger=None, *names, **kwargs):
-    """A decorator that adds a `--verbosity, -v` option to the decoratedcommand.
+    """Add a decorator that adds a `--verbosity, -v` option to the decorated command.
 
     Name can be configured through `*names`. Keyword arguments are passed to
     the underlying `click.option` decorator.
