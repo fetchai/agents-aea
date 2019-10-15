@@ -28,16 +28,18 @@ from pathlib import Path
 from typing import Dict, List, cast
 
 import click
-import click_log
 import jsonschema  # type: ignore
 from dotenv import load_dotenv
 
+from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
     DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 
 logger = logging.getLogger("aea")
-logger = click_log.basic_config(logger=logger)
+logger = default_logging_config(logger)
+
+DEFAULT_REGISTRY_PATH = "../packages"
 
 
 class Context(object):

@@ -39,7 +39,7 @@ import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR
+from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
 
 
 class TestCreate:
@@ -57,7 +57,7 @@ class TestCreate:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def _load_config_file(self) -> Dict:
         """Load a config file."""
@@ -191,7 +191,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the error code is equal to -1."""
@@ -233,7 +233,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the error code is equal to -1."""
@@ -271,7 +271,7 @@ class TestCreateFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the error code is equal to -1."""
