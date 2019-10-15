@@ -138,7 +138,7 @@ def test_handle():
     try:
         t.start()
         agent.mailbox.inbox._queue.put(envelope)
-        env = agent.mailbox.outbox._queue.get(block=True, timeout=5.0)
+        env = agent.mailbox.outbox._queue.get(block=True, timeout=10.0)
         assert env.protocol_id == "default", \
             "The envelope is not the expected protocol (Unsupported protocol)"
 
