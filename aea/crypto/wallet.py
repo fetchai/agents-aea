@@ -72,4 +72,5 @@ class Wallet(object):
 
     @property
     def crypto_addresses(self):
+        """Get the crypt addresses."""
         return self._crypto_addresses

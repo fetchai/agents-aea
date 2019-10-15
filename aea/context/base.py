@@ -67,6 +67,7 @@ class AgentContext:
     def public_keys(self) -> Dict[str, str]:
         """Get public keys."""
         return self._public_keys
+
     @property
     def addresses(self) -> Dict[str, str]:
         """Get addresses."""

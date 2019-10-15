@@ -59,11 +59,10 @@ class Crypto(ABC):
     @abstractmethod
     def address(self) -> str:
         """
-        Returns the address.
+        Return the address.
 
         :return: an address string
         """
-
 
 
 class DefaultCrypto(Crypto):
