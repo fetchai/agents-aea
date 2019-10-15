@@ -68,7 +68,7 @@ def get_all_extras() -> Dict:
 
     cli_gui = [
         "flask",
-        "connexion[swagger-ui]"
+        "connexion[swagger-ui]==2018.0.dev1"
     ]
 
     cli_deps = [
