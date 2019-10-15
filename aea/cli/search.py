@@ -19,11 +19,12 @@
 
 """Implementation of the 'aea search' subcommand."""
 from pathlib import Path
-
+from typing import Set, cast
 import click
+import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH
 
 
 @click.group()
@@ -36,6 +37,8 @@ def search(ctx: Context, registry):
 
         aea search --registry packages/ skills
     """
+    if registry is None:
+        registry = os.path.join(AEA_DIR, DEFAULT_REGISTRY_PATH)
     ctx.set_config("registry", registry)
 
 
@@ -43,57 +46,63 @@ def search(ctx: Context, registry):
 @pass_ctx
 def connections(ctx: Context):
     """List all the connections available in the registry."""
-    registry = ctx.config.get("registry")
-    result = set()
+    registry = cast(str, ctx.config.get("registry"))
+    result = set()  # type: Set[str]
     for r in Path(AEA_DIR).glob("connections/[!_]*[!.py]/"):
         result.add(r.name)
 
     try:
         for r in Path(registry).glob("connections/[!_]*[!.py]/"):
             result.add(r.name)
-    except:
+    except Exception:
         pass
 
     if "scaffold" in result: result.remove("scaffold")
-    for r in sorted(result):
-        print(r)
+    if ".DS_Store" in result: result.remove(".DS_Store")
+    print("Available connections:")
+    for conn in sorted(result):
+        print("- " + conn)
 
 
 @search.command()
 @pass_ctx
 def protocols(ctx: Context):
     """List all the protocols available in the registry."""
-    registry = ctx.config.get("registry")
-    result = set()
+    registry = cast(str, ctx.config.get("registry"))
+    result = set()  # type: Set[str]
     for r in Path(AEA_DIR).glob("protocols/[!_]*[!.py]"):
         result.add(r.name)
 
     try:
         for r in Path(registry).glob("protocols/[!_]*[!.py]/"):
             result.add(r.name)
-    except:
+    except Exception:
         pass
 
     if "scaffold" in result: result.remove("scaffold")
-    for r in sorted(result):
-        print(r)
+    if ".DS_Store" in result: result.remove(".DS_Store")
+    print("Available protocols:")
+    for protocol in sorted(result):
+        print("- " + protocol)
 
 
 @search.command()
 @pass_ctx
 def skills(ctx: Context):
     """List all the skills available in the registry."""
-    registry = ctx.config.get("registry")
-    result = set()
-    for e in Path(AEA_DIR).glob("skills/[!_]*[!.py]"):
-        result.add(e.name)
+    registry = cast(str, ctx.config.get("registry"))
+    result = set()  # type: Set[str]
+    for r in Path(AEA_DIR).glob("skills/[!_]*[!.py]"):
+        result.add(r.name)
 
     try:
         for r in Path(registry).glob("skills/[!_]*[!.py]/"):
             result.add(r.name)
-    except:
+    except Exception:
         pass
 
     if "scaffold" in result: result.remove("scaffold")
-    for r in sorted(result):
-        print(r)
+    if ".DS_Store" in result: result.remove(".DS_Store")
+    print("Available skills:")
+    for skill in sorted(result):
+        print("- " + skill)
