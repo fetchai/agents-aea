@@ -18,19 +18,20 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'gym' skill."""
+import logging
 from typing import cast, TYPE_CHECKING
 
-from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
     from packages.protocols.gym.message import GymMessage
-    from packages.protocols.gym.serialization import GymSerializer
     from packages.skills.gym.tasks import GymTask
 else:
     from gym_protocol.message import GymMessage
-    from gym_protocol.serialization import GymSerializer
     from gym_skill.tasks import GymTask
+
+logger = logging.getLogger("aea.gym_skill")
 
 
 class GymHandler(Handler):
@@ -40,21 +41,22 @@ class GymHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        print("GymHandler.__init__: arguments: {}".format(kwargs))
+        logger.info("GymHandler.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
 
     def setup(self) -> None:
         """Set up the handler."""
-        print("Gym handler: setup method called.")
+        logger.info("Gym handler: setup method called.")
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Handle envelopes.
+        Handle messages.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        gym_msg = GymSerializer().decode(envelope.message)
+        gym_msg = cast(GymMessage, message)
         gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
         if gym_msg_performative == GymMessage.Performative.PERCEPT:
             assert self.context.tasks is not None, "Incorrect initialization."
@@ -70,4 +72,4 @@ class GymHandler(Handler):
 
         :return: None
         """
-        print("Gym handler: teardown method called.")
+        logger.info("Gym handler: teardown method called.")

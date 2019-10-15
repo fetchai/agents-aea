@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "description": "Schema for the skill configuration file.",
     "additionalProperties": false,
     "type": "object",
@@ -12,18 +12,20 @@
         "protocols"
     ],
     "properties": {
-        "name": {"type": "string"},
+        "name": {"$ref": "definitions.json#/definitions/resource_name"},
         "authors": {"type": "string"},
         "version": {"type": "string"},
         "license": {"type": "string"},
         "url": {"type": "string"},
         "protocols": {
             "type": "array",
+            "additionalProperties": false,
             "uniqueItems": true,
             "items": {"type": "string"}
         },
         "handlers": {
             "type": "array",
+            "additionalProperties": false,
             "uniqueItems": true,
             "items": {
               "type": "object",
@@ -38,6 +40,7 @@
             "uniqueItems": true,
             "items": {
               "type": "object",
+              "additionalProperties": false,
               "required": ["behaviour"],
               "properties": {
                 "behaviour": { "$ref": "#/definitions/behaviour" }
@@ -49,6 +52,7 @@
             "uniqueItems": true,
             "items": {
               "type": "object",
+              "additionalProperties": false,
               "required": ["task"],
               "properties": {
                 "task": { "$ref": "#/definitions/task" }
@@ -60,7 +64,6 @@
             "uniqueItems": true,
             "items": {
               "type": "object",
-              "required": ["shared_class"],
               "properties": {
                 "task": { "$ref": "#/definitions/shared_class" }
               }
@@ -70,12 +73,14 @@
             "type": "array",
             "uniqueItems": true,
             "items": { "$ref": "definitions.json#/definitions/requirement" }
-        }
+        },
+        "description": {"type": "string"}
     },
     "definitions": {
         "behaviour": {
             "type": "object",
-            "required": ["class_name", "args"],
+            "additionalProperties": false,
+            "required": ["class_name"],
             "properties": {
                 "class_name": {"type": "string"},
                 "args": {"type": "object"}
@@ -83,7 +88,8 @@
         },
         "task": {
             "type": "object",
-            "required": ["class_name", "args"],
+            "additionalProperties": false,
+            "required": ["class_name"],
             "properties": {
                 "class_name": {"type": "string"},
                 "args": {"type": "object"}
@@ -91,7 +97,8 @@
         },
         "handler": {
             "type": "object",
-            "required": ["class_name", "args"],
+            "additionalProperties": false,
+            "required": ["class_name"],
             "properties": {
                 "class_name": {"type": "string"},
                 "args": {"type": "object"}
@@ -99,7 +106,8 @@
         },
         "shared_class": {
             "type": "object",
-            "required": ["class_name", "args"],
+            "additionalProperties": false,
+            "required": ["class_name"],
             "properties": {
                 "class_name": {"type": "string"},
                 "args": {"type": "object"}

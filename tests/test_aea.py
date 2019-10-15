@@ -24,7 +24,7 @@ from threading import Thread
 
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.crypto.base import Crypto
+from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -33,33 +33,34 @@ from aea.protocols.fipa.serialization import FIPASerializer
 from .conftest import CUR_PATH
 
 
-def test_initialiseAeA():
-    """Tests the initialisation of the AeA."""
+def test_initialise_AEA():
+    """Tests the initialisation of the AEA."""
     node = LocalNode()
     public_key_1 = "mailbox1"
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
-    myAea = AEA("Agent0", mailbox1, directory=str(Path(CUR_PATH, "aea")))
-    assert AEA("Agent0", mailbox1), "Agent is not inisialised"
-    print(myAea.context)
-    assert myAea.context == myAea._context, "Cannot access the Agent's Context"
-    myAea.setup()
-    assert myAea.resources is not None,\
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
+    my_AEA = AEA("Agent0", mailbox1, wallet, directory=str(Path(CUR_PATH, "aea")))
+    assert AEA("Agent0", mailbox1, wallet), "Agent is not initialised"
+    assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
+    my_AEA.setup()
+    assert my_AEA.resources is not None,\
         "Resources must not be None after setup"
 
 
 def test_act():
-    """Tests the act function of the AeA."""
+    """Tests the act function of the AEA."""
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
+    wallet = Wallet({'default': private_key_pem_path})
+    public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
     agent = AEA(
         agent_name,
         mailbox,
-        private_key_pem_path=private_key_pem_path,
+        wallet,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:
@@ -78,8 +79,8 @@ def test_react():
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
+    wallet = Wallet({'default': private_key_pem_path})
+    public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
@@ -94,7 +95,7 @@ def test_react():
     agent = AEA(
         agent_name,
         mailbox,
-        private_key_pem_path=private_key_pem_path,
+        wallet,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:
@@ -103,8 +104,8 @@ def test_react():
         time.sleep(1)
         handler = agent.resources \
             .handler_registry.fetch_by_skill('default', "dummy")
-        assert envelope in handler.handled_envelopes, \
-            "The envelope is not inside the handled_envelopes."
+        assert msg in handler.handled_messages, \
+            "The message is not inside the handled_messages."
     finally:
         agent.stop()
         t.join()
@@ -115,8 +116,8 @@ def test_handle():
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
+    wallet = Wallet({'default': private_key_pem_path})
+    public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
@@ -131,7 +132,7 @@ def test_handle():
     agent = AEA(
         agent_name,
         mailbox,
-        private_key_pem_path=private_key_pem_path,
+        wallet,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:

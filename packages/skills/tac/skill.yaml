@@ -1,4 +1,4 @@
-name: ''
+name: tac
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
@@ -28,3 +28,4 @@ shared_classes:
       args:
         expected_version_id: 1
 protocols: ['oef', 'tac']
+description: "tac skill description [Fill in]"

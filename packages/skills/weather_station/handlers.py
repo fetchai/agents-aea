@@ -25,7 +25,7 @@ import time
 from typing import Any, Dict, List, Optional, Union, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
-from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
@@ -60,23 +60,23 @@ class MyWeatherHandler(Handler):
         """Implement the setup for the handler."""
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to an message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        msg = FIPASerializer().decode(envelope.message)
-        msg = cast(FIPAMessage, msg)
-        msg_performative = FIPAMessage.Performative(msg.get('performative'))
-        message_id = cast(int, msg.get('id'))
-        dialogue_id = cast(int, msg.get('dialogue_id'))
+        fipa_msg = cast(FIPAMessage, message)
+        msg_performative = FIPAMessage.Performative(fipa_msg.get('performative'))
+        message_id = cast(int, fipa_msg.get('id'))
+        dialogue_id = cast(int, fipa_msg.get('dialogue_id'))
 
         if msg_performative == FIPAMessage.Performative.CFP:
-            self.handle_cfp(msg, envelope.sender, message_id, dialogue_id)
+            self.handle_cfp(fipa_msg, sender, message_id, dialogue_id)
         elif msg_performative == FIPAMessage.Performative.ACCEPT:
-            self.handle_accept(envelope.sender)
+            self.handle_accept(sender)
 
     def teardown(self) -> None:
         """
@@ -156,7 +156,7 @@ class MyWeatherHandler(Handler):
                 break
         json_data = json.dumps(command)
         json_bytes = json_data.encode("utf-8")
-        logger.info("[{}]: handling accept and sending wheather data to sender={}".format(self.context.agent_name, sender))
+        logger.info("[{}]: handling accept and sending weather data to sender={}".format(self.context.agent_name, sender))
         data_msg = DefaultMessage(
             type=DefaultMessage.Type.BYTES, content=json_bytes)
         self.context.outbox.put_message(to=sender,

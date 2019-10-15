@@ -1,9 +1,21 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "description": "Schema for the agent configuration file.",
     "additionalProperties": false,
     "type": "object",
-    "required": ["aea_version", "agent_name", "authors", "version", "license", "url", "private_key_pem_path", "connections", "default_connection", "protocols", "skills"],
+    "required": [
+        "aea_version",
+        "agent_name",
+        "authors",
+        "version",
+        "license",
+        "url",
+        "private_key_paths",
+        "connections",
+        "default_connection",
+        "protocols",
+        "skills"
+    ],
     "properties": {
         "aea_version": {"type": "string"},
         "agent_name": {"type": "string"},
@@ -12,22 +24,50 @@
         "license": {"type": "string"},
         "url": {"type": "string"},
         "registry_path": {"type": "string"},
-        "private_key_pem_path": {"type": "string"},
+        "private_key_paths": {
+            "type": "array",
+            "additionalProperties": false,
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": ["private_key_path"],
+                "properties": {
+                    "private_key_path": { "$ref": "#/definitions/private_key_path" }
+                }
+            }
+        },
         "connections": {
             "type": "array",
             "uniqueItems": true,
-            "items": {"type": "string"}
+            "items": {"$ref": "definitions.json#/definitions/resource_name"}
         },
         "default_connection": {"type": "string"},
         "protocols": {
             "type": "array",
             "uniqueItems": true,
-            "items": {"type": "string"}
+            "items": {"$ref": "definitions.json#/definitions/resource_name"}
         },
         "skills": {
             "type": "array",
             "uniqueItems": true,
             "items": {"type": "string"}
+        },
+        "logging_config": {
+            "type": "object"
+        },
+        "description": {
+            "type": "string"
+        }
+    },
+    "definitions": {
+        "private_key_path": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ledger", "path"],
+            "properties": {
+                "ledger": {"type": "string"},
+                "path": {"type": "string"}
+            }
         }
     }
 }

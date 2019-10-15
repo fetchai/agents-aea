@@ -32,7 +32,7 @@ else:
 
 Address = str
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.tac_skill")
 
 
 class GamePhase(Enum):
@@ -146,8 +146,9 @@ class GameConfiguration:
 class Game(SharedClass):
     """This class deals with the game."""
 
-    def __init__(self, expected_version_id: str, expected_controller_pbk: Optional[Address] = None):
+    def __init__(self, expected_version_id: str, expected_controller_pbk: Optional[Address] = None, **kwargs):
         """Instantiate the game class."""
+        super().__init__(**kwargs)
         self._expected_version_id = expected_version_id
         self._game_phase = GamePhase.PRE_GAME
         self._expected_controller_pbk = expected_controller_pbk

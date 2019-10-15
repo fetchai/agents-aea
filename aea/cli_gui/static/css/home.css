@@ -1,0 +1,164 @@
+/*
+ * This is a basic placeholder CSS stylesheet for the AEA CLI GUI
+ */
+
+@import url(http://fonts.googleapis.com/css?family=Roboto:400,300,500,700);
+
+body, .ui-btn {
+    font-family: Roboto;
+}
+
+.container {
+    padding: 10px;
+}
+
+.banner {
+    text-align: center;
+}
+
+table {
+    table-layout: fixed ;
+    width: 100% ;
+}
+
+td {
+    vertical-align: top;
+    width: 50%;
+}
+
+.editor {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    margin-bottom: 5px;
+}
+
+
+label {
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+button {
+    padding: 5px;
+    margin-right: 5px;
+    border-radius: 3px;
+    background-color: #eee;
+}
+
+.people {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+table, caption, th, td {
+    border: 1px solid lightgrey;
+}
+
+table caption {
+    height: 33px;
+    font-weight: bold;
+    padding-top: 5px;
+    border-bottom: none;
+}
+
+tr {
+    height: 33px;
+}
+
+
+td {
+    padding-left: 5px;
+    text-align: left;
+}
+
+.error {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    background-color: #fbb;
+    visibility: hidden;
+
+}
+
+/* Split the screen in half */
+.split {
+  height: 90%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  top: 1;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Control the left side */
+.left {
+  left: 0;
+}
+
+/* Control the right side */
+.right {
+  right: 0;
+}
+
+/* If you want the content centered horizontally and vertically */
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* Style the image inside the centered container, if needed */
+.centered img {
+  width: 150px;
+  border-radius: 50%;
+}
+
+.code {
+    display:block;
+    overflow: scroll;
+    width: 90%;
+    height:150px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    background-color: black;
+    color: white;
+    font-family: "Courier New", Courier, monospace;
+
+}
+
+.codeError {
+    display:block;
+    overflow: scroll;
+    width: 90%;
+    height:150px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    background-color: black;
+    color: red;
+    font-family: "Courier New", Courier, monospace;
+
+}

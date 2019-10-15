@@ -1,4 +1,4 @@
-name: scaffold
+name: scaffold_connection
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
@@ -7,3 +7,4 @@ class_name: MyScaffoldConnection
 supported_protocols: []
 config:
   foo: bar
+description: "default connection description [Fill in]"

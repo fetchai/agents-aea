@@ -22,9 +22,8 @@
 import logging
 from typing import List, cast, TYPE_CHECKING
 
-from aea.mail.base import Envelope
+from aea.protocols.base import Message
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.serialization import OEFSerializer
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
@@ -41,7 +40,7 @@ else:
 
 Address = str
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.tac_skill")
 
 
 class OEFHandler(Handler):
@@ -51,6 +50,7 @@ class OEFHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
+        super().__init__(**kwargs)
         self._rejoin = False
 
     def setup(self) -> None:
@@ -61,14 +61,15 @@ class OEFHandler(Handler):
         """
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to a message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        oef_message = OEFSerializer().decode(envelope.message)
+        oef_message = cast(OEFMessage, message)
         oef_type = oef_message.get("type")
 
         logger.debug("[{}]: Handling OEF message. type={}".format(self.context.agent_name, oef_type))
@@ -198,38 +199,38 @@ class TACHandler(Handler):
         """
         pass
 
-    def handle_envelope(self, envelope: Envelope) -> None:
+    def handle(self, message: Message, sender: str) -> None:
         """
-        Implement the reaction to an envelope.
+        Implement the reaction to a message.
 
-        :param envelope: the envelope
+        :param message: the message
+        :param sender: the sender
         :return: None
         """
-        tac_msg = TACSerializer().decode(envelope.message)
+        tac_msg = cast(TACMessage, message)
         tac_msg_type = TACMessage.Type(tac_msg.get("type"))
-        tac_msg = cast(TACMessage, tac_msg)
         game = cast(Game, self.context.game)
         logger.debug("[{}]: Handling controller response. type={}".format(self.context.agent_name, tac_msg_type))
         try:
-            if envelope.sender != game.expected_controller_pbk:
+            if sender != game.expected_controller_pbk:
                 raise ValueError("The sender of the message is not the controller agent we registered with.")
 
             if tac_msg_type == TACMessage.Type.TAC_ERROR:
-                self._on_tac_error(tac_msg, envelope.sender)
+                self._on_tac_error(tac_msg, sender)
             elif game.game_phase == GamePhase.PRE_GAME:
                 raise ValueError("We do not expect a controller agent message in the pre game phase.")
             elif game.game_phase == GamePhase.GAME_SETUP:
                 if tac_msg_type == TACMessage.Type.GAME_DATA:
-                    self._on_start(tac_msg, envelope.sender)
+                    self._on_start(tac_msg, sender)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
             elif game.game_phase == GamePhase.GAME:
                 if tac_msg_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
-                    self._on_transaction_confirmed(tac_msg, envelope.sender)
+                    self._on_transaction_confirmed(tac_msg, sender)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
                 elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
-                    self._on_state_update(tac_msg, envelope.sender)
+                    self._on_state_update(tac_msg, sender)
             elif game.game_phase == GamePhase.POST_GAME:
                 raise ValueError("We do not expect a controller agent message in the post game phase.")
         except ValueError as e:

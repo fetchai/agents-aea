@@ -29,3 +29,4 @@ dependencies:
   - dep3>=1.10.11a1
   - dep4<=1.11.12b2
   - dep5 >= 1.4.5.0
+description: "dummy_skill skill description [Fill in]"

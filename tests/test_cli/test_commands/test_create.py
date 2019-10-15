@@ -32,13 +32,14 @@ import jsonschema
 import pytest
 import yaml
 from click.testing import CliRunner
+from jsonschema import Draft4Validator
 
 import aea
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR
+from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR
 
 
 class TestCreate:
@@ -47,6 +48,10 @@ class TestCreate:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
+        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
@@ -80,10 +85,8 @@ class TestCreate:
     def test_configuration_file_is_compliant_to_schema(self):
         """Check that the agent's configuration file is compliant with the schema."""
         agent_config_instance = self._load_config_file()
-        agent_config_schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-
         try:
-            jsonschema.validate(instance=agent_config_instance, schema=agent_config_schema)
+            self.validator.validate(instance=agent_config_instance)
         except jsonschema.exceptions.ValidationError as e:
             pytest.fail("Configuration file is not compliant with the schema. Exception: {}".format(str(e)))
 
@@ -117,12 +120,12 @@ class TestCreate:
         agent_config_instance = self._load_config_file()
         assert agent_config_instance["license"] == ""
 
-    def test_private_key_pem_path_field_is_empty_string(self):
-        """Check that the 'private_key_pem_path' is the empty string."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["private_key_pem_path"] == ""
+    # def test_private_key_pem_path_field_is_empty_string(self):
+    #     """Check that the 'private_key_pem_path' is the empty string."""
+    #     agent_config_instance = self._load_config_file()
+    #     assert agent_config_instance["private_key_pem_path"] == ""
 
-    def test_protocols_field_is_empty_list(self):
+    def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
         agent_config_instance = self._load_config_file()
         assert agent_config_instance["protocols"] == ["default"]
