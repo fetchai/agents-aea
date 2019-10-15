@@ -36,7 +36,7 @@ def _generate_wealth(amount, private_key: Optional[str] = None) -> None:
     :return:
     """
     entity_to_generate_wealth = Entity.from_hex(private_key)
-    api = LedgerApi("127.0.0.1", 8100)
+    api = LedgerApi("127.0.0.1", 8000)
     api.sync(api.tokens.wealth(entity_to_generate_wealth, amount))
     address = Address(entity_to_generate_wealth)
     logger.info('The new balance of the address {} is : {} FET'.format(address, api.tokens.balance(address)))
