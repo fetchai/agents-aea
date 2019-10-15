@@ -39,6 +39,8 @@ from aea.configurations.loader import ConfigLoader
 logger = logging.getLogger("aea")
 logger = click_log.basic_config(logger=logger)
 
+DEFAULT_REGISTRY_PATH = "../packages"
+
 
 class Context(object):
     """A class to keep configuration of the cli tool."""

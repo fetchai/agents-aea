@@ -31,6 +31,7 @@ RUN apt-get install -y                                                       \
        libssl-dev                                                            \
        libffi-dev                                                            \
        python3-dev                                                           \
+       python3.7-dev                                                         \
        python3-pip
 
 

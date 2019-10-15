@@ -14,7 +14,7 @@
         "config"
     ],
     "properties": {
-        "name": {"type": "string"},
+        "name": {"$ref": "definitions.json#/definitions/resource_name"},
         "authors": {"type": "string"},
         "version": {"type": "string"},
         "license": {"type": "string"},

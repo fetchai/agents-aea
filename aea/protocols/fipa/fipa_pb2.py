@@ -7,6 +7,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf import descriptor_pb2
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -18,9 +19,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='fipa.proto',
   package='fetch.aea.fipa',
   syntax='proto3',
-  serialized_options=None,
   serialized_pb=_b('\n\nfipa.proto\x12\x0e\x66\x65tch.aea.fipa\"\xb1\x07\n\x0b\x46IPAMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12\x13\n\x0b\x64ialogue_id\x18\x02 \x01(\x05\x12\x0e\n\x06target\x18\x03 \x01(\x05\x12.\n\x03\x63\x66p\x18\x04 \x01(\x0b\x32\x1f.fetch.aea.fipa.FIPAMessage.CFPH\x00\x12\x36\n\x07propose\x18\x05 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.ProposeH\x00\x12\x34\n\x06\x61\x63\x63\x65pt\x18\x06 \x01(\x0b\x32\".fetch.aea.fipa.FIPAMessage.AcceptH\x00\x12?\n\x0cmatch_accept\x18\x07 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.MatchAcceptH\x00\x12\x36\n\x07\x64\x65\x63line\x18\x08 \x01(\x0b\x32#.fetch.aea.fipa.FIPAMessage.DeclineH\x00\x12\x34\n\x06inform\x18\t \x01(\x0b\x32\".fetch.aea.fipa.FIPAMessage.InformH\x00\x12\x46\n\x10\x61\x63\x63\x65pt_w_address\x18\n \x01(\x0b\x32*.fetch.aea.fipa.FIPAMessage.AcceptWAddressH\x00\x12Q\n\x16match_accept_w_address\x18\x0b \x01(\x0b\x32/.fetch.aea.fipa.FIPAMessage.MatchAcceptWAddressH\x00\x1a}\n\x03\x43\x46P\x12\x0f\n\x05\x62ytes\x18\x01 \x01(\x0cH\x00\x12:\n\x07nothing\x18\x02 \x01(\x0b\x32\'.fetch.aea.fipa.FIPAMessage.CFP.NothingH\x00\x12\x15\n\x0bquery_bytes\x18\x03 \x01(\x0cH\x00\x1a\t\n\x07NothingB\x07\n\x05query\x1a\x1b\n\x07Propose\x12\x10\n\x08proposal\x18\x01 \x03(\x0c\x1a\x08\n\x06\x41\x63\x63\x65pt\x1a\r\n\x0bMatchAccept\x1a#\n\x10\x41\x63\x63\x65pt_W_Address\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x1a(\n\x15MatchAccept_W_Address\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x1a\t\n\x07\x44\x65\x63line\x1a\x17\n\x06Inform\x12\r\n\x05\x62ytes\x18\x01 \x01(\x0c\x1a!\n\x0e\x41\x63\x63\x65ptWAddress\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x1a&\n\x13MatchAcceptWAddress\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\tB\x0e\n\x0cperformativeb\x06proto3')
 )
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -38,7 +39,7 @@ _FIPAMESSAGE_CFP_NOTHING = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -61,28 +62,28 @@ _FIPAMESSAGE_CFP = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='nothing', full_name='fetch.aea.fipa.FIPAMessage.CFP.nothing', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='query_bytes', full_name='fetch.aea.fipa.FIPAMessage.CFP.query_bytes', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[_FIPAMESSAGE_CFP_NOTHING, ],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -108,14 +109,14 @@ _FIPAMESSAGE_PROPOSE = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -138,7 +139,7 @@ _FIPAMESSAGE_ACCEPT = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -161,7 +162,7 @@ _FIPAMESSAGE_MATCHACCEPT = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -184,14 +185,14 @@ _FIPAMESSAGE_ACCEPT_W_ADDRESS = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -214,14 +215,14 @@ _FIPAMESSAGE_MATCHACCEPT_W_ADDRESS = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -244,7 +245,7 @@ _FIPAMESSAGE_DECLINE = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -267,14 +268,14 @@ _FIPAMESSAGE_INFORM = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -297,14 +298,14 @@ _FIPAMESSAGE_ACCEPTWADDRESS = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -327,14 +328,14 @@ _FIPAMESSAGE_MATCHACCEPTWADDRESS = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -357,84 +358,84 @@ _FIPAMESSAGE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='dialogue_id', full_name='fetch.aea.fipa.FIPAMessage.dialogue_id', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='target', full_name='fetch.aea.fipa.FIPAMessage.target', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='cfp', full_name='fetch.aea.fipa.FIPAMessage.cfp', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='propose', full_name='fetch.aea.fipa.FIPAMessage.propose', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='accept', full_name='fetch.aea.fipa.FIPAMessage.accept', index=5,
       number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='match_accept', full_name='fetch.aea.fipa.FIPAMessage.match_accept', index=6,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='decline', full_name='fetch.aea.fipa.FIPAMessage.decline', index=7,
       number=8, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='inform', full_name='fetch.aea.fipa.FIPAMessage.inform', index=8,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='accept_w_address', full_name='fetch.aea.fipa.FIPAMessage.accept_w_address', index=9,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
     _descriptor.FieldDescriptor(
       name='match_accept_w_address', full_name='fetch.aea.fipa.FIPAMessage.match_accept_w_address', index=10,
       number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[_FIPAMESSAGE_CFP, _FIPAMESSAGE_PROPOSE, _FIPAMESSAGE_ACCEPT, _FIPAMESSAGE_MATCHACCEPT, _FIPAMESSAGE_ACCEPT_W_ADDRESS, _FIPAMESSAGE_MATCHACCEPT_W_ADDRESS, _FIPAMESSAGE_DECLINE, _FIPAMESSAGE_INFORM, _FIPAMESSAGE_ACCEPTWADDRESS, _FIPAMESSAGE_MATCHACCEPTWADDRESS, ],
   enum_types=[
   ],
-  serialized_options=None,
+  options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -501,7 +502,6 @@ _FIPAMESSAGE.oneofs_by_name['performative'].fields.append(
   _FIPAMESSAGE.fields_by_name['match_accept_w_address'])
 _FIPAMESSAGE.fields_by_name['match_accept_w_address'].containing_oneof = _FIPAMESSAGE.oneofs_by_name['performative']
 DESCRIPTOR.message_types_by_name['FIPAMessage'] = _FIPAMESSAGE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 FIPAMessage = _reflection.GeneratedProtocolMessageType('FIPAMessage', (_message.Message,), dict(
 

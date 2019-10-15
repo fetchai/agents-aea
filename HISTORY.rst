@@ -52,3 +52,12 @@ Release History
 - Extended docs on framework and skills
 - Introduces core framework components like decision maker and shared classes
 - Multiple additional minor fixes and changes
+
+0.1.7 (2019-10-14)
+-------------------
+
+- Adds gui to interact with cli
+- Adds new connection stub to read from/write to file
+- Adds ledger entities (fetchai and ethereum); creates wallet for ledger entities
+- Adds more documentation and fixes old one
+- Multiple additional minor fixes and changes
