@@ -37,6 +37,7 @@ class ColorFormatter(logging.Formatter):
     }
 
     def format(self, record):
+        """Format the log message."""
         if not record.exc_info:
             level = record.levelname.lower()
             msg = record.getMessage()
@@ -49,12 +50,10 @@ class ColorFormatter(logging.Formatter):
 
 
 def simple_verbosity_option(logger=None, *names, **kwargs):
-    """
-    A decorator that adds a `--verbosity, -v` option to the decorated
-    command.
+    """A decorator that adds a `--verbosity, -v` option to the decoratedcommand.
 
-    Name can be configured through ``*names``. Keyword arguments are passed to
-    the underlying ``click.option`` decorator.
+    Name can be configured through `*names`. Keyword arguments are passed to
+    the underlying `click.option` decorator.
     """
     if not names:
         names = ['--verbosity', '-v']
