@@ -618,7 +618,7 @@ class Controller{
             }
         }
         if (agentSelectionId != "NONE"){
-            $('.localItemHeading').html(agentSelectionId + "'s");
+            $('.localItemHeading').html(agentSelectionId);
         }
         else{
             $('.localItemHeading').html("Local");

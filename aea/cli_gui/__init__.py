@@ -23,6 +23,7 @@ import argparse
 from enum import Enum
 import glob
 import io
+import logging
 import os
 import subprocess
 import threading
@@ -76,7 +77,7 @@ def read_description(dir_name, yaml_name):
             if "description" in yaml_data:
                 return yaml_data["description"]
         except yaml.YAMLError as exc:
-            print(exc)
+            logging.error(exc)
     return "Placeholder description"
 
 
@@ -201,7 +202,9 @@ def _call_aea(param_list, dir):
 def _call_aea_async(param_list, dir):
     old_cwd = os.getcwd()
     os.chdir(dir)
-    ret = subprocess.Popen(param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    env = os.environ.copy()
+    env["PYTHONUNBUFFERED"] = "1"
+    ret = subprocess.Popen(param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     os.chdir(old_cwd)
     return ret
 
@@ -303,7 +306,7 @@ def start_agent(agent_id):
 
 def _read_tty(process, str_list):
     for line in io.TextIOWrapper(process.stdout, encoding="utf-8"):
-        # print(line)
+        logging.info("stdout: " + line.replace("\n", ""))
         str_list.append(line)
 
     str_list.append("process terminated\n")
@@ -311,7 +314,7 @@ def _read_tty(process, str_list):
 
 def _read_error(process, str_list):
     for line in io.TextIOWrapper(process.stderr, encoding="utf-8"):
-        # print("Error:" + line)
+        logging.error("stderr: " + line.replace("\n", ""))
         str_list.append(line)
 
     str_list.append("process terminated\n")
@@ -380,7 +383,7 @@ def get_process_status(process_id) -> ProcessState:
 
 
 def _kill_running_oef_nodes():
-    print("Kill off any existing OEF nodes which are running...")
+    logging.info("Kill off any existing OEF nodes which are running...")
     subprocess.call(['docker', 'kill', oef_node_name])
 
 
@@ -399,7 +402,7 @@ def run():
 
     @app.route('/')
     def home():
-        """Respond to browser URL:  localhost:5000/ ."""
+        """Respond to browser URL:  localhost:5000/."""
         return flask.render_template('home.html', len=len(elements), htmlElements=elements)
 
     @app.route('/static/js/home.js')
@@ -413,7 +416,7 @@ def run():
         return flask.send_from_directory(
             os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=False)
 
 
 # If we're running in stand alone mode, run the application
