@@ -1,4 +1,4 @@
-aea_version: 0.1.4
+aea_version: 0.1.7
 agent_name: Agent0
 authors: Fetch.AI Limited
 connections:
@@ -6,9 +6,9 @@ connections:
 default_connection: local
 license: Apache 2.0
 private_key_paths:
-  private_key_path:
-    ledger: default
-    path: ''
+  - private_key_path:
+      ledger: default
+      path: ''
 protocols:
 - fipa
 - default

@@ -28,7 +28,7 @@ import yaml
 from jsonschema import validate, Draft4Validator  # type: ignore
 
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
-    DEFAULT_SKILL_CONFIG_FILE
+    DEFAULT_SKILL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
 from ..conftest import CUR_PATH, ROOT_DIR, AGENT_CONFIGURATION_SCHEMA, SKILL_CONFIGURATION_SCHEMA, \
     CONNECTION_CONFIGURATION_SCHEMA, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
 
@@ -57,6 +57,27 @@ def test_validate_agent_config():
     agent_config_schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
     resolver = jsonschema.RefResolver("file://{}/".format(CONFIGURATION_SCHEMA_DIR), agent_config_schema)
     validate(instance=agent_config_file, schema=agent_config_schema, resolver=resolver)
+
+
+class TestAgentSchema:
+    """Test that the agent configuration validation works."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+    @pytest.mark.parametrize("agent_path",
+                             [
+                                 os.path.join(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE),
+                                 os.path.join(CUR_PATH, "data", "aea-config.example.yaml")
+                             ])
+    def test_validate_agent_config(self, agent_path):
+        """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
+        protocol_config_file = yaml.safe_load(open(agent_path))
+        self.validator.validate(instance=protocol_config_file)
 
 
 class TestProtocolsSchema:
