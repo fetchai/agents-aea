@@ -19,11 +19,9 @@
 
 """This test module contains the tests for the `aea install` sub-command."""
 import os
-import shutil
 import tempfile
-from pathlib import Path
-
 import unittest.mock
+from pathlib import Path
 
 import yaml
 from click.testing import CliRunner
@@ -32,6 +30,7 @@ import aea.cli.common
 from aea.cli import cli
 from ...conftest import CLI_LOG_OPTION, CUR_PATH
 
+
 class TestInstall:
     """Test that the command 'aea install' works as expected."""
 
@@ -39,10 +38,31 @@ class TestInstall:
     def setup_class(cls):
         """Set the test up."""
         cls.runner = CliRunner()
-        cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install"])
+
+    def test_exit_code_equal_to_zero(self):
+        """Assert that the exit code is equal to zero (i.e. success)."""
+        assert self.result.exit_code == 0
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        os.chdir(cls.cwd)
+
+
+class TestInstallFromRequirementFile:
+    """Test that the command 'aea install --requirement REQ_FILE' works."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.cwd = os.getcwd()
+        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install", "-r", "requirements.txt"])
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -84,7 +104,6 @@ class TestInstallFails:
     def test_exit_code_equal_to_minus_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
         assert self.result.exit_code == -1
-
 
     @classmethod
     def teardown_class(cls):
