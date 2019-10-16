@@ -2,6 +2,7 @@ name: echo
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
+description: "The echo skill implements simple echo functionality."
 url: ""
 behaviours:
   - behaviour:
@@ -23,4 +24,3 @@ tasks:
 shared_classes: []
 protocols: ["default"]
 dependencies: []
-description: "Echo skill description [Fill in]"
