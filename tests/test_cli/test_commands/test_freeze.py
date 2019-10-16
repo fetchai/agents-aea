@@ -46,6 +46,10 @@ class TestFreeze:
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
 
+    def test_exit_code_equal_to_zero(self):
+        """Assert that the exit code is equal to zero (i.e. success)."""
+        assert self.result.exit_code == 0
+
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
         assert self.result.output == """protobuf\n"""
