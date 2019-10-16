@@ -20,22 +20,15 @@
 """This test module contains the tests for the `aea gui` sub-command."""
 import json
 import os
-import shutil
-import socket
 import subprocess
-import sys
 import tempfile
 import time
-from multiprocessing import Process
 from pathlib import Path
 
 import jsonschema
-from click.testing import CliRunner
 from jsonschema import Draft4Validator
 
-from aea.cli import cli
-from aea.cli.__main__ import gui
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH, tcpping
+from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
 
 
 class TestGui:

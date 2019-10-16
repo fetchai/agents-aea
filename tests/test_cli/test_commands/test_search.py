@@ -29,7 +29,7 @@ from jsonschema import Draft4Validator
 from aea import AEA_DIR
 from aea.cli import cli
 from aea.cli.common import DEFAULT_REGISTRY_PATH
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
+from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
 
 
 class TestSearchProtocols:
