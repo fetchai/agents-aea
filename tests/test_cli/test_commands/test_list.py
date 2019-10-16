@@ -46,7 +46,7 @@ class TestListProtocols:
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"])
 
-    def test_correct_output(self, capsys):
+    def test_correct_output(self):
         """Test that the command has printed the correct output."""
         assert self.result.output == "\n".join(["default", "fipa"]) + "\n"
 
@@ -72,7 +72,7 @@ class TestListConnections:
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"])
 
-    def test_correct_output(self, capsys):
+    def test_correct_output(self):
         """Test that the command has printed the correct output."""
         assert self.result.output == "\n".join(["local"]) + "\n"
 
@@ -98,7 +98,7 @@ class TestListSkills:
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"])
 
-    def test_correct_output(self, capsys):
+    def test_correct_output(self):
         """Test that the command has printed the correct output."""
         assert self.result.output == "\n".join(["dummy", "error"]) + "\n"
 

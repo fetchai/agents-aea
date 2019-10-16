@@ -46,7 +46,7 @@ class TestFreeze:
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
 
-    def test_correct_output(self, capsys):
+    def test_correct_output(self):
         """Test that the command has printed the correct output."""
         assert self.result.output == """protobuf\n"""
 
