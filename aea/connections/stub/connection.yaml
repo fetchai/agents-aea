@@ -3,6 +3,7 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The stub connection implements a connection stub which reads/writes messages from/to file."
 class_name: StubConnection
 supported_protocols:
   - oef
