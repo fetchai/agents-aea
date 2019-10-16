@@ -22,6 +22,7 @@
 from queue import Queue
 from typing import Dict
 
+from aea.agent import Liveness
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
 
@@ -35,7 +36,8 @@ class AgentContext:
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
                  preferences: Preferences,
-                 is_ready_to_pursuit_goals: bool):
+                 is_ready_to_pursuit_goals: bool,
+                 liveness: Liveness):
         """
         Initialize an agent context.
 
@@ -47,6 +49,7 @@ class AgentContext:
         :param ownership_state: the ownership state of the agent
         :param preferences: the preferences of the agent
         :param is_ready_to_pursuit_goals: whether the agent is ready to pursuit its goals
+        :param liveness: the liveness object.
         """
         self._agent_name = agent_name
         self._public_keys = public_keys
@@ -55,6 +58,7 @@ class AgentContext:
         self._ownership_state = ownership_state
         self._preferences = preferences
         self._is_ready_to_pursuit_goals = is_ready_to_pursuit_goals
+        self._liveness = liveness
 
     @property
     def agent_name(self) -> str:
@@ -95,3 +99,8 @@ class AgentContext:
     def is_ready_to_pursuit_goals(self) -> bool:
         """Get the goal pursuit readiness."""
         return self._is_ready_to_pursuit_goals
+
+    @property
+    def liveness(self) -> Liveness:
+        """Get the liveness object."""
+        return self._liveness
