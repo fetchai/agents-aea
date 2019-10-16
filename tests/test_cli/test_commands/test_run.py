@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea run` sub-command."""
-import logging
 import os
 import shutil
 import tempfile

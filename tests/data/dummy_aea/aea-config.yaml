@@ -26,6 +26,5 @@ registry_path: aea
 skills:
 - dummy
 - error
-- stopping
 url: ''
 version: v1
