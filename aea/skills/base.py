@@ -66,6 +66,16 @@ class SkillContext:
         return self._agent_context.public_keys
 
     @property
+    def agent_addresses(self) -> Dict[str, str]:
+        """Get addresses."""
+        return self._agent_context.addresses
+
+    @property
+    def agent_address(self) -> str:
+        """Get address."""
+        return self._agent_context.address
+
+    @property
     def outbox(self) -> OutBox:
         """Get outbox."""
         return self._agent_context.outbox
