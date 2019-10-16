@@ -53,6 +53,7 @@ class TestGui:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
         cls.proc = subprocess.Popen(["aea", *CLI_LOG_OPTION, "gui"])
+        time.sleep(3.0)
 
     def test_gui(self):
         """Test that the gui process has been spawned correctly."""
