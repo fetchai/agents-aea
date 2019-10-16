@@ -213,7 +213,7 @@ def start_oef_node(dummy):
         "-c",
         "./scripts/oef/launch_config.json"]
 
-    flask.app.oef_process = _call_aea_async(param_list, flask.app.module_dir)
+    flask.app.oef_process = _call_aea_async(param_list, flask.app.agents_dir)
 
     if flask.app.oef_process is not None:
         flask.app.oef_tty = []
