@@ -31,11 +31,11 @@ To create a new agent and run it, follow these steps:
 4. Click on the [Add skill] button - which should actually now say "Add echo skill to my_new_agent agent"
 5. Start an OEF Node, by clicking on the [Start OEF Node] button. Wait for the text saying "A thing of beauty is a joy forever..." to appear. This shows that the node has started successfully
 
-<center>![start node](assets/cli_gui03_oef_node.png)</center>
+    <center>![start node](assets/cli_gui03_oef_node.png)</center>
 
 6. Start the agent running, by clicking on the [start agent] button - you should say the output from the echo agent appearing on the screen
 
-<center>![start agent](assets/cli_gui04_new_agent.png)</center>
+    <center>![start agent](assets/cli_gui04_new_agent.png)</center>
 
 This is how your whole page should look if you followed the instrucitons corectly
 <center>![whole screen running](assets/cli_gui05_full_running_agent.png)</center>
