@@ -64,6 +64,7 @@ class ProcessState(Enum):
 
 oef_node_name = "aea_local_oef_node"
 max_log_lines = 100
+lock = threading.Lock()
 
 
 def read_description(dir_name, yaml_name):
@@ -99,9 +100,7 @@ def is_item_dir(dir_name, item_type):
 
 def get_agents():
     """Return list of all local agents."""
-    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
-
-    file_list = glob.glob(os.path.join(agent_dir, '*'))
+    file_list = glob.glob(os.path.join(flask.app.agents_dir, '*'))
 
     agent_list = []
 
@@ -115,8 +114,7 @@ def get_agents():
 
 def get_registered_items(item_type):
     """Return list of all protocols, connections or skills in the registry."""
-    agent_dir = os.path.join(os.getcwd(), args.agent_dir)
-    item_dir = os.path.join(agent_dir, "packages/" + item_type + "s")
+    item_dir = os.path.join(flask.app.agents_dir, "packages/" + item_type + "s")
 
     file_list = glob.glob(os.path.join(item_dir, '*'))
 
@@ -133,7 +131,7 @@ def get_registered_items(item_type):
 
 def create_agent(agent_id):
     """Create a new AEA project."""
-    if _call_aea(["aea", "create", agent_id], args.agent_dir) == 0:
+    if _call_aea(["aea", "create", agent_id], flask.app.agents_dir) == 0:
         return agent_id, 201  # 201 (Created)
     else:
         return {"detail": "Failed to create Agent {} - a folder of this name may exist already".format(agent_id)}, 400  # 400 Bad request
@@ -141,7 +139,7 @@ def create_agent(agent_id):
 
 def delete_agent(agent_id):
     """Delete an existing AEA project."""
-    if _call_aea(["aea", "delete", agent_id], args.agent_dir) == 0:
+    if _call_aea(["aea", "delete", agent_id], flask.app.agents_dir) == 0:
         return 'Agent {} deleted'.format(agent_id), 200   # 200 (OK)
     else:
         return {"detail": "Failed to delete Agent {} - it ay not exist".format(agent_id)}, 400   # 400 Bad request
@@ -149,7 +147,7 @@ def delete_agent(agent_id):
 
 def add_item(agent_id, item_type, item_id):
     """Add a protocol, skill or connection to the register to a local agent."""
-    agent_dir = os.path.join(args.agent_dir, agent_id)
+    agent_dir = os.path.join(flask.app.agents_dir, agent_id)
     if _call_aea(["aea", "add", item_type, item_id], agent_dir) == 0:
         return agent_id, 201  # 200 (OK)
     else:
@@ -158,7 +156,7 @@ def add_item(agent_id, item_type, item_id):
 
 def remove_local_item(agent_id, item_type, item_id):
     """Remove a protocol, skill or connection from a local agent."""
-    agent_dir = os.path.join(args.agent_dir, agent_id)
+    agent_dir = os.path.join(flask.app.agents_dir, agent_id)
     if _call_aea(["aea", "remove", item_type, item_id], agent_dir) == 0:
         return agent_id, 201  # 200 (OK)
     else:
@@ -167,7 +165,7 @@ def remove_local_item(agent_id, item_type, item_id):
 
 def get_local_items(agent_id, item_type):
     """Return a list of protocols, skills or connections supported by a local agent."""
-    items_dir = os.path.join(os.path.join(args.agent_dir, agent_id), item_type + "s")
+    items_dir = os.path.join(os.path.join(flask.app.agents_dir, agent_id), item_type + "s")
 
     file_list = glob.glob(os.path.join(items_dir, '*'))
 
@@ -184,7 +182,7 @@ def get_local_items(agent_id, item_type):
 
 def scaffold_item(agent_id, item_type, item_id):
     """Scaffold a moslty empty item on an agent (either protocol, skill or connection)."""
-    agent_dir = os.path.join(args.agent_dir, agent_id)
+    agent_dir = os.path.join(flask.app.agents_dir, agent_id)
     if _call_aea(["aea", "scaffold", item_type, item_id], agent_dir) == 0:
         return agent_id, 201  # 200 (OK)
     else:
@@ -192,28 +190,30 @@ def scaffold_item(agent_id, item_type, item_id):
 
 
 def _call_aea(param_list, dir):
-    old_cwd = os.getcwd()
-    os.chdir(dir)
-    ret = subprocess.call(param_list)
-    os.chdir(old_cwd)
+    # Should lock here to prevet multiple calls coming in at once and changing the current working directory weirdly
+    with lock:
+        old_cwd = os.getcwd()
+        os.chdir(dir)
+        ret = subprocess.call(param_list)
+        os.chdir(old_cwd)
     return ret
 
 
 def _call_aea_async(param_list, dir):
-    old_cwd = os.getcwd()
-    os.chdir(dir)
-    env = os.environ.copy()
-    env["PYTHONUNBUFFERED"] = "1"
-    ret = subprocess.Popen(param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-    os.chdir(old_cwd)
+    # Should lock here to prevet multiple calls coming in at once and changing the current working directory weirdly
+    with lock:
+        old_cwd = os.getcwd()
+        os.chdir(dir)
+        env = os.environ.copy()
+        env["PYTHONUNBUFFERED"] = "1"
+        ret = subprocess.Popen(param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+        os.chdir(old_cwd)
     return ret
 
 
 def start_oef_node(dummy):
     """Start an OEF node running."""
     _kill_running_oef_nodes()
-
-    CUR_DIR = os.path.abspath(os.path.dirname(__file__))
 
     param_list = [
         "python",
@@ -224,7 +224,7 @@ def start_oef_node(dummy):
         "-c",
         "./scripts/oef/launch_config.json"]
 
-    flask.app.oef_process = _call_aea_async(param_list, os.path.join(CUR_DIR, "../../"))
+    flask.app.oef_process = _call_aea_async(param_list, flask.app.agents_dir)
 
     if flask.app.oef_process is not None:
         flask.app.oef_tty = []
@@ -286,7 +286,7 @@ def start_agent(agent_id):
         else:
             return {"detail": "Agent {} is already running".format(agent_id)}, 400  # 400 Bad request
 
-    agent_dir = os.path.join(args.agent_dir, agent_id)
+    agent_dir = os.path.join(flask.app.agents_dir, agent_id)
     agent_process = _call_aea_async(["aea", "run"], agent_dir)
     if agent_process is None:
         return {"detail": "Failed to run agent {}".format(agent_id)}, 400  # 400 Bad request
@@ -397,6 +397,8 @@ def run():
     flask.app.agent_tty = {}
     flask.app.agent_error = {}
     flask.app.ui_is_starting = False
+    flask.app.agents_dir = os.path.join(os.path.abspath(os.getcwd()), args.agent_dir)
+    flask.app.module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
 
     app.add_api('aea_cli_rest.yaml')
 

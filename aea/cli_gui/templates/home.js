@@ -337,8 +337,6 @@ class Controller{
             }
         }, 100)
 
-
-
         // Go through each of the element types setting up call-back and table building functions on the
         // Items which exist
         var self = this;
@@ -365,6 +363,7 @@ class Controller{
 
                     if (self.validateId(id)) {
                         self.model.deleteItem(e.data.el, id)
+                        self.view.setSelectedId(e.data.el["combined"], "NONE")
                     } else {
                         alert('Error: Problem with selected id');
                     }
@@ -380,6 +379,10 @@ class Controller{
 
                 if (self.validateId(agentId) && self.validateId(itemId) ) {
                     self.model.addItem(e.data.el, agentId, itemId)
+                    self.view.setSelectedId(e.data.el["combined"], "NONE")
+                    var tableBody = $("."+ e.data.el["combined"] +"registeredTable");
+                    self.clearTable(tableBody);
+
 
                 } else {
                     alert('Error: Problem with one of the selected ids (either agent or ' + element['type']);
@@ -394,6 +397,8 @@ class Controller{
 
                 if (self.validateId(agentId) && self.validateId(itemId) ) {
                     self.model.removeItem(e.data.el, agentId, itemId)
+                    self.view.setSelectedId(e.data.el["combined"], "NONE")
+
 
                 } else {
                     alert('Error: Problem with one of the selected ids (either agent or ' + element['type']);
@@ -465,22 +470,18 @@ class Controller{
 
             this.$event_pump.on('model_'+ combineName + 'DeleteSuccess', {el: element}, function(e, data) {
                 self.model.readData(e.data.el);
-                self.view.setSelectedId(e.data.el["combined"], "NONE")
+
                 self.refreshAgentData(data)
                 self.handleButtonStates()
 
             });
             this.$event_pump.on('model_'+ combineName + 'AddSuccess', {el: element}, function(e, data) {
                 self.refreshAgentData(data)
-                self.view.setSelectedId(e.data.el["combined"], "NONE")
-                var tableBody = $("."+ e.data.el["combined"] +"registeredTable");
-                self.clearTable(tableBody);
                 self.handleButtonStates()
 
             });
             this.$event_pump.on('model_'+ combineName + 'RemoveSuccess', {el: element}, function(e, data) {
                 self.refreshAgentData(data)
-                self.view.setSelectedId(e.data.el["combined"], "NONE")
                 self.handleButtonStates()
 
             });
