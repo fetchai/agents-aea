@@ -19,7 +19,6 @@
 
 """Key pieces of functionality for CLI GUI."""
 
-import argparse
 from enum import Enum
 import glob
 import io
@@ -31,16 +30,6 @@ import threading
 import connexion
 import flask
 import yaml
-
-
-parser = argparse.ArgumentParser(description='Launch the AEA CLI GUI')
-parser.add_argument(
-    '-ad',
-    '--agent_dir',
-    default='./',
-    help='Location of script and package files and where agents will be created (default: ./)'
-)
-args = None  # pragma: no cover
 
 
 elements = [['local', 'agent', 'localAgents'],
@@ -224,7 +213,7 @@ def start_oef_node(dummy):
         "-c",
         "./scripts/oef/launch_config.json"]
 
-    flask.app.oef_process = _call_aea_async(param_list, flask.app.agents_dir)
+    flask.app.oef_process = _call_aea_async(param_list, flask.app.module_dir)
 
     if flask.app.oef_process is not None:
         flask.app.oef_tty = []
@@ -397,7 +386,7 @@ def run():
     flask.app.agent_tty = {}
     flask.app.agent_error = {}
     flask.app.ui_is_starting = False
-    flask.app.agents_dir = os.path.join(os.path.abspath(os.getcwd()), args.agent_dir)
+    flask.app.agents_dir = os.path.abspath(os.getcwd())
     flask.app.module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
 
     app.add_api('aea_cli_rest.yaml')
@@ -423,8 +412,5 @@ def run():
 
 # If we're running in stand alone mode, run the application
 if __name__ == '__main__':
-    args = parser.parse_args()  # pragma: no cover
     run()
 
-else:
-    args, _ = parser.parse_known_args()
