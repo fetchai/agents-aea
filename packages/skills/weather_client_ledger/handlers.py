@@ -76,6 +76,8 @@ class FIPAHandler(Handler):
                     logger.info("[{}]: received proposal={} in dialogue={}".format(self.context.agent_name, item.values,
                                                                                    dialogue_id))
                     if "Price" in item.values.keys():
+                        # TODO: Add  if tx_message.get("amount") <= api.tokens.balance(m_address)
+                        # Though I don't want to create a new ledger api conenction here.
                         if item.values["Price"] < self.max_price:
                             self.handle_accept(sender, message_id, dialogue_id)
                         else:

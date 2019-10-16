@@ -185,7 +185,7 @@ def _create_temporary_private_key_pem_path() -> str:
     return DEFAULT_PRIVATE_KEY_FILE
 
 
-def _generate_address_from_public_key(public_key) -> Address:
+def generate_address_from_public_key(public_key) -> Address:
     """
     Generate the address to send the tokens.
 

@@ -26,7 +26,7 @@ from queue import Queue
 from typing import Dict, List, Optional, cast
 
 from aea.crypto.wallet import Wallet
-from aea.crypto.helpers import _generate_address_from_public_key
+from aea.crypto.helpers import generate_address_from_public_key
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.mail.base import OutBox  # , Envelope
@@ -306,14 +306,13 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        amount = 0
-        m_address = _generate_address_from_public_key(self._wallet.public_keys['fetchai'])
-        api = LedgerApi("127.0.0.1", 8100)
-        if amount <= api.tokens.balance(m_address) and amount <= api.tokens.balance(m_address):
+        m_address = generate_address_from_public_key(self._wallet.public_keys['fetchai'])
+        api = LedgerApi("127.0.0.1", 8000)
+        if tx_message.get("amount") <= api.tokens.balance(m_address):
             m_entity = Entity.from_hex(self._wallet.crypto_objects['fetchai'].private_key)
-            to = _generate_address_from_public_key(tx_message.get("counterparty"))
+            to = generate_address_from_public_key(tx_message.get("counterparty"))
             api.sync(api.tokens.transfer(m_entity, to, 1, 1))
-
+        logger.info("Just made the transaction!")
         # TODO: //Notify the handler that we made the transaction.
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:

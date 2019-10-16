@@ -19,31 +19,41 @@
 # ------------------------------------------------------------------------------
 
 """Helper script that generates wealth on a specific address."""
+import argparse
 import logging
-import sys
-from typing import Optional
+import pprint
 
 from fetchai.ledger.api import LedgerApi        # type: ignore
-from fetchai.ledger.crypto import Entity, Address, Identity  # type: ignore
+from fetchai.ledger.crypto import Entity, Address  # type: ignore
 
 logger = logging.getLogger(__name__)
 
 
-def _generate_wealth(amount, private_key: Optional[str] = None) -> None:
+def generate_wealth(arguments: argparse.Namespace) -> None:
     """
     Generate tokens to be able to make a transaction.
 
     :return:
     """
-    entity_to_generate_wealth = Entity.from_hex(private_key)
+    entity_to_generate_wealth = Entity.from_hex(arguments.private_key)
     api = LedgerApi("127.0.0.1", 8000)
-    api.sync(api.tokens.wealth(entity_to_generate_wealth, amount))
+    api.sync(api.tokens.wealth(entity_to_generate_wealth, arguments.amount))
     address = Address(entity_to_generate_wealth)
     logger.info('The new balance of the address {} is : {} FET'.format(address, api.tokens.balance(address)))
 
 
+def parse_arguments():
+    """Arguments parsing."""
+    parser = argparse.ArgumentParser("wealth_creation")
+    parser.add_argument("--amount", type=int, default=10, help="The amount we want to generate to the address")
+    parser.add_argument("--private-key", type=str, default="dd50e375684f4a9013129483883fff2d3402335d847547819a45c11198b627db",
+                        help="The amount we want to generate to the address")
+    arguments = parser.parse_args()
+    logger.debug("Arguments: {}".format(pprint.pformat(arguments.__dict__)))
+
+    return arguments
+
+
 if __name__ == "__main__":
-    if len(sys.argv) > 2:
-        _generate_wealth(sys.argv[1], sys.argv[2])
-    else:
-        _generate_wealth(sys.argv[1])
+    arguments = parse_arguments()
+    generate_wealth(arguments)
