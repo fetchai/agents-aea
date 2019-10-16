@@ -32,6 +32,7 @@ import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from tests.conftest import CLI_LOG_OPTION
 
 
 class TestRemoveProtocol:
@@ -49,12 +50,12 @@ class TestRemoveProtocol:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
         assert result.exit_code == 0
-        cls.result = cls.runner.invoke(cli, ["remove", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "protocol", cls.protocol_name])
 
     def test_exit_code_equal_to_zero(self):
         """Test that the exit code is equal to minus 1."""
@@ -94,11 +95,11 @@ class TestRemoveProtocolFailsWhenProtocolDoesNotExist:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
-        cls.result = cls.runner.invoke(cli, ["remove", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "protocol", cls.protocol_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""
@@ -137,16 +138,16 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
         assert result.exit_code == 0
 
         cls.patch = unittest.mock.patch("shutil.rmtree", side_effect=BaseException("an exception"))
         cls.patch.__enter__()
 
-        cls.result = cls.runner.invoke(cli, ["remove", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "protocol", cls.protocol_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""

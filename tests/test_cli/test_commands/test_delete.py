@@ -29,6 +29,7 @@ from click.testing import CliRunner
 import aea
 import aea.cli.common
 from aea.cli import cli
+from tests.conftest import CLI_LOG_OPTION
 
 
 class TestDelete:
@@ -43,8 +44,8 @@ class TestDelete:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.runner.invoke(cli, ["create", cls.agent_name])
-        cls.result = cls.runner.invoke(cli, ["delete", cls.agent_name])
+        cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name])
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -81,7 +82,7 @@ class TestDeleteFailsWhenDirectoryDoesNotExist:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # agent's directory does not exist -> command will fail.
-        cls.result = cls.runner.invoke(cli, ["delete", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the error code is equal to -1."""

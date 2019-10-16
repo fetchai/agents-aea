@@ -31,6 +31,7 @@ import aea
 import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
+from tests.conftest import CLI_LOG_OPTION
 
 
 class TestAddConnectionFailsWhenConnectionAlreadyExists:
@@ -48,14 +49,14 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add connection first time
-        result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
         assert result.exit_code == 0
         # add connection again
-        cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""
@@ -94,10 +95,10 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""
@@ -136,7 +137,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
@@ -145,7 +146,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""
@@ -184,12 +185,12 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
 
         os.chdir(cls.agent_name)
         Path("connections", cls.connection_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, ["add", "connection", cls.connection_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""

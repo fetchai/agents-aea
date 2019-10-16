@@ -31,6 +31,7 @@ import aea
 import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
+from tests.conftest import CLI_LOG_OPTION
 
 
 class TestAddProtocolFailsWhenProtocolAlreadyExists:
@@ -48,12 +49,12 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
         assert result.exit_code == 0
-        cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""
@@ -92,10 +93,10 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""
@@ -134,7 +135,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
 
         # change the serialization of the ProtocolConfig class so to make the parsing to fail.
@@ -143,7 +144,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""
@@ -182,12 +183,12 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
 
         os.chdir(cls.agent_name)
         Path("protocols", cls.protocol_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, ["add", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the exit code is equal to minus 1."""
