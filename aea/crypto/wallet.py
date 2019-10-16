@@ -71,6 +71,6 @@ class Wallet(object):
         return self._crypto_objects
 
     @property
-    def addresses(self):
-        """Get the crypt addresses."""
+    def addresses(self) -> Dict[str, str]:
+        """Get the crypto addresses."""
         return self._addresses
