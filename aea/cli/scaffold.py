@@ -70,7 +70,7 @@ def connection(ctx: Context, connection_name: str) -> None:
     except FileExistsError:
         logger.error("Directory already exist. Aborting...")
         exit(-1)
-    except ValidationError as e:
+    except ValidationError:
         logger.error("Error when validating the skill configuration file.")
         shutil.rmtree(os.path.join("connections", connection_name), ignore_errors=True)
         exit(-1)
@@ -112,7 +112,7 @@ def protocol(ctx: Context, protocol_name: str):
     except FileExistsError:
         logger.error("Directory already exist. Aborting...")
         exit(-1)
-    except ValidationError as e:
+    except ValidationError:
         logger.error("Error when validating the skill configuration file.")
         shutil.rmtree(os.path.join("protocols", protocol_name), ignore_errors=True)
         exit(-1)
@@ -154,7 +154,7 @@ def skill(ctx: Context, skill_name: str):
     except FileExistsError:
         logger.error("Directory already exist. Aborting...")
         exit(-1)
-    except ValidationError as e:
+    except ValidationError:
         logger.error("Error when validating the skill configuration file.")
         shutil.rmtree(os.path.join("skills", skill_name), ignore_errors=True)
         exit(-1)

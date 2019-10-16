@@ -308,4 +308,3 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-

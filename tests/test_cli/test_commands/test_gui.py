@@ -49,7 +49,7 @@ class TestGui:
         cls.proc = subprocess.Popen(["aea", *CLI_LOG_OPTION, "gui"])
         time.sleep(3.0)
 
-    def test_gui(self,pytestconfig):
+    def test_gui(self, pytestconfig):
         """Test that the gui process has been spawned correctly."""
         if pytestconfig.getoption("ci"):
             pytest.skip('skipped: CI')
