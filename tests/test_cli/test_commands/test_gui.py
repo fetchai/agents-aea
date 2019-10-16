@@ -26,6 +26,7 @@ import time
 from pathlib import Path
 
 import jsonschema
+import pytest
 from jsonschema import Draft4Validator
 
 from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
@@ -48,9 +49,12 @@ class TestGui:
         cls.proc = subprocess.Popen(["aea", *CLI_LOG_OPTION, "gui"])
         time.sleep(3.0)
 
-    def test_gui(self):
+    def test_gui(self,pytestconfig):
         """Test that the gui process has been spawned correctly."""
-        assert tcpping("localhost", 8080)
+        if pytestconfig.getoption("ci"):
+            pytest.skip('skipped: CI')
+        else:
+            assert tcpping("localhost", 8080)
 
     @classmethod
     def teardown_class(cls):

@@ -106,7 +106,7 @@ def _try_to_load_agent_config(ctx: Context):
     except FileNotFoundError:
         logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
         exit(-1)
-    except jsonschema.exceptions.ValidationError as e:
+    except jsonschema.exceptions.ValidationError:
         logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
         exit(-1)
 

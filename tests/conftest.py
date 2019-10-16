@@ -70,7 +70,8 @@ def tcpping(ip, port) -> bool:
         s.connect((ip, int(port)))
         s.shutdown(2)
         return True
-    except:
+    except Exception as e:
+        logger.exception(e)
         return False
 
 
