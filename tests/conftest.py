@@ -22,6 +22,7 @@ import asyncio
 import inspect
 import logging
 import os
+import socket
 import time
 from threading import Timer
 from typing import Optional
@@ -60,6 +61,17 @@ def oef_addr() -> str:
 def oef_port() -> int:
     """Port of the connection to the OEF Node to use during the tests."""
     return 10000
+
+
+def tcpping(ip, port) -> bool:
+    """Ping TCP port."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.connect((ip, int(port)))
+        s.shutdown(2)
+        return True
+    except:
+        return False
 
 
 class OEFHealthCheck(object):

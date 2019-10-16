@@ -17,9 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea freeze` sub-command."""
+"""This test module contains the tests for the `aea gui` sub-command."""
 import json
 import os
+import shutil
+import socket
+import subprocess
+import sys
+import tempfile
+import time
+from multiprocessing import Process
 from pathlib import Path
 
 import jsonschema
@@ -27,11 +34,12 @@ from click.testing import CliRunner
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
+from aea.cli.__main__ import gui
+from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH, tcpping
 
 
-class TestFreeze:
-    """Test that the command 'aea freeze' works as expected."""
+class TestGui:
+    """Test that the command 'aea gui' works as expected."""
 
     @classmethod
     def setup_class(cls):
@@ -40,17 +48,19 @@ class TestFreeze:
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
-        cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+        cls.proc = subprocess.Popen(["aea", *CLI_LOG_OPTION, "gui"])
 
-    def test_correct_output(self, capsys):
-        """Test that the command has printed the correct output."""
-        assert self.result.output == """protobuf\n"""
+    def test_gui(self):
+        """Test that the gui process has been spawned correctly."""
+        assert tcpping("localhost", 8080)
 
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
+        cls.proc.terminate()
+        cls.proc.wait(2.0)
         os.chdir(cls.cwd)
