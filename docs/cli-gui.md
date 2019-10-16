@@ -12,7 +12,7 @@ Go to your working folder, where you want to create new agents. If you followed 
 aea gui
 ```
 
-Open this page in a browser: http://127.0.0.1:8080
+Open this page in a browser: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
 You should see the following page displayed:
 
