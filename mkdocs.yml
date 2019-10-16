@@ -38,6 +38,7 @@ nav:
       - CLI:
          - "CLI tool": 'cli-how-to.md'
          - "Commands": 'cli-commands.md'
+         - "GUI": 'cli-gui.md'
     - Integration:
       - "Integrate with third parties": 'integration.md'
     - Demos:
