@@ -314,7 +314,7 @@ class View{
 
     error(error_msg) {
         $('.error')
-            .text(error_msg)
+            .html("<br>" + error_msg)
             .css('visibility', 'visible');
         setTimeout(function() {
             $('.error').css('visibility', 'hidden');
