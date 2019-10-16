@@ -118,7 +118,8 @@ def test_handle():
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
     public_key = wallet.public_keys['default']
-    mailbox = MailBox(OEFLocalConnection(public_key, node))
+    connection = OEFLocalConnection(public_key, node)
+    mailbox = MailBox(connection)
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     message_bytes = DefaultSerializer().encode(msg)
@@ -137,8 +138,8 @@ def test_handle():
     t = Thread(target=agent.start)
     try:
         t.start()
-        agent.mailbox.inbox._queue.put(envelope)
-        env = agent.mailbox.outbox._queue.get(block=True, timeout=10.0)
+        connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=4.0)
         assert env.protocol_id == "default", \
             "The envelope is not the expected protocol (Unsupported protocol)"
 
@@ -149,7 +150,7 @@ def test_handle():
             sender=public_key,
             protocol_id='default',
             message=msg)
-        agent.mailbox.inbox._queue.put(envelope)
+        connection.in_queue.put(envelope)
         #   UNSUPPORTED SKILL
         msg = FIPASerializer().encode(
             FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
@@ -162,7 +163,7 @@ def test_handle():
             sender=public_key,
             protocol_id="fipa",
             message=msg)
-        agent.mailbox.inbox._queue.put(envelope)
+        connection.in_queue.put(envelope)
     finally:
         agent.stop()
         t.join()
