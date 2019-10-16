@@ -35,7 +35,7 @@ def list(ctx: Context):
 @pass_ctx
 def connections(ctx: Context):
     """List all the installed connections."""
-    for c in ctx.agent_config.connections:
+    for c in sorted(ctx.agent_config.connections):
         print(c)
 
 
@@ -43,7 +43,7 @@ def connections(ctx: Context):
 @pass_ctx
 def protocols(ctx: Context):
     """List all the installed protocols."""
-    for c in ctx.agent_config.protocols:
+    for c in sorted(ctx.agent_config.protocols):
         print(c)
 
 
@@ -51,5 +51,5 @@ def protocols(ctx: Context):
 @pass_ctx
 def skills(ctx: Context):
     """List all the installed skills."""
-    for c in ctx.agent_config.skills:
+    for c in sorted(ctx.agent_config.skills):
         print(c)
