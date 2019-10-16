@@ -28,6 +28,7 @@ from click.testing import CliRunner
 
 import aea.cli.common
 from aea.cli import cli
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from ...conftest import CLI_LOG_OPTION, CUR_PATH
 
 
@@ -95,7 +96,7 @@ class TestInstallFails:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", "my_protocol"])
         assert result.exit_code == 0
 
-        config_path = Path("protocols", "my_protocol", "protocol.yaml")
+        config_path = Path("protocols", "my_protocol", DEFAULT_PROTOCOL_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
         config.setdefault("dependencies", []).append("this_dependency_does_not_exist")
         yaml.safe_dump(config, open(config_path, "w"))

@@ -17,23 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'dummy' skill."""
+"""This module contains the tasks for the 'stop' skill."""
+import datetime
 
-from aea.protocols.base import Message
-from aea.skills.base import Handler
+from aea.skills.base import Task
 
 
-class DummyHandler(Handler):
-    """Echo handler."""
-
-    SUPPORTED_PROTOCOL = "default"
+class StopTask(Task):
+    """Dummy task."""
 
     def __init__(self, **kwargs):
-        """Initialize the handler."""
+        """Initialize the task."""
         super().__init__(**kwargs)
         self.kwargs = kwargs
-        self.handled_messages = []
-        self.nb_teardown_called = 0
+        self.timeout = kwargs.get("timeout", 3.0)
+        self.enabled = kwargs.get("enabled", False)
 
     def setup(self) -> None:
         """
@@ -41,22 +39,13 @@ class DummyHandler(Handler):
 
         :return: None
         """
-        pass
+        self.start_time = datetime.datetime.now()
+        self.end_time = self.start_time + datetime.timedelta(0, self.timeout)
 
-    def handle(self, message: Message, sender: str) -> None:
-        """
-        Handle message.
-
-        :param message: the message
-        :param sender: the sender
-        :return: None
-        """
-        self.handled_messages.append(message)
+    def execute(self) -> None:
+        """Execute the task."""
+        if self.enabled and datetime.datetime.now() > self.end_time:
+            self.context.liveness._is_stopped = True
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
-        self.nb_teardown_called += 1
+        """Teardown the task."""

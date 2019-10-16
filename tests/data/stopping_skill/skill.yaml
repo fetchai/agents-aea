@@ -1,0 +1,17 @@
+name: stopping
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours: []
+handlers: []
+tasks:
+  - task:
+      class_name: StopTask
+      args:
+        enabled: true
+        timeout: 3
+shared_classes: []
+protocols: []
+dependencies: []
+description: "Stop the agent as soon as possible."
