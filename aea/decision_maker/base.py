@@ -306,12 +306,13 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        m_address = generate_address_from_public_key(self._wallet.public_keys['fetchai'])
         api = LedgerApi("127.0.0.1", 8000)
-        if tx_message.get("amount") <= api.tokens.balance(m_address):
+        if tx_message.get("amount") <= api.tokens.balance(self._wallet.addresses['fetchai']):
+            fetch_entity = self._wallet.enity
+            print(fetch_entity.public_key)
             m_entity = Entity.from_hex(self._wallet.crypto_objects['fetchai'].private_key)
             to = generate_address_from_public_key(tx_message.get("counterparty"))
-            api.sync(api.tokens.transfer(m_entity, to, 1, 1))
+            api.sync(api.tokens.transfer(m_entity, to, tx_message.get("amount"), tx_message.get("sender_tx_fee")))
         logger.info("Just made the transaction!")
         # TODO: //Notify the handler that we made the transaction.
 

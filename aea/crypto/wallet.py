@@ -21,6 +21,8 @@
 """Module wrapping all the public and private keys cryptography."""
 from typing import Dict, cast
 
+from fetchai.ledger.crypto import Entity
+
 from aea.crypto.base import Crypto, DefaultCrypto
 from aea.crypto.ethereum_base import EthCrypto
 from aea.crypto.fetchai_base import FetchCrypto
@@ -74,3 +76,8 @@ class Wallet(object):
     def addresses(self) -> Dict[str, str]:
         """Get the crypto addresses."""
         return self._addresses
+
+    @property
+    def enity(self) -> Entity:
+        """Get the entity for Fet"""
+        return self.crypto_objects['fetchai'].entity

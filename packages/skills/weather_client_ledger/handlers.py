@@ -230,7 +230,6 @@ class DefaultHandler(Handler):
         pass
 
     def _create_message_for_transaction(self, public_key: str):
-        print(type(self.context.agent_public_keys['fetchai']))
         msg = TransactionMessage(transaction_id="transaction0",
                                  sender=self.context.agent_public_keys['fetchai'],
                                  counterparty=public_key,
