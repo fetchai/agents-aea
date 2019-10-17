@@ -71,7 +71,7 @@ class FetchCrypto(Crypto):
     @property
     def entity(self) -> Entity:
         """
-        Return the entity of the fetch.ai (Private/Public keys pair)
+        Return the entity of the fetch.ai (Private/Public keys pair).
 
         :return: entity
         """
