@@ -139,7 +139,7 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'A skill with name '{skill_name}' already exists. Aborting...'
         """
-        s = "Directory already exist. Aborting..."
+        s = "A skill with this name already exists. Please choose a different name and try again."
         self.mocked_logger_error.assert_called_once_with(s)
 
     def test_resource_directory_exists(self):

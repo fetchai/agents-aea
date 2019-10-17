@@ -68,7 +68,7 @@ def connection(ctx: Context, connection_name: str) -> None:
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
     except FileExistsError:
-        logger.error("Directory already exist. Aborting...")
+        logger.error("A connection with this name already exists. Please choose a different name and try again.")
         exit(-1)
     except ValidationError:
         logger.error("Error when validating the skill configuration file.")
@@ -110,7 +110,7 @@ def protocol(ctx: Context, protocol_name: str):
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
     except FileExistsError:
-        logger.error("Directory already exist. Aborting...")
+        logger.error("A protocol with this name already exists. Please choose a different name and try again.")
         exit(-1)
     except ValidationError:
         logger.error("Error when validating the skill configuration file.")
@@ -152,7 +152,7 @@ def skill(ctx: Context, skill_name: str):
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
     except FileExistsError:
-        logger.error("Directory already exist. Aborting...")
+        logger.error("A skill with this name already exists. Please choose a different name and try again.")
         exit(-1)
     except ValidationError:
         logger.error("Error when validating the skill configuration file.")

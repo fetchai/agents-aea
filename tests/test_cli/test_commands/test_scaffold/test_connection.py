@@ -121,7 +121,7 @@ class TestScaffoldConnectionFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'A connection with name '{connection_name}' already exists. Aborting...'
         """
-        s = "Directory already exist. Aborting..."
+        s = "A connection with this name already exists. Please choose a different name and try again."
         self.mocked_logger_error.assert_called_once_with(s)
 
     def test_resource_directory_exists(self):

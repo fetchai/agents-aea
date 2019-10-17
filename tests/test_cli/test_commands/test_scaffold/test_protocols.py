@@ -127,7 +127,7 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
-        s = "Directory already exist. Aborting..."
+        s = "A protocol with this name already exists. Please choose a different name and try again."
         self.mocked_logger_error.assert_called_once_with(s)
 
     def test_resource_directory_exists(self):
