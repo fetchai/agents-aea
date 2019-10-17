@@ -140,6 +140,7 @@ class ConnectionConfig(Configuration):
                  class_name: str = "",
                  supported_protocols: Optional[List[str]] = None,
                  dependencies: Optional[List[str]] = None,
+                 description: str = "",
                  **config):
         """Initialize a connection configuration object."""
         self.name = name
@@ -150,6 +151,7 @@ class ConnectionConfig(Configuration):
         self.class_name = class_name
         self.supported_protocols = supported_protocols if supported_protocols is not None else []
         self.dependencies = dependencies if dependencies is not None else []
+        self.description = description
         self.config = config
 
     @property
@@ -164,6 +166,7 @@ class ConnectionConfig(Configuration):
             "class_name": self.class_name,
             "supported_protocols": self.supported_protocols,
             "dependencies": self.dependencies,
+            "description": self.description,
             "config": self.config
         }
 
@@ -181,6 +184,7 @@ class ConnectionConfig(Configuration):
             class_name=cast(str, obj.get("class_name")),
             supported_protocols=supported_protocols,
             dependencies=dependencies,
+            description=cast(str, obj.get("description")),
             **cast(dict, obj.get("config"))
         )
 
@@ -194,7 +198,8 @@ class ProtocolConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
-                 dependencies: Optional[List[str]] = None):
+                 dependencies: Optional[List[str]] = None,
+                 description: str = ""):
         """Initialize a connection configuration object."""
         self.name = name
         self.authors = authors
@@ -202,6 +207,7 @@ class ProtocolConfig(Configuration):
         self.license = license
         self.url = url
         self.dependencies = dependencies
+        self.description = description
 
     @property
     def json(self) -> Dict:
@@ -212,7 +218,8 @@ class ProtocolConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "url": self.url,
-            "dependencies": self.dependencies
+            "dependencies": self.dependencies,
+            "description": self.description
         }
 
     @classmethod
@@ -225,7 +232,8 @@ class ProtocolConfig(Configuration):
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
-            dependencies=dependencies
+            dependencies=dependencies,
+            description=cast(str, obj.get("description")),
         )
 
 
@@ -343,7 +351,8 @@ class SkillConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  protocols: List[str] = None,
-                 dependencies: Optional[List[str]] = None):
+                 dependencies: Optional[List[str]] = None,
+                 description: str = ""):
         """Initialize a skill configuration."""
         self.name = name
         self.authors = authors
@@ -352,6 +361,7 @@ class SkillConfig(Configuration):
         self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[str]
         self.dependencies = dependencies
+        self.description = description
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
         self.tasks = CRUDCollection[TaskConfig]()
@@ -372,6 +382,7 @@ class SkillConfig(Configuration):
             "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
             "tasks": [{"task": t.json} for _, t in self.tasks.read_all()],
             "shared_classes": [{"shared_class": s.json} for _, s in self.shared_classes.read_all()],
+            "description": self.description
         }
 
     @classmethod
@@ -384,6 +395,7 @@ class SkillConfig(Configuration):
         url = cast(str, obj.get("url"))
         protocols = cast(List[str], obj.get("protocols", []))
         dependencies = cast(List[str], obj.get("dependencies", []))
+        description = cast(str, obj.get("description"))
         skill_config = SkillConfig(
             name=name,
             authors=authors,
@@ -391,7 +403,8 @@ class SkillConfig(Configuration):
             license=license,
             url=url,
             protocols=protocols,
-            dependencies=dependencies
+            dependencies=dependencies,
+            description=description
         )
 
         for b in obj.get("behaviours", []):  # type: ignore
@@ -424,6 +437,7 @@ class AgentConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  registry_path: str = "",
+                 description: str = "",
                  private_key_paths: Dict[str, str] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
@@ -434,11 +448,13 @@ class AgentConfig(Configuration):
         self.license = license
         self.url = url
         self.registry_path = registry_path
+        self.description = description
         self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
 
         private_key_paths = private_key_paths if private_key_paths is not None else {}
         for ledger, path in private_key_paths.items():
             self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
+
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
@@ -476,6 +492,7 @@ class AgentConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "registry_path": self.registry_path,
+            "description": self.description,
             "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
             "logging_config": self.logging_config,
             "default_connection": self.default_connection,
@@ -500,6 +517,7 @@ class AgentConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
+            description=cast(str, obj.get("description")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
             private_key_paths=cast(Dict, private_key_paths)
         )

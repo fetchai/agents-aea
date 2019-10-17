@@ -1,8 +1,9 @@
-name: ''
+name: scaffold_skill
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The scaffold skill is a scaffold for your own skill implementation."
 behaviours:
   - behaviour:
       class_name: MyScaffoldBehaviour

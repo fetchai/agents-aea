@@ -145,7 +145,6 @@ def _try_validate_fet_private_key_path(private_key_path: str) -> None:
     :raises: an exception if the private key is invalid.
     """
     try:
-        # TODO :Change this to match the enity.fromhex()
         with open(private_key_path, "r") as key:
             data = key.read()
             Entity.from_hex(data)
@@ -163,7 +162,6 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
     :raises: an exception if the private key is invalid.
     """
     try:
-        # TODO :Change this to match the Account.fromhex()
         with open(private_key_path, "r") as key:
             data = key.read()
             Account.from_key(data)

@@ -3,6 +3,7 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The weather station skill offers weather data for sale."
 behaviours:
   - behaviour:
       class_name: MyWeatherBehaviour
@@ -20,6 +21,3 @@ tasks:
         foo: bar
 shared_classes: []
 protocols: ['fipa']
-
-
-

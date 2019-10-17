@@ -32,13 +32,14 @@ import jsonschema
 import pytest
 import yaml
 from click.testing import CliRunner
+from jsonschema import Draft4Validator
 
 import aea
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR
+from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
 
 
 class TestCreate:
@@ -47,12 +48,16 @@ class TestCreate:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
+        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def _load_config_file(self) -> Dict:
         """Load a config file."""
@@ -80,10 +85,8 @@ class TestCreate:
     def test_configuration_file_is_compliant_to_schema(self):
         """Check that the agent's configuration file is compliant with the schema."""
         agent_config_instance = self._load_config_file()
-        agent_config_schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-
         try:
-            jsonschema.validate(instance=agent_config_instance, schema=agent_config_schema)
+            self.validator.validate(instance=agent_config_instance)
         except jsonschema.exceptions.ValidationError as e:
             pytest.fail("Configuration file is not compliant with the schema. Exception: {}".format(str(e)))
 
@@ -188,7 +191,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the error code is equal to -1."""
@@ -230,7 +233,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the error code is equal to -1."""
@@ -268,7 +271,7 @@ class TestCreateFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.result = cls.runner.invoke(cli, ["create", cls.agent_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_minus_1(self):
         """Test that the error code is equal to -1."""

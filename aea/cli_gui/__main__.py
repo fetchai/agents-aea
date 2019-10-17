@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -8,7 +7,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Specifies the version of the TAC package."""
+"""Main entry point for CLI GUI."""
+import aea.cli_gui
 
-__title__ = 'aea'
-__description__ = 'Autonomous Economic Agent framework'
-__url__ = 'https://github.com/fetchai/agents-aea.git'
-__version__ = '0.1.7'
-__author__ = 'Fetch.AI Limited'
-__license__ = 'Apache 2.0'
-__copyright__ = '2019 Fetch.AI Limited'
+# If we're running in stand alone mode, run the application
+if __name__ == '__main__':
+    aea.cli_gui.run()

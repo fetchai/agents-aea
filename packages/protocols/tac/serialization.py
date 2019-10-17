@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from packages.protocols.tac import tac_pb2
     from packages.protocols.tac.message import TACMessage
 else:
-    from tac_protocol import tac_pb2
+    import tac_protocol.tac_pb2 as tac_pb2
     from tac_protocol.message import TACMessage
 
 

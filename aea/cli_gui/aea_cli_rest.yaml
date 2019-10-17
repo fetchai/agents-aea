@@ -14,7 +14,7 @@ basePath: /api
 paths:
   /agent:
     get:
-      operationId: app.get_agents
+      operationId: aea.cli_gui.get_agents
       tags:
       - agents
       summary: Return list of all aea projects
@@ -27,14 +27,14 @@ paths:
             items:
               type: string
     post:
-      operationId: app.create_agent
+      operationId: aea.cli_gui.create_agent
       tags:
         - People
-      summary: Creare a new AEA project (an agent)
+      summary: Create a new AEA project (an agent)
       parameters:
         - name: agent_id
           in: body
-          description: Person to create
+          description: Name of aea project to create
           required: True
           schema:
             type: string
@@ -50,7 +50,7 @@ paths:
 
   /agent/{agent_id}:
     delete:
-      operationId: app.delete_agent
+      operationId: aea.cli_gui.delete_agent
       tags:
       - agents
       summary: Delete an aea project
@@ -73,7 +73,7 @@ paths:
 
   /agent/{agent_id}/{item_type}:
     post:
-      operationId: app.add_item
+      operationId: aea.cli_gui.add_item
       tags:
       - agents
       summary: Fetch a protocol from the registry to the currently selected agent
@@ -105,7 +105,7 @@ paths:
           schema:
             type: string
     get:
-      operationId: app.get_local_items
+      operationId: aea.cli_gui.get_local_items
       tags:
       - agents
       summary: Return list of all items if a given type supported by this agent
@@ -135,7 +135,7 @@ paths:
 
   /agent/{agent_id}/{item_type}/{item_id}:
     delete:
-      operationId: app.remove_local_item
+      operationId: aea.cli_gui.remove_local_item
       tags:
       - agents
       summary: Delete a protocol, connection or skill from an agent
@@ -169,7 +169,7 @@ paths:
 
   /agent/{agent_id}/{item_type}/scaffold:
     post:
-      operationId: app.scaffold_item
+      operationId: aea.cli_gui.scaffold_item
       tags:
       - agents
       summary: Scaffold a new (mostly empty) item (either a protocol, connection or skill) on to an agent
@@ -204,7 +204,7 @@ paths:
 
   /{item_type}:
     get:
-      operationId: app.get_registered_items
+      operationId: aea.cli_gui.get_registered_items
       tags:
         - agents
       summary: Return list of all registered items (protocols, connections, skills)
@@ -221,3 +221,129 @@ paths:
             type: array
             items:
               type: string
+
+  /oef:
+    post:
+      operationId: aea.cli_gui.start_oef_node
+      tags:
+      - oef
+      summary: Start an OEF node that our agents can communicate with
+      parameters:
+        - name: dummy
+          in: body
+          description: Seeing if this makes it work
+          schema:
+            type: string
+          required: True
+      responses:
+        201:
+          description: Start the OEF Nodoe
+          schema:
+            type: string
+
+        400:
+          description: Cannot start node
+          schema:
+            type: string
+
+    get:
+      operationId: aea.cli_gui.get_oef_node_status
+      tags:
+      - oef
+      summary: Get status info about the oef
+
+      responses:
+        200:
+          description: successfully got status data
+          schema:
+            type: string
+
+        400:
+          description: Cannot get status data
+          schema:
+            type: string
+
+    delete:
+      operationId: aea.cli_gui.stop_oef_node
+      tags:
+      - oef
+      summary: Stops an OEF node
+
+      responses:
+        200:
+          description: successfully started OEF Node
+          schema:
+            type: string
+
+        400:
+          description: Cannot stop node
+          schema:
+            type: string
+
+  /agent/{agent_id}/run:
+    post:
+      operationId: aea.cli_gui.start_agent
+      tags:
+      - agents
+      summary: Start an agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to run
+          type: string
+          required: True
+      responses:
+        201:
+          description: Start the OEF Nodoe
+          schema:
+            type: string
+
+        400:
+          description: Cannot start agent
+          schema:
+            type: string
+
+    get:
+      operationId: aea.cli_gui.get_agent_status
+      tags:
+      - agents
+      summary: Get status of a running agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: get status of agent
+          type: string
+          required: True
+      responses:
+        200:
+          description: successfully got status data
+          schema:
+            type: string
+
+        400:
+          description: Cannot get status data
+          schema:
+            type: string
+
+    delete:
+      operationId: aea.cli_gui.stop_agent
+      tags:
+      - agents
+      summary: Stops an agent
+      parameters:
+        - name: agent_id
+          in: path
+          description: id of agent to stop
+          type: string
+          required: True
+
+      responses:
+        200:
+          description: successfully started agent
+          schema:
+            type: string
+
+        400:
+          description: Cannot stop agent
+          schema:
+            type: string

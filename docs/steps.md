@@ -12,7 +12,7 @@
 <li>Set up your <a href="../skill/">skills</a>.</li>
 <li>Code the <a href="../protocol/">protocols</a>.</li>
 <li>Add the <a href="../connection/">connections</a>.</li>
-<li>Scaffold any of the above resources with the <a href="../scaffolding/">scaffolding tool</a>.</li> 
+<li>Scaffold any of the above resources with the <a href="../scaffolding/">scaffolding tool</a>. <a href="../skill-guide/">This guide</a> shows you step by step how to develop a skill.</li> 
 
 
 <li>Now, build and run your agent using the <a href="../quickstart/">quick start guide</a>.</li> 
