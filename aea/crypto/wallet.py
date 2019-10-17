@@ -76,8 +76,3 @@ class Wallet(object):
     def addresses(self) -> Dict[str, str]:
         """Get the crypto addresses."""
         return self._addresses
-
-    @property
-    def enity(self) -> Entity:
-        """Get the entity for Fet"""
-        return self.crypto_objects['fetchai'].entity

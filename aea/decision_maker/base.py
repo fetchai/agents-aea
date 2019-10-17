@@ -308,7 +308,7 @@ class DecisionMaker:
         """
         api = LedgerApi("127.0.0.1", 8000)
         if tx_message.get("amount") <= api.tokens.balance(self._wallet.addresses['fetchai']):
-            fetch_entity = self._wallet.enity
+            fetch_entity = self._wallet.crypto_objects['fetchai'].entity
             print(fetch_entity.public_key)
             m_entity = Entity.from_hex(self._wallet.crypto_objects['fetchai'].private_key)
             to = generate_address_from_public_key(tx_message.get("counterparty"))
