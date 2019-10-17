@@ -1,0 +1,21 @@
+aea_version: 0.1.7
+agent_name: asdsd
+authors: ''
+connections:
+- oef
+default_connection: oef
+description: ''
+license: ''
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: []
+protocols:
+- default
+- gym
+- tac
+registry_path: ../packages
+skills:
+- error
+url: ''
+version: v1

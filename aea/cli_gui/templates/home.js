@@ -681,5 +681,6 @@ class Controller{
 
 }
 
-
-c = new Controller(new Model(), new View())
+$( document ).ready(function() {
+    c = new Controller(new Model(), new View())
+});

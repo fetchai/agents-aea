@@ -1,0 +1,21 @@
+name: my_search
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+description: 'A simple search skill utilising the OEF.'
+behaviours:
+  - behaviour:
+      class_name: MySearchBehaviour
+      args: {}
+handlers:
+  - handler:
+      class_name: MySearchHandler
+      args: {}
+tasks:
+  - task:
+      class_name: MySearchTask
+      args: {}
+shared_classes: []
+protocols: ["oef"]
+dependencies: []
