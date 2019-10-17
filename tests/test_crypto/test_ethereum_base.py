@@ -36,7 +36,7 @@ def test_creation():
 def test_initialization():
     """Test the initialisation of the variables."""
     account = EthCrypto()
-    assert account.display_address is not None, "After creation the display address must not be None"
+    assert account.address is not None, "After creation the display address must not be None"
     assert account._bytes_representation is not None, "After creation the bytes_representation of the " \
                                                       "address must not be None"
     assert account.public_key is not None, "After creation the public key must no be None"
