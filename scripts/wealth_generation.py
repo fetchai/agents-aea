@@ -39,7 +39,7 @@ def generate_wealth(arguments: argparse.Namespace) -> None:
     api = LedgerApi("127.0.0.1", 8000)
 
     try:
-        if arguments.private_key is None or arguments.private_key == "" :
+        if arguments.private_key is None or arguments.private_key == "":
             raise ValueError
         entity_to_generate_wealth = Entity.from_hex(arguments.private_key)
     except ValueError:

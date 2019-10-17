@@ -179,7 +179,7 @@ class DefaultHandler(Handler):
         """
         logger.info("[{}]: Received a default message :) !".format(self.context.agent_name))
         data = message.get("content")
-        json_data = json.loads(data.decode('utf-8'))
+        json_data = json.loads(data.decode('utf-8'))  # type: ignore
         if json_data is not None:
             if "Command" in json_data.keys():
                 if json_data['Command'] == 'Transferred':

@@ -193,7 +193,7 @@ class DefaultHandler(Handler):
         :param sender: the sender
         :return: None
         """
-        json_data = json.loads(message.get("content").decode())
+        json_data = json.loads(message.get("content").decode())  # type: ignore
         if json_data is not None:
             if "Command" in json_data.keys():
                 if json_data['Command'] == 'success':

@@ -21,8 +21,6 @@
 """Module wrapping all the public and private keys cryptography."""
 from typing import Dict, cast
 
-from fetchai.ledger.crypto import Entity
-
 from aea.crypto.base import Crypto, DefaultCrypto
 from aea.crypto.ethereum_base import EthCrypto
 from aea.crypto.fetchai_base import FetchCrypto
