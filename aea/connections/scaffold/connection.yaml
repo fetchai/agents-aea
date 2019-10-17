@@ -1,8 +1,9 @@
-name: scaffold
+name: scaffold_connection
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The scaffold connection provides a scaffold for a connection to be implemented by the developer."
 class_name: MyScaffoldConnection
 supported_protocols: []
 config:

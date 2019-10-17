@@ -66,6 +66,16 @@ class SkillContext:
         return self._agent_context.public_keys
 
     @property
+    def agent_addresses(self) -> Dict[str, str]:
+        """Get addresses."""
+        return self._agent_context.addresses
+
+    @property
+    def agent_address(self) -> str:
+        """Get address."""
+        return self._agent_context.address
+
+    @property
     def outbox(self) -> OutBox:
         """Get outbox."""
         return self._agent_context.outbox
@@ -487,26 +497,30 @@ class Skill:
 
         skill_context = SkillContext(agent_context)
 
-        if skill_config.handlers:
-            handlers_configurations = list(dict(skill_config.handlers.read_all()).values())
+        handlers_by_id = skill_config.handlers.read_all()
+        if len(handlers_by_id) > 0:
+            handlers_configurations = list(dict(handlers_by_id).values())
             handlers = Handler.parse_module(os.path.join(directory, "handlers.py"), handlers_configurations, skill_context)
         else:
             handlers = []
 
-        if skill_config.behaviours:
-            behaviours_configurations = list(dict(skill_config.behaviours.read_all()).values())
+        behaviours_by_id = skill_config.behaviours.read_all()
+        if len(behaviours_by_id) > 0:
+            behaviours_configurations = list(dict(behaviours_by_id).values())
             behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_configurations, skill_context)
         else:
             behaviours = []
 
-        if skill_config.tasks:
-            tasks_configurations = list(dict(skill_config.tasks.read_all()).values())
+        tasks_by_id = skill_config.tasks.read_all()
+        if len(tasks_by_id) > 0:
+            tasks_configurations = list(dict(tasks_by_id).values())
             tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_configurations, skill_context)
         else:
             tasks = []
 
-        if skill_config.shared_classes:
-            shared_classes_configurations = list(dict(skill_config.shared_classes.read_all()).values())
+        shared_classes_by_id = skill_config.shared_classes.read_all()
+        if len(shared_classes_by_id) > 0:
+            shared_classes_configurations = list(dict(shared_classes_by_id).values())
             shared_classes_instances = SharedClass.parse_module(directory, shared_classes_configurations, skill_context)
         else:
             shared_classes_instances = []

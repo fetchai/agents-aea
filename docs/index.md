@@ -7,9 +7,19 @@ The framework is super modular, easily extensible, and highly composable.
 The AEA framework attempts to make agent development as straightforward as web development using popular web frameworks.
 
 
+## AEA definition
+
+An autonomous economic agent (AEA) is an intelligent agent whose goal is generating economic value for its owner.
+
+The AEA super power is their ability to autonomously acquire new skills.
+
+AEAs achieve their goals with the help of the Fetch.AI OEF and the Fetch.AI Ledger. Third party systems, such as Ethereum, may also allow AEA integration. As such, AEAs bridge web 2 and web 3.
+
+
 ## Our vision
 
-The AEA framework has two focused commercial roles.
+The AEA framework has two commercial roles.
+
 
 ### Open source technology
 
@@ -27,24 +37,12 @@ AEA users are, among others:
 * Crypto passionates
 * Web developers
 
+
 ### Platform for start ups
 
 By operating as a platform for start ups, we envisage the AEA framework to be in a continuous growth pattern.
 
 With start up grants we will kick start solutions while testing product-problem fit and identifying our user base.
-
-<!-- Both successes and failures allow us to conceive new hypotheses and hence offer opportunities. -->
-
-
-## Agents
-
-An autonomous economic agent (AEA) is an intelligent agent whose goal is generating economic value for its owner. 
-
-The AEA super power is the ability to autonomously acquire new skills.
-
-AEAs achieve their goals with the help of the Fetch.AI OEF and the Fetch.AI Ledger.
-
-Third party systems, such as Ethereum, may also allow AEA integration.
 
 
 

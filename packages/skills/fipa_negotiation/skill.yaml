@@ -2,6 +2,7 @@ name: 'fipa_negotiation'
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
+description: "The fipa skill implements the logic for an AEA to do fipa negotiation."
 url: ""
 behaviours:
   - behaviour:

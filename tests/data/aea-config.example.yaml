@@ -18,3 +18,4 @@ protocols:
 - fipa
 skills:
 - echo_skill
+description: "aea-config example agent description [Fill in]"
