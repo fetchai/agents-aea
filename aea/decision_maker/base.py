@@ -21,7 +21,6 @@
 
 import copy
 import logging
-import math
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
@@ -38,12 +37,12 @@ CurrencyEndowment = Dict[str, float]  # a map from identifier to quantity
 CurrencyHoldings = Dict[str, float]
 GoodEndowment = Dict[str, int]   # a map from identifier to quantity
 GoodHoldings = Dict[str, int]
-UtilityParams = Dict[str, float]   # a map from identifier to quantity
-ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
 QUANTITY_SHIFT = 100
 
 logger = logging.getLogger(__name__)
+
+MAX_PRICE = 2
 
 
 class OwnershipState:
@@ -147,88 +146,13 @@ class Preferences:
 
     def __init__(self):
         """Instantiate an agent preference object."""
-        self._utility_params = None  # type: UtilityParams
-        self._exchange_params = None  # type: ExchangeParams
-        self._quantity_shift = QUANTITY_SHIFT
-
-    def init(self, utility_params: UtilityParams, exchange_params: ExchangeParams):
-        """
-        Instantiate an agent preference object.
-
-        :param utility_params: the utility params for every asset.
-        :param exchange_params: the exchange params.
-        """
-        logger.warning("Careful! Preferences are being updated!")
-        self._utility_params = utility_params
-        self._exchange_params = exchange_params
+        self._max_price = MAX_PRICE
 
     @property
-    def utility_params(self) -> UtilityParams:
-        """Get utility parameter for each good."""
-        assert self._utility_params is not None, "UtilityParams not set!"
-        return self._utility_params
-
-    @property
-    def exchange_params(self) -> ExchangeParams:
-        """Get exchange parameter for each currency."""
-        assert self._exchange_params is not None, "ExchangeParams not set!"
-        return self._exchange_params
-
-    def logarithmic_utility(self, good_holdings: GoodHoldings) -> float:
-        """
-        Compute agent's utility given her utility function params and a good bundle.
-
-        :param good_holdings: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
-        :return: utility value
-        """
-        goodwise_utility = [self.utility_params[good_pbk] * math.log(quantity + self._quantity_shift) if quantity + self._quantity_shift > 0 else -10000
-                            for good_pbk, quantity in good_holdings.items()]
-        return sum(goodwise_utility)
-
-    def linear_utility(self, currency_holdings: CurrencyHoldings) -> float:
-        """
-        Compute agent's utility given her utility function params and a currency bundle.
-
-        :param currency_holdings: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
-        :return: utility value
-        """
-        currencywise_utility = [self.exchange_params[currency_pbk] for currency_pbk, quantity in currency_holdings.items()]
-        return sum(currencywise_utility)
-
-    def get_score(self, good_holdings: GoodHoldings, currency_holdings: CurrencyHoldings) -> float:
-        """
-        Compute the score given the good and currency holdings.
-
-        :param good_holdings: the good holdings
-        :param currency_holdings: the currency holdings
-        :return: the score.
-        """
-        goods_score = self.logarithmic_utility(good_holdings)
-        currency_score = self.linear_utility(currency_holdings)
-        score = goods_score + currency_score
-        return score
-
-    def marginal_utility(self, ownership_state: OwnershipState, delta_good_holdings: GoodHoldings) -> float:
-        """
-        Compute the marginal utility.
-
-        :return: the marginal utility score
-        """
-        pass
-
-    def get_score_diff_from_transaction(self, ownership_state: OwnershipState, tx_message: TransactionMessage) -> float:
-        """
-        Simulate a transaction and get the resulting score (taking into account the fee).
-
-        :param tx_message: a transaction object.
-        :return: the score.
-        """
-        current_score = self.get_score(good_holdings=ownership_state.good_holdings,
-                                       currency_holdings=ownership_state.currency_holdings)
-        new_ownership_state = ownership_state.apply([tx_message])
-        new_score = self.get_score(good_holdings=new_ownership_state.good_holdings,
-                                   currency_holdings=new_ownership_state.currency_holdings)
-        return new_score - current_score
+    def max_price(self) -> int:
+        """Get the max_price parameter for the transactions."""
+        assert self._max_price is not None, "max_price not set!"
+        return self._max_price
 
 
 class DecisionMaker:
@@ -309,11 +233,8 @@ class DecisionMaker:
         api = LedgerApi("127.0.0.1", 8000)
         if tx_message.get("amount") <= api.tokens.balance(self._wallet.addresses['fetchai']):
             fetch_entity = self._wallet.crypto_objects['fetchai'].entity
-            print(fetch_entity.public_key)
-            m_entity = Entity.from_hex(self._wallet.crypto_objects['fetchai'].private_key)
             to = generate_address_from_public_key(tx_message.get("counterparty"))
-            api.sync(api.tokens.transfer(m_entity, to, tx_message.get("amount"), tx_message.get("sender_tx_fee")))
-        logger.info("Just made the transaction!")
+            api.sync(api.tokens.transfer(fetch_entity, to, tx_message.get("amount"), tx_message.get("sender_tx_fee")))
         # TODO: //Notify the handler that we made the transaction.
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
@@ -328,6 +249,3 @@ class DecisionMaker:
         currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
         good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
-        utility_params = cast(UtilityParams, state_update_message.get("utility_params"))
-        exchange_params = cast(ExchangeParams, state_update_message.get("exchange_params"))
-        self.preferences.init(exchange_params=exchange_params, utility_params=utility_params)

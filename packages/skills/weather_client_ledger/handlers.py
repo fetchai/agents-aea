@@ -33,7 +33,7 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 from aea.decision_maker.messages.transaction import TransactionMessage
 
-MAX_PRICE = 2
+
 STARTING_MESSAGE_ID = 1
 STARTING_TARGET_ID = 0
 
@@ -44,11 +44,6 @@ class FIPAHandler(Handler):
     """This class scaffolds a handler."""
 
     SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
-
-    def __init__(self, **kwargs):
-        """Initiliase the handler."""
-        super().__init__(**kwargs)
-        self.max_price = kwargs['max_price'] if 'max_price' in kwargs.keys() else MAX_PRICE
 
     def setup(self) -> None:
         """
@@ -78,7 +73,7 @@ class FIPAHandler(Handler):
                     if "Price" in item.values.keys():
                         # TODO: Add  if tx_message.get("amount") <= api.tokens.balance(m_address)
                         # Though I don't want to create a new ledger api conenction here.
-                        if item.values["Price"] < self.max_price:
+                        if item.values["Price"] < self.context.agent_preferences.max_price:
                             self.handle_accept(sender, message_id, dialogue_id)
                         else:
                             self.handle_decline(sender, message_id, dialogue_id)
