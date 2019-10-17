@@ -30,7 +30,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from .conftest import CUR_PATH
+from .conftest import CUR_PATH, DummyConnection
 
 
 def test_initialise_AEA():
@@ -113,12 +113,11 @@ def test_react():
 
 def test_handle():
     """Tests handle method of an agent."""
-    node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
     public_key = wallet.public_keys['default']
-    connection = OEFLocalConnection(public_key, node)
+    connection = DummyConnection()
     mailbox = MailBox(connection)
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
@@ -139,7 +138,7 @@ def test_handle():
     try:
         t.start()
         connection.in_queue.put(envelope)
-        env = connection.out_queue.get(block=True, timeout=4.0)
+        env = connection.out_queue.get(block=True, timeout=5.0)
         assert env.protocol_id == "default", \
             "The envelope is not the expected protocol (Unsupported protocol)"
 
