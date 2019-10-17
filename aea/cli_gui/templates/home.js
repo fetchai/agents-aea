@@ -314,7 +314,7 @@ class View{
 
     error(error_msg) {
         $('.error')
-            .text(error_msg)
+            .html("<br>" + error_msg)
             .css('visibility', 'visible');
         setTimeout(function() {
             $('.error').css('visibility', 'hidden');
@@ -681,5 +681,6 @@ class Controller{
 
 }
 
-
-c = new Controller(new Model(), new View())
+$( document ).ready(function() {
+    c = new Controller(new Model(), new View())
+});
