@@ -531,4 +531,3 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
