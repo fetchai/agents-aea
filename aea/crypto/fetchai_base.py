@@ -68,6 +68,11 @@ class FetchCrypto(Crypto):
         """
         return str(Address(Identity.from_hex(self.public_key)))
 
+    @property
+    def entity(self) -> Entity:
+        """Get the entity."""
+        return self._entity
+
     @staticmethod
     def get_address_from_public_key(public_key: str) -> Address:
         """

@@ -18,17 +18,21 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the decision maker class."""
+import math
 
 import copy
 import logging
-import math
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
+from aea.crypto.wallet import Wallet
+from aea.crypto.helpers import generate_address_from_public_key
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.mail.base import OutBox  # , Envelope
 from aea.protocols.base import Message
+from fetchai.ledger.api import LedgerApi    # type: ignore
+
 
 CurrencyEndowment = Dict[str, float]  # a map from identifier to quantity
 CurrencyHoldings = Dict[str, float]
@@ -40,6 +44,8 @@ ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 QUANTITY_SHIFT = 100
 
 logger = logging.getLogger(__name__)
+
+MAX_PRICE = 2
 
 
 class OwnershipState:
@@ -146,6 +152,7 @@ class Preferences:
         self._utility_params = None  # type: UtilityParams
         self._exchange_params = None  # type: ExchangeParams
         self._quantity_shift = QUANTITY_SHIFT
+        self._max_price = MAX_PRICE
 
     def init(self, utility_params: UtilityParams, exchange_params: ExchangeParams):
         """
@@ -170,6 +177,12 @@ class Preferences:
         assert self._exchange_params is not None, "ExchangeParams not set!"
         return self._exchange_params
 
+    @property
+    def max_price(self) -> int:
+        """Get the max_price parameter for the transactions."""
+        assert self._max_price is not None, "max_price not set!"
+        return self._max_price
+
     def logarithmic_utility(self, good_holdings: GoodHoldings) -> float:
         """
         Compute agent's utility given her utility function params and a good bundle.
@@ -177,8 +190,9 @@ class Preferences:
         :param good_holdings: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
         :return: utility value
         """
-        goodwise_utility = [self.utility_params[good_pbk] * math.log(quantity + self._quantity_shift) if quantity + self._quantity_shift > 0 else -10000
-                            for good_pbk, quantity in good_holdings.items()]
+        goodwise_utility = [self.utility_params[good_pbk] * math.log(
+            quantity + self._quantity_shift) if quantity + self._quantity_shift > 0 else -10000
+            for good_pbk, quantity in good_holdings.items()]
         return sum(goodwise_utility)
 
     def linear_utility(self, currency_holdings: CurrencyHoldings) -> float:
@@ -188,7 +202,8 @@ class Preferences:
         :param currency_holdings: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
         :return: utility value
         """
-        currencywise_utility = [self.exchange_params[currency_pbk] for currency_pbk, quantity in currency_holdings.items()]
+        currencywise_utility = [self.exchange_params[currency_pbk] for currency_pbk, quantity in
+                                currency_holdings.items()]
         return sum(currencywise_utility)
 
     def get_score(self, good_holdings: GoodHoldings, currency_holdings: CurrencyHoldings) -> float:
@@ -230,7 +245,7 @@ class Preferences:
 class DecisionMaker:
     """This class implements the decision maker."""
 
-    def __init__(self, max_reactions: int, outbox: OutBox):
+    def __init__(self, max_reactions: int, outbox: OutBox, wallet: Wallet):
         """
         Initialize the decision maker.
 
@@ -239,6 +254,7 @@ class DecisionMaker:
         """
         self.max_reactions = max_reactions
         self._outbox = outbox
+        self._wallet = wallet
         self._message_queue = Queue()  # type: Queue
         self._ownership_state = OwnershipState()
         self._preferences = Preferences()
@@ -301,11 +317,12 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        score_diff = self.preferences.get_score_diff_from_transaction(self.ownership_state, tx_message)
-        if score_diff >= 0.0:
-            pass  # TODO: implement tx flow
-            # envelope = Envelope()
-            # self.outbox.put(envelope)
+        api = LedgerApi("127.0.0.1", 8000)
+        if tx_message.get("amount") <= api.tokens.balance(self._wallet.addresses['fetchai']):
+            fetch_entity = self._wallet.crypto_objects['fetchai'].entity
+            to = generate_address_from_public_key(tx_message.get("counterparty"))
+            api.sync(api.tokens.transfer(fetch_entity, to, tx_message.get("amount"), tx_message.get("sender_tx_fee")))
+        # TODO: //Notify the handler that we made the transaction.
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
         """
@@ -319,6 +336,3 @@ class DecisionMaker:
         currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
         good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
-        utility_params = cast(UtilityParams, state_update_message.get("utility_params"))
-        exchange_params = cast(ExchangeParams, state_update_message.get("exchange_params"))
-        self.preferences.init(exchange_params=exchange_params, utility_params=utility_params)

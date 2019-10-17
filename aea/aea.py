@@ -64,7 +64,7 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._decision_maker = DecisionMaker(self.max_reactions, self.outbox)
+        self._decision_maker = DecisionMaker(self.max_reactions, self.outbox, self.wallet)
         self._context = AgentContext(self.name,
                                      self.wallet.public_keys,
                                      self.wallet.addresses,

@@ -64,7 +64,7 @@ class TransactionMessage(Message):
                          amount=amount,
                          quantities_by_good_pbk=quantities_by_good_pbk,
                          **kwargs)
-        assert self.check_consistency(), "FIPAMessage initialization inconsistent."
+        assert self.check_consistency(), "Transaction message initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """
