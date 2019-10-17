@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a dummy 'stopping' skill for an AEA."""
+"""This module contains the handler for the 'exception' skill."""
