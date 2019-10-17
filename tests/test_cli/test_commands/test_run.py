@@ -531,3 +531,48 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class TestRunFailsWhenProtocolNotComplete:
+    """Test that the command 'aea run' fails when a protocol directory is not complete."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.connection_name = "local"
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        assert result.exit_code == 0
+        os.chdir(Path(cls.t, cls.agent_name))
+
+        Path(cls.t, cls.agent_name, "protocols", "default", "__init__.py").unlink()
+
+        try:
+            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+        except SystemExit as e:
+            cls.exit_code = e.code
+
+    def test_exit_code_equal_to_minus_one(self):
+        """Assert that the exit code is equal to -1 (i.e. failure)."""
+        assert self.exit_code == -1
+
+    def test_log_error_message(self):
+        """Test that the log error message is fixed."""
+        s = "A problem occurred while processing protocol {}.".format("default")
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
