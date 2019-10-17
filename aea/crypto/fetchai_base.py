@@ -107,7 +107,7 @@ class FetchCrypto(Crypto):
                 entity = self._generate_private_key()
 
             return entity
-        except IOError as e:
+        except IOError as e:  # pragma: no cover
             logger.exception(str(e))
 
     def _generate_private_key(self) -> Entity:
