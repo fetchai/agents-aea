@@ -48,6 +48,10 @@ class TestRun:
         assert result.exit_code == 0
 
         os.chdir(Path(cls.t, cls.agent_name))
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+        assert result.exit_code == 0
+
         shutil.copytree(Path(CUR_PATH, "data", "stopping_skill"), Path(cls.t, cls.agent_name, "skills", "stopping"))
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
@@ -55,7 +59,7 @@ class TestRun:
         yaml.safe_dump(config, open(config_path, "w"))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run"])
+            cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -400,7 +404,12 @@ class TestRunWithInstallDeps:
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
+
         os.chdir(Path(cls.t, cls.agent_name))
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+        assert result.exit_code == 0
+
         shutil.copytree(Path(CUR_PATH, "data", "stopping_skill"), Path(cls.t, cls.agent_name, "skills", "stopping"))
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
@@ -408,7 +417,7 @@ class TestRunWithInstallDeps:
         yaml.safe_dump(config, open(config_path, "w"))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--install-deps"])
+            cli.main([*CLI_LOG_OPTION, "run", "--install-deps", "--connection", "local"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -443,7 +452,11 @@ class TestRunWithInstallDepsAndRequirementFile:
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
         assert result.exit_code == 0
+
         os.chdir(Path(cls.t, cls.agent_name))
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+        assert result.exit_code == 0
 
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
         assert result.exit_code == 0
@@ -456,7 +469,7 @@ class TestRunWithInstallDepsAndRequirementFile:
         yaml.safe_dump(config, open(config_path, "w"))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--install-deps"])
+            cli.main([*CLI_LOG_OPTION, "run", "--install-deps", "--connection", "local"])
         except SystemExit as e:
             cls.exit_code = e.code
 
