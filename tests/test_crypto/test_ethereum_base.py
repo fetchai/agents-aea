@@ -26,7 +26,7 @@ PRIVATE_KEY_PATH = ROOT_DIR + "/tests/data/eth_private_key.txt"
 
 
 def test_creation():
-    """Test the creation of the crypto_objects.ls"""
+    """Test the creation of the crypto_objects."""
     assert EthCrypto(), "Managed to initialise the eth_account"
     assert EthCrypto(PRIVATE_KEY_PATH), "Managed to load the eth private key"
     assert EthCrypto("./"), "Managed to create a new eth private key"
