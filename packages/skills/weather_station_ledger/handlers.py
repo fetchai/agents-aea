@@ -46,6 +46,7 @@ logger = logging.getLogger("aea.weather_station_skill")
 
 DATE_ONE = "3/10/2019"
 DATE_TWO = "15/10/2019"
+FET_PRICE = 0.02
 
 
 class MyWeatherHandler(Handler):
@@ -56,7 +57,7 @@ class MyWeatherHandler(Handler):
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
         super().__init__(**kwargs)
-        self.fet_price = 0.002
+        self.fet_price = kwargs['fet_price'] if 'fet_price' in kwargs.keys() else FET_PRICE
         self.db = DBCommunication()
         self.fetched_data = []
 
