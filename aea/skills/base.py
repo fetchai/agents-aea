@@ -28,8 +28,8 @@ from pathlib import Path
 from queue import Queue
 from typing import Optional, List, Dict, Any, cast
 
-from aea.agent import Liveness
-from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, ProtocolId, DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, \
+    ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
 from aea.decision_maker.base import OwnershipState, Preferences
@@ -90,11 +90,6 @@ class SkillContext:
     def agent_is_ready_to_pursuit_goals(self) -> bool:
         """Get the goal pursuit readiness."""
         return self._agent_context.is_ready_to_pursuit_goals
-
-    @property
-    def liveness(self) -> Liveness:
-        """Get the liveness object."""
-        return self._agent_context.liveness
 
     @property
     def handlers(self) -> Optional[List['Handler']]:

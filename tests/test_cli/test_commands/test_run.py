@@ -20,10 +20,15 @@
 """This test module contains the tests for the `aea run` sub-command."""
 import os
 import shutil
+import signal
+import subprocess
+import sys
 import tempfile
+import time
 import unittest.mock
 from pathlib import Path
 
+import pytest
 import yaml
 from click.testing import CliRunner
 
@@ -33,148 +38,150 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_
 from ...conftest import CLI_LOG_OPTION, CUR_PATH
 
 
-class TestRun:
+def test_run(pytestconfig):
     """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
-        assert result.exit_code == 0
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
 
-        os.chdir(Path(cls.t, cls.agent_name))
+    os.chdir(Path(t, agent_name))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
-        assert result.exit_code == 0
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
 
-        shutil.copytree(Path(CUR_PATH, "data", "stopping_skill"), Path(cls.t, cls.agent_name, "skills", "stopping"))
-        config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
-        config = yaml.safe_load(open(config_path))
-        config.setdefault("skills", []).append("stopping")
-        yaml.safe_dump(config, open(config_path, "w"))
+    process = subprocess.Popen([
+        sys.executable,
+        '-m',
+        'aea.cli',
+        "run",
+        "--connection",
+        "local"
+    ],
+        stdout=subprocess.PIPE,
+        env=os.environ.copy())
 
-        try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
-        except SystemExit as e:
-            cls.exit_code = e.code
+    time.sleep(10.0)
+    process.send_signal(signal.SIGINT)
+    process.wait(timeout=20)
 
-    def test_exit_code_equal_to_zero(self):
-        """Assert that the exit code is equal to zero (i.e. success)."""
-        assert self.exit_code == 0
+    assert process.returncode == 0
 
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+    os.chdir(cwd)
+
+    poll = process.poll()
+    if poll is None:
+        process.terminate()
+        process.wait(2)
+
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
 
 
-class TestRunWithInstallDeps:
+def test_run_with_install_deps(pytestconfig):
     """Test that the command 'aea run --install-deps' does not crash."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
-        cls.connection_name = "stub"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
-        cls.mocked_logger_error = cls.patch.__enter__()
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
-        assert result.exit_code == 0
+    os.chdir(Path(t, agent_name))
 
-        os.chdir(Path(cls.t, cls.agent_name))
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
-        assert result.exit_code == 0
+    process = subprocess.Popen([
+        sys.executable,
+        '-m',
+        'aea.cli',
+        "run",
+        "--install-deps",
+        "--connection",
+        "local"
+    ],
+        stdout=subprocess.PIPE,
+        env=os.environ.copy())
 
-        shutil.copytree(Path(CUR_PATH, "data", "stopping_skill"), Path(cls.t, cls.agent_name, "skills", "stopping"))
-        config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
-        config = yaml.safe_load(open(config_path))
-        config.setdefault("skills", []).append("stopping")
-        yaml.safe_dump(config, open(config_path, "w"))
+    time.sleep(10.0)
+    process.send_signal(signal.SIGINT)
+    process.communicate(timeout=20)
 
-        try:
-            cli.main([*CLI_LOG_OPTION, "run", "--install-deps", "--connection", "local"])
-        except SystemExit as e:
-            cls.exit_code = e.code
+    assert process.returncode == 0
 
-    def test_exit_code_equal_to_zero(self):
-        """Assert that the exit code is equal to zero (i.e. success)."""
-        assert self.exit_code == 0
+    poll = process.poll()
+    if poll is None:
+        process.terminate()
+        process.wait(2)
 
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        cls.patch.__exit__()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+    os.chdir(cwd)
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
 
 
-class TestRunWithInstallDepsAndRequirementFile:
+def test_run_with_install_deps_and_requirement_file(pytestconfig):
     """Test that the command 'aea run --install-deps' with requirement file does not crash."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
-        cls.connection_name = "stub"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
-        cls.mocked_logger_error = cls.patch.__enter__()
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
-        assert result.exit_code == 0
+    os.chdir(Path(t, agent_name))
 
-        os.chdir(Path(cls.t, cls.agent_name))
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
-        assert result.exit_code == 0
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
+    assert result.exit_code == 0
+    Path(t, agent_name, "requirements.txt").write_text(result.output)
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
-        assert result.exit_code == 0
-        Path(cls.t, cls.agent_name, "requirements.txt").write_text(result.output)
+    process = subprocess.Popen([
+        sys.executable,
+        '-m',
+        'aea.cli',
+        "run",
+        "--install-deps",
+        "--connection",
+        "local"
+    ],
+        stdout=subprocess.PIPE,
+        env=os.environ.copy())
 
-        shutil.copytree(Path(CUR_PATH, "data", "stopping_skill"), Path(cls.t, cls.agent_name, "skills", "stopping"))
-        config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
-        config = yaml.safe_load(open(config_path))
-        config.setdefault("skills", []).append("stopping")
-        yaml.safe_dump(config, open(config_path, "w"))
+    time.sleep(10.0)
+    process.send_signal(signal.SIGINT)
+    process.wait(timeout=20)
 
-        try:
-            cli.main([*CLI_LOG_OPTION, "run", "--install-deps", "--connection", "local"])
-        except SystemExit as e:
-            cls.exit_code = e.code
+    assert process.returncode == 0
 
-    def test_exit_code_equal_to_zero(self):
-        """Assert that the exit code is equal to zero (i.e. success)."""
-        assert self.exit_code == 0
+    poll = process.poll()
+    if poll is None:
+        process.terminate()
+        process.wait(10)
 
-    @classmethod
-    def teardown_class(cls):
-        """Teardowm the test."""
-        cls.patch.__exit__()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+    os.chdir(cwd)
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
 
 
 class TestRunFailsWhenExceptionOccursInSkill:

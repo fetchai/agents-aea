@@ -71,8 +71,7 @@ class AEA(Agent):
                                      self.decision_maker.message_queue,
                                      self.decision_maker.ownership_state,
                                      self.decision_maker.preferences,
-                                     self.decision_maker.is_ready_to_pursuit_goals,
-                                     self.liveness)
+                                     self.decision_maker.is_ready_to_pursuit_goals)
         self._resources = None  # type: Optional[Resources]
 
     @property

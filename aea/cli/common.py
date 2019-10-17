@@ -123,7 +123,7 @@ def _try_to_load_protocols(ctx: Context):
         try:
             protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join("protocols", protocol_name, "__init__.py"))
             protocol_module = importlib.util.module_from_spec(protocol_spec)
-            protocol_spec.loader.exec_module(protocol_module)
+            protocol_spec.loader.exec_module(protocol_module)  # type: ignore
             sys.modules[protocol_spec.name + "_protocol"] = protocol_module
         except Exception:
             logger.error("A problem occurred while processing protocol {}.".format(protocol_name))
