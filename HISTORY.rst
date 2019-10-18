@@ -69,3 +69,10 @@ Release History
 - Adds full test coverage on cli
 - Improves docs
 - Multiple additional minor fixes and changes
+
+0.1.9 (2019-10-18)
+-------------------
+
+- Stability improvements
+- Higher test coverage, including on Python 3.6
+- Multiple additional minor fixes and changes

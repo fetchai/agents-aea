@@ -6,8 +6,7 @@ All the commands must be executed from the parent directory, if not stated other
 
 We recommend using the following command for building:
 
-    ./deploy-image/scripts/docker-build-img.sh \
-        -t aea-deploy:latest --
+    ./deploy-image/scripts/docker-build-img.sh -t aea-deploy:latest --
 
 ## Run
 

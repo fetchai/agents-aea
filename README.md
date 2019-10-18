@@ -50,10 +50,6 @@ The following dependency is only relevant if you intend to contribute to the rep
 
 The following steps are only relevant if you intend to contribute to the repository. They are not required for agent development.
 
-- Clear cache
-
-      pipenv --clear
-
 - Install development dependencies:
 
 	  pipenv install --dev
