@@ -71,12 +71,12 @@ def get_all_extras() -> Dict:
         "PyYAML",
         "jsonschema",
         "python-dotenv",
+        "flask",
         *crypto_deps
     ]
 
     cli_gui = [
         "flask",
-        "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]",
         *cli_deps
     ]
 
