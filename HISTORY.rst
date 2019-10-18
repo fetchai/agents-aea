@@ -61,3 +61,11 @@ Release History
 - Adds ledger entities (fetchai and ethereum); creates wallet for ledger entities
 - Adds more documentation and fixes old one
 - Multiple additional minor fixes and changes
+
+0.1.8 (2019-10-18)
+-------------------
+
+- Multiple bug fixes and improvements to gui of cli
+- Adds full test coverage on cli
+- Improves docs
+- Multiple additional minor fixes and changes
