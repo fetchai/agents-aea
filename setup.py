@@ -137,7 +137,10 @@ setup(
     zip_safe=False,
     include_package_data=True,
     data_files=[
-        ("aea/skills/base/schemas/", glob.glob("aea/skills/base/schemas/*.json")),
+        (
+            os.path.join("aea", "skills", "base", "schemas"),
+            glob.glob(os.path.join("aea", "skills", "base", "schemas", "*.json"))
+        ),
     ],
     license=about['__license__'],
 )
