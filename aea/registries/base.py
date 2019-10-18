@@ -479,7 +479,8 @@ class Resources(object):
             logger.warning("No skill found.")
             return
 
-        skill_directories = [str(x) for x in Path(root_skill_directory).iterdir() if x.is_dir()]
+        skill_directories = [str(x) for x in Path(root_skill_directory).iterdir()
+                             if x.is_dir() and re.match(PACKAGE_NAME_REGEX, x.name)]
         logger.debug("Processing the following skill directories: {}".format(pprint.pformat(skill_directories)))
         for skill_directory in skill_directories:
             try:

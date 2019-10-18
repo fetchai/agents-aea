@@ -30,7 +30,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from .conftest import CUR_PATH
+from .conftest import CUR_PATH, DummyConnection
 
 
 def test_initialise_AEA():
@@ -113,12 +113,12 @@ def test_react():
 
 def test_handle():
     """Tests handle method of an agent."""
-    node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
     public_key = wallet.public_keys['default']
-    mailbox = MailBox(OEFLocalConnection(public_key, node))
+    connection = DummyConnection()
+    mailbox = MailBox(connection)
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     message_bytes = DefaultSerializer().encode(msg)
@@ -137,8 +137,8 @@ def test_handle():
     t = Thread(target=agent.start)
     try:
         t.start()
-        agent.mailbox.inbox._queue.put(envelope)
-        env = agent.mailbox.outbox._queue.get(block=True, timeout=10.0)
+        connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
         assert env.protocol_id == "default", \
             "The envelope is not the expected protocol (Unsupported protocol)"
 
@@ -149,7 +149,7 @@ def test_handle():
             sender=public_key,
             protocol_id='default',
             message=msg)
-        agent.mailbox.inbox._queue.put(envelope)
+        connection.in_queue.put(envelope)
         #   UNSUPPORTED SKILL
         msg = FIPASerializer().encode(
             FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
@@ -162,7 +162,7 @@ def test_handle():
             sender=public_key,
             protocol_id="fipa",
             message=msg)
-        agent.mailbox.inbox._queue.put(envelope)
+        connection.in_queue.put(envelope)
     finally:
         agent.stop()
         t.join()

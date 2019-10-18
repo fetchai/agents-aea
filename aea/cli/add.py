@@ -130,7 +130,6 @@ def protocol(click_context, protocol_name):
     except ValidationError as e:
         logger.error("Protocol configuration file not valid: {}".format(str(e)))
         exit(-1)
-        return
 
     # copy the protocol package into the agent's supported connections.
     src = str(Path(os.path.join(registry_path, "protocols", protocol_name)).absolute())

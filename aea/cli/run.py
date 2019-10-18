@@ -53,17 +53,19 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
     if connection_name not in ctx.agent_config.connections:
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
-    connection_config = ctx.connection_loader.load(open(os.path.join(ctx.cwd, "connections", connection_name, "connection.yaml")))
-    if connection_config is None:
+    try:
+        connection_config = ctx.connection_loader.load(open(os.path.join(ctx.cwd, "connections", connection_name, "connection.yaml")))
+    except FileNotFoundError:
         raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
 
-    connection_spec = importlib.util.spec_from_file_location(connection_config.name, os.path.join(ctx.cwd, "connections", connection_config.name, "connection.py"))
-    if connection_spec is None:
+    try:
+        connection_spec = importlib.util.spec_from_file_location(connection_config.name, os.path.join(ctx.cwd, "connections", connection_config.name, "connection.py"))
+        connection_module = importlib.util.module_from_spec(connection_spec)
+        connection_spec.loader.exec_module(connection_module)  # type: ignore
+    except FileNotFoundError:
         raise AEAConfigException("Connection '{}' not found.".format(connection_name))
 
-    connection_module = importlib.util.module_from_spec(connection_spec)
     sys.modules[connection_spec.name + "_connection"] = connection_module
-    connection_spec.loader.exec_module(connection_module)  # type: ignore
     classes = inspect.getmembers(connection_module, inspect.isclass)
     connection_classes = list(filter(lambda x: re.match("\\w+Connection", x[0]), classes))
     name_to_class = dict(connection_classes)
@@ -101,7 +103,6 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     except AEAConfigException as e:
         logger.error(str(e))
         exit(-1)
-        return
 
     if install_deps:
         if Path("requirements.txt").exists():
@@ -114,8 +115,9 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     try:
         agent.start()
     except KeyboardInterrupt:
-        logger.info("Interrupted.")
+        logger.info("Interrupted.")  # pragma: no cover
     except Exception as e:
         logger.exception(e)
+        exit(-1)
     finally:
         agent.stop()

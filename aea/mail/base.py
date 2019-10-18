@@ -214,7 +214,7 @@ class OutBox(object):
         :param envelope: the envelope.
         :return: None
         """
-        logger.debug("Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{}'..."
+        logger.debug("Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}'..."
                      .format(envelope.to, envelope.sender, envelope.protocol_id, envelope.message))
         self._queue.put(envelope)
 

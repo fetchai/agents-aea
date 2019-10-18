@@ -48,7 +48,7 @@ pipeline {
                 stage('Unit Tests: Python 3.7') {
 
                     steps {
-                        sh 'tox -e py37 -- --no-integration-tests'
+                        sh 'tox -e py37 -- --no-integration-tests --ci'
                     }
 
                 } // unit tests: python 3.7
