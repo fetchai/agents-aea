@@ -30,30 +30,38 @@ from fetchai.ledger.crypto import Entity, Address  # type: ignore
 logger = logging.getLogger(__name__)
 
 
-def generate_wealth(arguments: argparse.Namespace) -> None:
+def generate_fetchai_wealth(arguments: argparse.Namespace) -> None:
     """
     Generate tokens to be able to make a transaction.
 
-    :return:
+    :param arguments: the arguments
+    :return: None
     """
-    api = LedgerApi("127.0.0.1", 8000)
+    try:
+        api = LedgerApi(arguments.addr, arguments.port)
+    except Exception:
+        logger.debug("Couldn't connect! Please check your add and port.")
+        sys.exit("Couldn't connect! Please check your add and port.")
 
     try:
         if arguments.private_key is None or arguments.private_key == "":
             raise ValueError
-        entity_to_generate_wealth = Entity.from_hex(arguments.private_key)
     except ValueError:
         logger.debug("Please provide a private key. --privte-key .... ")
         sys.exit("-Please provide a private key. --private-key .... ")
 
+    entity_to_generate_wealth = Entity.from_hex(arguments.private_key)
     api.sync(api.tokens.wealth(entity_to_generate_wealth, arguments.amount))
     address = Address(entity_to_generate_wealth)
-    logger.info('The new balance of the address {} is : {} FET'.format(address, api.tokens.balance(address)))
+    balance = api.tokens.balance(address)
+    logger.info('The new balance of the address {} is : {} FET'.format(address, balance))
 
 
 def parse_arguments():
     """Arguments parsing."""
     parser = argparse.ArgumentParser("wealth_creation")
+    parser.add_argument("--addr", type=str, default="127.0.0.1", help="The addr for the ledger api")
+    parser.add_argument("--port", type=int, default=8000, help="The port for the ledger api")
     parser.add_argument("--amount", type=int, default=10, help="The amount we want to generate to the address")
     parser.add_argument("--private-key", type=str, default=None,
                         help="The amount we want to generate to the address")
@@ -65,4 +73,4 @@ def parse_arguments():
 
 if __name__ == "__main__":
     arguments = parse_arguments()
-    generate_wealth(arguments)
+    generate_fetchai_wealth(arguments)

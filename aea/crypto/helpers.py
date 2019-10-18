@@ -29,9 +29,9 @@ from fetchai.ledger.crypto import Entity, Address, Identity  # type: ignore
 from eth_account import Account  # type: ignore
 
 from aea.crypto.base import DefaultCrypto
-from aea.crypto.wallet import SUPPORTED_CRYPTOS, DEFAULT, FETCHAI, ETHEREUM
+from aea.crypto.wallet import SUPPORTED_CRYPTOS, SUPPORTED_LEDGER_APIS, DEFAULT, FETCHAI, ETHEREUM
 from aea.configurations.loader import ConfigLoader
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig
 from aea.cli.common import Context
 
 DEFAULT_PRIVATE_KEY_FILE = 'default_private_key.pem'
@@ -108,6 +108,45 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     fp = open(str(path), mode="w", encoding="utf-8")
     agent_loader.dump(aea_conf, fp)
     ctx.agent_config = aea_conf
+
+
+def _verify_ledger_apis_access(ctx: Context) -> None
+    """
+    Verify access to ledger apis.
+
+    :param ctx: Context
+    """
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    fp = open(str(path), mode="r", encoding="utf-8")
+    aea_conf = agent_loader.load(fp)
+
+    for identifier, value in aea_conf.ledger_apis.read_all():
+        if identifier not in SUPPORTED_LEDGER_APIS:
+            ValueError("Unsupported identifier in ledger apis.")
+
+    fetchai_ledger_api_config = aea_conf.ledger_apis.read(FETCHAI)
+    if fetchai_ledger_api_config is None:
+        logger.debug("No fetchai ledger api config specified.")
+    else:
+        fetchai_ledger_api_config = cast(LedgerAPIConfig, fetchai_ledger_api_config)
+        try:
+            from fetchai.ledger.api import LedgerApi
+            api = LedgerApi(fetchai_ledger_api_config)
+        except Exception:
+            logger.error("Cannot connect to fetchai ledger with provided config.")
+            exit(-1)
+
+    ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
+    if ethereum_ledger_config is None:
+        logger.debug("No ethereum ledger api config specified.")
+    else:
+        ethereum_private_key_config = cast(PrivateKeyPathConfig, ethereum_private_key_config)
+        try:
+            # TODO connect to ledger
+        except Exception:
+            logger.error("Cannot connect to ethereum ledger with provided config.")
+            exit(-1)
 
 
 def _create_temporary_private_key() -> bytes:

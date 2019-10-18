@@ -21,14 +21,16 @@
 """Module wrapping all the public and private keys cryptography."""
 from typing import Dict, cast
 
-from aea.crypto.base import Crypto, DefaultCrypto
-from aea.crypto.ethereum_base import EthCrypto
-from aea.crypto.fetchai_base import FetchCrypto
+from aea.crypto.base import Crypto
+from aea.crypto.default import DefaultCrypto
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 
-FETCHAI = "fetchai"
 DEFAULT = "default"
 ETHEREUM = "ethereum"
-SUPPORTED_CRYPTOS = [DEFAULT, FETCHAI, ETHEREUM]
+FETCHAI = "fetchai"
+SUPPORTED_CRYPTOS = [DEFAULT, ETHEREUM, FETCHAI]
+SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
 
 
 class Wallet(object):
@@ -47,9 +49,9 @@ class Wallet(object):
             if identifier == DEFAULT:
                 crypto_objects[identifier] = DefaultCrypto(path)
             elif identifier == FETCHAI:
-                crypto_objects[identifier] = FetchCrypto(path)
+                crypto_objects[identifier] = FetchAICrypto(path)
             elif identifier == ETHEREUM:
-                crypto_objects[identifier] = EthCrypto(path)
+                crypto_objects[identifier] = EthereumCrypto(path)
             else:
                 ValueError("Unsupported identifier in private key paths.")
             crypto = cast(Crypto, crypto_objects.get(identifier))

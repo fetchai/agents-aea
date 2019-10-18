@@ -46,7 +46,8 @@ logger = logging.getLogger("aea.weather_station_skill")
 
 DATE_ONE = "3/10/2019"
 DATE_TWO = "15/10/2019"
-FET_PRICE = 0.02
+DEFAULT_SALE_PRICE = 0.02
+DEFAULT_CURRENCY = 'FET'
 
 
 class MyWeatherHandler(Handler):
@@ -57,7 +58,8 @@ class MyWeatherHandler(Handler):
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
         super().__init__(**kwargs)
-        self.fet_price = kwargs['fet_price'] if 'fet_price' in kwargs.keys() else FET_PRICE
+        self.sale_price = kwargs['sale_price'] if 'sale_price' in kwargs.keys() else DEFAULT_SALE_PRICE
+        self.currency = kwargs['currency'] if 'currency' in kwargs.keys() else DEFAULT_CURRENCY
         self.db = DBCommunication()
         self.fetched_data = []
 
@@ -107,10 +109,11 @@ class MyWeatherHandler(Handler):
 
         if len(fetched_data) >= 1:
             self.fetched_data = fetched_data
-            total_price = self.fet_price * len(fetched_data)
+            total_price = self.sale_price * len(fetched_data)
             proposal = [Description({"Rows": len(fetched_data),
-                                     "Price": total_price})]
-            logger.info("[{}]: sending sender={} a proposal at price={}".format(self.context.agent_name, sender, total_price))
+                                     "Sale Price": total_price,
+                                     "Currency": self.currency})]
+            logger.info("[{}]: sending sender={} a proposal at price={} and currency={}".format(self.context.agent_name, sender, total_price, self.currency))
             proposal_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_id=dialogue_id,
                                        target=1,

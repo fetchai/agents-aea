@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Module wrapping the public and private key generation from fetch.ai ledger."""
+"""Fetchai module wrapping the public and private key cryptography and ledger api."""
 
 from typing import Optional
 import logging
@@ -31,16 +31,18 @@ from aea.crypto.base import Crypto
 logger = logging.getLogger(__name__)
 
 
-class FetchCryptoError(Exception):
-    """Exception to be thrown when cryptographic signatures don't match!."""
-
-
-class FetchCrypto(Crypto):
+class FetchAICrypto(Crypto):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
-    def __init__(self, private_key_path: Optional[str] = None):
-        """Instantiate a crypto object."""
+    def __init__(self, private_key_path: Optional[str] = None, ledger_api_config: Tuple[addr, port]):
+        """
+        Instantiate a crypto object.
+
+        :param private_key_path: the private key path of the agent
+        :param ledger_api_config: the ledger api config
+        """
         self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        self._ledger_api_config = ledger_api_config
 
     @property
     def public_key(self) -> str:
@@ -51,14 +53,14 @@ class FetchCrypto(Crypto):
         """
         return self._entity.public_key_hex
 
-    @property
-    def private_key(self) -> str:
-        """
-        Return the private key in hex format.
+    # @property
+    # def private_key(self) -> str:
+    #     """
+    #     Return the private key in hex format.
 
-        :return: a public key string in hex format
-        """
-        return self._entity.private_key_hex
+    #     :return: a public key string in hex format
+    #     """
+    #     return self._entity.private_key_hex
 
     @property
     def address(self) -> str:
@@ -71,21 +73,35 @@ class FetchCrypto(Crypto):
 
     @property
     def token_balance(self) -> float:
-        """Get the token balance."""
-        api = LedgerApi("127.0.0.1", 8000)
-        token_balance = api.tokens.balance(self.address)
+        """
+        Get the token balance.
+
+        :return: the token balance
+        """
+        try:
+            api = LedgerApi(self._ledger_api_config)
+            token_balance = api.tokens.balance(self.address)
+        except Exception:
+            token_balance = 0
         return token_balance
 
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> None:
+    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
         """
         Transfer from self to destination.
 
         :param destination_address: the address of the receive
         :param amount: the amount
         :param tx_fee: the tx fee
+
+        :return: bool indicating success
         """
-        api = LedgerApi("127.0.0.1", 8000)
-        api.sync(api.tokens.transfer(self._entity, destination, amount, tx_fee))
+        try:
+            api = LedgerApi(self._ledger_api_config)
+            api.sync(api.tokens.transfer(self._entity, destination, amount, tx_fee))
+            success = True
+        except Exception:
+            success = False
+        return success
 
     @staticmethod
     def get_address_from_public_key(public_key: str) -> Address:

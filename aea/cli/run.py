@@ -34,7 +34,7 @@ from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_l
     AEAConfigException, _load_env_file
 from aea.cli.install import install
 from aea.connections.base import Connection
-from aea.crypto.helpers import _verify_or_create_private_keys
+from aea.crypto.helpers import _verify_or_create_private_keys, _verify_ledger_apis_access
 from aea.crypto.wallet import Wallet, DEFAULT
 from aea.mail.base import MailBox
 
@@ -93,9 +93,12 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     _try_to_load_agent_config(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
+    
     _verify_or_create_private_keys(ctx)
     wallet = Wallet(dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()]))
 
+    _verify_ledger_apis_access(ctx)
+    
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
     try:

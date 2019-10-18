@@ -6,24 +6,17 @@ url: ""
 behaviours:
   - behaviour:
       class_name: MyWeatherBehaviour
-      args:
-        foo: bar
+      args: {}
 handlers:
   - handler:
       class_name: MyWeatherHandler
       args:
-        foo: bar
+        sale_price: 0.03
+        currency: 'FET'
   - handler:
       class_name: DefaultHandler
-      args:
-        foo: bar
-tasks:
-  - task:
-      class_name: MyWeatherTask
-      args:
-        foo: bar
+      args: {}
+tasks: []
 shared_classes: []
-protocols: ['fipa','default']
-
-
-
+protocols: ['fipa', 'default']
+ledgers: ['fetchai']

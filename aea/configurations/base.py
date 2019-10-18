@@ -128,6 +128,37 @@ class PrivateKeyPathConfig(Configuration):
         )
 
 
+class LedgerAPIConfig(Configuration):
+    """Handle a ledger api configuration."""
+
+    def __init__(self, ledger: str = "", addr: str = "", port: int = None):
+        """Initialize a handler configuration."""
+        self.ledger = ledger
+        self.addr = addr
+        self.port = port
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "ledger": self.ledger,
+            "addr": self.addr,
+            "port": self.port
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        ledger = cast(str, obj.get("ledger"))
+        addr = cast(str, obj.get("addr"))
+        port = cast(int, obj.get("port"))
+        return LedgerAPIConfig(
+            ledger=ledger,
+            addr=addr,
+            port=port
+        )
+
+
 class ConnectionConfig(Configuration):
     """Handle connection configuration."""
 
@@ -439,6 +470,7 @@ class AgentConfig(Configuration):
                  registry_path: str = "",
                  description: str = "",
                  private_key_paths: Dict[str, str] = None,
+                 ledger_apis: Dict[str, Tuple[str, int]] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
@@ -450,10 +482,15 @@ class AgentConfig(Configuration):
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
+        self.ledger_apis = CRUDCollection[LedgerAPIConfig]()
 
         private_key_paths = private_key_paths if private_key_paths is not None else {}
         for ledger, path in private_key_paths.items():
             self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
+
+        ledger_apis = ledger_apis if ledger_apis is not None else {}
+        for ledger, (addr, port) in ledger_apis.items():
+            self.ledger_apis.create(ledger, LedgerAPIConfig(ledger, addr, port))
 
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_connection = None  # type: Optional[str]
@@ -494,6 +531,7 @@ class AgentConfig(Configuration):
             "registry_path": self.registry_path,
             "description": self.description,
             "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
+            "ledger_apis": [{"ledger_api": t.json} for l, t in self.ledger_apis.read_all()],
             "logging_config": self.logging_config,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
@@ -509,6 +547,11 @@ class AgentConfig(Configuration):
             private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
             private_key_paths[private_key_path.ledger] = private_key_path.path
 
+        ledger_apis = {}
+        for l in obj.get("ledger_apis", []):  # type: ignore
+            ledger_api = LedgerAPIConfig.from_json(l["ledger_api"])
+            ledger_apis[ledger_api.ledger] = (ledger_api.addr, ledger_api.port)
+
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
@@ -519,7 +562,8 @@ class AgentConfig(Configuration):
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
-            private_key_paths=cast(Dict, private_key_paths)
+            private_key_paths=cast(Dict, private_key_paths),
+            ledger_apis=cast(Dict, ledger_apis)
         )
 
         agent_config.connections = set(cast(List[str], obj.get("connections")))
