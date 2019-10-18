@@ -121,7 +121,7 @@ class LocalNode:
         if destination not in self._queues:
             msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR, id=STUB_DIALOGUE_ID, dialogue_id=STUB_DIALOGUE_ID, origin=destination)
             msg_bytes = OEFSerializer().encode(msg)
-            error_envelope = Envelope(to=destination, sender=envelope.sender, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            error_envelope = Envelope(to=envelope.sender, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
             self._send(error_envelope)
             return
         else:
