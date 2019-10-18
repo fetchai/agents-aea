@@ -6,6 +6,12 @@ These instructions will take you through building an agent, starting an OEF Node
 
 Ensure you have the framework installed and the CLI is working by following the [quick-start guide](quickstart.md). 
 
+Additionally, install the following revision of the `connexion` package:
+
+```bash
+pip install git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui] 
+```
+
 ## Starting the GUI
 Go to your working folder, where you want to create new agents. If you followed the quick start guide, this will be in the my_aea directory. Start the local web-server:
 ``` bash
