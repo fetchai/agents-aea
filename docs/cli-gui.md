@@ -6,6 +6,11 @@ These instructions will take you through building an agent, starting an OEF Node
 
 Ensure you have the framework installed and the CLI is working by following the [quick-start guide](quickstart.md). 
 
+Please install the extra dependency for the CLI GUI:
+```python
+pip install aea[cli_gui]
+```
+
 Additionally, install the following revision of the `connexion` package:
 
 ```bash

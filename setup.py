@@ -71,7 +71,6 @@ def get_all_extras() -> Dict:
         "PyYAML",
         "jsonschema",
         "python-dotenv",
-        "flask",
         *crypto_deps
     ]
 
