@@ -101,19 +101,22 @@ def get_agents():
     return agent_list
 
 
-def get_registered_items(item_type):
-    """Return list of all protocols, connections or skills in the registry."""
-    item_dir = os.path.join(flask.app.agents_dir, "packages/" + item_type + "s")
-
+def _add_items(item_dir, item_type, items_list):
     file_list = glob.glob(os.path.join(item_dir, '*'))
-
-    items_list = []
-
     for path in file_list:
         if is_item_dir(path, item_type):
             head, tail = os.path.split(path)
             desc = read_description(path, item_type)
-            items_list.append({"id": tail, "description": desc})
+            if not {"id": tail, "description": desc} in items_list:
+                items_list.append({"id": tail, "description": desc})
+
+
+def get_registered_items(item_type):
+    """Return list of all protocols, connections or skills in the registry."""
+    items_list = []
+
+    _add_items(os.path.join(flask.app.agents_dir, "packages/" + item_type + "s"), item_type, items_list)
+    _add_items(os.path.join(flask.app.module_dir, "aea/" + item_type + "s"), item_type, items_list)
 
     return items_list
 

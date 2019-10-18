@@ -51,7 +51,7 @@ class Wallet(object):
                 if FETCHAI in ledger_api_configs.keys():
                     fetch_ledger_api_config = ledger_api_configs[identifier]
                 else:
-                    fetch_ledger_api_config = { FETCHAI: None}
+                    fetch_ledger_api_config = ('', 1000)
                 crypto_objects[identifier] = FetchAICrypto(path, fetch_ledger_api_config)
             elif identifier == ETHEREUM:
                 crypto_objects[identifier] = EthereumCrypto(path)

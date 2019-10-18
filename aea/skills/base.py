@@ -493,7 +493,8 @@ class Skill:
 
         skill_module = importlib.util.module_from_spec(skills_spec)
         sys.modules[skill_config.name + "_skill"] = skill_module
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
+        loader_contents = [path.name for path in Path(directory).iterdir()]
+        skills_packages = list(filter(lambda x: not x.startswith("__"), loader_contents))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
         skill_context = SkillContext(agent_context)

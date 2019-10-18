@@ -33,7 +33,7 @@ colorlog = "*"
 jsonschema = "*"
 protobuf = "*"
 flask = "*"
-connexion = {git = "https://github.com/neverpanic/connexion.git",editable = true,ref = "jsonschema-3"}
+connexion = ">=2.4.0"
 watchdog = "*"
 python-dotenv = "*"
 fetchai-ledger-api = "*"

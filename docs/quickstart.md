@@ -24,6 +24,12 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
 
+At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
+(e.g. to run an OEF Node).
+ 
+If you don't have it, please check the official documentation [here](https://docs.docker.com/install/) 
+and follow the instructions for your platform.
+
 ## Installation
 
 Install the Autonomous Economic Agent framework.

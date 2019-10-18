@@ -23,3 +23,22 @@ E.g.:
 As before, to pass params to the `docker run` command:
 
     ./develop-image/scripts/docker-run.sh -p 8080:80 -- /bin/bash
+
+
+## Publish
+
+First, be sure you tagged the image with the `latest` tag: 
+
+    docker tag aea-develop:<latest-version-number> aea-develop:latest
+
+Then, publish the images. First, the `aea-develop:<latest-version-number>`
+
+    ./develop-image/scripts/docker-publish-img.sh
+
+And then, the `aea-develop:latest` image:
+
+- In `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=aea-develop:latest`  
+
+- Run the publish command again: 
+
+      ./develop-image/scripts/docker-publish-img.sh

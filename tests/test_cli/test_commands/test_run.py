@@ -199,6 +199,10 @@ class TestRunFailsWhenExceptionOccursInSkill:
         assert result.exit_code == 0
 
         os.chdir(Path(cls.t, cls.agent_name))
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+        assert result.exit_code == 0
+
         shutil.copytree(Path(CUR_PATH, "data", "exception_skill"), Path(cls.t, cls.agent_name, "skills", "exception"))
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
@@ -206,7 +210,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         yaml.safe_dump(config, open(config_path, "w"))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run"])
+            cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
         except SystemExit as e:
             cls.exit_code = e.code
 
