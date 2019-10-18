@@ -18,11 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+import os
 
 from aea.crypto.ethereum_base import EthCrypto
 from ..conftest import ROOT_DIR
 
-PRIVATE_KEY_PATH = ROOT_DIR + "/tests/data/eth_private_key.txt"
+PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/eth_private_key.txt")
 
 
 def test_creation():
