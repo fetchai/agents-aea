@@ -14,7 +14,7 @@ pip install aea[cli_gui]
 Additionally, install the following revision of the `connexion` package:
 
 ```bash
-pip install git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui] 
+pip install git+https://github.com/neverpanic/connexion.git@2f0d92b#egg=connexion[swagger-ui] 
 ```
 
 ## Starting the GUI

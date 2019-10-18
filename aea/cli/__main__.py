@@ -126,7 +126,20 @@ def freeze(ctx: Context):
 @pass_ctx
 def gui(ctx: Context):
     """Run the CLI GUI."""
-    import aea.cli_gui  # pragma: no cover
+    try:
+        import aea.cli_gui  # pragma: no cover
+    except ImportError:
+        msg = """Please install aea[cli_gui] extension to use this feature:
+    
+    pip install aea[cli_gui]
+            
+Also, run the following:
+
+    pip install git+https://github.com/neverpanic/connexion.git@2f0d92b#egg=connexion[swagger-ui]
+         
+"""
+        logger.error(msg)
+        exit(-1)
     logger.info("Running the GUI.....(press Ctrl+C to exit)")   # pragma: no cover
     aea.cli_gui.run()   # pragma: no cover
 
