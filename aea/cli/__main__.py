@@ -126,9 +126,9 @@ def freeze(ctx: Context):
 @pass_ctx
 def gui(ctx: Context):
     """Run the CLI GUI."""
-    import aea.cli_gui
-    logger.info("Running the GUI.....(press Ctrl+C to exit)")
-    aea.cli_gui.run()
+    import aea.cli_gui  # pragma: no cover
+    logger.info("Running the GUI.....(press Ctrl+C to exit)")   # pragma: no cover
+    aea.cli_gui.run()   # pragma: no cover
 
 
 cli.add_command(add)

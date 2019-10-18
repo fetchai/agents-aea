@@ -137,7 +137,7 @@ class StubConnection(Connection):
     def receive(self) -> None:
         """Receive new messages, if any."""
         line = self.input_file.readline()
-        logger.debug("read line: {}".format(line))
+        logger.debug("read line: {!r}".format(line))
         while len(line) > 0:
             self._process_line(line[:-1])
             line = self.input_file.readline()

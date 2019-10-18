@@ -51,7 +51,7 @@ class ColorFormatter(logging.Formatter):
                                      **self.colors[level])
                 msg = '\n'.join(prefix + x for x in msg.splitlines())
             return msg
-        return logging.Formatter.format(self, record)
+        return logging.Formatter.format(self, record)  # pragma: no cover
 
 
 def simple_verbosity_option(logger=None, *names, **kwargs):
