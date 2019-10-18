@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'echo' skill."""
+"""This module contains the handler for the 'dummy' skill."""
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler

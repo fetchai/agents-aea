@@ -60,9 +60,9 @@ class FetchCrypto(Crypto):
         return self._entity.private_key_hex
 
     @property
-    def display_address(self) -> str:
+    def address(self) -> str:
         """
-        Return the display_address for the key pair.
+        Return the address for the key pair.
 
         :return: a display_address str
         """
@@ -107,7 +107,7 @@ class FetchCrypto(Crypto):
                 entity = self._generate_private_key()
 
             return entity
-        except IOError as e:
+        except IOError as e:  # pragma: no cover
             logger.exception(str(e))
 
     def _generate_private_key(self) -> Entity:

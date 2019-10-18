@@ -58,9 +58,9 @@ class EthCrypto(Crypto):
         return self._public_key
 
     @property
-    def display_address(self) -> str:
+    def address(self) -> str:
         """
-        Return the display_address for the key pair.
+        Return the address for the key pair.
 
         :return: a display_address str
         """
@@ -83,7 +83,7 @@ class EthCrypto(Crypto):
             else:
                 account = self._generate_private_key()
             return account
-        except IOError as e:
+        except IOError as e:        # pragma: no cover
             logger.exception(str(e))
 
     def sign_transaction(self, message: str) -> bytes:

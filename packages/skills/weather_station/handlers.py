@@ -70,7 +70,7 @@ class MyWeatherHandler(Handler):
         """
         fipa_msg = cast(FIPAMessage, message)
         msg_performative = FIPAMessage.Performative(fipa_msg.get('performative'))
-        message_id = cast(int, fipa_msg.get('id'))
+        message_id = cast(int, fipa_msg.get('message_id'))
         dialogue_id = cast(int, fipa_msg.get('dialogue_id'))
 
         if msg_performative == FIPAMessage.Performative.CFP:

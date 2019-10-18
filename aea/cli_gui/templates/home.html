@@ -12,6 +12,7 @@
     </script>
 </head>
 <body>
+    <div class="error"><br></div>
     <div class="container">
         <h1 class="banner">Fetch.AI AEA CLI REST API</h1>
         <table>
@@ -51,7 +52,7 @@
                                 <div class="section ">
                                     <div class="{{htmlElements[i][2]}}">
                                         <table>
-                                            <caption><span class="localItemHeading">Local</span> {{htmlElements[i][1]}}s</caption>
+                                            <caption><span class="localItemHeading">Local</span>'s {{htmlElements[i][1]}}s</caption>
                                             <thead>
                                                 <tr>
                                                     <th>{{htmlElements[i][1]}} id</th>
@@ -80,14 +81,13 @@
                     {% endfor %}
                     <div class="section editor">
                         <div class="section ">
-                            <button id="localAgentsDelete">Delete <span class="localItemHeading">NONE</span> Agent</button>
-                            <div class="error"><br></div>
+                            <button id="localAgentsDelete">Delete "<span class="localItemHeading">NONE</span>" Agent</button>
                         </div>
                     </div>
 
 
                     <div class="section editor">
-                        <h2>Running <span class="localItemHeading">NONE</span> Agent</h2>
+                        <h2>Running "<span class="localItemHeading">NONE</span>" Agent</h2>
                         <button id="startAgent">Start Agent</button>
                         <button id="stopAgent">Stop Agent</button>
                         <h3 id="agentStatus">Agent Status: NONE</h3>

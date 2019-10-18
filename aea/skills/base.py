@@ -28,7 +28,8 @@ from pathlib import Path
 from queue import Queue
 from typing import Optional, List, Dict, Any, cast
 
-from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, ProtocolId, DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, \
+    ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
 from aea.decision_maker.base import OwnershipState, Preferences
@@ -64,6 +65,16 @@ class SkillContext:
     def agent_public_keys(self) -> Dict[str, str]:
         """Get public keys."""
         return self._agent_context.public_keys
+
+    @property
+    def agent_addresses(self) -> Dict[str, str]:
+        """Get addresses."""
+        return self._agent_context.addresses
+
+    @property
+    def agent_address(self) -> str:
+        """Get address."""
+        return self._agent_context.address
 
     @property
     def outbox(self) -> OutBox:

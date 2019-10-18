@@ -28,16 +28,16 @@ from pathlib import Path
 from typing import Dict, List, cast
 
 import click
-import click_log
 import jsonschema  # type: ignore
 from dotenv import load_dotenv
 
+from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
     DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 
 logger = logging.getLogger("aea")
-logger = click_log.basic_config(logger=logger)
+logger = default_logging_config(logger)
 
 DEFAULT_REGISTRY_PATH = "../packages"
 
@@ -113,22 +113,20 @@ def _try_to_load_agent_config(ctx: Context):
 
 def _try_to_load_protocols(ctx: Context):
     for protocol_name in ctx.agent_config.protocols:
+        logger.debug("Processing protocol {}".format(protocol_name))
         try:
-            logger.debug("Processing protocol {}".format(protocol_name))
-            protocol_config = ctx.protocol_loader.load(open(os.path.join("protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
-            if protocol_config is None:
-                logger.debug("Protocol configuration file for protocol {} not found.".format(protocol_name))
-                exit(-1)
-
-            protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join(ctx.agent_config.registry_path, "protocols", protocol_name, "__init__.py"))
-            if protocol_spec is None:
-                logger.warning("Protocol not found in registry.")
-                continue
-
-            protocol_module = importlib.util.module_from_spec(protocol_spec)
-            sys.modules[protocol_spec.name + "_protocol"] = protocol_module
+            ctx.protocol_loader.load(open(os.path.join("protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
         except FileNotFoundError:
-            logger.error("Protocol {} not found in registry".format(protocol_name))
+            logger.error("Protocol configuration file for protocol {} not found.".format(protocol_name))
+            exit(-1)
+
+        try:
+            protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join("protocols", protocol_name, "__init__.py"))
+            protocol_module = importlib.util.module_from_spec(protocol_spec)
+            protocol_spec.loader.exec_module(protocol_module)  # type: ignore
+            sys.modules[protocol_spec.name + "_protocol"] = protocol_module
+        except Exception:
+            logger.error("A problem occurred while processing protocol {}.".format(protocol_name))
             exit(-1)
 
 
