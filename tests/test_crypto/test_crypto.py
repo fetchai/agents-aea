@@ -18,20 +18,19 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the crypto module."""
+import os
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from aea.crypto.base import DefaultCrypto, _load_pem_private_key_from_path
 from ..conftest import ROOT_DIR
-from pathlib import Path
 
 
-PRIVATE_KEY_PEM_PATH = ROOT_DIR + "/tests/data/priv.pem"
+PRIVATE_KEY_PEM_PATH = os.path.join(ROOT_DIR, "tests/data/priv.pem")
 
 
 def test_initialization_from_existing_private_key():
     """Test that the initialization from an existing private key works correctly."""
-    path = Path(PRIVATE_KEY_PEM_PATH)
-    private_key = _load_pem_private_key_from_path(path=path)
+    private_key = _load_pem_private_key_from_path(path=PRIVATE_KEY_PEM_PATH)
     assert private_key is not None, "The private key is not None after the loading!"
     c = DefaultCrypto(private_key_pem_path=PRIVATE_KEY_PEM_PATH)
 
