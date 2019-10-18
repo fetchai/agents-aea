@@ -146,7 +146,8 @@ class ProtocolRegistry(Registry):
             logger.warning("No protocol found.")
             return
 
-        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), protocols_spec.loader.contents()))  # type: ignore
+        loader_contents = [path.name for path in Path(directory, "protocols").iterdir()]
+        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), loader_contents))  # type: ignore
         logger.debug("Processing the following protocol package: {}".format(protocols_packages))
         for protocol_name in protocols_packages:
             try:
