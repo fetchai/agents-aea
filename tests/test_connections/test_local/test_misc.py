@@ -31,6 +31,10 @@ from aea.protocols.fipa.serialization import FIPASerializer
 def test_connection():
     """Test that two mailbox can connect to the node."""
     node = LocalNode()
+
+    node._queues['m_key'] = "m_key"
+    assert node.connect("m_key") is None, "The connect function must return None."
+
     mailbox1 = MailBox(OEFLocalConnection("mailbox1", node))
     mailbox2 = MailBox(OEFLocalConnection("mailbox2", node))
 
@@ -97,6 +101,5 @@ def test_communication():
     msg = FIPASerializer().decode(envelope.message)
     assert envelope.protocol_id == "fipa"
     assert msg.get("performative") == FIPAMessage.Performative.DECLINE
-
     mailbox1.disconnect()
     mailbox2.disconnect()

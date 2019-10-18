@@ -140,7 +140,7 @@ class LocalNode:
 
     def register_service_wide(self, public_key: str, service_description: Description):
         """Register service wide."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def unregister_service(self, public_key: str, msg_id: int, service_description: Description) -> None:
         """
