@@ -13,7 +13,7 @@ aea create my_agent && cd my_agent
 aea scaffold skill my_search
 ```
 
-In the following steps, we will replace each one of the scaffolded `Behaviour`, `Handler` and `Task` in `my_agent/skills/my_search` with our implementation.
+In the following steps, we will replace each one of the scaffolded `Behaviour`, `Handler` and `Task` in `my_agent/skills/my_search` with our implementation. We will build a simple skill which lets the agent send a search query to the [OEF](https://docs.fetch.ai/oef/) and process the resulting response.
 
 
 ## Step 2: Develop a Behaviour
