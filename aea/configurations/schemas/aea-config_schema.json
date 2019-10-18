@@ -80,9 +80,7 @@
                 "ledger": {"type": "string"},
                 "path": {"type": "string"}
             }
-        }
-    },
-    "definitions": {
+        },
         "ledger_api": {
             "type": "object",
             "additionalProperties": false,

@@ -122,7 +122,9 @@ class TestSearchSkills:
 - gym
 - tac
 - weather_client
+- weather_client_ledger
 - weather_station
+- weather_client_station
 """
         assert self.result.output == expected_output
 
@@ -137,7 +139,9 @@ class TestSearchSkills:
 - gym
 - tac
 - weather_client
+- weather_client_ledger
 - weather_station
+- weather_client_station
 """
         assert self.result.output == expected_output
 
