@@ -26,7 +26,7 @@ from typing import Optional, TYPE_CHECKING
 
 from aea.configurations.base import ConnectionConfig
 if TYPE_CHECKING:
-    from aea.mail.base import Envelope
+    from aea.mail.base import Envelope  # pragma: no cover
 
 
 class Channel(ABC):
