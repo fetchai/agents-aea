@@ -76,7 +76,7 @@ def get_all_extras() -> Dict:
 
     cli_gui = [
         "flask",
-        "connexion[swagger-ui] @ git+https://github.com/neverpanic/connexion.git@jsonschema-3#egg=connexion[swagger-ui]",
+        "connexion[swagger-ui]",
         *cli_deps
     ]
 
