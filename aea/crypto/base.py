@@ -56,12 +56,31 @@ class Crypto(ABC):
 
         :return: a public key string
         """
+
     @abstractmethod
     def address(self) -> str:
         """
         Return the address.
 
         :return: an address string
+        """
+
+    @abstractmethod
+    def token_balance(self) -> float:
+        """
+        Return the token balance.
+
+        :return: the token balance
+        """
+
+    @abstractmethod
+    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> None:
+        """
+        Transfer from self to destination.
+
+        :param destination_address: the address of the receive
+        :param amount: the amount
+        :param tx_fee: the tx fee
         """
 
 

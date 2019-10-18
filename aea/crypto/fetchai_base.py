@@ -22,6 +22,7 @@
 
 from typing import Optional
 import logging
+from fetchai.ledger.api import LedgerApi
 from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
 from pathlib import Path
 
@@ -69,9 +70,22 @@ class FetchCrypto(Crypto):
         return str(Address(Identity.from_hex(self.public_key)))
 
     @property
-    def entity(self) -> Entity:
-        """Get the entity."""
-        return self._entity
+    def token_balance(self) -> float:
+        """Get the token balance."""
+        api = LedgerApi("127.0.0.1", 8000)
+        token_balance = api.tokens.balance(self.address)
+        return token_balance
+
+    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> None:
+        """
+        Transfer from self to destination.
+
+        :param destination_address: the address of the receive
+        :param amount: the amount
+        :param tx_fee: the tx fee
+        """
+        api = LedgerApi("127.0.0.1", 8000)
+        api.sync(api.tokens.transfer(self._entity, destination, amount, tx_fee))
 
     @staticmethod
     def get_address_from_public_key(public_key: str) -> Address:

@@ -242,6 +242,9 @@ class Preferences:
         return new_score - current_score
 
 
+ID_TO_CURRENCY_MAP = { 'fetchai': 'FET'}
+
+
 class DecisionMaker:
     """This class implements the decision maker."""
 
@@ -317,12 +320,35 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        api = LedgerApi("127.0.0.1", 8000)
-        if tx_message.get("amount") <= api.tokens.balance(self._wallet.addresses['fetchai']):
-            fetch_entity = self._wallet.crypto_objects['fetchai'].entity
-            to = generate_address_from_public_key(tx_message.get("counterparty"))
-            api.sync(api.tokens.transfer(fetch_entity, to, tx_message.get("amount"), tx_message.get("sender_tx_fee")))
-        # TODO: //Notify the handler that we made the transaction.
+        crypto_identifier = ID_TO_CURRENCY_MAP[tx_message.get("currency")]
+        amount = tx_message.get("amount")
+        crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
+        if self._is_acceptable_tx(crypto_object, amount):
+            self._settle_tx(crypto_object, tx_message.get("counterparty"), amount, tx_message.get("sender_tx_fee"))
+        # TODO: //Notify the relevant skill that we made the transaction.
+
+    def _is_acceptable_tx(self, crypto_object: Crypto, amount: float) -> bool:
+        """
+        Check if the tx is acceptable.
+
+        :param crypto_object: the crypto object
+        :param amount: the tx amount
+        :return: whether the transaction is acceptable or not
+        """
+        affordable = amount <= crypto_object.token_balance
+        return affordable
+
+    def _settle_tx(self, crypto_object: Crypto, counterparty_pbk: str, amount: float, tx_fee: float):
+        """
+        Settle the tx.
+
+        :param crypto_object: the crypto object
+        :param counterparty_pbk: the counterparty pbk
+        :param amount: the tx amount
+        :param tx_fee: the tx fee
+        """
+        counterparty_address = generate_address_from_public_key(counterparty_pbk)
+        crypto_object.transfer(counterparty_address, amount, sender_tx_fee)
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
         """
@@ -336,3 +362,6 @@ class DecisionMaker:
         currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
         good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
+        utility_params = cast(UtilityParams, state_update_message.get("utility_params"))        
+        exchange_params = cast(ExchangeParams, state_update_message.get("exchange_params"))        
+        self.preferences.init(exchange_params=exchange_params, utility_params=utility_params)
