@@ -23,6 +23,7 @@ import inspect
 import logging
 import os
 import socket
+import sys
 import time
 from threading import Timer
 from typing import Optional
@@ -224,6 +225,8 @@ def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
 @pytest.fixture(scope="session")
 def network_node(oef_addr, oef_port, pytestconfig):
     """Network node initialization."""
+    if sys.version_info < (3, 7):
+        pytest.skip("Python version < 3.7 not supported by the OEF.")
     if pytestconfig.getoption("no_integration_tests"):
         pytest.skip('skipped: no OEF running')
         return
