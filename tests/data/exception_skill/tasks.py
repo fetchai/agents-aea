@@ -17,23 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'dummy' skill."""
+"""This module contains the tasks for the 'exception' skill."""
 
-from aea.protocols.base import Message
-from aea.skills.base import Handler
+from aea.skills.base import Task
 
 
-class DummyHandler(Handler):
-    """Echo handler."""
-
-    SUPPORTED_PROTOCOL = "default"
-
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-        self.kwargs = kwargs
-        self.handled_messages = []
-        self.nb_teardown_called = 0
+class ExceptionTask(Task):
+    """Dummy task."""
 
     def setup(self) -> None:
         """
@@ -41,22 +31,10 @@ class DummyHandler(Handler):
 
         :return: None
         """
-        pass
 
-    def handle(self, message: Message, sender: str) -> None:
-        """
-        Handle message.
-
-        :param message: the message
-        :param sender: the sender
-        :return: None
-        """
-        self.handled_messages.append(message)
+    def execute(self) -> None:
+        """Execute the task."""
+        raise Exception()
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
-        self.nb_teardown_called += 1
+        """Teardown the task."""

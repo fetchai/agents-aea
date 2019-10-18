@@ -24,11 +24,12 @@ import click
 import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger
 
 
 @click.group()
-@click.option("--registry", type=str, default=None, help="Path/URL to the registry.")
+@click.option("--registry", type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True, resolve_path=True),
+              default=None, help="Path/URL to the registry.")
 @pass_ctx
 def search(ctx: Context, registry):
     """Search for components in the registry.
@@ -39,7 +40,8 @@ def search(ctx: Context, registry):
     """
     if registry is None:
         registry = os.path.join(AEA_DIR, DEFAULT_REGISTRY_PATH)
-    ctx.set_config("registry", registry)
+    logger.debug("Using registry {}".format(registry))
+    ctx.set_config("registry", str(registry))
 
 
 @search.command()
@@ -54,7 +56,7 @@ def connections(ctx: Context):
     try:
         for r in Path(registry).glob("connections/[!_]*[!.py]/"):
             result.add(r.name)
-    except Exception:
+    except Exception:  # pragma: no cover
         pass
 
     if "scaffold" in result: result.remove("scaffold")
@@ -76,7 +78,7 @@ def protocols(ctx: Context):
     try:
         for r in Path(registry).glob("protocols/[!_]*[!.py]/"):
             result.add(r.name)
-    except Exception:
+    except Exception:  # pragma: no cover
         pass
 
     if "scaffold" in result: result.remove("scaffold")
@@ -98,7 +100,7 @@ def skills(ctx: Context):
     try:
         for r in Path(registry).glob("skills/[!_]*[!.py]/"):
             result.add(r.name)
-    except Exception:
+    except Exception:  # pragma: no cover
         pass
 
     if "scaffold" in result: result.remove("scaffold")
