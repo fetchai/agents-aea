@@ -20,7 +20,9 @@
 """This test module contains the tests for the `aea gui` sub-command."""
 import json
 import os
+import signal
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -46,8 +48,8 @@ class TestGui:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.proc = subprocess.Popen(["aea", *CLI_LOG_OPTION, "gui"])
-        time.sleep(3.0)
+        cls.proc = subprocess.Popen([sys.executable, "-m", "aea.cli", *CLI_LOG_OPTION, "gui"], stdout=subprocess.PIPE, env=os.environ.copy())
+        time.sleep(5.0)
 
     def test_gui(self, pytestconfig):
         """Test that the gui process has been spawned correctly."""
@@ -59,6 +61,9 @@ class TestGui:
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
-        cls.proc.terminate()
-        cls.proc.wait(2.0)
+        cls.proc.send_signal(signal.SIGINT)
+        try:
+            cls.proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            cls.proc.terminate()
         os.chdir(cls.cwd)
