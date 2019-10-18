@@ -90,7 +90,7 @@
             "properties": {
                 "ledger": {"type": "string"},
                 "addr": {"type": "string"},
-                "port": {"type": "string"}
+                "port": {"type": "number"}
             }
         }
     }

@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
-from typing import Dict, cast
+from typing import Dict, Tuple, cast
 
 from aea.crypto.base import Crypto
 from aea.crypto.default import DefaultCrypto, DEFAULT
@@ -34,11 +34,12 @@ CURRENCY_TO_ID_MAP = {'FET': FETCHAI, 'ETH': ETHEREUM}
 class Wallet(object):
     """Store all the public keys we initialise."""
 
-    def __init__(self, private_key_paths: Dict[str, str]):
+    def __init__(self, private_key_paths: Dict[str, str], ledger_api_configs: Dict[str, Tuple[str, int]]):
         """
         Instantiate a wallet object.
 
         :param private_key_paths: the private key paths
+        :param ledger_api_configs: the ledger api configs
         """
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
@@ -47,7 +48,8 @@ class Wallet(object):
             if identifier == DEFAULT:
                 crypto_objects[identifier] = DefaultCrypto(path)
             elif identifier == FETCHAI:
-                crypto_objects[identifier] = FetchAICrypto(path)
+                fetch_ledger_api_config = ledger_api_configs[identifier]
+                crypto_objects[identifier] = FetchAICrypto(path, fetch_ledger_api_config)
             elif identifier == ETHEREUM:
                 crypto_objects[identifier] = EthereumCrypto(path)
             else:

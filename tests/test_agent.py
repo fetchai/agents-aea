@@ -59,7 +59,7 @@ class DummyAgent(Agent):
 def test_run_agent():
     """Test that we can set up and then run the agent."""
     agent_name = "dummyagent"
-    wallet = Wallet({'default': None})
+    wallet = Wallet({'default': None}, {'default': None})
     agent = DummyAgent(agent_name, wallet)
     mailbox = MailBox(OEFLocalConnection("mypbk", LocalNode()))
     agent.mailbox = mailbox

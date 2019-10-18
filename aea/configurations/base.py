@@ -131,7 +131,7 @@ class PrivateKeyPathConfig(Configuration):
 class LedgerAPIConfig(Configuration):
     """Handle a ledger api configuration."""
 
-    def __init__(self, ledger: str = "", addr: str = "", port: int = None):
+    def __init__(self, ledger: str = "", addr: str = "", port: int = 1000):
         """Initialize a handler configuration."""
         self.ledger = ledger
         self.addr = addr

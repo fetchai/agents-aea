@@ -95,9 +95,10 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     agent_name = cast(str, ctx.agent_config.agent_name)
 
     _verify_or_create_private_keys(ctx)
-    wallet = Wallet(dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()]))
-
     _verify_ledger_apis_access(ctx)
+    private_key_paths = dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()])
+    ledger_api_configs = dict([(identifier, (config.addr, config.port)) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
+    wallet = Wallet(private_key_paths, ledger_api_configs)
 
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
