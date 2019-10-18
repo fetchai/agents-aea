@@ -26,6 +26,8 @@ from abc import ABC, abstractmethod
 class Crypto(ABC):
     """Base class for a crypto object."""
 
+    identifier = 'base'
+
     @abstractmethod
     def public_key(self) -> str:
         """
@@ -51,11 +53,23 @@ class Crypto(ABC):
         """
 
     @abstractmethod
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> None:
+    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
         """
         Transfer from self to destination.
 
         :param destination_address: the address of the receive
         :param amount: the amount
         :param tx_fee: the tx fee
+
+        :return: bool indicating success
+        """
+
+    @abstractmethod
+    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
+        """
+        Generate the address from the public key.
+
+        :param counterparty_pbk: the public key of the counterparty
+
+        :return: the address
         """

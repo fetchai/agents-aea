@@ -32,9 +32,13 @@ from aea.crypto.base import Crypto
 
 logger = logging.getLogger(__name__)
 
+ETHEREUM = "ethereum"
+
 
 class EthereumCrypto(Crypto):
     """Class wrapping the Account Generation from Ethereum ledger."""
+
+    identifier = ETHEREUM
 
     def __init__(self, private_key_path: Optional[str] = None):
         """Instantiate a crypto object."""
@@ -96,7 +100,7 @@ class EthereumCrypto(Crypto):
         account = Account.create()
         return account
 
-    @property    
+    @property
     def token_balance(self) -> float:
         """
         Return the token balance.
@@ -105,12 +109,24 @@ class EthereumCrypto(Crypto):
         """
         pass
 
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> None:
+    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
         """
         Transfer from self to destination.
 
         :param destination_address: the address of the receive
         :param amount: the amount
         :param tx_fee: the tx fee
+
+        :return: bool indicating success
+        """
+        pass
+
+    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
+        """
+        Generate the address from the public key.
+
+        :param counterparty_pbk: the public key of the counterparty
+
+        :return: the address
         """
         pass

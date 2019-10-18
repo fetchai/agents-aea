@@ -20,21 +20,26 @@
 
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
-from typing import Optional
-import logging
 from fetchai.ledger.api import LedgerApi
 from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
+import logging
 from pathlib import Path
+from typing import Optional, Tuple
 
 from aea.crypto.base import Crypto
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_FETCHAI_CONFIG = ("127.0.0.1", 8000)
+FETCHAI = "fetchai"
+
 
 class FetchAICrypto(Crypto):
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
-    def __init__(self, private_key_path: Optional[str] = None, ledger_api_config: Tuple[addr, port]):
+    identifier = FETCHAI
+
+    def __init__(self, private_key_path: Optional[str] = None, ledger_api_config: Tuple[str, int] = DEFAULT_FETCHAI_CONFIG):
         """
         Instantiate a crypto object.
 
@@ -82,7 +87,7 @@ class FetchAICrypto(Crypto):
             api = LedgerApi(self._ledger_api_config)
             token_balance = api.tokens.balance(self.address)
         except Exception:
-            token_balance = 0
+            token_balance = 0.0
         return token_balance
 
     def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
@@ -97,11 +102,22 @@ class FetchAICrypto(Crypto):
         """
         try:
             api = LedgerApi(self._ledger_api_config)
-            api.sync(api.tokens.transfer(self._entity, destination, amount, tx_fee))
+            api.sync(api.tokens.transfer(self._entity, destination_address, amount, tx_fee))
             success = True
         except Exception:
             success = False
         return success
+
+    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
+        """
+        Generate the address from the public key.
+
+        :param counterparty_pbk: the public key of the counterparty
+
+        :return: the address
+        """
+        address = Address(Identity.from_hex(counterparty_pbk))
+        return address
 
     @staticmethod
     def get_address_from_public_key(public_key: str) -> Address:

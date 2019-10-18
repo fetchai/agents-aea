@@ -21,7 +21,7 @@
 """This module contains the tests of the ethereum module."""
 import os
 
-from aea.crypto.fetchai_base import FetchCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from ..conftest import ROOT_DIR
 
 PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/fet_private_key.txt")
@@ -29,18 +29,17 @@ PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/fet_private_key.txt")
 
 def test_initialisation():
     """Test the initialisation of the the fet crypto."""
-    fet_crypto = FetchCrypto()
+    fet_crypto = FetchAICrypto()
     assert fet_crypto.public_key is not None, "Public key must not be None after Initialisation"
     assert fet_crypto.address is not None, "Address must not be None after Initialisation"
-    assert fet_crypto.private_key is not None, "Private key must not be None after Initialisation"
     assert fet_crypto.address == str(fet_crypto.get_address_from_public_key(fet_crypto.public_key)), \
         "Must generate the same Address"
-    assert FetchCrypto(PRIVATE_KEY_PATH), "Couldn't load the fet private_key from the path!"
-    assert FetchCrypto("./"), "Couldn't create a new entity for the given path!"
+    assert FetchAICrypto(PRIVATE_KEY_PATH), "Couldn't load the fet private_key from the path!"
+    assert FetchAICrypto("./"), "Couldn't create a new entity for the given path!"
 
 
 def test_sign_message():
     """Test the signing process."""
-    fet_crypto = FetchCrypto()
+    fet_crypto = FetchAICrypto()
     signature = fet_crypto.sign_transaction(message=b'HelloWorld')
     assert len(signature) > 1, "The len(signature) must be more than 0"

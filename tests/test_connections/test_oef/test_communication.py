@@ -24,7 +24,7 @@ import pytest
 from unittest import mock
 
 from aea.connections.oef.connection import OEFMailBox
-from aea.crypto.base import DefaultCrypto
+from aea.crypto.default import DefaultCrypto
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage

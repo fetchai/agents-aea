@@ -23,7 +23,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, \
     load_pem_private_key
 
-from aea.crypto.base import DefaultCrypto
+from aea.crypto.default import DefaultCrypto
 from ..conftest import ROOT_DIR
 
 

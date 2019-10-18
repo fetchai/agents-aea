@@ -25,11 +25,13 @@ from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat
 import logging
 from pathlib import Path
 
-from fetchai.ledger.crypto import Entity, Address, Identity  # type: ignore
+from fetchai.ledger.crypto import Entity  # type: ignore
 from eth_account import Account  # type: ignore
 
-from aea.crypto.base import DefaultCrypto
-from aea.crypto.wallet import SUPPORTED_CRYPTOS, SUPPORTED_LEDGER_APIS, DEFAULT, FETCHAI, ETHEREUM
+from aea.crypto.default import DefaultCrypto, DEFAULT
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.wallet import SUPPORTED_CRYPTOS, SUPPORTED_LEDGER_APIS
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig
 from aea.cli.common import Context
@@ -110,7 +112,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     ctx.agent_config = aea_conf
 
 
-def _verify_ledger_apis_access(ctx: Context) -> None
+def _verify_ledger_apis_access(ctx: Context) -> None:
     """
     Verify access to ledger apis.
 
@@ -132,7 +134,7 @@ def _verify_ledger_apis_access(ctx: Context) -> None
         fetchai_ledger_api_config = cast(LedgerAPIConfig, fetchai_ledger_api_config)
         try:
             from fetchai.ledger.api import LedgerApi
-            api = LedgerApi(fetchai_ledger_api_config)
+            LedgerApi(fetchai_ledger_api_config)
         except Exception:
             logger.error("Cannot connect to fetchai ledger with provided config.")
             exit(-1)
@@ -141,8 +143,9 @@ def _verify_ledger_apis_access(ctx: Context) -> None
     if ethereum_ledger_config is None:
         logger.debug("No ethereum ledger api config specified.")
     else:
-        ethereum_private_key_config = cast(PrivateKeyPathConfig, ethereum_private_key_config)
+        ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
         try:
+            pass
             # TODO connect to ledger
         except Exception:
             logger.error("Cannot connect to ethereum ledger with provided config.")
@@ -220,13 +223,3 @@ def _create_temporary_private_key_pem_path() -> str:
     file.write(pem)
     file.close()
     return DEFAULT_PRIVATE_KEY_FILE
-
-
-def generate_address_from_public_key(public_key) -> Address:
-    """
-    Generate the address to send the tokens.
-
-    :param public_key:
-    :return:
-    """
-    return Address(Identity.from_hex(public_key))

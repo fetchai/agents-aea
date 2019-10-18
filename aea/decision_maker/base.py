@@ -25,14 +25,12 @@ import logging
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
-from aea.crypto.wallet import Wallet
-from aea.crypto.helpers import generate_address_from_public_key
+from aea.crypto.base import Crypto
+from aea.crypto.wallet import Wallet, CURRENCY_TO_ID_MAP
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.mail.base import OutBox  # , Envelope
 from aea.protocols.base import Message
-from fetchai.ledger.api import LedgerApi    # type: ignore
-
 
 CurrencyEndowment = Dict[str, float]  # a map from identifier to quantity
 CurrencyHoldings = Dict[str, float]
@@ -44,8 +42,6 @@ ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 QUANTITY_SHIFT = 100
 
 logger = logging.getLogger(__name__)
-
-MAX_PRICE = 2
 
 
 class OwnershipState:
@@ -152,7 +148,6 @@ class Preferences:
         self._utility_params = None  # type: UtilityParams
         self._exchange_params = None  # type: ExchangeParams
         self._quantity_shift = QUANTITY_SHIFT
-        self._max_price = MAX_PRICE
 
     def init(self, utility_params: UtilityParams, exchange_params: ExchangeParams):
         """
@@ -176,12 +171,6 @@ class Preferences:
         """Get exchange parameter for each currency."""
         assert self._exchange_params is not None, "ExchangeParams not set!"
         return self._exchange_params
-
-    @property
-    def max_price(self) -> int:
-        """Get the max_price parameter for the transactions."""
-        assert self._max_price is not None, "max_price not set!"
-        return self._max_price
 
     def logarithmic_utility(self, good_holdings: GoodHoldings) -> float:
         """
@@ -240,9 +229,6 @@ class Preferences:
         new_score = self.get_score(good_holdings=new_ownership_state.good_holdings,
                                    currency_holdings=new_ownership_state.currency_holdings)
         return new_score - current_score
-
-
-ID_TO_CURRENCY_MAP = { 'fetchai': 'FET'}
 
 
 class DecisionMaker:
@@ -320,11 +306,11 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        crypto_identifier = ID_TO_CURRENCY_MAP[tx_message.get("currency")]
-        amount = tx_message.get("amount")
+        crypto_identifier = CURRENCY_TO_ID_MAP.get(cast(str, tx_message.get("currency")))
+        amount = cast(float, tx_message.get("amount"))
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
         if self._is_acceptable_tx(crypto_object, amount):
-            self._settle_tx(crypto_object, tx_message.get("counterparty"), amount, tx_message.get("sender_tx_fee"))
+            self._settle_tx(crypto_object, cast(str, tx_message.get("counterparty")), amount, cast(float, tx_message.get("sender_tx_fee")))
         # TODO: //Notify the relevant skill that we made the transaction.
 
     def _is_acceptable_tx(self, crypto_object: Crypto, amount: float) -> bool:
@@ -335,7 +321,9 @@ class DecisionMaker:
         :param amount: the tx amount
         :return: whether the transaction is acceptable or not
         """
-        affordable = amount <= crypto_object.token_balance
+        balance = cast(float, crypto_object.token_balance)
+        affordable = amount <= balance
+        # TODO check against preferences and other constraints
         return affordable
 
     def _settle_tx(self, crypto_object: Crypto, counterparty_pbk: str, amount: float, tx_fee: float):
@@ -347,8 +335,8 @@ class DecisionMaker:
         :param amount: the tx amount
         :param tx_fee: the tx fee
         """
-        counterparty_address = generate_address_from_public_key(counterparty_pbk)
-        crypto_object.transfer(counterparty_address, amount, sender_tx_fee)
+        counterparty_address = crypto_object.generate_counterparty_address(counterparty_pbk)
+        crypto_object.transfer(counterparty_address, amount, tx_fee)
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
         """
@@ -362,6 +350,6 @@ class DecisionMaker:
         currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
         good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
-        utility_params = cast(UtilityParams, state_update_message.get("utility_params"))        
-        exchange_params = cast(ExchangeParams, state_update_message.get("exchange_params"))        
+        utility_params = cast(UtilityParams, state_update_message.get("utility_params"))
+        exchange_params = cast(ExchangeParams, state_update_message.get("exchange_params"))
         self.preferences.init(exchange_params=exchange_params, utility_params=utility_params)

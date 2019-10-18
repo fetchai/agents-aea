@@ -33,17 +33,23 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 from aea.decision_maker.messages.transaction import TransactionMessage
 
+logger = logging.getLogger("aea.weather_client_skill")
 
 STARTING_MESSAGE_ID = 1
 STARTING_TARGET_ID = 0
-
-logger = logging.getLogger("aea.weather_client_skill")
+DEFAULT_MAX_PRICE = 2.0
 
 
 class FIPAHandler(Handler):
     """This class scaffolds a handler."""
 
     SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def __init__(self, **kwargs):
+        """Initialise the class."""
+        max_price = kwargs.pop('max_price') if 'max_price' in kwargs.keys() else DEFAULT_MAX_PRICE
+        super().__init__(**kwargs)
+        self.max_price = max_price
 
     def setup(self) -> None:
         """
@@ -73,7 +79,7 @@ class FIPAHandler(Handler):
                     if "Price" in item.values.keys():
                         # TODO: Add  if tx_message.get("amount") <= api.tokens.balance(m_address)
                         # Though I don't want to create a new ledger api conenction here.
-                        if item.values["Price"] < self.context.agent_preferences.max_price:
+                        if item.values["Price"] < self.max_price:
                             self.handle_accept(sender, message_id, dialogue_id)
                         else:
                             self.handle_decline(sender, message_id, dialogue_id)
@@ -205,8 +211,8 @@ class DefaultHandler(Handler):
                     json_data = json.dumps(command)
                     json_bytes = json_data.encode("utf-8")
                     logger.info(
-                        "[{}]: Sending to weather station that I paid ".format(self.context.agent_name,
-                                                                               sender))
+                        "[{}]: Sending to weather station={} that I paid ".format(self.context.agent_name,
+                                                                                  sender))
                     data_msg = DefaultMessage(
                         type=DefaultMessage.Type.BYTES, content=json_bytes)
                     self.context.outbox.put_message(to=sender,

@@ -17,4 +17,3 @@ handlers:
 tasks: []
 shared_classes: []
 protocols: ['fipa']
-ledgers: []

@@ -20,7 +20,6 @@
 
 """Default module wrapping the public and private key cryptography and ledger api."""
 
-from abc import ABC, abstractmethod
 import base58
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
@@ -36,6 +35,8 @@ logger = logging.getLogger(__name__)
 CHOSEN_ALGORITHM_ID = b'MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE'
 CHOSEN_PBK_LENGTH = 160
 
+DEFAULT = "default"
+
 
 def _load_pem_private_key_from_path(path):
     return load_pem_private_key(open(path, "rb").read(), None, default_backend())
@@ -47,6 +48,8 @@ class DefaultCryptoError(Exception):
 
 class DefaultCrypto(Crypto):
     """Class wrapping the public and private key cryptography."""
+
+    identifier = DEFAULT
 
     def __init__(self, private_key_pem_path: Optional[str] = None):
         """Instantiate a crypto object."""
@@ -266,8 +269,12 @@ class DefaultCrypto(Crypto):
         return pbk_hex
 
     def _pvk_obj_to_pem(self, pvk: object) -> bytes:
-        return pvk.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.TraditionalOpenSSL, serialization.NoEncryption())  # type: ignore
+        """
+        Convert the private key to pem format.
 
+        :return: bytes (pem format)
+        """
+        return pvk.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.TraditionalOpenSSL, serialization.NoEncryption())  # type: ignore
 
     def token_balance(self) -> float:
         """
@@ -277,12 +284,24 @@ class DefaultCrypto(Crypto):
         """
         pass
 
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> None:
+    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
         """
         Transfer from self to destination.
 
         :param destination_address: the address of the receive
         :param amount: the amount
         :param tx_fee: the tx fee
+
+        :return: bool indicating success
+        """
+        pass
+
+    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
+        """
+        Generate the address from the public key.
+
+        :param counterparty_pbk: the public key of the counterparty
+
+        :return: the address
         """
         pass

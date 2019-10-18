@@ -22,15 +22,13 @@
 from typing import Dict, cast
 
 from aea.crypto.base import Crypto
-from aea.crypto.default import DefaultCrypto
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.default import DefaultCrypto, DEFAULT
+from aea.crypto.ethereum import EthereumCrypto, ETHEREUM
+from aea.crypto.fetchai import FetchAICrypto, FETCHAI
 
-DEFAULT = "default"
-ETHEREUM = "ethereum"
-FETCHAI = "fetchai"
 SUPPORTED_CRYPTOS = [DEFAULT, ETHEREUM, FETCHAI]
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
+CURRENCY_TO_ID_MAP = {'FET': FETCHAI, 'ETH': ETHEREUM}
 
 
 class Wallet(object):
