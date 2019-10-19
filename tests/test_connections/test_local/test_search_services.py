@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the search feature of the local OEF node."""
-import time
 import pytest
 
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
