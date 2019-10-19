@@ -76,3 +76,9 @@ Release History
 - Stability improvements
 - Higher test coverage, including on Python 3.6
 - Multiple additional minor fixes and changes
+
+0.1.10 (2019-10-19)
+-------------------
+
+- Compatibility fixes for Ubuntu and Windows platforms
+- Multiple additional minor fixes and changes
