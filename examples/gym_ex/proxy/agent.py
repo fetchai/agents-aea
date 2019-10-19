@@ -27,6 +27,7 @@ from typing import Optional
 import gym
 
 from aea.agent import Agent
+from aea.crypto.wallet import Wallet, DEFAULT
 from aea.helpers.base import locate
 from aea.mail.base import Envelope, MailBox
 
@@ -46,9 +47,11 @@ class ProxyAgent(Agent):
         :param proxy_env_queue: the queue of the proxy environment
         :return: None
         """
-        super().__init__(name, timeout=0)
+        wallet = Wallet({DEFAULT: None})
+        super().__init__(name, wallet, timeout=0)
         self.proxy_env_queue = proxy_env_queue
-        self.mailbox = MailBox(GymConnection(self.crypto.public_key, gym_env))
+        crypto_object = self.wallet.crypto_objects.get(DEFAULT)
+        self.mailbox = MailBox(GymConnection(crypto_object.public_key, gym_env))
 
     def setup(self) -> None:
         """
