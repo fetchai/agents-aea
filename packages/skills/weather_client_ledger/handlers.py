@@ -22,9 +22,6 @@ import json
 import logging
 from typing import Optional, cast, List
 
-from fetchai.ledger.api import LedgerApi
-from fetchai.ledger.crypto import Address, Identity
-
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
