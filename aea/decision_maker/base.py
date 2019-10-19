@@ -311,7 +311,7 @@ class DecisionMaker:
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
         if self._is_acceptable_tx(crypto_object, amount):
             self._settle_tx(crypto_object, cast(str, tx_message.get("counterparty")), amount, cast(float, tx_message.get("sender_tx_fee")))
-        # TODO: //Notify the relevant skill that we made the transaction.
+        # TODO: Notify the relevant skill that we made the transaction.
 
     def _is_acceptable_tx(self, crypto_object: Crypto, amount: float) -> bool:
         """
