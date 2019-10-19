@@ -57,6 +57,21 @@ pip install aea[cli]
 ```
 
 
+### Known issues
+
+If the installation steps fail, it might be because some of
+ the dependencies cannot be built on your system. 
+
+The following hints can help:
+
+- Ubuntu/Debian systems only: install Python 3.7 headers 
+```bash
+sudo apt-get install python3.7-dev
+``` 
+
+- Windows users: install [build tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019). 
+
+
 ## Echo skill demo
 
 The echo skill is a simple demo that prints logs from the agent's main loop as it calls registered `Task` and `Behaviour` code.

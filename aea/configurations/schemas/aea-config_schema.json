@@ -1,95 +1,148 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "description": "Schema for the agent configuration file.",
-    "additionalProperties": false,
-    "type": "object",
-    "required": [
-        "aea_version",
-        "agent_name",
-        "authors",
-        "version",
-        "license",
-        "url",
-        "private_key_paths",
-        "connections",
-        "default_connection",
-        "protocols",
-        "skills"
-    ],
-    "properties": {
-        "aea_version": {"type": "string"},
-        "agent_name": {"type": "string"},
-        "authors": {"type": "string"},
-        "version": {"type": "string"},
-        "license": {"type": "string"},
-        "url": {"type": "string"},
-        "registry_path": {"type": "string"},
-        "private_key_paths": {
-            "type": "array",
-            "additionalProperties": false,
-            "uniqueItems": true,
-            "items": {
-                "type": "object",
-                "required": ["private_key_path"],
-                "properties": {
-                    "private_key_path": { "$ref": "#/definitions/private_key_path" }
-                }
-            }
-        },
-        "ledger_apis": {
-            "type": "array",
-            "additionalProperties": false,
-            "uniqueItems": true,
-            "items": {
-                "type": "object",
-                "required": ["ledger_api"],
-                "properties": {
-                    "ledger_api": { "$ref": "#/definitions/ledger_api" }
-                }
-            }
-        },
-        "connections": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {"$ref": "definitions.json#/definitions/resource_name"}
-        },
-        "default_connection": {"type": "string"},
-        "protocols": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {"$ref": "definitions.json#/definitions/resource_name"}
-        },
-        "skills": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {"type": "string"}
-        },
-        "logging_config": {
-            "type": "object"
-        },
-        "description": {
-            "type": "string"
-        }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for the agent configuration file.",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "aea_version",
+    "agent_name",
+    "authors",
+    "version",
+    "license",
+    "url",
+    "private_key_paths",
+    "connections",
+    "default_connection",
+    "protocols",
+    "skills"
+  ],
+  "properties": {
+    "aea_version": {
+      "type": "string"
     },
-    "definitions": {
-        "private_key_path": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["ledger", "path"],
-            "properties": {
-                "ledger": {"type": "string"},
-                "path": {"type": "string"}
-            }
-        },
-        "ledger_api": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["ledger", "addr", "port"],
-            "properties": {
-                "ledger": {"type": "string"},
-                "addr": {"type": "string"},
-                "port": {"type": "number"}
-            }
+    "agent_name": {
+      "type": "string"
+    },
+    "authors": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "license": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "registry_path": {
+      "type": "string"
+    },
+    "private_key_paths": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": [
+          "private_key_path"
+        ],
+        "properties": {
+          "private_key_path": {
+            "$ref": "#/definitions/private_key_path"
+          }
         }
+      }
+    },
+    "ledger_apis": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["ledger_api"],
+        "properties": {
+          "ledger_api": { 
+            "$ref": "#/definitions/ledger_api"
+          }
+        }
+      }
+    },
+    "connections": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/resource_name"
+      }
+    },
+    "default_connection": {
+      "type": "string"
+    },
+    "protocols": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/resource_name"
+      }
+    },
+    "skills": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "logging_config": {
+      "type": "object"
+    },
+    "description": {
+      "type": "string"
     }
+  },
+  "definitions": {
+    "private_key_path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ledger",
+        "path"
+      ],
+      "properties": {
+        "ledger": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "ledger_api": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ledger",
+        "addr",
+        "port"
+      ],
+      "properties": {
+        "ledger": {
+          "type": "string"
+        },
+        "addr": {
+          "type": "string"
+        },
+        "port": {
+          "type": "number"
+        }
+      }
+    },
+    "requirement": {
+      "type": "string",
+      "pattern": "([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9])( *(~=|==|>=|<=|!=|<|>) *v?(?:(?:(?P<epoch>[0-9]+)!)?(?P<release>[0-9]+(?:\\.[0-9]+)*)(?P<pre>[-_\\.]?(?P<pre_l>(a|b|c|rc|alpha|beta|pre|preview))[-_\\.]?(?P<pre_n>[0-9]+)?)?(?P<post>(?:-(?P<post_n1>[0-9]+))|(?:[-_\\.]?(?P<post_l>post|rev|r)[-_\\.]?(?P<post_n2>[0-9]+)?))?(?P<dev>[-_\\.]?(?P<dev_l>dev)[-_\\.]?(?P<dev_n>[0-9]+)?)?)(?:\\+(?P<local>[a-z0-9]+(?:[-_\\.][a-z0-9]+)*))?)?$"
+    },
+    "resource_name": {
+      "type": "string",
+      "pattern": "[a-zA-Z_][a-zA-Z0-9_]*"
+    }
+  }
 }
