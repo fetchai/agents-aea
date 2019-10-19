@@ -134,7 +134,7 @@ def _verify_ledger_apis_access(ctx: Context) -> None:
         fetchai_ledger_api_config = cast(LedgerAPIConfig, fetchai_ledger_api_config)
         try:
             from fetchai.ledger.api import LedgerApi
-            LedgerApi(fetchai_ledger_api_config)
+            LedgerApi(fetchai_ledger_api_config.addr, fetchai_ledger_api_config.port)
         except Exception:
             logger.error("Cannot connect to fetchai ledger with provided config.")
             exit(-1)

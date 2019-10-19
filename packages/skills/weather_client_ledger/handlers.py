@@ -22,6 +22,9 @@ import json
 import logging
 from typing import Optional, cast, List
 
+from fetchai.ledger.api import LedgerApi
+from fetchai.ledger.crypto import Address, Identity
+
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -76,10 +79,10 @@ class FIPAHandler(Handler):
                 for item in proposals:
                     logger.info("[{}]: received proposal={} in dialogue={}".format(self.context.agent_name, item.values,
                                                                                    dialogue_id))
-                    if "Price" in item.values.keys():
+                    if "Sale Price" in item.values.keys():
                         # TODO: Add  if tx_message.get("amount") <= api.tokens.balance(m_address)
                         # Though I don't want to create a new ledger api conenction here.
-                        if item.values["Price"] < self.max_price:
+                        if item.values["Sale Price"] < self.max_price:
                             self.handle_accept(sender, message_id, dialogue_id)
                         else:
                             self.handle_decline(sender, message_id, dialogue_id)
@@ -206,7 +209,7 @@ class DefaultHandler(Handler):
                     logger.info("[{}]: receiving data ...".format(self.context.agent_name))
                     logger.info("[{}]: this is the data I got: {}".format(self.context.agent_name, json_data))
                 elif json_data['Command'] == "address":
-                    self._create_message_for_transaction(json_data['Address'])
+                    self._create_message_for_transaction(json_data['Address'], 100)
                     command = {'Command': 'Transferred'}
                     json_data = json.dumps(command)
                     json_bytes = json_data.encode("utf-8")
@@ -230,14 +233,14 @@ class DefaultHandler(Handler):
         """
         pass
 
-    def _create_message_for_transaction(self, public_key: str):
+    def _create_message_for_transaction(self, public_key: str, amount: int):
         msg = TransactionMessage(transaction_id="transaction0",
                                  sender=self.context.agent_public_keys['fetchai'],
                                  counterparty=public_key,
-                                 is_sender_buyer=False,
+                                 is_sender_buyer=True,
                                  currency="FET",
-                                 amount=100,
-                                 sender_tx_fee=20,
+                                 amount=amount,
+                                 sender_tx_fee=1.0,
                                  counterparty_tx_fee=0.0,
                                  quantities_by_good_pbk={"FET": 10})
 

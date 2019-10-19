@@ -84,9 +84,10 @@ class FetchAICrypto(Crypto):
         :return: the token balance
         """
         try:
-            api = LedgerApi(self._ledger_api_config)
+            api = LedgerApi(self._ledger_api_config[0], self._ledger_api_config[1])
             token_balance = api.tokens.balance(self.address)
         except Exception:
+            logger.warning("An error occurred while attempting to get the current balance.")
             token_balance = 0.0
         return token_balance
 
@@ -101,10 +102,13 @@ class FetchAICrypto(Crypto):
         :return: bool indicating success
         """
         try:
-            api = LedgerApi(self._ledger_api_config)
+            api = LedgerApi(self._ledger_api_config[0], self._ledger_api_config[1])
+            logger.info("Waiting for the validation of the transaction...")
             api.sync(api.tokens.transfer(self._entity, destination_address, amount, tx_fee))
+            logger.info("Done!")
             success = True
         except Exception:
+            logger.warning("An error occurred while attempting the transfer.")
             success = False
         return success
 

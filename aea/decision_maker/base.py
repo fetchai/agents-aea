@@ -306,7 +306,7 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        crypto_identifier = CURRENCY_TO_ID_MAP.get(cast(str, tx_message.get("currency")))
+        crypto_identifier = CURRENCY_TO_ID_MAP.get(cast(str, tx_message.get("currency_pbk")))
         amount = cast(float, tx_message.get("amount"))
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
         if self._is_acceptable_tx(crypto_object, amount):
