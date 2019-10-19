@@ -165,12 +165,17 @@ class DefaultHandler(Handler):
         self.fetched_data = []
         self.db = DBCommunication()
 
+        self.ledger_addr = kwargs.pop("ledger_addr")
+        self.ledger_port = kwargs.pop("ledger_port")
+
     def setup(self) -> None:
         """Call to setup the handler."""
         fetched_data = self.db.get_data_for_specific_dates(DATE_ONE, DATE_TWO)
         if len(fetched_data) > 1:
             self.fetched_data = fetched_data
-        pass
+
+        cur_balance = _ask_balance(self.context.agent_public_keys['fetchai'], self.ledger_addr, self.ledger_port)
+        logger.info("[{}]: My current balance is ={}".format(self.context.agent_name, cur_balance))
 
     def handle(self, message: Message, sender: str) -> None:
         """
@@ -238,19 +243,17 @@ class DefaultHandler(Handler):
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(data_msg))
 
-        _ask_balance(self.context.agent_public_keys['fetchai'])
-        logger.info(
-            "[{}]: My new balance is ={}".format(self.context.agent_name,
-                                                 _ask_balance(self.context.agent_public_keys['fetchai'])))
+        new_balance = _ask_balance(self.context.agent_public_keys['fetchai'], self.ledger_addr, self.ledger_port)
+        logger.info("[{}]: My new balance is ={}".format(self.context.agent_name, new_balance))
 
 
-def _ask_balance(public_key):
+def _ask_balance(public_key, address, port) -> int:
     """
-    Generate tokens to be able to make a transaction.
+    Get the current balance.
 
-    :return:
+    :return: the balance
     """
-    api = LedgerApi("127.0.0.1", 8100)
+    api = LedgerApi(address, port)
     public_k = generate_address_from_public_key(public_key)
     balance = api.tokens.balance(public_k)
     return balance

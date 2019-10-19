@@ -23,6 +23,7 @@ import argparse
 import logging
 import pprint
 import sys
+from pathlib import Path
 
 from fetchai.ledger.api import LedgerApi        # type: ignore
 from fetchai.ledger.crypto import Entity, Address  # type: ignore
@@ -50,7 +51,7 @@ def generate_fetchai_wealth(arguments: argparse.Namespace) -> None:
         logger.debug("Please provide a private key. --privte-key .... ")
         sys.exit("-Please provide a private key. --private-key .... ")
 
-    entity_to_generate_wealth = Entity.from_hex(arguments.private_key)
+    entity_to_generate_wealth = Entity.from_hex(Path(arguments.private_key).read_text())
     api.sync(api.tokens.wealth(entity_to_generate_wealth, arguments.amount))
     address = Address(entity_to_generate_wealth)
     balance = api.tokens.balance(address)
@@ -63,8 +64,7 @@ def parse_arguments():
     parser.add_argument("--addr", type=str, default="127.0.0.1", help="The addr for the ledger api")
     parser.add_argument("--port", type=int, default=8000, help="The port for the ledger api")
     parser.add_argument("--amount", type=int, default=10, help="The amount we want to generate to the address")
-    parser.add_argument("--private-key", type=str, default=None,
-                        help="The amount we want to generate to the address")
+    parser.add_argument("--private-key", type=str, default=None, help="The path to the private key file.")
     arguments = parser.parse_args()
     logger.debug("Arguments: {}".format(pprint.pformat(arguments.__dict__)))
 

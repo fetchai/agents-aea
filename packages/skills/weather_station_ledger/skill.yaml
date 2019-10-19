@@ -15,7 +15,9 @@ handlers:
         currency: 'FET'
   - handler:
       class_name: DefaultHandler
-      args: {}
+      args:
+        ledger_addr: alpha.fetch-ai.com
+        ledger_port: 80
 tasks: []
 shared_classes: []
 protocols: ['fipa', 'default']
