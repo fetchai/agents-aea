@@ -24,8 +24,7 @@ from unittest import mock
 import pytest
 
 from aea.connections.oef.connection import OEFObjectTranslator
-from aea.protocols.oef.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint, ConstraintType, \
-    ConstraintTypes
+from aea.protocols.oef.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint, ConstraintType
 
 
 class TestTranslator:
@@ -62,7 +61,6 @@ class TestTranslator:
         m_desc = iter(description_foobar.values)
         assert next(m_desc) == "foo"
         assert description_foobar == description_foobar.__iter__()
-
 
     def test_query(self):
         """Test that the translation for the Query class works."""
@@ -198,8 +196,8 @@ class TestCheckValidity:
         data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
         description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
         constraint = Or([(Constraint("foo", ConstraintType("==", 1))),
-                        (Constraint("bar", ConstraintType("==", "baz")))
-                        ])
+                         (Constraint("bar", ConstraintType("==", "baz")))
+                         ])
         assert constraint.check(description_foobar)
 
     def test_and_check(self):
@@ -209,8 +207,8 @@ class TestCheckValidity:
         data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
         description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
         constraint = And([(Constraint("foo", ConstraintType("==", 1))),
-                         (Constraint("bar", ConstraintType("==", "baz")))
-                         ])
+                          (Constraint("bar", ConstraintType("==", "baz")))
+                          ])
         assert constraint.check(description_foobar)
 
     def test_query_check(self):

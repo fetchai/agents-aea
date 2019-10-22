@@ -82,5 +82,3 @@ class TestBaseSerializations:
         """Test the protocol config."""
         protocol = Protocol(id="test", serializer=cast(Serializer, ProtobufSerializer), config=ProtocolConfig())
         assert protocol.config is not None
-
-
