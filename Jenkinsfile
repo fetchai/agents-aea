@@ -7,6 +7,10 @@ pipeline {
 
     }
 
+    options {
+        timeout(time: 2, unit: 'HOURS')
+    }
+
     stages {
 
         stage('Unit Tests & Code Style Check') {
