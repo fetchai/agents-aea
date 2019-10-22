@@ -558,6 +558,9 @@ class TestOefConstraint:
                 m_constraint = ConstraintType(mock_constraintType_enum.EQUAL, "==")
                 eq = self.obj_transaltor.to_oef_constraint_type(m_constraint)
 
+        with pytest.raises(ValueError):
+            self.obj_transaltor.from_oef_constraint_expr(oef_constraint_expr=cast(ConstraintExpr, DummyConstrainExpr()))
+
     def test_oef_constraint_expr(self):
         """Test the value error of constraint type."""
         with pytest.raises(ValueError):

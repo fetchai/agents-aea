@@ -20,6 +20,7 @@
 """This module contains the tests for the search feature of the local OEF node."""
 import pytest
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.fipa.message import FIPAMessage
@@ -136,6 +137,141 @@ class TestSimpleSearchResult:
         cls.mailbox1.disconnect()
 
 
+class TestUnregister:
+    """Test that the unregister service results to Error Message."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        cls.node = LocalNode()
+
+        cls.public_key_1 = "mailbox1"
+        cls.mailbox1 = MailBox(OEFLocalConnection(cls.public_key_1, cls.node))
+        cls.public_key_2 = "mailbox2"
+        cls.mailbox2 = MailBox(OEFLocalConnection(cls.public_key_2, cls.node))
+        cls.mailbox1.connect()
+        cls.mailbox2.connect()
+
+    def test_unregister_service_result(self):
+        """Test that at the beginning, the search request returns an empty search result."""
+        data_model = DataModel("foobar", attributes=[])
+        service_description = Description({"foo": 1, "bar": "baz"}, data_model=data_model)
+        msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=0, service_description=service_description,
+                         service_id="Test_service")
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.mailbox1.send(envelope)
+
+        # check the result
+        response_envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+        assert response_envelope.protocol_id == OEFMessage.protocol_id
+        assert response_envelope.sender == DEFAULT_OEF
+        result = OEFSerializer().decode(response_envelope.message)
+        assert result.get("type") == OEFMessage.Type.OEF_ERROR
+
+        msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=0, service_description=service_description,
+                         service_id="Test_Service")
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.mailbox1.send(envelope)
+
+        """Test that at the beginning, the search request returns an empty search result."""
+        data_model = DataModel("foobar", attributes=[])
+        service_description = Description({"foo": 1, "bar": "baz"}, data_model=data_model)
+        msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=0, service_description=service_description,
+                         service_id="Test_service")
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.mailbox1.send(envelope)
+
+    def test_search_agent(self):
+        """Test the registered agents, we will not find any."""
+        data_model = DataModel("foobar", attributes=[])
+        service_description = Description({"foo": 1, "bar": "baz"}, data_model=data_model)
+        query = Query(constraints=[], model=data_model)
+        msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=0, service_description=service_description,
+                         service_id="Test_Service")
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox2", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.mailbox1.send(envelope)
+
+        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox2", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.mailbox2.send(envelope)
+
+        # check the result
+        response_envelope = self.mailbox2.inbox.get(block=True, timeout=5.0)
+        assert response_envelope.protocol_id == OEFMessage.protocol_id
+        assert response_envelope.sender == DEFAULT_OEF
+        result = OEFSerializer().decode(response_envelope.message)
+        assert len(result.get("agents")) == 0, "There are registered agents!"
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the test."""
+        cls.mailbox1.disconnect()
+        cls.mailbox2.disconnect()
+
+
+class TestAgentMessage:
+    """Test the the OEF will return Dialogue Error if it doesn't know the public key."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        cls.node = LocalNode()
+
+        cls.public_key_1 = "mailbox1"
+        cls.mailbox1 = MailBox(OEFLocalConnection(cls.public_key_1, cls.node))
+
+    def test_messages(self):
+        """Test that at the beginning, the search request returns an empty search result."""
+        msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
+        msg_bytes = FIPASerializer().encode(msg)
+        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        with pytest.raises(ConnectionError):
+            OEFLocalConnection(self.public_key_1, self.node).send(envelope)
+
+        self.mailbox1.connect()
+        msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
+        msg_bytes = FIPASerializer().encode(msg)
+        envelope = Envelope(to="mailbox3", sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        self.mailbox1.send(envelope)
+
+        # check the result
+        response_envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+        assert response_envelope.protocol_id == OEFMessage.protocol_id
+        assert response_envelope.sender == DEFAULT_OEF
+        result = OEFSerializer().decode(response_envelope.message)
+        assert result.get("type") == OEFMessage.Type.DIALOGUE_ERROR
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the test."""
+        cls.mailbox1.disconnect()
+
+
+class TestOEFConnectionFromJson:
+    """Test the the OEF will return a connection after reading the .json file."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        cls.node = LocalNode()
+        cls.public_key_1 = "mailbox1"
+
+    def test_from_config(self):
+        """Test the configuration loading."""
+        con = OEFLocalConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
+        assert not con.is_established, "We are connected..."
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the test."""
+        pass
+
+
 # class TestFilteredSearchResult:
 #     """Test that the query system of the search gives the expected result."""
 #
@@ -229,92 +365,3 @@ class TestSimpleSearchResult:
 #         """Teardown the test."""
 #         cls.mailbox1.disconnect()
 #         cls.mailbox2.disconnect()
-
-
-class TestUnregister:
-    """Test that the unregister service results to Error Message."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test."""
-        cls.node = LocalNode()
-
-        cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = MailBox(OEFLocalConnection(cls.public_key_1, cls.node))
-
-        cls.mailbox1.connect()
-
-    def test_unregister_service_result(self):
-        """Test that at the beginning, the search request returns an empty search result."""
-        data_model = DataModel("foobar", attributes=[])
-        service_description = Description({"foo": 1, "bar": "baz"}, data_model=data_model)
-        msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=0, service_description=service_description,
-                         service_id="Test_service")
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.send(envelope)
-
-        # check the result
-        response_envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OEFMessage.protocol_id
-        assert response_envelope.sender == DEFAULT_OEF
-        result = OEFSerializer().decode(response_envelope.message)
-        assert result.get("type") == OEFMessage.Type.OEF_ERROR
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardown the test."""
-        cls.mailbox1.disconnect()
-
-
-class TestAgentMessage:
-    """Test the the OEF will return Dialogue Error if it doesn't know the public key."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test."""
-        cls.node = LocalNode()
-
-        cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = MailBox(OEFLocalConnection(cls.public_key_1, cls.node))
-
-    def test_messages(self):
-        """Test that at the beginning, the search request returns an empty search result."""
-        msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
-        msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        with pytest.raises(ConnectionError):
-            OEFLocalConnection(self.public_key_1, self.node).send(envelope)
-
-        self.mailbox1.connect()
-        msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
-        msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to="mailbox3", sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.send(envelope)
-
-        # check the result
-        response_envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OEFMessage.protocol_id
-        assert response_envelope.sender == DEFAULT_OEF
-        result = OEFSerializer().decode(response_envelope.message)
-        assert result.get("type") == OEFMessage.Type.DIALOGUE_ERROR
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardown the test."""
-        cls.mailbox1.disconnect()
-
-
-class TestOEFConnectionFromJson:
-    """Test the the OEF will return a connection after reading the .json file."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set up the test."""
-        cls.node = LocalNode()
-        cls.public_key_1 = "mailbox1"
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardown the test."""
-        cls.mailbox1.disconnect()
