@@ -24,7 +24,6 @@ from copy import deepcopy
 from enum import Enum
 from typing import Dict, Type, Union, Optional, List, Any
 
-
 ATTRIBUTE_TYPES = Union[float, str, bool, int]
 
 
@@ -73,9 +72,9 @@ class Attribute:
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, Attribute) \
-            and self.name == other.name \
-            and self.type == other.type \
-            and self.is_required == other.is_required
+               and self.name == other.name \
+               and self.type == other.type \
+               and self.is_required == other.is_required
 
 
 class DataModel:
@@ -96,8 +95,8 @@ class DataModel:
     def __eq__(self, other) -> bool:
         """Compare with another object."""
         return isinstance(other, DataModel) \
-            and self.name == other.name \
-            and self.attributes == other.attributes
+               and self.name == other.name \
+               and self.attributes == other.attributes
 
 
 class Description:
@@ -116,8 +115,8 @@ class Description:
     def __eq__(self, other) -> bool:
         """Compare with another object."""
         return isinstance(other, Description) \
-            and self.values == other.values \
-            and self.data_model == other.data_model
+               and self.values == other.values \
+               and self.data_model == other.data_model
 
     def __iter__(self):
         """Create an iterator."""
@@ -174,6 +173,7 @@ class ConstraintType:
         """
         self.type = ConstraintTypes(type)
         self.value = value
+        assert self._check_validity(), "ConstraintType initialization inconsistent."
 
     def _check_validity(self):
         """
@@ -210,9 +210,12 @@ class ConstraintType:
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
                     assert all(isinstance(obj, _type) for obj in self.value)
-        except AssertionError:
-            raise ValueError("Value '{}' not compatible with constraint type '{}'"
-                             .format(self.value, str(self.type)))
+            else:
+                raise ValueError("Type not recognized.")
+        except (AssertionError, ValueError):
+            return False
+
+        return True
 
     def check(self, value: ATTRIBUTE_TYPES) -> bool:
         """
@@ -415,8 +418,8 @@ class Constraint(ConstraintExpr):
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, Constraint) \
-            and self.attribute_name == other.attribute_name \
-            and self.constraint_type == other.constraint_type
+               and self.attribute_name == other.attribute_name \
+               and self.constraint_type == other.constraint_type
 
 
 class Query:
@@ -446,5 +449,5 @@ class Query:
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, Query) \
-            and self.constraints == other.constraints \
-            and self.model == other.model
+               and self.constraints == other.constraints \
+               and self.model == other.model
