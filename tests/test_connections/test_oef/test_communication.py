@@ -29,6 +29,7 @@ from oef.core import AsyncioCore
 from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.oef.connection import OEFMailBox, OEFConnection, OEFChannel
 from aea.connections.oef.connection import OEFObjectTranslator
 from aea.crypto.base import DefaultCrypto
@@ -456,6 +457,15 @@ class TestFIPA:
         with pytest.raises(ValueError):
             my_channel.send_oef_message(envelope)
 
+        data_model = DataModel("foobar", attributes=[])
+        query = Query(constraints=[], model=data_model)
+
+        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        my_channel.conn = OEFConnection(public_key="pk", oef_addr="192.0.0.1")
+        my_channel.send_oef_message(envelope)
+
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
@@ -472,6 +482,11 @@ class TestOefConnection:
         assert not con.is_established
         with pytest.raises(ConnectionError):
             con.connect()
+
+    def test_oef_from_config(self):
+        """Test the Connection from config File."""
+        con = OEFConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
+        assert not con.is_established, "We are connected..."
 
 
 class TestOefConstraint:
@@ -564,6 +579,8 @@ class DummyConstrainExpr(ConstraintExpr):
         :param description: the description to check.
         :return: ``True`` if the description satisfy the constraint expression, ``False`` otherwise.
         """
+        pass
+
     def is_valid(self, data_model: DataModel) -> bool:
         """
         Check whether a constraint expression is valid wrt a data model. Specifically, check the following conditions.
@@ -573,6 +590,7 @@ class DummyConstrainExpr(ConstraintExpr):
         :param data_model: the data model used to check the validity of the constraint expression.
         :return: ``True`` if the constraint expression is valid wrt the data model, ``False`` otherwise.
         """
+        pass
 
     def _check_validity(self) -> None:
         """Check whether a Constraint Expression satisfies some basic requirements.
