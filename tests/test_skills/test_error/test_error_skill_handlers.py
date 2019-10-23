@@ -155,7 +155,7 @@ class TestSkillError:
             self.my_aea.stop()
             t.join()
 
-
     @classmethod
     def teardown(cls):
+        """Teardown method."""
         pass

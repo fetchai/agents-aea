@@ -25,11 +25,13 @@ from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import MailBox
-from aea.skills.base import SkillContext, Skill
+from aea.skills.base import SkillContext
 from tests.conftest import CUR_PATH
 
 
 class TestSkillContext:
+    """Test the skill context."""
+
     @classmethod
     def setup_class(cls):
         """Test the initialisation of the AEA."""
@@ -64,14 +66,14 @@ class TestSkillContext:
         assert isinstance(self.skill_context.agent_ownership_state, OwnershipState)
 
     def test_agent_preferences(self):
-        """Test the agents_preferences"""
+        """Test the agents_preferences."""
         assert isinstance(self.skill_context.agent_preferences, Preferences)
 
     def test_agent_is_ready_to_pursuit_goals(self):
-        """Test if the agent is ready to pursuit his goals"""
+        """Test if the agent is ready to pursuit his goals."""
         assert not self.skill_context.agent_is_ready_to_pursuit_goals
 
     @classmethod
     def teardown(cls):
-        """Test teardown"""
+        """Test teardown."""
         pass
