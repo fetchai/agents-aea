@@ -18,10 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the stub connection."""
+import base64
 import shutil
 import tempfile
 from pathlib import Path
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
@@ -57,6 +59,20 @@ class TestStubConnection:
 
         actual_envelope = self.mailbox.inbox.get(timeout=2.0)
         assert expected_envelope == actual_envelope
+
+    def test_connection_is_established(self):
+        """Test the stub connection is established and the bad formatted messages."""
+        assert self.connection.is_established
+        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        encoded_envelope = "{},{},{},{}".format("any", "any", DefaultMessage.protocol_id, DefaultSerializer().encode(msg).decode("utf-8"))
+        encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
+
+        self.connection._process_line(encoded_envelope)
+
+    def test_connection_from_config(self):
+        """Test loading a connection from config file."""
+        stub_con = StubConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
+        assert not stub_con.is_established
 
     def test_send_message(self):
         """Test that the messages in the outbox are posted on the output file."""
