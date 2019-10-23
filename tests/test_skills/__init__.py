@@ -17,34 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the error behaviours."""
-
-from aea.skills.base import Behaviour
-
-
-class ErrorBehaviour(Behaviour):
-    """This class implements the error behaviour."""
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        pass        # pragma: no cover
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        pass        # pragma: no cover
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        pass        # pragma: no cover
+"""The tests for the skills module contains the tests for the skills."""

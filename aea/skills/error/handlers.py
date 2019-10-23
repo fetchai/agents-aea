@@ -24,7 +24,7 @@ from typing import Optional
 
 from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
-from aea.protocols.base import Message, Protocol
+from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
@@ -112,15 +112,14 @@ class ErrorHandler(Handler):
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
 
-    def send_unsupported_skill(self, envelope: Envelope, protocol: Protocol) -> None:
+    def send_unsupported_skill(self, envelope: Envelope) -> None:
         """
         Handle the received envelope in case the skill is not supported.
 
         :param envelope: the envelope
-        :param protocol: the protocol
         :return: None
         """
-        logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(protocol.id))
+        logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(envelope.protocol_id))
         encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
         reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
                                error_code=DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value,
