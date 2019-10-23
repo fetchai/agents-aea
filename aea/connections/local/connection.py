@@ -179,8 +179,8 @@ class LocalNode:
             result = list(set(self.services.keys()))
         else:
             for agent_public_key, description in self.agents.items():
-                if query.model == description.data_model:   # pragma: no cover
-                    result.append(agent_public_key)         # pragma: no cover
+                if query.model == description.data_model:
+                    result.append(agent_public_key)
 
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
         msg_bytes = OEFSerializer().encode(msg)

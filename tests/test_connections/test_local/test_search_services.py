@@ -86,6 +86,24 @@ class TestEmptySearch:
         cls.mailbox1.disconnect()
 
 
+class TesAgentSearchAndRegister:
+    """Test that we can register an agent and search him."""
+
+    @classmethod
+    def setup_class(cls):
+        cls.node = LocalNode()
+        cls.public_key_1 = "mailbox1"
+        cls.public_key = "mailbox"
+        cls.connection = OEFLocalConnection(cls.public_key_1, cls.node)
+        cls.mailbox = OEFLocalConnection(cls.public_key, cls.node)
+        cls.mailbox.connect()
+        cls.connection.connect()
+        cls.data_model = DataModel("foobar", attributes=[])
+
+    def test_registering_agent(self):
+        service_description = Description({"foo": 1, "bar": "baz"}, data_model=self.data_model)
+        self.connection.channel
+
 class TestSimpleSearchResult:
     """Test that a simple search result return the expected result."""
 
