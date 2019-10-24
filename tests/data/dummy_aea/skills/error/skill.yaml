@@ -3,6 +3,7 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The error skill implements basic error handling required by all AEAs."
 behaviours: []
 handlers:
   - handler:
@@ -12,4 +13,3 @@ handlers:
 tasks: []
 shared_classes: []
 protocols: ['default']
-description: "error skill description [Fill in]"
