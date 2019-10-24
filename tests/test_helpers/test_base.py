@@ -30,4 +30,6 @@ class TestHelpersBase:
     def test_locate(self):
         """Test the locate function."""
         sys.modules["gym_connection"] = locate("packages.connections.gym")
+        assert sys.modules['gym_connection'] is not None
         sys.modules["gym_connection"] = locate("packages.connections.weather")
+        assert sys.modules['gym_connection'] is None

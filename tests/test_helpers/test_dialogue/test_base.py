@@ -21,6 +21,7 @@
 from typing import Dict
 
 from aea.helpers.dialogue.base import DialogueLabel, Dialogue, Dialogues
+from aea.protocols.default.message import DefaultMessage
 
 
 class TestDialogueBase:
@@ -54,9 +55,10 @@ class TestDialogueBase:
     def test_dialogue(self):
         """Test the dialogue."""
         assert self.dialogue.is_self_initiated
-        self.dialogue.outgoing_extend(message="my_message")
+        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, message=b'Hello')
+        self.dialogue.outgoing_extend(message=msg)
         assert "my_message" in self.dialogue._outgoing_messages
-        self.dialogue.incoming_extend(message="my_message")
+        self.dialogue.incoming_extend(message=msg)
         assert "my_message" in self.dialogue._incoming_messages
 
     def test_dialogues(self):
