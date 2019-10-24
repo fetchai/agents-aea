@@ -24,7 +24,6 @@ from copy import deepcopy
 from enum import Enum
 from typing import Dict, Type, Union, Optional, List, Any
 
-
 ATTRIBUTE_TYPES = Union[float, str, bool, int]
 
 
@@ -121,7 +120,7 @@ class Description:
 
     def __iter__(self):
         """Create an iterator."""
-        return self
+        return iter(self.values)
 
 
 class ConstraintTypes(Enum):
@@ -174,6 +173,7 @@ class ConstraintType:
         """
         self.type = ConstraintTypes(type)
         self.value = value
+        assert self._check_validity(), "ConstraintType initialization inconsistent."
 
     def _check_validity(self):
         """
@@ -210,9 +210,12 @@ class ConstraintType:
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
                     assert all(isinstance(obj, _type) for obj in self.value)
-        except AssertionError:
-            raise ValueError("Value '{}' not compatible with constraint type '{}'"
-                             .format(self.value, str(self.type)))
+            else:
+                raise ValueError("Type not recognized.")
+        except (AssertionError, ValueError):
+            return False
+
+        return True
 
     def check(self, value: ATTRIBUTE_TYPES) -> bool:
         """

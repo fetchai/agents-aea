@@ -24,7 +24,7 @@
 from unittest import mock
 
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import DataModel, Attribute, Query, Constraint, ConstraintType
+from aea.protocols.oef.models import DataModel, Attribute, Query, Constraint, ConstraintType, Description
 from aea.protocols.oef.serialization import OEFSerializer
 
 
@@ -34,6 +34,10 @@ def test_oef_type_string_value():
         "The string representation must be register_service"
     assert str(OEFMessage.Type.UNREGISTER_SERVICE) == "unregister_service",\
         "The string representation must be unregister_service"
+    assert str(OEFMessage.Type.REGISTER_AGENT) == "register_agent",\
+        "The string representation must be register_agent"
+    assert str(OEFMessage.Type.UNREGISTER_AGENT) == "unregister_agent",\
+        "The string representation must be unregister_agent"
     assert str(OEFMessage.Type.SEARCH_SERVICES) == "search_services",\
         "The string representation must be search_services"
     assert str(OEFMessage.Type.SEARCH_AGENTS) == "search_agents",\
@@ -62,8 +66,23 @@ def test_oef_message_consistency():
         assert not msg.check_consistency(),\
             "Expect the consistency to return False"
 
+    attribute_foo = Attribute("foo", int, True, "a foo attribute.")
+    attribute_bar = Attribute("bar", str, True, "a bar attribute.")
+    data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+    description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
+    msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_AGENT,
+                     id=0,
+                     agent_description=description_foobar,
+                     agent_id="public_key")
+    assert msg.check_consistency()
 
-def test_oef_message_OEFError():
+    msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_AGENT, id=0, agent_description=description_foobar,
+                     agent_id="public_key")
+
+    assert msg.check_consistency()
+
+
+def test_oef_message_oef_error():
     """Tests the OEF_ERROR type of message."""
     msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)

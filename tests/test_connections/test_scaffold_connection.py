@@ -17,31 +17,20 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the error behaviours."""
+"""This test module contains the tests for the Scaffold connection.py."""
 
-from aea.skills.base import Behaviour
+from aea.connections.scaffold.connection import MyScaffoldChannel, MyScaffoldConnection
 
 
-class ErrorBehaviour(Behaviour):
-    """This class implements the error behaviour."""
+class TestScaffold:
+    """Test the aea/connections/scaffold/connection.py."""
 
-    def setup(self) -> None:
-        """
-        Implement the setup.
+    def test_scaffold_channel(self):
+        """Test the initialisation of the scaffold_channel."""
+        m_channel = MyScaffoldChannel(public_key="pk")
+        assert m_channel.public_key == "pk"
 
-        :return: None
-        """
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+    def test_scaffold_connection(self):
+        """Test the initialisation of the scaffold_connection."""
+        m_connection = MyScaffoldConnection(public_key="pk")
+        assert m_connection.public_key == "pk"

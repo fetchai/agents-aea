@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
-from typing import Dict, Tuple, cast
+from typing import Dict, Tuple, cast, Optional
 
 from aea.crypto.base import Crypto
 from aea.crypto.default import DefaultCrypto, DEFAULT
@@ -34,7 +34,7 @@ CURRENCY_TO_ID_MAP = {'FET': FETCHAI, 'ETH': ETHEREUM}
 class Wallet(object):
     """Store all the public keys we initialise."""
 
-    def __init__(self, private_key_paths: Dict[str, str], ledger_api_configs: Dict[str, Tuple[str, int]]):
+    def __init__(self, private_key_paths: Dict[str, Optional[str]], ledger_api_configs: Dict[str, Tuple[str, int]]):
         """
         Instantiate a wallet object.
 
