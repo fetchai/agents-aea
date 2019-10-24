@@ -198,7 +198,7 @@ class Dialogues(SharedClass):
         if performative == FIPAMessage.Performative.PROPOSE and target == PROPOSE_TARGET and self_initiated_dialogue_label in self.dialogues:
             self_initiated_dialogue = cast(Dialogue, self.dialogues[self_initiated_dialogue_label])
             result = self_initiated_dialogue.is_expecting_propose()
-        elif performative == FIPAMessage.Performative.MATCH_ACCEPT and target == MATCH_ACCEPT_TARGET and self_initiated_dialogue_label in self.dialogues:
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS and target == MATCH_ACCEPT_TARGET and self_initiated_dialogue_label in self.dialogues:
             self_initiated_dialogue = cast(Dialogue, self.dialogues[self_initiated_dialogue_label])
             result = self_initiated_dialogue.is_expecting_matching_accept()
         elif performative == FIPAMessage.Performative.DECLINE:
@@ -229,7 +229,7 @@ class Dialogues(SharedClass):
         self_initiated_dialogue_label = DialogueLabel(dialogue_id, sender, agent_pbk)
         if (performative == FIPAMessage.Performative.PROPOSE and target == PROPOSE_TARGET and self_initiated_dialogue_label in self.dialogues) \
                 or \
-                (performative == FIPAMessage.Performative.MATCH_ACCEPT and target == MATCH_ACCEPT_TARGET and self_initiated_dialogue_label in self.dialogues) \
+                (performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS and target == MATCH_ACCEPT_TARGET and self_initiated_dialogue_label in self.dialogues) \
                 or \
                 (performative == FIPAMessage.Performative.DECLINE and target == DECLINED_CFP_TARGET and self_initiated_dialogue_label in self.dialogues) \
                 or \

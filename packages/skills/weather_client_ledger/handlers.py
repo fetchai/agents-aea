@@ -92,7 +92,7 @@ class FIPAHandler(Handler):
             self._handle_propose(fipa_msg, sender, message_id, dialogue_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.DECLINE:
             self._handle_decline(fipa_msg, sender, message_id, dialogue_id, dialogue)
-        elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT:
+        elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
             self._handle_match_accept(fipa_msg, sender, message_id, dialogue_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, sender, message_id, dialogue_id, dialogue)
@@ -116,7 +116,7 @@ class FIPAHandler(Handler):
         default_msg = DefaultMessage(type=DefaultMessage.Type.ERROR,
                                      error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
                                      error_msg="Invalid dialogue.",
-                                     error_data={"fipa_message": FIPASerializer().encode(msg)})
+                                     error_data="fipa_message")  #+ FIPASerializer().encode(msg))
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
                                         protocol_id=DefaultMessage.protocol_id,
