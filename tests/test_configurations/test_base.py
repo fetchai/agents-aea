@@ -17,4 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the cli tool commands."""
+"""This module contains the tests for the aea.configurations.base module."""
+
+
+class TestCRUDCollection:
+    """Test the CRUDCollection data structure."""
+
+    def test_create_with_existing_key(self):
+        """Test that creating and item with an existing key raises an exception."""

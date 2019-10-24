@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests for aea.aea.py."""
+"""This module contains the tests for aea/aea.py."""
 import os
 import time
 from pathlib import Path

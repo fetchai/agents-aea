@@ -32,7 +32,7 @@ import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
-from ....conftest import ROOT_DIR, CLI_LOG_OPTION
+from tests.conftest import ROOT_DIR, CLI_LOG_OPTION
 
 
 class TestRemoveSkill:

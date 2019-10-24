@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the cli tool commands."""
+"""This test module contains the tests for the aea.configurations module."""
