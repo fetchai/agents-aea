@@ -21,7 +21,12 @@ tasks:
       args:
         task_arg_1: 1
         task_arg_2: "2"
-shared_classes: []
+shared_classes:
+  - shared_class:
+      class_name: DummySharedClass
+      args:
+        shared_class_arg_1: 1
+        shared_class_arg_2: "2"
 protocols: ["default"]
 dependencies:
   - dep1==1.0.0

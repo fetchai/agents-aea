@@ -19,3 +19,7 @@ protocols:
 skills:
 - echo_skill
 description: "aea-config example agent description [Fill in]"
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+registry_path: ../../packages

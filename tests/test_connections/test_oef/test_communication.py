@@ -48,15 +48,6 @@ from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 logger = logging.getLogger(__name__)
 
 
-def test_connection(network_node):
-    """Test that a mailbox can connect to the OEF."""
-    crypto = DefaultCrypto()
-    mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
-    mailbox.connect()
-
-    mailbox.disconnect()
-
-
 class TestDefault:
     """Test that the default protocol is correctly implemented by the OEF channel."""
 
@@ -480,9 +471,16 @@ class TestOefConnection:
     def _start_oef_node(self, network_node):
         """Start an oef node."""
 
+    def test_connection(self):
+        """Test that a mailbox can connect to the OEF."""
+        crypto = DefaultCrypto()
+        mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        mailbox.connect()
+        mailbox.disconnect()
+
     def test_oef_connect(self):
         """Test the OEFConnection."""
-        con = OEFConnection(public_key="pk", oef_addr="192.0.0.1")
+        con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
         assert not con.is_established
         with pytest.raises(ConnectionError):
             con.connect()
