@@ -137,10 +137,10 @@ def test_handle():
     t = Thread(target=agent.start)
     try:
         t.start()
+        time.sleep(1.0)
         connection.in_queue.put(envelope)
         env = connection.out_queue.get(block=True, timeout=5.0)
-        assert env.protocol_id == "default", \
-            "The envelope is not the expected protocol (Unsupported protocol)"
+        assert env.protocol_id == "default"
 
         #   DECODING ERROR
         msg = "hello".encode("utf-8")
@@ -150,6 +150,9 @@ def test_handle():
             protocol_id='default',
             message=msg)
         connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default"
+
         #   UNSUPPORTED SKILL
         msg = FIPASerializer().encode(
             FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
@@ -163,6 +166,9 @@ def test_handle():
             protocol_id="fipa",
             message=msg)
         connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default"
+
     finally:
         agent.stop()
         t.join()

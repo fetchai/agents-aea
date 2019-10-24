@@ -130,6 +130,7 @@ class AEA(Agent):
         :param envelope: the envelope to handle.
         :return: None
         """
+        logger.debug("Handling envelope: {}".format(envelope))
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
         error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")
@@ -153,7 +154,7 @@ class AEA(Agent):
         handlers = self.resources.handler_registry.fetch(protocol.id)
         if handlers is None:
             if error_handler is not None:
-                error_handler.send_unsupported_skill(envelope, protocol)
+                error_handler.send_unsupported_skill(envelope)
             return
 
         # TODO: add filter, currently each handler independently acts on the message
