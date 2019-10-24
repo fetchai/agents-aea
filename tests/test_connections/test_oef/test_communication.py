@@ -476,6 +476,10 @@ class TestFIPA:
 class TestOefConnection:
     """Tests the con.is_established property."""
 
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node):
+        """Start an oef node."""
+
     def test_oef_connect(self):
         """Test the OEFConnection."""
         con = OEFConnection(public_key="pk", oef_addr="192.0.0.1")
