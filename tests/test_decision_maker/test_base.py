@@ -28,6 +28,7 @@ from aea.mail.base import OutBox  # , Envelope
 
 MAX_REACTIONS = 10
 
+
 class TestDecisionMakerBase:
     """Test the base.py for DecisionMaker."""
     @classmethod
@@ -56,5 +57,15 @@ class TestDecisionMakerBase:
 
     def test_transaction_is_consistent(self):
         """Test the consistency of the transaction message."""
+
+        msg = TransactionMessage(transaction_id="transaction0",
+                                 sender="agent_1",
+                                 counterparty="pk",
+                                 is_sender_buyer=True,
+                                 currency="FET",
+                                 amount=1,
+                                 sender_tx_fee=1.0,
+                                 counterparty_tx_fee=0.0,
+                                 quantities_by_good_pbk={"FET": 10})
         # tx_message = TransactionMessage()
 
