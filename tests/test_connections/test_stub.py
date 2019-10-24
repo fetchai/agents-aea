@@ -61,13 +61,13 @@ class TestStubConnection:
         assert expected_envelope == actual_envelope
 
     def test_connection_is_established(self):
-        """Test the stub connection is established and the bad formatted messages."""
+        """Test the stub connection is established and then bad formatted messages."""
         assert self.connection.is_established
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         encoded_envelope = "{},{},{},{}".format("any", "any", DefaultMessage.protocol_id, DefaultSerializer().encode(msg).decode("utf-8"))
         encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
-
         self.connection._process_line(encoded_envelope)
+        assert self.mailbox.inbox.empty(), "The inbox must be empty due to bad encoded message"
 
     def test_connection_from_config(self):
         """Test loading a connection from config file."""
