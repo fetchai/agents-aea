@@ -35,7 +35,9 @@ class OEFMessage(Message):
         """OEF Message types."""
 
         REGISTER_SERVICE = "register_service"
+        REGISTER_AGENT = "register_agent"
         UNREGISTER_SERVICE = "unregister_service"
+        UNREGISTER_AGENT = "unregister_agent"
         SEARCH_SERVICES = "search_services"
         SEARCH_AGENTS = "search_agents"
         OEF_ERROR = "oef_error"
@@ -55,6 +57,8 @@ class OEFMessage(Message):
         SEARCH_SERVICES_WIDE = 3
         SEARCH_AGENTS = 4
         SEND_MESSAGE = 5
+        REGISTER_AGENT = 6
+        UNREGISTER_AGENT = 7
 
         OTHER = 10000
 
@@ -85,6 +89,14 @@ class OEFMessage(Message):
                 service_id = self.get("service_id")
                 assert isinstance(service_description, Description)
                 assert isinstance(service_id, str)
+            elif oef_type == OEFMessage.Type.REGISTER_AGENT:
+                assert self.is_set("id")
+                assert self.is_set("agent_description")
+                assert self.is_set("agent_id")
+                agent_description = self.get("agent_description")
+                agent_id = self.get("agent_id")
+                assert isinstance(agent_description, Description)
+                assert isinstance(agent_id, str)
             elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
                 assert self.is_set("id")
                 assert self.is_set("service_description")
@@ -93,6 +105,14 @@ class OEFMessage(Message):
                 service_id = self.get("service_id")
                 assert isinstance(service_description, Description)
                 assert isinstance(service_id, str)
+            elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
+                assert self.is_set("id")
+                assert self.is_set("agent_description")
+                assert self.is_set("agent_id")
+                agent_description = self.get("agent_description")
+                agent_id = self.get("agent_id")
+                assert isinstance(agent_description, Description)
+                assert isinstance(agent_id, str)
             elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
                 assert self.is_set("id")
                 assert self.is_set("query")
