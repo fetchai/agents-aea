@@ -23,6 +23,7 @@ from queue import Queue
 import pytest
 
 from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import OutBox  # , Envelope
 
 MAX_REACTIONS = 10
@@ -38,6 +39,22 @@ class TestDecisionMakerBase:
         cls.decision_maker = DecisionMaker(MAX_REACTIONS, cls.outbox)
 
     def test_properties(self):
-        """Test the assertion error for currency_holdings."""
+        """Test the assertion error for *_holdings."""
         with pytest.raises(AssertionError):
             self.ownership_state.currency_holdings
+
+        with pytest.raises(AssertionError):
+            self.ownership_state.good_holdings
+
+    def test_initialisation(self):
+        """Test the initialisation of the ownership_state."""
+        currency_endowment = {"test_holdings": 2.0}
+        good_endowment = {"test_good_holdings": 2}
+        self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
+        assert self.ownership_state.currency_holdings is not None
+        assert self.ownership_state.good_holdings is not None
+
+    def test_transaction_is_consistent(self):
+        """Test the consistency of the transaction message."""
+        # tx_message = TransactionMessage()
+
