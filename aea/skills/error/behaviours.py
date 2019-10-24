@@ -31,7 +31,6 @@ class ErrorBehaviour(Behaviour):
 
         :return: None
         """
-        pass        # pragma: no cover
 
     def act(self) -> None:
         """
@@ -39,7 +38,6 @@ class ErrorBehaviour(Behaviour):
 
         :return: None
         """
-        pass        # pragma: no cover
 
     def teardown(self) -> None:
         """
@@ -47,4 +45,3 @@ class ErrorBehaviour(Behaviour):
 
         :return: None
         """
-        pass        # pragma: no cover

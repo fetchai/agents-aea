@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests for aea.aea.py."""
-
+"""The test error skill module contains the tests of the error skill."""
 import time
 from pathlib import Path
 from threading import Thread
 
 from aea.aea import AEA
-from aea.connections.local.connection import LocalNode, OEFLocalConnection
+from aea.connections.local.connection import LocalNode
 from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
@@ -31,10 +30,9 @@ from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
-from aea.skills.base import SkillContext
-from tests.conftest import CUR_PATH
-
-from aea.skills.error.handlers import ErrorHandler
+from aea.skills.error.behaviours import ErrorBehaviour
+from aea.skills.error.tasks import ErrorTask
+from ..conftest import CUR_PATH, DummyConnection
 
 
 class TestSkillError:
@@ -45,21 +43,24 @@ class TestSkillError:
         """Test the initialisation of the AEA."""
         cls.node = LocalNode()
         cls.wallet = Wallet({'default': None})
-        cls.mailbox1 = MailBox(OEFLocalConnection(cls.wallet.public_keys['default'], cls.node))
-        cls.my_aea = AEA("Agent0", cls.mailbox1, cls.wallet, directory=str(Path(CUR_PATH, "data/dummy_aea")))
+        cls.agent_name = "Agent0"
+        cls.public_key = cls.wallet.public_keys['default']
 
-        cls.skill_context = SkillContext(cls.my_aea.context)
-        cls.my_error_handler = ErrorHandler(skill_context=cls.skill_context)
+        cls.connection = DummyConnection()
+        cls.mailbox1 = MailBox(cls.connection)
+        cls.my_aea = AEA(cls.agent_name, cls.mailbox1, cls.wallet, timeout=2.0, directory=str(Path(CUR_PATH, "data/dummy_aea")))
+        cls.t = Thread(target=cls.my_aea.start)
+        cls.t.start()
+        time.sleep(1.0)
 
-    def test_error_handler_setup(self):
-        """Test the setup."""
-        self.my_error_handler.setup()
+        handlers = cls.my_aea.resources.handler_registry.fetch("default")
+        cls.my_error_handler = handlers[1]
 
     def test_error_handler_handle(self):
         """Test the handle function."""
         msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.wallet.public_keys['default'], sender="test_mail",
+        envelope = Envelope(to=self.public_key, sender=self.public_key,
                             protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         self.my_error_handler.handle(message=msg, sender=envelope.sender)
 
@@ -69,93 +70,67 @@ class TestSkillError:
 
     def test_error_skill_unsupported_protocol(self):
         """Test the unsupported error message."""
-        t = Thread(target=self.my_aea.start)
         msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.wallet.public_keys['default'], sender="test_mail",
+        envelope = Envelope(to=self.public_key, sender=self.public_key,
                             protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
 
         self.my_error_handler.send_unsupported_protocol(envelope)
 
-        try:
-            t.start()
-            time.sleep(0.1)
-            envelope = self.my_aea.outbox._queue.get(block=True, timeout=0.1)
-            msg = DefaultSerializer().decode(envelope.message)
-            assert msg.get("type") == DefaultMessage.Type.ERROR
-            assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL.value
-
-        finally:
-            self.my_aea.stop()
-            t.join()
+        envelope = self.connection.out_queue.get(block=True, timeout=1.0)
+        msg = DefaultSerializer().decode(envelope.message)
+        assert msg.get("type") == DefaultMessage.Type.ERROR
+        assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL.value
 
     def test_error_decoding_error(self):
         """Test the decoding error."""
         t = Thread(target=self.my_aea.start)
         msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.wallet.public_keys['default'], sender="test_mail",
+        envelope = Envelope(to=self.public_key, sender=self.public_key,
                             protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
 
         self.my_error_handler.send_decoding_error(envelope)
 
-        try:
-            t.start()
-            time.sleep(0.1)
-            envelope = self.my_aea.outbox._queue.get(block=True, timeout=0.1)
-            msg = DefaultSerializer().decode(envelope.message)
-            assert msg.get("type") == DefaultMessage.Type.ERROR
-            assert msg.get("error_code") < -1000
-
-        finally:
-            self.my_aea.stop()
-            t.join()
+        envelope = self.connection.out_queue.get(block=True, timeout=1.0)
+        msg = DefaultSerializer().decode(envelope.message)
+        assert msg.get("type") == DefaultMessage.Type.ERROR
+        assert msg.get("error_code") == DefaultMessage.ErrorCode.DECODING_ERROR.value
 
     def test_error_invalid_message(self):
         """Test the invalid message."""
         t = Thread(target=self.my_aea.start)
         msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.wallet.public_keys['default'], sender="test_mail",
+        envelope = Envelope(to=self.public_key, sender=self.public_key,
                             protocol_id=OEFMessage.protocol_id, message=msg_bytes)
 
         self.my_error_handler.send_invalid_message(envelope)
 
-        try:
-            t.start()
-            time.sleep(0.1)
-            envelope = self.my_aea.outbox._queue.get(block=True, timeout=0.1)
-            msg = DefaultSerializer().decode(envelope.message)
-            assert msg.get("type") == DefaultMessage.Type.ERROR
-            assert msg.get("error_code") < -1000
-
-        finally:
-            self.my_aea.stop()
-            t.join()
+        envelope = self.connection.out_queue.get(block=True, timeout=1.0)
+        msg = DefaultSerializer().decode(envelope.message)
+        assert msg.get("type") == DefaultMessage.Type.ERROR
+        assert msg.get("error_code") < DefaultMessage.ErrorCode.INVALID_MESSAGE.value
 
     def test_error_unsupported_skill(self):
         """Test the unsupported skill."""
         t = Thread(target=self.my_aea.start)
         msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.wallet.public_keys['default'], sender="test_mail",
+        envelope = Envelope(to=self.public_key, sender=self.public_key,
                             protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)
 
-        try:
-            t.start()
-            time.sleep(0.1)
-            envelope = self.my_aea.outbox._queue.get(block=True, timeout=0.1)
-            msg = DefaultSerializer().decode(envelope.message)
-            assert msg.get("type") == DefaultMessage.Type.ERROR
-            assert msg.get("error_code") < -1000
+        envelope = self.connection.out_queue.get(block=True, timeout=1.0)
+        msg = DefaultSerializer().decode(envelope.message)
+        assert msg.get("type") == DefaultMessage.Type.ERROR
+        assert msg.get("error_code") < DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value
 
-        finally:
-            self.my_aea.stop()
-            t.join()
 
     @classmethod
     def teardown(cls):
         """Teardown method."""
-        pass
+        cls.my_aea.stop()
+        cls.t.join()
+
