@@ -35,9 +35,9 @@ def test_oef_type_string_value():
     assert str(OEFMessage.Type.UNREGISTER_SERVICE) == "unregister_service",\
         "The string representation must be unregister_service"
     assert str(OEFMessage.Type.REGISTER_AGENT) == "register_agent",\
-        "The string representation must be register_service"
+        "The string representation must be register_agent"
     assert str(OEFMessage.Type.UNREGISTER_AGENT) == "unregister_agent",\
-        "The string representation must be unregister_service"
+        "The string representation must be unregister_agent"
     assert str(OEFMessage.Type.SEARCH_SERVICES) == "search_services",\
         "The string representation must be search_services"
     assert str(OEFMessage.Type.SEARCH_AGENTS) == "search_agents",\
