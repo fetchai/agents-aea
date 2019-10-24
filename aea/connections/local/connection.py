@@ -44,7 +44,7 @@ class LocalNode:
 
     def __init__(self):
         """Initialize a local (i.e. non-networked) implementation of an OEF Node."""
-        self.agents = dict()  # type: Dict[str, Description]
+        self.agents = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self._lock = threading.Lock()
 
@@ -99,6 +99,8 @@ class LocalNode:
         oef_type = OEFMessage.Type(oef_message.get("type"))
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
             self.register_service(sender, cast(Description, oef_message.get("service_description")))
+        elif oef_type == OEFMessage.Type.REGISTER_AGENT:
+            self.register_service(sender, cast(Description, oef_message.get("agent_description")))
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             self.unregister_service(sender, request_id, cast(Description, oef_message.get("service_description")))
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
@@ -137,6 +139,17 @@ class LocalNode:
         """
         with self._lock:
             self.services[public_key].append(service_description)
+
+    def register_agent(self, public_key: str, agent_description: Description):
+        """
+        Register a service agent in the service directory of the node.
+
+        :param public_key: the public key of the service agent to be registered.
+        :param agent_description: the description of the service agent to be registered.
+        :return: None
+        """
+        with self._lock:
+            self.agents[public_key].append(agent_description)
 
     def register_service_wide(self, public_key: str, service_description: Description):
         """Register service wide."""
@@ -178,9 +191,10 @@ class LocalNode:
         if query.model is None:
             result = list(set(self.services.keys()))
         else:
-            for agent_public_key, description in self.agents.items():
-                if query.model == description.data_model:
-                    result.append(agent_public_key)
+            for agent_public_key, descriptions in self.agents.items():
+                for description in descriptions:
+                    if query.model == description.data_model:
+                        result.append(agent_public_key)
 
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
         msg_bytes = OEFSerializer().encode(msg)
