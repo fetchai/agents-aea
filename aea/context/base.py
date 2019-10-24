@@ -107,3 +107,7 @@ class AgentContext:
     def is_ready_to_pursuit_goals(self) -> bool:
         """Get the goal pursuit readiness."""
         return self._is_ready_to_pursuit_goals
+
+    def is_tx_settled(self, tx_digest: str, total_price: float) -> bool:
+        """Get the status of the transaction."""
+        return True

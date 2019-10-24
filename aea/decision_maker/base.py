@@ -299,6 +299,17 @@ class DecisionMaker:
         elif isinstance(message, StateUpdateMessage):
             self._handle_state_update_message(message)
 
+    def get_wallet_balance(self, currency_pbk) -> float:
+        """
+        Get the wallet balance of the agent.
+
+        :param message: the message
+        """
+        crypto_identifier = CURRENCY_TO_ID_MAP.get(currency_pbk)
+        crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
+        balance = crypto_object.token_balance
+        return balance
+
     def _handle_tx_message(self, tx_message: TransactionMessage) -> None:
         """
         Handle a transaction message.

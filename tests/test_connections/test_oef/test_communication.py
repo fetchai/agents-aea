@@ -303,7 +303,8 @@ class TestFIPA:
                 message_id=0,
                 dialogue_id=0,
                 destination="publicKey",
-                target=1)
+                target=1,
+                query=None)
             with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
                     as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"

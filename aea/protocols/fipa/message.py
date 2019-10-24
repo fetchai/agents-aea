@@ -75,9 +75,11 @@ class FIPAMessage(Message):
             assert self.is_set("target")
             performative = FIPAMessage.Performative(self.get("performative"))
             if performative == FIPAMessage.Performative.CFP:
+                assert self.is_set("query")
                 query = self.get("query")
                 assert isinstance(query, Query) or isinstance(query, bytes) or query is None
             elif performative == FIPAMessage.Performative.PROPOSE:
+                assert self.is_set("proposal")
                 proposal = self.get("proposal")
                 assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
             elif performative == FIPAMessage.Performative.ACCEPT \
@@ -88,8 +90,9 @@ class FIPAMessage(Message):
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
                 assert self.is_set("address")
             elif performative == FIPAMessage.Performative.INFORM:
-                data = self.get("data")
-                assert isinstance(data, bytes)
+                assert self.is_set("json_data")
+                json_data = self.get("json_data")
+                assert isinstance(json_data, dict)
             else:
                 raise ValueError("Performative not recognized.")
 

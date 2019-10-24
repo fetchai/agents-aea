@@ -1,31 +1,28 @@
-name: weather_client
+name: weather_client_ledger
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
 behaviours:
   - behaviour:
-      class_name: MyBuyBehaviour
-      args:
-        ledger_addr: alpha.fetch-ai.com
-        ledger_port: 80
+      class_name: MySearchBehaviour
+      args: {}
 handlers:
   - handler:
       class_name: FIPAHandler
-      args:
-        foo: bar
-  - handler:
-      class_name: DefaultHandler
-      args:
-        foo: bar
+      args: {}
   - handler:
       class_name: OEFHandler
+      args: {}
+tasks: []
+shared_classes:
+  - shared_class:
+      class_name: Strategy
       args:
-        foo: bar
-tasks:
-  - task:
-      class_name: EmptyTask
-      args:
-        foo: bar
-shared_classes: []
+        country: UK
+        search_interval: 5
+        max_price: 0.2
+  - shared_class:
+      class_name: Dialogues
+      args: {}
 protocols: ['fipa','default','oef']
