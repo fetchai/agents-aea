@@ -48,7 +48,7 @@ class MyScaffoldChannel(Channel):
 
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -57,7 +57,7 @@ class MyScaffoldChannel(Channel):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def disconnect(self) -> None:
         """
@@ -65,7 +65,7 @@ class MyScaffoldChannel(Channel):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class MyScaffoldConnection(Connection):
@@ -84,7 +84,7 @@ class MyScaffoldConnection(Connection):
     @property
     def is_established(self) -> bool:
         """Return True if the connection has been established, False otherwise."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def connect(self) -> None:
         """
@@ -92,7 +92,7 @@ class MyScaffoldConnection(Connection):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def disconnect(self) -> None:
         """
@@ -100,7 +100,7 @@ class MyScaffoldConnection(Connection):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -109,7 +109,7 @@ class MyScaffoldConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
@@ -120,4 +120,4 @@ class MyScaffoldConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover

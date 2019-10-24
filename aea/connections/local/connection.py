@@ -103,6 +103,8 @@ class LocalNode:
             self.register_agent(sender, cast(Description, oef_message.get("agent_description")))
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             self.unregister_service(sender, request_id, cast(Description, oef_message.get("service_description")))
+        elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
+            self.unregister_agent(sender, request_id, cast(Description, oef_message.get("agent_description")))
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
             self.search_agents(sender, request_id, cast(Query, oef_message.get("query")))
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
@@ -174,6 +176,26 @@ class LocalNode:
                 self.services[public_key].remove(service_description)
                 if len(self.services[public_key]) == 0:
                     self.services.pop(public_key)
+
+    def unregister_agent(self, public_key: str, msg_id: int, agent_description: Description) -> None:
+        """
+        Unregister an agent.
+
+        :param agent_description:
+        :param public_key: the public key of the service agent to be unregistered.
+        :param msg_id: the message id of the request.
+        :return: None
+        """
+        with self._lock:
+            if public_key not in self.agents:
+                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT)
+                msg_bytes = OEFSerializer().encode(msg)
+                envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                self._send(envelope)
+            else:
+                self.agents[public_key].remove(agent_description)
+                if len(self.agents[public_key]) == 0:
+                    self.agents.pop(public_key)
 
     def search_agents(self, public_key: str, search_id: int, query: Query) -> None:
         """
