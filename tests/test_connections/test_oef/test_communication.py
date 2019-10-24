@@ -381,7 +381,7 @@ class TestFIPA:
         assert returned_accept_w_address == accept_w_address
 
     def test_inform(self):
-        """Test that an accept with address can be sent correctly."""
+        """Test that an inform can be sent correctly."""
         payload = {'foo': 'bar'}
         json_data = json.dumps(payload)
         inform = FIPAMessage(message_id=0,
