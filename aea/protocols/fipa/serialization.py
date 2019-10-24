@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
+import json
 import pickle
 from typing import cast
 
@@ -84,7 +85,7 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.INFORM:
             performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
             data = msg.get("json_data")
-            data_bytes = pickle.dumps(data)
+            data_bytes = json.dumps(data).encode("utf-8")
             performative.bytes = data_bytes
             fipa_msg.inform.CopyFrom(performative)
         else:
@@ -134,7 +135,7 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.DECLINE:
             pass
         elif performative_id == FIPAMessage.Performative.INFORM:
-            data = pickle.loads(fipa_pb.inform.bytes)
+            data = json.loads(fipa_pb.inform.bytes)
             performative_content["json_data"] = data
         else:
             raise ValueError("Performative not valid: {}.".format(performative))

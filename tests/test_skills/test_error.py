@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """The test error skill module contains the tests of the error skill."""
+import os
 from pathlib import Path
 
 from aea.aea import AEA
@@ -42,7 +43,8 @@ class TestSkillError:
     def setup_class(cls):
         """Test the initialisation of the AEA."""
         cls.node = LocalNode()
-        cls.wallet = Wallet({'default': None})
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        cls.wallet = Wallet({'default': private_key_pem_path}, {})
         cls.agent_name = "Agent0"
         cls.public_key = cls.wallet.public_keys['default']
 

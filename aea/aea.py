@@ -153,7 +153,7 @@ class AEA(Agent):
         handlers = self.resources.handler_registry.fetch(protocol.id)
         if handlers is None:
             if error_handler is not None:
-                error_handler.send_unsupported_skill(envelope, protocol)
+                error_handler.send_unsupported_skill(envelope)
             return
 
         # TODO: add filter, currently each handler independently acts on the message

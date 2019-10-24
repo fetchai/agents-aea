@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the agent module."""
-
+import os
 import time
 from threading import Thread
 
@@ -26,6 +26,7 @@ from aea.agent import Agent, AgentState
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, InBox, OutBox
+from .conftest import CUR_PATH
 
 
 class DummyAgent(Agent):
@@ -59,7 +60,8 @@ class DummyAgent(Agent):
 def test_run_agent():
     """Test that we can set up and then run the agent."""
     agent_name = "dummyagent"
-    wallet = Wallet({'default': None}, {'default': None})
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path}, {})
     agent = DummyAgent(agent_name, wallet)
     mailbox = MailBox(OEFLocalConnection("mypbk", LocalNode()))
     agent.mailbox = mailbox
