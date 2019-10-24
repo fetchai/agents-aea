@@ -60,7 +60,7 @@ class TestTranslator:
         assert expected_description == actual_description
         m_desc = iter(description_foobar.values)
         assert next(m_desc) == "foo"
-        assert description_foobar == description_foobar.__iter__()
+        assert description_foobar == iter(description_foobar)
 
     def test_query(self):
         """Test that the translation for the Query class works."""
@@ -201,7 +201,7 @@ class TestCheckValidity:
         assert constraint.check(description_foobar)
 
     def test_and_check(self):
-        """Test the or().check function."""
+        """Test the and().check function."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
         data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
@@ -212,7 +212,7 @@ class TestCheckValidity:
         assert constraint.check(description_foobar)
 
     def test_query_check(self):
-        """Test that an istance of the Query class is pickable."""
+        """Test that the query.check() method works."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
         data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
