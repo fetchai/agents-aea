@@ -50,6 +50,33 @@ def test_fipa_cfp_serialization():
     assert expected_msg == actual_msg
 
 
+def test_fipa_cfp_serialization_bytes():
+    """Test that the serialization - deserialization for the 'fipa' protocol works."""
+    query = b'Hello'
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=0,
+                      performative=FIPAMessage.Performative.CFP,
+                      query=query)
+    msg_bytes = FIPASerializer().encode(msg)
+    envelope = Envelope(to="receiver",
+                        sender="sender",
+                        protocol_id=FIPAMessage.protocol_id,
+                        message=msg_bytes)
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope == actual_envelope
+
+    actual_msg = FIPASerializer().decode(actual_envelope.message)
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+    deserialised_msg = FIPASerializer().decode(envelope.message)
+    assert msg.get("performative") == deserialised_msg.get("performative")
+
+
 def test_fipa_propose_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
     proposal = [
@@ -119,15 +146,87 @@ def test_performative_not_recognized():
             "We expect that the check_consistency will return False"
 
 
+def test_performative_accept_with_address():
+    """Test the serialization - deserialization of the accept_with_address performative."""
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=1,
+                      performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
+                      address="dummy_address")
+
+    msg_bytes = FIPASerializer().encode(msg)
+    envelope = Envelope(to="receiver",
+                        sender="sender",
+                        protocol_id=FIPAMessage.protocol_id,
+                        message=msg_bytes)
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope == actual_envelope
+    deserialised_msg = FIPASerializer().decode(envelope.message)
+    assert msg.get("performative") == deserialised_msg.get("performative")
+
+
+def test_performative_match_accept_with_address():
+    """Test the serialization - deserialization of the match_accept_with_address performative."""
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=1,
+                      performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
+                      address="dummy_address")
+
+    msg_bytes = FIPASerializer().encode(msg)
+    envelope = Envelope(to="receiver",
+                        sender="sender",
+                        protocol_id=FIPAMessage.protocol_id,
+                        message=msg_bytes)
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope == actual_envelope
+    deserialised_msg = FIPASerializer().decode(envelope.message)
+    assert msg.get("performative") == deserialised_msg.get("performative")
+
+
+def test_performative_inform():
+    """Test the serialization-deserialization of the inform performative."""
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=1,
+                      performative=FIPAMessage.Performative.INFORM,
+                      data=b'HelloWorld')
+
+    msg_bytes = FIPASerializer().encode(msg)
+    envelope = Envelope(to="receiver",
+                        sender="sender",
+                        protocol_id=FIPAMessage.protocol_id,
+                        message=msg_bytes)
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope == actual_envelope
+    deserialised_msg = FIPASerializer().decode(envelope.message)
+    assert msg.get("performative") == deserialised_msg.get("performative")
+
+
 def test_performative_string_value():
     """Test the string value of the performatives."""
     assert str(FIPAMessage.Performative.CFP) == "cfp",\
-        "The str vlue must be cfp"
+        "The str value must be cfp"
     assert str(FIPAMessage.Performative.PROPOSE) == "propose",\
-        "The str vlue must be propose"
+        "The str value must be propose"
     assert str(FIPAMessage.Performative.DECLINE) == "decline",\
-        "The str vlue must be decline"
+        "The str value must be decline"
     assert str(FIPAMessage.Performative.ACCEPT) == "accept",\
-        "The str vlue must be accept"
+        "The str value must be accept"
     assert str(FIPAMessage.Performative.MATCH_ACCEPT) == "match_accept",\
-        "The str vlue must be match_accept"
+        "The str value must be match_accept"
+    assert str(FIPAMessage.Performative.ACCEPT_W_ADDRESS) == "accept_w_address", \
+        "The str value must be accept_w_address"
+    assert str(FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS) == "match_accept_w_address", \
+        "The str value must be match_accept_w_address"
+    assert str(FIPAMessage.Performative.INFORM) == "inform", \
+        "The str value must be inform"
