@@ -37,7 +37,6 @@ class TestHelpersBase:
 
     def test_locate_class(self):
         """Test the locate function to locate classes."""
-
         expected_class = OEFConnection
         actual_class = locate("aea.connections.oef.connection.OEFConnection")
         # although they are the same class, they are different instances in memory
