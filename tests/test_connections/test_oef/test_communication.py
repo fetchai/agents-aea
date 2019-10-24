@@ -555,11 +555,9 @@ class TestOefConstraint:
         assert m_constraint == m_constr
         assert "C++" not in not_in._value
 
-        with mock.patch("aea.protocols.oef.models.ConstraintTypes") \
-                as mock_constraintType_enum:
-            mock_constraintType_enum.EQUAL.type = "unknown"
-            with pytest.raises(ValueError):
-                m_constraint = ConstraintType(mock_constraintType_enum.EQUAL, "==")
+        with pytest.raises(ValueError):
+            m_constraint = ConstraintType(ConstraintTypes.EQUAL, "foo")
+            with mock.patch.object(m_constraint, "type", return_value="unknown_constraint_type"):
                 eq = self.obj_transaltor.to_oef_constraint_type(m_constraint)
 
         with pytest.raises(ValueError):
