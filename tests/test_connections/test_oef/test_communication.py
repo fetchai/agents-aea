@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF communication using an OEF."""
+import json
 import logging
 import time
 from queue import Queue
@@ -348,6 +349,53 @@ class TestFIPA:
         envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
         expected_decline = FIPASerializer().decode(envelope.message)
         assert expected_decline == decline
+
+    def test_match_accept_w_address(self):
+        """Test that a match accept with address can be sent correctly."""
+        match_accept_w_address = FIPAMessage(message_id=0,
+                                             dialogue_id=0,
+                                             target=0,
+                                             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
+                                             address='my_address')
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
+                                         sender=self.crypto1.public_key,
+                                         protocol_id=FIPAMessage.protocol_id,
+                                         message=FIPASerializer().encode(match_accept_w_address))
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        returned_match_accept_w_address = FIPASerializer().decode(envelope.message)
+        assert returned_match_accept_w_address == match_accept_w_address
+
+    def test_accept_w_address(self):
+        """Test that an accept with address can be sent correctly."""
+        accept_w_address = FIPAMessage(message_id=0,
+                                       dialogue_id=0,
+                                       target=0,
+                                       performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
+                                       address='my_address')
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
+                                         sender=self.crypto1.public_key,
+                                         protocol_id=FIPAMessage.protocol_id,
+                                         message=FIPASerializer().encode(accept_w_address))
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        returned_accept_w_address = FIPASerializer().decode(envelope.message)
+        assert returned_accept_w_address == accept_w_address
+
+    def test_inform(self):
+        """Test that an accept with address can be sent correctly."""
+        payload = {'foo': 'bar'}
+        json_data = json.dumps(payload)
+        inform = FIPAMessage(message_id=0,
+                             dialogue_id=0,
+                             target=0,
+                             performative=FIPAMessage.Performative.INFORM,
+                             data=json_data.encode("utf-8"))
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
+                                         sender=self.crypto1.public_key,
+                                         protocol_id=FIPAMessage.protocol_id,
+                                         message=FIPASerializer().encode(inform))
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        returned_inform = FIPASerializer().decode(envelope.message)
+        assert returned_inform == inform
 
     def test_serialisation_fipa(self):
         """Tests a Value Error flag for wrong CFP query."""
