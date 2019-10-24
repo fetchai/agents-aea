@@ -100,7 +100,7 @@ class LocalNode:
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
             self.register_service(sender, cast(Description, oef_message.get("service_description")))
         elif oef_type == OEFMessage.Type.REGISTER_AGENT:
-            self.register_service(sender, cast(Description, oef_message.get("agent_description")))
+            self.register_agent(sender, cast(Description, oef_message.get("agent_description")))
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             self.unregister_service(sender, request_id, cast(Description, oef_message.get("service_description")))
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
