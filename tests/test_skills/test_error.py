@@ -17,9 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """The test error skill module contains the tests of the error skill."""
-import time
 from pathlib import Path
-from threading import Thread
 
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode
@@ -30,7 +28,9 @@ from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
+from aea.skills.base import SkillContext
 from aea.skills.error.behaviours import ErrorBehaviour
+from aea.skills.error.handlers import ErrorHandler
 from aea.skills.error.tasks import ErrorTask
 from ..conftest import CUR_PATH, DummyConnection
 
@@ -48,13 +48,11 @@ class TestSkillError:
 
         cls.connection = DummyConnection()
         cls.mailbox1 = MailBox(cls.connection)
-        cls.my_aea = AEA(cls.agent_name, cls.mailbox1, cls.wallet, timeout=2.0, directory=str(Path(CUR_PATH, "data/dummy_aea")))
-        cls.t = Thread(target=cls.my_aea.start)
-        cls.t.start()
-        time.sleep(1.0)
+        cls.my_aea = AEA(cls.agent_name, cls.mailbox1, cls.wallet, timeout=2.0,
+                         directory=str(Path(CUR_PATH, "data/dummy_aea")))
 
-        handlers = cls.my_aea.resources.handler_registry.fetch("default")
-        cls.my_error_handler = handlers[1]
+        cls.skill_context = SkillContext(cls.my_aea._context)
+        cls.my_error_handler = ErrorHandler(skill_context=cls.skill_context)
 
     def test_error_handler_handle(self):
         """Test the handle function."""
@@ -63,10 +61,6 @@ class TestSkillError:
         envelope = Envelope(to=self.public_key, sender=self.public_key,
                             protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         self.my_error_handler.handle(message=msg, sender=envelope.sender)
-
-    def test_error_teardown(self):
-        """Test the teardown function."""
-        self.my_error_handler.teardown()
 
     def test_error_skill_unsupported_protocol(self):
         """Test the unsupported error message."""
@@ -84,7 +78,6 @@ class TestSkillError:
 
     def test_error_decoding_error(self):
         """Test the decoding error."""
-        t = Thread(target=self.my_aea.start)
         msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=self.public_key,
@@ -99,7 +92,6 @@ class TestSkillError:
 
     def test_error_invalid_message(self):
         """Test the invalid message."""
-        t = Thread(target=self.my_aea.start)
         msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=self.public_key,
@@ -110,11 +102,10 @@ class TestSkillError:
         envelope = self.connection.out_queue.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
-        assert msg.get("error_code") < DefaultMessage.ErrorCode.INVALID_MESSAGE.value
+        assert msg.get("error_code") == DefaultMessage.ErrorCode.INVALID_MESSAGE.value
 
     def test_error_unsupported_skill(self):
         """Test the unsupported skill."""
-        t = Thread(target=self.my_aea.start)
         msg = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=self.public_key,
@@ -125,12 +116,17 @@ class TestSkillError:
         envelope = self.connection.out_queue.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
-        assert msg.get("error_code") < DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value
+        assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value
 
+    def test_error_behaviour_instantiation(self):
+        """Test that we can instantiate the 'ErrorBehaviour' class."""
+        ErrorBehaviour(skill_context=self.skill_context)
+
+    def test_error_task_instantiation(self):
+        """Test that we can instantiate the 'ErrorTask' class."""
+        ErrorTask(skill_context=self.skill_context)
 
     @classmethod
-    def teardown(cls):
+    def teardown_class(cls):
         """Teardown method."""
-        cls.my_aea.stop()
-        cls.t.join()
-
+        pass
