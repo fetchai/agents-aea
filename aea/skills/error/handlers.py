@@ -43,7 +43,6 @@ class ErrorHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message, sender: str) -> None:
         """
@@ -52,7 +51,6 @@ class ErrorHandler(Handler):
         :param message: the message
         :param sender: the sender
         """
-        pass
 
     def teardown(self) -> None:
         """
@@ -60,7 +58,6 @@ class ErrorHandler(Handler):
 
         :return: None
         """
-        pass
 
     def send_unsupported_protocol(self, envelope: Envelope) -> None:
         """
