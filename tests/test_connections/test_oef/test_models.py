@@ -60,7 +60,7 @@ class TestTranslator:
         assert expected_description == actual_description
         m_desc = iter(description_foobar.values)
         assert next(m_desc) == "foo"
-        assert description_foobar == iter(description_foobar)
+        assert {"foo", "bar"} == set(iter(description_foobar))
 
     def test_query(self):
         """Test that the translation for the Query class works."""
