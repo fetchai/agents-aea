@@ -28,7 +28,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Query
+from aea.protocols.oef.models import Description, Query
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
@@ -214,14 +214,17 @@ class FIPAHandler(Handler):
         new_target = message_id
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, sender))
 
-        dialogues = cast(Dialogues, self.context.dialogues)
         json_data = cast(dict, msg.get("json_data"))
         if "transaction_digest" in json_data.keys():
             tx_digest = json_data['transaction_digest']
             logger.info("[{}]: checking whether transaction={} has been received ...".format(self.context.agent_name,
                                                                                              tx_digest))
-            total_price = dialogue.proposal
+            proposal = cast(Description, dialogue.proposal)
+            total_price = proposal.values.get("price")
             # watch ledger for transaction (this setup assumes the weather client trusts the weather station)
+            fetchai_ledger_api = self.context.ledger_apis.get('fetchai')
+            # TODO:
+            fetchai_ledger_api.is_tx_settled(tx_digest, total_price)  # type: ignore
             if self.context.is_tx_settled(tx_digest, total_price):
                 token_balance = self.context.get_balance()
                 logger.info("[{}]: transaction={} settled, new balance={}. Sending data ...".format(self.context.agent_name,
@@ -237,6 +240,7 @@ class FIPAHandler(Handler):
                                                 sender=self.context.agent_public_key,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(inform_msg))
+                dialogues = cast(Dialogues, self.context.dialogues)
                 dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
             else:
                 logger.info("[{}]: transaction={} not settled, aborting".format(self.context.agent_name,

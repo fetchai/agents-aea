@@ -83,8 +83,8 @@ class SkillContext:
         return self._agent_context.outbox
 
     @property
-    def in_queue(self) -> Queue:
-        """Get in queue."""
+    def message_in_queue(self) -> Queue:
+        """Get message in queue."""
         return self._in_queue
 
     @property

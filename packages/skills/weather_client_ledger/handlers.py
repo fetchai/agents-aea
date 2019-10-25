@@ -219,7 +219,7 @@ class FIPAHandler(Handler):
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
 
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
-        tx_msg_response = self.context.in_queue.get(block=True, timeout=20.0)
+        tx_msg_response = self.context.message_in_queue.get(block=True, timeout=20.0)
         if tx_msg_response is not None and \
                 tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
             json_data = {'transaction_digest': tx_msg_response.transaction_digest}
