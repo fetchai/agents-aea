@@ -55,11 +55,11 @@ class TestDialogueBase:
     def test_dialogue(self):
         """Test the dialogue."""
         assert self.dialogue.is_self_initiated
-        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, message=b'Hello')
+        msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b'Hello')
         self.dialogue.outgoing_extend(message=msg)
-        assert b'Hello' == self.dialogue._outgoing_messages[0].get("message")
+        assert b'Hello' == self.dialogue._outgoing_messages[0].get("content")
         self.dialogue.incoming_extend(message=msg)
-        assert b'Hello' == self.dialogue._incoming_messages[0].get("message")
+        assert b'Hello' == self.dialogue._incoming_messages[0].get("content")
 
     def test_dialogues(self):
         """Test the dialogues."""

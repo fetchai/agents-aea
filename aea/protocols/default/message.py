@@ -47,6 +47,7 @@ class DefaultMessage(Message):
         DECODING_ERROR = -10002
         INVALID_MESSAGE = -10003
         UNSUPPORTED_SKILL = -10004
+        INVALID_DIALOGUE = -10005
 
     def __init__(self, type: Optional[Type] = None,
                  **kwargs):
@@ -57,3 +58,25 @@ class DefaultMessage(Message):
         """
         super().__init__(type=type, **kwargs)
         assert self.check_consistency(), "DefaultMessage initialization inconsistent."
+
+    def check_consistency(self) -> bool:
+        """Check that the data is consistent."""
+        try:
+            ttype = DefaultMessage.Type(self.get("type"))
+            if ttype == DefaultMessage.Type.BYTES:
+                assert self.is_set("content")
+                content = self.get("content")
+                assert isinstance(content, bytes)
+            elif ttype == DefaultMessage.Type.ERROR:
+                assert self.is_set("error_code")
+                error_code = DefaultMessage.ErrorCode(self.get("error_code"))
+                assert error_code in DefaultMessage.ErrorCode
+                assert self.is_set("error_msg")
+                assert self.is_set("error_data")
+            else:
+                raise ValueError("Performative not recognized.")
+
+        except (AssertionError, ValueError, KeyError):
+            return False
+
+        return True

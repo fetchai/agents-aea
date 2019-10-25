@@ -152,10 +152,12 @@ class FIPANegotiationHandler(Handler):
         else:
             assert proposal_description is not None
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
-            transaction_msg = TransactionMessage(transaction_id=transaction_id,
+            transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                                 skill="fipa_negotiation_skill",
+                                                 transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
-                                                 currency='FET',
+                                                 currency_pbk='FET',
                                                  amount=proposal_description.values['amount'],
                                                  is_sender_buyer=not dialogue.is_seller,
                                                  sender_tx_fee=1,
@@ -190,10 +192,12 @@ class FIPANegotiationHandler(Handler):
         for num, proposal_description in enumerate(proposals):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
-            transaction_msg = TransactionMessage(transaction_id=transaction_id,
+            transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                                 skill="fipa_negotiation_skill",
+                                                 transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
-                                                 currency='FET',
+                                                 currency_pbk='FET',
                                                  amount=proposal_description.values['amount'],
                                                  is_sender_buyer=not dialogue.is_seller,
                                                  sender_tx_fee=1,

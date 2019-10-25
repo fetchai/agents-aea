@@ -21,7 +21,7 @@
 import os
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
-from aea.crypto.base import DefaultCrypto, _load_pem_private_key_from_path
+from aea.crypto.default import DefaultCrypto, _load_pem_private_key_from_path
 from ..conftest import ROOT_DIR
 
 

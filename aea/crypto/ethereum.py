@@ -18,35 +18,33 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Module wrapping the public and private key generation for interacting with ethereum."""
-
-from typing import Optional
-import logging
+"""Ethereum module wrapping the public and private key cryptography and ledger api."""
 
 from eth_account.messages import encode_defunct  # type: ignore
 from web3 import Web3       # type: ignore
 from eth_account import Account     # type: ignore
 from eth_keys import keys       # type: ignore
+import logging
 from pathlib import Path
+from typing import Optional
 
 from aea.crypto.base import Crypto
 
 logger = logging.getLogger(__name__)
 
-
-class EthCryptoError(Exception):
-    """Exception to be thrown when cryptographic signatures don't match!."""
+ETHEREUM = "ethereum"
 
 
-class EthCrypto(Crypto):
-    """Class wrapping the Entity Generation from Fetch.AI ledger."""
+class EthereumCrypto(Crypto):
+    """Class wrapping the Account Generation from Ethereum ledger."""
+
+    identifier = ETHEREUM
 
     def __init__(self, private_key_path: Optional[str] = None):
         """Instantiate a crypto object."""
-        self.account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        self._display_address = self.account.address
-        self._bytes_representation = Web3.toBytes(hexstr=self.account.privateKey.hex())
-        self._public_key = keys.PrivateKey(self._bytes_representation).public_key
+        self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        bytes_representation = Web3.toBytes(hexstr=self._account.privateKey.hex())
+        self._public_key = keys.PrivateKey(bytes_representation).public_key
 
     @property
     def public_key(self) -> str:
@@ -64,7 +62,7 @@ class EthCrypto(Crypto):
 
         :return: a display_address str
         """
-        return str(self._display_address)
+        return str(self._account.address)
 
     def _load_private_key_from_path(self, file_name) -> Account:
         """
@@ -94,10 +92,41 @@ class EthCrypto(Crypto):
         :return: Signed message in bytes
         """
         m_message = encode_defunct(text=message)
-        signature = self.account.sign_message(m_message)
+        signature = self._account.sign_message(m_message)
         return signature
 
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""
         account = Account.create()
         return account
+
+    @property
+    def token_balance(self) -> float:
+        """
+        Return the token balance.
+
+        :return: the token balance
+        """
+        pass
+
+    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
+        """
+        Transfer from self to destination.
+
+        :param destination_address: the address of the receive
+        :param amount: the amount
+        :param tx_fee: the tx fee
+
+        :return: bool indicating success
+        """
+        pass
+
+    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
+        """
+        Generate the address from the public key.
+
+        :param counterparty_pbk: the public key of the counterparty
+
+        :return: the address
+        """
+        pass

@@ -18,8 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF communication using an OEF."""
-import json
 import logging
+import os
 import time
 from queue import Queue
 from typing import cast
@@ -33,7 +33,7 @@ from oef.query import ConstraintExpr
 from aea.configurations.base import ConnectionConfig
 from aea.connections.oef.connection import OEFMailBox, OEFConnection, OEFChannel
 from aea.connections.oef.connection import OEFObjectTranslator
-from aea.crypto.base import DefaultCrypto
+from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
@@ -45,6 +45,7 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, DataModel, Attribute, Query, Constraint, ConstraintType, \
     ConstraintTypes
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from ...conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -383,12 +384,11 @@ class TestFIPA:
     def test_inform(self):
         """Test that an inform can be sent correctly."""
         payload = {'foo': 'bar'}
-        json_data = json.dumps(payload)
         inform = FIPAMessage(message_id=0,
                              dialogue_id=0,
                              target=0,
                              performative=FIPAMessage.Performative.INFORM,
-                             data=json_data.encode("utf-8"))
+                             json_data=payload)
         self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
                                          sender=self.crypto1.public_key,
                                          protocol_id=FIPAMessage.protocol_id,
@@ -405,8 +405,9 @@ class TestFIPA:
                 message_id=0,
                 dialogue_id=0,
                 destination="publicKey",
-                target=1)
-            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") \
+                target=1,
+                query=None)
+            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
                     as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 assert FIPASerializer().encode(msg), "Raises Value Error"
@@ -450,7 +451,8 @@ class TestFIPA:
 
     def test_on_oef_error(self):
         """Test the oef error."""
-        wallet = Wallet({'default': None})
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path}, {})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
@@ -466,7 +468,8 @@ class TestFIPA:
 
     def test_on_dialogue_error(self):
         """Test the dialogue error."""
-        wallet = Wallet({'default': None})
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path}, {})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
@@ -492,7 +495,8 @@ class TestFIPA:
 
     def test_send_oef_message(self):
         """Test the send oef message."""
-        wallet = Wallet({'default': None})
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path}, {})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,

@@ -49,6 +49,7 @@ class SkillContext:
         :param agent_context: the agent's context
         """
         self._agent_context = agent_context
+        self._in_queue = Queue()  # type: Queue
         self._skill = None  # type: Optional[Skill]
 
     @property
@@ -82,6 +83,11 @@ class SkillContext:
         return self._agent_context.outbox
 
     @property
+    def message_in_queue(self) -> Queue:
+        """Get message in queue."""
+        return self._in_queue
+
+    @property
     def decision_maker_message_queue(self) -> Queue:
         """Get message queue of decision maker."""
         return self._agent_context.decision_maker_message_queue
@@ -100,6 +106,11 @@ class SkillContext:
     def agent_is_ready_to_pursuit_goals(self) -> bool:
         """Get the goal pursuit readiness."""
         return self._agent_context.is_ready_to_pursuit_goals
+
+    @property
+    def ledger_apis(self) -> Dict[str, Any]:
+        """Get ledger APIs."""
+        return self._agent_context.ledger_apis
 
     @property
     def handlers(self) -> Optional[List['Handler']]:

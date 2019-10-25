@@ -19,26 +19,27 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
-from typing import Dict, cast, Optional
+from typing import Dict, Tuple, cast
 
-from aea.crypto.base import Crypto, DefaultCrypto
-from aea.crypto.ethereum_base import EthCrypto
-from aea.crypto.fetchai_base import FetchCrypto
+from aea.crypto.base import Crypto
+from aea.crypto.default import DefaultCrypto, DEFAULT
+from aea.crypto.ethereum import EthereumCrypto, ETHEREUM
+from aea.crypto.fetchai import FetchAICrypto, FETCHAI
 
-FETCHAI = "fetchai"
-DEFAULT = "default"
-ETHEREUM = "ethereum"
-SUPPORTED_CRYPTOS = [DEFAULT, FETCHAI, ETHEREUM]
+SUPPORTED_CRYPTOS = [DEFAULT, ETHEREUM, FETCHAI]
+SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
+CURRENCY_TO_ID_MAP = {'FET': FETCHAI, 'ETH': ETHEREUM}
 
 
 class Wallet(object):
     """Store all the public keys we initialise."""
 
-    def __init__(self, private_key_paths: Dict[str, Optional[str]]):
+    def __init__(self, private_key_paths: Dict[str, str], ledger_api_configs: Dict[str, Tuple[str, int]]):
         """
         Instantiate a wallet object.
 
         :param private_key_paths: the private key paths
+        :param ledger_api_configs: the ledger api configs
         """
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
@@ -47,9 +48,13 @@ class Wallet(object):
             if identifier == DEFAULT:
                 crypto_objects[identifier] = DefaultCrypto(path)
             elif identifier == FETCHAI:
-                crypto_objects[identifier] = FetchCrypto(path)
+                if FETCHAI in ledger_api_configs.keys():
+                    fetch_ledger_api_config = ledger_api_configs[identifier]
+                else:
+                    fetch_ledger_api_config = ('', 1000)
+                crypto_objects[identifier] = FetchAICrypto(path, fetch_ledger_api_config)
             elif identifier == ETHEREUM:
-                crypto_objects[identifier] = EthCrypto(path)
+                crypto_objects[identifier] = EthereumCrypto(path)
             else:
                 ValueError("Unsupported identifier in private key paths.")
             crypto = cast(Crypto, crypto_objects.get(identifier))

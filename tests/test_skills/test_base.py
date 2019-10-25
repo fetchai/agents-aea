@@ -17,6 +17,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the base classes for the skills."""
+import os
 from pathlib import Path
 from queue import Queue
 
@@ -36,7 +37,8 @@ class TestSkillContext:
     def setup_class(cls):
         """Test the initialisation of the AEA."""
         cls.node = LocalNode()
-        cls.wallet = Wallet({'default': None})
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        cls.wallet = Wallet({'default': private_key_pem_path}, {})
         cls.mailbox1 = MailBox(OEFLocalConnection(cls.wallet.public_keys['default'], cls.node))
         cls.my_aea = AEA("Agent0", cls.mailbox1, cls.wallet, directory=str(Path(CUR_PATH, "data/dummy_aea")))
         cls.skill_context = SkillContext(cls.my_aea.context)
