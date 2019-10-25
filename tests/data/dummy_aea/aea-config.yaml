@@ -22,7 +22,6 @@ private_key_paths:
 protocols:
 - default
 - fipa
-- bad
 registry_path: aea
 skills:
 - dummy

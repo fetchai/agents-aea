@@ -52,7 +52,7 @@ class TestListProtocols:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == "\n".join(["bad",  "default", "fipa"]) + "\n"
+        assert self.result.output == "\n".join(["default", "fipa"]) + "\n"
 
     @classmethod
     def teardown_class(cls):

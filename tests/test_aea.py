@@ -18,28 +18,27 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
 import os
+import shutil
+import tempfile
 import time
 import unittest.mock
 from pathlib import Path
-from queue import Queue
 from threading import Thread
 
-import pytest
-from aea.decision_maker.messages.transaction import TransactionMessage
-
-from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
+import yaml
 
 import aea.cli.common
 from aea.aea import AEA
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
-from aea.mail.base import MailBox, Envelope, OutBox
+from aea.mail.base import MailBox, Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.registries.base import ProtocolRegistry, HandlerRegistry, Resources
+from aea.registries.base import ProtocolRegistry, Resources
 from .conftest import CUR_PATH, DummyConnection
 
 
@@ -193,13 +192,28 @@ class TestProtocolRegistry:
         cls.patch = unittest.mock.patch.object(aea.registries.base.logger, 'exception')
         cls.mocked_logger = cls.patch.__enter__()
 
+        cls.agent_name = "agent_dir_test"
+        cls.t = tempfile.mkdtemp()
+        cls.agent_folder = os.path.join(cls.t, cls.agent_name)
+        cls.oldcwd = os.getcwd()
+        shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
+        os.chdir(cls.agent_folder)
+
+        # make fake protocol
+        cls.fake_protocol_id = "fake"
+        agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
+        agent_config = yaml.safe_load(agent_config_path.read_text())
+        agent_config.get("protocols").append(cls.fake_protocol_id)
+        yaml.safe_dump(agent_config, open(agent_config_path, "w"))
+        Path(cls.agent_folder, "protocols", cls.fake_protocol_id).mkdir()
+
         cls.registry = ProtocolRegistry()
-        cls.registry.populate(os.path.join(CUR_PATH, "data", "dummy_aea"))
+        cls.registry.populate(cls.agent_folder)
         cls.expected_protocol_ids = {"default", "fipa"}
 
     def test_not_able_to_add_bad_formatted_protocol_message(self):
         """Test that the protocol registry has not been able to add the protocol 'bad'."""
-        self.mocked_logger.assert_called_with("Not able to add protocol bad.")
+        self.mocked_logger.assert_called_with("Not able to add protocol {}.".format(self.fake_protocol_id))
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""
@@ -219,6 +233,12 @@ class TestProtocolRegistry:
 
         # restore the protocol
         self.registry.register((protocol_id_removed, None), protocol_removed)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the tests."""
+        shutil.rmtree(cls.t, ignore_errors=True)
+        os.chdir(cls.oldcwd)
 
 
 class TestResources:
