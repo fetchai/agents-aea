@@ -74,7 +74,7 @@ class DefaultMessage(Message):
                 assert self.is_set("error_msg")
                 assert self.is_set("error_data")
             else:
-                raise ValueError("Performative not recognized.")
+                raise ValueError("Type not recognized.")
 
         except (AssertionError, ValueError, KeyError):
             return False

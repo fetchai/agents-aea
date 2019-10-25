@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the messages module."""
+import unittest
 
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -73,3 +74,10 @@ def test_default_message_str_values():
         "DefaultMessage.Type.BYTES must be bytes"
     assert str(DefaultMessage.Type.ERROR) == "error",\
         "DefaultMessage.Type.ERROR must be error"
+
+
+def test_check_consistency_raises_exception_when_type_not_recognized():
+    """Test that we raise exception when the type of the message is not recognized."""
+    message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    message._body["type"] = "unknown_type"
+    assert not message.check_consistency()
