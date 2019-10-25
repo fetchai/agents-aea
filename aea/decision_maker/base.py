@@ -244,15 +244,21 @@ class DecisionMaker:
         self.max_reactions = max_reactions
         self._outbox = outbox
         self._wallet = wallet
-        self._message_queue = Queue()  # type: Queue
+        self._message_in_queue = Queue()  # type: Queue
+        self._message_out_queue = Queue()  # type: Queue
         self._ownership_state = OwnershipState()
         self._preferences = Preferences()
         self._is_ready_to_pursuit_goals = False
 
     @property
-    def message_queue(self) -> Queue:
+    def message_in_queue(self) -> Queue:
         """Get (in) queue."""
-        return self._message_queue
+        return self._message_in_queue
+
+    @property
+    def message_out_queue(self) -> Queue:
+        """Get (out) queue."""
+        return self._message_out_queue
 
     @property
     def outbox(self) -> OutBox:
@@ -281,9 +287,9 @@ class DecisionMaker:
         :return: None
         """
         counter = 0
-        while not self.message_queue.empty() and counter < self.max_reactions:
+        while not self.message_in_queue.empty() and counter < self.max_reactions:
             counter += 1
-            message = self.message_queue.get_nowait()  # type: Optional[Message]
+            message = self.message_in_queue.get_nowait()  # type: Optional[Message]
             if message is not None:
                 self.handle(message)
 
@@ -320,9 +326,16 @@ class DecisionMaker:
         crypto_identifier = CURRENCY_TO_ID_MAP.get(cast(str, tx_message.get("currency_pbk")))
         amount = cast(float, tx_message.get("amount"))
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
+
+        # check if the transaction is acceptable
         if self._is_acceptable_tx(crypto_object, amount):
-            self._settle_tx(crypto_object, cast(str, tx_message.get("counterparty")), amount, cast(float, tx_message.get("sender_tx_fee")))
-        # TODO: Notify the relevant skill that we made the transaction.
+            tx_digest = self._settle_tx(crypto_object, cast(str, tx_message.get("counterparty")), amount, cast(float, tx_message.get("sender_tx_fee")))
+            tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.ACCEPT, transaction_digest=tx_digest)
+        else:
+            tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.REJECT)
+
+        # Notify the relevant skill that we processed the transaction.
+        self.message_out_queue.put(tx_message_response)
 
     def _is_acceptable_tx(self, crypto_object: Crypto, amount: float) -> bool:
         """
@@ -337,7 +350,7 @@ class DecisionMaker:
         # TODO check against preferences and other constraints
         return affordable
 
-    def _settle_tx(self, crypto_object: Crypto, counterparty_pbk: str, amount: float, tx_fee: float):
+    def _settle_tx(self, crypto_object: Crypto, counterparty_pbk: str, amount: float, tx_fee: float) -> str:
         """
         Settle the tx.
 
@@ -345,9 +358,12 @@ class DecisionMaker:
         :param counterparty_pbk: the counterparty pbk
         :param amount: the tx amount
         :param tx_fee: the tx fee
+        :return: the transaction digest
         """
         counterparty_address = crypto_object.generate_counterparty_address(counterparty_pbk)
         crypto_object.transfer(counterparty_address, amount, tx_fee)
+        tx_digest = 'something'  # TODO: get tx_digest from the ledger api
+        return tx_digest
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
         """

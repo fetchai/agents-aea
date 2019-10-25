@@ -63,7 +63,7 @@ class ServiceRegistrationBehaviour(Behaviour):
                                             sender=self.context.agent_public_key,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(msg))
-            logger.info("[{}]: registering services on OEF.".format(self.context.agent_name))
+            logger.info("[{}]: registering weather station services on OEF.".format(self.context.agent_name))
             self._registered = True
 
     def act(self) -> None:
@@ -91,5 +91,5 @@ class ServiceRegistrationBehaviour(Behaviour):
                                             sender=self.context.agent_public_key,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(msg))
-            logger.info("[{}]: unregistering services from OEF.".format(self.context.agent_name))
+            logger.info("[{}]: unregistering weather station services from OEF.".format(self.context.agent_name))
             self._registered = False

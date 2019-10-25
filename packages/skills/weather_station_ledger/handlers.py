@@ -101,11 +101,11 @@ class FIPAHandler(Handler):
         :param msg: the message
         :param sender: the sender
         """
-        logger.debug("[{}]: unidentified dialogue.".format(self.context.agent_name))
+        logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
         default_msg = DefaultMessage(type=DefaultMessage.Type.ERROR,
                                      error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
                                      error_msg="Invalid dialogue.",
-                                     error_data={"fipa_message": FIPASerializer().encode(msg)})
+                                     error_data="fipa_message")  # FIPASerializer().encode(msg)
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
                                         protocol_id=DefaultMessage.protocol_id,
@@ -124,6 +124,7 @@ class FIPAHandler(Handler):
         """
         new_message_id = message_id + 1
         new_target = message_id
+        logger.info("[{}]: received CFP from sender={}".format(self.context.agent_name, sender))
         query = cast(Query, msg.get("query"))
         strategy = cast(Strategy, self.context.strategy)
 
@@ -133,7 +134,7 @@ class FIPAHandler(Handler):
             dialogue.proposal = proposal
             logger.info("[{}]: sending sender={} a proposal={}".format(self.context.agent_name,
                                                                        sender,
-                                                                       proposal))
+                                                                       proposal.values))
             proposal_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_id=dialogue_id,
                                        target=new_target,
@@ -167,6 +168,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
+        logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name, sender))
         dialogues = cast(Dialogues, self.context.dialogues)
         dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE)
 
@@ -183,7 +185,9 @@ class FIPAHandler(Handler):
         """
         new_message_id = message_id + 1
         new_target = message_id
+        logger.info("[{}]: received ACCEPT from sender={}".format(self.context.agent_name, sender))
 
+        logger.info("[{}]: sending MATCH_ACCEPT_W_ADDRESS to sender={}".format(self.context.agent_name, sender))
         match_accept_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_id=dialogue_id,
                                        target=new_target,
@@ -208,11 +212,12 @@ class FIPAHandler(Handler):
         """
         new_message_id = message_id + 1
         new_target = message_id
+        logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, sender))
 
         dialogues = cast(Dialogues, self.context.dialogues)
         json_data = cast(dict, msg.get("json_data"))
-        if "tx_digest" in json_data.keys():
-            tx_digest = json_data['tx_digest']
+        if "transaction_digest" in json_data.keys():
+            tx_digest = json_data['transaction_digest']
             logger.info("[{}]: checking whether transaction={} has been received ...".format(self.context.agent_name,
                                                                                              tx_digest))
             total_price = dialogue.proposal
@@ -237,4 +242,4 @@ class FIPAHandler(Handler):
                 logger.info("[{}]: transaction={} not settled, aborting".format(self.context.agent_name,
                                                                                 tx_digest))
         else:
-            logger.info("[{}]: received incompatible json data.".format(self.context.agent_name))
+            logger.info("[{}]: did not receive transaction digest from sender={}.".format(self.context.agent_name, sender))

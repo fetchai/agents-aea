@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a handler."""
-import json
 import logging
 from typing import Optional, cast, List, TYPE_CHECKING
 
@@ -112,11 +111,11 @@ class FIPAHandler(Handler):
         :param msg: the message
         :param sender: the sender
         """
-        logger.debug("[{}]: unidentified dialogue.".format(self.context.agent_name))
+        logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
         default_msg = DefaultMessage(type=DefaultMessage.Type.ERROR,
                                      error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
                                      error_msg="Invalid dialogue.",
-                                     error_data="fipa_message")  #+ FIPASerializer().encode(msg))
+                                     error_data="fipa_message")  # FIPASerializer().encode(msg))
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
                                         protocol_id=DefaultMessage.protocol_id,
@@ -136,12 +135,13 @@ class FIPAHandler(Handler):
         new_message_id = message_id + 1
         new_target_id = message_id
         proposals = cast(List[Description], msg.get("proposal"))
+
         if proposals is not []:
             # only take the first proposal
             proposal = proposals[0]
-            logger.info("[{}]: received proposal={} in dialogue={}".format(self.context.agent_name,
+            logger.info("[{}]: received proposal={} from sender={}".format(self.context.agent_name,
                                                                            proposal.values,
-                                                                           dialogue_id))
+                                                                           sender))
             strategy = cast(Strategy, self.context.strategy)
             if strategy.is_acceptable_proposal(proposal):
                 strategy.is_searching = False
@@ -181,7 +181,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        logger.debug("[{}]: received decline: dialogue_label={}".format(self.context.agent_name, dialogue.dialogue_label))
+        logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name, sender))
         target = msg.get("target")
         dialogues = cast(Dialogues, self.context.dialogues)
         if target == 1:
@@ -202,33 +202,38 @@ class FIPAHandler(Handler):
         """
         new_message_id = message_id + 1
         new_target_id = message_id
+        logger.info("[{}]: received MATCH_ACCEPT_W_ADDRESS from sender={}".format(self.context.agent_name, sender))
         address = cast(str, msg.get("address"))
         proposal = cast(Description, dialogue.proposal)
-        tx_msg = TransactionMessage(transaction_id="transaction0",
+        tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                    skill="weather_client_ledger_skill",
+                                    transaction_id="transaction0",
                                     sender=self.context.agent_public_keys['fetchai'],
                                     counterparty=address,
                                     is_sender_buyer=True,
-                                    currency="FET",
+                                    currency_pbk="FET",
                                     amount=proposal.values['price'],
                                     sender_tx_fee=1.0,
                                     counterparty_tx_fee=0.0,
                                     quantities_by_good_pbk={})
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
-        logger.info("[{}]: I asked the decision maker for the transaction!!!".format(self.context.agent_name))
-        tx_digest = ''
-        payload = {'tx_digest': tx_digest}
-        json_data = json.dumps(payload)
-        inform_msg = FIPAMessage(message_id=new_message_id,
-                                 dialogue_id=dialogue_id,
-                                 target=new_target_id,
-                                 performative=FIPAMessage.Performative.INFORM,
-                                 json_data=json_data)
-        dialogue.outgoing_extend(inform_msg)
-        self.context.outbox.put_message(to=sender,
-                                        sender=self.context.agent_public_key,
-                                        protocol_id=FIPAMessage.protocol_id,
-                                        message=FIPASerializer().encode(inform_msg))
-        logger.info("[{}]: informing={} that I paid.".format(self.context.agent_name, sender))
+
+        logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
+        tx_msg_response = self.context.in_queue.get(block=True, timeout=20.0)
+        if tx_msg_response is not None and \
+                tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
+            json_data = {'transaction_digest': tx_msg_response.transaction_digest}
+            inform_msg = FIPAMessage(message_id=new_message_id,
+                                     dialogue_id=dialogue_id,
+                                     target=new_target_id,
+                                     performative=FIPAMessage.Performative.INFORM,
+                                     json_data=json_data)
+            dialogue.outgoing_extend(inform_msg)
+            self.context.outbox.put_message(to=sender,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=FIPAMessage.protocol_id,
+                                            message=FIPASerializer().encode(inform_msg))
+            logger.info("[{}]: informing sender={} of tx digest.".format(self.context.agent_name, sender))
 
     def _handle_inform(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
         """
@@ -241,15 +246,15 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
+        logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, sender))
         json_data = cast(dict, msg.get("json_data"))
         if 'weather_data' in json_data.keys():
             weather_data = json_data['weather_data']
-            logger.info("[{}]: receiving data ...".format(self.context.agent_name))
-            logger.info("[{}]: this is the data I got: {}".format(self.context.agent_name, weather_data))
+            logger.info("[{}]: received the following weather data={}".format(self.context.agent_name, weather_data))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
         else:
-            logger.info("[{}]: there is no data in the message!".format(self.context.agent_name))
+            logger.info("[{}]: received no data from sender={}".format(self.context.agent_name, sender))
 
 
 class OEFHandler(Handler):
@@ -306,6 +311,7 @@ class OEFHandler(Handler):
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key)
             query = strategy.get_service_query()
+            logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk))
             cfp_msg = FIPAMessage(message_id=STARTING_MESSAGE_ID,
                                   dialogue_id=dialogue.dialogue_label.dialogue_id,
                                   performative=FIPAMessage.Performative.CFP,

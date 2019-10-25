@@ -20,7 +20,9 @@
 """This module contains the agent context class."""
 
 from queue import Queue
-from typing import Dict
+from typing import Dict, Any
+
+from fetchai.ledger.api import LedgerApi  # type: ignore
 
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
@@ -108,6 +110,8 @@ class AgentContext:
         """Get the goal pursuit readiness."""
         return self._is_ready_to_pursuit_goals
 
-    def is_tx_settled(self, tx_digest: str, total_price: float) -> bool:
-        """Get the status of the transaction."""
-        return True
+    @property
+    def ledger_apis(self) -> Dict[str, Any]:
+        """Get the ledger APIs."""
+        apis = {'fetchai': LedgerApi('alpha.fetch-ai.com', 80)}
+        return apis

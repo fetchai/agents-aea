@@ -61,7 +61,7 @@ cur.execute(command)
 cur.close()
 con.commit()
 if con is not None:
-    logger.info("Wheather station: I closed the db after checking it is populated!")
+    logger.debug("Weather station: I closed the db after checking it is populated!")
     con.close()
 
 
