@@ -32,7 +32,7 @@ from aea.protocols.oef.models import Description, Query
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
-    from packages.skills.carpark_detection_ledger.dialogues import Dialogue, Dialogues
+    from packages.skills.carpark_detection.dialogues import Dialogue, Dialogues
     from packages.skills.carpark_detection.strategy import Strategy
 else:
     from carpark_detection_skill.dialogues import Dialogue, Dialogues
@@ -41,7 +41,7 @@ else:
 logger = logging.getLogger("aea.weather_station_ledger_skill")
 
 
-class FIPACarParkHandler(Handler):
+class FIPAHandler(Handler):
     """This class scaffolds a handler."""
 
     SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
@@ -129,8 +129,8 @@ class FIPACarParkHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_matching_supply(query):
-            proposal, weather_data = strategy.generate_proposal_and_data(query)
-            dialogue.weather_data = weather_data
+            proposal, carpark_data = strategy.generate_proposal_and_data(query)
+            dialogue.carpark_data = carpark_data
             dialogue.proposal = proposal
             logger.info("[{}]: sending sender={} a proposal={}".format(self.context.agent_name,
                                                                        sender,
