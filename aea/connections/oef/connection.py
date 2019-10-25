@@ -452,6 +452,10 @@ class OEFChannel(OEFAgent, Channel):
             self.send_accept(id, dialogue_id, destination, target)
         elif performative == FIPAMessage.Performative.DECLINE:
             self.send_decline(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS or \
+                performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS or \
+                performative == FIPAMessage.Performative.INFORM:
+            self.send_default_message(envelope)
         else:
             raise ValueError("OEF FIPA message not recognized.")  # pragma: no cover
 
