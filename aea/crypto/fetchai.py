@@ -30,7 +30,6 @@ from aea.crypto.base import Crypto
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_FETCHAI_CONFIG = ("127.0.0.1", 8000)
 FETCHAI = "fetchai"
 
 
@@ -39,7 +38,7 @@ class FetchAICrypto(Crypto):
 
     identifier = FETCHAI
 
-    def __init__(self, private_key_path: Optional[str] = None, ledger_api_config: Tuple[str, int] = DEFAULT_FETCHAI_CONFIG):
+    def __init__(self, private_key_path: Optional[str] = None):
         """
         Instantiate a crypto object.
 
@@ -47,7 +46,6 @@ class FetchAICrypto(Crypto):
         :param ledger_api_config: the ledger api config
         """
         self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        self._ledger_api_config = ledger_api_config
 
     @property
     def public_key(self) -> str:
@@ -58,15 +56,6 @@ class FetchAICrypto(Crypto):
         """
         return self._entity.public_key_hex
 
-    # @property
-    # def private_key(self) -> str:
-    #     """
-    #     Return the private key in hex format.
-
-    #     :return: a public key string in hex format
-    #     """
-    #     return self._entity.private_key_hex
-
     @property
     def address(self) -> str:
         """
@@ -75,73 +64,6 @@ class FetchAICrypto(Crypto):
         :return: a display_address str
         """
         return str(Address(Identity.from_hex(self.public_key)))
-
-    @property
-    def token_balance(self) -> float:
-        """
-        Get the token balance.
-
-        :return: the token balance
-        """
-        try:
-            api = LedgerApi(self._ledger_api_config[0], self._ledger_api_config[1])
-            token_balance = api.tokens.balance(self.address)
-        except Exception:
-            logger.warning("An error occurred while attempting to get the current balance.")
-            token_balance = 0.0
-        return token_balance
-
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
-        """
-        Transfer from self to destination.
-
-        :param destination_address: the address of the receive
-        :param amount: the amount
-        :param tx_fee: the tx fee
-
-        :return: bool indicating success
-        """
-        try:
-            api = LedgerApi(self._ledger_api_config[0], self._ledger_api_config[1])
-            logger.info("Waiting for the validation of the transaction...")
-            api.sync(api.tokens.transfer(self._entity, destination_address, amount, tx_fee))
-            logger.info("Done!")
-            success = True
-        except Exception:
-            logger.warning("An error occurred while attempting the transfer.")
-            success = False
-        return success
-
-    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
-        """
-        Generate the address from the public key.
-
-        :param counterparty_pbk: the public key of the counterparty
-
-        :return: the address
-        """
-        address = Address(Identity.from_hex(counterparty_pbk))
-        return address
-
-    @staticmethod
-    def get_address_from_public_key(public_key: str) -> Address:
-        """
-        Get the address from the public key.
-
-        :return: str
-        """
-        identity = Identity.from_hex(public_key)
-        return Address(identity)
-
-    def sign_transaction(self, message: bytes) -> bytes:
-        """
-        Sing a transaction to send it to the ledger.
-
-        :param message:
-        :return: Signed message in bytes
-        """
-        signature = self._entity.sign(message)
-        return signature
 
     def _load_private_key_from_path(self, file_name) -> Entity:
         """

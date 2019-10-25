@@ -32,9 +32,9 @@ CURRENCY_TO_ID_MAP = {'FET': FETCHAI, 'ETH': ETHEREUM}
 
 
 class Wallet(object):
-    """Store all the public keys we initialise."""
+    """Store all the cryptos we initialise."""
 
-    def __init__(self, private_key_paths: Dict[str, str], ledger_api_configs: Dict[str, Tuple[str, int]]):
+    def __init__(self, private_key_paths: Dict[str, str]):
         """
         Instantiate a wallet object.
 
@@ -48,11 +48,7 @@ class Wallet(object):
             if identifier == DEFAULT:
                 crypto_objects[identifier] = DefaultCrypto(path)
             elif identifier == FETCHAI:
-                if FETCHAI in ledger_api_configs.keys():
-                    fetch_ledger_api_config = ledger_api_configs[identifier]
-                else:
-                    fetch_ledger_api_config = ('', 1000)
-                crypto_objects[identifier] = FetchAICrypto(path, fetch_ledger_api_config)
+                crypto_objects[identifier] = FetchAICrypto(path)
             elif identifier == ETHEREUM:
                 crypto_objects[identifier] = EthereumCrypto(path)
             else:
