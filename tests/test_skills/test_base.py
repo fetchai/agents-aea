@@ -24,6 +24,7 @@ from queue import Queue
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
+from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import MailBox
 from aea.skills.base import SkillContext

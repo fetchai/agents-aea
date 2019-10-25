@@ -23,6 +23,7 @@ from pathlib import Path
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode
 from aea.crypto.wallet import Wallet
+from aea.crypto.ledger_apis import LedgerApis
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
