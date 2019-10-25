@@ -39,7 +39,7 @@ def test_initialise_AEA():
     public_key_1 = "mailbox1"
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path})
+    wallet = Wallet({'default': private_key_pem_path}, {})
     my_AEA = AEA("Agent0", mailbox1, wallet, directory=str(Path(CUR_PATH, "aea")))
     assert AEA("Agent0", mailbox1, wallet), "Agent is not initialised"
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
@@ -53,7 +53,7 @@ def test_act():
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path})
+    wallet = Wallet({'default': private_key_pem_path}, {})
     public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
@@ -79,7 +79,7 @@ def test_react():
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path})
+    wallet = Wallet({'default': private_key_pem_path}, {})
     public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
@@ -115,7 +115,7 @@ def test_handle():
     """Tests handle method of an agent."""
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path})
+    wallet = Wallet({'default': private_key_pem_path}, {})
     public_key = wallet.public_keys['default']
     connection = DummyConnection()
     mailbox = MailBox(connection)

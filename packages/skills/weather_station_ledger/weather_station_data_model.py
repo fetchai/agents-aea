@@ -17,34 +17,20 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
+"""This package contains the dataModel for the weather agent."""
 
-from aea.skills.base import Task
+from aea.protocols.oef.models import DataModel, Attribute
+
+SCHEME = {'country': "UK", 'city': "Cambridge"}
 
 
-class MyWeatherTask(Task):
-    """This class scaffolds a task."""
+class WEATHER_STATION_DATAMODEL (DataModel):
+    """Data model for the weather Agent."""
 
-    def setup(self) -> None:
-        """
-        Implement the setup.
+    def __init__(self):
+        """Initialise the dataModel."""
+        self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)
+        self.ATTRIBUTE_CITY = Attribute("city", str, True)
 
-        :return: None
-        """
-        pass
-
-    def execute(self) -> None:
-        """
-        Implement the task execution.
-
-        :return: None
-        """
-        pass
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        pass
+        super().__init__("weather_station_datamodel", [self.ATTRIBUTE_COUNTRY,
+                                                       self.ATTRIBUTE_CITY])

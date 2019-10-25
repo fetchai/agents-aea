@@ -246,7 +246,8 @@ class OEFChannel(OEFAgent, Channel):
         :param oef_port: the OEF port.
         :param in_queue: the in queue.
         """
-        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core)
+        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core,
+                         logger=lambda *x: None, logger_debug=lambda *x: None)
         self.in_queue = in_queue
         self.mail_stats = MailStats()
 

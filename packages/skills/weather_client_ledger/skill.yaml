@@ -1,0 +1,28 @@
+name: weather_client_ledger
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: MySearchBehaviour
+      args: {}
+handlers:
+  - handler:
+      class_name: FIPAHandler
+      args: {}
+  - handler:
+      class_name: OEFHandler
+      args: {}
+tasks: []
+shared_classes:
+  - shared_class:
+      class_name: Strategy
+      args:
+        country: UK
+        search_interval: 5
+        max_price: 0.2
+  - shared_class:
+      class_name: Dialogues
+      args: {}
+protocols: ['fipa','default','oef']

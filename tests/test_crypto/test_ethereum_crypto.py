@@ -20,7 +20,7 @@
 """This module contains the tests of the ethereum module."""
 import os
 
-from aea.crypto.ethereum_base import EthCrypto
+from aea.crypto.ethereum import EthereumCrypto
 from ..conftest import ROOT_DIR
 
 PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/eth_private_key.txt")
@@ -28,22 +28,20 @@ PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/eth_private_key.txt")
 
 def test_creation():
     """Test the creation of the crypto_objects."""
-    assert EthCrypto(), "Managed to initialise the eth_account"
-    assert EthCrypto(PRIVATE_KEY_PATH), "Managed to load the eth private key"
-    assert EthCrypto("./"), "Managed to create a new eth private key"
+    assert EthereumCrypto(), "Managed to initialise the eth_account"
+    assert EthereumCrypto(PRIVATE_KEY_PATH), "Managed to load the eth private key"
+    assert EthereumCrypto("./"), "Managed to create a new eth private key"
 
 
 def test_initialization():
     """Test the initialisation of the variables."""
-    account = EthCrypto()
+    account = EthereumCrypto()
     assert account.address is not None, "After creation the display address must not be None"
-    assert account._bytes_representation is not None, "After creation the bytes_representation of the " \
-                                                      "address must not be None"
     assert account.public_key is not None, "After creation the public key must no be None"
 
 
 def test_sign_transaction():
     """Test the signing function for the eth_crypto."""
-    account = EthCrypto(PRIVATE_KEY_PATH)
+    account = EthereumCrypto(PRIVATE_KEY_PATH)
     sign_bytes = account.sign_transaction('Hello')
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
