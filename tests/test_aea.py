@@ -232,7 +232,7 @@ class TestResources:
 
         mailbox = MailBox(DummyConnection())
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path})
+        wallet = Wallet({'default': private_key_pem_path}, {})
         cls.aea = AEA("agent_name", mailbox, wallet, directory=str(Path(CUR_PATH, "data", "dummy_aea")))
         cls.resources = Resources.from_resource_dir(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.aea.context)
 

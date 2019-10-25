@@ -23,3 +23,4 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../../packages
+ledger_apis: []
