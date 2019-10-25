@@ -106,5 +106,6 @@ class LedgerApis(object):
 
         :return: str
         """
+        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         identity = Identity.from_hex(public_key)
         return Address(identity)

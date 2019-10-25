@@ -113,6 +113,6 @@ class AgentContext:
         return self._is_ready_to_pursuit_goals
 
     @property
-    def ledger_apis(self) -> Dict[str, Any]:
+    def ledger_apis(self) -> LedgerApis:
         """Get the ledger APIs."""
-        return self._ledger_apis.apis
+        return self._ledger_apis
