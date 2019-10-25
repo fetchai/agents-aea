@@ -81,6 +81,7 @@ class OwnershipState:
         or enough holdings if it is a seller.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
+        import pdb; pdb.set_trace()
         currency_pbk = tx_message.get("currency")
         currency_pbk = cast(str, currency_pbk)
         if tx_message.get("is_sender_buyer"):

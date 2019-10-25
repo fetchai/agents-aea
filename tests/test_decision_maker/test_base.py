@@ -22,7 +22,7 @@ from queue import Queue
 
 import pytest
 
-from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
+from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker, GoodEndowment, CurrencyHoldings
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import OutBox  # , Envelope
 
@@ -32,7 +32,7 @@ MAX_REACTIONS = 10
 class TestDecisionMakerBase:
     """Test the base.py for DecisionMaker."""
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Initialise the class."""
         cls.ownership_state = OwnershipState()
         cls.preferences = Preferences()
@@ -49,23 +49,32 @@ class TestDecisionMakerBase:
 
     def test_initialisation(self):
         """Test the initialisation of the ownership_state."""
-        currency_endowment = {"test_holdings": 2.0}
-        good_endowment = {"test_good_holdings": 2}
+        currency_endowment = {"FET": 100.0}
+        good_endowment = {"FET": 2}
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
         assert self.ownership_state.currency_holdings is not None
         assert self.ownership_state.good_holdings is not None
 
     def test_transaction_is_consistent(self):
         """Test the consistency of the transaction message."""
+        currency_endowment = {"FET": 100.0}
+        good_endowment = {"FET": 2}
+        self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
+        tx_message = TransactionMessage(transaction_id="transaction0",
+                                        sender="agent_1",
+                                        counterparty="pk",
+                                        is_sender_buyer=True,
+                                        currency_pbk="FET",
+                                        amount=1,
+                                        sender_tx_fee=0.0,
+                                        counterparty_tx_fee=0.0,
+                                        quantities_by_good_pbk={"FET": 10})
 
-        msg = TransactionMessage(transaction_id="transaction0",
-                                 sender="agent_1",
-                                 counterparty="pk",
-                                 is_sender_buyer=True,
-                                 currency="FET",
-                                 amount=1,
-                                 sender_tx_fee=1.0,
-                                 counterparty_tx_fee=0.0,
-                                 quantities_by_good_pbk={"FET": 10})
-        # tx_message = TransactionMessage()
+        assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message),\
+            "We should have the money for the transaction!"
 
+    @classmethod
+    def teardown_class(cls):
+        """ teardown any state that was previously setup with a call to
+        setup_class.
+        """
