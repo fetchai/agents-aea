@@ -14,10 +14,6 @@ handlers:
       class_name: MyWeatherHandler
       args:
         foo: bar
-tasks:
-  - task:
-      class_name: MyWeatherTask
-      args:
-        foo: bar
+tasks: []
 shared_classes: []
 protocols: ['fipa']

@@ -138,18 +138,19 @@ class MyWeatherHandler(Handler):
         command['fetched_data'] = []
         counter = 0
         for items in self.fetched_data:
-            dict_of_data = {}
-            dict_of_data['abs_pressure'] = items[0]
-            dict_of_data['delay'] = items[1]
-            dict_of_data['hum_in'] = items[2]
-            dict_of_data['hum_out'] = items[3]
-            dict_of_data['idx'] = time.ctime(int(items[4]))
-            dict_of_data['rain'] = items[5]
-            dict_of_data['temp_in'] = items[6]
-            dict_of_data['temp_out'] = items[7]
-            dict_of_data['wind_ave'] = items[8]
-            dict_of_data['wind_dir'] = items[9]
-            dict_of_data['wind_gust'] = items[10]
+            dict_of_data = {
+                'abs_pressure': items[0],
+                'delay': items[1],
+                'hum_in': items[2],
+                'hum_out': items[3],
+                'idx': time.ctime(int(items[4])),
+                'rain': items[5],
+                'temp_in': items[6],
+                'temp_out': items[7],
+                'wind_ave': items[8],
+                'wind_dir': items[9],
+                'wind_gust': items[10]
+            }
             command['fetched_data'].append(dict_of_data)  # type: ignore
             counter += 1
             if counter == 10:

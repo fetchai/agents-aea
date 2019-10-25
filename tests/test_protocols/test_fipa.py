@@ -196,7 +196,7 @@ def test_performative_inform():
                       dialogue_id=0,
                       target=1,
                       performative=FIPAMessage.Performative.INFORM,
-                      data=b'HelloWorld')
+                      json_data={"foo": "bar"})
 
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",

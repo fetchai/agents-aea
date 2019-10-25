@@ -19,6 +19,7 @@
 
 """This test module contains the tests for the OEF communication using an OEF."""
 import logging
+import os
 import time
 from queue import Queue
 from typing import cast
@@ -32,7 +33,7 @@ from oef.query import ConstraintExpr
 from aea.configurations.base import ConnectionConfig
 from aea.connections.oef.connection import OEFMailBox, OEFConnection, OEFChannel
 from aea.connections.oef.connection import OEFObjectTranslator
-from aea.crypto.base import DefaultCrypto
+from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
@@ -44,6 +45,7 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, DataModel, Attribute, Query, Constraint, ConstraintType, \
     ConstraintTypes
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from ...conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -340,6 +342,52 @@ class TestFIPA:
         expected_decline = FIPASerializer().decode(envelope.message)
         assert expected_decline == decline
 
+    def test_match_accept_w_address(self):
+        """Test that a match accept with address can be sent correctly."""
+        match_accept_w_address = FIPAMessage(message_id=0,
+                                             dialogue_id=0,
+                                             target=0,
+                                             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
+                                             address='my_address')
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
+                                         sender=self.crypto1.public_key,
+                                         protocol_id=FIPAMessage.protocol_id,
+                                         message=FIPASerializer().encode(match_accept_w_address))
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        returned_match_accept_w_address = FIPASerializer().decode(envelope.message)
+        assert returned_match_accept_w_address == match_accept_w_address
+
+    def test_accept_w_address(self):
+        """Test that an accept with address can be sent correctly."""
+        accept_w_address = FIPAMessage(message_id=0,
+                                       dialogue_id=0,
+                                       target=0,
+                                       performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
+                                       address='my_address')
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
+                                         sender=self.crypto1.public_key,
+                                         protocol_id=FIPAMessage.protocol_id,
+                                         message=FIPASerializer().encode(accept_w_address))
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        returned_accept_w_address = FIPASerializer().decode(envelope.message)
+        assert returned_accept_w_address == accept_w_address
+
+    def test_inform(self):
+        """Test that an inform can be sent correctly."""
+        payload = {'foo': 'bar'}
+        inform = FIPAMessage(message_id=0,
+                             dialogue_id=0,
+                             target=0,
+                             performative=FIPAMessage.Performative.INFORM,
+                             json_data=payload)
+        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
+                                         sender=self.crypto1.public_key,
+                                         protocol_id=FIPAMessage.protocol_id,
+                                         message=FIPASerializer().encode(inform))
+        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        returned_inform = FIPASerializer().decode(envelope.message)
+        assert returned_inform == inform
+
     def test_serialisation_fipa(self):
         """Tests a Value Error flag for wrong CFP query."""
         with pytest.raises(ValueError):
@@ -348,8 +396,9 @@ class TestFIPA:
                 message_id=0,
                 dialogue_id=0,
                 destination="publicKey",
-                target=1)
-            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") \
+                target=1,
+                query=None)
+            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
                     as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 assert FIPASerializer().encode(msg), "Raises Value Error"
@@ -393,7 +442,8 @@ class TestFIPA:
 
     def test_on_oef_error(self):
         """Test the oef error."""
-        wallet = Wallet({'default': None})
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path}, {})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
@@ -409,7 +459,8 @@ class TestFIPA:
 
     def test_on_dialogue_error(self):
         """Test the dialogue error."""
-        wallet = Wallet({'default': None})
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path}, {})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
@@ -435,7 +486,8 @@ class TestFIPA:
 
     def test_send_oef_message(self):
         """Test the send oef message."""
-        wallet = Wallet({'default': None})
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path}, {})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
