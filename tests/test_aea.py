@@ -19,17 +19,27 @@
 """This module contains the tests for aea/aea.py."""
 import os
 import time
+import unittest.mock
 from pathlib import Path
+from queue import Queue
 from threading import Thread
 
+import pytest
+from aea.decision_maker.messages.transaction import TransactionMessage
+
+from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
+
+import aea.cli.common
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
-from aea.mail.base import MailBox, Envelope
+from aea.mail.base import MailBox, Envelope, OutBox
+from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
+from aea.registries.base import ProtocolRegistry, HandlerRegistry, Resources
 from .conftest import CUR_PATH, DummyConnection
 
 
@@ -172,3 +182,58 @@ def test_handle():
     finally:
         agent.stop()
         t.join()
+
+
+class TestProtocolRegistry:
+    """Test the protocol registry."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, 'exception')
+        cls.mocked_logger = cls.patch.__enter__()
+
+        cls.registry = ProtocolRegistry()
+        cls.registry.populate(os.path.join(CUR_PATH, "data", "dummy_aea"))
+        cls.expected_protocol_ids = {"default", "fipa"}
+
+    def test_not_able_to_add_bad_formatted_protocol_message(self):
+        """Test that the protocol registry has not been able to add the protocol 'bad'."""
+        self.mocked_logger.assert_called_with("Not able to add protocol bad.")
+
+    def test_fetch_all(self):
+        """Test that the 'fetch_all' method works as expected."""
+        protocols = self.registry.fetch_all()
+        assert all(isinstance(p, Protocol) for p in protocols)
+        assert set(p.id for p in protocols) == self.expected_protocol_ids
+
+    def test_unregister(self):
+        """Test that the 'unregister' method works as expected."""
+        protocol_id_removed = "default"
+        protocol_removed = self.registry.fetch(protocol_id_removed)
+        self.registry.unregister(protocol_id_removed)
+        expected_protocols_ids = set(self.expected_protocol_ids)
+        expected_protocols_ids.remove(protocol_id_removed)
+
+        assert set(p.id for p in self.registry.fetch_all()) == expected_protocols_ids
+
+        # restore the protocol
+        self.registry.register((protocol_id_removed, None), protocol_removed)
+
+
+class TestResources:
+    """Test the resources class."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, 'exception')
+        cls.mocked_logger = cls.patch.__enter__()
+
+        mailbox = MailBox(DummyConnection())
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path})
+        cls.aea = AEA("agent_name", mailbox, wallet, directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        cls.resources = Resources.from_resource_dir(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.aea.context)
+
+        cls.expected_skills = {"dummy", "error"}

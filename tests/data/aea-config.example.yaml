@@ -18,7 +18,7 @@ protocols:
 - fipa
 skills:
 - echo_skill
-description: "aea-config example agent description [Fill in]"
+description: "An example of agent configuration file for testing purposes."
 logging_config:
   disable_existing_loggers: false
   version: 1

@@ -317,7 +317,7 @@ class BehaviourRegistry(Registry):
         """
         Register a behaviour.
 
-        :param skill_id: the skill id.
+        :param ids: the skill id.
         :param behaviours: the behaviours of the skill.
         :return: None
         """
@@ -384,7 +384,7 @@ class TaskRegistry(Registry):
         """
         Register a task.
 
-        :param skill_id: the skill id.
+        :param ids: the skill id.
         :param tasks: the tasks list.
         :return: None
         """
