@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
-from typing import Dict, Tuple, cast
+from typing import Dict, cast
 
 from aea.crypto.base import Crypto
 from aea.crypto.default import DefaultCrypto, DEFAULT

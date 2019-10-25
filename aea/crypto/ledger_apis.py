@@ -20,9 +20,19 @@
 
 """Module wrapping all the public and private keys cryptography."""
 
-LEDGER_IDENTIFIERS
+import logging
+from typing import Any, Dict, Optional, Tuple
 
-DEFAULT_FETCHAI_CONFIG = ("127.0.0.1", 8000)
+from fetchai.ledger.api import LedgerApi as FetchLedgerApi  # type: ignore
+from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
+
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
+
+DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
+
+logger = logging.getLogger(__name__)
+
 
 class LedgerApis(object):
     """Store all the ledger apis we initialise."""
@@ -35,10 +45,10 @@ class LedgerApis(object):
         :param ledger_api_configs: the ledger api configs
         """
         apis = {}  # type: Dict[str, Any]
-        for identifier, configs in ledger_api_configs.items():
+        for identifier, config in ledger_api_configs.items():
             if identifier == FETCHAI:
-            	api = LedgerApi(self._ledger_api_config[0], self._ledger_api_config[1])
-            	apis[identifier] = api
+                api = FetchLedgerApi(config[0], config[1])
+                apis[identifier] = api
             elif identifier == ETHEREUM:
                 NotImplementedError
             else:
@@ -46,27 +56,28 @@ class LedgerApis(object):
         self._apis = apis
 
     @property
-    def apis(self):
+    def apis(self) -> Dict[str, Any]:
         """Get the apis."""
         return self._apis
 
-    @property
-    def token_balance(self, identifier: str) -> float:
+    def token_balance(self, identifier: str, address: str) -> float:
         """
         Get the token balance.
 
+        :param identifier: the identifier of the ledger
+        :param address: the address to check for
         :return: the token balance
         """
-        assert identifier in LEDGER_IDENTIFIERS
+        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         try:
             api = self.apis[identifier]
-            token_balance = api.tokens.balance(self.address)
+            balance = api.tokens.balance(address)
         except Exception:
             logger.warning("An error occurred while attempting to get the current balance.")
-            token_balance = 0.0
-        return token_balance
+            balance = 0.0
+        return balance
 
-    def transfer(self, identifier: str, entity, destination_address: str, amount: float, tx_fee: float) -> bool:
+    def transfer(self, identifier: str, entity: Entity, destination_address: str, amount: float, tx_fee: float) -> Optional[str]:
         """
         Transfer from self to destination.
 
@@ -74,33 +85,22 @@ class LedgerApis(object):
         :param amount: the amount
         :param tx_fee: the tx fee
 
-        :return: bool indicating success
+        :return: tx digest if successful, otherwise None
         """
+        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         try:
             api = self.apis[identifier]
-            logger.info("Waiting for the validation of the transaction...")
-            tx_digest = api.tokens.transfer(self._entity, destination_address, amount, tx_fee)
+            logger.info("Waiting for the validation of the transaction ...")
+            tx_digest = api.tokens.transfer(entity, destination_address, amount, tx_fee)
             api.sync(tx_digest)
-            logger.info("Done!")
-            success = True
+            logger.info("Transaction validated ...")
         except Exception:
             logger.warning("An error occurred while attempting the transfer.")
-            success = False
-        return success
-
-    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
-        """
-        Generate the address from the public key.
-
-        :param counterparty_pbk: the public key of the counterparty
-
-        :return: the address
-        """
-        address = Address(Identity.from_hex(counterparty_pbk))
-        return address
+            tx_digest = None
+        return tx_digest
 
     @staticmethod
-    def get_address_from_public_key(public_key: str) -> Address:
+    def get_address_from_public_key(self, public_key: str) -> Address:
         """
         Get the address from the public key.
 
@@ -108,13 +108,3 @@ class LedgerApis(object):
         """
         identity = Identity.from_hex(public_key)
         return Address(identity)
-        
-    def sign_transaction(self, message: bytes) -> bytes:
-        """
-        Sing a transaction to send it to the ledger.
-
-        :param message:
-        :return: Signed message in bytes
-        """
-        signature = self._entity.sign(message)
-        return signature

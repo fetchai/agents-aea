@@ -27,6 +27,7 @@ from typing import Dict, List, Optional, cast
 
 from aea.crypto.base import Crypto
 from aea.crypto.wallet import Wallet, CURRENCY_TO_ID_MAP
+from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.mail.base import OutBox  # , Envelope
@@ -234,7 +235,7 @@ class Preferences:
 class DecisionMaker:
     """This class implements the decision maker."""
 
-    def __init__(self, max_reactions: int, outbox: OutBox, wallet: Wallet):
+    def __init__(self, max_reactions: int, outbox: OutBox, wallet: Wallet, ledger_apis: LedgerApis):
         """
         Initialize the decision maker.
 
@@ -244,6 +245,7 @@ class DecisionMaker:
         self.max_reactions = max_reactions
         self._outbox = outbox
         self._wallet = wallet
+        self._ledger_apis = ledger_apis
         self._message_in_queue = Queue()  # type: Queue
         self._message_out_queue = Queue()  # type: Queue
         self._ownership_state = OwnershipState()
@@ -259,6 +261,11 @@ class DecisionMaker:
     def message_out_queue(self) -> Queue:
         """Get (out) queue."""
         return self._message_out_queue
+
+    @property
+    def ledger_apis(self) -> LedgerApis:
+        """Get outbox."""
+        return self._ledger_apis
 
     @property
     def outbox(self) -> OutBox:
@@ -305,17 +312,6 @@ class DecisionMaker:
         elif isinstance(message, StateUpdateMessage):
             self._handle_state_update_message(message)
 
-    def get_wallet_balance(self, currency_pbk) -> float:
-        """
-        Get the wallet balance of the agent.
-
-        :param message: the message
-        """
-        crypto_identifier = CURRENCY_TO_ID_MAP.get(currency_pbk)
-        crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
-        balance = crypto_object.token_balance
-        return balance
-
     def _handle_tx_message(self, tx_message: TransactionMessage) -> None:
         """
         Handle a transaction message.
@@ -326,15 +322,17 @@ class DecisionMaker:
         crypto_identifier = CURRENCY_TO_ID_MAP.get(cast(str, tx_message.get("currency_pbk")))
         amount = cast(float, tx_message.get("amount"))
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
+        counterparty_address = crypto_object.generate_counterparty_address(cast(str, tx_message.get("counterparty")))
 
         # check if the transaction is acceptable
         if self._is_acceptable_tx(crypto_object, amount):
-            tx_digest = self._settle_tx(crypto_object, cast(str, tx_message.get("counterparty")), amount, cast(float, tx_message.get("sender_tx_fee")))
-            tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.ACCEPT, transaction_digest=tx_digest)
+            tx_digest = self._settle_tx(crypto_object, counterparty_address, amount, cast(float, tx_message.get("sender_tx_fee")))
+            if tx_digest is not None:
+                tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.ACCEPT, transaction_digest=tx_digest)
+            else:
+                NotImplementedError
         else:
             tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.REJECT)
-
-        # Notify the relevant skill that we processed the transaction.
         self.message_out_queue.put(tx_message_response)
 
     def _is_acceptable_tx(self, crypto_object: Crypto, amount: float) -> bool:
@@ -345,24 +343,22 @@ class DecisionMaker:
         :param amount: the tx amount
         :return: whether the transaction is acceptable or not
         """
-        balance = cast(float, crypto_object.token_balance)
-        affordable = amount <= balance
+        balance = self.ledger_apis.token_balance(crypto_object.identifier, cast(str, crypto_object.address))
+        affordable = amount <= cast(float, balance)
         # TODO check against preferences and other constraints
         return affordable
 
-    def _settle_tx(self, crypto_object: Crypto, counterparty_pbk: str, amount: float, tx_fee: float) -> str:
+    def _settle_tx(self, crypto_object: Crypto, counterparty_address: str, amount: float, tx_fee: float) -> Optional[str]:
         """
         Settle the tx.
 
         :param crypto_object: the crypto object
-        :param counterparty_pbk: the counterparty pbk
+        :param counterparty_address: the counterparty address
         :param amount: the tx amount
         :param tx_fee: the tx fee
         :return: the transaction digest
         """
-        counterparty_address = crypto_object.generate_counterparty_address(counterparty_pbk)
-        crypto_object.transfer(counterparty_address, amount, tx_fee)
-        tx_digest = 'something'  # TODO: get tx_digest from the ledger api
+        tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object.entity, counterparty_address, amount, tx_fee)
         return tx_digest
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:

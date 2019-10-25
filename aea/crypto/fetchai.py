@@ -20,11 +20,11 @@
 
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
-from fetchai.ledger.api import LedgerApi
-from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
 import logging
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
+
+from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
 
 from aea.crypto.base import Crypto
 
@@ -46,6 +46,12 @@ class FetchAICrypto(Crypto):
         :param ledger_api_config: the ledger api config
         """
         self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        self._address = str(Address(Identity.from_hex(self.public_key)))
+
+    @property
+    def entity(self) -> Entity:
+        """Get the entity."""
+        return self._entity
 
     @property
     def public_key(self) -> str:
@@ -63,7 +69,7 @@ class FetchAICrypto(Crypto):
 
         :return: a display_address str
         """
-        return str(Address(Identity.from_hex(self.public_key)))
+        return self._address
 
     def _load_private_key_from_path(self, file_name) -> Entity:
         """
@@ -90,3 +96,13 @@ class FetchAICrypto(Crypto):
     def _generate_private_key(self) -> Entity:
         entity = Entity()
         return entity
+
+    def sign_transaction(self, message: bytes) -> bytes:
+        """
+        Sing a transaction to send it to the ledger.
+
+        :param message:
+        :return: Signed message in bytes
+        """
+        signature = self._entity.sign(message)
+        return signature
