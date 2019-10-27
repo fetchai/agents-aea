@@ -235,14 +235,18 @@ class Preferences:
 class DecisionMaker:
     """This class implements the decision maker."""
 
-    def __init__(self, max_reactions: int, outbox: OutBox, wallet: Wallet, ledger_apis: LedgerApis):
+    def __init__(self, agent_name: str, max_reactions: int, outbox: OutBox, wallet: Wallet, ledger_apis: LedgerApis):
         """
         Initialize the decision maker.
 
+        :param agent_name: the name of the agent
         :param max_reactions: the processing rate of messages per iteration.
         :param outbox: the outbox
+        :param wallet: the wallet
+        :param ledger_apis: the ledger apis
         """
-        self.max_reactions = max_reactions
+        self._max_reactions = max_reactions
+        self._agent_name = agent_name
         self._outbox = outbox
         self._wallet = wallet
         self._ledger_apis = ledger_apis
@@ -294,7 +298,7 @@ class DecisionMaker:
         :return: None
         """
         counter = 0
-        while not self.message_in_queue.empty() and counter < self.max_reactions:
+        while not self.message_in_queue.empty() and counter < self._max_reactions:
             counter += 1
             message = self.message_in_queue.get_nowait()  # type: Optional[Message]
             if message is not None:
@@ -319,36 +323,49 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
+        # get variables
         crypto_identifier = CURRENCY_TO_ID_MAP.get(cast(str, tx_message.get("currency_pbk")))
-        amount = cast(float, tx_message.get("amount"))
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
-        counterparty_address = crypto_object.generate_counterparty_address(cast(str, tx_message.get("counterparty")))
+        amount = cast(int, tx_message.get("amount"))
+        counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
+        sender_tx_fee = cast(int, tx_message.get("sender_tx_fee"))
+        counterparty_address = cast(str, tx_message.get("counterparty"))
 
-        # check if the transaction is acceptable
-        if self._is_acceptable_tx(crypto_object, amount):
-            tx_digest = self._settle_tx(crypto_object, counterparty_address, amount, cast(float, tx_message.get("sender_tx_fee")))
+        # adjust payment amount to reflect transaction fee split
+        amount -= counterparty_tx_fee
+        tx_fee = counterparty_tx_fee + sender_tx_fee
+        payable = amount + tx_fee
+
+        # check if the transaction is acceptable and process it accordingly
+        if self._is_acceptable_tx(crypto_object, payable):
+            tx_digest = self._settle_tx(crypto_object, counterparty_address, amount, tx_fee)
             if tx_digest is not None:
-                tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.ACCEPT, transaction_digest=tx_digest)
+                tx_message_response = TransactionMessage.respond_with(tx_message,
+                                                                      performative=TransactionMessage.Performative.ACCEPT,
+                                                                      transaction_digest=tx_digest)
             else:
-                NotImplementedError
+                tx_message_response = TransactionMessage.respond_with(tx_message,
+                                                                      performative=TransactionMessage.Performative.REJECT)
         else:
-            tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.REJECT)
+            tx_message_response = TransactionMessage.respond_with(tx_message,
+                                                                  performative=TransactionMessage.Performative.REJECT)
         self.message_out_queue.put(tx_message_response)
 
-    def _is_acceptable_tx(self, crypto_object: Crypto, amount: float) -> bool:
+    def _is_acceptable_tx(self, crypto_object: Crypto, payable: int) -> bool:
         """
         Check if the tx is acceptable.
 
         :param crypto_object: the crypto object
-        :param amount: the tx amount
+        :param payable: the payable amount
         :return: whether the transaction is acceptable or not
         """
+        is_correct_format = isinstance(payable, int)
         balance = self.ledger_apis.token_balance(crypto_object.identifier, cast(str, crypto_object.address))
-        affordable = amount <= cast(float, balance)
+        is_affordable = payable <= balance
         # TODO check against preferences and other constraints
-        return affordable
+        return is_correct_format and is_affordable
 
-    def _settle_tx(self, crypto_object: Crypto, counterparty_address: str, amount: float, tx_fee: float) -> Optional[str]:
+    def _settle_tx(self, crypto_object: Crypto, counterparty_address: str, amount: int, tx_fee: int) -> Optional[str]:
         """
         Settle the tx.
 

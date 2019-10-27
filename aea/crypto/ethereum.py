@@ -104,3 +104,13 @@ class EthereumCrypto(Crypto):
         """Generate a key pair for ethereum network."""
         account = Account.create()
         return account
+
+    @staticmethod
+    def get_address_from_public_key(self, public_key: str) -> str:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+        pass

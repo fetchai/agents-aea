@@ -20,7 +20,7 @@
 """This module contains the agent context class."""
 
 from queue import Queue
-from typing import Dict, Any
+from typing import Dict
 
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox

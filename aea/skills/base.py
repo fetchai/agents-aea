@@ -32,6 +32,7 @@ from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, 
     ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
+from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
@@ -108,7 +109,7 @@ class SkillContext:
         return self._agent_context.is_ready_to_pursuit_goals
 
     @property
-    def ledger_apis(self) -> Dict[str, Any]:
+    def ledger_apis(self) -> LedgerApis:
         """Get ledger APIs."""
         return self._agent_context.ledger_apis
 

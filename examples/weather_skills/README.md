@@ -1,6 +1,9 @@
-# Weather client
+# Weather station and client example
 
-A guide to create an AEA with the gym_skill.
+A guide to create two AEAs, one a weather station selling weather data, another a 
+purchaser (client) of weather data. The AEAs use the Fetch.ai ledger to settle their 
+trade. This setup assumes the weather client trusts the weather station to send the data
+upon successful payment.
 
 ## Quick start
 
@@ -21,6 +24,12 @@ A guide to create an AEA with the gym_skill.
       cd weather_client 
       aea add skill weather_client
       aea run
+
+- Afterwards, clean up:
+      
+      cd ..
+      aea delete weather_station
+      aea delete weather_client
 
 
 ## Using the ledger
@@ -53,10 +62,16 @@ ledger_apis:
     addr: alpha.fetch-ai.com
     port: 80
 ```
+- Generate the private key for the weather client:
 
-- After you run the client (so the private key is created), generate some wealth to your weather client FET address (it takes a while):
+     aea run
+
+Stop the agent again with `CTRL + C`.
+
+- Generate some wealth to your weather client FET address (it takes a while):
 ```
+cd ..
 python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
 ```
 
-- Run the agents, as in the previous section.
+- Run both agents, as in the previous section.

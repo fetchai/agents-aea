@@ -52,3 +52,13 @@ class Crypto(ABC):
 
         :return: an address string
         """
+
+    @staticmethod
+    @abstractmethod
+    def get_address_from_public_key(self, public_key: str) -> str:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
