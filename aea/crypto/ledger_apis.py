@@ -51,9 +51,9 @@ class LedgerApis(object):
                 api = FetchLedgerApi(config[0], config[1])
                 apis[identifier] = api
             elif identifier == ETHEREUM:
-                NotImplementedError
+                raise NotImplementedError
             else:
-                ValueError("Unsupported identifier in private key paths.")
+                raise ValueError("Unsupported identifier in private key paths.")
         self._apis = apis
 
     @property
@@ -132,7 +132,7 @@ class LedgerApis(object):
 
         :param identifier: the identifier
         :param public_key: the public key
-        :return: str
+        :return: the address
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         identity = Identity.from_hex(public_key)
