@@ -41,7 +41,11 @@ class EthereumCrypto(Crypto):
     identifier = ETHEREUM
 
     def __init__(self, private_key_path: Optional[str] = None):
-        """Instantiate a crypto object."""
+        """
+        Instantiate an ethereum crypto object.
+
+        :param private_key_path: the private key path of the agent
+        """
         self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
         bytes_representation = Web3.toBytes(hexstr=self._account.privateKey.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
