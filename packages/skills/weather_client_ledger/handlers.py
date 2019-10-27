@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a handler."""
 import logging
+import pprint
 from typing import Optional, cast, List, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
@@ -141,12 +142,14 @@ class FIPAHandler(Handler):
             proposal = proposals[0]
             logger.info("[{}]: received proposal={} from sender={}".format(self.context.agent_name,
                                                                            proposal.values,
-                                                                           sender))
+                                                                           sender[-5:]))
             strategy = cast(Strategy, self.context.strategy)
-            if strategy.is_acceptable_proposal(proposal):
+            acceptable = strategy.is_acceptable_proposal(proposal)
+            affordable = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai'))) >= cast(int, proposal.values.get('price'))
+            if acceptable and affordable:
                 strategy.is_searching = False
                 logger.info("[{}]: accepting the proposal from sender={}".format(self.context.agent_name,
-                                                                                 sender))
+                                                                                 sender[-5:]))
                 dialogue.proposal = proposal
                 accept_msg = FIPAMessage(message_id=new_message_id,
                                          dialogue_id=dialogue_id,
@@ -159,7 +162,7 @@ class FIPAHandler(Handler):
                                                 message=FIPASerializer().encode(accept_msg))
             else:
                 logger.info("[{}]: declining the proposal from sender={}".format(self.context.agent_name,
-                                                                                 sender))
+                                                                                 sender[-5:]))
                 decline_msg = FIPAMessage(message_id=new_message_id,
                                           dialogue_id=dialogue_id,
                                           target=new_target_id,
@@ -181,13 +184,13 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name, sender))
-        target = msg.get("target")
-        dialogues = cast(Dialogues, self.context.dialogues)
-        if target == 1:
-            dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP)
-        elif target == 3:
-            dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT)
+        logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name, sender[-5:]))
+        # target = msg.get("target")
+        # dialogues = cast(Dialogues, self.context.dialogues)
+        # if target == 1:
+        #     dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP)
+        # elif target == 3:
+        #     dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT)
 
     def _handle_match_accept(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
         """
@@ -200,40 +203,23 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = message_id + 1
-        new_target_id = message_id
-        logger.info("[{}]: received MATCH_ACCEPT_W_ADDRESS from sender={}".format(self.context.agent_name, sender))
+        logger.info("[{}]: received MATCH_ACCEPT_W_ADDRESS from sender={}".format(self.context.agent_name, sender[-5:]))
         address = cast(str, msg.get("address"))
         proposal = cast(Description, dialogue.proposal)
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                    skill="weather_client_ledger_skill",
+                                    skill_id="weather_client_ledger",
                                     transaction_id="transaction0",
                                     sender=self.context.agent_public_keys['fetchai'],
                                     counterparty=address,
                                     is_sender_buyer=True,
                                     currency_pbk="FET",
                                     amount=proposal.values['price'],
-                                    sender_tx_fee=1.0,
-                                    counterparty_tx_fee=0.0,
-                                    quantities_by_good_pbk={})
+                                    sender_tx_fee=0,
+                                    counterparty_tx_fee=0,
+                                    quantities_by_good_pbk={},
+                                    dialogue_label=dialogue.dialogue_label.json)
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
-
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
-        tx_msg_response = self.context.message_in_queue.get(block=True, timeout=20.0)
-        if tx_msg_response is not None and \
-                tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
-            json_data = {'transaction_digest': tx_msg_response.transaction_digest}
-            inform_msg = FIPAMessage(message_id=new_message_id,
-                                     dialogue_id=dialogue_id,
-                                     target=new_target_id,
-                                     performative=FIPAMessage.Performative.INFORM,
-                                     json_data=json_data)
-            dialogue.outgoing_extend(inform_msg)
-            self.context.outbox.put_message(to=sender,
-                                            sender=self.context.agent_public_key,
-                                            protocol_id=FIPAMessage.protocol_id,
-                                            message=FIPASerializer().encode(inform_msg))
-            logger.info("[{}]: informing sender={} of tx digest.".format(self.context.agent_name, sender))
 
     def _handle_inform(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
         """
@@ -246,15 +232,17 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, sender))
+        logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, sender[-5:]))
         json_data = cast(dict, msg.get("json_data"))
         if 'weather_data' in json_data.keys():
             weather_data = json_data['weather_data']
-            logger.info("[{}]: received the following weather data={}".format(self.context.agent_name, weather_data))
-            dialogues = cast(Dialogues, self.context.dialogues)
-            dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
+            logger.info("[{}]: received the following weather data={}".format(self.context.agent_name,
+                                                                              pprint.pformat(weather_data)))
+            # dialogues = cast(Dialogues, self.context.dialogues)
+            # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
         else:
-            logger.info("[{}]: received no data from sender={}".format(self.context.agent_name, sender))
+            logger.info("[{}]: received no data from sender={}".format(self.context.agent_name,
+                                                                       sender[-5:]))
 
 
 class OEFHandler(Handler):
@@ -302,7 +290,7 @@ class OEFHandler(Handler):
         :return: None
         """
         if len(agents) > 0:
-            logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, agents))
+            logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
             strategy = cast(Strategy, self.context.strategy)
             # stopping search
             strategy.is_searching = False
@@ -311,7 +299,7 @@ class OEFHandler(Handler):
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key)
             query = strategy.get_service_query()
-            logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk))
+            logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
             cfp_msg = FIPAMessage(message_id=STARTING_MESSAGE_ID,
                                   dialogue_id=dialogue.dialogue_label.dialogue_id,
                                   performative=FIPAMessage.Performative.CFP,
@@ -323,4 +311,4 @@ class OEFHandler(Handler):
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(cfp_msg))
         else:
-            logger.info("[{}]: found no agents={}, continue searching.".format(self.context.agent_name, agents))
+            logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))

@@ -21,9 +21,10 @@
 """Module wrapping all the public and private keys cryptography."""
 
 import logging
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, cast
 
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi  # type: ignore
+# from fetchai.ledger.api.tx import TxStatus
 from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
 
 from aea.crypto.ethereum import ETHEREUM
@@ -60,7 +61,7 @@ class LedgerApis(object):
         """Get the apis."""
         return self._apis
 
-    def token_balance(self, identifier: str, address: str) -> float:
+    def token_balance(self, identifier: str, address: str) -> int:
         """
         Get the token balance.
 
@@ -74,10 +75,10 @@ class LedgerApis(object):
             balance = api.tokens.balance(address)
         except Exception:
             logger.warning("An error occurred while attempting to get the current balance.")
-            balance = 0.0
+            balance = 0
         return balance
 
-    def transfer(self, identifier: str, entity: Entity, destination_address: str, amount: float, tx_fee: float) -> Optional[str]:
+    def transfer(self, identifier: str, entity: Entity, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
         """
         Transfer from self to destination.
 
@@ -98,6 +99,31 @@ class LedgerApis(object):
             logger.warning("An error occurred while attempting the transfer.")
             tx_digest = None
         return tx_digest
+
+    def is_tx_settled(self, identifier: str, tx_digest: str, amount: int) -> bool:
+        """
+        Check whether the transaction is settled and correct.
+
+        :param identifier: the identifier of the ledger
+        :param tx_digest: the transaction digest
+        :param amount: the amount
+        :return: True if correctly settled, False otherwise
+        """
+        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
+        is_successful = False
+        try:
+            api = self.apis[identifier]
+            logger.info("Checking the transaction ...")
+            # tx_status = cast(TxStatus, api.tx.status(tx_digest))
+            tx_status = cast(str, api.tx.status(tx_digest))
+            SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
+            if tx_status in SUCCESSFUL_TERMINAL_STATES:
+                # TODO: check the amount of the transaction is correct
+                is_successful = True
+            logger.info("Transaction validated ...")
+        except Exception:
+            logger.warning("An error occurred while attempting to check the transaction.")
+        return is_successful
 
     @staticmethod
     def get_address_from_public_key(self, identifier: str, public_key: str) -> Address:

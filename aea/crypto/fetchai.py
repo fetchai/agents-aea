@@ -40,10 +40,9 @@ class FetchAICrypto(Crypto):
 
     def __init__(self, private_key_path: Optional[str] = None):
         """
-        Instantiate a crypto object.
+        Instantiate a fetchai crypto object.
 
         :param private_key_path: the private key path of the agent
-        :param ledger_api_config: the ledger api config
         """
         self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
         self._address = str(Address(Identity.from_hex(self.public_key)))
@@ -106,3 +105,14 @@ class FetchAICrypto(Crypto):
         """
         signature = self._entity.sign(message)
         return signature
+
+    @staticmethod
+    def get_address_from_public_key(self, public_key: str) -> Address:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+        identity = Identity.from_hex(public_key)
+        return Address(identity)

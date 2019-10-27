@@ -145,7 +145,7 @@ def _verify_ledger_apis_access(ctx: Context) -> None:
     else:
         ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
         try:
-            pass
+            raise NotImplementedError
             # TODO connect to ledger
         except Exception:
             logger.error("Cannot connect to ethereum ledger with provided config.")

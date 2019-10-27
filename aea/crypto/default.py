@@ -280,3 +280,13 @@ class DefaultCrypto(Crypto):
         :return: bytes (pem format)
         """
         return pvk.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.TraditionalOpenSSL, serialization.NoEncryption())  # type: ignore
+
+    @staticmethod
+    def get_address_from_public_key(self, public_key: str) -> str:
+        """
+        Get the address from the public key.
+
+        :param public_key: the public key
+        :return: str
+        """
+        raise NotImplementedError

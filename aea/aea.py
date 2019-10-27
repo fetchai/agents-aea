@@ -27,6 +27,7 @@ from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Envelope, MailBox
 from aea.registries.base import Resources
 from aea.skills.error.handlers import ErrorHandler
@@ -67,7 +68,8 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._decision_maker = DecisionMaker(self.max_reactions,
+        self._decision_maker = DecisionMaker(self.name,
+                                             self.max_reactions,
                                              self.outbox,
                                              self.wallet,
                                              ledger_apis)
@@ -175,6 +177,15 @@ class AEA(Agent):
         for task in self.resources.task_registry.fetch_all():
             task.execute()
         self.decision_maker.execute()
+        counter = 0
+        while not self.decision_maker.message_out_queue.empty() and counter < self.max_reactions:
+            counter += 1
+            tx_message = self.decision_maker.message_out_queue.get_nowait()  # type: Optional[TransactionMessage]
+            if tx_message is not None:
+                skill_id = cast(str, tx_message.get("skill_id"))
+                skill = self.resources._skills.get(skill_id)
+                if skill is not None:
+                    skill.skill_context.message_in_queue.put(tx_message)
 
     def teardown(self) -> None:
         """
