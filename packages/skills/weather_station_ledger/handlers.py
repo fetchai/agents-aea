@@ -222,9 +222,7 @@ class FIPAHandler(Handler):
             proposal = cast(Description, dialogue.proposal)
             total_price = proposal.values.get("price")
             # watch ledger for transaction (this setup assumes the weather client trusts the weather station)
-            fetchai_ledger_api = self.context.ledger_apis.get('fetchai')
-            # TODO:
-            fetchai_ledger_api.is_tx_settled(tx_digest, total_price)  # type: ignore
+            self.context.ledger_apis.is_tx_settled('fetchai', tx_digest, total_price)  # type: ignore
             if self.context.is_tx_settled(tx_digest, total_price):
                 token_balance = self.context.get_balance()
                 logger.info("[{}]: transaction={} settled, new balance={}. Sending data ...".format(self.context.agent_name,

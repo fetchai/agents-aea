@@ -24,6 +24,7 @@ from typing import Optional, cast
 
 from aea.agent import Agent
 from aea.context.base import AgentContext
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.mail.base import Envelope, MailBox
@@ -40,6 +41,7 @@ class AEA(Agent):
     def __init__(self, name: str,
                  mailbox: MailBox,
                  wallet: Wallet,
+                 ledger_apis: LedgerApis,
                  timeout: float = 0.0,
                  debug: bool = False,
                  max_reactions: int = 20,
@@ -50,6 +52,7 @@ class AEA(Agent):
         :param name: the name of the agent
         :param mailbox: the mailbox of the agent.
         :param wallet: the wallet of the agent.
+        :param ledger_apis: the ledger apis of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
@@ -64,10 +67,14 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._decision_maker = DecisionMaker(self.max_reactions, self.outbox, self.wallet)
+        self._decision_maker = DecisionMaker(self.max_reactions,
+                                             self.outbox,
+                                             self.wallet,
+                                             ledger_apis)
         self._context = AgentContext(self.name,
                                      self.wallet.public_keys,
                                      self.wallet.addresses,
+                                     ledger_apis,
                                      self.outbox,
                                      self.decision_maker.message_in_queue,
                                      self.decision_maker.ownership_state,

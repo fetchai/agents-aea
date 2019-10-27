@@ -47,6 +47,11 @@ class EthereumCrypto(Crypto):
         self._public_key = keys.PrivateKey(bytes_representation).public_key
 
     @property
+    def entity(self) -> Account:
+        """Get the entity."""
+        return self._account
+
+    @property
     def public_key(self) -> str:
         """
         Return a public key in hex format.
@@ -99,34 +104,3 @@ class EthereumCrypto(Crypto):
         """Generate a key pair for ethereum network."""
         account = Account.create()
         return account
-
-    @property
-    def token_balance(self) -> float:
-        """
-        Return the token balance.
-
-        :return: the token balance
-        """
-        pass
-
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
-        """
-        Transfer from self to destination.
-
-        :param destination_address: the address of the receive
-        :param amount: the amount
-        :param tx_fee: the tx fee
-
-        :return: bool indicating success
-        """
-        pass
-
-    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
-        """
-        Generate the address from the public key.
-
-        :param counterparty_pbk: the public key of the counterparty
-
-        :return: the address
-        """
-        pass

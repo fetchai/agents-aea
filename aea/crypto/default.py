@@ -64,6 +64,11 @@ class DefaultCrypto(Crypto):
         assert self._pbk_obj_to_b58(self._public_key_obj) == self._pbk_obj_to_b58(self._pbk_b58_to_obj(self._public_key_b58))
 
     @property
+    def entity(self) -> None:
+        """Get the entity."""
+        return None
+
+    @property
     def public_key(self) -> str:
         """
         Return a 219 character public key in base58 format.
@@ -275,33 +280,3 @@ class DefaultCrypto(Crypto):
         :return: bytes (pem format)
         """
         return pvk.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.TraditionalOpenSSL, serialization.NoEncryption())  # type: ignore
-
-    def token_balance(self) -> float:
-        """
-        Return the token balance.
-
-        :return: the token balance
-        """
-        pass
-
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
-        """
-        Transfer from self to destination.
-
-        :param destination_address: the address of the receive
-        :param amount: the amount
-        :param tx_fee: the tx fee
-
-        :return: bool indicating success
-        """
-        pass
-
-    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
-        """
-        Generate the address from the public key.
-
-        :param counterparty_pbk: the public key of the counterparty
-
-        :return: the address
-        """
-        pass
