@@ -66,7 +66,7 @@ ledger_apis:
 
      aea run
 
-Stop the agent again with `CTRL + C`.
+Stop the agent again with `CTRL + C`. You should see that the agent has no balance on Fetch.ai.
 
 - Generate some wealth to your weather client FET address (it takes a while):
 ```
