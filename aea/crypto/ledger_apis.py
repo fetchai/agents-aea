@@ -50,9 +50,9 @@ class LedgerApis(object):
                 api = FetchLedgerApi(config[0], config[1])
                 apis[identifier] = api
             elif identifier == ETHEREUM:
-                NotImplementedError
+                raise NotImplementedError
             else:
-                ValueError("Unsupported identifier in private key paths.")
+                raise ValueError("Unsupported identifier in private key paths.")
         self._apis = apis
 
     @property

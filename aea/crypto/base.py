@@ -29,6 +29,7 @@ class Crypto(ABC):
 
     identifier = 'base'
 
+    @property
     @abstractmethod
     def entity(self) -> Any:
         """
@@ -37,6 +38,7 @@ class Crypto(ABC):
         :return: a public key string
         """
 
+    @property
     @abstractmethod
     def public_key(self) -> str:
         """
@@ -45,6 +47,7 @@ class Crypto(ABC):
         :return: a public key string
         """
 
+    @property
     @abstractmethod
     def address(self) -> str:
         """

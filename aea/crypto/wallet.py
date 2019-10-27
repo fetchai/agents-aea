@@ -39,7 +39,6 @@ class Wallet(object):
         Instantiate a wallet object.
 
         :param private_key_paths: the private key paths
-        :param ledger_api_configs: the ledger api configs
         """
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]

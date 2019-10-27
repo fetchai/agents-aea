@@ -330,7 +330,7 @@ class DecisionMaker:
             if tx_digest is not None:
                 tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.ACCEPT, transaction_digest=tx_digest)
             else:
-                NotImplementedError
+                raise NotImplementedError
         else:
             tx_message_response = TransactionMessage.respond_with(tx_message, performative=TransactionMessage.Performative.REJECT)
         self.message_out_queue.put(tx_message_response)
