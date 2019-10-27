@@ -124,12 +124,12 @@ class Dialogue:
     @property
     def last_incoming_message(self) -> Optional[Message]:
         """Get the last incoming message."""
-        return self._incoming_messages[-1]
+        return self._incoming_messages[-1] if len(self._incoming_messages) > 0 else None
 
     @property
     def last_outgoing_message(self) -> Optional[Message]:
         """Get the last incoming message."""
-        return self._outgoing_messages[-1]
+        return self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None
 
     def outgoing_extend(self, message: 'Message') -> None:
         """

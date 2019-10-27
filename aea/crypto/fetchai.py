@@ -46,7 +46,7 @@ class FetchAICrypto(Crypto):
         :param ledger_api_config: the ledger api config
         """
         self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        self._address = Address(Identity.from_hex(self.public_key)).__str__()
+        self._address = str(Address(Identity.from_hex(self.public_key)))
 
     @property
     def entity(self) -> Entity:

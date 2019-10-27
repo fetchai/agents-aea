@@ -289,4 +289,4 @@ class DefaultCrypto(Crypto):
         :param public_key: the public key
         :return: str
         """
-        pass
+        raise NotImplementedError

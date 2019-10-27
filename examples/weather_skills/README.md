@@ -72,6 +72,7 @@ Stop the agent again with `CTRL + C`. You should see that the agent has no balan
 ```
 cd ..
 python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
+cd weather_client
 ```
 
 - Run both agents, as in the previous section.

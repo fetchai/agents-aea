@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a handler."""
 import logging
+import pprint
 from typing import Optional, cast, List, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
@@ -235,11 +236,13 @@ class FIPAHandler(Handler):
         json_data = cast(dict, msg.get("json_data"))
         if 'weather_data' in json_data.keys():
             weather_data = json_data['weather_data']
-            logger.info("[{}]: received the following weather data={}".format(self.context.agent_name, weather_data))
+            logger.info("[{}]: received the following weather data={}".format(self.context.agent_name,
+                                                                              pprint.pformat(weather_data)))
             # dialogues = cast(Dialogues, self.context.dialogues)
             # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
         else:
-            logger.info("[{}]: received no data from sender={}".format(self.context.agent_name, sender[-5:]))
+            logger.info("[{}]: received no data from sender={}".format(self.context.agent_name,
+                                                                       sender[-5:]))
 
 
 class OEFHandler(Handler):

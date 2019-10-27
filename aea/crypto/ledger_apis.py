@@ -78,7 +78,7 @@ class LedgerApis(object):
             balance = 0
         return balance
 
-    def transfer(self, identifier: str, entity: Entity, destination_address: str, amount: float, tx_fee: float) -> Optional[str]:
+    def transfer(self, identifier: str, entity: Entity, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
         """
         Transfer from self to destination.
 
@@ -100,7 +100,7 @@ class LedgerApis(object):
             tx_digest = None
         return tx_digest
 
-    def is_tx_settled(self, identifier: str, tx_digest: str, amount: float) -> bool:
+    def is_tx_settled(self, identifier: str, tx_digest: str, amount: int) -> bool:
         """
         Check whether the transaction is settled and correct.
 
