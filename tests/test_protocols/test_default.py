@@ -18,16 +18,16 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the messages module."""
-import unittest
 
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
-
-from unittest import mock
-import pytest
 import base64
 import json
 from typing import cast
+from unittest import mock
+
+import pytest
+
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 
 
 def test_default_bytes_serialization():
