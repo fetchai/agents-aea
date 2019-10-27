@@ -64,7 +64,7 @@ ledger_apis:
 ```
 - Generate the private key for the weather client:
 
-     aea run
+      aea run
 
 Stop the agent again with `CTRL + C`. You should see that the agent has no balance on Fetch.ai.
 
