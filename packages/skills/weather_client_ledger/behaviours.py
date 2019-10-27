@@ -54,7 +54,7 @@ class MySearchBehaviour(Behaviour):
         if balance > 0:
             logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, balance))
         else:
-            logger.warning("[{}]: you have no starting balance on fetchai ledger!".format(self.context.agent_name, balance))
+            logger.warning("[{}]: you have no starting balance on fetchai ledger!".format(self.context.agent_name))
             # TODO: deregister skill from filter
 
     def act(self) -> None:
