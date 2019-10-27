@@ -100,11 +100,13 @@ class LedgerApis(object):
         return tx_digest
 
     @staticmethod
-    def get_address_from_public_key(self, public_key: str) -> Address:
+    def get_address_from_public_key(self, identifier: str, public_key: str) -> Address:
         """
         Get the address from the public key.
 
-        :return: str
+        :param identifier: the identifier
+        :param public_key: the public key
+        :return: the address
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         identity = Identity.from_hex(public_key)
