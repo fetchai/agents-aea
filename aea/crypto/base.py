@@ -19,9 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """Abstract module wrapping the public and private key cryptography and ledger api."""
-
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, BinaryIO
 
 
 class Crypto(ABC):
@@ -56,12 +55,31 @@ class Crypto(ABC):
         :return: an address string
         """
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def get_address_from_public_key(self, public_key: str) -> str:
+    def get_address_from_public_key(cls, public_key: str) -> str:
         """
         Get the address from the public key.
 
         :param public_key: the public key
         :return: str
+        """
+
+    @classmethod
+    @abstractmethod
+    def load(cls, fp: BinaryIO) -> 'Crypto':
+        """
+        Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
+
+        :param fp: the input file pointer. Must be set in binary mode (mode='rb')
+        :return: None
+        """
+
+    @abstractmethod
+    def dump(self, fp: BinaryIO) -> None:
+        """
+        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+
+        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
+        :return: None
         """
