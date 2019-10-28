@@ -37,7 +37,7 @@ def test_no_argument():
 
 def test_flag_version():
     """Test that the flag '--version' works correctly."""
-    result = subprocess.Popen([sys.executable, "-m", "aea", "--version"], stdout=subprocess.PIPE)
+    result = subprocess.Popen([sys.executable, "-m", "aea.cli", "--version"], stdout=subprocess.PIPE)
     try:
         result.wait(timeout=5.0)
     except TimeoutError:
