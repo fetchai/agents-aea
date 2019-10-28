@@ -116,12 +116,12 @@ class TestResources:
         cls._patch_logger()
 
         # create temp agent folder
-        os.chdir(cls.agent_folder)
+        cls.oldcwd = os.getcwd()
         cls.agent_name = "agent_dir_test"
         cls.t = tempfile.mkdtemp()
         cls.agent_folder = os.path.join(cls.t, cls.agent_name)
-        cls.oldcwd = os.getcwd()
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
+        os.chdir(cls.agent_folder)
 
         # make fake skill
         cls.fake_skill_id = "fake"

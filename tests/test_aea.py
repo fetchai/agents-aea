@@ -18,28 +18,18 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
 import os
-import shutil
-import tempfile
 import time
-import unittest.mock
 from pathlib import Path
 from threading import Thread
 
-import yaml
-
-import aea.cli.common
 from aea.aea import AEA
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, Envelope
-from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.registries.base import ProtocolRegistry, Resources
-from .data.dummy_skill.handlers import DummyHandler
 from .conftest import CUR_PATH, DummyConnection
 
 
