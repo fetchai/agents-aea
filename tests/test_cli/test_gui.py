@@ -17,21 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea freeze` sub-command."""
+"""This test module contains the tests for the `aea gui` sub-command."""
 import json
 import os
+import subprocess
+import tempfile
+import time
 from pathlib import Path
 
 import jsonschema
-from click.testing import CliRunner
+import pytest
 from jsonschema import Draft4Validator
 
-from aea.cli import cli
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
+from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
 
 
-class TestFreeze:
-    """Test that the command 'aea freeze' works as expected."""
+class TestGui:
+    """Test that the command 'aea gui' works as expected."""
 
     @classmethod
     def setup_class(cls):
@@ -40,21 +42,23 @@ class TestFreeze:
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
-        cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
-        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+        cls.proc = subprocess.Popen(["aea", *CLI_LOG_OPTION, "gui"])
+        time.sleep(10.0)
 
-    def test_exit_code_equal_to_zero(self):
-        """Assert that the exit code is equal to zero (i.e. success)."""
-        assert self.result.exit_code == 0
-
-    def test_correct_output(self):
-        """Test that the command has printed the correct output."""
-        assert self.result.output == """protobuf\n"""
+    def test_gui(self, pytestconfig):
+        """Test that the gui process has been spawned correctly."""
+        if pytestconfig.getoption("ci"):
+            pytest.skip('skipped: CI')
+        else:
+            assert tcpping("localhost", 8080)
 
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
+        cls.proc.terminate()
+        cls.proc.wait(2.0)
         os.chdir(cls.cwd)

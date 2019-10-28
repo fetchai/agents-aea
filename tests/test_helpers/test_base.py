@@ -18,11 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the helper module."""
-
+import os
 import sys
 
 from aea.connections.oef.connection import OEFConnection
 from aea.helpers.base import locate
+from ..conftest import CUR_PATH
 
 
 class TestHelpersBase:
@@ -30,13 +31,18 @@ class TestHelpersBase:
 
     def test_locate(self):
         """Test the locate function to locate modules."""
+        cwd = os.getcwd()
+        os.chdir(os.path.join(CUR_PATH, ".."))
         sys.modules["gym_connection"] = locate("packages.connections.gym")
         assert sys.modules['gym_connection'] is not None
         sys.modules["gym_connection"] = locate("packages.connections.weather")
         assert sys.modules['gym_connection'] is None
+        os.chdir(cwd)
 
     def test_locate_class(self):
         """Test the locate function to locate classes."""
+        cwd = os.getcwd()
+        os.chdir(os.path.join(CUR_PATH, ".."))
         expected_class = OEFConnection
         actual_class = locate("aea.connections.oef.connection.OEFConnection")
         # although they are the same class, they are different instances in memory
@@ -44,6 +50,7 @@ class TestHelpersBase:
         # so compare the names
         assert actual_class is not None
         assert expected_class.__name__ == actual_class.__name__
+        os.chdir(cwd)
 
     def test_locate_with_builtins(self):
         """Test that locate function returns the built-in."""

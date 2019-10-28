@@ -39,7 +39,7 @@ import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+from tests.conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
 
 
 class TestCreate:

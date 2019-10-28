@@ -42,7 +42,6 @@ class LedgerApis(object):
         """
         Instantiate a wallet object.
 
-        :param private_key_paths: the private key paths
         :param ledger_api_configs: the ledger api configs
         """
         apis = {}  # type: Dict[str, Any]

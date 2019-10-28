@@ -17,32 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tasks for the 'dummy' skill."""
-from aea.skills.base import Task
+"""This module contains a dummy shared class."""
+
+from aea.skills.base import SharedClass
 
 
-class DummyTask(Task):
-    """Dummy task."""
-
-    def __init__(self, **kwargs):
-        """Initialize the task."""
-        super().__init__(**kwargs)
-        self.kwargs = kwargs
-        self.nb_execute_called = 0
-        self.nb_teardown_called = 0
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        pass
-
-    def execute(self) -> None:
-        """Execute the task."""
-        self.nb_execute_called += 1
-
-    def teardown(self) -> None:
-        """Teardown the task."""
-        self.nb_teardown_called += 1
+class DummySharedClass(SharedClass):
+    """This class is a dummy shared class."""
