@@ -23,4 +23,12 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../../packages
-ledger_apis: []
+ledger_apis:
+- ledger_api:
+    ledger: fetchai
+    addr: example.fetch-ai.com
+    port: 8080
+- ledger_api:
+    ledger: ethereum
+    addr: example.ethereum.com
+    port: 8080

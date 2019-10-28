@@ -12,6 +12,9 @@ handlers:
 tasks:
   - task:
       class_name: DummyTask
-shared_classes: []
+shared_classes:
+  - shared_class:
+      class_name: DummySharedClass
+      args: {}
 protocols: ["default"]
 description: "dummy skill description [Fill in]"

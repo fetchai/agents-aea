@@ -79,5 +79,6 @@ def test_default_message_str_values():
 def test_check_consistency_raises_exception_when_type_not_recognized():
     """Test that we raise exception when the type of the message is not recognized."""
     message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-    message._body["type"] = "unknown_type"
-    assert not message.check_consistency()
+    # mock the __eq__ method such that any kind of matching is going to fail.
+    with mock.patch.object(DefaultMessage.Type, "__eq__", return_value=False):
+        assert not message.check_consistency()
