@@ -35,6 +35,7 @@ from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_l
 from aea.cli.install import install
 from aea.connections.base import Connection
 from aea.crypto.helpers import _verify_or_create_private_keys, _verify_ledger_apis_access
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet, DEFAULT
 from aea.mail.base import MailBox
 
@@ -99,7 +100,8 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     private_key_paths = dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()])
     ledger_api_configs = dict([(identifier, (config.addr, config.port)) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
 
-    wallet = Wallet(private_key_paths, ledger_api_configs)
+    wallet = Wallet(private_key_paths)
+    ledger_apis = LedgerApis(ledger_api_configs)
 
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
@@ -116,7 +118,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
             click_context.invoke(install)
 
     mailbox = MailBox(connection)
-    agent = AEA(agent_name, mailbox, wallet, directory=str(Path(".")))
+    agent = AEA(agent_name, mailbox, wallet, ledger_apis, directory=str(Path(".")))
     try:
         agent.start()
     except KeyboardInterrupt:

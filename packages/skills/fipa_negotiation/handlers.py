@@ -153,7 +153,7 @@ class FIPANegotiationHandler(Handler):
             assert proposal_description is not None
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                                 skill="fipa_negotiation_skill",
+                                                 skill_id="fipa_negotiation_skill",
                                                  transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
@@ -193,7 +193,7 @@ class FIPANegotiationHandler(Handler):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                                 skill="fipa_negotiation_skill",
+                                                 skill_id="fipa_negotiation_skill",
                                                  transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,

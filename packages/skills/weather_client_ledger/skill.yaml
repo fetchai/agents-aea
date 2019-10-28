@@ -7,6 +7,9 @@ behaviours:
   - behaviour:
       class_name: MySearchBehaviour
       args: {}
+  - behaviour:
+      class_name: MyTransactionBehaviour
+      args: {}
 handlers:
   - handler:
       class_name: FIPAHandler
@@ -21,7 +24,7 @@ shared_classes:
       args:
         country: UK
         search_interval: 5
-        max_price: 0.2
+        max_price: 4
   - shared_class:
       class_name: Dialogues
       args: {}

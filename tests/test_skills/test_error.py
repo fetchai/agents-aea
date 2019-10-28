@@ -23,6 +23,7 @@ from pathlib import Path
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode
 from aea.crypto.wallet import Wallet
+from aea.crypto.ledger_apis import LedgerApis
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -44,13 +45,14 @@ class TestSkillError:
         """Test the initialisation of the AEA."""
         cls.node = LocalNode()
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({'default': private_key_pem_path}, {})
+        cls.wallet = Wallet({'default': private_key_pem_path})
+        cls.ledger_apis = LedgerApis({})
         cls.agent_name = "Agent0"
         cls.public_key = cls.wallet.public_keys['default']
 
         cls.connection = DummyConnection()
         cls.mailbox1 = MailBox(cls.connection)
-        cls.my_aea = AEA(cls.agent_name, cls.mailbox1, cls.wallet, timeout=2.0,
+        cls.my_aea = AEA(cls.agent_name, cls.mailbox1, cls.wallet, cls.ledger_apis, timeout=2.0,
                          directory=str(Path(CUR_PATH, "data/dummy_aea")))
 
         cls.skill_context = SkillContext(cls.my_aea._context)

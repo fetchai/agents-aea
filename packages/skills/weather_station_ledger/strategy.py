@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-import json
 import time
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
@@ -32,7 +31,7 @@ else:
     from weather_station_ledger_skill.db_communication import DBCommunication
     from weather_station_ledger_skill.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
-DEFAULT_PRICE_PER_ROW = 0.02
+DEFAULT_PRICE_PER_ROW = 2
 DEFAULT_CURRENCY_PBK = 'FET'
 DATE_ONE = "3/10/2019"
 DATE_TWO = "15/10/2019"
@@ -74,31 +73,36 @@ class Strategy(SharedClass):
         # TODO, this is a stub
         return True
 
-    def generate_proposal_and_data(self, query: Query) -> Tuple[Description, bytes]:
+    def generate_proposal_and_data(self, query: Query) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
         """
         Generate a proposal matching the query.
 
         :param query: the query
-        :return: a tuple of proposal and the bytes of weather data
+        :return: a tuple of proposal and the weather data
         """
         # TODO, this is a stub
         fetched_data = self.db.get_data_for_specific_dates(DATE_ONE, DATE_TWO)
-        weather_data_json = self._build_data_payload(fetched_data)
-        total_price = self.price_per_row * len(fetched_data)
-        proposal = Description({"rows": len(fetched_data),
+        weather_data, rows = self._build_data_payload(fetched_data)
+        total_price = self.price_per_row * rows
+        proposal = Description({"rows": rows,
                                 "price": total_price,
                                 "currency_pbk": self.currency})
-        return (proposal, weather_data_json)
+        return (proposal, weather_data)
 
-    def _build_data_payload(self, fetched_data: Dict[str, int]) -> bytes:
+    def _build_data_payload(self, fetched_data: Dict[str, int]) -> Tuple[Dict[str, List[Dict[str, Any]]], int]:
         """
         Build the data payload.
 
         :param fetched_data: the fetched data
+        :return: a tuple of the data and the rows
         """
         weather_data = {}  # type: Dict[str, List[Dict[str, Any]]]
         weather_data['weather_data'] = []
+        counter = 0
         for items in fetched_data:
+            if counter > 10:
+                break  # TODO: fix OEF so more data can be sent
+            counter += 1
             dict_of_data = {
                 'abs_pressure': items[0],
                 'delay': items[1],
@@ -113,6 +117,4 @@ class Strategy(SharedClass):
                 'wind_gust': items[10]
             }
             weather_data['weather_data'].append(dict_of_data)
-        json_data = json.dumps(weather_data)
-        json_bytes = json_data.encode("utf-8")
-        return json_bytes
+        return weather_data, counter

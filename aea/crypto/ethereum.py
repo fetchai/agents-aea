@@ -41,10 +41,19 @@ class EthereumCrypto(Crypto):
     identifier = ETHEREUM
 
     def __init__(self, private_key_path: Optional[str] = None):
-        """Instantiate a crypto object."""
+        """
+        Instantiate an ethereum crypto object.
+
+        :param private_key_path: the private key path of the agent
+        """
         self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
         bytes_representation = Web3.toBytes(hexstr=self._account.privateKey.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
+
+    @property
+    def entity(self) -> Account:
+        """Get the entity."""
+        return self._account
 
     @property
     def public_key(self) -> str:
@@ -100,33 +109,12 @@ class EthereumCrypto(Crypto):
         account = Account.create()
         return account
 
-    @property
-    def token_balance(self) -> float:
+    @staticmethod
+    def get_address_from_public_key(self, public_key: str) -> str:
         """
-        Return the token balance.
+        Get the address from the public key.
 
-        :return: the token balance
+        :param public_key: the public key
+        :return: str
         """
-        pass
-
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
-        """
-        Transfer from self to destination.
-
-        :param destination_address: the address of the receive
-        :param amount: the amount
-        :param tx_fee: the tx fee
-
-        :return: bool indicating success
-        """
-        pass
-
-    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
-        """
-        Generate the address from the public key.
-
-        :param counterparty_pbk: the public key of the counterparty
-
-        :return: the address
-        """
-        pass
+        raise NotImplementedError
