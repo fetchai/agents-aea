@@ -23,6 +23,7 @@ from unittest import mock
 import pytest
 
 from aea.mail.base import Envelope
+from aea.protocols.fipa import fipa_pb2
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.models import Description, Query, Constraint, ConstraintType
@@ -257,3 +258,42 @@ def test_performative_string_value():
         "The str value must be match_accept_w_address"
     assert str(FIPAMessage.Performative.INFORM) == "inform", \
         "The str value must be inform"
+
+
+def test_fipa_encoding_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during encoding."""
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=1,
+                      performative=FIPAMessage.Performative.ACCEPT)
+
+    with pytest.raises(ValueError, match="Performative not valid:"):
+        with mock.patch.object(FIPAMessage.Performative, "__eq__", return_value=False):
+            FIPASerializer().encode(msg)
+
+
+def test_fipa_decoding_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during decoding."""
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=1,
+                      performative=FIPAMessage.Performative.ACCEPT)
+
+    encoded_msg = FIPASerializer().encode(msg)
+    with pytest.raises(ValueError, match="Performative not valid:"):
+        with mock.patch.object(FIPAMessage.Performative, "__eq__", return_value=False):
+            FIPASerializer().decode(encoded_msg)
+
+
+def test_fipa_serialization_cfp_not_recognized_query():
+    """Test that we raise an exception if the query type is not recognized."""
+    msg = FIPAMessage(message_id=0,
+                      dialogue_id=0,
+                      target=1,
+                      query=b"a_query",
+                      performative=FIPAMessage.Performative.CFP)
+
+    encoded_msg = FIPASerializer().encode(msg)
+    with pytest.raises(ValueError, match="Query type not recognized"):
+        with mock.patch.object(fipa_pb2.FIPAMessage.CFP, "WhichOneof", return_value=""):
+            FIPASerializer().decode(encoded_msg)
