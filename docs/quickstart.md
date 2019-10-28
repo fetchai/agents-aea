@@ -96,6 +96,10 @@ cd my_first_agent
 aea add skill echo
 ```
 
+This copies the echo application code for the behaviours, handlers, and tasks into the skill, ready to run.
+
+
+
 ### Add a local connection
 
 ``` bash
@@ -116,7 +120,9 @@ You will see the echo task running in the terminal window.
 
 <center>![The echo call and response log](assets/echo.png)</center>
 
-The AEA initially calls the setup method on `Handler`, `Behaviour` and `Task` and then it repeatedly calls the `Behaviour` and `Task` methods `act` and `execute`. This is the main agent loop in action. To investigate the `Handler` a bit more, we will first stop the agent.
+The framework first calls the `setup` method on the `Handler`, `Behaviour`, and `Task` code in that order; after which it repeatedly calls the `Behaviour` and `Task` methods, `act` and `execute`. This is the main agent loop in action. 
+
+Let's look at the `Handler` in more depth. First, stop the agent.
 
 ### Stop the agent
 
@@ -130,32 +136,55 @@ aea add connection stub
 
 A stub connection provides an I/O reader/writer. 
 
-This connection uses two files to communicate: one for the incoming messages and
+It uses two files for communication: one for the incoming messages and
 the other for the outgoing messages. Each line contains an encoded envelope.
+
+The agent waits for new messages posted to the file `my_first_agent/input_file`,
+and adds a response to the file `my_first_agent/output_file`.
 
 The format of each line is the following:
 
-        TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
+``` bash
+TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
+```
+        
+For example:
 
-e.g.:
+``` bash
+my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+```
 
-        recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+### Add the line to the input_file
+
+We can send the AEA a message by adding an envelope to the input file.
+
+``` bash
+echo 'my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
+```
 
 ### Run the agent
 
-Run the agent with the `local` connection.
+Run the agent with the `stub` connection.
+
 
 ``` bash
 aea run --connection stub
 ```
 
-### Add an envelope the the input_file
+You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`.
 
-We can send the AEA a message by adding an envelope to the input file.
+``` bash
+info: Echo Task: execute method called.
+info: Echo Behaviour: act method called.
+info: Echo Handler: message=Message(type=bytes content=b'hello'), sender=sender_agent
+info: Echo Task: execute method called.
+info: Echo Behaviour: act method called.
+info: Echo Task: execute method called.
+info: Echo Behaviour: act method called.
+info: Echo Task: execute method called.
+```
 
-        echo 'my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
-
-You should now see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`
+<center>![Stub connection input and output](assets/input-output.png)</center>
 
 ### Stop the agent
 
@@ -163,7 +192,7 @@ Stop the agent by pressing `CTRL c`
 
 ### Delete the agent
 
-When you're done, you can delete the agent (first go to the parent directory via `cd ..`).
+Delete the agent from the parent directory via `cd ..`.
 
 ``` bash
 aea delete my_first_agent
