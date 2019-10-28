@@ -71,12 +71,6 @@ sudo apt-get install python3.7-dev
 
 - Windows users: install [build tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019). 
 
-Also, make sure you are running the latest version.
-
-``` bash
-pip install aea[all] --force --no-cache-dir
-```
-
 
 ## Echo skill demo
 
@@ -102,6 +96,10 @@ cd my_first_agent
 aea add skill echo
 ```
 
+This copies the echo application code for the behaviours, handlers, and tasks into the skill, ready to run.
+
+
+
 ### Add a local connection
 
 ``` bash
@@ -122,13 +120,75 @@ You will see the echo task running in the terminal window.
 
 <center>![The echo call and response log](assets/echo.png)</center>
 
+The framework first calls the `setup` method on the `Handler`, `Behaviour`, and `Task` code in that order; after which it repeatedly calls the `Behaviour` and `Task` methods, `act` and `execute`. This is the main agent loop in action. 
+
+Let's look at the `Handler` in more depth. First, stop the agent.
+
+### Stop the agent
+
+Stop the agent by pressing `CTRL c`
+
+### Add a stub connection
+
+``` bash
+aea add connection stub
+```
+A stub connection provides an I/O reader/writer. 
+
+It uses two files for communication: one for the incoming messages and
+the other for the outgoing messages. Each line contains an encoded envelope.
+
+The agent waits for new messages posted to the file `my_first_agent/input_file`,
+and adds a response to the file `my_first_agent/output_file`.
+
+The format of each line is the following:
+
+``` bash
+TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
+```
+        
+For example:
+
+``` bash
+recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+```
+
+### Add the line to the input_file
+
+``` bash
+echo 'my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
+```
+
+### Run the agent
+
+Run the agent with the `stub` connection.
+
+``` bash
+aea run --connection stub
+```
+
+You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`.
+
+``` bash
+info: Echo Task: execute method called.
+info: Echo Behaviour: act method called.
+info: Echo Handler: message=Message(type=bytes content=b'hello'), sender=sender_agent
+info: Echo Task: execute method called.
+info: Echo Behaviour: act method called.
+info: Echo Task: execute method called.
+info: Echo Behaviour: act method called.
+info: Echo Task: execute method called.
+```
+
+<center>![Stub connection input and output](assets/input-output.png)</center>
+
 ### Stop the agent
 
 Stop the agent by pressing `CTRL c`
 
 ### Delete the agent
 
-When you're done, you can delete the agent (first go to the parent directory via `cd ..`).
+Delete the agent from the parent directory via `cd ..`.
 
 ``` bash
 aea delete my_first_agent
