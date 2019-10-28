@@ -84,7 +84,7 @@ class OwnershipState:
         or enough holdings if it is a seller.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        currency_pbk = tx_message.get("currency")
+        currency_pbk = tx_message.get("currency_pbk")
         currency_pbk = cast(str, currency_pbk)
         if tx_message.get("is_sender_buyer"):
             # check if we have the money to cover amount and tx fee.
@@ -117,11 +117,10 @@ class OwnershipState:
         """
         Update the agent state from a transaction.
 
-        :param tx: the transaction.
-        :param tx_fee: the transaction fee.
+        :param tx_message:
         :return: None
         """
-        currency_pbk = tx_message.get("currency")
+        currency_pbk = tx_message.get("currency_pbk")
         currency_pbk = cast(str, currency_pbk)
         if tx_message.get("is_sender_buyer"):
             diff = cast(float, tx_message.get("amount")) + cast(float, tx_message.get("sender_tx_fee"))
@@ -138,7 +137,10 @@ class OwnershipState:
 
     def __copy__(self):
         """Copy the object."""
-        return OwnershipState(self.currency_holdings, self.good_holdings)
+        state = OwnershipState()
+        if self.currency_holdings is not None and self.good_holdings is not None:
+            state.init(self.currency_holdings, self.good_holdings)
+        return state
 
 
 class Preferences:
@@ -215,7 +217,7 @@ class Preferences:
 
         :return: the marginal utility score
         """
-        pass
+        pass    # pragma: no cover
 
     def get_score_diff_from_transaction(self, ownership_state: OwnershipState, tx_message: TransactionMessage) -> float:
         """
@@ -335,7 +337,6 @@ class DecisionMaker:
         amount -= counterparty_tx_fee
         tx_fee = counterparty_tx_fee + sender_tx_fee
         payable = amount + tx_fee
-
         # check if the transaction is acceptable and process it accordingly
         if self._is_acceptable_tx(crypto_object, payable):
             tx_digest = self._settle_tx(crypto_object, counterparty_address, amount, tx_fee)
@@ -385,8 +386,6 @@ class DecisionMaker:
         :param state_update_message: the state update message
         :return: None
         """
-        assert self._ownership_state is None, "OwnershipState already initialized."
-        assert self._preferences is None, "Preferences already initialized."
         currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
         good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
