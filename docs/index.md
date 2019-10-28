@@ -13,7 +13,7 @@ An autonomous economic agent (AEA) is an intelligent agent whose goal is generat
 
 The AEA super power is their ability to autonomously acquire new skills.
 
-AEAs achieve their goals with the help of the Fetch.AI OEF and the Fetch.AI Ledger. Third party systems, such as Ethereum, may also allow AEA integration. As such, AEAs bridge web 2 and web 3.
+AEAs achieve their goals with the help of the Fetch.ai OEF and the Fetch.ai Ledger. Third party systems, such as Ethereum, may also allow AEA integration. As such, AEAs bridge web 2 and web 3.
 
 
 ## Our vision

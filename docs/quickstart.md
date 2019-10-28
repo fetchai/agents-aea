@@ -71,6 +71,12 @@ sudo apt-get install python3.7-dev
 
 - Windows users: install [build tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019). 
 
+Also, make sure you are running the latest version.
+
+``` bash
+pip install aea[all] --force --no-cache-dir
+```
+
 
 ## Echo skill demo
 

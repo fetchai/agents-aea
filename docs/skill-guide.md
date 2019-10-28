@@ -86,7 +86,7 @@ We place this code in `my_agent/skills/my_search/behaviours.py`.
 
 ## Step 3: Develop a Handler
 
-So far, we have tasked the agent with sending search requests to the OEF. However, we have no way of handling the responses sent to the agent by the OEF at the moment. The agent would simply respond to the OEF via the default `error` skill which sends all unrecognized envelopes back to the sender.
+So far, we have tasked the agent with sending search requests to the OEF. However, we have no way of handling the responses sent to the agent by the OEF at the moment. The agent would simply respond to the OEF via the default `error` skill which sends all unrecognised envelopes back to the sender.
 
 Let us now implement a handler to deal with the incoming search responses.
 
@@ -204,7 +204,7 @@ Based on our skill components above, we create the following config file:
 
 ```yaml
 name: my_search
-authors: Fetch.AI Limited
+authors: Fetch.ai Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
@@ -256,3 +256,4 @@ Stop the agent with `CTRL + C`.
 
 We hope this step by step introduction has helped you to develop your own skill. We are excited to see what you will build.
 
+<br />
