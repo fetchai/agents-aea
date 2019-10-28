@@ -131,6 +131,7 @@ def gui(ctx: Context):
     logger.info("Running the GUI.....(press Ctrl+C to exit)")   # pragma: no cover
     aea.cli_gui.run()   # pragma: no cover
 
+
 cli.add_command(add)
 cli.add_command(_list)
 cli.add_command(search)
