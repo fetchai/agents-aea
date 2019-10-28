@@ -27,7 +27,7 @@ class TestTransaction:
     """Test the transaction module."""
 
     def test_message_consistency(self):
-        """Test the message consistency of a transaction message."""
+        """Test for an error in consistency of a message."""
         with pytest.raises(AssertionError):
             TransactionMessage(performative="performative",
                                skill_id="default",
@@ -56,3 +56,17 @@ class TestTransaction:
                                  quantities_by_good_pbk={"FET": 10})
         assert not msg.matches(msg), "It shouldn't match since it is the same message."
         assert msg == msg, "It should be equal since is the same message."
+
+        mirrored_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
+                                              skill_id="default",
+                                              transaction_id="transaction0",
+                                              sender="pk",
+                                              counterparty="agent_1",
+                                              is_sender_buyer=False,
+                                              currency_pbk="FET",
+                                              amount=2,
+                                              sender_tx_fee=0,
+                                              counterparty_tx_fee=0,
+                                              quantities_by_good_pbk={"FET": 10})
+
+        assert msg.matches(mirrored_message), "It should match since the messages mirror each other"

@@ -28,7 +28,7 @@ class TestStateUpdateMessage:
     """Test the StateUpdateMessage."""
 
     def test_message_consistency(self):
-        """Test the consistency of the message."""
+        """Test for an error in consistency of a message."""
         with pytest.raises(AssertionError):
             good_endowment = {"FET": 2}
             currency_endowment = {"FET": 100.0}

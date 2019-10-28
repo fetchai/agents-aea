@@ -337,7 +337,6 @@ class DecisionMaker:
         amount -= counterparty_tx_fee
         tx_fee = counterparty_tx_fee + sender_tx_fee
         payable = amount + tx_fee
-        logger.debug(self._is_acceptable_tx(crypto_object, payable))
         # check if the transaction is acceptable and process it accordingly
         if self._is_acceptable_tx(crypto_object, payable):
             tx_digest = self._settle_tx(crypto_object, counterparty_address, amount, tx_fee)
