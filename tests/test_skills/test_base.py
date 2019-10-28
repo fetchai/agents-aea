@@ -24,6 +24,7 @@ from queue import Queue
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
+from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import MailBox
 from aea.skills.base import SkillContext
@@ -38,9 +39,10 @@ class TestSkillContext:
         """Test the initialisation of the AEA."""
         cls.node = LocalNode()
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({'default': private_key_pem_path}, {})
+        cls.wallet = Wallet({'default': private_key_pem_path})
+        cls.ledger_apis = LedgerApis({})
         cls.mailbox1 = MailBox(OEFLocalConnection(cls.wallet.public_keys['default'], cls.node))
-        cls.my_aea = AEA("Agent0", cls.mailbox1, cls.wallet, directory=str(Path(CUR_PATH, "data/dummy_aea")))
+        cls.my_aea = AEA("Agent0", cls.mailbox1, cls.wallet, cls.ledger_apis, directory=str(Path(CUR_PATH, "data/dummy_aea")))
         cls.skill_context = SkillContext(cls.my_aea.context)
 
     def test_agent_name(self):

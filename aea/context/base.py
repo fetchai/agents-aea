@@ -20,12 +20,11 @@
 """This module contains the agent context class."""
 
 from queue import Queue
-from typing import Dict, Any
-
-from fetchai.ledger.api import LedgerApi  # type: ignore
+from typing import Dict
 
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
+from aea.crypto.ledger_apis import LedgerApis
 
 
 class AgentContext:
@@ -34,6 +33,7 @@ class AgentContext:
     def __init__(self, agent_name: str,
                  public_keys: Dict[str, str],
                  addresses: Dict[str, str],
+                 ledger_apis: LedgerApis,
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
@@ -45,6 +45,7 @@ class AgentContext:
         :param agent_name: the agent's name
         :param public_keys: the public keys of the agent
         :param public_key: the default public key
+        :param ledger_apis: the ledger apis
         :param outbox: the outbox
         :param decision_maker_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
@@ -54,6 +55,7 @@ class AgentContext:
         self._agent_name = agent_name
         self._public_keys = public_keys
         self._addresses = addresses
+        self._ledger_apis = ledger_apis
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
         self._ownership_state = ownership_state
@@ -111,7 +113,6 @@ class AgentContext:
         return self._is_ready_to_pursuit_goals
 
     @property
-    def ledger_apis(self) -> Dict[str, Any]:
+    def ledger_apis(self) -> LedgerApis:
         """Get the ledger APIs."""
-        apis = {'fetchai': LedgerApi('alpha.fetch-ai.com', 80)}
-        return apis
+        return self._ledger_apis

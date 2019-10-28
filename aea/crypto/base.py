@@ -21,6 +21,7 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class Crypto(ABC):
@@ -28,6 +29,16 @@ class Crypto(ABC):
 
     identifier = 'base'
 
+    @property
+    @abstractmethod
+    def entity(self) -> Any:
+        """
+        Return a public key.
+
+        :return: a public key string
+        """
+
+    @property
     @abstractmethod
     def public_key(self) -> str:
         """
@@ -36,6 +47,7 @@ class Crypto(ABC):
         :return: a public key string
         """
 
+    @property
     @abstractmethod
     def address(self) -> str:
         """
@@ -44,32 +56,12 @@ class Crypto(ABC):
         :return: an address string
         """
 
+    @staticmethod
     @abstractmethod
-    def token_balance(self) -> float:
+    def get_address_from_public_key(self, public_key: str) -> str:
         """
-        Return the token balance.
+        Get the address from the public key.
 
-        :return: the token balance
-        """
-
-    @abstractmethod
-    def transfer(self, destination_address: str, amount: float, tx_fee: float) -> bool:
-        """
-        Transfer from self to destination.
-
-        :param destination_address: the address of the receive
-        :param amount: the amount
-        :param tx_fee: the tx fee
-
-        :return: bool indicating success
-        """
-
-    @abstractmethod
-    def generate_counterparty_address(self, counterparty_pbk: str) -> str:
-        """
-        Generate the address from the public key.
-
-        :param counterparty_pbk: the public key of the counterparty
-
-        :return: the address
+        :param public_key: the public key
+        :return: str
         """

@@ -32,8 +32,6 @@ def test_initialisation():
     fet_crypto = FetchAICrypto()
     assert fet_crypto.public_key is not None, "Public key must not be None after Initialisation"
     assert fet_crypto.address is not None, "Address must not be None after Initialisation"
-    assert fet_crypto.address == str(fet_crypto.get_address_from_public_key(fet_crypto.public_key)), \
-        "Must generate the same Address"
     assert FetchAICrypto(PRIVATE_KEY_PATH), "Couldn't load the fet private_key from the path!"
     assert FetchAICrypto("./"), "Couldn't create a new entity for the given path!"
 

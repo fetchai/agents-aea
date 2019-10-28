@@ -40,23 +40,24 @@ class TransactionMessage(Message):
         REJECT = "reject"
 
     def __init__(self, performative: Union[str, Performative],
-                 skill: str,
+                 skill_id: str,
                  transaction_id: TransactionId,
                  sender: Address,
                  counterparty: Address,
                  is_sender_buyer: bool,
                  currency_pbk: str,
-                 amount: float,
-                 sender_tx_fee: float,
-                 counterparty_tx_fee: float,
+                 amount: int,
+                 sender_tx_fee: int,
+                 counterparty_tx_fee: int,
                  quantities_by_good_pbk: Dict[str, int],
                  transaction_digest: Optional[str] = None,
+                 dialogue_label: Optional[Dict[str, str]] = None,
                  **kwargs):
         """
         Instantiate transaction message.
 
         :param performative: the performative
-        :param skill: the skill sending the transaction message
+        :param skill_id: the skill sending the transaction message
         :param transaction_id: the id of the transaction.
         :param sender: the sender of the transaction.
         :param counterparty: the counterparty of the transaction.
@@ -67,9 +68,10 @@ class TransactionMessage(Message):
         :param amount: the amount of money involved.
         :param quantities_by_good_pbk: a map from good pbk to the quantity of that good involved in the transaction.
         :param transaction_digest: the transaction digest
+        :param dialog_label: the dialog label
         """
         super().__init__(performative=performative,
-                         skill=skill,
+                         skill_id=skill_id,
                          transaction_id=transaction_id,
                          sender=sender,
                          counterparty=counterparty,
@@ -80,6 +82,7 @@ class TransactionMessage(Message):
                          amount=amount,
                          quantities_by_good_pbk=quantities_by_good_pbk,
                          transaction_digest=transaction_digest,
+                         dialogue_label=dialogue_label,
                          **kwargs)
         assert self.check_consistency(), "Transaction message initialization inconsistent."
 
@@ -91,7 +94,7 @@ class TransactionMessage(Message):
         """
         try:
             assert self.is_set("performative")
-            assert self.is_set("skill")
+            assert self.is_set("skill_id")
             assert self.is_set("transaction_id")
             assert self.is_set("sender")
             assert self.is_set("counterparty")
@@ -102,22 +105,23 @@ class TransactionMessage(Message):
             assert self.is_set("currency_pbk")
             assert self.is_set("amount")
             amount = self.get("amount")
-            amount = cast(float, amount)
-            assert amount >= 0.0
+            amount = cast(int, amount)
+            assert amount >= 0
             assert self.is_set("sender_tx_fee")
             sender_tx_fee = self.get("sender_tx_fee")
-            sender_tx_fee = cast(float, sender_tx_fee)
-            assert sender_tx_fee >= 0.0
+            sender_tx_fee = cast(int, sender_tx_fee)
+            assert sender_tx_fee >= 0
             assert self.is_set("counterparty_tx_fee")
             counterparty_tx_fee = self.get("counterparty_tx_fee")
-            counterparty_tx_fee = cast(float, counterparty_tx_fee)
-            assert counterparty_tx_fee >= 0.0
+            counterparty_tx_fee = cast(int, counterparty_tx_fee)
+            assert counterparty_tx_fee >= 0
             assert self.is_set("quantities_by_good_pbk")
             quantities_by_good_pbk = self.get("quantities_by_good_pbk")
             quantities_by_good_pbk = cast(Dict[str, int], quantities_by_good_pbk)
             assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
             assert all(quantity >= 0 for quantity in quantities_by_good_pbk.values())
             assert self.is_set("transaction_digest")
+            assert self.is_set("dialogue_label")
         except (AssertionError, KeyError):
             return False
         return True
@@ -131,7 +135,7 @@ class TransactionMessage(Message):
         """
         return isinstance(other, TransactionMessage) \
             and self.get("performative") == other.get("performative") \
-            and self.get("skill") == other.get("skill") \
+            and self.get("skill_id") == other.get("skill_id") \
             and self.get("transaction_id") == other.get("transaction_id") \
             and self.get("sender") == other.get("counterparty") \
             and self.get("counterparty") == other.get("sender") \
@@ -140,7 +144,9 @@ class TransactionMessage(Message):
             and self.get("amount") == other.get("amount") \
             and self.get("sender_tx_fee") == other.get("counterparty_tx_fee") \
             and self.get("counterparty_tx_fee") == other.get("sender_tx_fee") \
-            and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk")
+            and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk") \
+            and self.get("transaction_digest") == other.get("transaction_digest") \
+            and self.get("dialogue_label") == other.get("dialogue_label")
 
     @classmethod
     def respond_with(cls, other: 'TransactionMessage', performative: Performative, transaction_digest: Optional[str] = None) -> 'TransactionMessage':
@@ -153,17 +159,18 @@ class TransactionMessage(Message):
         :return: a transaction message object
         """
         tx_msg = TransactionMessage(performative=performative,
-                                    skill=cast(str, other.get("skill")),
+                                    skill_id=cast(str, other.get("skill_id")),
                                     transaction_id=cast(str, other.get("transaction_id")),
                                     sender=cast(Address, other.get("sender")),
                                     counterparty=cast(Address, other.get("counterparty")),
                                     is_sender_buyer=cast(bool, other.get("is_sender_buyer")),
                                     currency_pbk=cast(str, other.get("currency_pbk")),
-                                    sender_tx_fee=cast(float, other.get("sender_tx_fee")),
-                                    counterparty_tx_fee=cast(float, other.get("counterparty_tx_fee")),
-                                    amount=cast(float, other.get("amount")),
+                                    sender_tx_fee=cast(int, other.get("sender_tx_fee")),
+                                    counterparty_tx_fee=cast(int, other.get("counterparty_tx_fee")),
+                                    amount=cast(int, other.get("amount")),
                                     quantities_by_good_pbk=cast(Dict[str, int], other.get("quantities_by_good_pbk")),
-                                    transaction_digest=transaction_digest)
+                                    transaction_digest=transaction_digest,
+                                    dialogue_label=cast(Dict, other.get("dialogue_label")))
         return tx_msg
 
     def __eq__(self, other: object) -> bool:
@@ -175,7 +182,7 @@ class TransactionMessage(Message):
         """
         return isinstance(other, TransactionMessage) \
             and self.get("performative") == other.get("performative") \
-            and self.get("skill") == other.get("skill") \
+            and self.get("skill_id") == other.get("skill_id") \
             and self.get("transaction_id") == other.get("transaction_id") \
             and self.get("sender") == other.get("sender") \
             and self.get("counterparty") == other.get("counterparty") \
@@ -185,4 +192,5 @@ class TransactionMessage(Message):
             and self.get("sender_tx_fee") == other.get("sender_tx_fee") \
             and self.get("counterparty_tx_fee") == other.get("counterparty_tx_fee") \
             and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk") \
-            and self.get("transaction_digest") == other.get("transaction_digest")
+            and self.get("transaction_digest") == other.get("transaction_digest") \
+            and self.get("dialogue_label") == other.get("dialogue_label")

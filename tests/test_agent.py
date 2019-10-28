@@ -61,7 +61,7 @@ def test_run_agent():
     """Test that we can set up and then run the agent."""
     agent_name = "dummyagent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path}, {})
+    wallet = Wallet({'default': private_key_pem_path})
     agent = DummyAgent(agent_name, wallet)
     mailbox = MailBox(OEFLocalConnection("mypbk", LocalNode()))
     agent.mailbox = mailbox

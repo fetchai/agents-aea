@@ -157,7 +157,7 @@ class ProtocolRegistry(Registry):
 
     def setup(self) -> None:
         """
-        Teardown the registry.
+        Set up the registry.
 
         :return: None
         """
