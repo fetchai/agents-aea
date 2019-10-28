@@ -45,10 +45,10 @@ class TestProtocolRegistry:
         cls.patch = unittest.mock.patch.object(aea.registries.base.logger, 'exception')
         cls.mocked_logger = cls.patch.__enter__()
 
+        cls.oldcwd = os.getcwd()
         cls.agent_name = "agent_dir_test"
         cls.t = tempfile.mkdtemp()
         cls.agent_folder = os.path.join(cls.t, cls.agent_name)
-        cls.oldcwd = os.getcwd()
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
@@ -116,12 +116,12 @@ class TestResources:
         cls._patch_logger()
 
         # create temp agent folder
+        os.chdir(cls.agent_folder)
         cls.agent_name = "agent_dir_test"
         cls.t = tempfile.mkdtemp()
         cls.agent_folder = os.path.join(cls.t, cls.agent_name)
         cls.oldcwd = os.getcwd()
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
-        os.chdir(cls.agent_folder)
 
         # make fake skill
         cls.fake_skill_id = "fake"
@@ -197,3 +197,5 @@ class TestResources:
     def teardown_class(cls):
         """Tear the tests down."""
         cls._unpatch_logger()
+        shutil.rmtree(cls.t, ignore_errors=True)
+        os.chdir(cls.oldcwd)
