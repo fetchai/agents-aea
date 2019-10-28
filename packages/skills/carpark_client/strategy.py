@@ -76,7 +76,7 @@ class Strategy(SharedClass):
 
         :return: whether it is acceptable
         """
-        result = proposal.values["price"] < self._max_price and proposal.values["last_detection_time"] > \
-                 int(time.time()) - self._max_detection_age
+        result = proposal.values["price"] < self._max_price and \
+            proposal.values["last_detection_time"] > int(time.time()) - self._max_detection_age
 
         return result

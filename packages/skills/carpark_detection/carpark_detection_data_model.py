@@ -9,10 +9,9 @@ class CarParkDataModel (DataModel):
 
     def __init__(self):
         """Initialise the dataModel."""
-        self.ATTRIBUTE_LATITUDE= Attribute("latitude", float, True)
+        self.ATTRIBUTE_LATITUDE = Attribute("latitude", float, True)
         self.ATTRIBUTE_LONGITUDE = Attribute("longitude", float, True)
         self.ATTRIBUTE_UNIQUE_ID = Attribute("unique_id", str, True)
-
 
         super().__init__("carpark_detection_datamodel", [
             self.ATTRIBUTE_LATITUDE,

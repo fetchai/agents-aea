@@ -69,7 +69,7 @@ class Dialogue(BaseDialogue):
         :return: None
         """
         BaseDialogue.__init__(self, dialogue_label=dialogue_label)
-        self.carpark_data = None  # type: Optional[bytes]
+        self.carpark_data = None  # type: Optional[Dict[str, Any]]
         self.proposal = None  # type: Optional[Description]
 
     def is_expecting_accept(self) -> bool:
@@ -111,7 +111,7 @@ class DialogueStats(object):
         self._other_initiated = {Dialogue.EndState.SUCCESSFUL: 0,
                                  Dialogue.EndState.DECLINED_PROPOSE: 0}  # type: Dict[Dialogue.EndState, int]
 
-        print("__init__: self._other_initiated = {}".format( self._other_initiated))
+        print("__init__: self._other_initiated = {}".format(self._other_initiated))
 
     @property
     def other_initiated(self) -> Dict[Dialogue.EndState, int]:
@@ -126,7 +126,6 @@ class DialogueStats(object):
 
         :return: None
         """
-
         self._other_initiated[end_state] += 1
 
 

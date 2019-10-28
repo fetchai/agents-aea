@@ -18,9 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-import json
 import os
-import time
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 from aea.protocols.oef.models import Description, Query
@@ -67,7 +65,6 @@ class Strategy(SharedClass):
 
         :return: a description of the offered services
         """
-
         desc = Description(
             {
                 "latitude": float(self.lat),
@@ -97,10 +94,6 @@ class Strategy(SharedClass):
         """
         # TODO, this is a stub
         data = self.db.get_latest_detection_data(1)
-        data = self.db.get_latest_detection_data(1)
-        if data is None:
-            return None, None
-
 
         del data[0]['raw_image_path']
         del data[0]['processed_image_path']
@@ -112,14 +105,11 @@ class Strategy(SharedClass):
             "lat": data[0]["lat"],
             "lon": data[0]["lon"],
             "price": self.data_price_fet,
-            "last_detection_time": int(time.time()),  #last_detection_time,
+            "last_detection_time": last_detection_time,
             "max_spaces": max_spaces,
         })
-        print ("WARNING - always using now time")
-
 
         data[0]["price_fet"] = self.data_price_fet
         data[0]["message_type"] = "car_park_data"
-        #encoded_data = json.dumps(data[0]).encode("utf-8")
 
-        return (proposal, data[0])
+        return proposal, data[0]

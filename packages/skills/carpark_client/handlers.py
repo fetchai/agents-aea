@@ -34,8 +34,8 @@ from aea.skills.base import Handler
 from aea.decision_maker.messages.transaction import TransactionMessage
 
 if TYPE_CHECKING:
-    from packages.skills.carpark_client_.dialogues import Dialogue, Dialogues
-    from packages.skills.carpark_client_.strategy import Strategy
+    from packages.skills.carpark_client.dialogues import Dialogue, Dialogues
+    from packages.skills.carpark_client.strategy import Strategy
 else:
     from carpark_client_skill.dialogues import Dialogue, Dialogues
     from carpark_client_skill.strategy import Strategy

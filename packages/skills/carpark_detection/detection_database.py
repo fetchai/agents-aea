@@ -1,3 +1,22 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""Communicate between the database and the python objects."""
 
 import sqlite3
 import os
@@ -7,13 +26,16 @@ import time
 
 
 class DetectionDatabase:
+    """Communicate between the database and the python objects."""
+
     def __init__(self, run_dir):
-        self.this_dir =os.path.dirname(__file__)
+        """Initialise the Detection Database Communication class."""
+        self.this_dir = os.path.dirname(__file__)
         self.run_dir = run_dir
         self.temp_dir = str(os.path.join(self.run_dir, '', "temp_files"))
 
         self.mask_image_path = self.temp_dir + "/mask.tiff"
-        self.mask_ref_image_path =self. temp_dir + "/mask_ref.tiff"
+        self.mask_ref_image_path = self. temp_dir + "/mask_ref.tiff"
         self.raw_image_dir = self.temp_dir + "/db_raw_images/"
         self.processed_image_dir = self.temp_dir + "/db_processed_images/"
         # Note that this path should be under source control
@@ -25,6 +47,7 @@ class DetectionDatabase:
         self.initialise_backend()
 
     def reset_database(self):
+        """Reset the database and remove all data."""
         # If we need to reset the database, then remove the table and any stored images
         print("Database being reset")
 
@@ -39,8 +62,8 @@ class DetectionDatabase:
         # Recreate them
         self.initialise_backend()
 
-
     def reset_mask(self):
+        """Just reset the detection mask."""
         # If we need to reset the database, then remove the table and any stored images
         print("Database being reset")
 
@@ -52,19 +75,18 @@ class DetectionDatabase:
         self.ensure_dirs_exist()
 
     def initialise_backend(self):
+        """Generate all tables in database and any temporary directories needed."""
         self.ensure_dirs_exist()
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS images (epoch INTEGER, raw_image_path TEXT, "
             "processed_image_path TEXT, total_count INTEGER, "
             "moving_count INTEGER, free_spaces INTEGER, lat TEXT, lon TEXT)")
 
-       # self.execute_single_sql("DROP TABLE fet_table")
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS fet_table (id INTEGER PRIMARY KEY, amount BIGINT, last_updated TEXT)")
 
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS status_table (system_name TEXT PRIMARY KEY, status TEXT)")
-
 
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS name_lookup2 (oef_key TEXT PRIMARY KEY, friendly_name TEXT, epoch INT, is_self BIT)")
@@ -73,17 +95,17 @@ class DetectionDatabase:
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS transaction_history (tx TEXT PRIMARY KEY, epoch INT, oef_key_payer TEXT, oef_key_payee TEXT, amount BIGINT, status TEXT)")
 
-        #self.execute_single_sql("DROP TABLE dialogue_statuses")
+        # self.execute_single_sql("DROP TABLE dialogue_statuses")
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS dialogue_statuses (dialogue_id TEXT, epoch DECIMAL, other_agent_key TEXT, received_msg TEXT, sent_msg TEXT)")
 
-
-
     def set_fet(self, amount, t):
+        """Record how much FET we have and when we last read it from the ledger."""
         self.execute_single_sql(
             "INSERT OR REPLACE INTO fet_table(id, amount, last_updated) values(0, '{0}', '{1}')".format(amount, t))
 
     def get_fet(self):
+        """Read how much FET we have."""
         result = self.execute_single_sql("SELECT amount FROM fet_table WHERE id=0")
         if len(result) != 0:
             return result[0][0]
@@ -91,9 +113,11 @@ class DetectionDatabase:
             return -99
 
     def save_max_capacity(self, max_capacity):
+        """Record the maximum number of spaces we can report on."""
         self.set_system_status("max_capacity", str(max_capacity))
 
     def get_max_capacity(self):
+        """Read the maximum number of spaces we can report on."""
         max_capacity = self.get_system_status("max_capacity")
 
         if max_capacity == "UNKNOWN":
@@ -102,10 +126,12 @@ class DetectionDatabase:
             return int(max_capacity)
 
     def save_lat_lon(self, lat, lon):
-       self.set_system_status("lat", str(lat))
-       self.set_system_status("lon", str(lon))
+        """Record the longitude and latitude of our device."""
+        self.set_system_status("lat", str(lat))
+        self.set_system_status("lon", str(lon))
 
     def get_lat_lon(self):
+        """Read the longitude and latitude of our device."""
         lat = self.get_system_status("lat")
         lon = self.get_system_status("lon")
         if lat == "UNKNOWN" or lon == "UNKNOWN":
@@ -114,10 +140,12 @@ class DetectionDatabase:
             return float(lat), float(lon)
 
     def set_system_status(self, system_name, status):
+        """Record the status of one of the systems."""
         self.execute_single_sql(
             "INSERT OR REPLACE INTO status_table(system_name, status) values('{}', '{}')".format(system_name, status))
 
     def get_system_status(self, system_name):
+        """Read the status of one of the systems."""
         result = self.execute_single_sql("SELECT status FROM status_table WHERE system_name='{}'".format(system_name))
         if len(result) != 0:
             return result[0][0]
@@ -125,12 +153,14 @@ class DetectionDatabase:
             return "UNKNOWN"
 
     def set_dialogue_status(self, dialogue_id, other_agent_key, received_msg, sent_msg):
+        """Record the status of a dialog we are having."""
         t = time.time()
         self.execute_single_sql(
             "INSERT INTO dialogue_statuses(dialogue_id, epoch, other_agent_key, received_msg, sent_msg) "
             "values('{}', {}, '{}', '{}', '{}')".format(dialogue_id, t, other_agent_key, received_msg, sent_msg))
 
     def get_dialogue_statuses(self):
+        """Read the statuses of all the dialog we are having."""
         data = self.execute_single_sql("SELECT * FROM dialogue_statuses ORDER BY epoch DESC LIMIT 100")
         results = []
         for datum in data:
@@ -145,6 +175,7 @@ class DetectionDatabase:
         return results
 
     def calc_uncleared_fet(self):
+        """Calc our uncleared fet."""
         cleared_fet_result = self.execute_single_sql("SELECT amount FROM fet_table WHERE id=0")
         if len(cleared_fet_result) != 0:
             uncleared_fet_result = self.execute_single_sql("SELECT SUM(amount) FROM transaction_history WHERE status = 'in_progress'")
@@ -156,12 +187,14 @@ class DetectionDatabase:
             return -99
 
     def add_friendly_name(self, oef_key, friendly_name, is_self=False):
+        """Record the friendly name of one the agents we are dealing with (including ourselves)."""
         t = int(time.time())
         self.execute_single_sql(
             "INSERT OR REPLACE INTO name_lookup2(oef_key, friendly_name, epoch, is_self) "
             "values('{}', '{}', {}, {})".format(oef_key, friendly_name, t, 1 if is_self else 0))
 
     def add_in_progress_transaction(self, tx, oef_key_payer, oef_key_payee, amount):
+        """Record that a transaction in underway."""
         t = int(time.time())
         self.execute_single_sql(
             "INSERT OR REPLACE INTO transaction_history(tx, epoch, oef_key_payer, oef_key_payee, amount, status) "
@@ -173,13 +206,15 @@ class DetectionDatabase:
                 amount))
 
     def get_in_progress_transactions(self):
+        """Read all in-progress transactions."""
         return self.get_transactions_with_status("in_progress")
 
     def get_complete_transactions(self):
+        """Read all complete transactions."""
         return self.get_transactions_with_status("complete")
 
-
     def get_transactions_with_status(self, status):
+        """Read all transactions with a given status."""
         data = self.execute_single_sql("SELECT * from transaction_history WHERE status = '{}' ORDER BY epoch DESC".format(status))
         results = []
         for datum in data:
@@ -194,8 +229,8 @@ class DetectionDatabase:
 
         return results
 
-
     def get_n_transactions(self, count):
+        """Get the most resent N transactions."""
         data = self.execute_single_sql("SELECT * from transaction_history ORDER BY epoch DESC LIMIT {}".format(count))
         results = []
         for datum in data:
@@ -210,13 +245,13 @@ class DetectionDatabase:
 
         return results
 
-
-
     def set_transaction_complete(self, tx):
+        """Set a specific transaction as complete."""
         self.execute_single_sql(
             "UPDATE transaction_history SET status ='complete' WHERE tx = '{}'".format(tx))
 
     def lookup_friendly_name(self, oef_key):
+        """Look iup friendly name given the OEF key."""
         results = self.execute_single_sql(
             "SELECT * FROM name_lookup2 WHERE oef_key = '{}' ORDER BY epoch DESC".format(oef_key))
         if len(results) == 0:
@@ -224,8 +259,8 @@ class DetectionDatabase:
         else:
             return results[0][1]
 
-    # return public_key, friendly_name
     def lookup_self_names(self):
+        """Return out own name and key."""
         results = self.execute_single_sql(
             "SELECT oef_key, friendly_name FROM name_lookup2 WHERE is_self = 1 ORDER BY epoch DESC")
         if len(results) == 0:
@@ -234,13 +269,14 @@ class DetectionDatabase:
             return results[0][0], results[0][1]
 
     def add_entry_no_save(self, raw_path, processed_path, total_count, moving_count, free_spaces, lat, lon):
+        """Add an entry into the detection database but do not save anything to disk."""
         # need to extract the time!
         t = self.extract_time_from_raw_path(raw_path)
         self.execute_single_sql("INSERT INTO images VALUES ({}, '{}', '{}', {}, {}, {}, '{}', '{}')".format(
             t, raw_path, processed_path, total_count, moving_count, free_spaces, lat, lon))
 
-
     def add_entry(self, raw_image, processed_image, total_count, moving_count, free_spaces, lat, lon):
+        """Add an entry into the detection database and record images to disk."""
         t = int(time.time())
         raw_path = self.generate_raw_image_path(t)
         processed_path = self.generate_processed_path(t)
@@ -252,10 +288,11 @@ class DetectionDatabase:
             t, raw_path, processed_path, total_count, moving_count, free_spaces, lat, lon))
 
     def execute_single_sql(self, command):
+        """Query the database - all the other functions use this under the hood."""
         conn = None
         ret = []
         try:
-            conn = sqlite3.connect(self.database_path, timeout=300) # 5 mins
+            conn = sqlite3.connect(self.database_path, timeout=300)  # 5 mins
             c = conn.cursor()
             c.execute(command)
             ret = c.fetchall()
@@ -269,6 +306,7 @@ class DetectionDatabase:
         return ret
 
     def get_latest_detection_data(self, max_num_rows):
+        """Return the most recent detection data."""
         results = self.execute_single_sql(
             "SELECT * FROM images ORDER BY epoch DESC LIMIT {}".format(max_num_rows))
 
@@ -290,13 +328,15 @@ class DetectionDatabase:
         return ret_data
 
     def prune_image_table(self, max_entries):
+        """Remove image data if table longer than max_entries."""
         self.prune_table("images", max_entries)
 
     def prune_transaction_table(self, max_entries):
+        """Remove transaction data if table longer than max_entries."""
         self.prune_table("transaction_history", max_entries)
 
-
     def prune_table(self, table_name, max_entries):
+        """Remove any data if table longer than max_entries."""
         results = self.execute_single_sql(
             "SELECT epoch FROM {} ORDER BY epoch DESC LIMIT 1 OFFSET {}".format(table_name, max_entries - 1))
 
@@ -305,6 +345,7 @@ class DetectionDatabase:
             self.execute_single_sql("DELETE FROM {} WHERE epoch<{}".format(table_name, last_epoch))
 
     def ensure_dirs_exist(self):
+        """Test if we have our temp directotries, and if we don't create them."""
         if not os.path.isdir(self.temp_dir):
             os.mkdir(self.temp_dir)
         if not os.path.isdir(self.raw_image_dir):
@@ -313,15 +354,19 @@ class DetectionDatabase:
             os.mkdir(self.processed_image_dir)
 
     def generate_raw_image_path(self, t):
+        """Return path where we store raw images."""
         return self.raw_image_dir + "{0:012d}".format(t) + "_raw_image" + self.image_file_ext
 
     def generate_processed_path(self, t):
-        return self.processed_image_dir + "{0:012d}".format(t)+ "_processed_image" + self.image_file_ext
+        """Return path where we store processed images."""
+        return self.processed_image_dir + "{0:012d}".format(t) + "_processed_image" + self.image_file_ext
 
     def generate_processed_from_raw_path(self, raw_name):
+        """Given the raw path, return the processes path."""
         return raw_name.replace("_raw_image.", "_processed_image.").replace(self.raw_image_dir, self.processed_image_dir)
 
     def extract_time_from_raw_path(self, raw_name):
+        """Given the raw path name, return the time the detection happened."""
         start_index = len(self.raw_image_dir)
         extracted_num = raw_name[start_index:start_index + self.num_digits_time]
         return int(extracted_num)

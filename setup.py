@@ -79,13 +79,17 @@ def get_all_extras() -> Dict:
         "connexion[swagger-ui]",
         *cli_deps
     ]
+    image_deps = [
+        "scikit-image",
+    ]
 
     extras = {
         "cli": cli_deps,
         "cli_gui": cli_gui,
         "fetch": fetch_ledger_deps,
         "ethereum": ethereum_deps,
-        "crypto": crypto_deps
+        "crypto": crypto_deps,
+        "image": image_deps
     }
     extras.update(get_aea_extras())
 
