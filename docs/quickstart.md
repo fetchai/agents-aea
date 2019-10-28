@@ -116,6 +116,47 @@ You will see the echo task running in the terminal window.
 
 <center>![The echo call and response log](assets/echo.png)</center>
 
+The AEA initially calls the setup method on `Handler`, `Behaviour` and `Task` and then it repeatedly calls the `Behaviour` and `Task` methods `act` and `execute`. This is the main agent loop in action. To investigate the `Handler` a bit more, we will first stop the agent.
+
+### Stop the agent
+
+Stop the agent by pressing `CTRL c`
+
+### Add a stub connection
+
+``` bash
+aea add connection stub
+```
+
+A stub connection provides an I/O reader/writer. 
+
+This connection uses two files to communicate: one for the incoming messages and
+the other for the outgoing messages. Each line contains an encoded envelope.
+
+The format of each line is the following:
+
+        TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
+
+e.g.:
+
+        recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+
+### Run the agent
+
+Run the agent with the `local` connection.
+
+``` bash
+aea run --connection stub
+```
+
+### Add an envelope the the input_file
+
+We can send the AEA a message by adding an envelope to the input file.
+
+        echo 'my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
+
+You should now see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`
+
 ### Stop the agent
 
 Stop the agent by pressing `CTRL c`
