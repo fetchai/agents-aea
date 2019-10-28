@@ -134,4 +134,4 @@ class FetchAICrypto(Crypto):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self.entity.private_key_hex)
+        fp.write(self.entity.private_key_hex.encode("utf-8"))

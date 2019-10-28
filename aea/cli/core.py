@@ -41,6 +41,10 @@ from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.crypto.default import DefaultCrypto
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE
 
 DEFAULT_CONNECTION = "oef"
 DEFAULT_SKILL = "error"
@@ -130,6 +134,23 @@ def gui(ctx: Context):
     import aea.cli_gui  # pragma: no cover
     logger.info("Running the GUI.....(press Ctrl+C to exit)")   # pragma: no cover
     aea.cli_gui.run()   # pragma: no cover
+
+
+@cli.command()
+@click.argument("type_", metavar="TYPE", type=click.Choice([
+    DefaultCrypto.identifier,
+    FetchAICrypto.identifier,
+    EthereumCrypto.identifier,
+    "all"]), required=True)
+@pass_ctx
+def generate_key(ctx: Context, type_):
+    """Generate private keys."""
+    if type_ == DefaultCrypto.identifier or type_ == "all":
+        DefaultCrypto().dump(open(DEFAULT_PRIVATE_KEY_FILE, "wb"))
+    if type_ == FetchAICrypto.identifier or type_ == "all":
+        FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
+    if type_ == EthereumCrypto.identifier or type_ == "all":
+        EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
 
 
 cli.add_command(add)

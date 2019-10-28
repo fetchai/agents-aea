@@ -136,4 +136,4 @@ class EthereumCrypto(Crypto):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self._account.privateKey.hex())
+        fp.write(self._account.privateKey.hex().encode("utf-8"))
