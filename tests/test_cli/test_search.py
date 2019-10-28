@@ -116,6 +116,8 @@ class TestSearchSkills:
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"])
         expected_output = """Available skills:
+- carpark_client
+- carpark_detection
 - echo
 - error
 - fipa_negotiation
@@ -133,6 +135,8 @@ class TestSearchSkills:
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "skills"])
         expected_output = """Available skills:
+- carpark_client
+- carpark_detection
 - echo
 - error
 - fipa_negotiation
