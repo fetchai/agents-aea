@@ -39,16 +39,17 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import SharedClass
 
 Action = Any
-logger = logging.getLogger("aea.weather_station_ledger_skill")
+logger = logging.getLogger("aea.carpark_client_skill")
 
-STARTING_MESSAGE_TARGET = 0
 STARTING_MESSAGE_ID = 1
+STARTING_MESSAGE_TARGET = 0
 
 PROPOSE_TARGET = STARTING_MESSAGE_ID
 ACCEPT_TARGET = PROPOSE_TARGET + 1
 MATCH_ACCEPT_TARGET = ACCEPT_TARGET + 1
 
-DECLINED_PROPOSE_TARGET = PROPOSE_TARGET + 1
+DECLINED_CFP_TARGET = STARTING_MESSAGE_ID
+DECLINED_ACCEPT_TARGET = ACCEPT_TARGET + 1
 INFORM_TARGET = MATCH_ACCEPT_TARGET + 1
 
 
@@ -59,7 +60,8 @@ class Dialogue(BaseDialogue):
         """This class defines the end states of a dialogue."""
 
         SUCCESSFUL = 0
-        DECLINED_PROPOSE = 1
+        DECLINED_CFP = 1
+        DECLINED_ACCEPT = 2
 
     def __init__(self, dialogue_label: DialogueLabel, **kwargs) -> None:
         """
@@ -70,27 +72,46 @@ class Dialogue(BaseDialogue):
         :return: None
         """
         BaseDialogue.__init__(self, dialogue_label=dialogue_label)
-        self.carpark_data = None  # type: Optional[bytes]
         self.proposal = None  # type: Optional[Description]
 
-    def is_expecting_accept(self) -> bool:
+    def is_expecting_propose(self) -> bool:
         """
-        Check whether the dialogue is expecting an initial accept.
+        Check whether the dialogue is expecting a propose.
 
         :return: True if yes, False otherwise.
         """
         last_sent_message = self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None  # type: Optional[Message]
-        result = (last_sent_message is not None) and last_sent_message.get("performative") == FIPAMessage.Performative.PROPOSE
+        result = (last_sent_message is not None) and last_sent_message.get("performative") == FIPAMessage.Performative.CFP
         return result
 
-    def is_expecting_propose_decline(self) -> bool:
+    def is_expecting_matching_accept(self) -> bool:
         """
-        Check whether the dialogue is expecting an decline following a propose.
+        Check whether the dialogue is expecting a matching accept.
 
         :return: True if yes, False otherwise.
         """
         last_sent_message = self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None  # type: Optional[Message]
-        result = (last_sent_message is not None) and last_sent_message.get("performative") == FIPAMessage.Performative.PROPOSE
+        result = (last_sent_message is not None) and last_sent_message.get("performative") == FIPAMessage.Performative.ACCEPT
+        return result
+
+    def is_expecting_cfp_decline(self) -> bool:
+        """
+        Check whether the dialogue is expecting an decline following a cfp.
+
+        :return: True if yes, False otherwise.
+        """
+        last_sent_message = self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None  # type: Optional[Message]
+        result = (last_sent_message is not None) and last_sent_message.get("performative") == FIPAMessage.Performative.CFP
+        return result
+
+    def is_expecting_accept_decline(self) -> bool:
+        """
+        Check whether the dialogue is expecting an decline following an accept.
+
+        :return: True if yes, False otherwise.
+        """
+        last_sent_message = self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None  # type: Optional[Message]
+        result = (last_sent_message is not None) and last_sent_message.get("performative") == FIPAMessage.Performative.ACCEPT
         return result
 
     def is_expecting_inform(self) -> bool:
@@ -100,7 +121,7 @@ class Dialogue(BaseDialogue):
         :return: True if yes, False otherwise.
         """
         last_sent_message = self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None  # type: Optional[Message]
-        result = (last_sent_message is not None) and last_sent_message.get("performative") == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS
+        result = (last_sent_message is not None) and last_sent_message.get("performative") == FIPAMessage.Performative.INFORM
         return result
 
 
@@ -109,23 +130,23 @@ class DialogueStats(object):
 
     def __init__(self) -> None:
         """Initialize a StatsManager."""
-        self._other_initiated = {Dialogue.EndState.SUCCESSFUL: 0,
-                                 Dialogue.EndState.DECLINED_PROPOSE: 0}  # type: Dict[Dialogue.EndState, int]
+        self._self_initiated = {Dialogue.EndState.SUCCESSFUL: 0,
+                                Dialogue.EndState.DECLINED_CFP: 0,
+                                Dialogue.EndState.DECLINED_ACCEPT: 0}  # type: Dict[Dialogue.EndState, int]
 
     @property
-    def other_initiated(self) -> Dict[Dialogue.EndState, int]:
-        """Get the stats dictionary on other initiated dialogues."""
-        return self._other_initiated
+    def self_initiated(self) -> Dict[Dialogue.EndState, int]:
+        """Get the stats dictionary on self initiated dialogues."""
+        return self._self_initiated
 
     def add_dialogue_endstate(self, end_state: Dialogue.EndState) -> None:
         """
         Add dialogue endstate stats.
 
         :param end_state: the end state of the dialogue
-
         :return: None
         """
-        self._other_initiated[end_state] += 1
+        self._self_initiated[end_state] += 1
 
 
 class Dialogues(SharedClass):
@@ -139,6 +160,7 @@ class Dialogues(SharedClass):
         """
         SharedClass.__init__(self, **kwargs)
         self._dialogues = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogue_id = 0
         self._dialogue_stats = DialogueStats()
 
     @property
@@ -151,28 +173,14 @@ class Dialogues(SharedClass):
         """Get the dialogue statistics."""
         return self._dialogue_stats
 
-    def is_permitted_for_new_dialogue(self, fipa_msg: Message, sender: Address) -> bool:
+    def _next_dialogue_id(self) -> int:
         """
-        Check whether a fipa message is permitted for a new dialogue.
+        Increment the id and returns it.
 
-        That is, the message has to
-        - be a CFP, and
-        - have the correct msg id and message target.
-
-        :param message: the fipa message
-        :param sender: the sender
-
-        :return: a boolean indicating whether the message is permitted for a new dialogue
+        :return: the next id
         """
-        fipa_msg = cast(FIPAMessage, fipa_msg)
-        msg_id = fipa_msg.get("message_id")
-        target = fipa_msg.get("target")
-        performative = fipa_msg.get("performative")
-
-        result = performative == FIPAMessage.Performative.CFP \
-            and msg_id == STARTING_MESSAGE_ID \
-            and target == STARTING_MESSAGE_TARGET
-        return result
+        self._dialogue_id += 1
+        return self._dialogue_id
 
     def is_belonging_to_registered_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> bool:
         """
@@ -187,20 +195,24 @@ class Dialogues(SharedClass):
         dialogue_id = cast(int, fipa_msg.get("dialogue_id"))
         target = cast(int, fipa_msg.get("target"))
         performative = fipa_msg.get("performative")
-        other_initiated_dialogue_label = DialogueLabel(dialogue_id, sender, sender)
+        self_initiated_dialogue_label = DialogueLabel(dialogue_id, sender, agent_pbk)
         result = False
-        if performative == FIPAMessage.Performative.ACCEPT:
-            if target == ACCEPT_TARGET and other_initiated_dialogue_label in self.dialogues:
-                other_initiated_dialogue = cast(Dialogue, self.dialogues[other_initiated_dialogue_label])
-                result = other_initiated_dialogue.is_expecting_accept()
+        if performative == FIPAMessage.Performative.PROPOSE and target == PROPOSE_TARGET and self_initiated_dialogue_label in self.dialogues:
+            self_initiated_dialogue = cast(Dialogue, self.dialogues[self_initiated_dialogue_label])
+            result = self_initiated_dialogue.is_expecting_propose()
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS and target == MATCH_ACCEPT_TARGET and self_initiated_dialogue_label in self.dialogues:
+            self_initiated_dialogue = cast(Dialogue, self.dialogues[self_initiated_dialogue_label])
+            result = self_initiated_dialogue.is_expecting_matching_accept()
         elif performative == FIPAMessage.Performative.DECLINE:
-            if target == DECLINED_PROPOSE_TARGET and other_initiated_dialogue_label in self.dialogues:
-                other_initiated_dialogue = cast(Dialogue, self.dialogues[other_initiated_dialogue_label])
-                result = other_initiated_dialogue.is_expecting_propose_decline()
-        elif performative == FIPAMessage.Performative.INFORM:
-            if target == INFORM_TARGET and other_initiated_dialogue_label in self.dialogues:
-                other_initiated_dialogue = cast(Dialogue, self.dialogues[other_initiated_dialogue_label])
-                result = other_initiated_dialogue.is_expecting_inform()
+            if target == DECLINED_CFP_TARGET and self_initiated_dialogue_label in self.dialogues:
+                self_initiated_dialogue = cast(Dialogue, self.dialogues[self_initiated_dialogue_label])
+                result = self_initiated_dialogue.is_expecting_cfp_decline()
+            elif target == DECLINED_ACCEPT_TARGET and self_initiated_dialogue_label in self.dialogues:
+                self_initiated_dialogue = cast(Dialogue, self.dialogues[self_initiated_dialogue_label])
+                result = self_initiated_dialogue.is_expecting_accept_decline()
+        elif performative == FIPAMessage.Performative.INFORM and target == INFORM_TARGET and self_initiated_dialogue_label in self.dialogues:
+            self_initiated_dialogue = cast(Dialogue, self.dialogues[self_initiated_dialogue_label])
+            result = self_initiated_dialogue.is_expecting_inform()
         return result
 
     def get_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> Dialogue:
@@ -216,38 +228,31 @@ class Dialogues(SharedClass):
         dialogue_id = cast(int, fipa_msg.get("dialogue_id"))
         target = cast(int, fipa_msg.get("target"))
         performative = fipa_msg.get("performative")
-        other_initiated_dialogue_label = DialogueLabel(dialogue_id, sender, sender)
-        if performative == FIPAMessage.Performative.ACCEPT:
-            if target == ACCEPT_TARGET and other_initiated_dialogue_label in self.dialogues:
-                dialogue = self.dialogues[other_initiated_dialogue_label]
-            else:
-                raise ValueError('Should have found dialogue.')
-        elif performative == FIPAMessage.Performative.DECLINE:
-            if target == DECLINED_PROPOSE_TARGET and other_initiated_dialogue_label in self.dialogues:
-                dialogue = self.dialogues[other_initiated_dialogue_label]
-            else:
-                raise ValueError('Should have found dialogue.')
-        elif performative == FIPAMessage.Performative.INFORM:
-            if target == INFORM_TARGET and other_initiated_dialogue_label in self.dialogues:
-                dialogue = self.dialogues[other_initiated_dialogue_label]
+        self_initiated_dialogue_label = DialogueLabel(dialogue_id, sender, agent_pbk)
+        if (performative == FIPAMessage.Performative.PROPOSE and target == PROPOSE_TARGET and self_initiated_dialogue_label in self.dialogues) \
+                or \
+                (performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS and target == MATCH_ACCEPT_TARGET and self_initiated_dialogue_label in self.dialogues) \
+                or \
+                (performative == FIPAMessage.Performative.DECLINE and target == DECLINED_CFP_TARGET and self_initiated_dialogue_label in self.dialogues) \
+                or \
+                (performative == FIPAMessage.Performative.DECLINE and target == DECLINED_ACCEPT_TARGET and self_initiated_dialogue_label in self.dialogues) \
+                or \
+                (performative == FIPAMessage.Performative.INFORM and target == INFORM_TARGET and self_initiated_dialogue_label in self.dialogues):
+            dialogue = cast(Dialogue, self.dialogues[self_initiated_dialogue_label])
         else:
             raise ValueError('Should have found dialogue.')
-        dialogue = cast(Dialogue, dialogue)
         return dialogue
 
-    def create_opponent_initiated(self, fipa_msg: FIPAMessage, sender: Address) -> Dialogue:
+    def create_self_initiated(self, dialogue_opponent_pbk: Address, dialogue_starter_pbk: Address) -> Dialogue:
         """
-        Save an opponent initiated dialogue.
+        Create a self initiated dialogue.
 
-        :param fipa_msg: the fipa message
-        :param sender: the pbk of the sender
+        :param dialogue_opponent_pbk: the pbk of the agent with which the dialogue is kept.
+        :param dialogue_starter_pbk: the pbk of the agent which started the dialogue
 
-        :return: the created dialogue
+        :return: the created dialogue.
         """
-        dialogue_starter_pbk = sender
-        dialogue_opponent_pbk = sender
-        dialogue_id = cast(int, fipa_msg.get("dialogue_id"))
-        dialogue_label = DialogueLabel(dialogue_id, dialogue_opponent_pbk, dialogue_starter_pbk)
+        dialogue_label = DialogueLabel(self._next_dialogue_id(), dialogue_opponent_pbk, dialogue_starter_pbk)
         result = self._create(dialogue_label)
         return result
 
@@ -256,6 +261,7 @@ class Dialogues(SharedClass):
         Create a dialogue.
 
         :param dialogue_label: the dialogue label
+        :param is_seller: boolean indicating the agent role
 
         :return: the created dialogue
         """

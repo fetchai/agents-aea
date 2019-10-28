@@ -20,6 +20,7 @@
 """This module contains the strategy class."""
 import json
 import os
+import time
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
 from aea.protocols.oef.models import Description, Query
@@ -28,9 +29,12 @@ from aea.skills.base import SharedClass
 if TYPE_CHECKING:
     from packages.skills.carpark_detection.detection_database import DetectionDatabase
     from packages.skills.carpark_detection.carpark_detection_data_model import CarParkDataModel
+#    from packages.skills.carpark_detection.carpark_detection_data_model import WEATHER_STATION_DATAMODEL, SCHEME
+
 else:
     from carpark_detection_skill.detection_database import DetectionDatabase
     from carpark_detection_skill.carpark_detection_data_model import CarParkDataModel
+ #   from carpark_detection_skill.carpark_detection_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
 DEFAULT_PRICE_PER_ROW = 0.02
 DEFAULT_CURRENCY_PBK = 'FET'
@@ -56,8 +60,8 @@ class Strategy(SharedClass):
 
         self.db = DetectionDatabase(os.path.dirname(__file__))
         self.data_price_fet = 2000
-        self.lon = 42
         self.lat = 43
+        self.lon = 42
 
     def get_service_description(self) -> Description:
         """
@@ -70,9 +74,10 @@ class Strategy(SharedClass):
             {
                 "latitude": float(self.lat),
                 "longitude": float(self.lon),
-                "unique_id": str("YAYAYAYAY")
+                "unique_id": self.context.agent_public_key
             }, data_model=CarParkDataModel()
         )
+
         return desc
 
     def is_matching_supply(self, query: Query) -> bool:
@@ -90,7 +95,7 @@ class Strategy(SharedClass):
         Generate a proposal matching the query.
 
         :param query: the query
-        :return: a tuple of proposal and the bytes of weather data
+        :return: a tuple of proposal and the bytes of carpark data
         """
         # TODO, this is a stub
         data = self.db.get_latest_detection_data(1)
@@ -108,9 +113,10 @@ class Strategy(SharedClass):
             "lat": data[0]["lat"],
             "lon": data[0]["lon"],
             "price": self.data_price_fet,
-            "last_detection_time": last_detection_time,
+            "last_detection_time": int(time.time()),  #last_detection_time,
             "max_spaces": max_spaces,
         })
+        print ("WARNING - always using now time")
 
 
         data[0]["price_fet"] = self.data_price_fet

@@ -21,7 +21,7 @@ shared_classes:
       args:
         country: UK
         search_interval: 5
-        max_price: 0.2
+        max_price: 4000
   - shared_class:
       class_name: Dialogues
       args: {}

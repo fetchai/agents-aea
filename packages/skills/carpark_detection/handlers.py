@@ -38,7 +38,7 @@ else:
     from carpark_detection_skill.dialogues import Dialogue, Dialogues
     from carpark_detection_skill.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_station_ledger_skill")
+logger = logging.getLogger("aea.carpark_detection_skill")
 
 
 class FIPAHandler(Handler):
@@ -221,7 +221,7 @@ class FIPAHandler(Handler):
                                                                                              tx_digest))
             proposal = cast(Description, dialogue.proposal)
             total_price = proposal.values.get("price")
-            # watch ledger for transaction (this setup assumes the weather client trusts the weather station)
+            # watch ledger for transaction (this setup assumes the carpark client trusts the carpark station)
             fetchai_ledger_api = self.context.ledger_apis.get('fetchai')
             # TODO:
             fetchai_ledger_api.is_tx_settled(tx_digest, total_price)  # type: ignore
@@ -234,7 +234,7 @@ class FIPAHandler(Handler):
                                          dialogue_id=dialogue_id,
                                          target=new_target,
                                          performative=FIPAMessage.Performative.INFORM,
-                                         json_data=dialogue.weather_data)
+                                         json_data=dialogue.carpark_data)
                 dialogue.outgoing_extend(inform_msg)
                 self.context.outbox.put_message(to=sender,
                                                 sender=self.context.agent_public_key,

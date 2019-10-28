@@ -39,7 +39,7 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import SharedClass
 
 Action = Any
-logger = logging.getLogger("aea.weather_station_ledger_skill")
+logger = logging.getLogger("aea.carpark_detection_skill")
 
 STARTING_MESSAGE_TARGET = 0
 STARTING_MESSAGE_ID = 1
@@ -112,6 +112,8 @@ class DialogueStats(object):
         self._other_initiated = {Dialogue.EndState.SUCCESSFUL: 0,
                                  Dialogue.EndState.DECLINED_PROPOSE: 0}  # type: Dict[Dialogue.EndState, int]
 
+        print("__init__: self._other_initiated = {}".format( self._other_initiated))
+
     @property
     def other_initiated(self) -> Dict[Dialogue.EndState, int]:
         """Get the stats dictionary on other initiated dialogues."""
@@ -125,7 +127,15 @@ class DialogueStats(object):
 
         :return: None
         """
-        self._other_initiated[end_state] += 1
+        print("add_dialogue_endstate: self._other_initiated = {}\n\n".format( self._other_initiated))
+
+        if Dialogue.EndState.DECLINED_PROPOSE in self._other_initiated:
+            print("DECLINED_PROPOSE is present")
+        else:
+            print("DECLINED_PROPOSE is NOT present")
+
+        print("WARNING - HAVE HAD TO REMOVE THIS DUE TO SOME TYPE ODDITIES")
+        #self._other_initiated[end_state] += 1
 
 
 class Dialogues(SharedClass):
