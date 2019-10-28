@@ -18,9 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea` sub-commands."""
+import subprocess
+import sys
 
+import pytest
 from click.testing import CliRunner
 
+import aea
 from aea.cli import cli
 
 
@@ -29,3 +33,15 @@ def test_no_argument():
     runner = CliRunner()
     result = runner.invoke(cli, [])
     assert result.exit_code == 0
+
+
+def test_flag_version():
+    """Test that the flag '--version' works correctly."""
+    result = subprocess.Popen([sys.executable, "-m", "aea.cli", "--version"], stdout=subprocess.PIPE)
+    try:
+        result.wait(timeout=5.0)
+    except TimeoutError:
+        pytest.fail("The command didn't terminate in a reasonable amount of time.")
+
+    stdout, stderr = result.communicate()
+    assert stdout == "aea, version {}\n".format(aea.__version__).encode("utf-8")

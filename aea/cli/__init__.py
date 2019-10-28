@@ -19,4 +19,4 @@
 
 """This module contains the implementation of command-line tool 'aea'."""
 
-from .__main__ import cli
+from .core import cli
