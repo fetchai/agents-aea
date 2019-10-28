@@ -1,0 +1,25 @@
+name: carpark_detection
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: ServiceRegistrationBehaviour
+      args: {}
+handlers:
+  - handler:
+      class_name: FIPAHandler
+      args: {}
+tasks: []
+shared_classes:
+  - shared_class:
+      class_name: Strategy
+      args:
+        price_per_row: 1
+        currency_pbk: 'FET'
+  - shared_class:
+      class_name: Dialogues
+      args: {}
+protocols: ['fipa', 'oef', 'default']
+ledgers: ['fetchai']
