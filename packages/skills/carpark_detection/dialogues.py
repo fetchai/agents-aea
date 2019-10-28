@@ -41,14 +41,13 @@ from aea.skills.base import SharedClass
 Action = Any
 logger = logging.getLogger("aea.carpark_detection_skill")
 
-STARTING_MESSAGE_TARGET = 0
 STARTING_MESSAGE_ID = 1
-
-PROPOSE_TARGET = STARTING_MESSAGE_ID
+STARTING_MESSAGE_TARGET = 0
+CFP_TARGET = STARTING_MESSAGE_TARGET
+PROPOSE_TARGET = CFP_TARGET + 1
 ACCEPT_TARGET = PROPOSE_TARGET + 1
-MATCH_ACCEPT_TARGET = ACCEPT_TARGET + 1
-
 DECLINED_PROPOSE_TARGET = PROPOSE_TARGET + 1
+MATCH_ACCEPT_TARGET = ACCEPT_TARGET + 1
 INFORM_TARGET = MATCH_ACCEPT_TARGET + 1
 
 
@@ -127,15 +126,8 @@ class DialogueStats(object):
 
         :return: None
         """
-        print("add_dialogue_endstate: self._other_initiated = {}\n\n".format( self._other_initiated))
 
-        if Dialogue.EndState.DECLINED_PROPOSE in self._other_initiated:
-            print("DECLINED_PROPOSE is present")
-        else:
-            print("DECLINED_PROPOSE is NOT present")
-
-        print("WARNING - HAVE HAD TO REMOVE THIS DUE TO SOME TYPE ODDITIES")
-        #self._other_initiated[end_state] += 1
+        self._other_initiated[end_state] += 1
 
 
 class Dialogues(SharedClass):
@@ -181,7 +173,7 @@ class Dialogues(SharedClass):
 
         result = performative == FIPAMessage.Performative.CFP \
             and msg_id == STARTING_MESSAGE_ID \
-            and target == STARTING_MESSAGE_TARGET
+            and target == CFP_TARGET
         return result
 
     def is_belonging_to_registered_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> bool:

@@ -5,7 +5,7 @@ from aea.protocols.oef.models import DataModel, Attribute
 
 
 class CarParkDataModel (DataModel):
-    """Data model for the weather Agent."""
+    """Data model for the Carpark Agent."""
 
     def __init__(self):
         """Initialise the dataModel."""

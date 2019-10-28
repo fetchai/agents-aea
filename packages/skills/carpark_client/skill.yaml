@@ -7,6 +7,9 @@ behaviours:
   - behaviour:
       class_name: MySearchBehaviour
       args: {}
+  - behaviour:
+      class_name: MyTransactionBehaviour
+      args: {}
 handlers:
   - handler:
       class_name: FIPAHandler

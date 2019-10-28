@@ -29,14 +29,12 @@ from aea.skills.base import SharedClass
 if TYPE_CHECKING:
     from packages.skills.carpark_detection.detection_database import DetectionDatabase
     from packages.skills.carpark_detection.carpark_detection_data_model import CarParkDataModel
-#    from packages.skills.carpark_detection.carpark_detection_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
 else:
     from carpark_detection_skill.detection_database import DetectionDatabase
     from carpark_detection_skill.carpark_detection_data_model import CarParkDataModel
- #   from carpark_detection_skill.carpark_detection_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
-DEFAULT_PRICE_PER_ROW = 0.02
+DEFAULT_PRICE_PER_ROW = 2
 DEFAULT_CURRENCY_PBK = 'FET'
 DATE_ONE = "3/10/2019"
 DATE_TWO = "15/10/2019"
@@ -90,7 +88,7 @@ class Strategy(SharedClass):
         # TODO, this is a stub
         return True
 
-    def generate_proposal_and_data(self, query: Query) -> Tuple[Description, bytes]:
+    def generate_proposal_and_data(self, query: Query) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
         """
         Generate a proposal matching the query.
 
@@ -110,6 +108,7 @@ class Strategy(SharedClass):
         last_detection_time = data[0]["epoch"]
         max_spaces = data[0]["free_spaces"] + data[0]["total_count"]
         proposal = Description({
+
             "lat": data[0]["lat"],
             "lon": data[0]["lon"],
             "price": self.data_price_fet,
@@ -121,6 +120,6 @@ class Strategy(SharedClass):
 
         data[0]["price_fet"] = self.data_price_fet
         data[0]["message_type"] = "car_park_data"
-        encoded_data = json.dumps(data[0]).encode("utf-8")
+        #encoded_data = json.dumps(data[0]).encode("utf-8")
 
-        return (proposal, encoded_data)
+        return (proposal, data[0])
