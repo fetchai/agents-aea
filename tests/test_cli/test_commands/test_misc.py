@@ -19,6 +19,7 @@
 
 """This test module contains the tests for the `aea` sub-commands."""
 import subprocess
+import sys
 
 import pytest
 from click.testing import CliRunner
@@ -36,9 +37,9 @@ def test_no_argument():
 
 def test_flag_version():
     """Test that the flag '--version' works correctly."""
-    result = subprocess.Popen(["aea", "--version"], stdout=subprocess.PIPE)
+    result = subprocess.Popen([sys.executable, "-m", "aea", "--version"], stdout=subprocess.PIPE)
     try:
-        result.wait(timeout=2.0)
+        result.wait(timeout=5.0)
     except TimeoutError:
         pytest.fail("The command didn't terminate in a reasonable amount of time.")
 
