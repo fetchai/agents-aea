@@ -17,6 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of command-line tool 'aea'."""
-
-from .core import cli
+"""This module contains tests for decision_maker."""

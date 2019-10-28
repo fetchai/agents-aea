@@ -71,12 +71,12 @@ class StateUpdateMessage(Message):
             currency_endowment = cast(CurrencyEndowment, currency_endowment)
             exchange_params = self.get("exchange_params")
             exchange_params = cast(ExchangeParams, exchange_params)
-            currency_endowment.keys() == exchange_params.keys()
+            assert currency_endowment.keys() == exchange_params.keys()
             good_endowment = self.get("good_endowment")
             good_endowment = cast(GoodEndowment, good_endowment)
             utility_params = self.get("utility_params")
             utility_params = cast(UtilityParams, utility_params)
-            good_endowment.keys() == utility_params.keys()
+            assert good_endowment.keys() == utility_params.keys()
         except (AssertionError, KeyError):
             return False
         return True

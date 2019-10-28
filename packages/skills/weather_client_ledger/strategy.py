@@ -28,7 +28,7 @@ from aea.skills.base import SharedClass
 DEFAULT_COUNTRY = 'UK'
 SEARCH_TERM = 'country'
 DEFAULT_SEARCH_INTERVAL = 5.0
-DEFAULT_MAX_PRICE = 0.2
+DEFAULT_MAX_PRICE = 5
 
 
 class Strategy(SharedClass):

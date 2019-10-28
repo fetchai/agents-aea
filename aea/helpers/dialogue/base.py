@@ -27,7 +27,7 @@ This module contains the classes required for dialogue management.
 """
 
 from abc import abstractmethod
-from typing import Dict, List
+from typing import Dict, List, Optional, cast
 
 from aea.protocols.base import Message
 
@@ -75,6 +75,25 @@ class DialogueLabel:
         """Turn object into hash."""
         return hash((self.dialogue_id, self.dialogue_opponent_pbk, self.dialogue_starter_pbk))
 
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "dialogue_id": str(self.dialogue_id),
+            "dialogue_opponent_pbk": self.dialogue_opponent_pbk,
+            "dialogue_starter_pbk": self.dialogue_starter_pbk
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict[str, str]) -> 'DialogueLabel':
+        """Get dialogue label from json."""
+        dialogue_label = DialogueLabel(
+            int(cast(str, obj.get('dialogue_id'))),
+            cast(str, obj.get('dialogue_opponent_pbk')),
+            cast(str, obj.get('dialogue_starter_pbk'))
+        )
+        return dialogue_label
+
 
 class Dialogue:
     """The dialogue class maintains state of a dialogue and manages it."""
@@ -101,6 +120,16 @@ class Dialogue:
     def is_self_initiated(self) -> bool:
         """Check whether the agent initiated the dialogue."""
         return self._is_self_initiated
+
+    @property
+    def last_incoming_message(self) -> Optional[Message]:
+        """Get the last incoming message."""
+        return self._incoming_messages[-1] if len(self._incoming_messages) > 0 else None
+
+    @property
+    def last_outgoing_message(self) -> Optional[Message]:
+        """Get the last incoming message."""
+        return self._outgoing_messages[-1] if len(self._outgoing_messages) > 0 else None
 
     def outgoing_extend(self, message: 'Message') -> None:
         """

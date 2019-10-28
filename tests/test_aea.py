@@ -24,6 +24,7 @@ from threading import Thread
 
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
@@ -39,9 +40,10 @@ def test_initialise_AEA():
     public_key_1 = "mailbox1"
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path}, {})
-    my_AEA = AEA("Agent0", mailbox1, wallet, directory=str(Path(CUR_PATH, "aea")))
-    assert AEA("Agent0", mailbox1, wallet), "Agent is not initialised"
+    wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
+    my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, directory=str(Path(CUR_PATH, "aea")))
+    assert AEA("Agent0", mailbox1, wallet, ledger_apis), "Agent is not initialised"
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
     my_AEA.setup()
     assert my_AEA.resources is not None,\
@@ -53,7 +55,8 @@ def test_act():
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path}, {})
+    wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
     public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
@@ -61,6 +64,7 @@ def test_act():
         agent_name,
         mailbox,
         wallet,
+        ledger_apis,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:
@@ -79,7 +83,8 @@ def test_react():
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path}, {})
+    wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
     public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
@@ -96,6 +101,7 @@ def test_react():
         agent_name,
         mailbox,
         wallet,
+        ledger_apis,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:
@@ -115,7 +121,8 @@ def test_handle():
     """Tests handle method of an agent."""
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path}, {})
+    wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
     public_key = wallet.public_keys['default']
     connection = DummyConnection()
     mailbox = MailBox(connection)
@@ -133,6 +140,7 @@ def test_handle():
         agent_name,
         mailbox,
         wallet,
+        ledger_apis,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:

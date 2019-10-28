@@ -443,7 +443,7 @@ class TestFIPA:
     def test_on_oef_error(self):
         """Test the oef error."""
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path}, {})
+        wallet = Wallet({'default': private_key_pem_path})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
@@ -460,7 +460,7 @@ class TestFIPA:
     def test_on_dialogue_error(self):
         """Test the dialogue error."""
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path}, {})
+        wallet = Wallet({'default': private_key_pem_path})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
@@ -487,7 +487,7 @@ class TestFIPA:
     def test_send_oef_message(self):
         """Test the send oef message."""
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path}, {})
+        wallet = Wallet({'default': private_key_pem_path})
         in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,

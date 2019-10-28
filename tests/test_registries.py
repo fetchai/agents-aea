@@ -30,6 +30,7 @@ import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox
 from aea.protocols.base import Protocol
@@ -134,8 +135,9 @@ class TestResources:
 
         mailbox = MailBox(DummyConnection())
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path}, {})
-        cls.aea = AEA(cls.agent_name, mailbox, wallet, directory=cls.agent_folder)
+        wallet = Wallet({'default': private_key_pem_path})
+        ledger_apis = LedgerApis({})
+        cls.aea = AEA(cls.agent_name, mailbox, wallet, ledger_apis, directory=cls.agent_folder)
         cls.resources = Resources.from_resource_dir(os.path.join(cls.agent_folder), cls.aea.context)
 
         cls.expected_skills = {"dummy", "error"}

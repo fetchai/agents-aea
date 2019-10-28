@@ -43,10 +43,11 @@ logger = logging.getLogger("aea.weather_station_ledger_skill")
 
 STARTING_MESSAGE_ID = 1
 STARTING_MESSAGE_TARGET = 0
-PROPOSE_TARGET = STARTING_MESSAGE_ID
+CFP_TARGET = STARTING_MESSAGE_TARGET
+PROPOSE_TARGET = CFP_TARGET + 1
 ACCEPT_TARGET = PROPOSE_TARGET + 1
-MATCH_ACCEPT_TARGET = ACCEPT_TARGET + 1
 DECLINED_PROPOSE_TARGET = PROPOSE_TARGET + 1
+MATCH_ACCEPT_TARGET = ACCEPT_TARGET + 1
 INFORM_TARGET = MATCH_ACCEPT_TARGET + 1
 
 
@@ -68,7 +69,7 @@ class Dialogue(BaseDialogue):
         :return: None
         """
         BaseDialogue.__init__(self, dialogue_label=dialogue_label)
-        self.weather_data = None  # type: Optional[bytes]
+        self.weather_data = None  # type: Optional[Dict[str, Any]]
         self.proposal = None  # type: Optional[Description]
 
     def is_expecting_accept(self) -> bool:
@@ -169,7 +170,7 @@ class Dialogues(SharedClass):
 
         result = performative == FIPAMessage.Performative.CFP \
             and msg_id == STARTING_MESSAGE_ID \
-            and target == STARTING_MESSAGE_TARGET
+            and target == CFP_TARGET
         return result
 
     def is_belonging_to_registered_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> bool:
