@@ -25,8 +25,10 @@ from queue import Queue
 
 import pytest
 
+from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG
 from aea.crypto.wallet import Wallet, FETCHAI
 from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
+from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import OutBox  # , Envelope
 from tests.conftest import CUR_PATH
@@ -36,6 +38,7 @@ MAX_REACTIONS = 10
 
 class TestUtilityPreferencesBase:
     """Test the base.py for DecisionMaker."""
+
     @classmethod
     def setup_class(cls):
         """Initialise the class."""
@@ -65,49 +68,50 @@ class TestUtilityPreferencesBase:
         good_endowment = {"FET": 2}
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                        skill= "default",
+                                        skill_id="default",
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=True,
                                         currency_pbk="FET",
                                         amount=1,
-                                        sender_tx_fee=0.0,
-                                        counterparty_tx_fee=0.0,
+                                        sender_tx_fee=0,
+                                        counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"FET": 10})
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message),\
             "We should have the money for the transaction!"
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                        skill="default",
+                                        skill_id="default",
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=False,
                                         currency_pbk="FET",
                                         amount=1,
-                                        sender_tx_fee=0.0,
-                                        counterparty_tx_fee=0.0,
+                                        sender_tx_fee=0,
+                                        counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"FET": 10})
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message), \
             "We should have the money for the transaction!"
 
     def test_apply(self):
+        """Test the apply function."""
         currency_endowment = {"FET": 100.0}
         good_endowment = {"FET": 2}
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                        skill="default",
+                                        skill_id="default",
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=True,
                                         currency_pbk="FET",
                                         amount=20,
-                                        sender_tx_fee=5.0,
-                                        counterparty_tx_fee=0.0,
+                                        sender_tx_fee=5,
+                                        counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"FET": 10})
         list_of_transactions = [tx_message]
         state = self.ownership_state
@@ -115,43 +119,44 @@ class TestUtilityPreferencesBase:
         assert state != new_state, "after applying a list_of_transactions must have a different state!"
 
     def test_transaction_update(self):
+        """Test the tranasction update."""
         currency_endowment = {"FET": 100.0}
         good_endowment = {"FET": 2}
 
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                        skill="default",
+                                        skill_id="default",
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=True,
                                         currency_pbk="FET",
                                         amount=20,
-                                        sender_tx_fee=5.0,
-                                        counterparty_tx_fee=0.0,
+                                        sender_tx_fee=5,
+                                        counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"FET": 10})
         cur_holdings = self.ownership_state.currency_holdings['FET']
         self.ownership_state.update(tx_message=tx_message)
         assert self.ownership_state.currency_holdings['FET'] < cur_holdings
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                        skill="default",
+                                        skill_id="default",
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=False,
                                         currency_pbk="FET",
                                         amount=20,
-                                        sender_tx_fee=5.0,
-                                        counterparty_tx_fee=0.0,
+                                        sender_tx_fee=5,
+                                        counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"FET": 10})
         cur_holdings = self.ownership_state.currency_holdings['FET']
         self.ownership_state.update(tx_message=tx_message)
         assert self.ownership_state.currency_holdings['FET'] > cur_holdings
 
-    # PREFERENCES
+    # # PREFERENCES
     def test_preferences_properties(self):
-        """Test the properties of the preferences class!"""
+        """Test the properties of the preferences class."""
         with pytest.raises(AssertionError):
             self.preferences.exchange_params
         with pytest.raises(AssertionError):
@@ -190,15 +195,15 @@ class TestUtilityPreferencesBase:
         self.ownership_state.init(currency_endowment=currency_holdings, good_endowment=good_holdings)
         self.preferences.init(utility_params=utility_params, exchange_params=exchange_params)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                        skill="default",
+                                        skill_id="default",
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=False,
                                         currency_pbk="FET",
                                         amount=20,
-                                        sender_tx_fee=5.0,
-                                        counterparty_tx_fee=0.0,
+                                        sender_tx_fee=5,
+                                        counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"FET": 10})
 
         cur_score = self.preferences.get_score(good_holdings=good_holdings, currency_holdings=currency_holdings)
@@ -210,48 +215,63 @@ class TestUtilityPreferencesBase:
 
     @classmethod
     def teardown_class(cls):
-        """ teardown any state that was previously setup with a call to
-        setup_class.
-        """
+        """Teardown any state that was previously setup with a call to setup_class."""
 
 
 class TestDecisionMaker:
     """Test the decision maker."""
+
     @classmethod
     def setup_class(cls):
         """Initialise the decision maker."""
         cls.outbox = OutBox(Queue())
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        cls.wallet = Wallet({FETCHAI: private_key_pem_path}, {})
-        cls.decision_maker = DecisionMaker(MAX_REACTIONS, cls.outbox, cls.wallet)
+        cls.wallet = Wallet({FETCHAI: private_key_pem_path})
+        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG})
+        cls.agent_name = "test"
+        cls.ownership_state = OwnershipState()
+        cls.preferences = Preferences()
+        cls.decision_maker = DecisionMaker(agent_name=cls.agent_name, max_reactions=MAX_REACTIONS, outbox=cls.outbox,
+                                           wallet=cls.wallet, ledger_apis=cls.ledger_apis)
 
     def test_properties(self):
         """Test the properties of the decision maker."""
         assert self.decision_maker.outbox.empty()
         assert isinstance(self.decision_maker.message_in_queue, Queue)
         assert isinstance(self.decision_maker.message_out_queue, Queue)
+        assert isinstance(self.decision_maker.ledger_apis, LedgerApis)
+        assert isinstance(self.outbox, OutBox)
 
     def test_decision_maker_execute(self):
         """Test the execute method."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                        skill="default",
+                                        skill_id="default",
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=True,
-                                        currency_pbk=self.wallet.crypto_objects[FETCHAI].public_key,
+                                        currency_pbk="FET",
                                         amount=2,
                                         sender_tx_fee=0,
-                                        counterparty_tx_fee=0.0,
+                                        counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"FET": 10})
 
-        with mock.patch.object(self.wallet.crypto_objects[FETCHAI], "token_balance", return_value=1000.0):
-            self.wallet.crypto_objects[FETCHAI].token_balance()
-            self.decision_maker.message_in_queue.put_nowait(tx_message)
-            self.decision_maker.execute()
-            assert self.decision_maker.message_in_queue.empty()
+        self.decision_maker.message_in_queue.put_nowait(tx_message)
+        self.decision_maker.execute()
+        assert self.decision_maker.message_in_queue.empty()
+        good_endowment = {"FET": 2}
+        currency_endowment = {"FET": 100.0}
+        utility_params = {"FET": 20.0}
+        exchange_params = {"FET": 10.0}
 
-    def test_get_wallet_balance(self):
-        """Test the wallet balance."""
-        balance = self.decision_maker.get_wallet_balance(FETCHAI)
-        assert balance == 0
+        state_update_message = StateUpdateMessage(currency_endowment=currency_endowment, good_endowment=good_endowment,
+                                                  utility_params=utility_params, exchange_params=exchange_params)
+        self.decision_maker.handle(state_update_message)
+        assert self.decision_maker.ownership_state.good_holdings == good_endowment
+
+        with mock.patch.object(self.decision_maker, "_is_acceptable_tx", return_value=True):
+            self.decision_maker.handle(tx_message)
+            assert not self.decision_maker.message_out_queue.empty()
+            with mock.patch.object(self.decision_maker, "_settle_tx", return_value="This is a test digest"):
+                self.decision_maker.handle(tx_message)
+                assert not self.decision_maker.message_out_queue.empty()

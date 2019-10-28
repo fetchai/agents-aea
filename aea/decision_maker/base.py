@@ -337,7 +337,7 @@ class DecisionMaker:
         amount -= counterparty_tx_fee
         tx_fee = counterparty_tx_fee + sender_tx_fee
         payable = amount + tx_fee
-
+        logger.debug(self._is_acceptable_tx(crypto_object, payable))
         # check if the transaction is acceptable and process it accordingly
         if self._is_acceptable_tx(crypto_object, payable):
             tx_digest = self._settle_tx(crypto_object, counterparty_address, amount, tx_fee)
@@ -387,8 +387,6 @@ class DecisionMaker:
         :param state_update_message: the state update message
         :return: None
         """
-        assert self._ownership_state is None, "OwnershipState already initialized."
-        assert self._preferences is None, "Preferences already initialized."
         currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
         good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
