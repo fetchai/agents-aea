@@ -151,8 +151,13 @@ class TestResources:
         assert len(handlers) == 1
         assert handlers[0].__class__.__name__ == "DummyHandler"
 
-        # restore the handler
+        dummy_handler = self.resources.handler_registry.fetch_by_skill("default", "dummy")
+        self.resources.handler_registry.unregister("dummy")
+        assert len(self.resources.handler_registry.fetch_all()) == 0
+
+        # restore the handlers
         self.resources.handler_registry.register((None, "error"), [error_handler])
+        self.resources.handler_registry.register((None, "dummy"), [dummy_handler])
         assert len(self.resources.handler_registry.fetch_all()) == 2
 
     def test_fake_skill_loading_failed(self):
@@ -183,6 +188,11 @@ class TestResources:
         assert self.resources.behaviour_registry.fetch("dummy") is None
 
         self.resources.behaviour_registry.register((None, "dummy"), [dummy_behaviour])
+
+    def test_register_task_with_already_existing_skill_id(self):
+        """Test that registering a task with an already existing skill id behaves as expected."""
+        self.resources.task_registry.register((None, "error"), [])
+        self.mocked_logger_warning.assert_called_with("Tasks already registered with skill id 'error'")
 
     def test_task_registry(self):
         """Test that the task registry behaves as expected."""
