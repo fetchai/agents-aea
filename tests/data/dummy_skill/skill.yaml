@@ -28,10 +28,5 @@ shared_classes:
         shared_class_arg_1: 1
         shared_class_arg_2: "2"
 protocols: ["default"]
-dependencies:
-  - dep1==1.0.0
-  - dep2~=1.1.2
-  - dep3>=1.10.11a1
-  - dep4<=1.11.12b2
-  - dep5 >= 1.4.5.0
-description: "dummy_skill skill description [Fill in]"
+dependencies: []
+description: "a dummy_skill for testing purposes."

@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/registries/base.py."""
 import os
+import random
 import shutil
 import tempfile
 import unittest.mock
@@ -117,7 +118,7 @@ class TestResources:
 
         # create temp agent folder
         cls.oldcwd = os.getcwd()
-        cls.agent_name = "agent_dir_test"
+        cls.agent_name = "agent_test" + str(random.randint(0, 1000))
         cls.t = tempfile.mkdtemp()
         cls.agent_folder = os.path.join(cls.t, cls.agent_name)
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
@@ -134,7 +135,7 @@ class TestResources:
         mailbox = MailBox(DummyConnection())
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path}, {})
-        cls.aea = AEA("agent_name", mailbox, wallet, directory=cls.agent_folder)
+        cls.aea = AEA(cls.agent_name, mailbox, wallet, directory=cls.agent_folder)
         cls.resources = Resources.from_resource_dir(os.path.join(cls.agent_folder), cls.aea.context)
 
         cls.expected_skills = {"dummy", "error"}
@@ -183,11 +184,11 @@ class TestResources:
     def test_behaviour_registry(self):
         """Test that the behaviour registry behaves as expected."""
         assert len(self.resources.behaviour_registry.fetch_all()) == 1
-        dummy_behaviour = self.resources.behaviour_registry.fetch("dummy")
+        dummy_behaviours = self.resources.behaviour_registry.fetch("dummy")
         self.resources.behaviour_registry.unregister("dummy")
         assert self.resources.behaviour_registry.fetch("dummy") is None
 
-        self.resources.behaviour_registry.register((None, "dummy"), [dummy_behaviour])
+        self.resources.behaviour_registry.register((None, "dummy"), dummy_behaviours)
 
     def test_register_task_with_already_existing_skill_id(self):
         """Test that registering a task with an already existing skill id behaves as expected."""
@@ -197,11 +198,76 @@ class TestResources:
     def test_task_registry(self):
         """Test that the task registry behaves as expected."""
         assert len(self.resources.task_registry.fetch_all()) == 1
-        dummy_task = self.resources.task_registry.fetch("dummy")
+        dummy_tasks = self.resources.task_registry.fetch("dummy")
         self.resources.task_registry.unregister("dummy")
         assert self.resources.task_registry.fetch("dummy") is None
 
-        self.resources.task_registry.register((None, "dummy"), [dummy_task])
+        self.resources.task_registry.register((None, "dummy"), dummy_tasks)
+
+    def test_skill_loading(self):
+        """Test that the skills have been loaded correctly."""
+        dummy_skill = self.resources.get_skill("dummy")
+        error_skill_context = dummy_skill.skill_context
+
+        handlers = dummy_skill.handlers
+        behaviours = dummy_skill.behaviours
+        tasks = dummy_skill.tasks
+        shared_classes = dummy_skill.shared_classes
+
+        assert handlers == error_skill_context.handlers
+        assert behaviours == error_skill_context.behaviours
+        assert tasks == error_skill_context.tasks
+        assert getattr(error_skill_context, "agent_name") == self.agent_name
+
+        assert handlers[0].context == dummy_skill.skill_context
+        assert behaviours[0].context == dummy_skill.skill_context
+        assert tasks[0].context == dummy_skill.skill_context
+        assert shared_classes[0].context == dummy_skill.skill_context
+
+    def test_handler_configuration_loading(self):
+        """Test that the handler configurations are loaded correctly."""
+        default_handlers = self.resources.handler_registry.fetch("default")
+        assert len(default_handlers) == 2
+        handler1, handler2 = default_handlers[0], default_handlers[1]
+        dummy_handler = handler1 if handler1.__class__.__name__ == "DummyHandler" else handler2
+
+        assert dummy_handler.config == {
+            "handler_arg_1": 1,
+            "handler_arg_2": "2"
+        }
+
+    def test_behaviour_configuration_loading(self):
+        """Test that the behaviour configurations are loaded correctly."""
+        dummy_behaviours = self.resources.behaviour_registry.fetch("dummy")
+        assert len(dummy_behaviours) == 1
+        dummy_behaviour = dummy_behaviours[0]
+
+        assert dummy_behaviour.config == {
+            "behaviour_arg_1": 1,
+            "behaviour_arg_2": "2"
+        }
+
+    def test_task_configuration_loading(self):
+        """Test that the task configurations are loaded correctly."""
+        dummy_tasks = self.resources.task_registry.fetch("dummy")
+        assert len(dummy_tasks) == 1
+        dummy_task = dummy_tasks[0]
+
+        assert dummy_task.config == {
+            "task_arg_1": 1,
+            "task_arg_2": "2"
+        }
+
+    def test_shared_class_configuration_loading(self):
+        """Test that the shared class configurations are loaded correctly."""
+        dummy_skill = self.resources.get_skill("dummy")
+        assert len(dummy_skill.shared_classes) == 1
+        dummy_shared_class = dummy_skill.shared_classes[0]
+
+        assert dummy_shared_class.config == {
+            "shared_class_arg_1": 1,
+            "shared_class_arg_2": "2"
+        }
 
     @classmethod
     def teardown_class(cls):

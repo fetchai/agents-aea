@@ -45,7 +45,7 @@ class DummyHandler(Handler):
 
     def handle(self, message: Message, sender: str) -> None:
         """
-        Handle messages.
+        Handle message.
 
         :param message: the message
         :param sender: the sender

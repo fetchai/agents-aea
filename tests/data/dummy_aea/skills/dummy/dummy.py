@@ -17,9 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the shared classes for the 'dummy' skill."""
+"""This module contains a dummy shared class."""
+
 from aea.skills.base import SharedClass
 
 
 class DummySharedClass(SharedClass):
-    """This is a dummy shared class."""
+    """This class is a dummy shared class."""
