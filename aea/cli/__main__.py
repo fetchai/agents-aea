@@ -46,7 +46,7 @@ DEFAULT_SKILL = "error"
 
 
 @click.group()
-@click.version_option('0.1.0')
+@click.version_option(aea.__version__)
 @simple_verbosity_option(logger, default="INFO")
 @click.pass_context
 def cli(ctx) -> None:
