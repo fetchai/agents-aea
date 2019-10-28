@@ -30,9 +30,16 @@ from click import pass_context
 from jsonschema import ValidationError
 
 import aea
+from aea.cli.add import add
 from aea.cli.add import connection, skill
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, DEFAULT_REGISTRY_PATH
+from aea.cli.install import install
+from aea.cli.list import list as _list
 from aea.cli.loggers import simple_verbosity_option
+from aea.cli.remove import remove
+from aea.cli.run import run
+from aea.cli.scaffold import scaffold
+from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 DEFAULT_CONNECTION = "oef"
@@ -123,3 +130,12 @@ def gui(ctx: Context):
     import aea.cli_gui  # pragma: no cover
     logger.info("Running the GUI.....(press Ctrl+C to exit)")   # pragma: no cover
     aea.cli_gui.run()   # pragma: no cover
+
+
+cli.add_command(add)
+cli.add_command(_list)
+cli.add_command(search)
+cli.add_command(scaffold)
+cli.add_command(remove)
+cli.add_command(install)
+cli.add_command(run)
