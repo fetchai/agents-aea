@@ -17,6 +17,22 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of command-line tool 'aea'."""
+"""This module contains tests for transaction."""
 
-from .core import cli
+import pytest
+
+from aea.decision_maker.messages.state_update import StateUpdateMessage
+
+
+class TestStateUpdateMessage:
+    """Test the StateUpdateMessage."""
+
+    def test_message_consistency(self):
+        """Test for an error in consistency of a message."""
+        with pytest.raises(AssertionError):
+            good_endowment = {"FET": 2}
+            currency_endowment = {"FET": 100.0}
+            utility_params = {"Unknown": 20.0}
+            exchange_params = {"FET": 10.0}
+            assert StateUpdateMessage(currency_endowment=currency_endowment, good_endowment=good_endowment,
+                                      utility_params=utility_params, exchange_params=exchange_params)
