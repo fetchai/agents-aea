@@ -67,6 +67,13 @@ class TestBaseSerializations:
         """Test the __str__ of the message."""
         assert "hello" in str(self.message2)
 
+    def test_set(self):
+        """Test that the set method works."""
+        key, value = "temporary_key", "temporary_value"
+        assert self.message.get(key) is None
+        self.message.set(key, value)
+        assert self.message.get(key) == value
+
     def test_unset(self):
         """Test the unset function of the message."""
         self.message2.unset("content")
@@ -82,3 +89,7 @@ class TestBaseSerializations:
         """Test the protocol config."""
         protocol = Protocol(id="test", serializer=cast(Serializer, ProtobufSerializer), config=ProtocolConfig())
         assert protocol.config is not None
+
+    def test_check_consistency_returns_true(self):
+        """Test that the check consistency method returns True."""
+        assert self.message.check_consistency()

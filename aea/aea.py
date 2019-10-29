@@ -139,6 +139,7 @@ class AEA(Agent):
         :param envelope: the envelope to handle.
         :return: None
         """
+        logger.debug("Handling envelope: {}".format(envelope))
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
         error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")

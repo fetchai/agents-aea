@@ -1,0 +1,17 @@
+name: dummy
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours: []
+handlers: []
+tasks: []
+shared_classes: []
+protocols: ["default"]
+dependencies:
+  - dep1==1.0.0
+  - dep2~=1.1.2
+  - dep3>=1.10.11a1
+  - dep4<=1.11.12b2
+  - dep5 >= 1.4.5.0
+description: "a skill for testing purposes."

@@ -20,13 +20,14 @@
 
 """Default module wrapping the public and private key cryptography and ledger api."""
 
+import logging
+from typing import Optional, BinaryIO
+
 import base58
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, utils
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
-import logging
-from typing import Optional
+from cryptography.hazmat.primitives.serialization import load_pem_private_key, NoEncryption, PrivateFormat, Encoding
 
 from aea.crypto.base import Crypto
 
@@ -50,11 +51,11 @@ class DefaultCrypto(Crypto):
     """Class wrapping the public and private key cryptography."""
 
     identifier = DEFAULT
+    _chosen_ec = ec.SECP384R1()
+    _chosen_hash = hashes.SHA256()
 
     def __init__(self, private_key_pem_path: Optional[str] = None):
         """Instantiate a crypto object."""
-        self._chosen_ec = ec.SECP384R1()
-        self._chosen_hash = hashes.SHA256()
         self._private_key = self._generate_pk() if private_key_pem_path is None else self._load_pem_private_key_from_path(private_key_pem_path)
         self._public_key_obj = self._compute_pbk()
         self._public_key_pem = self._pbk_obj_to_pem(self._public_key_obj)
@@ -103,6 +104,29 @@ class DefaultCrypto(Crypto):
         :return: the fingerprint
         """
         return self._fingerprint_hex
+
+    @classmethod
+    def load(cls, fp: BinaryIO) -> 'DefaultCrypto':
+        """
+        Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
+
+        :param fp: the input file pointer. Must be set in binary mode (mode='rb')
+        :return: None
+        """
+        # todo: this requires changing the constructor. So we can feed directly the private key
+        #       instead of the path to it.
+        raise NotImplementedError
+
+    def dump(self, fp: BinaryIO) -> None:
+        """
+        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+
+        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
+        :return: None
+        """
+        pem = self._private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())  # type: ignore
+        fp.write(pem)
+        fp.close()
 
     def _generate_pk(self) -> object:
         """
@@ -281,8 +305,8 @@ class DefaultCrypto(Crypto):
         """
         return pvk.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.TraditionalOpenSSL, serialization.NoEncryption())  # type: ignore
 
-    @staticmethod
-    def get_address_from_public_key(self, public_key: str) -> str:
+    @classmethod
+    def get_address_from_public_key(cls, public_key: str) -> str:
         """
         Get the address from the public key.
 

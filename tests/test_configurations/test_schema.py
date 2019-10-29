@@ -145,7 +145,9 @@ class TestSkillsSchema:
                                  os.path.join(ROOT_DIR, "aea", "skills", "scaffold"),
                                  os.path.join(ROOT_DIR, "packages", "skills", "echo"),
                                  os.path.join(ROOT_DIR, "packages", "skills", "gym"),
-                                 os.path.join(CUR_PATH, "data", "dummy_skill")
+                                 os.path.join(CUR_PATH, "data", "dummy_skill"),
+                                 os.path.join(CUR_PATH, "data", "dependencies_skill"),
+                                 os.path.join(CUR_PATH, "data", "exception_skill")
                              ])
     def test_validate_skill_config(self, skill_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""

@@ -1,11 +1,6 @@
-## Logging
+The AEA framework supports flexible logging capabilities with the standard [Python logging library](https://docs.python.org/3/library/logging.html).
 
-The framework supports flexible logging capabilities by 
-relying on the standard [Python logging library](https://docs.python.org/3/library/logging.html).
-
-In this tutorial, you'll see how you can configure 
-logging for your agent.
-
+In this tutorial, we will configure logging for an agent.
 
 First of all, create your agent:
 
@@ -14,7 +9,6 @@ First of all, create your agent:
 aea create my_agent
 cd my_agent
 ```
-
 
 The `aea-config.yaml` file should look like:
 ```yaml
@@ -75,7 +69,10 @@ logging_config:
       propagate: true
 ```
 
-This configuration wiill set up a logger with name `aea`,
+This configuration will set up a logger with name `aea`,
 print both on console (see `console` handler) and on file
 (see `logfile` handler) with format specified by the 
 `standard` formatter.
+
+
+<br />

@@ -1,5 +1,19 @@
-The AEA wheather skills demonstrates a scenario where two AEA agents interact, one as the provider of weather data, the other as the seller of weather data.
+The AEA weather skill demonstrates the interaction between two AEA agents; one as the provider of weather data, the other as the seller of weather data.
 
+
+## Prerequisites
+
+Make sure you have the latest `aea` version.
+
+``` bash
+aea --version
+```
+
+If not, update with the following.
+
+``` bash
+pip install aea[all] --force --no-cache-dir
+```
 
 ## Demo instructions
 
@@ -40,7 +54,7 @@ aea run
 ```
 
 
-### Create the weather client agent:
+### Create the weather client agent
 Return to the root directory, and create the weather client agent.
 ``` bash
 aea create my_weather_client
@@ -74,6 +88,7 @@ cd ..
 aea delete my_weather_station
 aea delete my_weather_client
 ```
+
 
 ## Using the ledger
 
@@ -133,3 +148,5 @@ aea run
 ```
 
 <br/>
+
+

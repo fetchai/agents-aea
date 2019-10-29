@@ -26,7 +26,7 @@ from eth_account import Account     # type: ignore
 from eth_keys import keys       # type: ignore
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, BinaryIO
 
 from aea.crypto.base import Crypto
 
@@ -73,7 +73,13 @@ class EthereumCrypto(Crypto):
     def _load_private_key_from_path(self, file_name) -> Account:
         """
         Load a private key in hex format from a file.
+<<<<<<< HEAD
         :param path: the path to the hex file.
+=======
+
+        :param file_name: the path to the hex file.
+
+>>>>>>> 6170f55a5f78409513b17226c90d3fbd225cc263
         :return: the Entity.
         """
         path = Path(file_name)
@@ -116,11 +122,30 @@ class EthereumCrypto(Crypto):
         account = Account.create()
         return account
 
-    @staticmethod
-    def get_address_from_public_key(self, public_key: str) -> str:
+    @classmethod
+    def get_address_from_public_key(cls, public_key: str) -> str:
         """
         Get the address from the public key.
         :param public_key: the public key
         :return: str
         """
         raise NotImplementedError
+
+    @classmethod
+    def load(cls, fp: BinaryIO):
+        """
+        Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
+
+        :param fp: the input file pointer. Must be set in binary mode (mode='rb')
+        :return: None
+        """
+        raise NotImplementedError
+
+    def dump(self, fp: BinaryIO) -> None:
+        """
+        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+
+        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
+        :return: None
+        """
+        fp.write(self._account.privateKey.hex().encode("utf-8"))

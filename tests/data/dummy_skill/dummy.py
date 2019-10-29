@@ -17,4 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the cli tool commands."""
+"""This module contains a dummy shared class."""
+
+from aea.skills.base import SharedClass
+
+
+class DummySharedClass(SharedClass):
+    """This class is a dummy shared class."""
