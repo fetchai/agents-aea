@@ -25,12 +25,15 @@ from queue import Queue
 
 import pytest
 
+import aea
+import aea.decision_maker.base
 from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG
 from aea.crypto.wallet import Wallet, FETCHAI
 from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import OutBox  # , Envelope
+from aea.protocols.default.message import DefaultMessage
 from tests.conftest import CUR_PATH
 
 MAX_REACTIONS = 10
@@ -222,8 +225,18 @@ class TestDecisionMaker:
     """Test the decision maker."""
 
     @classmethod
+    def _patch_logger(cls):
+        cls.patch_logger_warning = mock.patch.object(aea.decision_maker.base.logger, 'warning')
+        cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
+
+    @classmethod
+    def _unpatch_logger(cls):
+        cls.mocked_logger_warning.__exit__()
+
+    @classmethod
     def setup_class(cls):
         """Initialise the decision maker."""
+        cls._patch_logger()
         cls.outbox = OutBox(Queue())
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet({FETCHAI: private_key_pem_path})
@@ -275,3 +288,18 @@ class TestDecisionMaker:
             with mock.patch.object(self.decision_maker, "_settle_tx", return_value="This is a test digest"):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
+
+    def test_decision_maker_execute_w_wrong_input(self):
+        """Test the execute method with wrong input."""
+        default_message = DefaultMessage(type=DefaultMessage.Type.BYTES,
+                                         content=b'hello')
+
+        self.decision_maker.message_in_queue.put_nowait(default_message)
+        self.decision_maker.execute()
+
+        self.mocked_logger_warning.assert_called_with('Message received by the decision maker is not of protocol_id=internal.')
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the tests down."""
+        cls._unpatch_logger()

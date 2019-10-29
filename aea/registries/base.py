@@ -26,17 +26,21 @@ import os
 import pprint
 import re
 from abc import ABC, abstractmethod
+from queue import Queue
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast
 
 from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Protocol
 from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext
 
 logger = logging.getLogger(__name__)
 
 PACKAGE_NAME_REGEX = re.compile("^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE)
+INTERNAL_PROTOCOL_ID = 'internal'
+DECISION_MAKER = 'decision_maker'
 
 
 class Registry(ABC):
@@ -279,6 +283,15 @@ class HandlerRegistry(Registry):
             for handler in skill_id_to_handler_dict.values():
                 result.append(handler)
         return result
+
+    def fetch_internal_handler(self, skill_id: SkillId) -> Optional[Handler]:
+        """
+        Fetch the internal handler.
+
+        :param skill_id: the skill id
+        :return: the internal handler registered for the skill id
+        """
+        return self._handlers.get(INTERNAL_PROTOCOL_ID, {}).get(skill_id, None)
 
     def setup(self) -> None:
         """
@@ -533,3 +546,76 @@ class Resources(object):
         """
         for r in self._registries:
             r.teardown()
+
+
+class Filter(object):
+    """This class implements the filter of an AEA."""
+
+    def __init__(self, resources: Resources, decision_maker_out_queue: Queue):
+        """
+        Instantiate the filter.
+
+        :param resources: the resources
+        :param decision_maker_out_queue: the decision maker queue
+        """
+        self._resources = resources
+        self._decision_maker_out_queue = decision_maker_out_queue
+        # TODO: self._inactive_handlers = {}  # type: Dict[SkillId, List[HandlerId]]
+        # TODO: self._inactive_behaviours = {}  # type: Dict[SkillId, List[BehaviourId]]
+        # TODO: self._inactive_tasks = {}  # type: Dict[SkillId, List[TaskId]]
+
+    @property
+    def resources(self) -> Resources:
+        """Get resources."""
+        assert self._resources is not None, "No resources initialized. Call setup."
+        return self._resources
+
+    @property
+    def decision_maker_out_queue(self) -> Queue:
+        """Get decision maker (out) queue."""
+        return self._decision_maker_out_queue
+
+    def get_active_handlers(self, protocol_id: str) -> List[Handler]:
+        """
+        Get active handlers.
+
+        :param protocol_id: the protocol id
+        :return: list of handlers
+        """
+        handlers = self.resources.handler_registry.fetch(protocol_id)
+        # TODO: add option for advanced filtering, currently each handler independently acts on the message
+        return handlers
+
+    def get_active_tasks(self) -> List[Task]:
+        """
+        Get the active tasks.
+
+        :return: the list of tasks currently active
+        """
+        tasks = self.resources.task_registry.fetch_all()
+        # TODO: add filtering, remove inactive tasks
+        return tasks
+
+    def get_active_behaviours(self) -> List[Behaviour]:
+        """
+        Get the active behaviours.
+
+        :return: the list of behaviours currently active
+        """
+        behaviours = self.resources.behaviour_registry.fetch_all()
+        # TODO: add filtering, remove inactive behaviours
+        return behaviours
+
+    def handle_internal_messages(self) -> None:
+        """
+        Handle the messages from the decision maker.
+
+        :return: None
+        """
+        while not self.decision_maker_out_queue.empty():
+            tx_message = self.decision_maker_out_queue.get_nowait()  # type: Optional[TransactionMessage]
+            if tx_message is not None:
+                skill_id = cast(str, tx_message.get("skill_id"))
+                handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
+                if handler is not None:
+                    handler.handle(tx_message, DECISION_MAKER)

@@ -32,6 +32,7 @@ from aea.aea import AEA
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import MailBox
 from aea.protocols.base import Protocol
 from aea.registries.base import ProtocolRegistry, Resources
@@ -144,14 +145,14 @@ class TestResources:
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
-        assert len(self.resources.handler_registry.fetch_all()) == 2
+        assert len(self.resources.handler_registry.fetch_all()) == 3
         error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")
         self.resources.handler_registry.unregister("error")
 
         # unregister the handler and test that it has been actually unregistered.
         assert self.resources.handler_registry.fetch_by_skill("default", "error") is None
         handlers = self.resources.handler_registry.fetch_all()
-        assert len(handlers) == 1
+        assert len(handlers) == 2
         assert handlers[0].__class__.__name__ == "DummyHandler"
 
         dummy_handler = self.resources.handler_registry.fetch_by_skill("default", "dummy")
@@ -275,5 +276,52 @@ class TestResources:
     def teardown_class(cls):
         """Tear the tests down."""
         cls._unpatch_logger()
+        shutil.rmtree(cls.t, ignore_errors=True)
+        os.chdir(cls.oldcwd)
+
+
+class TestFilter:
+    """Test the resources class."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the tests up."""
+        # create temp agent folder
+        cls.oldcwd = os.getcwd()
+        cls.agent_name = "agent_test" + str(random.randint(0, 1000))
+        cls.t = tempfile.mkdtemp()
+        cls.agent_folder = os.path.join(cls.t, cls.agent_name)
+        shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
+        os.chdir(cls.agent_folder)
+
+        mailbox = MailBox(DummyConnection())
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path})
+        ledger_apis = LedgerApis({})
+        cls.aea = AEA(cls.agent_name, mailbox, wallet, ledger_apis, directory=cls.agent_folder)
+
+    def test_handle_internal_messages(self):
+        """Test that the internal messages are handled."""
+        self.aea.setup()
+        t = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
+                               skill_id="dummy",
+                               transaction_id="transaction0",
+                               sender="pk1",
+                               counterparty="pk2",
+                               is_sender_buyer=True,
+                               currency_pbk="Unknown",
+                               amount=2,
+                               sender_tx_fee=0,
+                               counterparty_tx_fee=0,
+                               quantities_by_good_pbk={"Unknown": 10})
+        self.aea.decision_maker.message_out_queue.put(t)
+        self.aea.filter.handle_internal_messages()
+
+        internal_handler = self.aea.resources.handler_registry.fetch_by_skill("internal", "dummy")
+        assert len(internal_handler.handled_internal_messages) == 1
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the tests down."""
         shutil.rmtree(cls.t, ignore_errors=True)
         os.chdir(cls.oldcwd)

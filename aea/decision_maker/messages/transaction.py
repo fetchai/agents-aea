@@ -32,6 +32,8 @@ Address = str
 class TransactionMessage(Message):
     """The transaction message class."""
 
+    protocol_id = "internal"
+
     class Performative(Enum):
         """Transaction performative."""
 
