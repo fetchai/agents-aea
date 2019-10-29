@@ -135,18 +135,24 @@ ledger_apis:
       port: 80
 ```
 
+### Run the agents
+``` bash
+aea run
+```
+
+### Generate the private key
+``` bash
+aea generate-key fetchai
+```
+
 ### Fund the client agent
 
-After you run the client (so the private key is created), generate some wealth to your weather client FET address (it takes a while):
+After you run the client and generate the private key, send your weather client some FET with its FET address (it takes a while):
 ``` bash
 python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
 ```
 
-### Run the agents
 
-``` bash
-aea run
-```
 
 <br/>
 

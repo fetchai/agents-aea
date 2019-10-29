@@ -4,6 +4,8 @@ For example, using the AEA weather skill application without a ledger for transa
 
 A step up, if you run the weather skill application on a ledger system then the client must again trust the weather station to send sufficient data. However, all transactions are recorded so there is some data verifiability.
 
-An app could limit trustlessness even further by implementing a third party escrow contract.
+Crucially, the weather station does not need to trust the weather client as it can observe the transaction taking place on the public ledger.
 
-Finally, in the case of non-fungible token transactions where there is an atomic swap, zero trustlessness is apparent.
+An app could expand trustlessness even further by implementing a third party escrow contract.
+
+Finally, in the case of (non-fungible) token transactions where there is an atomic swap, full trustlessness is apparent.

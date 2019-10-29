@@ -3,9 +3,9 @@ An autonomous economic agent (AEA) is an intelligent agent whose goal is generat
 There are five general application areas for Fetch.ai agents.
 
 * **Inhabitants**: agents paired with real world hardware devices such as drones, laptops, heat sensors, etc.
-* **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between old and new economic models.
+* **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between old (Web 2.0) and new (Web 3.0) economic models.
 * **Pure software**: software agents living in the digital space that interact with inhabitant and interface agents and others.
-* **Digital data sales agents**: pure software agents that attach to data sources in the data marketplace.
+* **Digital data sales agents**: pure software agents that attach to data sources and sell it via the open economic framework.
 * **Representative**: an agent which represents an individual's activities on the Fetch.ai network.
 
 ## Multi-agent system vs agent-based modelling
