@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
-from eth_account.datastructures import AttributeDict
+
 from eth_account.messages import encode_defunct  # type: ignore
 from web3 import Web3       # type: ignore
 from eth_account import Account     # type: ignore
@@ -46,7 +46,7 @@ class EthereumCrypto(Crypto):
         :param private_key_path: the private key path of the agent
         """
         self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
+        bytes_representation = Web3.toBytes(hexstr=self._account.privateKey.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
 
     @property
@@ -73,13 +73,7 @@ class EthereumCrypto(Crypto):
     def _load_private_key_from_path(self, file_name) -> Account:
         """
         Load a private key in hex format from a file.
-<<<<<<< HEAD
-        :param path: the path to the hex file.
-=======
-
         :param file_name: the path to the hex file.
-
->>>>>>> 6170f55a5f78409513b17226c90d3fbd225cc263
         :return: the Entity.
         """
         path = Path(file_name)
@@ -104,19 +98,6 @@ class EthereumCrypto(Crypto):
         signature = self._account.sign_message(m_message)
         return signature
 
-    def _sign_transaction(self, to: str, value: int, gas: int, gas_price: int) -> AttributeDict:
-        """sign a transaction and send it to the infura network."""
-        transaction = {
-            # Note that the address must be in checksum format or native bytes:
-            'to': to,
-            'value': value,
-            'gas': gas,
-            'gasPrice': gas_price,
-            'nonce': 0,
-            'chainId': 3
-        }
-        return self._account.signTransaction(transaction_dict=transaction, private_key=self._account.key)
-
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""
         account = Account.create()
@@ -135,7 +116,6 @@ class EthereumCrypto(Crypto):
     def load(cls, fp: BinaryIO):
         """
         Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
-
         :param fp: the input file pointer. Must be set in binary mode (mode='rb')
         :return: None
         """
@@ -144,7 +124,6 @@ class EthereumCrypto(Crypto):
     def dump(self, fp: BinaryIO) -> None:
         """
         Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
-
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
