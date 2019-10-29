@@ -32,10 +32,9 @@ else:
     from carpark_detection_skill.detection_database import DetectionDatabase
     from carpark_detection_skill.carpark_detection_data_model import CarParkDataModel
 
-DEFAULT_PRICE_PER_ROW = 2
-DEFAULT_CURRENCY_PBK = 'FET'
-DATE_ONE = "3/10/2019"
-DATE_TWO = "15/10/2019"
+DEFAULT_PRICE = 2000
+DEFAULT_DB_IS_REL_TO_CWD = False
+DEFAULT_DB_REL_DIR = "temp_files_placeholder"
 
 
 class Strategy(SharedClass):
@@ -50,11 +49,18 @@ class Strategy(SharedClass):
 
         :return: None
         """
-        self.price_per_row = kwargs.pop('price_per_row') if 'price_per_row' in kwargs.keys() else DEFAULT_PRICE_PER_ROW
-        self.currency = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
+        db_is_rel_to_cwd = kwargs.pop('db_is_rel_to_cwd') if 'db_is_rel_to_cwd' in kwargs.keys() else DEFAULT_DB_IS_REL_TO_CWD
+        db_rel_dir = kwargs.pop('db_rel_dir') if 'db_rel_dir' in kwargs.keys() else DEFAULT_DB_REL_DIR
+
+        if db_is_rel_to_cwd:
+            db_dir = os.path.join(os.getcwd(), db_rel_dir)
+        else:
+            db_dir = os.path.join(os.path.dirname(__file__), DEFAULT_DB_REL_DIR)
+
+        self.data_price_fet = kwargs.pop('data_price_fet') if 'data_price_fet' in kwargs.keys() else DEFAULT_PRICE
         super().__init__(**kwargs)
 
-        self.db = DetectionDatabase(os.path.dirname(__file__))
+        self.db = DetectionDatabase(db_dir)
         self.data_price_fet = 2000
         self.lat = 43
         self.lon = 42

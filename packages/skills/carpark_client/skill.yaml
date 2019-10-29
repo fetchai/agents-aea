@@ -25,6 +25,7 @@ shared_classes:
         country: UK
         search_interval: 5
         max_price: 4000
+        max_detection_age: 3600000
   - shared_class:
       class_name: Dialogues
       args: {}

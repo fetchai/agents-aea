@@ -28,11 +28,10 @@ import time
 class DetectionDatabase:
     """Communicate between the database and the python objects."""
 
-    def __init__(self, run_dir):
+    def __init__(self, temp_dir):
         """Initialise the Detection Database Communication class."""
         self.this_dir = os.path.dirname(__file__)
-        self.run_dir = run_dir
-        self.temp_dir = str(os.path.join(self.run_dir, '', "temp_files"))
+        self.temp_dir = temp_dir
 
         self.mask_image_path = self.temp_dir + "/mask.tiff"
         self.mask_ref_image_path = self. temp_dir + "/mask_ref.tiff"

@@ -16,10 +16,13 @@ shared_classes:
   - shared_class:
       class_name: Strategy
       args:
-        price_per_row: 1
-        currency_pbk: 'FET'
+        data_price_fet: 2000
+       # db_is_rel_to_cwd: true
+       # db_rel_dir: temp_files
   - shared_class:
       class_name: Dialogues
       args: {}
 protocols: ['fipa', 'oef', 'default']
 ledgers: ['fetchai']
+dependencies:
+  - scikit-image
