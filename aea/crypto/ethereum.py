@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
-
+from eth_account.datastructures import AttributeDict
 from eth_account.messages import encode_defunct  # type: ignore
 from web3 import Web3       # type: ignore
 from eth_account import Account     # type: ignore
@@ -43,11 +43,10 @@ class EthereumCrypto(Crypto):
     def __init__(self, private_key_path: Optional[str] = None):
         """
         Instantiate an ethereum crypto object.
-
         :param private_key_path: the private key path of the agent
         """
         self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        bytes_representation = Web3.toBytes(hexstr=self._account.privateKey.hex())
+        bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
 
     @property
@@ -59,7 +58,6 @@ class EthereumCrypto(Crypto):
     def public_key(self) -> str:
         """
         Return a public key in hex format.
-
         :return: a public key string in hex format
         """
         return self._public_key
@@ -68,7 +66,6 @@ class EthereumCrypto(Crypto):
     def address(self) -> str:
         """
         Return the address for the key pair.
-
         :return: a display_address str
         """
         return str(self._account.address)
@@ -76,9 +73,7 @@ class EthereumCrypto(Crypto):
     def _load_private_key_from_path(self, file_name) -> Account:
         """
         Load a private key in hex format from a file.
-
         :param path: the path to the hex file.
-
         :return: the Entity.
         """
         path = Path(file_name)
@@ -96,13 +91,25 @@ class EthereumCrypto(Crypto):
     def sign_transaction(self, message: str) -> bytes:
         """
         Sing a transaction to send it to the ledger.
-
         :param message:
         :return: Signed message in bytes
         """
         m_message = encode_defunct(text=message)
         signature = self._account.sign_message(m_message)
         return signature
+
+    def _sign_transaction(self, to: str, value: int, gas: int, gas_price: int) -> AttributeDict:
+        """sign a transaction and send it to the infura network."""
+        transaction = {
+            # Note that the address must be in checksum format or native bytes:
+            'to': to,
+            'value': value,
+            'gas': gas,
+            'gasPrice': gas_price,
+            'nonce': 0,
+            'chainId': 3
+        }
+        return self._account.signTransaction(transaction_dict=transaction, private_key=self._account.key)
 
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""
@@ -113,7 +120,6 @@ class EthereumCrypto(Crypto):
     def get_address_from_public_key(self, public_key: str) -> str:
         """
         Get the address from the public key.
-
         :param public_key: the public key
         :return: str
         """

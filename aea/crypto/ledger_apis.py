@@ -26,11 +26,13 @@ from typing import Any, Dict, Optional, Tuple, cast
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi  # type: ignore
 # from fetchai.ledger.api.tx import TxStatus
 from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
+from web3 import Web3, HTTPProvider
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 
 DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
+ETHEREUM_TEST_NETWORK = ("https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",)
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +53,8 @@ class LedgerApis(object):
                 api = FetchLedgerApi(config[0], config[1])
                 apis[identifier] = api
             elif identifier == ETHEREUM:
-                raise NotImplementedError
+                api = Web3(HTTPProvider(config[0]))
+                apis[identifier] = api
             else:
                 raise ValueError("Unsupported identifier in private key paths.")
         self._apis = apis
