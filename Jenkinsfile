@@ -57,6 +57,14 @@ pipeline {
 
                 } // unit tests: python 3.7
 
+                stage('Unit Tests: Python 3.8') {
+
+                    steps {
+                        sh 'tox -e py38 -- --no-integration-tests --ci'
+                    }
+
+                } // unit tests: python 3.8
+
             } // parallel
 
         }  // unit tests & code style check
