@@ -85,7 +85,7 @@ def get_all_extras() -> Dict:
         "cli_gui": cli_gui,
         "fetch": fetch_ledger_deps,
         "ethereum": ethereum_deps,
-        "crypto": crypto_deps,
+        "crypto": crypto_deps
     }
     extras.update(get_aea_extras())
 
