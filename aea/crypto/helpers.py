@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping the helpers of public and private key cryptography."""
+import sys
 from typing import cast
 
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
