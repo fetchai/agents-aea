@@ -21,7 +21,7 @@
 import os
 import shutil
 import tempfile
-import unittest
+import unittest.mock
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -78,15 +78,48 @@ class TestDeleteFailsWhenDirectoryDoesNotExist:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
-        cls.mocked_logger_error = cls.patch.__enter__()
-
         # agent's directory does not exist -> command will fail.
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name])
 
-    def test_exit_code_equal_to_minus_1(self):
-        """Test that the error code is equal to -1."""
-        assert self.result.exit_code == -1
+    def test_exit_code_equal_to_2(self):
+        """Test that the error code is equal to 2 (i.e. Misuse of shell builtins)."""
+        assert self.result.exit_code == 2
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestDeleteFailsWhenDirectoryCannotBeDeleted:
+    """Test that 'aea delete' sub-command fails when the directory with the agent name cannot be deleted."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        assert result.exit_code == 0
+
+        # agent's directory does not exist -> command will fail.
+        with unittest.mock.patch.object(shutil, "rmtree", side_effect=OSError):
+            cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name])
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed.
@@ -94,6 +127,48 @@ class TestDeleteFailsWhenDirectoryDoesNotExist:
         The expected message is: 'Directory already exist. Aborting...'
         """
         s = "An error occurred while deleting the agent directory. Aborting..."
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        os.chdir(cls.cwd)
+        cls.mocked_logger_error.__exit__()
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestDeleteFailsWhenDirectoryIsNotAnAEAProject:
+    """Test that 'aea delete' sub-command fails when the directory with the agent name in input is not an AEA project."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        # directory is not AEA project -> command will fail.
+        Path(cls.t, cls.agent_name).mkdir()
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name])
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    def test_log_error_message(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: 'Directory already exist. Aborting...'
+        """
+        s = "The name provided is not an AEA project."
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
