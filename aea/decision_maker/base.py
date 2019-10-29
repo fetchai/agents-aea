@@ -376,7 +376,7 @@ class DecisionMaker:
         :param tx_fee: the tx fee
         :return: the transaction digest
         """
-        tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object.entity, counterparty_address, amount, tx_fee)
+        tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object, counterparty_address, amount, tx_fee)
         return tx_digest
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:

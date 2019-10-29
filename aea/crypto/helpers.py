@@ -145,7 +145,7 @@ def _verify_ledger_apis_access(ctx: Context) -> None:
     else:
         ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
         try:
-            from web3 import Web3, HTTPProvider
+            from web3 import Web3, HTTPProvider     # type: ignore
             Web3(HTTPProvider(ethereum_ledger_config.addr))
         except Exception:
             logger.error("Cannot connect to ethereum ledger with provided config.")

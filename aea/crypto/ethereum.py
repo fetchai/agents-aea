@@ -43,6 +43,7 @@ class EthereumCrypto(Crypto):
     def __init__(self, private_key_path: Optional[str] = None):
         """
         Instantiate an ethereum crypto object.
+
         :param private_key_path: the private key path of the agent
         """
         self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
@@ -58,6 +59,7 @@ class EthereumCrypto(Crypto):
     def public_key(self) -> str:
         """
         Return a public key in hex format.
+
         :return: a public key string in hex format
         """
         return self._public_key
@@ -66,6 +68,7 @@ class EthereumCrypto(Crypto):
     def address(self) -> str:
         """
         Return the address for the key pair.
+
         :return: a display_address str
         """
         return str(self._account.address)
@@ -73,6 +76,7 @@ class EthereumCrypto(Crypto):
     def _load_private_key_from_path(self, file_name) -> Account:
         """
         Load a private key in hex format from a file.
+
         :param file_name: the path to the hex file.
         :return: the Entity.
         """
@@ -88,9 +92,10 @@ class EthereumCrypto(Crypto):
         except IOError as e:        # pragma: no cover
             logger.exception(str(e))
 
-    def sign_transaction(self, message: str) -> bytes:
+    def sign_message(self, message: str) -> bytes:
         """
         Sing a transaction to send it to the ledger.
+
         :param message:
         :return: Signed message in bytes
         """
@@ -107,6 +112,7 @@ class EthereumCrypto(Crypto):
     def get_address_from_public_key(cls, public_key: str) -> str:
         """
         Get the address from the public key.
+
         :param public_key: the public key
         :return: str
         """
@@ -116,6 +122,7 @@ class EthereumCrypto(Crypto):
     def load(cls, fp: BinaryIO):
         """
         Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
+
         :param fp: the input file pointer. Must be set in binary mode (mode='rb')
         :return: None
         """
@@ -124,6 +131,7 @@ class EthereumCrypto(Crypto):
     def dump(self, fp: BinaryIO) -> None:
         """
         Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """

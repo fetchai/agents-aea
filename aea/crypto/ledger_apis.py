@@ -25,14 +25,17 @@ from typing import Any, Dict, Optional, Tuple, cast
 
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi  # type: ignore
 # from fetchai.ledger.api.tx import TxStatus
-from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
-from web3 import Web3, HTTPProvider
+from fetchai.ledger.crypto import Identity, Address  # type: ignore
+from web3 import Web3, HTTPProvider  # type: ignore
 
+from aea.crypto.base import Crypto
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 
 DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
 ETHEREUM_TEST_NETWORK = ("https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",)
+
+SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
 
 logger = logging.getLogger(__name__)
 
@@ -72,18 +75,29 @@ class LedgerApis(object):
         :return: the token balance
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        try:
-            api = self.apis[identifier]
-            balance = api.tokens.balance(address)
-        except Exception:
-            logger.warning("An error occurred while attempting to get the current balance.")
+        api = self.apis[identifier]
+        if identifier == FETCHAI:
+            try:
+                balance = api.tokens.balance(address)
+            except Exception:
+                logger.warning("An error occurred while attempting to get the current balance.")
+                balance = 0
+        elif identifier == ETHEREUM:
+            try:
+                balance = api.eth.getBalance(address)
+            except Exception:
+                logger.warning("An error occurred while attempting to get the current balance.")
+                balance = 0
+        else:
             balance = 0
         return balance
 
-    def transfer(self, identifier: str, entity: Entity, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
+    def transfer(self, identifier: str, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
         """
         Transfer from self to destination.
 
+        :param identifier: the crypto code
+        :param crypto: the crypto object that contains the fucntions for signing transactions.
         :param destination_address: the address of the receive
         :param amount: the amount
         :param tx_fee: the tx fee
@@ -91,14 +105,32 @@ class LedgerApis(object):
         :return: tx digest if successful, otherwise None
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        try:
-            api = self.apis[identifier]
-            logger.info("Waiting for the validation of the transaction ...")
-            tx_digest = api.tokens.transfer(entity, destination_address, amount, tx_fee)
-            api.sync(tx_digest)
-            logger.info("Transaction validated ...")
-        except Exception:
-            logger.warning("An error occurred while attempting the transfer.")
+        api = self.apis[identifier]
+        logger.info("Waiting for the validation of the transaction ...")
+        if identifier == FETCHAI:
+            try:
+                tx_digest = api.tokens.transfer(crypto_object.entity, destination_address, amount, tx_fee)
+                api.sync(tx_digest)
+                logger.info("Transaction validated ...")
+            except Exception:
+                logger.warning("An error occurred while attempting the transfer.")
+                tx_digest = None
+        elif identifier == ETHEREUM:
+            try:
+                transaction = {
+                    'nonce': 0x05,
+                    'chainId': 3,
+                    'to': api.toChecksumAddress(destination_address),
+                    'value': amount,
+                    'gas': tx_fee + api.eth.gasPrice,
+                    'gasPrice': api.eth.gasPrice
+                }
+                signature = api.eth.account.signTransaction(transaction_dict=transaction,
+                                                            private_key=crypto_object.entity.key)
+                tx_digest = api.eth.sendRawTransaction(signature.rawTransaction)
+            except Exception:
+                tx_digest = None
+        else:
             tx_digest = None
         return tx_digest
 
@@ -113,18 +145,22 @@ class LedgerApis(object):
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         is_successful = False
-        try:
-            api = self.apis[identifier]
-            logger.info("Checking the transaction ...")
-            # tx_status = cast(TxStatus, api.tx.status(tx_digest))
-            tx_status = cast(str, api.tx.status(tx_digest))
-            SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
-            if tx_status in SUCCESSFUL_TERMINAL_STATES:
-                # TODO: check the amount of the transaction is correct
-                is_successful = True
-            logger.info("Transaction validated ...")
-        except Exception:
-            logger.warning("An error occurred while attempting to check the transaction.")
+        api = self.apis[identifier]
+
+        if identifier == FETCHAI:
+            try:
+                logger.info("Checking the transaction ...")
+                # tx_status = cast(TxStatus, api.tx.status(tx_digest))
+                tx_status = cast(str, api.tx.status(tx_digest))
+                if tx_status in SUCCESSFUL_TERMINAL_STATES:
+                    # TODO: check the amount of the transaction is correct
+                    is_successful = True
+                logger.info("Transaction validated ...")
+            except Exception:
+                logger.warning("An error occurred while attempting to check the transaction.")
+        elif identifier == ETHEREUM:
+            is_successful = True
+
         return is_successful
 
     @staticmethod
@@ -132,6 +168,7 @@ class LedgerApis(object):
         """
         Get the address from the public key.
 
+        :param self:
         :param identifier: the identifier
         :param public_key: the public key
         :return: the address
