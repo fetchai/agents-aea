@@ -64,7 +64,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. failure)."""
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_error_message_skill_already_existing(self):
@@ -106,7 +106,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. failure)."""
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_error_message_skill_already_existing(self):
@@ -159,7 +159,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. failure)."""
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_configuration_file_not_valid(self):
@@ -208,7 +208,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. failure)."""
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_file_exists_error(self):

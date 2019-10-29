@@ -58,7 +58,7 @@ class TestRemoveConnection:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_name])
 
     def test_exit_code_equal_to_zero(self):
-        """Test that the exit code is equal to 1 (i.e. failure)."""
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 0
 
     def test_directory_does_not_exist(self):
@@ -102,7 +102,7 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. failure)."""
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_error_message_connection_not_existing(self):
@@ -150,7 +150,7 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the exit code is equal to 1 (i.e. failure)."""
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     @classmethod

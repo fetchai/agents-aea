@@ -215,7 +215,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     @classmethod
@@ -253,7 +253,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     def test_log_error_message(self):
@@ -298,7 +298,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     def test_log_error_message(self):
@@ -342,7 +342,7 @@ class TestRunFailsWhenConnectionNotDeclared:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     def test_log_error_message(self):
@@ -388,7 +388,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     def test_log_error_message(self):
@@ -434,7 +434,7 @@ class TestRunFailsWhenConnectionNotComplete:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     def test_log_error_message(self):
@@ -480,7 +480,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     def test_log_error_message(self):
@@ -525,7 +525,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     def test_log_error_message(self):
@@ -570,7 +570,7 @@ class TestRunFailsWhenProtocolNotComplete:
             cls.exit_code = e.code
 
     def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. failure)."""
+        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.exit_code == 1
 
     def test_log_error_message(self):

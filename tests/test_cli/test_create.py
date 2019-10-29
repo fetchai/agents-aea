@@ -194,7 +194,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the error code is equal to 1 (i.e. failure)."""
+        """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_log_error_message(self):
@@ -236,7 +236,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the error code is equal to 1 (i.e. failure)."""
+        """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_agent_folder_is_not_created(self):
@@ -274,7 +274,7 @@ class TestCreateFailsWhenExceptionOccurs:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the error code is equal to 1 (i.e. failure)."""
+        """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
 
     def test_agent_folder_is_not_created(self):
