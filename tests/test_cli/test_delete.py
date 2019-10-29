@@ -82,7 +82,7 @@ class TestDeleteFailsWhenDirectoryDoesNotExist:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name])
 
     def test_exit_code_equal_to_2(self):
-        """Test that the error code is equal to 2 (i.e. Misuse of shell builtins)"""
+        """Test that the error code is equal to 2 (i.e. Misuse of shell builtins)."""
         assert self.result.exit_code == 2
 
     @classmethod
