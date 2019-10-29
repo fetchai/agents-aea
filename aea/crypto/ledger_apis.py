@@ -97,7 +97,7 @@ class LedgerApis(object):
         Transfer from self to destination.
 
         :param identifier: the crypto code
-        :param crypto: the crypto object that contains the fucntions for signing transactions.
+        :param crypto_object: the crypto object that contains the fucntions for signing transactions.
         :param destination_address: the address of the receive
         :param amount: the amount
         :param tx_fee: the tx fee
@@ -118,16 +118,20 @@ class LedgerApis(object):
         elif identifier == ETHEREUM:
             try:
                 transaction = {
-                    'nonce': 0x05,
+                    'nonce': 0x00,
                     'chainId': 3,
                     'to': api.toChecksumAddress(destination_address),
                     'value': amount,
                     'gas': tx_fee + api.eth.gasPrice,
                     'gasPrice': api.eth.gasPrice
                 }
-                signature = api.eth.account.signTransaction(transaction_dict=transaction,
-                                                            private_key=crypto_object.entity.key)
+
+                signature = api.eth.account.sign_transaction(transaction_dict=transaction,
+                                                             private_key=crypto_object.entity.privateKey)
+
+                logger.info("Signature: {}".format(signature))
                 tx_digest = api.eth.sendRawTransaction(signature.rawTransaction)
+                logger.info("Digest: {}".format(tx_digest))
             except Exception:
                 tx_digest = None
         else:
@@ -168,7 +172,6 @@ class LedgerApis(object):
         """
         Get the address from the public key.
 
-        :param self:
         :param identifier: the identifier
         :param public_key: the public key
         :return: the address

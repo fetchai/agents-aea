@@ -50,11 +50,19 @@ class MySearchBehaviour(Behaviour):
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
-        balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
-        if balance > 0:
-            logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, balance))
+        fet_balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
+
+        eth_balance = self.context.ledger_apis.token_balance('ethereum', cast(str, self.context.agent_addresses.get('ethereum')))
+        if fet_balance > 0:
+            logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, fet_balance))
         else:
             logger.warning("[{}]: you have no starting balance on fetchai ledger!".format(self.context.agent_name))
+            # TODO: deregister skill from filter
+
+        if eth_balance > 0:
+            logger.info("[{}]: starting balance on ethereum ledger={}.".format(self.context.agent_name, eth_balance))
+        else:
+            logger.warning("[{}]: you have no starting balance on ethereum ledger!".format(self.context.agent_name))
             # TODO: deregister skill from filter
 
     def act(self) -> None:

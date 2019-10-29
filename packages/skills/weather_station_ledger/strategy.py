@@ -86,7 +86,7 @@ class Strategy(SharedClass):
         total_price = self.price_per_row * rows
         proposal = Description({"rows": rows,
                                 "price": total_price,
-                                "currency_pbk": self.currency})
+                                "currency_pbk": self.currency[1]})
         return (proposal, weather_data)
 
     def _build_data_payload(self, fetched_data: Dict[str, int]) -> Tuple[Dict[str, List[Dict[str, Any]]], int]:

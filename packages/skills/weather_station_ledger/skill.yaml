@@ -17,7 +17,7 @@ shared_classes:
       class_name: Strategy
       args:
         price_per_row: 1
-        currency_pbk: 'FET'
+        currency_pbk: ['FET', 'ETH']
   - shared_class:
       class_name: Dialogues
       args: {}

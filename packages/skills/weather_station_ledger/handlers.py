@@ -40,6 +40,8 @@ else:
 
 logger = logging.getLogger("aea.weather_station_ledger_skill")
 
+USED_ADDRESS = "ethereum"
+
 
 class FIPAHandler(Handler):
     """This class scaffolds a handler."""
@@ -205,7 +207,7 @@ class FIPAHandler(Handler):
                                        dialogue_id=dialogue_id,
                                        target=new_target,
                                        performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
-                                       address=self.context.agent_addresses['fetchai'])
+                                       address=self.context.agent_addresses[USED_ADDRESS])
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
