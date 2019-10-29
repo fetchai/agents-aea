@@ -28,8 +28,8 @@ if TYPE_CHECKING:
     from packages.skills.weather_station_eth.db_communication import DBCommunication
     from packages.skills.weather_station_eth.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 else:
-    from weather_station_eth.db_communication import DBCommunication
-    from weather_station_eth.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
+    from weather_station_eth_skill.db_communication import DBCommunication
+    from weather_station_eth_skill.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
 DEFAULT_PRICE_PER_ROW = 2
 DEFAULT_CURRENCY_PBK = 'ETH'

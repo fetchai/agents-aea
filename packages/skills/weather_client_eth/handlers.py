@@ -37,8 +37,8 @@ if TYPE_CHECKING:
     from packages.skills.weather_client_eth.dialogues import Dialogue, Dialogues
     from packages.skills.weather_client_eth.strategy import Strategy
 else:
-    from weather_client_eth.dialogues import Dialogue, Dialogues
-    from weather_client_eth.strategy import Strategy
+    from weather_client_eth_skill.dialogues import Dialogue, Dialogues
+    from weather_client_eth_skill.strategy import Strategy
 
 logger = logging.getLogger("aea.weather_client_ledger_skill")
 
