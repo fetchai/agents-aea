@@ -53,6 +53,10 @@ follow these steps:
       cd weather_client 
       aea add skill weather_client_ledger
 
+- Generate the private key for the weather client:
+
+      aea generate-key fetchai
+
 - Both in `weather_station/aea-config.yaml` and
 `weather_client/aea-config.yaml`, replace `ledger_apis: []` with:
 ```
@@ -62,11 +66,6 @@ ledger_apis:
     addr: alpha.fetch-ai.com
     port: 80
 ```
-- Generate the private key for the weather client:
-
-      aea run
-
-Stop the agent again with `CTRL + C`. You should see that the agent has no balance on Fetch.ai.
 
 - Generate some wealth to your weather client FET address (it takes a while):
 ```
