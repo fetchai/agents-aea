@@ -21,6 +21,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -46,7 +47,7 @@ class TestGui:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.proc = subprocess.Popen(["aea", *CLI_LOG_OPTION, "gui"])
+        cls.proc = subprocess.Popen([sys.executable, "-m", "aea.cli", *CLI_LOG_OPTION, "gui"])
         time.sleep(10.0)
 
     def test_gui(self, pytestconfig):
