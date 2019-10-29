@@ -73,7 +73,7 @@ class TestGenerateKey:
         Path(ETHEREUM_PRIVATE_KEY_FILE).unlink()
 
     def test_all(self):
-        """Test that all the private keys are created correctly when running 'aea generate-key all'"""
+        """Test that all the private keys are created correctly when running 'aea generate-key all'."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "all"])
         assert result.exit_code == 0
 
