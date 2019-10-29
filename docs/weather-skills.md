@@ -55,7 +55,7 @@ aea run
 
 
 ### Create the weather client agent
-Return to the root directory, and create the weather client agent.
+In a new terminal window, return to the root directory and create the weather client agent.
 ``` bash
 aea create my_weather_client
 ```
@@ -69,19 +69,21 @@ aea add skill weather_client
 
 
 ### Run the weather client agent
-
 ``` bash
 aea run
 ```
 
 
-### Observe the logs of both agents:
+### Observe the logs of both agents
 
+<center>![Weather station logs](assets/weather-station-logs.png)</center>
+
+<center>![Weather client logs](assets/weather-client-logs.png)</center>
 
 
 ### Delete the agents
 
-When you're done, you can go up a level and delete the agents.
+When you're done, go up a level and delete the agents.
 
 ``` bash
 cd ..
@@ -92,8 +94,7 @@ aea delete my_weather_client
 
 ## Using the ledger
 
-To run the same example but with a true ledger transaction,
-follow these steps:
+To run the same example but with a true ledger transaction, do the following.
 
 ### Launch the OEF Node
 
@@ -103,7 +104,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 ### Create a weather station (ledger version)
 
-The agent that will provide weather measurements:
+In a new terminal window, create the agent that will provide weather measurements.
 
 ``` bash
 aea create weather_station 
@@ -121,7 +122,7 @@ cd weather_client
 aea add skill weather_client_ledger
 ```
 
-### Update the agent configs:
+### Update the agent configs
 
 Both in `weather_station/aea-config.yaml` and
 `weather_client/aea-config.yaml`, replace `ledger_apis: []` with:
@@ -134,14 +135,14 @@ ledger_apis:
       port: 80
 ```
 
-### Fund the client agent:
+### Fund the client agent
 
 After you run the client (so the private key is created), generate some wealth to your weather client FET address (it takes a while):
-```
+``` bash
 python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
 ```
 
-### Run the agents, as in the previous section.
+### Run the agents
 
 ``` bash
 aea run
