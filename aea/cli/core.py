@@ -109,6 +109,18 @@ def create(click_context, agent_name):
 def delete(ctx: Context, agent_name):
     """Delete an agent."""
     path = Path(agent_name)
+
+    # check that the target folder is an AEA project.
+    try:
+        cwd = os.getcwd()
+        os.chdir(agent_name)
+        _try_to_load_agent_config(ctx)
+    except Exception:
+        logger.error("The name provided it's not an AEA project.")
+        sys.exit(1)
+    finally:
+        os.chdir(cwd)
+
     logger.info("Deleting agent's directory in '{}'...".format(path))
 
     # delete the agent's directory
