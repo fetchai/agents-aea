@@ -83,7 +83,7 @@ It also details the protocol types used in the skill and points to shared module
 
 ``` yaml
 name: echo
-authors: Fetch.AI Limited
+authors: Fetch.ai Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""

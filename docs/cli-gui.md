@@ -26,7 +26,7 @@ You should see the following page displayed:
 
 On the left-hand side we can see any agents you have created and any protocols, connections and skills they have. Initially this will be empty - or if you have created an agent using the CLI in the quick-start guide and not deleted it then that should be listed.
 
-On the right-hand side is the Reqistry which shows all the protocols, connections and skills which are available to you to construct your agents out of.
+On the right-hand side is the Registry which shows all the protocols, connections and skills which are available to you to construct your agents out of.
 
 To create a new agent and run it, follow these steps:
 <center>![gui sequence](assets/cli_gui02_sequence.png)</center>
@@ -46,3 +46,5 @@ To create a new agent and run it, follow these steps:
 This is how your whole page should look if you followed the instructions correctly
 <center>![whole screen running](assets/cli_gui05_full_running_agent.png)</center>
  
+
+<br />

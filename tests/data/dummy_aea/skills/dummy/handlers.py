@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'echo' skill."""
+"""This module contains the handler for the 'dummy' skill."""
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -45,7 +45,7 @@ class DummyHandler(Handler):
 
     def handle(self, message: Message, sender: str) -> None:
         """
-        Handle messages.
+        Handle message.
 
         :param message: the message
         :param sender: the sender

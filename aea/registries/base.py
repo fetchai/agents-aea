@@ -233,11 +233,16 @@ class HandlerRegistry(Registry):
         :param skill_id: the skill id.
         :return: None
         """
+        protocol_ids_to_remove = set()
         for protocol_id, skill_to_handler_dict in self._handlers.items():
             if skill_id in skill_to_handler_dict.keys():
                 self._handlers[protocol_id].pop(skill_id, None)
             if len(self._handlers[protocol_id]) == 0:
-                self._handlers.pop(protocol_id, None)
+                protocol_ids_to_remove.add(protocol_id)
+
+        # clean the dictionary up
+        for protocol_id in protocol_ids_to_remove:
+            self._handlers.pop(protocol_id, None)
 
     def fetch(self, protocol_id: ProtocolId) -> Optional[List[Handler]]:
         """
@@ -261,22 +266,19 @@ class HandlerRegistry(Registry):
         :param skill_id: the skill id
         :return: the handlers registered for the protocol_id and skill_id
         """
-        result = self._handlers.get(protocol_id, None)
-        if result is None:
-            return None
-        else:
-            return result.get(skill_id, None)
+        return self._handlers.get(protocol_id, {}).get(skill_id, None)
 
-    def fetch_all(self) -> Optional[List[Handler]]:
-        """Fetch all the handlers."""
-        if self._handlers.values() is None:
-            return None
-        else:
-            result = []
-            for skill_id_to_handler_dict in self._handlers.values():
-                for handler in skill_id_to_handler_dict.values():
-                    result.append(handler)
-            return result
+    def fetch_all(self) -> List[Handler]:
+        """
+        Fetch all the handlers.
+
+        :return: the list of handlers.
+        """
+        result = []
+        for skill_id_to_handler_dict in self._handlers.values():
+            for handler in skill_id_to_handler_dict.values():
+                result.append(handler)
+        return result
 
     def setup(self) -> None:
         """
@@ -317,7 +319,7 @@ class BehaviourRegistry(Registry):
         """
         Register a behaviour.
 
-        :param skill_id: the skill id.
+        :param ids: the skill id.
         :param behaviours: the behaviours of the skill.
         :return: None
         """
@@ -384,7 +386,7 @@ class TaskRegistry(Registry):
         """
         Register a task.
 
-        :param skill_id: the skill id.
+        :param ids: the skill id.
         :param tasks: the tasks list.
         :return: None
         """
@@ -502,6 +504,10 @@ class Resources(object):
             self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], skill.behaviours))
         if skill.tasks is not None:
             self.task_registry.register((None, skill_id), cast(List[Task], skill.tasks))
+
+    def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
+        """Get the skill."""
+        return self._skills.get(skill_id, None)
 
     def remove_skill(self, skill_id: SkillId):
         """Remove a skill from the set of resources."""

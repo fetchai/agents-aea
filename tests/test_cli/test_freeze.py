@@ -17,23 +17,21 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea gui` sub-command."""
+"""This test module contains the tests for the `aea freeze` sub-command."""
 import json
 import os
-import subprocess
-import tempfile
-import time
 from pathlib import Path
 
 import jsonschema
-import pytest
+from click.testing import CliRunner
 from jsonschema import Draft4Validator
 
-from ...conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
+from aea.cli import cli
+from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
 
 
-class TestGui:
-    """Test that the command 'aea gui' works as expected."""
+class TestFreeze:
+    """Test that the command 'aea freeze' works as expected."""
 
     @classmethod
     def setup_class(cls):
@@ -42,23 +40,21 @@ class TestGui:
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
+        cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-        cls.proc = subprocess.Popen(["aea", *CLI_LOG_OPTION, "gui"])
-        time.sleep(10.0)
+        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
 
-    def test_gui(self, pytestconfig):
-        """Test that the gui process has been spawned correctly."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip('skipped: CI')
-        else:
-            assert tcpping("localhost", 8080)
+    def test_exit_code_equal_to_zero(self):
+        """Assert that the exit code is equal to zero (i.e. success)."""
+        assert self.result.exit_code == 0
+
+    def test_correct_output(self):
+        """Test that the command has printed the correct output."""
+        assert self.result.output == """protobuf\n"""
 
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
-        cls.proc.terminate()
-        cls.proc.wait(2.0)
         os.chdir(cls.cwd)

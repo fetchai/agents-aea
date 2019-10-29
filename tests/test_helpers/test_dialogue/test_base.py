@@ -52,14 +52,27 @@ class TestDialogueBase:
 
         assert hash(self.dialogue_label) == hash(self.dialogue.dialogue_label)
 
+        assert self.dialogue_label.json == dict(
+            dialogue_id=str(1), dialogue_opponent_pbk="opponent",
+            dialogue_starter_pbk="starter"
+        )
+        assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
+
     def test_dialogue(self):
         """Test the dialogue."""
         assert self.dialogue.is_self_initiated
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b'Hello')
+
+        assert self.dialogue.last_incoming_message is None
+        assert self.dialogue.last_outgoing_message is None
+
         self.dialogue.outgoing_extend(message=msg)
         assert b'Hello' == self.dialogue._outgoing_messages[0].get("content")
+        assert self.dialogue.last_outgoing_message == msg
+
         self.dialogue.incoming_extend(message=msg)
         assert b'Hello' == self.dialogue._incoming_messages[0].get("content")
+        assert self.dialogue.last_incoming_message == msg
 
     def test_dialogues(self):
         """Test the dialogues."""

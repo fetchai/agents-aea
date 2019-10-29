@@ -11,21 +11,21 @@ For a custom protocol, the developer must code methods from two classes.
 
 This method checks the message data for consistency and raises an error if necessary.
 
-!!! Todo
+!!! TODO
     For example.
 
 ### `Serializer.encode(self, msg: Message)`
 
 This method encodes a message object into bytes for passing around.
 
-!!! Todo
+!!! TODO
     For example.
 
 ### `Serializer.decode(self, obj: bytes)`
 
 This method decodes the byte representation of a message object.
 
-!!! Todo
+!!! TODO
     For example.
 
 Outside of these, the developer is free to implement the agent protocols in any way they see fit.

@@ -44,10 +44,9 @@ class AgentContext:
 
         :param agent_name: the agent's name
         :param public_keys: the public keys of the agent
-        :param public_key: the default public key
         :param ledger_apis: the ledger apis
         :param outbox: the outbox
-        :param decision_maker_queue: the (in) queue of the decision maker
+        :param decision_maker_message_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
         :param preferences: the preferences of the agent
         :param is_ready_to_pursuit_goals: whether the agent is ready to pursuit its goals

@@ -32,7 +32,7 @@ import aea
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
-from ....conftest import ROOT_DIR, CLI_LOG_OPTION
+from tests.conftest import ROOT_DIR, CLI_LOG_OPTION
 
 
 class TestAddSkillFailsWhenSkillAlreadyExists:
