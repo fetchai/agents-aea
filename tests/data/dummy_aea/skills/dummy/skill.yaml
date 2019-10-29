@@ -15,6 +15,11 @@ handlers:
       args:
         handler_arg_1: 1
         handler_arg_2: "2"
+  - handler:
+      class_name: DummyInternalHandler
+      args:
+        handler_arg_1: 1
+        handler_arg_2: "2"
 tasks:
   - task:
       class_name: DummyTask

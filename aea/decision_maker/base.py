@@ -302,8 +302,11 @@ class DecisionMaker:
         """
         while not self.message_in_queue.empty():
             message = self.message_in_queue.get_nowait()  # type: Optional[Message]
-            if message is not None and message.protocol_id == INTERNAL_PROTOCOL_ID:
-                self.handle(message)
+            if message is not None:
+                if message.protocol_id == INTERNAL_PROTOCOL_ID:
+                    self.handle(message)
+                else:
+                    logger.warning("Message received by the decision maker is not of protocol_id=internal.")
 
     def handle(self, message: Message) -> None:
         """
