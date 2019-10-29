@@ -85,7 +85,7 @@ class TestDeleteFailsWhenDirectoryDoesNotExist:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name])
 
     def test_exit_code_equal_to_1(self):
-        """Test that the error code is equal to -1."""
+        """Test that the error code is equal to 1 (i.e. failure)."""
         assert self.result.exit_code == 1
 
     def test_log_error_message(self):
