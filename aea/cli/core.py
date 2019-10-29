@@ -111,9 +111,11 @@ def delete(ctx: Context, agent_name):
     path = Path(agent_name)
 
     # check that the target folder is an AEA project.
+    cwd = os.getcwd()
     try:
-        cwd = os.getcwd()
         os.chdir(agent_name)
+        fp = open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8")
+        ctx.agent_config = ctx.agent_loader.load(fp)
         _try_to_load_agent_config(ctx)
     except Exception:
         logger.error("The name provided is not an AEA project.")
