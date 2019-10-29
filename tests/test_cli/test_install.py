@@ -102,9 +102,9 @@ class TestInstallFails:
         yaml.safe_dump(config, open(config_path, "w"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install"])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     @classmethod
     def teardown_class(cls):

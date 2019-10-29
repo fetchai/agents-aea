@@ -193,9 +193,9 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         os.mkdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to -1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed.
@@ -235,9 +235,9 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
 
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to -1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_agent_folder_is_not_created(self):
         """Test that the agent folder is removed."""
@@ -273,9 +273,9 @@ class TestCreateFailsWhenExceptionOccurs:
 
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to -1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_agent_folder_is_not_created(self):
         """Test that the agent folder is removed."""

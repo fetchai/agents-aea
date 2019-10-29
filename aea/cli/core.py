@@ -22,6 +22,7 @@
 
 import os
 import shutil
+import sys
 from pathlib import Path
 from typing import cast
 
@@ -91,19 +92,19 @@ def create(click_context, agent_name):
 
     except OSError:
         logger.error("Directory already exist. Aborting...")
-        exit(-1)
+        sys.exit(1)
     except ValidationError as e:
         logger.error(str(e))
         shutil.rmtree(agent_name, ignore_errors=True)
-        exit(-1)
+        sys.exit(1)
     except Exception as e:
         logger.exception(e)
         shutil.rmtree(agent_name, ignore_errors=True)
-        exit(-1)
+        sys.exit(1)
 
 
 @cli.command()
-@click.argument('agent_name', type=str, required=True)
+@click.argument('agent_name', type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True)
 @pass_ctx
 def delete(ctx: Context, agent_name):
     """Delete an agent."""
@@ -115,7 +116,7 @@ def delete(ctx: Context, agent_name):
         shutil.rmtree(path, ignore_errors=False)
     except OSError:
         logger.error("An error occurred while deleting the agent directory. Aborting...")
-        exit(-1)
+        sys.exit(1)
 
 
 @cli.command()

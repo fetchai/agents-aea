@@ -214,9 +214,9 @@ class TestRunFailsWhenExceptionOccursInSkill:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     @classmethod
     def teardown_class(cls):
@@ -252,9 +252,9 @@ class TestRunFailsWhenConfigurationFileNotFound:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
@@ -297,9 +297,9 @@ class TestRunFailsWhenConfigurationFileInvalid:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
@@ -341,9 +341,9 @@ class TestRunFailsWhenConnectionNotDeclared:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
@@ -387,9 +387,9 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
@@ -433,9 +433,9 @@ class TestRunFailsWhenConnectionNotComplete:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
@@ -479,9 +479,9 @@ class TestRunFailsWhenConnectionClassNotPresent:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
@@ -524,9 +524,9 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
@@ -569,9 +569,9 @@ class TestRunFailsWhenProtocolNotComplete:
         except SystemExit as e:
             cls.exit_code = e.code
 
-    def test_exit_code_equal_to_minus_one(self):
+    def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to -1 (i.e. failure)."""
-        assert self.exit_code == -1
+        assert self.exit_code == 1
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""

@@ -58,9 +58,9 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         # add connection again
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_connection_already_existing(self):
         """Test that the log error message is fixed.
@@ -100,9 +100,9 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_connection_already_existing(self):
         """Test that the log error message is fixed.
@@ -148,9 +148,9 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_configuration_file_not_valid(self):
         """Test that the log error message is fixed.
@@ -192,9 +192,9 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         Path("connections", cls.connection_name).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_file_exists_error(self):
         """Test that the log error message is fixed.

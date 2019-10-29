@@ -21,6 +21,7 @@
 
 import os
 import shutil
+import sys
 
 import click
 
@@ -46,14 +47,14 @@ def connection(ctx: Context, connection_name):
 
     if connection_name not in ctx.agent_config.connections:
         logger.error("Connection '{}' not found.".format(connection_name))
-        exit(-1)
+        sys.exit(1)
 
     connection_folder = os.path.join("connections", connection_name)
     try:
         shutil.rmtree(connection_folder)
     except BaseException:
         logger.exception("An error occurred while deleting '{}'.".format(connection_folder))
-        exit(-1)
+        sys.exit(1)
 
     # removing the connection to the configurations.
     logger.debug("Removing the connection from {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -73,14 +74,14 @@ def protocol(ctx: Context, protocol_name):
 
     if protocol_name not in ctx.agent_config.protocols:
         logger.error("Protocol '{}' not found.".format(protocol_name))
-        exit(-1)
+        sys.exit(1)
 
     protocol_folder = os.path.join("protocols", protocol_name)
     try:
         shutil.rmtree(protocol_folder)
     except BaseException:
         logger.exception("An error occurred.")
-        exit(-1)
+        sys.exit(1)
 
     # removing the protocol to the configurations.
     logger.debug("Removing the protocol from {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -100,14 +101,14 @@ def skill(ctx: Context, skill_name):
 
     if skill_name not in ctx.agent_config.skills:
         logger.error("The skill '{}' is not supported.".format(skill_name))
-        exit(-1)
+        sys.exit(1)
 
     skill_folder = os.path.join("skills", skill_name)
     try:
         shutil.rmtree(skill_folder)
     except BaseException:
         logger.exception("An error occurred.")
-        exit(-1)
+        sys.exit(1)
 
     # removing the protocol to the configurations.
     logger.debug("Removing the skill from {}".format(DEFAULT_AEA_CONFIG_FILE))

@@ -101,9 +101,9 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
 
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_connection_not_existing(self):
         """Test that the log error message is fixed.
@@ -149,9 +149,9 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
 
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     @classmethod
     def teardown_class(cls):

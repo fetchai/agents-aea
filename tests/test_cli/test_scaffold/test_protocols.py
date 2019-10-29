@@ -118,9 +118,9 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
         Path(cls.t, cls.agent_name, "protocols", cls.resource_name).mkdir(exist_ok=False, parents=True)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_protocol_already_existing(self):
         """Test that the log error message is fixed.
@@ -171,9 +171,9 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
         # scaffold protocol with the same protocol name
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_error_message_protocol_already_existing(self):
         """Test that the log error message is fixed.
@@ -225,9 +225,9 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_configuration_file_not_valid(self):
         """Test that the log error message is fixed.
@@ -276,9 +276,9 @@ class TestScaffoldProtocolFailsWhenExceptionOccurs:
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
 
-    def test_exit_code_equal_to_minus_1(self):
+    def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to minus 1."""
-        assert self.result.exit_code == -1
+        assert self.result.exit_code == 1
 
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.
