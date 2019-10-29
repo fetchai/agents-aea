@@ -133,7 +133,6 @@ Stop the agent by pressing `CTRL c`
 ``` bash
 aea add connection stub
 ```
-
 A stub connection provides an I/O reader/writer. 
 
 It uses two files for communication: one for the incoming messages and
@@ -151,12 +150,10 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
 For example:
 
 ``` bash
-my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
 ```
 
-### Add the line to the input_file
-
-We can send the AEA a message by adding an envelope to the input file.
+### Add the line to the input file
 
 ``` bash
 echo 'my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
@@ -166,12 +163,11 @@ echo 'my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8=
 
 Run the agent with the `stub` connection.
 
-
 ``` bash
 aea run --connection stub
 ```
 
-You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`.
+You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
 
 ``` bash
 info: Echo Task: execute method called.
