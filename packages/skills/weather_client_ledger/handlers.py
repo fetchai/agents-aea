@@ -23,7 +23,6 @@ import pprint
 from typing import Optional, cast, List, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
-from aea.crypto.wallet import CURRENCY_TO_ID_MAP
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -141,14 +140,14 @@ class FIPAHandler(Handler):
         if proposals is not []:
             # only take the first proposal
             proposal = proposals[0]
-            crypto = str(CURRENCY_TO_ID_MAP[proposal.values.get('currency_pbk')])
+            ledger_id = cast(str, proposal.values.get('ledger_id'))
             logger.info("[{}]: received proposal={} from sender={}".format(self.context.agent_name,
                                                                            proposal.values,
                                                                            sender[-5:]))
             strategy = cast(Strategy, self.context.strategy)
             acceptable = strategy.is_acceptable_proposal(proposal)
-            affordable = self.context.ledger_apis.token_balance(crypto, cast(str, self.context.agent_addresses.get(
-                crypto))) >= cast(int, proposal.values.get('price'))
+            affordable = self.context.ledger_apis.token_balance(ledger_id, cast(str, self.context.agent_addresses.get(
+                ledger_id))) >= cast(int, proposal.values.get('price'))
             if acceptable and affordable:
                 strategy.is_searching = False
                 logger.info("[{}]: accepting the proposal from sender={}".format(self.context.agent_name,
@@ -210,19 +209,21 @@ class FIPAHandler(Handler):
         logger.info("[{}]: received MATCH_ACCEPT_W_ADDRESS from sender={}".format(self.context.agent_name, sender[-5:]))
         address = cast(str, msg.get("address"))
         proposal = cast(Description, dialogue.proposal)
-        crypto = CURRENCY_TO_ID_MAP[proposal.values.get("currency_pbk")]
+        ledger_id = cast(str, proposal.values.get("ledger_id"))
+        print(ledger_id)
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                     skill_id="weather_client_ledger",
                                     transaction_id="transaction0",
-                                    sender=self.context.agent_public_keys[crypto],
+                                    sender=self.context.agent_public_keys[ledger_id],
                                     counterparty=address,
                                     is_sender_buyer=True,
-                                    currency_pbk=crypto,
+                                    currency_pbk=cast(str, proposal.values.get("currency_pbk")),
                                     amount=proposal.values['price'],
                                     sender_tx_fee=0,
                                     counterparty_tx_fee=0,
                                     quantities_by_good_pbk={},
-                                    dialogue_label=dialogue.dialogue_label.json)
+                                    dialogue_label=dialogue.dialogue_label.json,
+                                    ledger_id=ledger_id)
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
             self.context.agent_name))

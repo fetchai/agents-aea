@@ -18,6 +18,7 @@ shared_classes:
       args:
         price_per_row: 1
         currency_pbk: ['FET', 'ETH']
+        ledger_id: 'ethereum'
   - shared_class:
       class_name: Dialogues
       args: {}

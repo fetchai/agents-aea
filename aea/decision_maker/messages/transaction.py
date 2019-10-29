@@ -52,6 +52,7 @@ class TransactionMessage(Message):
                  quantities_by_good_pbk: Dict[str, int],
                  transaction_digest: Optional[str] = None,
                  dialogue_label: Optional[Dict[str, str]] = None,
+                 ledger_id: Optional[str] = None,
                  **kwargs):
         """
         Instantiate transaction message.

@@ -129,10 +129,10 @@ class LedgerApis(object):
                 signature = api.eth.account.sign_transaction(transaction_dict=transaction,
                                                              private_key=crypto_object.entity.privateKey)
 
-                logger.info("Signature: {}".format(signature))
                 tx_digest = api.eth.sendRawTransaction(signature.rawTransaction)
-                logger.info("Digest: {}".format(tx_digest))
+                logger.info("Transaction validated ...")
             except Exception:
+                logger.warning("An error occurred while attempting the transfer.")
                 tx_digest = None
         else:
             tx_digest = None

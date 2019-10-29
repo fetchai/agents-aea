@@ -64,8 +64,8 @@ class TestUtilityPreferencesBase:
 
     def test_transaction_is_consistent(self):
         """Test the consistency of the transaction message."""
-        currency_endowment = {"fetchai": 100.0}
-        good_endowment = {"fetchai": 2}
+        currency_endowment = {"FET": 100.0}
+        good_endowment = {"FET": 2}
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
                                         skill_id="default",
@@ -73,11 +73,11 @@ class TestUtilityPreferencesBase:
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=True,
-                                        currency_pbk="fetchai",
+                                        currency_pbk="FET",
                                         amount=1,
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"fetchai": 10})
+                                        quantities_by_good_pbk={"FET": 10})
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message),\
             "We should have the money for the transaction!"
@@ -88,19 +88,19 @@ class TestUtilityPreferencesBase:
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=False,
-                                        currency_pbk="fetchai",
+                                        currency_pbk="FET",
                                         amount=1,
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"fetchai": 10})
+                                        quantities_by_good_pbk={"FET": 10})
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message), \
             "We should have the money for the transaction!"
 
     def test_apply(self):
         """Test the apply function."""
-        currency_endowment = {"fetchai": 100.0}
-        good_endowment = {"fetchai": 2}
+        currency_endowment = {"FET": 100.0}
+        good_endowment = {"FET": 2}
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
                                         skill_id="default",
@@ -108,11 +108,11 @@ class TestUtilityPreferencesBase:
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=True,
-                                        currency_pbk="fetchai",
+                                        currency_pbk="FET",
                                         amount=20,
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"fetchai": 10})
+                                        quantities_by_good_pbk={"FET": 10})
         list_of_transactions = [tx_message]
         state = self.ownership_state
         new_state = self.ownership_state.apply(transactions=list_of_transactions)
@@ -120,8 +120,8 @@ class TestUtilityPreferencesBase:
 
     def test_transaction_update(self):
         """Test the tranasction update."""
-        currency_endowment = {"fetchai": 100.0}
-        good_endowment = {"fetchai": 2}
+        currency_endowment = {"FET": 100.0}
+        good_endowment = {"FET": 2}
 
         self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
@@ -130,14 +130,14 @@ class TestUtilityPreferencesBase:
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=True,
-                                        currency_pbk="fetchai",
+                                        currency_pbk="FET",
                                         amount=20,
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"fetchai": 10})
-        cur_holdings = self.ownership_state.currency_holdings["fetchai"]
+                                        quantities_by_good_pbk={"FET": 10})
+        cur_holdings = self.ownership_state.currency_holdings['FET']
         self.ownership_state.update(tx_message=tx_message)
-        assert self.ownership_state.currency_holdings["fetchai"] < cur_holdings
+        assert self.ownership_state.currency_holdings['FET'] < cur_holdings
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
                                         skill_id="default",
@@ -145,14 +145,14 @@ class TestUtilityPreferencesBase:
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=False,
-                                        currency_pbk="fetchai",
+                                        currency_pbk="FET",
                                         amount=20,
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"fetchai": 10})
-        cur_holdings = self.ownership_state.currency_holdings["fetchai"]
+                                        quantities_by_good_pbk={"FET": 10})
+        cur_holdings = self.ownership_state.currency_holdings['FET']
         self.ownership_state.update(tx_message=tx_message)
-        assert self.ownership_state.currency_holdings["fetchai"] > cur_holdings
+        assert self.ownership_state.currency_holdings['FET'] > cur_holdings
 
     # # PREFERENCES
     def test_preferences_properties(self):
@@ -164,18 +164,18 @@ class TestUtilityPreferencesBase:
 
     def test_preferences_init(self):
         """Test the preferences init()."""
-        utility_params = {"fetchai": 20.0}
-        exchange_params = {"fetchai": 10.0}
+        utility_params = {"FET": 20.0}
+        exchange_params = {"FET": 10.0}
         self.preferences.init(utility_params=utility_params, exchange_params=exchange_params)
         assert self.preferences.utility_params is not None
         assert self.preferences.exchange_params is not None
 
     def test_utilities(self):
         """Test the utilities."""
-        good_holdings = {"fetchai": 2}
-        currency_holdings = {"fetchai": 100.0}
-        utility_params = {"fetchai": 20.0}
-        exchange_params = {"fetchai": 10.0}
+        good_holdings = {"FET": 2}
+        currency_holdings = {"FET": 100.0}
+        utility_params = {"FET": 20.0}
+        exchange_params = {"FET": 10.0}
         self.preferences.init(utility_params=utility_params, exchange_params=exchange_params)
         log_utility = self.preferences.logarithmic_utility(good_holdings=good_holdings)
         assert log_utility is not None
@@ -188,10 +188,10 @@ class TestUtilityPreferencesBase:
 
     def test_score_diff_from_transaction(self):
         """Test the difference between the scores."""
-        good_holdings = {"fetchai": 2}
-        currency_holdings = {"fetchai": 100.0}
-        utility_params = {"fetchai": 20.0}
-        exchange_params = {"fetchai": 10.0}
+        good_holdings = {"FET": 2}
+        currency_holdings = {"FET": 100.0}
+        utility_params = {"FET": 20.0}
+        exchange_params = {"FET": 10.0}
         self.ownership_state.init(currency_endowment=currency_holdings, good_endowment=good_holdings)
         self.preferences.init(utility_params=utility_params, exchange_params=exchange_params)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
@@ -200,11 +200,11 @@ class TestUtilityPreferencesBase:
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=False,
-                                        currency_pbk="fetchai",
+                                        currency_pbk="FET",
                                         amount=20,
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"fetchai": 10})
+                                        quantities_by_good_pbk={"FET": 10})
 
         cur_score = self.preferences.get_score(good_holdings=good_holdings, currency_holdings=currency_holdings)
         new_state = self.ownership_state.apply([tx_message])
@@ -250,19 +250,19 @@ class TestDecisionMaker:
                                         sender="agent_1",
                                         counterparty="pk",
                                         is_sender_buyer=True,
-                                        currency_pbk="fetchai",
+                                        currency_pbk="FET",
                                         amount=2,
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"fetchai": 10})
+                                        quantities_by_good_pbk={"FET": 10})
 
         self.decision_maker.message_in_queue.put_nowait(tx_message)
         self.decision_maker.execute()
         assert self.decision_maker.message_in_queue.empty()
-        good_endowment = {"fetchai": 2}
-        currency_endowment = {"fetchai": 100.0}
-        utility_params = {"fetchai": 20.0}
-        exchange_params = {"fetchai": 10.0}
+        good_endowment = {"FET": 2}
+        currency_endowment = {"FET": 100.0}
+        utility_params = {"FET": 20.0}
+        exchange_params = {"FET": 10.0}
 
         state_update_message = StateUpdateMessage(currency_endowment=currency_endowment, good_endowment=good_endowment,
                                                   utility_params=utility_params, exchange_params=exchange_params)
