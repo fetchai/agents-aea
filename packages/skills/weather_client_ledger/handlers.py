@@ -320,13 +320,8 @@ class MyTransactionHandler(Handler):
 
     SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
 
-    def __init__(self, **kwargs):
-        """Initialise the class."""
-        super().__init__(**kwargs)
-        self._received_tx_message = False
-
     def setup(self) -> None:
-        """Implement the setup for the behaviour."""
+        """Implement the setup for the handler."""
         pass
 
     def handle(self, message: Message, sender: str) -> None:
@@ -367,7 +362,7 @@ class MyTransactionHandler(Handler):
 
     def teardown(self) -> None:
         """
-        Implement the task teardown.
+        Implement the handler teardown.
 
         :return: None
         """
