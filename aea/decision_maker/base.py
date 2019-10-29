@@ -41,6 +41,7 @@ UtilityParams = Dict[str, float]   # a map from identifier to quantity
 ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
 QUANTITY_SHIFT = 100
+INTERNAL_PROTOCOL_ID = 'internal'
 
 logger = logging.getLogger(__name__)
 
@@ -299,11 +300,9 @@ class DecisionMaker:
 
         :return: None
         """
-        counter = 0
-        while not self.message_in_queue.empty() and counter < self._max_reactions:
-            counter += 1
+        while not self.message_in_queue.empty():
             message = self.message_in_queue.get_nowait()  # type: Optional[Message]
-            if message is not None:
+            if message is not None and message.protocol_id == INTERNAL_PROTOCOL_ID:
                 self.handle(message)
 
     def handle(self, message: Message) -> None:

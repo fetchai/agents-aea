@@ -36,6 +36,8 @@ ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 class StateUpdateMessage(Message):
     """The transaction message class."""
 
+    protocol_id = "internal"
+
     def __init__(self, currency_endowment: CurrencyEndowment,
                  good_endowment: GoodEndowment,
                  utility_params: UtilityParams,

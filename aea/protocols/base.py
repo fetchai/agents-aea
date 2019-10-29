@@ -33,6 +33,8 @@ from aea.configurations.base import ProtocolConfig
 class Message:
     """This class implements a message."""
 
+    protocol_id = 'base'
+
     def __init__(self, body: Optional[Dict] = None,
                  **kwargs):
         """
