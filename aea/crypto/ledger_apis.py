@@ -21,8 +21,10 @@
 """Module wrapping all the public and private keys cryptography."""
 
 import logging
+import time
 from typing import Any, Dict, Optional, Tuple, cast
 
+import web3
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi
 # from fetchai.ledger.api.tx import TxStatus
 from fetchai.ledger.crypto import Identity, Address
@@ -114,24 +116,30 @@ class LedgerApis(object):
                 logger.warning("An error occurred while attempting the transfer.")
                 tx_digest = None
         elif identifier == ETHEREUM:
-            print(api)
-            try:
-                nonce = api.eth.getTransactionCount(crypto_object.address)
-                transaction = {
-                    'nonce': nonce + 50,
-                    'chainId': 3,
-                    'to': api.toChecksumAddress(destination_address),
-                    'value': amount,
-                    'gas': tx_fee + 200000,
-                    'gasPrice': api.toWei('40', 'gwei')
-                }
-                signature = api.eth.account.sign_transaction(transaction_dict=transaction,
-                                                             private_key=crypto_object.entity.key)
-                tx_digest = api.eth.sendRawTransaction(signature.rawTransaction)
-                tx_digest = tx_digest.hex()
-            except Exception:
-                logger.warning("An error occurred while attempting the transfer.")
-                tx_digest = None
+
+            nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
+            transaction = {
+                'nonce': nonce,
+                'chainId': 3,
+                'to': destination_address,
+                'value': amount,
+                'gas': tx_fee + 200000,
+                'gasPrice': api.toWei('50', 'gwei')
+            }
+            signed = api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
+            hex_value = api.eth.sendRawTransaction(signed.rawTransaction)
+            print("TX Hash: ", hex_value.hex())
+            print("connect_to https://ropsten.etherscan.io/tx/{}".format(hex_value.hex()))
+            while True:
+                try:
+                    api.eth.getTransactionReceipt(hex_value)
+                    logger.info("transaction validated - exiting")
+                    tx_digest = hex_value.hex()
+                    break
+                except web3.exceptions.TransactionNotFound:
+                    logger.info("transaction not found - sleeping for 3.0 seconds")
+                    time.sleep(3.0)
+
             return tx_digest
         else:
             tx_digest = None
