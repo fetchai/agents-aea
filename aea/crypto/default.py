@@ -44,10 +44,6 @@ def _load_pem_private_key_from_path(path):
     return load_pem_private_key(open(path, "rb").read(), None, default_backend())
 
 
-# class InvalidSignature(Exception):
-#     """Exception to be thrown when cryptographic signatures don't match!."""
-
-
 class DefaultCrypto(Crypto):
     """Class wrapping the public and private key cryptography."""
 
