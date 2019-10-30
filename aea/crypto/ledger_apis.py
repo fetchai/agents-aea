@@ -114,14 +114,16 @@ class LedgerApis(object):
                 logger.warning("An error occurred while attempting the transfer.")
                 tx_digest = None
         elif identifier == ETHEREUM:
+            print(api)
             try:
+                nonce = api.eth.getTransactionCount(crypto_object.address)
                 transaction = {
-                    'nonce': 10,
+                    'nonce': nonce + 50,
                     'chainId': 3,
                     'to': api.toChecksumAddress(destination_address),
                     'value': amount,
                     'gas': tx_fee + 200000,
-                    'gasPrice': 5
+                    'gasPrice': api.toWei('40', 'gwei')
                 }
                 signature = api.eth.account.sign_transaction(transaction_dict=transaction,
                                                              private_key=crypto_object.entity.key)
