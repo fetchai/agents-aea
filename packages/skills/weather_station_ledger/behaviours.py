@@ -54,6 +54,8 @@ class ServiceRegistrationBehaviour(Behaviour):
         """
         balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
         logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, balance))
+        balance = self.context.ledger_apis.token_balance('ethereum', cast(str, self.context.agent_addresses.get('ethereum')))
+        logger.info("[{}]: starting balance on ethereum ledger={}.".format(self.context.agent_name, balance))
         if not self._registered:
             strategy = cast(Strategy, self.context.strategy)
             desc = strategy.get_service_description()
