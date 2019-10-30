@@ -82,3 +82,13 @@ Release History
 
 - Compatibility fixes for Ubuntu and Windows platforms
 - Multiple additional minor fixes and changes
+
+0.1.11 (2019-10-30)
+-------------------
+
+- Adds python3.8 test coverage
+- Adds almost complete test coverage on aea package
+- Adds filter concept for message routing
+- Adds ledger integrations for fetch.ai and ethereum
+- Adds carpark examples and ledger examples
+- Multiple additional minor fixes and changes
