@@ -131,7 +131,8 @@ class LedgerApis(object):
         elif identifier == ETHEREUM:
 
             nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
-            chain_id = self.configs.get(identifier)[1]  # TODO : Add the chain_id in the schema.
+            # TODO : handle misconfiguration
+            chain_id = self.configs.get(identifier)[1]  # type: ignore
             transaction = {
                 'nonce': nonce,
                 'chainId': chain_id,
