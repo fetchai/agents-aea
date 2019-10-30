@@ -38,6 +38,7 @@ def test_initialization():
     account = EthereumCrypto()
     assert account.address is not None, "After creation the display address must not be None"
     assert account.public_key is not None, "After creation the public key must no be None"
+    assert account.entity is not None, "After creation the entity must no be None"
 
 
 def test_sign_transaction():

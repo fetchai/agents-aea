@@ -36,6 +36,12 @@ def test_initialisation():
     assert FetchAICrypto("./"), "Couldn't create a new entity for the given path!"
 
 
+def test_get_address():
+    """Test the get address."""
+    fet_crypto = FetchAICrypto()
+    assert fet_crypto.get_address_from_public_key(fet_crypto.public_key) is not None, "Get address must work"
+
+
 def test_sign_message():
     """Test the signing process."""
     fet_crypto = FetchAICrypto()

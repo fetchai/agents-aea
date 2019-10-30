@@ -24,6 +24,7 @@ import logging
 from typing import Optional, BinaryIO
 
 import base58
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, utils
@@ -43,8 +44,8 @@ def _load_pem_private_key_from_path(path):
     return load_pem_private_key(open(path, "rb").read(), None, default_backend())
 
 
-class DefaultCryptoError(Exception):
-    """Exception to be thrown when cryptographic signatures don't match!."""
+# class InvalidSignature(Exception):
+#     """Exception to be thrown when cryptographic signatures don't match!."""
 
 
 class DefaultCrypto(Crypto):
@@ -67,7 +68,7 @@ class DefaultCrypto(Crypto):
     @property
     def entity(self) -> None:
         """Get the entity."""
-        return None
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def public_key(self) -> str:
@@ -115,7 +116,7 @@ class DefaultCrypto(Crypto):
         """
         # todo: this requires changing the constructor. So we can feed directly the private key
         #       instead of the path to it.
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def dump(self, fp: BinaryIO) -> None:
         """
@@ -148,8 +149,10 @@ class DefaultCrypto(Crypto):
         private_key = load_pem_private_key(open(path, "rb").read(), None, default_backend())
         try:
             assert private_key.curve.name == self._chosen_ec.name
-        except AssertionError:
-            raise ValueError("Expected elliptic curve: {} actual: {}".format(private_key.curve.name, self._chosen_ec.name))
+        except ValueError as e:  # pragma: no cover
+            raise e  # pragma: no cover
+        except AssertionError:  # pragma: no cover
+            raise ValueError("Expected elliptic curve: {} actual: {}".format(private_key.curve.name, self._chosen_ec.name))  # pragma: no cover
         return private_key
 
     def _compute_pbk(self) -> object:
@@ -271,7 +274,7 @@ class DefaultCrypto(Crypto):
         try:
             signer_pbk_obj.verify(signature, digest, ec.ECDSA(utils.Prehashed(self._chosen_hash)))  # type: ignore
             return True
-        except DefaultCryptoError as e:
+        except InvalidSignature as e:
             logger.exception(str(e))
             return False
 
@@ -313,4 +316,4 @@ class DefaultCrypto(Crypto):
         :param public_key: the public key
         :return: str
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
