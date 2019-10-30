@@ -171,8 +171,9 @@ class LedgerApis(object):
         elif identifier == ETHEREUM:
             try:
                 logger.info("Checking the transaction ...")
-                tx_status = api.eth.getTransaction(tx_digest)
-                if tx_status in SUCCESSFUL_TERMINAL_STATES:
+                tx_status = api.eth.getTransactionReceipt(tx_digest)
+                logger.info(tx_status)
+                if tx_status is not None:
                     is_successful = True
                 logger.info("Transaction validated ...")
             except Exception:
