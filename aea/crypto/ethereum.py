@@ -20,10 +20,10 @@
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
 
-from eth_account.messages import encode_defunct  # type: ignore
-from web3 import Web3       # type: ignore
-from eth_account import Account     # type: ignore
-from eth_keys import keys       # type: ignore
+from eth_account.messages import encode_defunct
+from web3 import Web3
+from eth_account import Account
+from eth_keys import keys
 import logging
 from pathlib import Path
 from typing import Optional, BinaryIO

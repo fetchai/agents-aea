@@ -210,7 +210,6 @@ class FIPAHandler(Handler):
         address = cast(str, msg.get("address"))
         proposal = cast(Description, dialogue.proposal)
         ledger_id = cast(str, proposal.values.get("ledger_id"))
-        print(ledger_id)
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                     skill_id="weather_client_ledger",
                                     transaction_id="transaction0",

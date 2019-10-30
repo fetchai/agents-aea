@@ -23,18 +23,16 @@
 import logging
 from typing import Any, Dict, Optional, Tuple, cast
 
-from fetchai.ledger.api import LedgerApi as FetchLedgerApi  # type: ignore
+from fetchai.ledger.api import LedgerApi as FetchLedgerApi
 # from fetchai.ledger.api.tx import TxStatus
-from fetchai.ledger.crypto import Identity, Address  # type: ignore
-from web3 import Web3, HTTPProvider  # type: ignore
+from fetchai.ledger.crypto import Identity, Address
+from web3 import Web3, HTTPProvider
 
 from aea.crypto.base import Crypto
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 
 DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
-ETHEREUM_TEST_NETWORK = ("https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",)
-
 SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
 
 logger = logging.getLogger(__name__)

@@ -51,7 +51,7 @@ class Strategy(SharedClass):
         :return: None
         """
         self.price_per_row = kwargs.pop('price_per_row') if 'price_per_row' in kwargs.keys() else DEFAULT_PRICE_PER_ROW
-        self.currency = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
+        self.currency_pbk = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
         self.ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
         super().__init__(**kwargs)
         self.db = DBCommunication()
@@ -88,7 +88,7 @@ class Strategy(SharedClass):
         total_price = self.price_per_row * rows
         proposal = Description({"rows": rows,
                                 "price": total_price,
-                                "currency_pbk": self.currency[1],
+                                "currency_pbk": self.currency_pbk,
                                 "ledger_id": self.ledger_id})
         return (proposal, weather_data)
 
