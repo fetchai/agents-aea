@@ -25,6 +25,7 @@ import time
 from typing import Any, Dict, Optional, Tuple, cast
 
 import web3
+import web3.exceptions
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi
 from fetchai.ledger.crypto import Identity, Address
 from web3 import Web3, HTTPProvider
@@ -130,7 +131,7 @@ class LedgerApis(object):
         elif identifier == ETHEREUM:
 
             nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
-            chain_id = self.configs.get(identifier, Tuple[str, int])[1],  # TODO : Add the chain_id in the schema.
+            chain_id = self.configs.get(identifier)[1]  # TODO : Add the chain_id in the schema.
             transaction = {
                 'nonce': nonce,
                 'chainId': chain_id,

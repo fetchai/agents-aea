@@ -219,7 +219,7 @@ class FIPAHandler(Handler):
                                     is_sender_buyer=True,
                                     currency_pbk=cast(str, proposal.values.get("currency_pbk")),
                                     amount=proposal.values['price'],
-                                    sender_tx_fee=0,
+                                    sender_tx_fee=2000000,
                                     counterparty_tx_fee=0,
                                     quantities_by_good_pbk={},
                                     dialogue_label=dialogue.dialogue_label.json,
