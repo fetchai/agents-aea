@@ -21,18 +21,18 @@
 """Module wrapping all the public and private keys cryptography."""
 from typing import Dict, cast
 
-from aea.crypto.base import Crypto, DefaultCrypto
-from aea.crypto.ethereum_base import EthCrypto
-from aea.crypto.fetchai_base import FetchCrypto
+from aea.crypto.base import Crypto
+from aea.crypto.default import DefaultCrypto, DEFAULT
+from aea.crypto.ethereum import EthereumCrypto, ETHEREUM
+from aea.crypto.fetchai import FetchAICrypto, FETCHAI
 
-FETCHAI = "fetchai"
-DEFAULT = "default"
-ETHEREUM = "ethereum"
-SUPPORTED_CRYPTOS = [DEFAULT, FETCHAI, ETHEREUM]
+SUPPORTED_CRYPTOS = [DEFAULT, ETHEREUM, FETCHAI]
+SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
+CURRENCY_TO_ID_MAP = {'FET': FETCHAI, 'ETH': ETHEREUM}
 
 
 class Wallet(object):
-    """Store all the public keys we initialise."""
+    """Store all the cryptos we initialise."""
 
     def __init__(self, private_key_paths: Dict[str, str]):
         """
@@ -43,15 +43,16 @@ class Wallet(object):
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
         addresses = {}  # type: Dict[str, str]
+
         for identifier, path in private_key_paths.items():
             if identifier == DEFAULT:
                 crypto_objects[identifier] = DefaultCrypto(path)
             elif identifier == FETCHAI:
-                crypto_objects[identifier] = FetchCrypto(path)
+                crypto_objects[identifier] = FetchAICrypto(path)
             elif identifier == ETHEREUM:
-                crypto_objects[identifier] = EthCrypto(path)
+                crypto_objects[identifier] = EthereumCrypto(path)
             else:
-                ValueError("Unsupported identifier in private key paths.")
+                raise ValueError("Unsupported identifier in private key paths.")
             crypto = cast(Crypto, crypto_objects.get(identifier))
             public_keys[identifier] = cast(str, crypto.public_key)
             addresses[identifier] = cast(str, crypto.address)

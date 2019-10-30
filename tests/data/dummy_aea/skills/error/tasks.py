@@ -31,7 +31,7 @@ class ErrorTask(Task):
 
         :return: None
         """
-        pass
+        pass        # pragma: no cover
 
     def execute(self) -> None:
         """
@@ -40,7 +40,7 @@ class ErrorTask(Task):
         :param envelope: the envelope
         :return: None
         """
-        pass
+        pass        # pragma: no cover
 
     def teardown(self) -> None:
         """
@@ -48,4 +48,4 @@ class ErrorTask(Task):
 
         :return: None
         """
-        pass
+        pass        # pragma: no cover

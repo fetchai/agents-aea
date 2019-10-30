@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping the helpers of public and private key cryptography."""
+import sys
 from typing import cast
 
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
@@ -28,10 +29,12 @@ from pathlib import Path
 from fetchai.ledger.crypto import Entity  # type: ignore
 from eth_account import Account  # type: ignore
 
-from aea.crypto.base import DefaultCrypto
-from aea.crypto.wallet import SUPPORTED_CRYPTOS, DEFAULT, FETCHAI, ETHEREUM
+from aea.crypto.default import DefaultCrypto, DEFAULT
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.wallet import SUPPORTED_CRYPTOS, SUPPORTED_LEDGER_APIS
 from aea.configurations.loader import ConfigLoader
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig
 from aea.cli.common import Context
 
 DEFAULT_PRIVATE_KEY_FILE = 'default_private_key.pem'
@@ -67,7 +70,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
             _try_validate_private_key_pem_path(default_private_key_config.path)
         except FileNotFoundError:
             logger.error("File {} for private key {} not found.".format(repr(default_private_key_config.path), default_private_key_config.ledger))
-            exit(-1)
+            sys.exit(1)
 
     fetchai_private_key_config = aea_conf.private_key_paths.read(FETCHAI)
     if fetchai_private_key_config is None:
@@ -84,7 +87,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
             _try_validate_fet_private_key_path(fetchai_private_key_config.path)
         except FileNotFoundError:
             logger.error("File {} for private key {} not found.".format(repr(fetchai_private_key_config.path), fetchai_private_key_config.ledger))
-            exit(-1)
+            sys.exit(1)
 
     ethereum_private_key_config = aea_conf.private_key_paths.read(ETHEREUM)
     if ethereum_private_key_config is None:
@@ -101,13 +104,53 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
             _try_validate_ethereum_private_key_path(ethereum_private_key_config.path)
         except FileNotFoundError:
             logger.error("File {} for private key {} not found.".format(repr(ethereum_private_key_config.path), ethereum_private_key_config.ledger))
-            exit(-1)
+            sys.exit(1)
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
     fp = open(str(path), mode="w", encoding="utf-8")
     agent_loader.dump(aea_conf, fp)
     ctx.agent_config = aea_conf
+
+
+def _verify_ledger_apis_access(ctx: Context) -> None:
+    """
+    Verify access to ledger apis.
+
+    :param ctx: Context
+    """
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    fp = open(str(path), mode="r", encoding="utf-8")
+    aea_conf = agent_loader.load(fp)
+
+    for identifier, value in aea_conf.ledger_apis.read_all():
+        if identifier not in SUPPORTED_LEDGER_APIS:
+            ValueError("Unsupported identifier in ledger apis.")
+
+    fetchai_ledger_api_config = aea_conf.ledger_apis.read(FETCHAI)
+    if fetchai_ledger_api_config is None:
+        logger.debug("No fetchai ledger api config specified.")
+    else:
+        fetchai_ledger_api_config = cast(LedgerAPIConfig, fetchai_ledger_api_config)
+        try:
+            from fetchai.ledger.api import LedgerApi
+            LedgerApi(fetchai_ledger_api_config.addr, fetchai_ledger_api_config.port)
+        except Exception:
+            logger.error("Cannot connect to fetchai ledger with provided config.")
+            sys.exit(1)
+
+    ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
+    if ethereum_ledger_config is None:
+        logger.debug("No ethereum ledger api config specified.")
+    else:
+        ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
+        try:
+            from web3 import Web3, HTTPProvider
+            Web3(HTTPProvider(ethereum_ledger_config.addr))
+        except Exception:
+            logger.error("Cannot connect to ethereum ledger with provided config.")
+            sys.exit(1)
 
 
 def _create_temporary_private_key() -> bytes:
@@ -133,7 +176,7 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
         DefaultCrypto(private_key_pem_path=private_key_pem_path)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_pem_path))
-        exit(-1)
+        sys.exit(1)
 
 
 def _try_validate_fet_private_key_path(private_key_path: str) -> None:
@@ -150,7 +193,7 @@ def _try_validate_fet_private_key_path(private_key_path: str) -> None:
             Entity.from_hex(data)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_path))
-        exit(-1)
+        sys.exit(1)
 
 
 def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
@@ -167,7 +210,7 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
             Account.from_key(data)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_path))
-        exit(-1)
+        sys.exit(1)
 
 
 def _create_temporary_private_key_pem_path() -> str:

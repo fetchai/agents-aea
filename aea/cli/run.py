@@ -34,7 +34,8 @@ from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_l
     AEAConfigException, _load_env_file
 from aea.cli.install import install
 from aea.connections.base import Connection
-from aea.crypto.helpers import _verify_or_create_private_keys
+from aea.crypto.helpers import _verify_or_create_private_keys, _verify_ledger_apis_access
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet, DEFAULT
 from aea.mail.base import MailBox
 
@@ -93,8 +94,14 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     _try_to_load_agent_config(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
+
     _verify_or_create_private_keys(ctx)
-    wallet = Wallet(dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()]))
+    _verify_ledger_apis_access(ctx)
+    private_key_paths = dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()])
+    ledger_api_configs = dict([(identifier, (config.addr, config.port)) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
+
+    wallet = Wallet(private_key_paths)
+    ledger_apis = LedgerApis(ledger_api_configs)
 
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
@@ -102,7 +109,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
         connection = _setup_connection(connection_name, wallet.public_keys[DEFAULT], ctx)
     except AEAConfigException as e:
         logger.error(str(e))
-        exit(-1)
+        sys.exit(1)
 
     if install_deps:
         if Path("requirements.txt").exists():
@@ -111,13 +118,13 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
             click_context.invoke(install)
 
     mailbox = MailBox(connection)
-    agent = AEA(agent_name, mailbox, wallet, directory=str(Path(".")))
+    agent = AEA(agent_name, mailbox, wallet, ledger_apis, directory=str(Path(".")))
     try:
         agent.start()
     except KeyboardInterrupt:
         logger.info("Interrupted.")  # pragma: no cover
     except Exception as e:
         logger.exception(e)
-        exit(-1)
+        sys.exit(1)
     finally:
         agent.stop()

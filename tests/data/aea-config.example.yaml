@@ -18,4 +18,17 @@ protocols:
 - fipa
 skills:
 - echo_skill
-description: "aea-config example agent description [Fill in]"
+description: "An example of agent configuration file for testing purposes."
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+registry_path: ../../packages
+ledger_apis:
+- ledger_api:
+    ledger: fetchai
+    addr: example.fetch-ai.com
+    port: 8080
+- ledger_api:
+    ledger: ethereum
+    addr: example.ethereum.com
+    port: 8080

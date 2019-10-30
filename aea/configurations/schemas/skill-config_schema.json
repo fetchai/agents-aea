@@ -95,6 +95,13 @@
         }
       }
     },
+    "ledgers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
     "dependencies": {
       "type": "array",
       "uniqueItems": true,

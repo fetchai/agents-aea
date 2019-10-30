@@ -21,6 +21,7 @@
 
 import os
 import shutil
+import sys
 from pathlib import Path
 
 import click
@@ -47,7 +48,7 @@ def connection(ctx: Context, connection_name: str) -> None:
     logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
     if connection_name in ctx.agent_config.connections:
         logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
-        exit(-1)
+        sys.exit(1)
 
     try:
 
@@ -69,15 +70,15 @@ def connection(ctx: Context, connection_name: str) -> None:
 
     except FileExistsError:
         logger.error("A connection with this name already exists. Please choose a different name and try again.")
-        exit(-1)
+        sys.exit(1)
     except ValidationError:
         logger.error("Error when validating the skill configuration file.")
         shutil.rmtree(os.path.join("connections", connection_name), ignore_errors=True)
-        exit(-1)
+        sys.exit(1)
     except Exception as e:
         logger.exception(e)
         shutil.rmtree(os.path.join("connections", connection_name), ignore_errors=True)
-        exit(-1)
+        sys.exit(1)
 
 
 @scaffold.command()
@@ -89,7 +90,7 @@ def protocol(ctx: Context, protocol_name: str):
     logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
     if protocol_name in ctx.agent_config.protocols:
         logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
-        exit(-1)
+        sys.exit(1)
 
     try:
         # create the 'protocols' folder if it doesn't exist:
@@ -111,15 +112,15 @@ def protocol(ctx: Context, protocol_name: str):
 
     except FileExistsError:
         logger.error("A protocol with this name already exists. Please choose a different name and try again.")
-        exit(-1)
+        sys.exit(1)
     except ValidationError:
         logger.error("Error when validating the skill configuration file.")
         shutil.rmtree(os.path.join("protocols", protocol_name), ignore_errors=True)
-        exit(-1)
+        sys.exit(1)
     except Exception as e:
         logger.exception(e)
         shutil.rmtree(os.path.join("protocols", protocol_name), ignore_errors=True)
-        exit(-1)
+        sys.exit(1)
 
 
 @scaffold.command()
@@ -131,7 +132,7 @@ def skill(ctx: Context, skill_name: str):
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
     if skill_name in ctx.agent_config.skills:
         logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
-        exit(-1)
+        sys.exit(1)
 
     try:
         # create the 'skills' folder if it doesn't exist:
@@ -153,12 +154,12 @@ def skill(ctx: Context, skill_name: str):
 
     except FileExistsError:
         logger.error("A skill with this name already exists. Please choose a different name and try again.")
-        exit(-1)
+        sys.exit(1)
     except ValidationError:
         logger.error("Error when validating the skill configuration file.")
         shutil.rmtree(os.path.join("skills", skill_name), ignore_errors=True)
-        exit(-1)
+        sys.exit(1)
     except Exception as e:
         logger.exception(e)
         shutil.rmtree(os.path.join("skills", skill_name), ignore_errors=True)
-        exit(-1)
+        sys.exit(1)

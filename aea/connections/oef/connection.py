@@ -246,7 +246,8 @@ class OEFChannel(OEFAgent, Channel):
         :param oef_port: the OEF port.
         :param in_queue: the in queue.
         """
-        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core)
+        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core,
+                         logger=lambda *x: None, logger_debug=lambda *x: None)
         self.in_queue = in_queue
         self.mail_stats = MailStats()
 
@@ -452,8 +453,12 @@ class OEFChannel(OEFAgent, Channel):
             self.send_accept(id, dialogue_id, destination, target)
         elif performative == FIPAMessage.Performative.DECLINE:
             self.send_decline(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS or \
+                performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS or \
+                performative == FIPAMessage.Performative.INFORM:
+            self.send_default_message(envelope)
         else:
-            raise ValueError("OEF FIPA message not recognized.")
+            raise ValueError("OEF FIPA message not recognized.")  # pragma: no cover
 
     def send_oef_message(self, envelope: Envelope) -> None:
         """

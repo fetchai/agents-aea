@@ -24,10 +24,11 @@ from typing import Optional, cast
 
 from aea.agent import Agent
 from aea.context.base import AgentContext
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.mail.base import Envelope, MailBox
-from aea.registries.base import Resources
+from aea.registries.base import Filter, Resources
 from aea.skills.error.handlers import ErrorHandler
 
 
@@ -40,6 +41,7 @@ class AEA(Agent):
     def __init__(self, name: str,
                  mailbox: MailBox,
                  wallet: Wallet,
+                 ledger_apis: LedgerApis,
                  timeout: float = 0.0,
                  debug: bool = False,
                  max_reactions: int = 20,
@@ -50,6 +52,7 @@ class AEA(Agent):
         :param name: the name of the agent
         :param mailbox: the mailbox of the agent.
         :param wallet: the wallet of the agent.
+        :param ledger_apis: the ledger apis of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
@@ -64,16 +67,22 @@ class AEA(Agent):
         self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
-        self._decision_maker = DecisionMaker(self.max_reactions, self.outbox)
+        self._decision_maker = DecisionMaker(self.name,
+                                             self.max_reactions,
+                                             self.outbox,
+                                             self.wallet,
+                                             ledger_apis)
         self._context = AgentContext(self.name,
                                      self.wallet.public_keys,
                                      self.wallet.addresses,
+                                     ledger_apis,
                                      self.outbox,
-                                     self.decision_maker.message_queue,
+                                     self.decision_maker.message_in_queue,
                                      self.decision_maker.ownership_state,
                                      self.decision_maker.preferences,
                                      self.decision_maker.is_ready_to_pursuit_goals)
         self._resources = None  # type: Optional[Resources]
+        self._filter = None  # type: Optional[Filter]
 
     @property
     def decision_maker(self) -> DecisionMaker:
@@ -91,6 +100,12 @@ class AEA(Agent):
         assert self._resources is not None, "No resources initialized. Call setup."
         return self._resources
 
+    @property
+    def filter(self) -> Filter:
+        """Get filter."""
+        assert self._filter is not None, "No filter initialized. Call setup."
+        return self._filter
+
     def setup(self) -> None:
         """
         Set up the agent.
@@ -100,6 +115,7 @@ class AEA(Agent):
         self._resources = Resources.from_resource_dir(self._directory, self.context)
         assert self._resources is not None, "No resources initialized. Error in setup."
         self._resources.setup()
+        self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
     def act(self) -> None:
         """
@@ -107,7 +123,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self.resources.behaviour_registry.fetch_all():  # the skill should be able to register things here as active so we hand control fully to the skill and let this just spin through
+        for behaviour in self.filter.get_active_behaviours():
             behaviour.act()
 
     def react(self) -> None:
@@ -121,15 +137,16 @@ class AEA(Agent):
             counter += 1
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
             if envelope is not None:
-                self.handle(envelope)
+                self._handle(envelope)
 
-    def handle(self, envelope: Envelope) -> None:
+    def _handle(self, envelope: Envelope) -> None:
         """
         Handle an envelope.
 
         :param envelope: the envelope to handle.
         :return: None
         """
+        logger.debug("Handling envelope: {}".format(envelope))
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
         error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")
@@ -150,24 +167,25 @@ class AEA(Agent):
             error_handler.send_invalid_message(envelope)    # pragma: no cover
             return                                          # pragma: no cover
 
-        handlers = self.resources.handler_registry.fetch(protocol.id)
+        handlers = self.filter.get_active_handlers(protocol.id)
         if handlers is None:
             if error_handler is not None:
-                error_handler.send_unsupported_skill(envelope, protocol)
+                error_handler.send_unsupported_skill(envelope)
             return
 
-        # TODO: add filter, currently each handler independently acts on the message
         for handler in handlers:
             handler.handle(msg, envelope.sender)
 
     def update(self) -> None:
-        """Update the current state of the agent.
+        """
+        Update the current state of the agent.
 
         :return None
         """
-        for task in self.resources.task_registry.fetch_all():
+        for task in self.filter.get_active_tasks():
             task.execute()
         self.decision_maker.execute()
+        self.filter.handle_internal_messages()
 
     def teardown(self) -> None:
         """

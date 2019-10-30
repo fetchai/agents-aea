@@ -31,11 +31,8 @@ def _get_module(spec):
     """Try to execute a module. Return None if the attempt fail."""
     try:
         module = importlib.util.module_from_spec(spec)
-        if spec:
-            spec.loader.exec_module(module)
-            return module
-        else:
-            return None
+        spec.loader.exec_module(module)
+        return module
     except Exception:
         return None
 

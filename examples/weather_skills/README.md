@@ -1,6 +1,9 @@
-# Weather client
+# Weather station and client example
 
-A guide to create an AEA with the gym_skill.
+A guide to create two AEAs, one a weather station selling weather data, another a 
+purchaser (client) of weather data. The AEAs use the Fetch.ai ledger to settle their 
+trade. This setup assumes the weather client trusts the weather station to send the data
+upon successful payment.
 
 ## Quick start
 
@@ -21,3 +24,62 @@ A guide to create an AEA with the gym_skill.
       cd weather_client 
       aea add skill weather_client
       aea run
+
+- Afterwards, clean up:
+      
+      cd ..
+      aea delete weather_station
+      aea delete weather_client
+
+
+## Using the ledger
+
+To run the same example but with a true ledger transaction,
+follow these steps:
+
+- Launch the OEF Node:
+
+      python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+
+- Create a weather station (ledger version) - the agent that will provide weather measurements:
+
+      aea create weather_station 
+      cd weather_station
+      aea add skill weather_station_ledger
+
+- In another terminal, create the weather client (ledger version) - the agent that will query the weather station
+
+      aea create weather_client 
+      cd weather_client 
+      aea add skill weather_client_ledger
+
+- Generate the private key for the weather client:
+
+      aea generate-key fetchai
+
+- Both in `weather_station/aea-config.yaml` and
+`weather_client/aea-config.yaml`, replace `ledger_apis: []` with:
+```
+ledger_apis:
+- ledger_api:
+    addr: alpha.fetch-ai.com
+    ledger: fetchai
+    port: 80
+- ledger_api:
+    addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    ledger: ethereum
+    port: 3
+```
+
+- Generate some wealth to your weather client FET address (it takes a while):
+```
+cd ..
+python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
+cd weather_client
+```
+
+- Generate some wealth to your weather client ETH address:
+
+Go to Metamask [Faucet](https://faucet.metamask.io) and request some test ETH for the account your AEA is using (you need to first load your AEAs private key into MetaMask).
+
+- Run both agents, as in the previous section.

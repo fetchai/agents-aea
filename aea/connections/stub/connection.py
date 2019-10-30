@@ -164,7 +164,7 @@ class StubConnection(Connection):
             try:
                 self._observer.start()
                 self._fetch_thread.start()
-            except Exception as e:
+            except Exception as e:      # pragma: no cover
                 self._stopped = True
                 raise e
 
@@ -181,7 +181,7 @@ class StubConnection(Connection):
             self._fetch_thread.join()
             try:
                 self._observer.stop()
-            except Exception as e:
+            except Exception as e:      # pragma: no cover
                 self._stopped = False
                 raise e
 
