@@ -80,7 +80,8 @@ class TestUtilityPreferencesBase:
                                         amount=1,
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"FET": 10})
+                                        quantities_by_good_pbk={"FET": 10},
+                                        ledger_id="fetchai")
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message),\
             "We should have the money for the transaction!"
@@ -95,7 +96,8 @@ class TestUtilityPreferencesBase:
                                         amount=1,
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"FET": 10})
+                                        quantities_by_good_pbk={"FET": 10},
+                                        ledger_id="fetchai")
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message), \
             "We should have the money for the transaction!"
@@ -115,7 +117,8 @@ class TestUtilityPreferencesBase:
                                         amount=20,
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"FET": 10})
+                                        quantities_by_good_pbk={"FET": 10},
+                                        ledger_id="fetchai")
         list_of_transactions = [tx_message]
         state = self.ownership_state
         new_state = self.ownership_state.apply(transactions=list_of_transactions)
@@ -137,7 +140,8 @@ class TestUtilityPreferencesBase:
                                         amount=20,
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"FET": 10})
+                                        quantities_by_good_pbk={"FET": 10},
+                                        ledger_id="fetchai")
         cur_holdings = self.ownership_state.currency_holdings['FET']
         self.ownership_state.update(tx_message=tx_message)
         assert self.ownership_state.currency_holdings['FET'] < cur_holdings
@@ -152,7 +156,8 @@ class TestUtilityPreferencesBase:
                                         amount=20,
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"FET": 10})
+                                        quantities_by_good_pbk={"FET": 10},
+                                        ledger_id="fetchai")
         cur_holdings = self.ownership_state.currency_holdings['FET']
         self.ownership_state.update(tx_message=tx_message)
         assert self.ownership_state.currency_holdings['FET'] > cur_holdings
@@ -207,7 +212,8 @@ class TestUtilityPreferencesBase:
                                         amount=20,
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"FET": 10})
+                                        quantities_by_good_pbk={"FET": 10},
+                                        ledger_id="fetchai")
 
         cur_score = self.preferences.get_score(good_holdings=good_holdings, currency_holdings=currency_holdings)
         new_state = self.ownership_state.apply([tx_message])
@@ -267,7 +273,8 @@ class TestDecisionMaker:
                                         amount=2,
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
-                                        quantities_by_good_pbk={"FET": 10})
+                                        quantities_by_good_pbk={"FET": 10},
+                                        ledger_id="fetchai")
 
         self.decision_maker.message_in_queue.put_nowait(tx_message)
         self.decision_maker.execute()

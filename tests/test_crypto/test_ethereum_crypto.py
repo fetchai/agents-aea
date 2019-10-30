@@ -42,8 +42,8 @@ def test_initialization():
     assert account.entity is not None, "After creation the entity must no be None"
 
 
-def test_sign_transaction():
+def test_sign_message():
     """Test the signing function for the eth_crypto."""
     account = EthereumCrypto(PRIVATE_KEY_PATH)
-    sign_bytes = account.sign_transaction('Hello')
+    sign_bytes = account.sign_message('Hello')
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
