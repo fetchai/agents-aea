@@ -36,8 +36,10 @@ def test_creation():
 def test_initialization():
     """Test the initialisation of the variables."""
     account = EthereumCrypto()
+    assert account.entity is not None, "The property must return the account."
     assert account.address is not None, "After creation the display address must not be None"
     assert account.public_key is not None, "After creation the public key must no be None"
+    assert account.entity is not None, "After creation the entity must no be None"
 
 
 def test_sign_transaction():

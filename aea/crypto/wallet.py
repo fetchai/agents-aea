@@ -43,6 +43,7 @@ class Wallet(object):
         crypto_objects = {}  # type: Dict[str, Crypto]
         public_keys = {}  # type: Dict[str, str]
         addresses = {}  # type: Dict[str, str]
+
         for identifier, path in private_key_paths.items():
             if identifier == DEFAULT:
                 crypto_objects[identifier] = DefaultCrypto(path)
@@ -51,7 +52,7 @@ class Wallet(object):
             elif identifier == ETHEREUM:
                 crypto_objects[identifier] = EthereumCrypto(path)
             else:
-                ValueError("Unsupported identifier in private key paths.")
+                raise ValueError("Unsupported identifier in private key paths.")
             crypto = cast(Crypto, crypto_objects.get(identifier))
             public_keys[identifier] = cast(str, crypto.public_key)
             addresses[identifier] = cast(str, crypto.address)
