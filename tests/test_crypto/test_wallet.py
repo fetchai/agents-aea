@@ -18,20 +18,13 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the ethereum module."""
-import os
-import unittest
+"""This module contains the tests of the wallet module."""
+import pytest
 
 from aea.crypto.wallet import Wallet
-from ..conftest import CUR_PATH
 
 
-class WalletTest(unittest.TestCase):
-    """Wallet test class."""
-
-    def test_initialisation_with_wrong_identifier(self):
-        """Test the initialisation of the the fet crypto."""
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        with self.assertRaises(Exception) as context:
-            Wallet({'default': private_key_pem_path, 'not_an_identifier': ''})
-            unittest.TestCase.assertTrue('This is broken' in context.exception)
+def test_wallet_initialisation_error():
+    """Test the value error when we initialise the wallet."""
+    with pytest.raises(ValueError):
+        Wallet({"Test": "test"})
