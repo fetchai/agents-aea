@@ -26,7 +26,6 @@ from typing import Any, Dict, Optional, Tuple, cast
 
 import web3
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi
-# from fetchai.ledger.api.tx import TxStatus
 from fetchai.ledger.crypto import Identity, Address
 from web3 import Web3, HTTPProvider
 
@@ -39,6 +38,9 @@ SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
 
 logger = logging.getLogger(__name__)
 
+GAS_PRICE = '50'
+GAS_ID = 'gwei'
+
 
 class LedgerApis(object):
     """Store all the ledger apis we initialise."""
@@ -50,16 +52,26 @@ class LedgerApis(object):
         :param ledger_api_configs: the ledger api configs
         """
         apis = {}  # type: Dict[str, Any]
+        configs = {}  # type: Dict[str, Tuple[str, int]]
         for identifier, config in ledger_api_configs.items():
             if identifier == FETCHAI:
                 api = FetchLedgerApi(config[0], config[1])
                 apis[identifier] = api
+                configs[identifier] = config
             elif identifier == ETHEREUM:
                 api = Web3(HTTPProvider(config[0]))
                 apis[identifier] = api
+                configs[identifier] = config
             else:
                 raise ValueError("Unsupported identifier in private key paths.")
+
         self._apis = apis
+        self._configs = configs
+
+    @property
+    def configs(self) -> Dict[str, Tuple[str, int]]:
+        """Get the configs."""
+        return self._configs
 
     @property
     def apis(self) -> Dict[str, Any]:
@@ -118,13 +130,14 @@ class LedgerApis(object):
         elif identifier == ETHEREUM:
 
             nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
+            chain_id = self.configs.get(identifier, Tuple[str, int])[1],  # TODO : Add the chain_id in the schema.
             transaction = {
                 'nonce': nonce,
-                'chainId': 3,
+                'chainId': chain_id,
                 'to': destination_address,
                 'value': amount,
-                'gas': tx_fee + 200000,
-                'gasPrice': api.toWei('50', 'gwei')
+                'gas': tx_fee,
+                'gasPrice': api.toWei(GAS_PRICE, GAS_ID)
             }
             signed = api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
             hex_value = api.eth.sendRawTransaction(signed.rawTransaction)
@@ -172,7 +185,6 @@ class LedgerApis(object):
             try:
                 logger.info("Checking the transaction ...")
                 tx_status = api.eth.getTransactionReceipt(tx_digest)
-                logger.info(tx_status)
                 if tx_status is not None:
                     is_successful = True
                 logger.info("Transaction validated ...")
