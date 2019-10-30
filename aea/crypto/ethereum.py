@@ -20,10 +20,10 @@
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
 
-from eth_account.messages import encode_defunct  # type: ignore
-from web3 import Web3       # type: ignore
-from eth_account import Account     # type: ignore
-from eth_keys import keys       # type: ignore
+from eth_account.messages import encode_defunct
+from web3 import Web3
+from eth_account import Account
+from eth_keys import keys
 import logging
 from pathlib import Path
 from typing import Optional, BinaryIO
@@ -78,7 +78,6 @@ class EthereumCrypto(Crypto):
         Load a private key in hex format from a file.
 
         :param file_name: the path to the hex file.
-
         :return: the Entity.
         """
         path = Path(file_name)
@@ -93,7 +92,7 @@ class EthereumCrypto(Crypto):
         except IOError as e:        # pragma: no cover
             logger.exception(str(e))
 
-    def sign_transaction(self, message: str) -> bytes:
+    def sign_message(self, message: str) -> bytes:
         """
         Sing a transaction to send it to the ledger.
 

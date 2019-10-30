@@ -146,8 +146,8 @@ def _verify_ledger_apis_access(ctx: Context) -> None:
     else:
         ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
         try:
-            raise NotImplementedError
-            # TODO connect to ledger
+            from web3 import Web3, HTTPProvider
+            Web3(HTTPProvider(ethereum_ledger_config.addr))
         except Exception:
             logger.error("Cannot connect to ethereum ledger with provided config.")
             sys.exit(1)
