@@ -116,22 +116,21 @@ class LedgerApis(object):
         elif identifier == ETHEREUM:
             try:
                 transaction = {
-                    'nonce': 0x00,
+                    'nonce': 10,
                     'chainId': 3,
                     'to': api.toChecksumAddress(destination_address),
                     'value': amount,
-                    'gas': tx_fee + api.eth.gasPrice,
-                    'gasPrice': api.eth.gasPrice
+                    'gas': tx_fee + 200000,
+                    'gasPrice': 5
                 }
-
                 signature = api.eth.account.sign_transaction(transaction_dict=transaction,
-                                                             private_key=crypto_object.entity.privateKey)
-
+                                                             private_key=crypto_object.entity.key)
                 tx_digest = api.eth.sendRawTransaction(signature.rawTransaction)
-                logger.info("Transaction validated ...")
+                tx_digest = tx_digest.hex()
             except Exception:
                 logger.warning("An error occurred while attempting the transfer.")
                 tx_digest = None
+            return tx_digest
         else:
             tx_digest = None
         return tx_digest
@@ -148,7 +147,6 @@ class LedgerApis(object):
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         is_successful = False
         api = self.apis[identifier]
-
         if identifier == FETCHAI:
             try:
                 logger.info("Checking the transaction ...")
@@ -161,7 +159,14 @@ class LedgerApis(object):
             except Exception:
                 logger.warning("An error occurred while attempting to check the transaction.")
         elif identifier == ETHEREUM:
-            is_successful = True
+            try:
+                logger.info("Checking the transaction ...")
+                tx_status = api.eth.getTransaction(tx_digest)
+                if tx_status in SUCCESSFUL_TERMINAL_STATES:
+                    is_successful = True
+                logger.info("Transaction validated ...")
+            except Exception:
+                logger.warning("An error occured while attempting to check the transaction!")
 
         return is_successful
 

@@ -201,7 +201,8 @@ class FIPAHandler(Handler):
                                                                   sender[-5:]))
         logger.info("[{}]: sending MATCH_ACCEPT_W_ADDRESS to sender={}".format(self.context.agent_name,
                                                                                sender[-5:]))
-        identifier = cast(str, dialogue.proposal.values.get("ledger_id"))
+        proposal = cast(Description, dialogue.proposal)
+        identifier = cast(str, proposal.values.get("ledger_id"))
         match_accept_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_id=dialogue_id,
                                        target=new_target,
@@ -239,10 +240,11 @@ class FIPAHandler(Handler):
                                                                                              tx_digest))
             proposal = cast(Description, dialogue.proposal)
             total_price = cast(int, proposal.values.get("price"))
-            is_settled = self.context.ledger_apis.is_tx_settled('fetchai', tx_digest, total_price)
+            ledger_id = cast(str, proposal.values.get("ledger_id"))
+            is_settled = self.context.ledger_apis.is_tx_settled(ledger_id, tx_digest, total_price)
             if is_settled:
-                token_balance = self.context.ledger_apis.token_balance('fetchai',
-                                                                       cast(str, self.context.agent_addresses.get('fetchai')))
+                token_balance = self.context.ledger_apis.token_balance(ledger_id,
+                                                                       cast(str, self.context.agent_addresses.get(ledger_id)))
                 logger.info("[{}]: transaction={} settled, new balance={}. Sending data to sender={}".format(self.context.agent_name,
                                                                                                              tx_digest,
                                                                                                              token_balance,
