@@ -117,7 +117,7 @@ class EthereumCrypto(Crypto):
         :param public_key: the public key
         :return: str
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def load(cls, fp: BinaryIO):
@@ -127,7 +127,7 @@ class EthereumCrypto(Crypto):
         :param fp: the input file pointer. Must be set in binary mode (mode='rb')
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError   # pragma: no cover
 
     def dump(self, fp: BinaryIO) -> None:
         """

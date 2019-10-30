@@ -125,7 +125,7 @@ class FetchAICrypto(Crypto):
         :param fp: the input file pointer. Must be set in binary mode (mode='rb')
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def dump(self, fp: BinaryIO) -> None:
         """
