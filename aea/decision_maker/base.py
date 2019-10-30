@@ -26,7 +26,7 @@ from queue import Queue
 from typing import Dict, List, Optional, cast
 
 from aea.crypto.base import Crypto
-from aea.crypto.wallet import Wallet, CURRENCY_TO_ID_MAP
+from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
@@ -326,11 +326,7 @@ class DecisionMaker:
         :return: None
         """
         # get variables
-        if tx_message.get("ledger_id") is not None:
-            crypto_identifier = tx_message.get("ledger_id")
-        else:
-            crypto_identifier = CURRENCY_TO_ID_MAP.get(cast(str, tx_message.get("currency_pbk")))
-
+        crypto_identifier = tx_message.get("ledger_id")
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
         amount = cast(int, tx_message.get("amount"))
         counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
