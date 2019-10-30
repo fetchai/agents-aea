@@ -22,19 +22,13 @@ import datetime
 import logging
 from typing import cast, TYPE_CHECKING
 
-from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.helpers.dialogue.base import DialogueLabel
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from aea.skills.base import Behaviour
 
 if TYPE_CHECKING:
-    from packages.skills.carpark_client.dialogues import Dialogues
     from packages.skills.carpark_client.strategy import Strategy
 else:
-    from carpark_client_skill.dialogues import Dialogues
     from carpark_client_skill.strategy import Strategy
 
 logger = logging.getLogger("aea.carpark_client_skill")
@@ -84,59 +78,3 @@ class MySearchBehaviour(Behaviour):
         """
         balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
         logger.info("[{}]: ending balance on fetchai ledger={}.".format(self.context.agent_name, balance))
-
-
-class MyTransactionBehaviour(Behaviour):
-    """Implement the transaction behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialise the class."""
-        super().__init__(**kwargs)
-        self._received_tx_message = False
-
-    def setup(self) -> None:
-        """Implement the setup for the behaviour."""
-        pass
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        if not self._received_tx_message and not self.context.message_in_queue.empty():
-            tx_msg_response = self.context.message_in_queue.get_nowait()
-            if tx_msg_response is not None and \
-                    TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
-                logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
-                json_data = {'transaction_digest': tx_msg_response.get("transaction_digest")}
-                dialogue_label = DialogueLabel.from_json(tx_msg_response.get("dialogue_label"))
-                dialogues = cast(Dialogues, self.context.dialogues)
-                dialogue = dialogues.dialogues[dialogue_label]
-                fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
-                new_message_id = cast(int, fipa_msg.get("message_id")) + 1
-                new_target_id = cast(int, fipa_msg.get("target")) + 1
-                dialogue_id = cast(int, fipa_msg.get("dialogue_id"))
-                counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_pbk
-                inform_msg = FIPAMessage(message_id=new_message_id,
-                                         dialogue_id=dialogue_id,
-                                         target=new_target_id,
-                                         performative=FIPAMessage.Performative.INFORM,
-                                         json_data=json_data)
-                dialogue.outgoing_extend(inform_msg)
-                self.context.outbox.put_message(to=counterparty_pbk,
-                                                sender=self.context.agent_public_key,
-                                                protocol_id=FIPAMessage.protocol_id,
-                                                message=FIPASerializer().encode(inform_msg))
-                logger.info("[{}]: informing counterparty={} of transaction digest.".format(self.context.agent_name, counterparty_pbk[-5:]))
-                self._received_tx_message = True
-            else:
-                logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        pass
