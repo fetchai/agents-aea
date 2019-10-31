@@ -1,4 +1,19 @@
-The AEA framework provides the infrastructure for creating autonomous economic agents (AEA). 
+Do you want to create omnipresent, self-learning, and autonomous agents whose sole existence is to enrich your life? 
+
+Universal and ubiquitous AEA framework agents work constantly for your benefit without you having to do anything more than write them and start them up.
+
+They are self learning and self managing with the single goal of ensuring economic gain for their owners.
+
+Not just agency, AEA framework agents can represent a wide range of application areas.
+
+Bridging Web 2.0 to Web 3.0, the AEA is the future, now.
+
+
+
+
+## More specifically
+
+The AEA framework provides the tools for creating autonomous economic agents (AEA). 
 
 It is a Python-based development suite which equips developers with an efficient and easy to understand set of tools for building autonomous economic agents. 
 
@@ -6,43 +21,16 @@ The framework is super modular, easily extensible, and highly composable.
 
 The AEA framework attempts to make agent development as straightforward as web development using popular web frameworks.
 
-
-## AEA definition
-
-An autonomous economic agent (AEA) is an intelligent agent whose goal is generating economic value for its owner.
-
 The AEA super power is their ability to autonomously acquire new skills.
 
-AEAs achieve their goals with the help of the Fetch.ai OEF and the Fetch.ai Ledger. Third party systems, such as Ethereum, may also allow AEA integration. As such, AEAs bridge web 2 and web 3.
+AEAs achieve their goals with the help of the Fetch.ai OEF and the Fetch.ai Ledger. Third party systems, such as Ethereum, may also allow AEA integration, the bridge to Web 3.0.
 
 
-## Our vision
-
-The AEA framework has two commercial roles.
 
 
-### Open source technology
-
-We are creating infrastructure for developers to build their own agent-based solutions. 
-
-AEA users are, among others:
-
-* Data scientists
-* Economists
-* Researchers (Artificial Intelligence, Machine Learning, Multi-Agent Systems)
-* Engineers
-* Machine learning experts
-* Independent developers
-* Students/Academics
-* Crypto passionates
-* Web developers
 
 
-### Platform for start ups
 
-By operating as a platform for start ups, we envisage the AEA framework to be in a continuous growth pattern.
-
-With start up grants we will kick start solutions while testing product-problem fit and identifying our user base.
 
 
 

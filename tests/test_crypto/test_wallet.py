@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 
+# -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -8,7 +8,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,13 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Specifies the version of the TAC package."""
+"""This module contains the tests of the wallet module."""
+import pytest
 
-__title__ = 'aea'
-__description__ = 'Autonomous Economic Agent framework'
-__url__ = 'https://github.com/fetchai/agents-aea.git'
-__version__ = '0.1.11'
-__author__ = 'Fetch.AI Limited'
-__license__ = 'Apache 2.0'
-__copyright__ = '2019 Fetch.AI Limited'
+from aea.crypto.wallet import Wallet
+
+
+def test_wallet_initialisation_error():
+    """Test the value error when we initialise the wallet."""
+    with pytest.raises(ValueError):
+        Wallet({"Test": "test"})

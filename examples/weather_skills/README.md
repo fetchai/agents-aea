@@ -53,20 +53,23 @@ follow these steps:
       cd weather_client 
       aea add skill weather_client_ledger
 
+- Generate the private key for the weather client:
+
+      aea generate-key fetchai
+
 - Both in `weather_station/aea-config.yaml` and
 `weather_client/aea-config.yaml`, replace `ledger_apis: []` with:
 ```
 ledger_apis:
 - ledger_api:
-    ledger: fetchai
     addr: alpha.fetch-ai.com
+    ledger: fetchai
     port: 80
+- ledger_api:
+    addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    ledger: ethereum
+    port: 3
 ```
-- Generate the private key for the weather client:
-
-      aea run
-
-Stop the agent again with `CTRL + C`. You should see that the agent has no balance on Fetch.ai.
 
 - Generate some wealth to your weather client FET address (it takes a while):
 ```
@@ -74,5 +77,9 @@ cd ..
 python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
 cd weather_client
 ```
+
+- Generate some wealth to your weather client ETH address:
+
+Go to Metamask [Faucet](https://faucet.metamask.io) and request some test ETH for the account your AEA is using (you need to first load your AEAs private key into MetaMask).
 
 - Run both agents, as in the previous section.

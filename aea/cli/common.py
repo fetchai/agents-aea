@@ -105,10 +105,10 @@ def _try_to_load_agent_config(ctx: Context):
         logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
-        exit(-1)
+        sys.exit(1)
     except jsonschema.exceptions.ValidationError:
         logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
-        exit(-1)
+        sys.exit(1)
 
 
 def _try_to_load_protocols(ctx: Context):
@@ -118,7 +118,7 @@ def _try_to_load_protocols(ctx: Context):
             ctx.protocol_loader.load(open(os.path.join("protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
         except FileNotFoundError:
             logger.error("Protocol configuration file for protocol {} not found.".format(protocol_name))
-            exit(-1)
+            sys.exit(1)
 
         try:
             protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join("protocols", protocol_name, "__init__.py"))
@@ -127,7 +127,7 @@ def _try_to_load_protocols(ctx: Context):
             sys.modules[protocol_spec.name + "_protocol"] = protocol_module
         except Exception:
             logger.error("A problem occurred while processing protocol {}.".format(protocol_name))
-            exit(-1)
+            sys.exit(1)
 
 
 def _load_env_file(env_file: str):

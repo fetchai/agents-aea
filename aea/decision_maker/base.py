@@ -26,7 +26,7 @@ from queue import Queue
 from typing import Dict, List, Optional, cast
 
 from aea.crypto.base import Crypto
-from aea.crypto.wallet import Wallet, CURRENCY_TO_ID_MAP
+from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
@@ -41,6 +41,7 @@ UtilityParams = Dict[str, float]   # a map from identifier to quantity
 ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
 QUANTITY_SHIFT = 100
+INTERNAL_PROTOCOL_ID = 'internal'
 
 logger = logging.getLogger(__name__)
 
@@ -299,12 +300,13 @@ class DecisionMaker:
 
         :return: None
         """
-        counter = 0
-        while not self.message_in_queue.empty() and counter < self._max_reactions:
-            counter += 1
+        while not self.message_in_queue.empty():
             message = self.message_in_queue.get_nowait()  # type: Optional[Message]
             if message is not None:
-                self.handle(message)
+                if message.protocol_id == INTERNAL_PROTOCOL_ID:
+                    self.handle(message)
+                else:
+                    logger.warning("Message received by the decision maker is not of protocol_id=internal.")
 
     def handle(self, message: Message) -> None:
         """
@@ -326,7 +328,7 @@ class DecisionMaker:
         :return: None
         """
         # get variables
-        crypto_identifier = CURRENCY_TO_ID_MAP.get(cast(str, tx_message.get("currency_pbk")))
+        crypto_identifier = tx_message.get("ledger_id")
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
         amount = cast(int, tx_message.get("amount"))
         counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
@@ -376,7 +378,7 @@ class DecisionMaker:
         :param tx_fee: the tx fee
         :return: the transaction digest
         """
-        tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object.entity, counterparty_address, amount, tx_fee)
+        tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object, counterparty_address, amount, tx_fee)
         return tx_digest
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:

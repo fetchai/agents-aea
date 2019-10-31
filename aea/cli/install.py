@@ -51,4 +51,4 @@ def install(ctx: Context, requirement: Optional[str]):
             assert subp.returncode == 0
         except Exception:
             logger.error("An error occurred while installing {}. Stopping...".format(d))
-            exit(-1)
+            sys.exit(1)

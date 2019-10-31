@@ -49,7 +49,6 @@ class Strategy(SharedClass):
         super().__init__(**kwargs)
         self.is_searching = True
         self.last_search_time = datetime.datetime.now() - datetime.timedelta(seconds=self._search_interval)
-        print ("self._max_price  = {}".format(self._max_price ))
 
     def get_service_query(self) -> Query:
         """
@@ -89,6 +88,5 @@ class Strategy(SharedClass):
         """
         result = proposal.values["price"] < self._max_price and \
             proposal.values["last_detection_time"] > int(time.time()) - self._max_detection_age
-        print("is_acceptable_proposal price = {} - self._max_price = {}".format(proposal.values["price"], self._max_price))
 
         return result

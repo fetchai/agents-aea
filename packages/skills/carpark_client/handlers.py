@@ -20,9 +20,10 @@
 """This package contains a scaffold of a handler."""
 import logging
 import pprint
-from typing import Optional, cast, List, TYPE_CHECKING
+from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -220,7 +221,8 @@ class FIPAHandler(Handler):
                                     sender_tx_fee=0,
                                     counterparty_tx_fee=0,
                                     quantities_by_good_pbk={},
-                                    dialogue_label=dialogue.dialogue_label.json)
+                                    dialogue_label=dialogue.dialogue_label.json,
+                                    ledger_id='fetchai')
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
 
@@ -248,7 +250,7 @@ class FIPAHandler(Handler):
 
 
 class OEFHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class handles search related messages from the OEF."""
 
     SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -314,3 +316,59 @@ class OEFHandler(Handler):
         else:
             strategy.unpause_search()
             logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))
+
+
+class MyTransactionHandler(Handler):
+    """Implement the transaction handler."""
+
+    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """Implement the setup for the handler."""
+        pass
+
+    def handle(self, message: Message, sender: str) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :param sender: the sender
+        :return: None
+        """
+        tx_msg_response = cast(TransactionMessage, message)
+        if tx_msg_response is not None and \
+                TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
+            logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
+            strategy = cast(Strategy, self.context.strategy)
+            strategy.unpause_search()
+            json_data = {'transaction_digest': tx_msg_response.get("transaction_digest")}
+            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], tx_msg_response.get("dialogue_label")))
+            dialogues = cast(Dialogues, self.context.dialogues)
+            dialogue = dialogues.dialogues[dialogue_label]
+            fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
+            new_message_id = cast(int, fipa_msg.get("message_id")) + 1
+            new_target_id = cast(int, fipa_msg.get("target")) + 1
+            dialogue_id = cast(int, fipa_msg.get("dialogue_id"))
+            counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_pbk
+            inform_msg = FIPAMessage(message_id=new_message_id,
+                                     dialogue_id=dialogue_id,
+                                     target=new_target_id,
+                                     performative=FIPAMessage.Performative.INFORM,
+                                     json_data=json_data)
+            dialogue.outgoing_extend(inform_msg)
+            self.context.outbox.put_message(to=counterparty_pbk,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=FIPAMessage.protocol_id,
+                                            message=FIPASerializer().encode(inform_msg))
+            logger.info("[{}]: informing counterparty={} of transaction digest.".format(self.context.agent_name, counterparty_pbk[-5:]))
+            self._received_tx_message = True
+        else:
+            logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass

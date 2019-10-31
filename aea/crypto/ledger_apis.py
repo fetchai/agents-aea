@@ -21,18 +21,26 @@
 """Module wrapping all the public and private keys cryptography."""
 
 import logging
+import time
 from typing import Any, Dict, Optional, Tuple, cast
 
-from fetchai.ledger.api import LedgerApi as FetchLedgerApi  # type: ignore
-# from fetchai.ledger.api.tx import TxStatus
-from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
+import web3
+import web3.exceptions
+from fetchai.ledger.api import LedgerApi as FetchLedgerApi
+from fetchai.ledger.crypto import Identity, Address
+from web3 import Web3, HTTPProvider
 
+from aea.crypto.base import Crypto
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 
 DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
+SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
 
 logger = logging.getLogger(__name__)
+
+GAS_PRICE = '50'
+GAS_ID = 'gwei'
 
 
 class LedgerApis(object):
@@ -45,15 +53,26 @@ class LedgerApis(object):
         :param ledger_api_configs: the ledger api configs
         """
         apis = {}  # type: Dict[str, Any]
+        configs = {}  # type: Dict[str, Tuple[str, int]]
         for identifier, config in ledger_api_configs.items():
             if identifier == FETCHAI:
                 api = FetchLedgerApi(config[0], config[1])
                 apis[identifier] = api
+                configs[identifier] = config
             elif identifier == ETHEREUM:
-                raise NotImplementedError
+                api = Web3(HTTPProvider(config[0]))
+                apis[identifier] = api
+                configs[identifier] = config
             else:
                 raise ValueError("Unsupported identifier in private key paths.")
+
         self._apis = apis
+        self._configs = configs
+
+    @property
+    def configs(self) -> Dict[str, Tuple[str, int]]:
+        """Get the configs."""
+        return self._configs
 
     @property
     def apis(self) -> Dict[str, Any]:
@@ -69,18 +88,29 @@ class LedgerApis(object):
         :return: the token balance
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        try:
-            api = self.apis[identifier]
-            balance = api.tokens.balance(address)
-        except Exception:
-            logger.warning("An error occurred while attempting to get the current balance.")
+        api = self.apis[identifier]
+        if identifier == FETCHAI:
+            try:
+                balance = api.tokens.balance(address)
+            except Exception:
+                logger.warning("An error occurred while attempting to get the current balance.")
+                balance = 0
+        elif identifier == ETHEREUM:
+            try:
+                balance = api.eth.getBalance(address)
+            except Exception:
+                logger.warning("An error occurred while attempting to get the current balance.")
+                balance = 0
+        else:
             balance = 0
         return balance
 
-    def transfer(self, identifier: str, entity: Entity, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
+    def transfer(self, identifier: str, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
         """
         Transfer from self to destination.
 
+        :param identifier: the crypto code
+        :param crypto_object: the crypto object that contains the fucntions for signing transactions.
         :param destination_address: the address of the receive
         :param amount: the amount
         :param tx_fee: the tx fee
@@ -88,14 +118,45 @@ class LedgerApis(object):
         :return: tx digest if successful, otherwise None
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        try:
-            api = self.apis[identifier]
-            logger.info("Waiting for the validation of the transaction ...")
-            tx_digest = api.tokens.transfer(entity, destination_address, amount, tx_fee)
-            api.sync(tx_digest)
-            logger.info("Transaction validated ...")
-        except Exception:
-            logger.warning("An error occurred while attempting the transfer.")
+        api = self.apis[identifier]
+        logger.info("Waiting for the validation of the transaction ...")
+        if identifier == FETCHAI:
+            try:
+                tx_digest = api.tokens.transfer(crypto_object.entity, destination_address, amount, tx_fee)
+                api.sync(tx_digest)
+                logger.info("Transaction validated ...")
+            except Exception:
+                logger.warning("An error occurred while attempting the transfer.")
+                tx_digest = None
+        elif identifier == ETHEREUM:
+
+            nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
+            # TODO : handle misconfiguration
+            chain_id = self.configs.get(identifier)[1]  # type: ignore
+            transaction = {
+                'nonce': nonce,
+                'chainId': chain_id,
+                'to': destination_address,
+                'value': amount,
+                'gas': tx_fee,
+                'gasPrice': api.toWei(GAS_PRICE, GAS_ID)
+            }
+            signed = api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
+            hex_value = api.eth.sendRawTransaction(signed.rawTransaction)
+            print("TX Hash: ", hex_value.hex())
+            print("connect_to https://ropsten.etherscan.io/tx/{}".format(hex_value.hex()))
+            while True:
+                try:
+                    api.eth.getTransactionReceipt(hex_value)
+                    logger.info("transaction validated - exiting")
+                    tx_digest = hex_value.hex()
+                    break
+                except web3.exceptions.TransactionNotFound:
+                    logger.info("transaction not found - sleeping for 3.0 seconds")
+                    time.sleep(3.0)
+
+            return tx_digest
+        else:
             tx_digest = None
         return tx_digest
 
@@ -110,18 +171,28 @@ class LedgerApis(object):
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         is_successful = False
-        try:
-            api = self.apis[identifier]
-            logger.info("Checking the transaction ...")
-            # tx_status = cast(TxStatus, api.tx.status(tx_digest))
-            tx_status = cast(str, api.tx.status(tx_digest))
-            SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
-            if tx_status in SUCCESSFUL_TERMINAL_STATES:
-                # TODO: check the amount of the transaction is correct
-                is_successful = True
-            logger.info("Transaction validated ...")
-        except Exception:
-            logger.warning("An error occurred while attempting to check the transaction.")
+        api = self.apis[identifier]
+        if identifier == FETCHAI:
+            try:
+                logger.info("Checking the transaction ...")
+                # tx_status = cast(TxStatus, api.tx.status(tx_digest))
+                tx_status = cast(str, api.tx.status(tx_digest))
+                if tx_status in SUCCESSFUL_TERMINAL_STATES:
+                    # TODO: check the amount of the transaction is correct
+                    is_successful = True
+                logger.info("Transaction validated ...")
+            except Exception:
+                logger.warning("An error occurred while attempting to check the transaction.")
+        elif identifier == ETHEREUM:
+            try:
+                logger.info("Checking the transaction ...")
+                tx_status = api.eth.getTransactionReceipt(tx_digest)
+                if tx_status is not None:
+                    is_successful = True
+                logger.info("Transaction validated ...")
+            except Exception:
+                logger.warning("An error occured while attempting to check the transaction!")
+
         return is_successful
 
     @staticmethod

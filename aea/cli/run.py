@@ -109,7 +109,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
         connection = _setup_connection(connection_name, wallet.public_keys[DEFAULT], ctx)
     except AEAConfigException as e:
         logger.error(str(e))
-        exit(-1)
+        sys.exit(1)
 
     if install_deps:
         if Path("requirements.txt").exists():
@@ -125,6 +125,6 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
         logger.info("Interrupted.")  # pragma: no cover
     except Exception as e:
         logger.exception(e)
-        exit(-1)
+        sys.exit(1)
     finally:
         agent.stop()

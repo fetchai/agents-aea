@@ -7,15 +7,15 @@ behaviours:
   - behaviour:
       class_name: MySearchBehaviour
       args: {}
-  - behaviour:
-      class_name: MyTransactionBehaviour
-      args: {}
 handlers:
   - handler:
       class_name: FIPAHandler
       args: {}
   - handler:
       class_name: OEFHandler
+      args: {}
+  - handler:
+      class_name: MyTransactionHandler
       args: {}
 tasks: []
 shared_classes:
@@ -24,8 +24,9 @@ shared_classes:
       args:
         country: UK
         search_interval: 5
-        max_price: 4
+        max_price: 50
   - shared_class:
       class_name: Dialogues
       args: {}
 protocols: ['fipa','default','oef']
+ledgers: ['fetchai']

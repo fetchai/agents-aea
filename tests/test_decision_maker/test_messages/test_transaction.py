@@ -39,7 +39,8 @@ class TestTransaction:
                                amount=2,
                                sender_tx_fee=0,
                                counterparty_tx_fee=0,
-                               quantities_by_good_pbk={"Unknown": 10})
+                               quantities_by_good_pbk={"Unknown": 10},
+                               ledger_id="fetchai")
 
     def test_matches(self):
         """Test if the transaction matches with another transaction."""
@@ -53,7 +54,8 @@ class TestTransaction:
                                  amount=2,
                                  sender_tx_fee=0,
                                  counterparty_tx_fee=0,
-                                 quantities_by_good_pbk={"FET": 10})
+                                 quantities_by_good_pbk={"FET": 10},
+                                 ledger_id="fetchai")
         assert not msg.matches(msg), "It shouldn't match since it is the same message."
         assert msg == msg, "It should be equal since is the same message."
 
@@ -67,6 +69,7 @@ class TestTransaction:
                                               amount=2,
                                               sender_tx_fee=0,
                                               counterparty_tx_fee=0,
-                                              quantities_by_good_pbk={"FET": 10})
+                                              quantities_by_good_pbk={"FET": 10},
+                                              ledger_id="fetchai")
 
         assert msg.matches(mirrored_message), "It should match since the messages mirror each other"

@@ -27,9 +27,8 @@ from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
-from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Envelope, MailBox
-from aea.registries.base import Resources
+from aea.registries.base import Filter, Resources
 from aea.skills.error.handlers import ErrorHandler
 
 
@@ -83,6 +82,7 @@ class AEA(Agent):
                                      self.decision_maker.preferences,
                                      self.decision_maker.is_ready_to_pursuit_goals)
         self._resources = None  # type: Optional[Resources]
+        self._filter = None  # type: Optional[Filter]
 
     @property
     def decision_maker(self) -> DecisionMaker:
@@ -100,6 +100,12 @@ class AEA(Agent):
         assert self._resources is not None, "No resources initialized. Call setup."
         return self._resources
 
+    @property
+    def filter(self) -> Filter:
+        """Get filter."""
+        assert self._filter is not None, "No filter initialized. Call setup."
+        return self._filter
+
     def setup(self) -> None:
         """
         Set up the agent.
@@ -109,6 +115,7 @@ class AEA(Agent):
         self._resources = Resources.from_resource_dir(self._directory, self.context)
         assert self._resources is not None, "No resources initialized. Error in setup."
         self._resources.setup()
+        self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
     def act(self) -> None:
         """
@@ -116,7 +123,7 @@ class AEA(Agent):
 
         :return: None
         """
-        for behaviour in self.resources.behaviour_registry.fetch_all():  # the skill should be able to register things here as active so we hand control fully to the skill and let this just spin through
+        for behaviour in self.filter.get_active_behaviours():
             behaviour.act()
 
     def react(self) -> None:
@@ -130,9 +137,9 @@ class AEA(Agent):
             counter += 1
             envelope = self.inbox.get_nowait()  # type: Optional[Envelope]
             if envelope is not None:
-                self.handle(envelope)
+                self._handle(envelope)
 
-    def handle(self, envelope: Envelope) -> None:
+    def _handle(self, envelope: Envelope) -> None:
         """
         Handle an envelope.
 
@@ -160,33 +167,25 @@ class AEA(Agent):
             error_handler.send_invalid_message(envelope)    # pragma: no cover
             return                                          # pragma: no cover
 
-        handlers = self.resources.handler_registry.fetch(protocol.id)
+        handlers = self.filter.get_active_handlers(protocol.id)
         if handlers is None:
             if error_handler is not None:
                 error_handler.send_unsupported_skill(envelope)
             return
 
-        # TODO: add filter, currently each handler independently acts on the message
         for handler in handlers:
             handler.handle(msg, envelope.sender)
 
     def update(self) -> None:
-        """Update the current state of the agent.
+        """
+        Update the current state of the agent.
 
         :return None
         """
-        for task in self.resources.task_registry.fetch_all():
+        for task in self.filter.get_active_tasks():
             task.execute()
         self.decision_maker.execute()
-        counter = 0
-        while not self.decision_maker.message_out_queue.empty() and counter < self.max_reactions:
-            counter += 1
-            tx_message = self.decision_maker.message_out_queue.get_nowait()  # type: Optional[TransactionMessage]
-            if tx_message is not None:
-                skill_id = cast(str, tx_message.get("skill_id"))
-                skill = self.resources._skills.get(skill_id)
-                if skill is not None:
-                    skill.skill_context.message_in_queue.put(tx_message)
+        self.filter.handle_internal_messages()
 
     def teardown(self) -> None:
         """
