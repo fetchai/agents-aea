@@ -21,14 +21,14 @@
 import sqlite3
 import os
 import shutil
-import skimage  # type: ignore
+import skimage
 import time
 
 
 class DetectionDatabase:
     """Communicate between the database and the python objects."""
 
-    def __init__(self, temp_dir):
+    def __init__(self, temp_dir, create_if_not_present=True):
         """Initialise the Detection Database Communication class."""
         self.this_dir = os.path.dirname(__file__)
         self.temp_dir = temp_dir
@@ -43,7 +43,8 @@ class DetectionDatabase:
         self.image_file_ext = ".png"
 
         self.database_path = self.temp_dir + "/" + "detection_results.db"
-        self.initialise_backend()
+        if create_if_not_present:
+            self.initialise_backend()
 
     def reset_database(self):
         """Reset the database and remove all data."""

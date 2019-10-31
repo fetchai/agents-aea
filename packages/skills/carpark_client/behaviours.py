@@ -66,6 +66,7 @@ class MySearchBehaviour(Behaviour):
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_searching and strategy.is_time_to_search():
             self._search_id += 1
+            strategy.pause_search()
             strategy.last_search_time = datetime.datetime.now()
             query = strategy.get_service_query()
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
@@ -104,7 +105,11 @@ class MyTransactionBehaviour(Behaviour):
 
         :return: None
         """
+        if not self.context.message_in_queue.empty():
+            logger.info("[{}]: self.context.message_in_queue.empty().".format(self.context.agent_name))
         if not self._received_tx_message and not self.context.message_in_queue.empty():
+            strategy = cast(Strategy, self.context.strategy)
+            strategy.unpause_search()
             tx_msg_response = self.context.message_in_queue.get_nowait()
             if tx_msg_response is not None and \
                     TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
@@ -129,7 +134,7 @@ class MyTransactionBehaviour(Behaviour):
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(inform_msg))
                 logger.info("[{}]: informing counterparty={} of transaction digest.".format(self.context.agent_name, counterparty_pbk[-5:]))
-                self._received_tx_message = True
+                #self._received_tx_message = True
             else:
                 logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 

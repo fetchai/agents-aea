@@ -19,7 +19,8 @@
 
 """This module contains the strategy class."""
 import os
-from typing import Any, Dict, List, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING, cast
+import time
 
 from aea.protocols.oef.models import Description, Query
 from aea.skills.base import SharedClass
@@ -60,10 +61,19 @@ class Strategy(SharedClass):
         self.data_price_fet = kwargs.pop('data_price_fet') if 'data_price_fet' in kwargs.keys() else DEFAULT_PRICE
         super().__init__(**kwargs)
 
-        self.db = DetectionDatabase(db_dir)
-        self.data_price_fet = 2000
+        balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
+
+        if not os.path.isdir(db_dir):
+            print("WARNING - DATABASE dir does not exist")
+
+        self.db = DetectionDatabase(db_dir, False)
         self.lat = 43
         self.lon = 42
+        self.record_balance(balance)
+
+
+    def record_balance(self, balance):
+        self.db.set_fet(balance, time.time())
 
     def get_service_description(self) -> Description:
         """
@@ -91,6 +101,11 @@ class Strategy(SharedClass):
         # TODO, this is a stub
         return True
 
+    def has_data(self) -> bool:
+        """Return whether we have any useful data to sell"""
+        data = self.db.get_latest_detection_data(1)
+        return len(data) > 0
+
     def generate_proposal_and_data(self, query: Query) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
         """
         Generate a proposal matching the query.
@@ -100,6 +115,7 @@ class Strategy(SharedClass):
         """
         # TODO, this is a stub
         data = self.db.get_latest_detection_data(1)
+        assert (len(data) > 0)
 
         del data[0]['raw_image_path']
         del data[0]['processed_image_path']
@@ -119,3 +135,4 @@ class Strategy(SharedClass):
         data[0]["message_type"] = "car_park_data"
 
         return proposal, data[0]
+

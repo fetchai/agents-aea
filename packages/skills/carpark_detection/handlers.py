@@ -134,7 +134,8 @@ class FIPAHandler(Handler):
         query = cast(Query, msg.get("query"))
         strategy = cast(Strategy, self.context.strategy)
 
-        if strategy.is_matching_supply(query):
+
+        if strategy.is_matching_supply(query) and strategy.has_data():
             proposal, carpark_data = strategy.generate_proposal_and_data(query)
             dialogue.carpark_data = carpark_data
             dialogue.proposal = proposal
@@ -151,6 +152,9 @@ class FIPAHandler(Handler):
                                             sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(proposal_msg))
+
+            strategy.db.set_dialogue_status(dialogue_id, sender[-5:], "received_cfp", "send_proposal")
+
         else:
             logger.info("[{}]: declined the CFP from sender={}".format(self.context.agent_name,
                                                                        sender[-5:]))
@@ -163,6 +167,8 @@ class FIPAHandler(Handler):
                                             sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(decline_msg))
+
+            strategy.db.set_dialogue_status(dialogue_id, sender[-5:], "received_cfp", "send_no_proposal")
 
     def _handle_decline(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
         """
@@ -179,6 +185,8 @@ class FIPAHandler(Handler):
         """
         logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name,
                                                                    sender[-5:]))
+        strategy = cast(Strategy, self.context.strategy)
+        strategy.db.set_dialogue_status(dialogue_id, sender[-5:], "received_decline", "[NONE]")
         # dialogues = cast(Dialogues, self.context.dialogues)
         # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE)
 
@@ -211,6 +219,8 @@ class FIPAHandler(Handler):
                                         sender=self.context.agent_public_key,
                                         protocol_id=FIPAMessage.protocol_id,
                                         message=FIPASerializer().encode(match_accept_msg))
+        strategy = cast(Strategy, self.context.strategy)
+        strategy.db.set_dialogue_status(dialogue_id, sender[-5:], "received_accept", "send_match_accept")
 
     def _handle_inform(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
         """
@@ -240,12 +250,18 @@ class FIPAHandler(Handler):
             total_price = cast(int, proposal.values.get("price"))
             is_settled = self.context.ledger_apis.is_tx_settled('fetchai', tx_digest, total_price)
             if is_settled:
-                token_balance = self.context.ledger_apis.token_balance('fetchai',
-                                                                       cast(str, self.context.agent_addresses.get('fetchai')))
-                logger.info("[{}]: transaction={} settled, new balance={}. Sending data to sender={}".format(self.context.agent_name,
-                                                                                                             tx_digest,
-                                                                                                             token_balance,
-                                                                                                             sender[-5:]))
+                token_balance = self.context.ledger_apis.token_balance(
+                    'fetchai',
+                    cast(str, self.context.agent_addresses.get('fetchai')))
+
+                strategy = cast(Strategy, self.context.strategy)
+                strategy.record_balance(token_balance)
+
+                logger.info("[{}]: transaction={} settled, new balance={}. Sending data to sender={}".format(
+                    self.context.agent_name,
+                    tx_digest,
+                    token_balance,
+                    sender[-5:]))
                 inform_msg = FIPAMessage(message_id=new_message_id,
                                          dialogue_id=dialogue_id,
                                          target=new_target,
@@ -259,6 +275,13 @@ class FIPAHandler(Handler):
                                                 message=FIPASerializer().encode(inform_msg))
                 # dialogues = cast(Dialogues, self.context.dialogues)
                 # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
+                strategy.db.add_in_progress_transaction(
+                    tx_digest,
+                    sender[-5:],
+                    self.context.agent_name,
+                    total_price)
+                strategy.db.set_transaction_complete(tx_digest)
+                strategy.db.set_dialogue_status(dialogue_id, sender[-5:], "transaction_complete", "send_request_data")
             else:
                 logger.info("[{}]: transaction={} not settled, aborting".format(self.context.agent_name,
                                                                                 tx_digest))

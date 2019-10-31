@@ -48,7 +48,8 @@ class Strategy(SharedClass):
         self._max_detection_age = kwargs.pop('max_detection_age') if 'max_detection_age' in kwargs.keys() else DEFAULT_MAX_DETECTION_AGE
         super().__init__(**kwargs)
         self.is_searching = True
-        self.last_search_time = datetime.datetime.now()
+        self.last_search_time = datetime.datetime.now() - datetime.timedelta(seconds=self._search_interval)
+        print ("self._max_price  = {}".format(self._max_price ))
 
     def get_service_query(self) -> Query:
         """
@@ -59,6 +60,15 @@ class Strategy(SharedClass):
         query = Query([Constraint('longitude', ConstraintType("!=", 0.0))], model=None)
         return query
 
+    def pause_search(self):
+        """Stop searching temporarily"""
+        self.is_searching = False
+
+    def unpause_search(self):
+        """Restart searching after pausing"""
+        self.last_search_time = datetime.datetime.now()
+        self.is_searching = True
+
     def is_time_to_search(self) -> bool:
         """
         Check whether it is time to search.
@@ -67,6 +77,7 @@ class Strategy(SharedClass):
         """
         now = datetime.datetime.now()
         diff = now - self.last_search_time
+       # print("is_time_to_search: diff = {}".format(diff))
         result = diff.total_seconds() > self._search_interval
         return result
 
@@ -78,5 +89,6 @@ class Strategy(SharedClass):
         """
         result = proposal.values["price"] < self._max_price and \
             proposal.values["last_detection_time"] > int(time.time()) - self._max_detection_age
+        print("is_acceptable_proposal price = {} - self._max_price = {}".format(proposal.values["price"], self._max_price))
 
         return result

@@ -147,7 +147,6 @@ class FIPAHandler(Handler):
             acceptable = strategy.is_acceptable_proposal(proposal)
             affordable = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai'))) >= cast(int, proposal.values.get('price'))
             if acceptable and affordable:
-                strategy.is_searching = False
                 logger.info("[{}]: accepting the proposal from sender={}".format(self.context.agent_name,
                                                                                  sender[-5:]))
                 dialogue.proposal = proposal
@@ -163,6 +162,7 @@ class FIPAHandler(Handler):
             else:
                 logger.info("[{}]: declining the proposal from sender={}".format(self.context.agent_name,
                                                                                  sender[-5:]))
+                strategy.unpause_search()
                 decline_msg = FIPAMessage(message_id=new_message_id,
                                           dialogue_id=dialogue_id,
                                           target=new_target_id,
@@ -172,6 +172,7 @@ class FIPAHandler(Handler):
                                                 sender=self.context.agent_public_key,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(decline_msg))
+
 
     def _handle_decline(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
         """
@@ -184,6 +185,8 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
+        strategy = cast(Strategy, self.context.strategy)
+        strategy.unpause_search()
         logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name, sender[-5:]))
         # target = msg.get("target")
         # dialogues = cast(Dialogues, self.context.dialogues)
@@ -288,11 +291,10 @@ class OEFHandler(Handler):
         :param agents: the agents returned by the search
         :return: None
         """
+        strategy = cast(Strategy, self.context.strategy)
         if len(agents) > 0:
             logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
-            strategy = cast(Strategy, self.context.strategy)
-            # stopping search
-            strategy.is_searching = False
+
             # pick first agent found
             opponent_pbk = agents[0]
             dialogues = cast(Dialogues, self.context.dialogues)
@@ -310,4 +312,5 @@ class OEFHandler(Handler):
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(cfp_msg))
         else:
+            strategy.unpause_search()
             logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))

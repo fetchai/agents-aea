@@ -16,9 +16,9 @@ shared_classes:
   - shared_class:
       class_name: Strategy
       args:
-        data_price_fet: 2000
-       # db_is_rel_to_cwd: true
-       # db_rel_dir: temp_files
+        data_price_fet: 200000000
+        db_is_rel_to_cwd: true
+        db_rel_dir: ../temp_files
   - shared_class:
       class_name: Dialogues
       args: {}
