@@ -29,6 +29,7 @@ from tests.conftest import CUR_PATH
 
 class TestHelperFile:
     """Test helper module in aea/crypto."""
+
     def tests_private_keys(self):
         """Test the private keys."""
         private_key_path = os.path.join(CUR_PATH, "data", "priv.pem")

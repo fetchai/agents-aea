@@ -27,7 +27,6 @@ from typing import Any, Dict, Optional, Tuple, cast
 import web3
 import web3.exceptions
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi
-from fetchai.ledger.crypto import Identity, Address
 from web3 import Web3, HTTPProvider
 
 from aea.crypto.base import Crypto

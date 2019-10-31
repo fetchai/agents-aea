@@ -20,10 +20,7 @@
 
 """This module contains the tests for the crypto/helpers module."""
 import logging
-import subprocess
-
 import os
-
 import pytest
 
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
@@ -36,6 +33,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_ETHEREUM_CONFIG = ("https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe", 3)
 fet_address = "B3t9pv4rYccWqCjeuoXsDoeXLiKxVAQh6Q3CLAiNZZQ2mtqF1"
 eth_address = "0x21795D753752ccC1AC728002D23Ba33cbF13b8b0"
+
 
 class TestLedgerApis:
     """Test the ledger_apis module."""
@@ -72,7 +70,7 @@ class TestLedgerApis:
         fet_obj = FetchAICrypto(private_key_path=private_key_path)
         ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
                                   FETCHAI: DEFAULT_FETCHAI_CONFIG})
-        tx_digest =ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
+        tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
         assert tx_digest is not None
         assert ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest)
         tx_digest = "unknown_hash"
@@ -85,5 +83,3 @@ class TestLedgerApis:
         assert not ledger_apis.is_tx_settled(identifier=ETHEREUM, tx_digest=tx_digest)
         with pytest.raises(ValueError):
             tx_digest = ledger_apis.transfer(ETHEREUM, eth_obj, eth_address, amount=50, tx_fee=2)
-
-

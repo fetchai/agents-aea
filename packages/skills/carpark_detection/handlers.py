@@ -28,7 +28,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Description, Query
+from aea.protocols.oef.models import Query  # Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
@@ -236,9 +236,9 @@ class FIPAHandler(Handler):
             tx_digest = json_data['transaction_digest']
             logger.info("[{}]: checking whether transaction={} has been received ...".format(self.context.agent_name,
                                                                                              tx_digest))
-            proposal = cast(Description, dialogue.proposal)
-            total_price = cast(int, proposal.values.get("price"))
-            is_settled = self.context.ledger_apis.is_tx_settled('fetchai', tx_digest, total_price)
+            # proposal = cast(Description, dialogue.proposal)
+            # total_price = cast(int, proposal.values.get("price"))
+            is_settled = self.context.ledger_apis.is_tx_settled('fetchai', tx_digest)
             if is_settled:
                 token_balance = self.context.ledger_apis.token_balance('fetchai',
                                                                        cast(str, self.context.agent_addresses.get('fetchai')))
