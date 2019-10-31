@@ -60,11 +60,11 @@ class Strategy(SharedClass):
         return query
 
     def pause_search(self):
-        """Stop searching temporarily"""
+        """Stop searching temporarily."""
         self.is_searching = False
 
     def unpause_search(self):
-        """Restart searching after pausing"""
+        """Restart searching after pausing."""
         self.last_search_time = datetime.datetime.now()
         self.is_searching = True
 
@@ -76,7 +76,6 @@ class Strategy(SharedClass):
         """
         now = datetime.datetime.now()
         diff = now - self.last_search_time
-       # print("is_time_to_search: diff = {}".format(diff))
         result = diff.total_seconds() > self._search_interval
         return result
 

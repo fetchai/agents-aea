@@ -71,8 +71,8 @@ class Strategy(SharedClass):
         self.lon = 42
         self.record_balance(balance)
 
-
     def record_balance(self, balance):
+        """Record current balance to database."""
         self.db.set_fet(balance, time.time())
 
     def get_service_description(self) -> Description:
@@ -102,7 +102,7 @@ class Strategy(SharedClass):
         return True
 
     def has_data(self) -> bool:
-        """Return whether we have any useful data to sell"""
+        """Return whether we have any useful data to sell."""
         data = self.db.get_latest_detection_data(1)
         return len(data) > 0
 
@@ -135,4 +135,3 @@ class Strategy(SharedClass):
         data[0]["message_type"] = "car_park_data"
 
         return proposal, data[0]
-

@@ -21,7 +21,7 @@
 import sqlite3
 import os
 import shutil
-import skimage
+import skimage  # type: ignore
 import time
 
 

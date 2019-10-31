@@ -134,7 +134,6 @@ class FIPAHandler(Handler):
         query = cast(Query, msg.get("query"))
         strategy = cast(Strategy, self.context.strategy)
 
-
         if strategy.is_matching_supply(query) and strategy.has_data():
             proposal, carpark_data = strategy.generate_proposal_and_data(query)
             dialogue.carpark_data = carpark_data
