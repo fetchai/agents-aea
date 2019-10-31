@@ -67,10 +67,10 @@ class FIPAHandler(Handler):
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
         if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
-            dialogue = dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key)
+            dialogue = dialogues.get_dialogue(dialogue_id, sender, self.context.agent_public_key)
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg, sender):
-            dialogue = dialogues.create_opponent_initiated(fipa_msg, sender)
+            dialogue = dialogues.create_opponent_initiated(dialogue_id, sender)
             dialogue.incoming_extend(fipa_msg)
         else:
             self._handle_unidentified_dialogue(fipa_msg, sender)

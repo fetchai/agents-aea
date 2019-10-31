@@ -24,7 +24,10 @@ shared_classes:
       args:
         country: UK
         search_interval: 5
-        max_price: 50
+        max_row_price: 4
+        max_buyer_tx_fee: 1
+        currency_pbk: 'FET'
+        ledger_id: 'fetchai'
   - shared_class:
       class_name: Dialogues
       args: {}

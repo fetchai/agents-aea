@@ -32,10 +32,11 @@ else:
     from weather_station_ledger_skill.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
 DEFAULT_PRICE_PER_ROW = 2
+DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_CURRENCY_PBK = 'FET'
 DEFAULT_LEDGER_ID = 'fetchai'
-DATE_ONE = "3/10/2019"
-DATE_TWO = "15/10/2019"
+DEFAULT_DATE_ONE = "3/10/2019"
+DEFAULT_DATE_TWO = "15/10/2019"
 
 
 class Strategy(SharedClass):
@@ -50,11 +51,24 @@ class Strategy(SharedClass):
 
         :return: None
         """
-        self.price_per_row = kwargs.pop('price_per_row') if 'price_per_row' in kwargs.keys() else DEFAULT_PRICE_PER_ROW
-        self.currency_pbk = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
-        self.ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
+        self._price_per_row = kwargs.pop('price_per_row') if 'price_per_row' in kwargs.keys() else DEFAULT_PRICE_PER_ROW
+        self._seller_tx_fee = kwargs.pop('seller_tx_fee') if 'seller_tx_fee' in kwargs.keys() else DEFAULT_SELLER_TX_FEE
+        self._currency_pbk = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
+        self._ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
+        self._date_one = kwargs.pop('date_one') if 'date_one' in kwargs.keys() else DEFAULT_DATE_ONE
+        self._date_two = kwargs.pop('date_two') if 'date_two' in kwargs.keys() else DEFAULT_DATE_TWO
         super().__init__(**kwargs)
         self.db = DBCommunication()
+        self._oef_msg_id = 0
+
+    def get_next_oef_msg_id(self) -> int:
+        """
+        Get the next oef msg id.
+
+        :return: the next oef msg id
+        """
+        self._oef_msg_id += 1
+        return self._oef_msg_id
 
     def get_service_description(self) -> Description:
         """
@@ -82,14 +96,15 @@ class Strategy(SharedClass):
         :param query: the query
         :return: a tuple of proposal and the weather data
         """
-        # TODO, this is a stub
-        fetched_data = self.db.get_data_for_specific_dates(DATE_ONE, DATE_TWO)
+        fetched_data = self.db.get_data_for_specific_dates(self._date_one, self._date_two)  # TODO: fetch real data
         weather_data, rows = self._build_data_payload(fetched_data)
-        total_price = self.price_per_row * rows
+        total_price = self._price_per_row * rows
+        assert total_price - self._seller_tx_fee > 0, "This sale would generate a loss, change the configs!"
         proposal = Description({"rows": rows,
                                 "price": total_price,
-                                "currency_pbk": self.currency_pbk,
-                                "ledger_id": self.ledger_id})
+                                "seller_tx_fee": self._seller_tx_fee,
+                                "currency_pbk": self._currency_pbk,
+                                "ledger_id": self._ledger_id})
         return (proposal, weather_data)
 
     def _build_data_payload(self, fetched_data: Dict[str, int]) -> Tuple[Dict[str, List[Dict[str, Any]]], int]:
