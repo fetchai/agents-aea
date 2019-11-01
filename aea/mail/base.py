@@ -44,8 +44,8 @@ class EnvelopeSerializer(ABC):
         """Decode the envelope"""
 
 
-class DefaultEnvelopeSerializer(EnvelopeSerializer):
-    """Default envelope serializer."""
+class ProtobufEnvelopeSerializer(EnvelopeSerializer):
+    """Envelope serializer using Protobuf."""
 
     def encode(self, envelope: 'Envelope') -> bytes:
         """Encode the envelope"""
@@ -73,8 +73,13 @@ class DefaultEnvelopeSerializer(EnvelopeSerializer):
         return envelope
 
 
+DefaultEnvelopeSerializer = ProtobufEnvelopeSerializer
+
+
 class Envelope:
     """The top level message class."""
+
+    default_serializer = DefaultEnvelopeSerializer()
 
     def __init__(self, to: Address,
                  sender: Address,
@@ -149,7 +154,7 @@ class Envelope:
         :return: the encoded envelope.
         """
         if serializer is None:
-            serializer = DefaultEnvelopeSerializer()
+            serializer = self.default_serializer
         envelope_bytes = serializer.encode(self)
         return envelope_bytes
 
@@ -163,7 +168,7 @@ class Envelope:
         :return: the decoded envelope.
         """
         if serializer is None:
-            serializer = DefaultEnvelopeSerializer()
+            serializer = cls.default_serializer
         envelope = serializer.decode(envelope_bytes)
         return envelope
 
