@@ -11,7 +11,6 @@ Release History
 
 - Provides examples and fixes.
 
-
 0.1.2 (2019-09-16)
 -------------------
 
@@ -91,4 +90,11 @@ Release History
 - Adds filter concept for message routing
 - Adds ledger integrations for fetch.ai and ethereum
 - Adds carpark examples and ledger examples
+- Multiple additional minor fixes and changes
+
+0.1.12 (2019-11-01)
+-------------------
+
+- Fixes some examples and docs
+- Refactors crypto modules and adds additional tests
 - Multiple additional minor fixes and changes
