@@ -20,6 +20,7 @@
 """Mail module abstract base classes."""
 
 import logging
+from abc import ABC, abstractmethod
 from queue import Queue
 from typing import Optional, TYPE_CHECKING
 
@@ -31,13 +32,55 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class EnvelopeSerializer(ABC):
+    """This abstract class let the devloper to specify serialization layer for the envelope."""
+
+    @abstractmethod
+    def encode(self, envelope: 'Envelope') -> bytes:
+        """Encode the envelope"""
+
+    @abstractmethod
+    def decode(self, envelope_bytes: bytes) -> 'Envelope':
+        """Decode the envelope"""
+
+
+class DefaultEnvelopeSerializer(EnvelopeSerializer):
+    """Default envelope serializer."""
+
+    def encode(self, envelope: 'Envelope') -> bytes:
+        """Encode the envelope"""
+        envelope_pb = base_pb2.Envelope()
+        envelope_pb.to = envelope.to
+        envelope_pb.sender = envelope.sender
+        envelope_pb.protocol_id = envelope.protocol_id
+        envelope_pb.message = envelope.message
+
+        envelope_bytes = envelope_pb.SerializeToString()
+        return envelope_bytes
+
+    def decode(self, envelope_bytes: bytes) -> 'Envelope':
+        """Decode the envelope"""
+        envelope_pb = base_pb2.Envelope()
+        envelope_pb.ParseFromString(envelope_bytes)
+
+        to = envelope_pb.to
+        sender = envelope_pb.sender
+        protocol_id = envelope_pb.protocol_id
+        message = envelope_pb.message
+
+        envelope = Envelope(to=to, sender=sender,
+                            protocol_id=protocol_id, message=message)
+        return envelope
+
+
 class Envelope:
     """The top level message class."""
 
     def __init__(self, to: Address,
                  sender: Address,
                  protocol_id: ProtocolId,
-                 message: bytes):
+                 message: bytes,
+                 serializer: Optional[EnvelopeSerializer] = None):
         """
         Initialize a Message object.
 
@@ -45,11 +88,13 @@ class Envelope:
         :param sender: the public key of the sender.
         :param protocol_id: the protocol id.
         :param message: the protocol-specific message
+        :param serializer: the implementation for the envelope serialization.
         """
         self._to = to
         self._sender = sender
         self._protocol_id = protocol_id
         self._message = message
+        self._serializer = serializer
 
     @property
     def to(self) -> Address:
@@ -105,34 +150,21 @@ class Envelope:
 
         :return: the encoded envelope.
         """
-        envelope = self
-        envelope_pb = base_pb2.Envelope()
-        envelope_pb.to = envelope.to
-        envelope_pb.sender = envelope.sender
-        envelope_pb.protocol_id = envelope.protocol_id
-        envelope_pb.message = envelope.message
-
-        envelope_bytes = envelope_pb.SerializeToString()
+        envelope_bytes = self._serializer.encode(self)
         return envelope_bytes
 
     @classmethod
-    def decode(cls, envelope_bytes: bytes) -> 'Envelope':
+    def decode(cls, envelope_bytes: bytes, serializer: Optional[EnvelopeSerializer] = None) -> 'Envelope':
         """
         Decode the envelope.
 
         :param envelope_bytes: the bytes to be decoded.
+        :param serializer: the serializer that implements the decoding procedure.
         :return: the decoded envelope.
         """
-        envelope_pb = base_pb2.Envelope()
-        envelope_pb.ParseFromString(envelope_bytes)
-
-        to = envelope_pb.to
-        sender = envelope_pb.sender
-        protocol_id = envelope_pb.protocol_id
-        message = envelope_pb.message
-
-        envelope = Envelope(to=to, sender=sender,
-                            protocol_id=protocol_id, message=message)
+        if serializer is None:
+            serializer = DefaultEnvelopeSerializer()
+        envelope = serializer.decode(envelope_bytes)
         return envelope
 
     def __str__(self):
