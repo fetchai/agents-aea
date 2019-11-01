@@ -1,11 +1,9 @@
 AEA applications operate within different orders of trustlessness.
 
-For example, using the AEA weather skill application without a ledger for transactions means that clients must 100% trust the weather station that any data it sends is sufficient, including no data at all.
+For example, using the AEA weather skills demo without a ledger means that clients must trust the weather station that any data it sends is sufficient, including no data at all. Similarly, the weather station must trust the weather clients to send payment via some mechanism.
 
-A step up, if you run the weather skill application on a ledger system then the client must again trust the weather station to send sufficient data. However, all transactions are recorded so there is some data verifiability.
+A step up, if you run the weather skills demo with a ledger (Fetch.ai or Ethereum) then the clients must again trust the weather station to send sufficient data. However, all payment transactions are executed via the public ledger. And so the weather station must no longer trust the weather clients as it can observe the transaction taking place on the public ledger.
 
-Crucially, the weather station does not need to trust the weather client as it can observe the transaction taking place on the public ledger.
+One could expand trustlessness even further by incorporating a third party as an arbitrator or some escrow contract. However, in the weather skills demo there are limits to trustlessness as the station ultimately offers unverifiable data.
 
-An app could expand trustlessness even further by implementing a third party escrow contract.
-
-Finally, in the case of (non-fungible) token transactions where there is an atomic swap, full trustlessness is apparent.
+Finally, in the case of (non-fungible) token transactions where there is an atomic swap, full trustlessness is apparent. This is demonstrated in the TAC.
