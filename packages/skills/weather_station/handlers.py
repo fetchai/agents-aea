@@ -28,7 +28,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Description, Query
+from aea.protocols.oef.models import Query  # Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:
@@ -38,7 +38,7 @@ else:
     from weather_station_skill.dialogues import Dialogue, Dialogues
     from weather_station_skill.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_station_ledger_skill")
+logger = logging.getLogger("aea.weather_station_skill")
 
 
 class FIPAHandler(Handler):
@@ -202,13 +202,13 @@ class FIPAHandler(Handler):
                                                                   sender[-5:]))
         logger.info("[{}]: sending MATCH_ACCEPT_W_ADDRESS to sender={}".format(self.context.agent_name,
                                                                                sender[-5:]))
-        proposal = cast(Description, dialogue.proposal)
-        identifier = cast(str, proposal.values.get("ledger_id"))
+        # proposal = cast(Description, dialogue.proposal)
+        # identifier = cast(str, proposal.values.get("ledger_id"))
         match_accept_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_id=dialogue_id,
                                        target=new_target,
                                        performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
-                                       address=self.context.agent_addresses[identifier])
+                                       address="no_address")
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,

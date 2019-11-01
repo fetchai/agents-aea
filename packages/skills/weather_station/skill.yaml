@@ -21,9 +21,9 @@ shared_classes:
         price_per_row: 1
         seller_tx_fee: 0
         currency_pbk: 'FET'
-        ledger_id: 'fetchai'
+        ledger_id: 'None'
   - shared_class:
       class_name: Dialogues
       args: {}
 protocols: ['fipa', 'oef', 'default']
-ledgers: ['fetchai']
+ledgers: []

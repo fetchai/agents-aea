@@ -39,7 +39,7 @@ else:
     from weather_client_skill.dialogues import Dialogue, Dialogues
     from weather_client_skill.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_client_ledger_skill")
+logger = logging.getLogger("aea.weather_client_skill")
 
 
 class FIPAHandler(Handler):

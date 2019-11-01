@@ -21,8 +21,6 @@
 import logging
 from typing import cast, TYPE_CHECKING
 
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from aea.skills.base import Behaviour
@@ -44,21 +42,7 @@ class MySearchBehaviour(Behaviour):
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
-        if self.context.ledger_apis.has_fetchai:
-            fet_balance = self.context.ledger_apis.token_balance(FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI)))
-            if fet_balance > 0:
-                logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, fet_balance))
-            else:
-                logger.warning("[{}]: you have no starting balance on fetchai ledger!".format(self.context.agent_name))
-                # TODO: deregister skill from filter
-
-        if self.context.ledger_apis.has_ethereum:
-            eth_balance = self.context.ledger_apis.token_balance(ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM)))
-            if eth_balance > 0:
-                logger.info("[{}]: starting balance on ethereum ledger={}.".format(self.context.agent_name, eth_balance))
-            else:
-                logger.warning("[{}]: you have no starting balance on ethereum ledger!".format(self.context.agent_name))
-                # TODO: deregister skill from filter
+        pass
 
     def act(self) -> None:
         """
@@ -84,10 +68,4 @@ class MySearchBehaviour(Behaviour):
 
         :return: None
         """
-        if self.context.ledger_apis.has_fetchai:
-            balance = self.context.ledger_apis.token_balance(FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI)))
-            logger.info("[{}]: ending balance on fetchai ledger={}.".format(self.context.agent_name, balance))
-
-        if self.context.ledger_apis.has_ethereum:
-            balance = self.context.ledger_apis.token_balance(ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM)))
-            logger.info("[{}]: ending balance on ethereum ledger={}.".format(self.context.agent_name, balance))
+        pass
