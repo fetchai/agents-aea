@@ -71,7 +71,6 @@ class FIPAHandler(Handler):
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        logger.info(fipa_msg)
         if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
             dialogue = dialogues.get_dialogue(dialogue_id, sender, self.context.agent_public_key)
             dialogue.incoming_extend(fipa_msg)
@@ -87,7 +86,6 @@ class FIPAHandler(Handler):
         elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
             self._handle_match_accept(fipa_msg, sender, message_id, dialogue_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
-            logger.info("RECEIVED AN INFORM MESSAGE!!!!")
             self._handle_inform(fipa_msg, sender, message_id, dialogue_id, dialogue)
 
     def teardown(self) -> None:
@@ -204,8 +202,8 @@ class FIPAHandler(Handler):
                                         sender=self.context.agent_public_key,
                                         protocol_id=FIPAMessage.protocol_id,
                                         message=FIPASerializer().encode(inform_msg))
-        logger.info("[{}]: informing counterparty={} of transaction digest.".format(self.context.agent_name,
-                                                                                    counterparty_pbk[-5:]))
+        logger.info("[{}]: informing counterparty={} of payment.".format(self.context.agent_name,
+                                                                         counterparty_pbk[-5:]))
         self._received_tx_message = True
 
     def _handle_inform(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
