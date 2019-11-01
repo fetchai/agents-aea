@@ -27,7 +27,6 @@ from typing import Any, Dict, Optional, Tuple, cast
 import web3
 import web3.exceptions
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi
-from fetchai.ledger.crypto import Identity, Address
 from web3 import Web3, HTTPProvider
 
 from aea.crypto.base import Crypto
@@ -111,7 +110,7 @@ class LedgerApis(object):
             except Exception:
                 logger.warning("An error occurred while attempting to get the current balance.")
                 balance = 0
-        else:
+        else:           # pragma: no cover
             balance = 0
         return balance
 
@@ -166,7 +165,7 @@ class LedgerApis(object):
                     time.sleep(3.0)
 
             return tx_digest
-        else:
+        else:                   # pragma: no cover
             tx_digest = None
         return tx_digest
 
@@ -176,7 +175,6 @@ class LedgerApis(object):
 
         :param identifier: the identifier of the ledger
         :param tx_digest: the transaction digest
-        :param amount: the amount
         :return: True if correctly settled, False otherwise
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
@@ -204,16 +202,3 @@ class LedgerApis(object):
                 logger.warning("An error occured while attempting to check the transaction!")
 
         return is_successful
-
-    @staticmethod
-    def get_address_from_public_key(self, identifier: str, public_key: str) -> Address:
-        """
-        Get the address from the public key.
-
-        :param identifier: the identifier
-        :param public_key: the public key
-        :return: the address
-        """
-        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        identity = Identity.from_hex(public_key)
-        return Address(identity)

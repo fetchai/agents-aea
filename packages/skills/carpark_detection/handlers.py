@@ -28,7 +28,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Description, Query
+from aea.protocols.oef.models import Query, Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING:

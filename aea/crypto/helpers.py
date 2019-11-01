@@ -70,7 +70,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
             _try_validate_private_key_pem_path(default_private_key_config.path)
         except FileNotFoundError:
             logger.error("File {} for private key {} not found.".format(repr(default_private_key_config.path), default_private_key_config.ledger))
-            sys.exit(1)
+            sys.exit(-1)
 
     fetchai_private_key_config = aea_conf.private_key_paths.read(FETCHAI)
     if fetchai_private_key_config is None:
@@ -87,7 +87,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
             _try_validate_fet_private_key_path(fetchai_private_key_config.path)
         except FileNotFoundError:
             logger.error("File {} for private key {} not found.".format(repr(fetchai_private_key_config.path), fetchai_private_key_config.ledger))
-            sys.exit(1)
+            sys.exit(-1)
 
     ethereum_private_key_config = aea_conf.private_key_paths.read(ETHEREUM)
     if ethereum_private_key_config is None:
@@ -104,7 +104,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
             _try_validate_ethereum_private_key_path(ethereum_private_key_config.path)
         except FileNotFoundError:
             logger.error("File {} for private key {} not found.".format(repr(ethereum_private_key_config.path), ethereum_private_key_config.ledger))
-            sys.exit(1)
+            sys.exit(-1)
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
@@ -138,7 +138,7 @@ def _verify_ledger_apis_access(ctx: Context) -> None:
             LedgerApi(fetchai_ledger_api_config.addr, fetchai_ledger_api_config.port)
         except Exception:
             logger.error("Cannot connect to fetchai ledger with provided config.")
-            sys.exit(1)
+            sys.exit(-1)
 
     ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
     if ethereum_ledger_config is None:
@@ -150,7 +150,7 @@ def _verify_ledger_apis_access(ctx: Context) -> None:
             Web3(HTTPProvider(ethereum_ledger_config.addr))
         except Exception:
             logger.error("Cannot connect to ethereum ledger with provided config.")
-            sys.exit(1)
+            sys.exit(-1)
 
 
 def _create_temporary_private_key() -> bytes:
@@ -176,7 +176,7 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
         DefaultCrypto(private_key_pem_path=private_key_pem_path)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_pem_path))
-        sys.exit(1)
+        sys.exit(-1)
 
 
 def _try_validate_fet_private_key_path(private_key_path: str) -> None:
@@ -193,7 +193,7 @@ def _try_validate_fet_private_key_path(private_key_path: str) -> None:
             Entity.from_hex(data)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_path))
-        sys.exit(1)
+        sys.exit(-1)
 
 
 def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
@@ -210,7 +210,7 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
             Account.from_key(data)
     except ValueError:
         logger.error("This is not a valid private key file: '{}'".format(private_key_path))
-        sys.exit(1)
+        sys.exit(-1)
 
 
 def _create_temporary_private_key_pem_path() -> str:
