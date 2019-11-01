@@ -40,7 +40,7 @@ class TestHelperFile:
         private_key_path = os.path.join(CUR_PATH, "data", "priv.pem")
         _try_validate_private_key_pem_path(private_key_path)
         with pytest.raises(SystemExit):
-            private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
+            private_key_path = os.path.join(CUR_PATH, "data", "priv_wrong.pem")
             _try_validate_private_key_pem_path(private_key_path)
 
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")

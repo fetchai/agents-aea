@@ -21,6 +21,7 @@
 """Module wrapping all the public and private keys cryptography."""
 
 import logging
+import sys
 import time
 from typing import Any, Dict, Optional, Tuple, cast
 
@@ -35,6 +36,7 @@ from aea.crypto.fetchai import FETCHAI
 
 DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
 SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
+SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
 
 logger = logging.getLogger(__name__)
 
@@ -202,3 +204,33 @@ class LedgerApis(object):
                 logger.warning("An error occured while attempting to check the transaction!")
 
         return is_successful
+
+
+def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
+    """
+    Tro to instantiate the fetchai ledger api.
+
+    :param addr: the address
+    :param port: the port
+    """
+    try:
+        from fetchai.ledger.api import LedgerApi
+        LedgerApi(addr, port)
+    except Exception:
+        logger.error("Cannot connect to fetchai ledger with provided config.")
+        sys.exit(1)
+
+
+def _try_to_instantiate_ethereum_ledger_api(addr: str, port: int) -> None:
+    """
+    Tro to instantiate the fetchai ledger api.
+
+    :param addr: the address
+    :param port: the port
+    """
+    try:
+        from web3 import Web3, HTTPProvider
+        Web3(HTTPProvider(addr))
+    except Exception:
+        logger.error("Cannot connect to ethereum ledger with provided config.")
+        sys.exit(1)
