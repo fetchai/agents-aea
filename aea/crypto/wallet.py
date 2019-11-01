@@ -27,8 +27,6 @@ from aea.crypto.ethereum import EthereumCrypto, ETHEREUM
 from aea.crypto.fetchai import FetchAICrypto, FETCHAI
 
 SUPPORTED_CRYPTOS = [DEFAULT, ETHEREUM, FETCHAI]
-SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
-CURRENCY_TO_ID_MAP = {'FET': FETCHAI, 'ETH': ETHEREUM}
 
 
 class Wallet(object):
