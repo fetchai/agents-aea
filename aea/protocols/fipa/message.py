@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Optional, Union
+from typing import Dict, List, Optional, Union
 
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
@@ -30,6 +30,9 @@ class FIPAMessage(Message):
     """The FIPA message class."""
 
     protocol_id = "fipa"
+
+    STARTING_MESSAGE_ID = 1
+    STARTING_TARGET = 0
 
     class Performative(Enum):
         """FIPA performatives."""
@@ -100,3 +103,15 @@ class FIPAMessage(Message):
             return False
 
         return True
+
+
+VALID_PREVIOUS_PERFORMATIVES = {
+    FIPAMessage.Performative.CFP: [None],
+    FIPAMessage.Performative.PROPOSE: [FIPAMessage.Performative.CFP],
+    FIPAMessage.Performative.ACCEPT: [FIPAMessage.Performative.PROPOSE],
+    FIPAMessage.Performative.ACCEPT_W_ADDRESS: [FIPAMessage.Performative.PROPOSE],
+    FIPAMessage.Performative.MATCH_ACCEPT: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS],
+    FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS],
+    FIPAMessage.Performative.INFORM: [FIPAMessage.Performative.MATCH_ACCEPT, FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS, FIPAMessage.Performative.INFORM],
+    FIPAMessage.Performative.DECLINE: [FIPAMessage.Performative.CFP, FIPAMessage.Performative.PROPOSE, FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS]
+}  # type: Dict[FIPAMessage.Performative, List[Union[None, FIPAMessage.Performative]]]

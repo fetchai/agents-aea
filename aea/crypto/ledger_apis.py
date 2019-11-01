@@ -79,6 +79,16 @@ class LedgerApis(object):
         """Get the apis."""
         return self._apis
 
+    @property
+    def has_fetchai(self):
+        """Check if it has the fetchai API."""
+        return FETCHAI in self.apis.keys()
+
+    @property
+    def has_ethereum(self):
+        """Check if it has the ethereum API."""
+        return ETHEREUM in self.apis.keys()
+
     def token_balance(self, identifier: str, address: str) -> int:
         """
         Get the token balance.
