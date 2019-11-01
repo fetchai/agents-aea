@@ -20,14 +20,13 @@
 
 """This module contains the tests for the crypto/helpers module."""
 import logging
-from unittest import mock
+# from unittest import mock
 
 import pytest
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG, _try_to_instantiate_fetchai_ledger_api, \
-    _try_to_instantiate_ethereum_ledger_api
+from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG  # , _try_to_instantiate_fetchai_ledger_api, _try_to_instantiate_ethereum_ledger_api
 
 
 logger = logging.getLogger(__name__)
@@ -51,26 +50,25 @@ class TestLedgerApis:
         with pytest.raises(ValueError):
             ledger_apis = LedgerApis({"UNKNOWN": unknown_config})
 
-    def test_token_balance(self):
-        """Test the token_balance for the different tokens."""
-        ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
-                                  FETCHAI: DEFAULT_FETCHAI_CONFIG})
+    # def test_token_balance(self):
+    #     """Test the token_balance for the different tokens."""
+    #     ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
+    #                               FETCHAI: DEFAULT_FETCHAI_CONFIG})
 
-        with mock.patch.object(ledger_apis, 'token_balance', return_value=10):
-            balance = ledger_apis.token_balance(FETCHAI, eth_address)
-            assert balance == 10
-            balance = ledger_apis.token_balance(ETHEREUM, eth_address)
-            assert balance == 10, "The specific address has some eth"
-        with mock.patch.object(ledger_apis, 'token_balance', return_value=0):
-            balance = ledger_apis.token_balance(ETHEREUM, fet_address)
-            assert balance == 0, "Should trigger the Exception and the balance will be 0"
-        # with mock.patch.object(ledger_apis, 'token_balance', return_value=Exception):
-        #     balance = ledger_apis.token_balance(ETHEREUM, fet_address)
-        #     assert balance == 0, "Should trigger the Exception and the balance will be 0"
-        with pytest.raises(AssertionError):
-            balance = ledger_apis.token_balance("UNKNOWN", fet_address)
-            assert balance == 0, "Unknown identifier so it will return 0"
-
+    #     with mock.patch.object(ledger_apis, 'token_balance', return_value=10):
+    #         balance = ledger_apis.token_balance(FETCHAI, eth_address)
+    #         assert balance == 10
+    #         balance = ledger_apis.token_balance(ETHEREUM, eth_address)
+    #         assert balance == 10, "The specific address has some eth"
+    #     with mock.patch.object(ledger_apis, 'token_balance', return_value=0):
+    #         balance = ledger_apis.token_balance(ETHEREUM, fet_address)
+    #         assert balance == 0, "Should trigger the Exception and the balance will be 0"
+    #     with mock.patch.object(ledger_apis, 'token_balance', return_value=Exception):
+    #         balance = ledger_apis.token_balance(ETHEREUM, fet_address)
+    #         assert balance == 0, "Should trigger the Exception and the balance will be 0"
+    #     with pytest.raises(AssertionError):
+    #         balance = ledger_apis.token_balance("UNKNOWN", fet_address)
+    #         assert balance == 0, "Unknown identifier so it will return 0"
     # def test_transfer(self):
     #     """Test the transfer function for the supported tokens."""
     #     private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
@@ -96,11 +94,10 @@ class TestLedgerApis:
     #             assert ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest, amount=10)
     #         with mock.patch.object(ledger_apis, 'is_tx_settled', return_value= False):
     #             assert not ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest, amount=10)
+    # def test_try_to_instantiate_fetchai_ledger_api(self):
+    #     """Test the instantiation of the fetchai ledger api."""
+    #     _try_to_instantiate_fetchai_ledger_api(addr="127.0.0.1", port=80)
 
-    def test_try_to_instantiate_fetchai_ledger_api(self):
-        """Test the instantiation of the fetchai ledger api."""
-        _try_to_instantiate_fetchai_ledger_api(addr="127.0.0.1", port=80)
-
-    def test__try_to_instantiate_ethereum_ledger_api(self):
-        """Test the instantiation of the ethereum ledger api."""
-        _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1", port=80)
+    # def test__try_to_instantiate_ethereum_ledger_api(self):
+    #     """Test the instantiation of the ethereum ledger api."""
+    #     _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1", port=80)
