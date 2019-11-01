@@ -54,6 +54,7 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
         self.image_capture_interval = kwargs.pop('image_capture_interval') if 'image_capture_interval' in kwargs.keys() else DEFAULT_IMAGE_CAPTURE_INTERVAL
         self.default_latitude = kwargs.pop('default_latitude') if 'default_latitude' in kwargs.keys() else DEFAULT_LAT
         self.default_longitude = kwargs.pop('default_longitude') if 'default_longitude' in kwargs.keys() else DEFAULT_LON
+        self.process_id = None
         super().__init__(**kwargs)
 
     def setup(self) -> None:

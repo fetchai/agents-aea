@@ -75,7 +75,7 @@ class Strategy(SharedClass):
         self.db.set_fet(balance, time.time())
 
     def has_service_description(self):
-        """Return true if we have a description"""
+        """Return true if we have a description."""
         if not self.db.is_db_exits():
             return False
 
