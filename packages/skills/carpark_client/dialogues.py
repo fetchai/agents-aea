@@ -179,6 +179,7 @@ class Dialogues(SharedClass):
         :return: the next id
         """
         self._dialogue_id += 1
+        print("_next_dialogue_id: _dialogue_id  = {}".format(self._dialogue_id))
         return self._dialogue_id
 
     def is_belonging_to_registered_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> bool:

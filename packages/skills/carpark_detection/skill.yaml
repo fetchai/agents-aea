@@ -7,6 +7,13 @@ behaviours:
   - behaviour:
       class_name: ServiceRegistrationBehaviour
       args: {}
+  - behaviour:
+      class_name: CarParkDetectionAndGUIBehaviour
+      args:
+        default_longitude: -73.967491
+        default_latitude: 40.780343
+        image_capture_interval: 120
+
 handlers:
   - handler:
       class_name: FIPAHandler
@@ -16,9 +23,10 @@ shared_classes:
   - shared_class:
       class_name: Strategy
       args:
-        data_price_fet: 2000
-       # db_is_rel_to_cwd: true
-       # db_rel_dir: temp_files
+        data_price_fet: 200000000
+        db_is_rel_to_cwd: true
+        db_rel_dir: ../temp_files
+
   - shared_class:
       class_name: Dialogues
       args: {}
