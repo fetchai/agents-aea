@@ -47,7 +47,7 @@ class ProxyAgent(Agent):
         :param proxy_env_queue: the queue of the proxy environment
         :return: None
         """
-        wallet = Wallet({DEFAULT: None}, {})
+        wallet = Wallet({DEFAULT: None})
         super().__init__(name, wallet, timeout=0)
         self.proxy_env_queue = proxy_env_queue
         crypto_object = self.wallet.crypto_objects.get(DEFAULT)
