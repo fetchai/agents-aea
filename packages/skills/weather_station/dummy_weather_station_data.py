@@ -27,7 +27,7 @@ import sqlite3
 import time
 from typing import Dict, Union
 
-logger = logging.getLogger("aea.weather_station_skill")
+logger = logging.getLogger("aea.weather_station_ledger_skill")
 
 my_path = os.path.dirname(__file__)
 
@@ -61,7 +61,7 @@ cur.execute(command)
 cur.close()
 con.commit()
 if con is not None:
-    logger.info("Wheather station: I closed the db after checking it is populated!")
+    logger.debug("Weather station: I closed the db after checking it is populated!")
     con.close()
 
 
