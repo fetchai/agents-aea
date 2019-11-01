@@ -64,7 +64,7 @@ class TCPChannel(Channel, ABC):
         """Send bytes."""
         logger.debug("Send a message")
         nbytes = struct.pack("I", len(data))
-        logger.debug("#bytes: {}".format(nbytes))
+        logger.debug("#bytes: {!r}".format(nbytes))
         try:
             writer.write(nbytes)
             writer.write(data)
@@ -82,7 +82,7 @@ class TCPChannel(Channel, ABC):
             data = await self._recv(reader)
             if data is None:
                 return
-            logger.debug("Message received: {}".format(data))
+            logger.debug("Message received: {!r}".format(data))
             envelope = Envelope.decode(data)  # TODO handle decoding error
             logger.debug("Decoded envelope: {}".format(envelope))
             self.in_queue.put_nowait(envelope)
