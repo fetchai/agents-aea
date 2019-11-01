@@ -31,7 +31,7 @@ DEFAULT_SEARCH_INTERVAL = 5.0
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_CURRENCY_PBK = 'FET'
-DEFAULT_LEDGER_ID = 'fetchai'
+DEFAULT_LEDGER_ID = 'None'
 
 
 class Strategy(SharedClass):
@@ -97,15 +97,3 @@ class Strategy(SharedClass):
             (proposal.values['currency_pbk'] == self._currency_pbk) and \
             (proposal.values['ledger_id'] == self._ledger_id)
         return result
-
-    def is_affordable_proposal(self, proposal: Description) -> bool:
-        """
-        Check whether it is an affordable proposal.
-
-        :return: whether it is affordable
-        """
-        payable = proposal.values['price'] + self.max_buyer_tx_fee
-        ledger_id = proposal.values['ledger_id']
-        address = cast(str, self.context.agent_addresses.get(ledger_id))
-        balance = self.context.ledger_apis.token_balance(ledger_id, address)
-        return balance >= payable
