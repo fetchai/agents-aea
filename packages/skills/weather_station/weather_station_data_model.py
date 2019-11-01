@@ -22,7 +22,6 @@
 from aea.protocols.oef.models import DataModel, Attribute
 
 SCHEME = {'country': "UK", 'city': "Cambridge"}
-SERVICE_ID = "WeatherData"
 
 
 class WEATHER_STATION_DATAMODEL (DataModel):
