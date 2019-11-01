@@ -236,7 +236,7 @@ class FIPAHandler(Handler):
                                                                   sender[-5:]))
 
         json_data = cast(dict, msg.get("json_data"))
-        if "transaction" in json_data:
+        if "Done" in json_data:
             inform_msg = FIPAMessage(message_id=new_message_id,
                                      dialogue_id=dialogue_id,
                                      target=new_target,

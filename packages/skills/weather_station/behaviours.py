@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 else:
     from weather_station_skill.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_station_ledger_skill")
+logger = logging.getLogger("aea.weather_station_skill")
 
 SERVICE_ID = ''
 

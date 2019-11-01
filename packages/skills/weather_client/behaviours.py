@@ -30,15 +30,11 @@ if TYPE_CHECKING:
 else:
     from weather_client_skill.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_client_ledger_skill")
+logger = logging.getLogger("aea.weather_client_skill")
 
 
 class MySearchBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialise the class."""
-        super().__init__(**kwargs)
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""

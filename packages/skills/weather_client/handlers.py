@@ -198,7 +198,7 @@ class FIPAHandler(Handler):
                                  dialogue_id=dialogue_id,
                                  target=new_target_id,
                                  performative=FIPAMessage.Performative.INFORM,
-                                 json_data={"transaction": "Done"})
+                                 json_data={"Done": "Sending payment via bank transfer"})
         dialogue.outgoing_extend(inform_msg)
         self.context.outbox.put_message(to=counterparty_pbk,
                                         sender=self.context.agent_public_key,
