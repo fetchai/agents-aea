@@ -23,9 +23,10 @@ shared_classes:
       class_name: Strategy
       args:
         country: UK
-        search_interval: 10
+        search_interval: 120
+        no_find_search_interval: 5
         max_price: 400000000
-        max_detection_age: 3600000
+        max_detection_age: 3600
   - shared_class:
       class_name: Dialogues
       args: {}

@@ -28,7 +28,6 @@ This module contains the classes required for dialogue management.
 
 from enum import Enum
 import logging
-import random
 from typing import Any, Dict, Optional, cast
 
 from aea.helpers.dialogue.base import DialogueLabel
@@ -179,7 +178,7 @@ class Dialogues(SharedClass):
 
         :return: the next id
         """
-        self._dialogue_id = random.randint(0, 1000000)
+        self._dialogue_id += 1
         print("_next_dialogue_id: _dialogue_id  = {}".format(self._dialogue_id))
         return self._dialogue_id
 

@@ -31,6 +31,7 @@ SEARCH_TERM = 'country'
 DEFAULT_SEARCH_INTERVAL = 5.0
 DEFAULT_MAX_PRICE = 4000
 DEFAULT_MAX_DETECTION_AGE = 60 * 60   # 1 hour
+DEFAULT_NO_FINDSEARCH_INTERVAL = 5
 
 
 class Strategy(SharedClass):
@@ -44,6 +45,7 @@ class Strategy(SharedClass):
         """
         self._country = kwargs.pop('country') if 'country' in kwargs.keys() else DEFAULT_COUNTRY
         self._search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
+        self._no_find_search_interval = cast(float, kwargs.pop('no_find_search_interval')) if 'no_find_search_interval' in kwargs.keys() else DEFAULT_NO_FINDSEARCH_INTERVAL
         self._max_price = kwargs.pop('max_price') if 'max_price' in kwargs.keys() else DEFAULT_MAX_PRICE
         self._max_detection_age = kwargs.pop('max_detection_age') if 'max_detection_age' in kwargs.keys() else DEFAULT_MAX_DETECTION_AGE
         super().__init__(**kwargs)
@@ -59,13 +61,18 @@ class Strategy(SharedClass):
         query = Query([Constraint('longitude', ConstraintType("!=", 0.0))], model=None)
         return query
 
-    def pause_search(self):
-        """Stop searching temporarily."""
+    def on_submit_search(self):
+        """Call when you submit a search ( to suspend searching)."""
         self.is_searching = False
 
-    def unpause_search(self):
-        """Restart searching after pausing."""
+    def on_search_success(self):
+        """Call when search returns succesfully."""
         self.last_search_time = datetime.datetime.now()
+        self.is_searching = True
+
+    def on_search_failed(self):
+        """Call when search returns with no matches."""
+        self.last_search_time = datetime.datetime.now() - datetime.timedelta(seconds=self._search_interval - self._no_find_search_interval)
         self.is_searching = True
 
     def is_time_to_search(self) -> bool:

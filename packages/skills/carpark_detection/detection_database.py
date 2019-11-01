@@ -41,10 +41,18 @@ class DetectionDatabase:
         self.default_mask_ref_path = self.this_dir + "/default_mask_ref.png"
         self.num_digits_time = 12  # need to match this up with the generate functions below
         self.image_file_ext = ".png"
-
         self.database_path = self.temp_dir + "/" + "detection_results.db"
+
         if create_if_not_present:
             self.initialise_backend()
+
+    def is_db_exits(self):
+        """Return true if database exixts and is set up."""
+        if not os.path.isfile(self.database_path):
+            return False
+
+        ret = self.get_system_status("db", False) == "Exists"
+        return ret
 
     def reset_database(self):
         """Reset the database and remove all data."""
@@ -60,7 +68,9 @@ class DetectionDatabase:
         shutil.rmtree(self.processed_image_dir)
 
         # Recreate them
+        print("initialise_backend")
         self.initialise_backend()
+        print("FINISH initialise_backend")
 
     def reset_mask(self):
         """Just reset the detection mask."""
@@ -75,13 +85,14 @@ class DetectionDatabase:
         self.ensure_dirs_exist()
 
     def initialise_backend(self):
-        """Generate all tables in database and any temporary directories needed."""
+        """Set up database and initialise the tables."""
         self.ensure_dirs_exist()
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS images (epoch INTEGER, raw_image_path TEXT, "
             "processed_image_path TEXT, total_count INTEGER, "
             "moving_count INTEGER, free_spaces INTEGER, lat TEXT, lon TEXT)")
 
+        # self.execute_single_sql("DROP TABLE fet_table")
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS fet_table (id INTEGER PRIMARY KEY, amount BIGINT, last_updated TEXT)")
 
@@ -98,6 +109,13 @@ class DetectionDatabase:
         # self.execute_single_sql("DROP TABLE dialogue_statuses")
         self.execute_single_sql(
             "CREATE TABLE IF NOT EXISTS dialogue_statuses (dialogue_id TEXT, epoch DECIMAL, other_agent_key TEXT, received_msg TEXT, sent_msg TEXT)")
+
+        if not self.is_db_exits():
+            self.set_system_status("lat", "UNKNOWN")
+            self.set_system_status("lon", "UNKNOWN")
+        self.set_system_status("db", "Exists")
+
+        print("**** backend initialised")
 
     def set_fet(self, amount, t):
         """Record how much FET we have and when we last read it from the ledger."""
@@ -144,9 +162,9 @@ class DetectionDatabase:
         self.execute_single_sql(
             "INSERT OR REPLACE INTO status_table(system_name, status) values('{}', '{}')".format(system_name, status))
 
-    def get_system_status(self, system_name):
+    def get_system_status(self, system_name, print_exceptions=True):
         """Read the status of one of the systems."""
-        result = self.execute_single_sql("SELECT status FROM status_table WHERE system_name='{}'".format(system_name))
+        result = self.execute_single_sql("SELECT status FROM status_table WHERE system_name='{}'".format(system_name), print_exceptions)
         if len(result) != 0:
             return result[0][0]
         else:
@@ -287,7 +305,7 @@ class DetectionDatabase:
         self.execute_single_sql("INSERT INTO images VALUES ({}, '{}', '{}', {}, {}, {}, '{}', '{}')".format(
             t, raw_path, processed_path, total_count, moving_count, free_spaces, lat, lon))
 
-    def execute_single_sql(self, command):
+    def execute_single_sql(self, command, print_exceptions=True):
         """Query the database - all the other functions use this under the hood."""
         conn = None
         ret = []
@@ -298,7 +316,8 @@ class DetectionDatabase:
             ret = c.fetchall()
             conn.commit()
         except Exception as e:
-            print("Exception in database: {}".format(e))
+            if print_exceptions:
+                print("Exception in database: {}".format(e))
         finally:
             if conn is not None:
                 conn.close()

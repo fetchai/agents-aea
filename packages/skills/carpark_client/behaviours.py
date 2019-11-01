@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a behaviour."""
-import datetime
 import logging
 from typing import cast, TYPE_CHECKING
 
@@ -59,9 +58,8 @@ class MySearchBehaviour(Behaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_searching and strategy.is_time_to_search():
+            strategy.on_submit_search()
             self._search_id += 1
-            strategy.pause_search()
-            strategy.last_search_time = datetime.datetime.now()
             query = strategy.get_service_query()
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
                                         id=self._search_id,

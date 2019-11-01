@@ -163,7 +163,6 @@ class FIPAHandler(Handler):
             else:
                 logger.info("[{}]: declining the proposal from sender={}".format(self.context.agent_name,
                                                                                  sender[-5:]))
-                strategy.unpause_search()
                 decline_msg = FIPAMessage(message_id=new_message_id,
                                           dialogue_id=dialogue_id,
                                           target=new_target_id,
@@ -185,15 +184,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        strategy = cast(Strategy, self.context.strategy)
-        strategy.unpause_search()
         logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name, sender[-5:]))
-        # target = msg.get("target")
-        # dialogues = cast(Dialogues, self.context.dialogues)
-        # if target == 1:
-        #     dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP)
-        # elif target == 3:
-        #     dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT)
 
     def _handle_match_accept(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
         """
@@ -294,6 +285,8 @@ class OEFHandler(Handler):
         """
         strategy = cast(Strategy, self.context.strategy)
         if len(agents) > 0:
+            strategy.on_search_success()
+
             logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
 
             # pick first agent found
@@ -313,8 +306,8 @@ class OEFHandler(Handler):
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(cfp_msg))
         else:
-            strategy.unpause_search()
             logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))
+            strategy.on_search_failed()
 
 
 class MyTransactionHandler(Handler):
@@ -338,8 +331,7 @@ class MyTransactionHandler(Handler):
         if tx_msg_response is not None and \
                 TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
-            strategy = cast(Strategy, self.context.strategy)
-            strategy.unpause_search()
+
             json_data = {'transaction_digest': tx_msg_response.get("transaction_digest")}
             dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], tx_msg_response.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)
