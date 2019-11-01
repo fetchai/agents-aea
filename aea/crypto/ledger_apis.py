@@ -159,7 +159,7 @@ class LedgerApis(object):
             tx_digest = None
         return tx_digest
 
-    def is_tx_settled(self, identifier: str, tx_digest: str) -> bool:
+    def is_tx_settled(self, identifier: str, tx_digest: str, amount: int) -> bool:
         """
         Check whether the transaction is settled and correct.
 

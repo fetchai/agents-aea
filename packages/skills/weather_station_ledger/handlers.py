@@ -239,9 +239,9 @@ class FIPAHandler(Handler):
             logger.info("[{}]: checking whether transaction={} has been received ...".format(self.context.agent_name,
                                                                                              tx_digest))
             proposal = cast(Description, dialogue.proposal)
-            # total_price = cast(int, proposal.values.get("price"))
+            total_price = cast(int, proposal.values.get("price"))
             ledger_id = cast(str, proposal.values.get("ledger_id"))
-            is_settled = self.context.ledger_apis.is_tx_settled(ledger_id, tx_digest)
+            is_settled = self.context.ledger_apis.is_tx_settled(ledger_id, tx_digest, total_price)
             if is_settled:
                 token_balance = self.context.ledger_apis.token_balance(ledger_id,
                                                                        cast(str, self.context.agent_addresses.get(ledger_id)))

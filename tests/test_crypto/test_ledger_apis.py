@@ -72,14 +72,14 @@ class TestLedgerApis:
                                   FETCHAI: DEFAULT_FETCHAI_CONFIG})
         tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
         assert tx_digest is not None
-        assert ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest)
+        assert ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest, amount=10)
         tx_digest = "unknown_hash"
-        assert not ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest)
+        assert not ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest, amount=10)
 
         tx_digest = ledger_apis.transfer(ETHEREUM, eth_obj, eth_address, amount=10, tx_fee=200000)
         assert tx_digest is not None
-        assert ledger_apis.is_tx_settled(identifier=ETHEREUM, tx_digest=tx_digest)
+        assert ledger_apis.is_tx_settled(identifier=ETHEREUM, tx_digest=tx_digest, amount=10)
         tx_digest = "unknown_hash"
-        assert not ledger_apis.is_tx_settled(identifier=ETHEREUM, tx_digest=tx_digest)
+        assert not ledger_apis.is_tx_settled(identifier=ETHEREUM, tx_digest=tx_digest, amount=10)
         with pytest.raises(ValueError):
             tx_digest = ledger_apis.transfer(ETHEREUM, eth_obj, eth_address, amount=50, tx_fee=2)
