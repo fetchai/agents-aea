@@ -52,3 +52,43 @@ Release History
 - Extended docs on framework and skills
 - Introduces core framework components like decision maker and shared classes
 - Multiple additional minor fixes and changes
+
+0.1.7 (2019-10-14)
+-------------------
+
+- Adds gui to interact with cli
+- Adds new connection stub to read from/write to file
+- Adds ledger entities (fetchai and ethereum); creates wallet for ledger entities
+- Adds more documentation and fixes old one
+- Multiple additional minor fixes and changes
+
+0.1.8 (2019-10-18)
+-------------------
+
+- Multiple bug fixes and improvements to gui of cli
+- Adds full test coverage on cli
+- Improves docs
+- Multiple additional minor fixes and changes
+
+0.1.9 (2019-10-18)
+-------------------
+
+- Stability improvements
+- Higher test coverage, including on Python 3.6
+- Multiple additional minor fixes and changes
+
+0.1.10 (2019-10-19)
+-------------------
+
+- Compatibility fixes for Ubuntu and Windows platforms
+- Multiple additional minor fixes and changes
+
+0.1.11 (2019-10-30)
+-------------------
+
+- Adds python3.8 test coverage
+- Adds almost complete test coverage on aea package
+- Adds filter concept for message routing
+- Adds ledger integrations for fetch.ai and ethereum
+- Adds carpark examples and ledger examples
+- Multiple additional minor fixes and changes

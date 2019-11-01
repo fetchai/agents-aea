@@ -1,17 +1,30 @@
-aea_version: 0.1.4
+aea_version: 0.1.7
 agent_name: Agent0
 authors: Fetch.AI Limited
 connections:
 - local
 default_connection: local
+description: dummy_aea agent description [Fill in]
 license: Apache 2.0
-private_key_pem_path: ''
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths:
+- private_key_path:
+    ledger: default
+    path: default_private_key.pem
+- private_key_path:
+    ledger: fetchai
+    path: fet_private_key.txt
+- private_key_path:
+    ledger: ethereum
+    path: eth_private_key.txt
 protocols:
-- fipa
 - default
+- fipa
 registry_path: aea
 skills:
-- error
 - dummy
+- error
 url: ''
 version: v1

@@ -6,3 +6,4 @@ url: ""
 class_name: OEFLocalConnection
 supported_protocols: ["oef"]
 config: {}
+description: "local connection description [Fill in]"

@@ -38,7 +38,7 @@ else:
 
 DEFAULT_MSG_ID = 1
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.fipa_negotiation_skill")
 
 
 class GoodsRegisterAndSearchBehaviour(Behaviour):

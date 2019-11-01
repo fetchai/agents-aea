@@ -3,3 +3,6 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "fipa protocol description [Fill in]"
+dependencies:
+  - protobuf

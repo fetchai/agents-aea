@@ -19,6 +19,7 @@
 
 """This test module contains the tests for the OEF models."""
 import pickle
+from unittest import mock
 
 import pytest
 
@@ -57,6 +58,9 @@ class TestTranslator:
         expected_description = OEFObjectTranslator.from_oef_description(oef_description)
         actual_description = description_foobar
         assert expected_description == actual_description
+        m_desc = iter(description_foobar.values)
+        assert next(m_desc) == "foo"
+        assert {"foo", "bar"} == set(iter(description_foobar))
 
     def test_query(self):
         """Test that the translation for the Query class works."""
@@ -132,3 +136,95 @@ class TestPickable:
             pickle.dumps(query)
         except Exception:
             pytest.fail("Error during pickling.")
+
+
+class TestCheckValidity:
+    """Test the initialization of the Constraint type."""
+
+    def test_validity(self):
+        """Test the validity of the Constraint type."""
+        m_constraint = ConstraintType("==", 3)
+        assert m_constraint.check(3)
+        assert str(m_constraint.type) == "=="
+        m_constraint = ConstraintType("!=", "London")
+        assert m_constraint.check("Paris")
+        assert str(m_constraint.type) == "!="
+        m_constraint = ConstraintType("<", 3.14)
+        assert m_constraint.check(5.0)
+        assert str(m_constraint.type) == "<"
+        m_constraint = ConstraintType(">", 3.14)
+        assert m_constraint.check(2.0)
+        assert str(m_constraint.type) == ">"
+        m_constraint = ConstraintType("<=", 5)
+        assert m_constraint.check(5)
+        assert str(m_constraint.type) == "<="
+        m_constraint = ConstraintType(">=", 5)
+        assert m_constraint.check(5)
+        assert str(m_constraint.type) == ">="
+        m_constraint = ConstraintType("within", (-10.0, 10.0))
+        assert m_constraint.check(5)
+        assert str(m_constraint.type) == "within"
+        m_constraint = ConstraintType("in", [1, 2, 3])
+        assert m_constraint.check(2)
+        assert str(m_constraint.type) == "in"
+        m_constraint = ConstraintType("not_in", {"C", "Java", "Python"})
+        assert m_constraint.check("C++")
+        assert str(m_constraint.type) == "not_in"
+
+        m_constraint.type = "unknown"
+        with pytest.raises(ValueError):
+            m_constraint.check("HelloWorld")
+
+        m_constraint = ConstraintType("==", 3)
+        with mock.patch("aea.protocols.oef.models.ConstraintTypes") as mocked_types:
+            mocked_types.EQUAL.value = "unknown"
+            assert not m_constraint._check_validity(), "My constraint must not be valid"
+
+    def test_not_check(self):
+        """Test the not().check function."""
+        attribute_foo = Attribute("foo", int, True, "a foo attribute.")
+        attribute_bar = Attribute("bar", str, True, "a bar attribute.")
+        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
+        no_constraint = Not(Constraint("foo", ConstraintType("==", 5)))
+        assert no_constraint.check(description_foobar)
+
+    def test_or_check(self):
+        """Test the or().check function."""
+        attribute_foo = Attribute("foo", int, True, "a foo attribute.")
+        attribute_bar = Attribute("bar", str, True, "a bar attribute.")
+        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
+        constraint = Or([(Constraint("foo", ConstraintType("==", 1))),
+                         (Constraint("bar", ConstraintType("==", "baz")))
+                         ])
+        assert constraint.check(description_foobar)
+
+    def test_and_check(self):
+        """Test the and().check function."""
+        attribute_foo = Attribute("foo", int, True, "a foo attribute.")
+        attribute_bar = Attribute("bar", str, True, "a bar attribute.")
+        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
+        constraint = And([(Constraint("foo", ConstraintType("==", 1))),
+                          (Constraint("bar", ConstraintType("==", "baz")))
+                          ])
+        assert constraint.check(description_foobar)
+
+    def test_query_check(self):
+        """Test that the query.check() method works."""
+        attribute_foo = Attribute("foo", int, True, "a foo attribute.")
+        attribute_bar = Attribute("bar", str, True, "a bar attribute.")
+        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
+        query = Query([
+            And([
+                Or([
+                    Not(Constraint("foo", ConstraintType("==", 1))),
+                    Not(Constraint("bar", ConstraintType("==", "baz")))
+                ]),
+                Constraint("foo", ConstraintType("<", 2)),
+            ])
+        ],
+            data_model_foobar)
+        assert not query.check(description=description_foobar)

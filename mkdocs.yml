@@ -18,18 +18,31 @@ theme:
 nav:
 
   - Autonomous Economic Agent Framework:
-    - Welcome:
-      - "What is the AEA framework?": 'index.md'
-      - "Version": 'version.md'
+    - Welcome: 'index.md'
+    - AEA quick start: 'quickstart.md'
+    - The AEA universe:
+      - "Vision": 'vision.md'
+      - "Application areas": 'app-areas.md'
+      - "Relation to OEF and Ledger": 'oef-ledger.md'
+      - "Trust issues": 'trust.md'
+      # - "Two-layered machine learning": 'two-layer.md'
+    - Demos:
+      - "Gym demo": 'gym-plugin.md'
+      - "Gym skill": 'gym-skill.md'
+      - "Weather skills": 'weather-skills.md'
+      - "TAC external app": 'tac.md'
+      # - "FIPA skill": 'fipa-skill.md'
+      # - "TAC skill": 'tac-skill.md'
+      # - "Car park agent": 'car-park.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
       - "Architectural diagram": 'diagram.md'
       - "Core components": 'core-components.md'
       - "File structure": 'file-structure.md'
-    - AEA quick start: 'quickstart.md'
     - Developer guide:
       - "Step by step": 'steps.md'
       - "Skill": 'skill.md'
+      - "Build your own skill": 'skill-guide.md'
       - "Protocol": 'protocol.md'
       - "Connection": 'connection.md'
       - "Scaffolding": 'scaffolding.md'
@@ -37,15 +50,10 @@ nav:
       - CLI:
          - "CLI tool": 'cli-how-to.md'
          - "Commands": 'cli-commands.md'
-    - Integration:
+         - "GUI": 'cli-gui.md'
+      - "Code an agent directly": 'hacking-an-agent.md'
       - "Integrate with third parties": 'integration.md'
-    - Demos:
-      - "Gym demo": 'gym-plugin.md'
-      - "Gym skill": 'gym-skill.md'
-      - "Weather skills": 'weather-skills.md'
-      - "TAC external app": 'tac.md'
-      - "FIPA skill": 'fipa-skill.md'
-      - "TAC skill": 'tac-skill.md'
+
 
 
 

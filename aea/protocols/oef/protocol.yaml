@@ -6,3 +6,4 @@ url: ""
 dependencies:
   - colorlog
   - oef
+description: "The oef protocol implements the OEF specific messages."

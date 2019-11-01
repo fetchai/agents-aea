@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
+import json
 import pickle
 from typing import cast
 
@@ -35,7 +36,7 @@ class FIPASerializer(Serializer):
     def encode(self, msg: Message) -> bytes:
         """Encode a FIPA message into bytes."""
         fipa_msg = fipa_pb2.FIPAMessage()
-        fipa_msg.message_id = msg.get("id")
+        fipa_msg.message_id = msg.get("message_id")
         fipa_msg.dialogue_id = msg.get("dialogue_id")
         fipa_msg.target = msg.get("target")
 
@@ -60,16 +61,33 @@ class FIPASerializer(Serializer):
             p_array_bytes = [pickle.dumps(p) for p in proposal]
             performative.proposal.extend(p_array_bytes)
             fipa_msg.propose.CopyFrom(performative)
-
         elif performative_id == FIPAMessage.Performative.ACCEPT:
             performative = fipa_pb2.FIPAMessage.Accept()  # type: ignore
             fipa_msg.accept.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
             performative = fipa_pb2.FIPAMessage.MatchAccept()  # type: ignore
             fipa_msg.match_accept.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.ACCEPT_W_ADDRESS:
+            performative = fipa_pb2.FIPAMessage.AcceptWAddress()  # type: ignore
+            address = msg.get("address")
+            if type(address) == str:
+                performative.address = address
+            fipa_msg.accept_w_address.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+            performative = fipa_pb2.FIPAMessage.MatchAcceptWAddress()  # type: ignore
+            address = msg.get("address")
+            if type(address) == str:
+                performative.address = address
+            fipa_msg.match_accept_w_address.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.DECLINE:
             performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.INFORM:
+            performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
+            data = msg.get("json_data")
+            data_bytes = json.dumps(data).encode("utf-8")
+            performative.bytes = data_bytes
+            fipa_msg.inform.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -96,8 +114,7 @@ class FIPASerializer(Serializer):
             elif query_type == "bytes":
                 query = fipa_pb.cfp.bytes
             else:
-                raise ValueError("Query type not recognized.")
-
+                raise ValueError("Query type not recognized.")  # pragma: no cover
             performative_content["query"] = query
         elif performative_id == FIPAMessage.Performative.PROPOSE:
             descriptions = []
@@ -109,8 +126,17 @@ class FIPASerializer(Serializer):
             pass
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
             pass
+        elif performative_id == FIPAMessage.Performative.ACCEPT_W_ADDRESS:
+            address = fipa_pb.accept_w_address.address
+            performative_content['address'] = address
+        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+            address = fipa_pb.match_accept_w_address.address
+            performative_content['address'] = address
         elif performative_id == FIPAMessage.Performative.DECLINE:
             pass
+        elif performative_id == FIPAMessage.Performative.INFORM:
+            data = json.loads(fipa_pb.inform.bytes)
+            performative_content["json_data"] = data
         else:
             raise ValueError("Performative not valid: {}.".format(performative))
 

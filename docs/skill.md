@@ -5,7 +5,7 @@ When you add a skill with the CLI, a directory is created which includes modules
 
 ## Context
 
-The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context also has a link to the agent context. The agent context provides read access to agent specific information like the private key of the agent, its preferences and ownership state. It also provides access to the `OutBox`.
+The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context also has a link to the agent context. The agent context provides read access to agent specific information like the public key and address of the agent, its preferences and ownership state. It also provides access to the `OutBox`.
 
 This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill and the agent.
 
@@ -83,7 +83,7 @@ It also details the protocol types used in the skill and points to shared module
 
 ``` yaml
 name: echo
-authors: Fetch.AI Limited
+authors: Fetch.ai Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""

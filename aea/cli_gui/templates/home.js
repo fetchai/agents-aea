@@ -44,6 +44,40 @@ class Model{
         })
     }
 
+    readOEFStatus() {
+        var ajax_options = {
+            type: 'GET',
+            url: 'api/oef',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_OEFStatusReadSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
+    readAgentStatus(agentId) {
+        var ajax_options = {
+            type: 'GET',
+            url: 'api/agent/' + agentId + '/run',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_AgentStatusReadSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
     createItem(element, id){
         var ajax_options = {
             type: 'POST',
@@ -152,12 +186,103 @@ class Model{
             self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
         })
     }
+    startOEFNode(){
+        var ajax_options = {
+            type: 'POST',
+            url: 'api/oef',
+            accepts: 'application/json',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify("Test dummy")
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_StartOEFNodeSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+    stopOEFNode(){
+        var ajax_options = {
+            type: 'DELETE',
+            url: 'api/oef',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_StopOEFNodeSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+    startAgent(agentId){
+        var ajax_options = {
+            type: 'POST',
+            url: 'api/agent/' + agentId + '/run',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_StartAgentSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+    stopAgent(agentId){
+        var ajax_options = {
+            type: 'DELETE',
+            url: 'api/agent/' + agentId + '/run',
+            accepts: 'application/json',
+            contentType: 'plain/text'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_StopAgentSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
 
 }
 
 class View{
     constructor(){
         this.$event_pump = $('body');
+
+    }
+
+    setOEFStatus(status){
+        $('#oefStatus').html(status);
+    }
+    setOEFTTY(tty){
+        $('#oefTTY').html(tty);
+        $('#oefTTY').scrollTop($('#oefTTY')[0].scrollHeight);
+    }
+    setOEFError(error){
+        $('#oefError').html(error);
+        $('#oefError').scrollTop($('#oefError')[0].scrollHeight);
+    }
+    setAgentStatus(status){
+        $('#agentStatus').html(status);
+    }
+    setAgentTTY(tty){
+        $('#agentTTY').html(tty);
+        $('#agentTTY').scrollTop($('#agentTTY')[0].scrollHeight);
+    }
+    setAgentError(error){
+        $('#agentError').html(error);
+        $('#agentError').scrollTop($('#agentError')[0].scrollHeight);
     }
 
     setCreateId(tag, id) {
@@ -189,7 +314,7 @@ class View{
 
     error(error_msg) {
         $('.error')
-            .text(error_msg)
+            .html("<br>" + error_msg)
             .css('visibility', 'visible');
         setTimeout(function() {
             $('.error').css('visibility', 'hidden');
@@ -230,18 +355,20 @@ class Controller{
                 }
             });
 
-
             $('#' + combineName + 'Delete').click({el: element}, function(e) {
                 var id =$('#' + e.data.el["combined"] + 'SelectionId').html();
+                if (confirm("This will completely remove agent: " + id + "'s code and is non-recoverable. Press OK to do this - otherwise press cancel")){
 
-                e.preventDefault();
+                    e.preventDefault();
 
-                if (self.validateId(id)) {
-                    self.model.deleteItem(e.data.el, id)
-                } else {
-                    alert('Error: Problem with selected id');
+                    if (self.validateId(id)) {
+                        self.model.deleteItem(e.data.el, id)
+                        self.view.setSelectedId(e.data.el["combined"], "NONE")
+                    } else {
+                        alert('Error: Problem with selected id');
+                    }
+                    e.preventDefault();
                 }
-                e.preventDefault();
             });
 
             $('#' + combineName + 'Add').click({el: element}, function(e) {
@@ -252,6 +379,10 @@ class Controller{
 
                 if (self.validateId(agentId) && self.validateId(itemId) ) {
                     self.model.addItem(e.data.el, agentId, itemId)
+                    self.view.setSelectedId(e.data.el["combined"], "NONE")
+                    var tableBody = $("."+ e.data.el["combined"] +"registeredTable");
+                    self.clearTable(tableBody);
+
 
                 } else {
                     alert('Error: Problem with one of the selected ids (either agent or ' + element['type']);
@@ -266,6 +397,8 @@ class Controller{
 
                 if (self.validateId(agentId) && self.validateId(itemId) ) {
                     self.model.removeItem(e.data.el, agentId, itemId)
+                    self.view.setSelectedId(e.data.el["combined"], "NONE")
+
 
                 } else {
                     alert('Error: Problem with one of the selected ids (either agent or ' + element['type']);
@@ -287,7 +420,7 @@ class Controller{
 
                 self.view.setSelectedId(e.data.el["combined"], id);
 
-                // Make all the cells white
+                // Select the appropriate row
                 var tableBody = $(e.target).closest("."+ e.data.el["combined"] +"registeredTable");
                 self.clearTable(tableBody);
 
@@ -321,6 +454,7 @@ class Controller{
                     alert('Error: Problem with id');
                 }
             });
+
             // Handle the model events
             this.$event_pump.on('model_'+ combineName + 'ReadSuccess', {el: element}, function(e, data) {
                 self.view.build_table(data, e.data.el["combined"]);
@@ -336,22 +470,18 @@ class Controller{
 
             this.$event_pump.on('model_'+ combineName + 'DeleteSuccess', {el: element}, function(e, data) {
                 self.model.readData(e.data.el);
-                self.view.setSelectedId(e.data.el["combined"], "NONE")
+
                 self.refreshAgentData(data)
                 self.handleButtonStates()
 
             });
             this.$event_pump.on('model_'+ combineName + 'AddSuccess', {el: element}, function(e, data) {
                 self.refreshAgentData(data)
-                self.view.setSelectedId(e.data.el["combined"], "NONE")
-                var tableBody = $("."+ e.data.el["combined"] +"registeredTable");
-                self.clearTable(tableBody);
                 self.handleButtonStates()
 
             });
             this.$event_pump.on('model_'+ combineName + 'RemoveSuccess', {el: element}, function(e, data) {
                 self.refreshAgentData(data)
-                self.view.setSelectedId(e.data.el["combined"], "NONE")
                 self.handleButtonStates()
 
             });
@@ -360,8 +490,62 @@ class Controller{
                 self.view.setScaffoldId(e.data.el["combined"], "")
                 self.handleButtonStates()
             });
-        }
 
+        }
+        this.$event_pump.on('model_OEFStatusReadSuccess', function(e, data) {
+            self.view.setOEFStatus("OEF Node Status: " + data["status"])
+            self.view.setOEFTTY(data["tty"])
+            self.view.setOEFError(data["error"])
+            self.handleButtonStates()
+        });
+
+        this.$event_pump.on('model_AgentStatusReadSuccess', function(e, data) {
+            self.view.setAgentStatus("Agent Status: " + data["status"])
+            self.view.setAgentTTY(data["tty"])
+            self.view.setAgentError(data["error"])
+            self.handleButtonStates()
+        });
+
+
+
+
+        $('#startOEFNode').click({el: element}, function(e) {
+            e.preventDefault();
+
+            self.model.startOEFNode()
+            e.preventDefault();
+        });
+        $('#stopOEFNode').click({el: element}, function(e) {
+            e.preventDefault();
+
+            self.model.stopOEFNode()
+            e.preventDefault();
+        });
+
+        $('#startAgent').click({el: element}, function(e) {
+            e.preventDefault();
+            var agentId = $('#localAgentsSelectionId').html()
+            if (self.validateId(agentId)){
+                self.model.startAgent(agentId)
+            }
+            else{
+                alert('Error: Attempting to start agent with ID: ' + agentId);
+            }
+
+            e.preventDefault();
+        });
+        $('#stopAgent').click({el: element}, function(e) {
+            e.preventDefault();
+            var agentId = $('#localAgentsSelectionId').html()
+            if (self.validateId(agentId)){
+                self.model.stopAgent(agentId)
+            }
+            else{
+                alert('Error: Attempting to stop agent with ID: ' + agentId);
+            }
+
+            e.preventDefault();
+        });
 
         this.$event_pump.on('model_error', {el: element}, function(e, xhr, textStatus, errorThrown) {
             var error_msg = textStatus + ': ' + errorThrown + ' - ' + xhr.responseJSON.detail;
@@ -374,15 +558,18 @@ class Controller{
 
         $('#localAgentsCreateId').on('input', function(e){
             self.handleButtonStates()
-            });
-        $('#localAgentsSelectedId').on('input', function(e){
+        });
+        $('#localAgentsSelectionId').on('input', function(e){
             self.handleButtonStates()
-            });
+        });
 
         for (var j = 0; j < elements.length; j++) {
             $('#'+ elements[j]["combined"] + 'ScaffoldId').on('input', function(e){
                 self.handleButtonStates()});
         }
+
+        this.getOEFStatus();
+        this.getAgentStatus();
 
     }
 
@@ -403,7 +590,14 @@ class Controller{
         for (var j = 0; j < elements.length; j++) {
             if (elements[j]["location"] == "local" && elements[j]["type"] != "agent"){
                 var itemSelectionId = $('#' + elements[j]["combined"] + 'SelectionId').html();
-                $('#' + elements[j]["combined"] + 'Remove').prop('disabled', !this.validateId(itemSelectionId));
+                var isDisabled =  !this.validateId(itemSelectionId);
+                $('#' + elements[j]["combined"] + 'Remove').prop('disabled', isDisabled);
+                if (isDisabled){
+                    $('#' + elements[j]["combined"] + 'Remove').html("Remove " + elements[j]["type"])
+                }
+                else{
+                    $('#' + elements[j]["combined"] + 'Remove').html("Remove " + itemSelectionId + " " + elements[j]["type"] + " from " + agentSelectionId + " agent")
+                }
 
                 var itemScaffoldId = $('#' + elements[j]["combined"] + 'ScaffoldId').val();
                 $('#' + elements[j]["combined"] + 'Scaffold').prop('disabled',
@@ -414,15 +608,61 @@ class Controller{
             }
             if (elements[j]["location"] == "registered"){
                 var itemSelectionId = $('#' + elements[j]["combined"] + 'SelectionId').html();
-                $('#' + elements[j]["combined"] + 'Add').prop('disabled',
-                    !this.validateId(itemSelectionId) ||
-                    !this.validateId(agentSelectionId));
+                var isDisabled =  !this.validateId(itemSelectionId) || !this.validateId(agentSelectionId);
+                $('#' + elements[j]["combined"] + 'Add').prop('disabled', isDisabled);
+                if (isDisabled){
+                    $('#' + elements[j]["combined"] + 'Add').html("<< Add " + elements[j]["type"])
+                }
+                else{
+                    $('#' + elements[j]["combined"] + 'Add').html("<< Add " + itemSelectionId + " " + elements[j]["type"] + " to " + agentSelectionId + " agent")
+                }
             }
         }
+        if (agentSelectionId != "NONE"){
+            $('.localItemHeading').html(agentSelectionId);
+        }
+        else{
+            $('.localItemHeading').html("Local");
+
+        }
+
+        var isOEFStopped = $('#oefStatus').html().includes("NOT_STARTED")
+        $('#startOEFNode').prop('disabled',!isOEFStopped);
+        $('#stopOEFNode').prop('disabled', isOEFStopped);
+
+        var agentOEFStopped = $('#agentStatus').html().includes("NOT_STARTED")
+        var hasValidAgent = this.validateId(agentSelectionId);
+        $('#startAgent').prop('disabled', !hasValidAgent || !agentOEFStopped);
+        $('#stopAgent').prop('disabled', !hasValidAgent || agentOEFStopped);
 
 
     }
 
+    getOEFStatus(){
+        this.model.readOEFStatus()
+        self = this
+        setTimeout(function() {
+            self.getOEFStatus()
+        }, 500)
+
+    }
+
+    getAgentStatus(){
+        var agentId = $('#localAgentsSelectionId').html()
+        if (self.validateId(agentId)){
+            this.model.readAgentStatus(agentId)
+        }
+        else{
+            self.view.setAgentStatus("Agent Status: NONE")
+            self.view.setAgentTTY("<br><br><br><br><br>")
+            self.view.setAgentError("<br><br><br><br><br>")
+        }
+        self = this
+        setTimeout(function() {
+            self.getAgentStatus()
+        }, 500)
+
+    }
 
     // Update lists of protocols, connections and skills for the selected agent
     refreshAgentData(agentId){
@@ -441,5 +681,6 @@ class Controller{
 
 }
 
-
-c = new Controller(new Model(), new View())
+$( document ).ready(function() {
+    c = new Controller(new Model(), new View())
+});

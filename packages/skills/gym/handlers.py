@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'gym' skill."""
+import logging
 from typing import cast, TYPE_CHECKING
 
 from aea.protocols.base import Message
@@ -30,6 +31,8 @@ else:
     from gym_protocol.message import GymMessage
     from gym_skill.tasks import GymTask
 
+logger = logging.getLogger("aea.gym_skill")
+
 
 class GymHandler(Handler):
     """Gym handler."""
@@ -38,12 +41,12 @@ class GymHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        print("GymHandler.__init__: arguments: {}".format(kwargs))
+        logger.info("GymHandler.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
 
     def setup(self) -> None:
         """Set up the handler."""
-        print("Gym handler: setup method called.")
+        logger.info("Gym handler: setup method called.")
 
     def handle(self, message: Message, sender: str) -> None:
         """
@@ -69,4 +72,4 @@ class GymHandler(Handler):
 
         :return: None
         """
-        print("Gym handler: teardown method called.")
+        logger.info("Gym handler: teardown method called.")

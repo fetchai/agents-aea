@@ -16,8 +16,18 @@ body, .ui-btn {
     text-align: center;
 }
 
+table {
+    table-layout: fixed ;
+    width: 100% ;
+}
+
+.mainTable {
+    vertical-align: top;
+    width: 50%;
+}
+
 .editor {
-    width: 80%;
+    width: 90%;
     margin-left: auto;
     margin-right: auto;
     padding: 5px;
@@ -25,6 +35,7 @@ body, .ui-btn {
     border-radius: 3px;
     margin-bottom: 5px;
 }
+
 
 label {
     display: inline-block;
@@ -38,16 +49,10 @@ button {
     background-color: #eee;
 }
 
-.people {
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 5px;
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
+    text-align: center;
 }
 
 table, caption, th, td {
@@ -67,18 +72,22 @@ tr {
 
 
 td {
-    text-align: center;
+    padding-left: 5px;
+    text-align: left;
 }
 
-.error {
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 5px;
+.error{
+    position: fixed; /* Sit on top of the page content */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 10%; /* A bit of the page */
+    bottom: 0;
+    visibility: hidden;
     border: 1px solid lightgrey;
     border-radius: 3px;
-    background-color: #fbb;
-    visibility: hidden;
+    background-color: #fbbd;
+    text-align: center;
+    font-weight: bold;
+
 }
 
 /* Split the screen in half */
@@ -115,4 +124,36 @@ td {
 .centered img {
   width: 150px;
   border-radius: 50%;
+}
+
+.code {
+    display:block;
+    overflow: scroll;
+    width: 90%;
+    height:150px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    background-color: black;
+    color: white;
+    font-family: "Courier New", Courier, monospace;
+
+}
+
+.codeError {
+    display:block;
+    overflow: scroll;
+    width: 90%;
+    height:150px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    background-color: black;
+    color: red;
+    font-family: "Courier New", Courier, monospace;
+
 }

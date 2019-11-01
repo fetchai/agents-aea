@@ -20,16 +20,20 @@
 """This module contains the agent context class."""
 
 from queue import Queue
+from typing import Dict
 
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
+from aea.crypto.ledger_apis import LedgerApis
 
 
 class AgentContext:
     """Provide read access to relevant data of the agent for the skills."""
 
     def __init__(self, agent_name: str,
-                 public_key: str,
+                 public_keys: Dict[str, str],
+                 addresses: Dict[str, str],
+                 ledger_apis: LedgerApis,
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
@@ -39,15 +43,18 @@ class AgentContext:
         Initialize an agent context.
 
         :param agent_name: the agent's name
-        :param public_key: the public key of the agent
+        :param public_keys: the public keys of the agent
+        :param ledger_apis: the ledger apis
         :param outbox: the outbox
-        :param decision_maker_queue: the (in) queue of the decision maker
+        :param decision_maker_message_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
         :param preferences: the preferences of the agent
         :param is_ready_to_pursuit_goals: whether the agent is ready to pursuit its goals
         """
         self._agent_name = agent_name
-        self._public_key = public_key
+        self._public_keys = public_keys
+        self._addresses = addresses
+        self._ledger_apis = ledger_apis
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
         self._ownership_state = ownership_state
@@ -60,9 +67,24 @@ class AgentContext:
         return self._agent_name
 
     @property
+    def public_keys(self) -> Dict[str, str]:
+        """Get public keys."""
+        return self._public_keys
+
+    @property
+    def addresses(self) -> Dict[str, str]:
+        """Get addresses."""
+        return self._addresses
+
+    @property
+    def address(self) -> str:
+        """Get the defualt address."""
+        return self._addresses['default']
+
+    @property
     def public_key(self) -> str:
-        """Get public key."""
-        return self._public_key
+        """Get the default public key."""
+        return self._public_keys['default']
 
     @property
     def outbox(self) -> OutBox:
@@ -88,3 +110,8 @@ class AgentContext:
     def is_ready_to_pursuit_goals(self) -> bool:
         """Get the goal pursuit readiness."""
         return self._is_ready_to_pursuit_goals
+
+    @property
+    def ledger_apis(self) -> LedgerApis:
+        """Get the ledger APIs."""
+        return self._ledger_apis

@@ -27,8 +27,9 @@ from aea.skills.base import SharedClass
 class Search(SharedClass):
     """This class deals with the search state."""
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Instantiate the search class."""
+        super().__init__(*args, **kwargs)
         self._id = 0
         self.ids_for_tac = set()  # type: Set[int]
 

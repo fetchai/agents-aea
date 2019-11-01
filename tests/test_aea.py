@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests for aea.aea.py."""
+"""This module contains the tests for aea/aea.py."""
 import os
 import time
 from pathlib import Path
@@ -24,42 +24,47 @@ from threading import Thread
 
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.crypto.base import Crypto
+from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from .conftest import CUR_PATH
+from .conftest import CUR_PATH, DummyConnection
 
 
-def test_initialiseAeA():
-    """Tests the initialisation of the AeA."""
+def test_initialise_AEA():
+    """Tests the initialisation of the AEA."""
     node = LocalNode()
     public_key_1 = "mailbox1"
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
-    myAea = AEA("Agent0", mailbox1, directory=str(Path(CUR_PATH, "aea")))
-    assert AEA("Agent0", mailbox1), "Agent is not inisialised"
-    print(myAea.context)
-    assert myAea.context == myAea._context, "Cannot access the Agent's Context"
-    myAea.setup()
-    assert myAea.resources is not None,\
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
+    my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, directory=str(Path(CUR_PATH, "aea")))
+    assert AEA("Agent0", mailbox1, wallet, ledger_apis), "Agent is not initialised"
+    assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
+    my_AEA.setup()
+    assert my_AEA.resources is not None,\
         "Resources must not be None after setup"
 
 
 def test_act():
-    """Tests the act function of the AeA."""
+    """Tests the act function of the AEA."""
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
+    wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
+    public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
     agent = AEA(
         agent_name,
         mailbox,
-        private_key_pem_path=private_key_pem_path,
+        wallet,
+        ledger_apis,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:
@@ -78,8 +83,9 @@ def test_react():
     node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
+    wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
+    public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
@@ -94,7 +100,8 @@ def test_react():
     agent = AEA(
         agent_name,
         mailbox,
-        private_key_pem_path=private_key_pem_path,
+        wallet,
+        ledger_apis,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:
@@ -112,12 +119,13 @@ def test_react():
 
 def test_handle():
     """Tests handle method of an agent."""
-    node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
-    mailbox = MailBox(OEFLocalConnection(public_key, node))
+    wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
+    public_key = wallet.public_keys['default']
+    connection = DummyConnection()
+    mailbox = MailBox(connection)
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     message_bytes = DefaultSerializer().encode(msg)
@@ -131,15 +139,16 @@ def test_handle():
     agent = AEA(
         agent_name,
         mailbox,
-        private_key_pem_path=private_key_pem_path,
+        wallet,
+        ledger_apis,
         directory=str(Path(CUR_PATH, "data", "dummy_aea")))
     t = Thread(target=agent.start)
     try:
         t.start()
-        agent.mailbox.inbox._queue.put(envelope)
-        env = agent.mailbox.outbox._queue.get(block=True, timeout=5.0)
-        assert env.protocol_id == "default", \
-            "The envelope is not the expected protocol (Unsupported protocol)"
+        time.sleep(1.0)
+        connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default"
 
         #   DECODING ERROR
         msg = "hello".encode("utf-8")
@@ -148,7 +157,10 @@ def test_handle():
             sender=public_key,
             protocol_id='default',
             message=msg)
-        agent.mailbox.inbox._queue.put(envelope)
+        connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default"
+
         #   UNSUPPORTED SKILL
         msg = FIPASerializer().encode(
             FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
@@ -161,7 +173,10 @@ def test_handle():
             sender=public_key,
             protocol_id="fipa",
             message=msg)
-        agent.mailbox.inbox._queue.put(envelope)
+        connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default"
+
     finally:
         agent.stop()
         t.join()

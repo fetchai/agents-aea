@@ -5,26 +5,28 @@ license: Apache 2.0
 url: ""
 behaviours:
   - behaviour:
-      class_name: MyBuyBehaviour
-      args:
-        foo: bar
+      class_name: MySearchBehaviour
+      args: {}
 handlers:
   - handler:
       class_name: FIPAHandler
-      args:
-        foo: bar
-  - handler:
-      class_name: DefaultHandler
-      args:
-        foo: bar
+      args: {}
   - handler:
       class_name: OEFHandler
+      args: {}
+tasks: []
+shared_classes:
+  - shared_class:
+      class_name: Strategy
       args:
-        foo: bar
-tasks:
-  - task:
-      class_name: EmptyTask
-      args:
-        foo: bar
-shared_classes: []
+        country: UK
+        search_interval: 5
+        max_row_price: 4
+        max_buyer_tx_fee: 1
+        currency_pbk: 'FET'
+        ledger_id: 'None'
+  - shared_class:
+      class_name: Dialogues
+      args: {}
 protocols: ['fipa','default','oef']
+ledgers: []

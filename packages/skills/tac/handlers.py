@@ -40,7 +40,7 @@ else:
 
 Address = str
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("aea.tac_skill")
 
 
 class OEFHandler(Handler):
@@ -50,6 +50,7 @@ class OEFHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
+        super().__init__(**kwargs)
         self._rejoin = False
 
     def setup(self) -> None:

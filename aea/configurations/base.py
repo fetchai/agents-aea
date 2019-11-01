@@ -26,6 +26,7 @@ DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = 'connection.yaml'
 DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
+DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
 T = TypeVar('T')
 
 Address = str
@@ -100,6 +101,64 @@ class CRUDCollection(Generic[T]):
         return [(k, v) for k, v in self._items_by_id.items()]
 
 
+class PrivateKeyPathConfig(Configuration):
+    """Handle a private key path configuration."""
+
+    def __init__(self, ledger: str = "", path: str = ""):
+        """Initialize a handler configuration."""
+        self.ledger = ledger
+        self.path = path
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "ledger": self.ledger,
+            "path": self.path
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        ledger = cast(str, obj.get("ledger"))
+        path = cast(str, obj.get("path"))
+        return PrivateKeyPathConfig(
+            ledger=ledger,
+            path=path
+        )
+
+
+class LedgerAPIConfig(Configuration):
+    """Handle a ledger api configuration."""
+
+    def __init__(self, ledger: str = "", addr: str = "", port: int = 1000):
+        """Initialize a handler configuration."""
+        self.ledger = ledger
+        self.addr = addr
+        self.port = port
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "ledger": self.ledger,
+            "addr": self.addr,
+            "port": self.port
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        ledger = cast(str, obj.get("ledger"))
+        addr = cast(str, obj.get("addr"))
+        port = cast(int, obj.get("port"))
+        return LedgerAPIConfig(
+            ledger=ledger,
+            addr=addr,
+            port=port
+        )
+
+
 class ConnectionConfig(Configuration):
     """Handle connection configuration."""
 
@@ -112,6 +171,7 @@ class ConnectionConfig(Configuration):
                  class_name: str = "",
                  supported_protocols: Optional[List[str]] = None,
                  dependencies: Optional[List[str]] = None,
+                 description: str = "",
                  **config):
         """Initialize a connection configuration object."""
         self.name = name
@@ -122,6 +182,7 @@ class ConnectionConfig(Configuration):
         self.class_name = class_name
         self.supported_protocols = supported_protocols if supported_protocols is not None else []
         self.dependencies = dependencies if dependencies is not None else []
+        self.description = description
         self.config = config
 
     @property
@@ -136,6 +197,7 @@ class ConnectionConfig(Configuration):
             "class_name": self.class_name,
             "supported_protocols": self.supported_protocols,
             "dependencies": self.dependencies,
+            "description": self.description,
             "config": self.config
         }
 
@@ -153,6 +215,7 @@ class ConnectionConfig(Configuration):
             class_name=cast(str, obj.get("class_name")),
             supported_protocols=supported_protocols,
             dependencies=dependencies,
+            description=cast(str, obj.get("description")),
             **cast(dict, obj.get("config"))
         )
 
@@ -166,7 +229,8 @@ class ProtocolConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
-                 dependencies: Optional[List[str]] = None):
+                 dependencies: Optional[List[str]] = None,
+                 description: str = ""):
         """Initialize a connection configuration object."""
         self.name = name
         self.authors = authors
@@ -174,6 +238,7 @@ class ProtocolConfig(Configuration):
         self.license = license
         self.url = url
         self.dependencies = dependencies
+        self.description = description
 
     @property
     def json(self) -> Dict:
@@ -184,7 +249,8 @@ class ProtocolConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "url": self.url,
-            "dependencies": self.dependencies
+            "dependencies": self.dependencies,
+            "description": self.description
         }
 
     @classmethod
@@ -197,7 +263,8 @@ class ProtocolConfig(Configuration):
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
-            dependencies=dependencies
+            dependencies=dependencies,
+            description=cast(str, obj.get("description")),
         )
 
 
@@ -223,7 +290,7 @@ class HandlerConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return HandlerConfig(
             class_name=class_name,
-            args=obj.get("args", {})
+            **obj.get("args", {})
         )
 
 
@@ -249,7 +316,7 @@ class BehaviourConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return BehaviourConfig(
             class_name=class_name,
-            args=obj.get("args", {})
+            **obj.get("args", {})
         )
 
 
@@ -275,7 +342,7 @@ class TaskConfig(Configuration):
         class_name = cast(str, obj.get("class_name"))
         return TaskConfig(
             class_name=class_name,
-            args=obj.get("args", {})
+            **obj.get("args", {})
         )
 
 
@@ -315,7 +382,8 @@ class SkillConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  protocols: List[str] = None,
-                 dependencies: Optional[List[str]] = None):
+                 dependencies: Optional[List[str]] = None,
+                 description: str = ""):
         """Initialize a skill configuration."""
         self.name = name
         self.authors = authors
@@ -324,6 +392,7 @@ class SkillConfig(Configuration):
         self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[str]
         self.dependencies = dependencies
+        self.description = description
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
         self.tasks = CRUDCollection[TaskConfig]()
@@ -344,6 +413,7 @@ class SkillConfig(Configuration):
             "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
             "tasks": [{"task": t.json} for _, t in self.tasks.read_all()],
             "shared_classes": [{"shared_class": s.json} for _, s in self.shared_classes.read_all()],
+            "description": self.description
         }
 
     @classmethod
@@ -356,6 +426,7 @@ class SkillConfig(Configuration):
         url = cast(str, obj.get("url"))
         protocols = cast(List[str], obj.get("protocols", []))
         dependencies = cast(List[str], obj.get("dependencies", []))
+        description = cast(str, obj.get("description"))
         skill_config = SkillConfig(
             name=name,
             authors=authors,
@@ -363,7 +434,8 @@ class SkillConfig(Configuration):
             license=license,
             url=url,
             protocols=protocols,
-            dependencies=dependencies
+            dependencies=dependencies,
+            description=description
         )
 
         for b in obj.get("behaviours", []):  # type: ignore
@@ -396,7 +468,9 @@ class AgentConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  registry_path: str = "",
-                 private_key_pem_path: str = "",
+                 description: str = "",
+                 private_key_paths: Dict[str, str] = None,
+                 ledger_apis: Dict[str, Tuple[str, int]] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
@@ -406,7 +480,18 @@ class AgentConfig(Configuration):
         self.license = license
         self.url = url
         self.registry_path = registry_path
-        self.private_key_pem_path = private_key_pem_path
+        self.description = description
+        self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
+        self.ledger_apis = CRUDCollection[LedgerAPIConfig]()
+
+        private_key_paths = private_key_paths if private_key_paths is not None else {}
+        for ledger, path in private_key_paths.items():
+            self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
+
+        ledger_apis = ledger_apis if ledger_apis is not None else {}
+        for ledger, (addr, port) in ledger_apis.items():
+            self.ledger_apis.create(ledger, LedgerAPIConfig(ledger, addr, port))
+
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
@@ -444,7 +529,9 @@ class AgentConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "registry_path": self.registry_path,
-            "private_key_pem_path": self.private_key_pem_path,
+            "description": self.description,
+            "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
+            "ledger_apis": [{"ledger_api": t.json} for l, t in self.ledger_apis.read_all()],
             "logging_config": self.logging_config,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
@@ -455,6 +542,16 @@ class AgentConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
+        private_key_paths = {}
+        for p in obj.get("private_key_paths", []):  # type: ignore
+            private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
+            private_key_paths[private_key_path.ledger] = private_key_path.path
+
+        ledger_apis = {}
+        for l in obj.get("ledger_apis", []):  # type: ignore
+            ledger_api = LedgerAPIConfig.from_json(l["ledger_api"])
+            ledger_apis[ledger_api.ledger] = (ledger_api.addr, ledger_api.port)
+
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
@@ -463,8 +560,10 @@ class AgentConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
-            private_key_pem_path=cast(str, obj.get("private_key_pem_path")),
+            description=cast(str, obj.get("description")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
+            private_key_paths=cast(Dict, private_key_paths),
+            ledger_apis=cast(Dict, ledger_apis)
         )
 
         agent_config.connections = set(cast(List[str], obj.get("connections")))

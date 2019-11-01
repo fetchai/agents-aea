@@ -29,6 +29,7 @@ from queue import Queue
 from threading import Thread
 from typing import Any, Tuple, cast
 
+from aea.crypto.wallet import DEFAULT
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
@@ -63,6 +64,8 @@ class ProxyEnv(gym.Env):
         self._queue = Queue()
         self._action_counter = 0
         self._agent = ProxyAgent(name="proxy", gym_env=gym_env, proxy_env_queue=self._queue)
+        crypto_object = self._agent.wallet.crypto_objects.get(DEFAULT)
+        self._agent_public_key = crypto_object.public_key
         self._agent_thread = Thread(target=self._agent.start)
 
     def step(self, action: Action) -> Feedback:
@@ -114,7 +117,7 @@ class ProxyEnv(gym.Env):
         self._connect()
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent.crypto.public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent_public_key, protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         self._agent.outbox.put(envelope)
 
@@ -126,7 +129,7 @@ class ProxyEnv(gym.Env):
         """
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent.crypto.public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent_public_key, protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         self._agent.outbox.put(envelope)
         self._disconnect()
@@ -159,7 +162,7 @@ class ProxyEnv(gym.Env):
         """
         gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent.crypto.public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent_public_key, protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         return envelope
 

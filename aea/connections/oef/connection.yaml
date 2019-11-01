@@ -3,11 +3,16 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The oef connection provides a wrapper around the OEF sdk."
 class_name: OEFConnection
-supported_protocols: ["oef"]
+supported_protocols:
+  - default
+  - oef
+  - fipa
+  - tac
 config:
-  addr: 127.0.0.1
-  port: 10000
+  addr: ${OEF_ADDR:127.0.0.1}
+  port: ${OEF_PORT:10000}
 dependencies:
   - colorlog
   - oef

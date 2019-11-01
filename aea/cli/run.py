@@ -31,12 +31,12 @@ from click import pass_context
 
 from aea.aea import AEA
 from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
-    AEAConfigException
+    AEAConfigException, _load_env_file
 from aea.cli.install import install
 from aea.connections.base import Connection
-from aea.crypto.base import Crypto
-from aea.crypto.helpers import _try_validate_private_key_pem_path, _create_temporary_private_key_pem_path
-# from aea.helpers.base import locate
+from aea.crypto.helpers import _verify_or_create_private_keys, _verify_ledger_apis_access
+from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet, DEFAULT
 from aea.mail.base import MailBox
 
 
@@ -54,17 +54,19 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
     if connection_name not in ctx.agent_config.connections:
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
-    connection_config = ctx.connection_loader.load(open(os.path.join(ctx.cwd, "connections", connection_name, "connection.yaml")))
-    if connection_config is None:
+    try:
+        connection_config = ctx.connection_loader.load(open(os.path.join(ctx.cwd, "connections", connection_name, "connection.yaml")))
+    except FileNotFoundError:
         raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
 
-    connection_spec = importlib.util.spec_from_file_location(connection_config.name, os.path.join(ctx.cwd, "connections", connection_config.name, "connection.py"))
-    if connection_spec is None:
+    try:
+        connection_spec = importlib.util.spec_from_file_location(connection_config.name, os.path.join(ctx.cwd, "connections", connection_config.name, "connection.py"))
+        connection_module = importlib.util.module_from_spec(connection_spec)
+        connection_spec.loader.exec_module(connection_module)  # type: ignore
+    except FileNotFoundError:
         raise AEAConfigException("Connection '{}' not found.".format(connection_name))
 
-    connection_module = importlib.util.module_from_spec(connection_spec)
     sys.modules[connection_spec.name + "_connection"] = connection_module
-    connection_spec.loader.exec_module(connection_module)  # type: ignore
     classes = inspect.getmembers(connection_module, inspect.isclass)
     connection_classes = list(filter(lambda x: re.match("\\w+Connection", x[0]), classes))
     name_to_class = dict(connection_classes)
@@ -81,29 +83,33 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
 @click.command()
 @click.option('--connection', 'connection_name', metavar="CONN_NAME", type=str, required=False, default=None,
               help="The connection name. Must be declared in the agent's configuration file.")
+@click.option('--env', 'env_file', type=click.Path(), required=False, default=".env",
+              help="Specify an environment file (default: .env)")
 @click.option('--install-deps', 'install_deps', is_flag=True, required=False, default=False,
               help="Install all the dependencies before running the agent.")
 @pass_context
-def run(click_context, connection_name: str, install_deps: bool):
+def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     _try_to_load_agent_config(ctx)
+    _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
-    private_key_pem_path = cast(str, ctx.agent_config.private_key_pem_path)
-    if private_key_pem_path == "":
-        private_key_pem_path = _create_temporary_private_key_pem_path()
-    else:
-        _try_validate_private_key_pem_path(private_key_pem_path)
-    crypto = Crypto(private_key_pem_path=private_key_pem_path)
-    public_key = crypto.public_key
+
+    _verify_or_create_private_keys(ctx)
+    _verify_ledger_apis_access(ctx)
+    private_key_paths = dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()])
+    ledger_api_configs = dict([(identifier, (config.addr, config.port)) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
+
+    wallet = Wallet(private_key_paths)
+    ledger_apis = LedgerApis(ledger_api_configs)
+
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
     try:
-        connection = _setup_connection(connection_name, public_key, ctx)
+        connection = _setup_connection(connection_name, wallet.public_keys[DEFAULT], ctx)
     except AEAConfigException as e:
         logger.error(str(e))
-        exit(-1)
-        return
+        sys.exit(1)
 
     if install_deps:
         if Path("requirements.txt").exists():
@@ -112,12 +118,13 @@ def run(click_context, connection_name: str, install_deps: bool):
             click_context.invoke(install)
 
     mailbox = MailBox(connection)
-    agent = AEA(agent_name, mailbox, private_key_pem_path=private_key_pem_path, directory=str(Path(".")))
+    agent = AEA(agent_name, mailbox, wallet, ledger_apis, directory=str(Path(".")))
     try:
         agent.start()
     except KeyboardInterrupt:
-        logger.info("Interrupted.")
+        logger.info("Interrupted.")  # pragma: no cover
     except Exception as e:
         logger.exception(e)
+        sys.exit(1)
     finally:
         agent.stop()
