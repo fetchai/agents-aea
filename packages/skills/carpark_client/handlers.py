@@ -148,7 +148,6 @@ class FIPAHandler(Handler):
             acceptable = strategy.is_acceptable_proposal(proposal)
             affordable = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai'))) >= cast(int, proposal.values.get('price'))
             if acceptable and affordable:
-                strategy.is_searching = False
                 logger.info("[{}]: accepting the proposal from sender={}".format(self.context.agent_name,
                                                                                  sender[-5:]))
                 dialogue.proposal = proposal
@@ -186,12 +185,6 @@ class FIPAHandler(Handler):
         :return: None
         """
         logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name, sender[-5:]))
-        # target = msg.get("target")
-        # dialogues = cast(Dialogues, self.context.dialogues)
-        # if target == 1:
-        #     dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP)
-        # elif target == 3:
-        #     dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT)
 
     def _handle_match_accept(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
         """
@@ -218,7 +211,8 @@ class FIPAHandler(Handler):
                                     sender_tx_fee=0,
                                     counterparty_tx_fee=0,
                                     quantities_by_good_pbk={},
-                                    dialogue_label=dialogue.dialogue_label.json)
+                                    dialogue_label=dialogue.dialogue_label.json,
+                                    ledger_id='fetchai')
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
 
@@ -246,7 +240,7 @@ class FIPAHandler(Handler):
 
 
 class OEFHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class handles search related messages from the OEF."""
 
     SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -289,11 +283,12 @@ class OEFHandler(Handler):
         :param agents: the agents returned by the search
         :return: None
         """
+        strategy = cast(Strategy, self.context.strategy)
         if len(agents) > 0:
+            strategy.on_search_success()
+
             logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
-            strategy = cast(Strategy, self.context.strategy)
-            # stopping search
-            strategy.is_searching = False
+
             # pick first agent found
             opponent_pbk = agents[0]
             dialogues = cast(Dialogues, self.context.dialogues)
@@ -312,6 +307,7 @@ class OEFHandler(Handler):
                                             message=FIPASerializer().encode(cfp_msg))
         else:
             logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))
+            strategy.on_search_failed()
 
 
 class MyTransactionHandler(Handler):
@@ -335,6 +331,7 @@ class MyTransactionHandler(Handler):
         if tx_msg_response is not None and \
                 TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
+
             json_data = {'transaction_digest': tx_msg_response.get("transaction_digest")}
             dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], tx_msg_response.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)

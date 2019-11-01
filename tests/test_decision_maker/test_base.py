@@ -296,6 +296,10 @@ class TestDecisionMaker:
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
 
+        with mock.patch.object(self.decision_maker, "_is_acceptable_tx", return_value=False):
+            self.decision_maker.handle(tx_message)
+            assert not self.decision_maker.message_out_queue.empty()
+
     def test_decision_maker_execute_w_wrong_input(self):
         """Test the execute method with wrong input."""
         default_message = DefaultMessage(type=DefaultMessage.Type.BYTES,

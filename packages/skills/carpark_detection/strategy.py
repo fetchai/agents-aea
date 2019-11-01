@@ -19,7 +19,8 @@
 
 """This module contains the strategy class."""
 import os
-from typing import Any, Dict, List, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING, cast
+import time
 
 from aea.protocols.oef.models import Description, Query
 from aea.skills.base import SharedClass
@@ -60,10 +61,29 @@ class Strategy(SharedClass):
         self.data_price_fet = kwargs.pop('data_price_fet') if 'data_price_fet' in kwargs.keys() else DEFAULT_PRICE
         super().__init__(**kwargs)
 
-        self.db = DetectionDatabase(db_dir)
-        self.data_price_fet = 2000
-        self.lat = 43
-        self.lon = 42
+        balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
+
+        if not os.path.isdir(db_dir):
+            print("WARNING - DATABASE dir does not exist")
+
+        self.db = DetectionDatabase(db_dir, False)
+        self.record_balance(balance)
+        self.other_carpark_processes_running = False
+
+    def record_balance(self, balance):
+        """Record current balance to database."""
+        self.db.set_fet(balance, time.time())
+
+    def has_service_description(self):
+        """Return true if we have a description."""
+        if not self.db.is_db_exits():
+            return False
+
+        lat, lon = self.db.get_lat_lon()
+        if lat is None or lon is None:
+            return False
+
+        return True
 
     def get_service_description(self) -> Description:
         """
@@ -71,10 +91,13 @@ class Strategy(SharedClass):
 
         :return: a description of the offered services
         """
+        assert(self.has_service_description())
+
+        lat, lon = self.db.get_lat_lon()
         desc = Description(
             {
-                "latitude": float(self.lat),
-                "longitude": float(self.lon),
+                "latitude": lat,
+                "longitude": lon,
                 "unique_id": self.context.agent_public_key
             }, data_model=CarParkDataModel()
         )
@@ -91,6 +114,14 @@ class Strategy(SharedClass):
         # TODO, this is a stub
         return True
 
+    def has_data(self) -> bool:
+        """Return whether we have any useful data to sell."""
+        if not self.db.is_db_exits():
+            return False
+
+        data = self.db.get_latest_detection_data(1)
+        return len(data) > 0
+
     def generate_proposal_and_data(self, query: Query) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
         """
         Generate a proposal matching the query.
@@ -98,8 +129,10 @@ class Strategy(SharedClass):
         :param query: the query
         :return: a tuple of proposal and the bytes of carpark data
         """
-        # TODO, this is a stub
+        assert(self.db.is_db_exits())
+
         data = self.db.get_latest_detection_data(1)
+        assert (len(data) > 0)
 
         del data[0]['raw_image_path']
         del data[0]['processed_image_path']

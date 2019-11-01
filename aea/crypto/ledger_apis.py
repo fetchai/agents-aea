@@ -21,13 +21,13 @@
 """Module wrapping all the public and private keys cryptography."""
 
 import logging
+import sys
 import time
 from typing import Any, Dict, Optional, Tuple, cast
 
 import web3
 import web3.exceptions
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi
-from fetchai.ledger.crypto import Identity, Address
 from web3 import Web3, HTTPProvider
 
 from aea.crypto.base import Crypto
@@ -36,6 +36,7 @@ from aea.crypto.fetchai import FETCHAI
 
 DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
 SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
+SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ class LedgerApis(object):
             except Exception:
                 logger.warning("An error occurred while attempting to get the current balance.")
                 balance = 0
-        else:
+        else:           # pragma: no cover
             balance = 0
         return balance
 
@@ -166,7 +167,7 @@ class LedgerApis(object):
                     time.sleep(3.0)
 
             return tx_digest
-        else:
+        else:                   # pragma: no cover
             tx_digest = None
         return tx_digest
 
@@ -176,7 +177,6 @@ class LedgerApis(object):
 
         :param identifier: the identifier of the ledger
         :param tx_digest: the transaction digest
-        :param amount: the amount
         :return: True if correctly settled, False otherwise
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
@@ -205,15 +205,32 @@ class LedgerApis(object):
 
         return is_successful
 
-    @staticmethod
-    def get_address_from_public_key(self, identifier: str, public_key: str) -> Address:
-        """
-        Get the address from the public key.
 
-        :param identifier: the identifier
-        :param public_key: the public key
-        :return: the address
-        """
-        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        identity = Identity.from_hex(public_key)
-        return Address(identity)
+def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
+    """
+    Tro to instantiate the fetchai ledger api.
+
+    :param addr: the address
+    :param port: the port
+    """
+    try:
+        from fetchai.ledger.api import LedgerApi
+        LedgerApi(addr, port)
+    except Exception:
+        logger.error("Cannot connect to fetchai ledger with provided config.")
+        sys.exit(1)
+
+
+def _try_to_instantiate_ethereum_ledger_api(addr: str, port: int) -> None:
+    """
+    Tro to instantiate the fetchai ledger api.
+
+    :param addr: the address
+    :param port: the port
+    """
+    try:
+        from web3 import Web3, HTTPProvider
+        Web3(HTTPProvider(addr))
+    except Exception:
+        logger.error("Cannot connect to ethereum ledger with provided config.")
+        sys.exit(1)
