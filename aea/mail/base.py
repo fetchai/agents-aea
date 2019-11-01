@@ -79,8 +79,7 @@ class Envelope:
     def __init__(self, to: Address,
                  sender: Address,
                  protocol_id: ProtocolId,
-                 message: bytes,
-                 serializer: Optional[EnvelopeSerializer] = None):
+                 message: bytes):
         """
         Initialize a Message object.
 
@@ -88,13 +87,11 @@ class Envelope:
         :param sender: the public key of the sender.
         :param protocol_id: the protocol id.
         :param message: the protocol-specific message
-        :param serializer: the implementation for the envelope serialization.
         """
         self._to = to
         self._sender = sender
         self._protocol_id = protocol_id
         self._message = message
-        self._serializer = serializer
 
     @property
     def to(self) -> Address:
@@ -144,13 +141,16 @@ class Envelope:
             and self.protocol_id == other.protocol_id \
             and self._message == other._message
 
-    def encode(self) -> bytes:
+    def encode(self, serializer: Optional[EnvelopeSerializer] = None) -> bytes:
         """
         Encode the envelope.
 
+        :param serializer: the serializer that implements the encoding procedure.
         :return: the encoded envelope.
         """
-        envelope_bytes = self._serializer.encode(self)
+        if serializer is None:
+            serializer = DefaultEnvelopeSerializer()
+        envelope_bytes = serializer.encode(self)
         return envelope_bytes
 
     @classmethod
