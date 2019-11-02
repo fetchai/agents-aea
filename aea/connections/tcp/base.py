@@ -20,9 +20,9 @@
 """Base classes for TCP communication."""
 import asyncio
 import logging
+import queue
 import struct
 import threading
-from _queue import Empty
 from abc import ABC, abstractmethod
 from asyncio import CancelledError, StreamWriter, StreamReader, AbstractEventLoop, Task
 from concurrent.futures import Executor
@@ -95,7 +95,7 @@ class TCPConnection(Connection, ABC):
     @abstractmethod
     def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:
         """
-        Select the destination, given the envelope
+        Select the destination, given the envelope.
 
         :param envelope: the envelope to be sent.
         :return: the stream writer to communicate with the recipient. None if it cannot be determined.
@@ -135,8 +135,6 @@ class TCPConnection(Connection, ABC):
                 return
 
             self._connected = False
-            self.out_queue.put(None)
-            self._fetch_task.result()
             self.teardown()
             if not self._is_threaded:
                 self._stop_loop()
@@ -147,7 +145,7 @@ class TCPConnection(Connection, ABC):
         try:
             data = await reader.read(len(struct.pack("I", 0)))
             if not self._connected:
-                return
+                return None
             nbytes = struct.unpack("I", data)[0]
             nbytes_read = 0
             data = b""
@@ -163,6 +161,8 @@ class TCPConnection(Connection, ABC):
         except Exception as e:
             logger.exception(e)
             raise
+        finally:
+            return None
 
     async def _send(self, writer: StreamWriter, data: bytes) -> None:
         """Send bytes."""
@@ -209,7 +209,7 @@ class TCPConnection(Connection, ABC):
         except CancelledError:
             logger.debug("[{}] Sending loop cancelled.".format(self.public_key))
             return
-        except Empty:
+        except queue.Empty:
             await self._send_loop()
         except Exception as e:
             logger.exception(e)

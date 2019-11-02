@@ -83,6 +83,8 @@ class TCPClientConnection(TCPConnection):
     def teardown(self):
         """Tear the connection down."""
         try:
+            self.out_queue.put(None)
+            self._fetch_task.result()
             self._read_task.cancel()
         except CancelledError:
             pass

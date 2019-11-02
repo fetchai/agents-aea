@@ -22,7 +22,7 @@
 import asyncio
 import logging
 from asyncio import AbstractEventLoop, StreamReader, StreamWriter, Task, AbstractServer
-from typing import Dict, Optional, Tuple, cast
+from typing import Dict, Optional, Tuple, cast, Set
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
@@ -54,7 +54,7 @@ class TCPServerConnection(TCPConnection):
         self._server = None  # type: Optional[AbstractServer]
         self._server_task = None  # type: Optional[Task]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
-        self._read_tasks = set()
+        self._read_tasks = set()  # type: Set[Task]
 
     async def handle(self, reader: StreamReader, writer: StreamWriter) -> None:
         """
@@ -84,6 +84,8 @@ class TCPServerConnection(TCPConnection):
 
     def teardown(self):
         """Tear the connection down."""
+        self.out_queue.put(None)
+        self._fetch_task.result()
         for t in self._read_tasks:
             t.cancel()
         self._server.close()
