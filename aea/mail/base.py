@@ -37,18 +37,18 @@ class EnvelopeSerializer(ABC):
 
     @abstractmethod
     def encode(self, envelope: 'Envelope') -> bytes:
-        """Encode the envelope"""
+        """Encode the envelope."""
 
     @abstractmethod
     def decode(self, envelope_bytes: bytes) -> 'Envelope':
-        """Decode the envelope"""
+        """Decode the envelope."""
 
 
 class ProtobufEnvelopeSerializer(EnvelopeSerializer):
     """Envelope serializer using Protobuf."""
 
     def encode(self, envelope: 'Envelope') -> bytes:
-        """Encode the envelope"""
+        """Encode the envelope."""
         envelope_pb = base_pb2.Envelope()
         envelope_pb.to = envelope.to
         envelope_pb.sender = envelope.sender
@@ -59,7 +59,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         return envelope_bytes
 
     def decode(self, envelope_bytes: bytes) -> 'Envelope':
-        """Decode the envelope"""
+        """Decode the envelope."""
         envelope_pb = base_pb2.Envelope()
         envelope_pb.ParseFromString(envelope_bytes)
 
