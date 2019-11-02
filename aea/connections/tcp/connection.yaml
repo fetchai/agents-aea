@@ -11,5 +11,5 @@ supported_protocols:
   - gym
   - tac
 config:
-  address: /tmp/socket
-  unix: true
+  address: 127.0.0.1
+  port: 8082

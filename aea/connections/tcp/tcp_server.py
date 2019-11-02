@@ -20,14 +20,18 @@
 
 """Implementation of the TCP server."""
 import asyncio
+import functools
 import logging
-from asyncio import AbstractEventLoop, StreamReader, StreamWriter, Task, AbstractServer
-from threading import Thread
+import struct
+from asyncio import AbstractEventLoop, StreamReader, StreamWriter, Task, AbstractServer, Protocol, transports, \
+    CancelledError
+from queue import Queue
+from threading import Thread, Lock
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.connections.p2p.base import TCPChannel, TCPConnection
+from aea.connections.tcp.base import TCPConnection
 from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
@@ -35,27 +39,27 @@ logger = logging.getLogger(__name__)
 STUB_DIALOGUE_ID = 0
 
 
-class TCPServerChannel(TCPChannel):
-    """Channel implementation for the local node."""
+class TCPServerConnection(TCPConnection):
+    """Abstract TCP channel."""
 
-    def __init__(self, public_key: str, address: str, unix: bool = True, loop: Optional[AbstractEventLoop] = None):
+    def __init__(self,
+                 public_key: str,
+                 host: str,
+                 port: int,
+                 unix: bool = True,
+                 loop: Optional[AbstractEventLoop] = None):
         """
         Initialize a TCP channel.
 
         :param public_key: public key.
-        :param address: the socket bind address.
-        :param unix: whether it's a unix server or a networked.
+        :param host: the socket bind address.
+        :param unix: whether a UNIX socket is used.
         :param loop: the asyncio loop.
         """
-        super().__init__(public_key)
-        self.address = address
-        self.unix = unix
-        self._loop = asyncio.new_event_loop() if loop is None else loop
+        super().__init__(public_key, host, port, unix=unix, loop=loop)
 
-        self._thread = None  # type: Optional[Thread]
         self._server = None  # type: Optional[AbstractServer]
         self._server_task = None  # type: Optional[Task]
-
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
 
     async def handle(self, reader: StreamReader, writer: StreamWriter) -> None:
@@ -75,65 +79,31 @@ class TCPServerChannel(TCPChannel):
             self.connections[public_key] = (reader, writer)
             await self._recv_loop(reader)
 
-    def connect(self):
-        """
-        Set up the connection.
-
-        :return: A queue or None.
-        """
-        self._thread = Thread(target=self._loop.run_forever)
-        self._thread.start()
-
-        if self.unix:
-            coro = asyncio.start_unix_server(self.handle, self.address, loop=self._loop, start_serving=False)
-        else:
-            coro = asyncio.start_server(self.handle, self.address, loop=self._loop, start_serving=False)
-        future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+    def setup(self):
+        """Set the connection up."""
+        future = self._run_task(asyncio.start_server(self.handle, host=self.host, port=self.port,
+                                                     loop=self._loop, start_serving=False))
         self._server = future.result()
-        self._server_task = asyncio.run_coroutine_threadsafe(self._server.serve_forever(), loop=self._loop)
+        self._server_task = self._run_task(self._server.serve_forever())
 
-    def disconnect(self) -> None:
-        """
-        Tear down the connection.
-
-        :return: None.
-        """
-        if self._stopped:
-            return
-
-        self._stopped = True
-
-        self._server = cast(AbstractServer, self._server)
-        self._thread = cast(Thread, self._thread)
-
+    def teardown(self):
+        """Tear the connection down."""
         self._server.close()
-        self._loop.call_soon_threadsafe(self._loop.stop)
-        self._thread.join()
 
-    def send(self, envelope: Envelope) -> None:
-        """
-        Send an envelope.
-
-        :param envelope: the envelope to send.
-        :return: None.
-        """
+    def select_writer_from_envelope(self, envelope: Envelope):
+        """Select the destination, given the envelope."""
         to = envelope.to
         _, writer = self.connections[to]
-        future = asyncio.run_coroutine_threadsafe(self._send(writer, envelope.encode()), loop=self._loop)
-        future.result()
-
-
-class TCPServerConnection(TCPConnection):
-    """Implementation of a TCP server connection."""
+        return writer
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
-        """Get the Local OEF connection from the connection configuration.
+        """Get the TCP server connection from the connection configuration.
 
         :param public_key: the public key of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
         address = cast(str, connection_configuration.config.get("address"))
-        channel = TCPServerChannel(public_key, address, unix=True)
-        return TCPServerConnection(public_key, channel)
+        port = cast(int, connection_configuration.config.get("port"))
+        return TCPServerConnection(public_key, address, port)

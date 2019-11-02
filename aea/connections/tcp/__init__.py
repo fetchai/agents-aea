@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of a P2P connection."""
+"""Implementation of a TCP connection."""
