@@ -20,9 +20,10 @@
 """Implementation of the TCP server."""
 import asyncio
 import logging
-from asyncio import AbstractEventLoop, Task, StreamWriter, StreamReader, AbstractServer
-from threading import Thread, Lock
-from typing import Optional, cast, Tuple, Dict
+from asyncio import AbstractEventLoop, Task, StreamWriter, StreamReader
+from concurrent.futures import CancelledError
+from threading import Thread
+from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
@@ -71,19 +72,23 @@ class TCPClientConnection(TCPConnection):
 
     def setup(self):
         """Set the connection up."""
-        future = self._run_task(coro=asyncio.open_connection(self.host, self.port, loop=self._loop))
+        future = self._run_task(asyncio.open_connection(self.host, self.port, loop=self._loop))
         self._reader, self._writer = future.result()
         public_key_bytes = self.public_key.encode("utf-8")
         future = self._run_task(self._send(self._writer, public_key_bytes))
         future.result()
         self._read_task = self._run_task(self._recv_loop(self._reader))  # TODO store future to handle cancellation
+        self._fetch_task = self._run_task(self._send_loop())
 
     def teardown(self):
         """Tear the connection down."""
+        try:
+            self._read_task.cancel()
+        except CancelledError:
+            pass
         self._writer.close()
-        self._read_task.result()
 
-    def select_writer_from_envelope(self, envelope: Envelope):
+    def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:
         """Select the destination, given the envelope."""
         return self._writer
 

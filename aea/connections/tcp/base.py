@@ -22,36 +22,17 @@ import asyncio
 import logging
 import struct
 import threading
+from _queue import Empty
 from abc import ABC, abstractmethod
-from asyncio import CancelledError, StreamWriter, StreamReader, Queue, transports, AbstractEventLoop
+from asyncio import CancelledError, StreamWriter, StreamReader, AbstractEventLoop, Task
+from concurrent.futures import Executor
 from threading import Thread
-from typing import Optional, Protocol
+from typing import Optional
 
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
-
-
-class AEAStreamProtocol(Protocol):
-    """A simple stream protocol for AEAs."""
-
-    def __init__(self, queue: Queue):
-        """
-        Initialize a protocol object.
-
-        :param queue: the queue that stores incoming messages.
-        """
-        self.queue = queue
-
-    def connection_made(self, transport: transports.BaseTransport) -> None:
-        """Validate the connection made."""
-
-    def data_received(self, data: bytes) -> None:
-        """Handle the received data."""
-
-    def eof_received(self) -> Optional[bool]:
-        """Handle the end of the connection."""
 
 
 class TCPConnection(Connection, ABC):
@@ -61,7 +42,8 @@ class TCPConnection(Connection, ABC):
                  public_key: str,
                  host: str,
                  port: int,
-                 loop: Optional[AbstractEventLoop] = None):
+                 loop: Optional[AbstractEventLoop] = None,
+                 executor: Optional[Executor] = None):
         """Initialize the TCP connection."""
         super().__init__()
         self.public_key = public_key
@@ -74,9 +56,10 @@ class TCPConnection(Connection, ABC):
         self._stopped = True
         self._connected = False
         self._thread_loop = None  # type: Optional[Thread]
+        self._recv_task = None  # type: Optional[Task]
+        self._fetch_task = None  # type: Optional[Task]
 
     def _run_task(self, coro):
-        assert self._loop.is_running()
         return asyncio.run_coroutine_threadsafe(coro=coro, loop=self._loop)
 
     @property
@@ -86,7 +69,13 @@ class TCPConnection(Connection, ABC):
 
     def _start_loop(self):
         assert self._thread_loop is None
-        self._thread_loop = Thread(target=self._loop.run_forever)
+
+        def loop_in_thread(loop):
+            asyncio.set_event_loop(loop)
+            loop.run_forever()
+            loop.close()
+
+        self._thread_loop = Thread(target=loop_in_thread, args=(self._loop, ))
         self._thread_loop.start()
 
     def _stop_loop(self):
@@ -104,8 +93,13 @@ class TCPConnection(Connection, ABC):
         """Tear the TCP connection down."""
 
     @abstractmethod
-    def select_writer_from_envelope(self, envelope: Envelope) -> StreamWriter:
-        """Select the destination, given the envelope"""
+    def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:
+        """
+        Select the destination, given the envelope
+
+        :param envelope: the envelope to be sent.
+        :return: the stream writer to communicate with the recipient. None if it cannot be determined.
+        """
 
     @property
     def is_established(self):
@@ -141,6 +135,8 @@ class TCPConnection(Connection, ABC):
                 return
 
             self._connected = False
+            self.out_queue.put(None)
+            self._fetch_task.result()
             self.teardown()
             if not self._is_threaded:
                 self._stop_loop()
@@ -150,23 +146,27 @@ class TCPConnection(Connection, ABC):
         """Receive bytes."""
         try:
             data = await reader.read(len(struct.pack("I", 0)))
+            if not self._connected:
+                return
             nbytes = struct.unpack("I", data)[0]
             nbytes_read = 0
             data = b""
             while nbytes_read < nbytes:
                 data += (await reader.read(nbytes - nbytes_read))
                 nbytes_read = len(data)
-
             return data
         except CancelledError:
-            return None
+            logger.debug("[{}] Read cancelled.".format(self.public_key))
+            raise
+        except struct.error as e:
+            logger.debug("Struct error: {}".format(str(e)))
         except Exception as e:
             logger.exception(e)
-            return None
+            raise
 
     async def _send(self, writer: StreamWriter, data: bytes) -> None:
         """Send bytes."""
-        logger.debug("Send a message")
+        logger.debug("[{}] Send a message".format(self.public_key))
         nbytes = struct.pack("I", len(data))
         logger.debug("#bytes: {!r}".format(nbytes))
         try:
@@ -179,18 +179,38 @@ class TCPConnection(Connection, ABC):
     async def _recv_loop(self, reader) -> None:
         """Process incoming messages."""
         try:
-            if not self.is_established:
-                logger.debug("Stopped receiving loop.")
-                return
-            logger.debug("Waiting for next message...")
+            logger.debug("[{}]: Waiting for receiving next message...".format(self.public_key))
             data = await self._recv(reader)
             if data is None:
                 return
-            logger.debug("Message received: {!r}".format(data))
+            logger.debug("[{}] Message received: {!r}".format(self.public_key, data))
             envelope = Envelope.decode(data)  # TODO handle decoding error
-            logger.debug("Decoded envelope: {}".format(envelope))
+            logger.debug("[{}] Decoded envelope: {}".format(self.public_key, envelope))
             self.in_queue.put_nowait(envelope)
             await self._recv_loop(reader)
+        except CancelledError:
+            logger.debug("[{}] Receiving loop cancelled.".format(self.public_key))
+            return
+        except Exception as e:
+            logger.exception(e)
+            return
+
+    async def _send_loop(self):
+        """Process outgoing messages."""
+        try:
+            logger.debug("[{}]: Waiting for sending next message...".format(self.public_key))
+            envelope = await self._loop.run_in_executor(None, self.out_queue.get, True)
+            if envelope is None:
+                logger.debug("[{}] Stopped sending loop.".format(self.public_key))
+                return
+            writer = self.select_writer_from_envelope(envelope)
+            await self._send(writer, envelope.encode())
+            await self._send_loop()
+        except CancelledError:
+            logger.debug("[{}] Sending loop cancelled.".format(self.public_key))
+            return
+        except Empty:
+            await self._send_loop()
         except Exception as e:
             logger.exception(e)
             return
@@ -202,6 +222,4 @@ class TCPConnection(Connection, ABC):
         :param envelope: the envelope to send.
         :return: None.
         """
-        writer = self.select_writer_from_envelope(envelope)
-        future = self._run_task(self._send(writer, envelope.encode()))
-        future.result()  # TODO avoid waiting and handle cancellation
+        self.out_queue.put(envelope)

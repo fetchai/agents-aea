@@ -20,13 +20,8 @@
 
 """Implementation of the TCP server."""
 import asyncio
-import functools
 import logging
-import struct
-from asyncio import AbstractEventLoop, StreamReader, StreamWriter, Task, AbstractServer, Protocol, transports, \
-    CancelledError
-from queue import Queue
-from threading import Thread, Lock
+from asyncio import AbstractEventLoop, StreamReader, StreamWriter, Task, AbstractServer
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ConnectionConfig
@@ -59,6 +54,7 @@ class TCPServerConnection(TCPConnection):
         self._server = None  # type: Optional[AbstractServer]
         self._server_task = None  # type: Optional[Task]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
+        self._read_tasks = set()
 
     async def handle(self, reader: StreamReader, writer: StreamWriter) -> None:
         """
@@ -75,7 +71,8 @@ class TCPServerConnection(TCPConnection):
             public_key = public_key_bytes.decode("utf-8")
             logger.debug("Public key of the client: {}".format(public_key))
             self.connections[public_key] = (reader, writer)
-            await self._recv_loop(reader)
+            task = self._loop.create_task(self._recv_loop(reader))
+            self._read_tasks.add(task)
 
     def setup(self):
         """Set the connection up."""
@@ -83,14 +80,19 @@ class TCPServerConnection(TCPConnection):
                                                      loop=self._loop, start_serving=False))
         self._server = future.result()
         self._server_task = self._run_task(self._server.serve_forever())
+        self._fetch_task = self._run_task(self._send_loop())
 
     def teardown(self):
         """Tear the connection down."""
+        for t in self._read_tasks:
+            t.cancel()
         self._server.close()
 
     def select_writer_from_envelope(self, envelope: Envelope):
         """Select the destination, given the envelope."""
         to = envelope.to
+        if to not in self.connections:
+            return None
         _, writer = self.connections[to]
         return writer
 
