@@ -61,7 +61,6 @@ class TCPConnection(Connection, ABC):
                  public_key: str,
                  host: str,
                  port: int,
-                 unix: bool = True,
                  loop: Optional[AbstractEventLoop] = None):
         """Initialize the TCP connection."""
         super().__init__()
@@ -69,7 +68,6 @@ class TCPConnection(Connection, ABC):
 
         self.host = host
         self.port = port
-        self.unix = unix
         self._loop = asyncio.new_event_loop() if loop is None else loop
 
         self._lock = threading.Lock()

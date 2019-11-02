@@ -41,17 +41,15 @@ class TCPClientConnection(TCPConnection):
                  public_key: str,
                  host: str,
                  port: int,
-                 unix: bool = True,
                  loop: Optional[AbstractEventLoop] = None):
         """
         Initialize a TCP channel.
 
         :param public_key: public key.
         :param host: the socket bind address.
-        :param unix: whether a UNIX socket is used.
         :param loop: the asyncio loop.
         """
-        super().__init__(public_key, host, port, unix=unix, loop=loop)
+        super().__init__(public_key, host, port, loop=loop)
 
         self._reader, self._writer = (None, None)  # type: Optional[StreamReader], Optional[StreamWriter]
         self._read_task = None  # type: Optional[Task]
