@@ -24,8 +24,8 @@ import queue
 import struct
 import threading
 from abc import ABC, abstractmethod
-from asyncio import CancelledError, StreamWriter, StreamReader, AbstractEventLoop, Task
-from concurrent.futures import Executor
+from asyncio import CancelledError, StreamWriter, StreamReader, AbstractEventLoop, Future
+from concurrent.futures import Executor, ThreadPoolExecutor
 from threading import Thread
 from typing import Optional
 
@@ -51,13 +51,14 @@ class TCPConnection(Connection, ABC):
         self.host = host
         self.port = port
         self._loop = asyncio.new_event_loop() if loop is None else loop
+        self._executor = executor if executor is not None else ThreadPoolExecutor()
 
         self._lock = threading.Lock()
         self._stopped = True
         self._connected = False
         self._thread_loop = None  # type: Optional[Thread]
-        self._recv_task = None  # type: Optional[Task]
-        self._fetch_task = None  # type: Optional[Task]
+        self._recv_task = None  # type: Optional[Future]
+        self._fetch_task = None  # type: Optional[Future]
 
     def _run_task(self, coro):
         return asyncio.run_coroutine_threadsafe(coro=coro, loop=self._loop)
@@ -111,17 +112,27 @@ class TCPConnection(Connection, ABC):
         Set up the connection.
 
         :return: A queue or None.
+        :raises ConnectionError: if a problem occurred during the connection.
         """
         with self._lock:
-            if self.is_established:
-                logger.warning("Connection already set up.")
-                return
+            try:
+                if self.is_established:
+                    logger.warning("Connection already set up.")
+                    return
 
-            self._stopped = False
-            if not self._is_threaded:
-                self._start_loop()
-            self.setup()
-            self._connected = True
+                self._stopped = False
+                if not self._is_threaded:
+                    self._start_loop()
+
+                self.setup()
+
+                self._connected = True
+            except Exception as e:
+                logger.error(str(e))
+                if not self._is_threaded:
+                    self._stop_loop()
+                self._connected = False
+                self._stopped = True
 
     def disconnect(self) -> None:
         """
@@ -155,14 +166,13 @@ class TCPConnection(Connection, ABC):
             return data
         except CancelledError:
             logger.debug("[{}] Read cancelled.".format(self.public_key))
-            raise
+            return None
         except struct.error as e:
             logger.debug("Struct error: {}".format(str(e)))
+            return None
         except Exception as e:
             logger.exception(e)
             raise
-        finally:
-            return None
 
     async def _send(self, writer: StreamWriter, data: bytes) -> None:
         """Send bytes."""
@@ -199,7 +209,7 @@ class TCPConnection(Connection, ABC):
         """Process outgoing messages."""
         try:
             logger.debug("[{}]: Waiting for sending next message...".format(self.public_key))
-            envelope = await self._loop.run_in_executor(None, self.out_queue.get, True)
+            envelope = await self._loop.run_in_executor(self._executor, self.out_queue.get, True)
             if envelope is None:
                 logger.debug("[{}] Stopped sending loop.".format(self.public_key))
                 return
@@ -222,4 +232,4 @@ class TCPConnection(Connection, ABC):
         :param envelope: the envelope to send.
         :return: None.
         """
-        self.out_queue.put(envelope)
+        self.out_queue.put_nowait(envelope)

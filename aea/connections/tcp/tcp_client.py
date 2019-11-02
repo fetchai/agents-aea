@@ -21,8 +21,7 @@
 import asyncio
 import logging
 from asyncio import AbstractEventLoop, Task, StreamWriter, StreamReader
-from concurrent.futures import CancelledError
-from threading import Thread
+from concurrent.futures import CancelledError, Executor
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
@@ -42,7 +41,8 @@ class TCPClientConnection(TCPConnection):
                  public_key: str,
                  host: str,
                  port: int,
-                 loop: Optional[AbstractEventLoop] = None):
+                 loop: Optional[AbstractEventLoop] = None,
+                 executor: Optional[Executor] = None):
         """
         Initialize a TCP channel.
 
@@ -50,25 +50,10 @@ class TCPClientConnection(TCPConnection):
         :param host: the socket bind address.
         :param loop: the asyncio loop.
         """
-        super().__init__(public_key, host, port, loop=loop)
+        super().__init__(public_key, host, port, loop=loop, executor=executor)
 
         self._reader, self._writer = (None, None)  # type: Optional[StreamReader], Optional[StreamWriter]
         self._read_task = None  # type: Optional[Task]
-
-    def _run_task(self, coro):
-        assert self._loop.is_running()
-        return asyncio.run_coroutine_threadsafe(coro=coro, loop=self._loop)
-
-    def _start_loop(self):
-        assert self._thread_loop is None
-        self._thread_loop = Thread(target=self._loop.run_forever)
-        self._thread_loop.start()
-
-    def _stop_loop(self):
-        assert self._thread_loop.is_alive()
-        self._loop.call_soon_threadsafe(self._loop.stop)
-        self._thread_loop.join(timeout=10)
-        self._thread_loop = None
 
     def setup(self):
         """Set the connection up."""
@@ -76,15 +61,16 @@ class TCPClientConnection(TCPConnection):
         self._reader, self._writer = future.result()
         public_key_bytes = self.public_key.encode("utf-8")
         future = self._run_task(self._send(self._writer, public_key_bytes))
-        future.result()
-        self._read_task = self._run_task(self._recv_loop(self._reader))  # TODO store future to handle cancellation
+        future.result(timeout=3.0)
+        self._read_task = self._run_task(self._recv_loop(self._reader))
         self._fetch_task = self._run_task(self._send_loop())
 
     def teardown(self):
         """Tear the connection down."""
         try:
-            self.out_queue.put(None)
+            self.out_queue.put_nowait(None)
             self._fetch_task.result()
+            self._reader.feed_eof()
             self._read_task.cancel()
         except CancelledError:
             pass

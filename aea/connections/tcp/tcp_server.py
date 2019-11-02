@@ -22,7 +22,8 @@
 import asyncio
 import logging
 from asyncio import AbstractEventLoop, StreamReader, StreamWriter, Task, AbstractServer
-from typing import Dict, Optional, Tuple, cast, Set
+from concurrent.futures import Executor
+from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
@@ -41,7 +42,8 @@ class TCPServerConnection(TCPConnection):
                  public_key: str,
                  host: str,
                  port: int,
-                 loop: Optional[AbstractEventLoop] = None):
+                 loop: Optional[AbstractEventLoop] = None,
+                 executor: Optional[Executor] = None):
         """
         Initialize a TCP channel.
 
@@ -49,12 +51,12 @@ class TCPServerConnection(TCPConnection):
         :param host: the socket bind address.
          :param loop: the asyncio loop.
         """
-        super().__init__(public_key, host, port, loop=loop)
+        super().__init__(public_key, host, port, loop=loop, executor=executor)
 
         self._server = None  # type: Optional[AbstractServer]
         self._server_task = None  # type: Optional[Task]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
-        self._read_tasks = set()  # type: Set[Task]
+        self._read_tasks = dict()  # type: Dict[str, Task]
 
     async def handle(self, reader: StreamReader, writer: StreamWriter) -> None:
         """
@@ -71,23 +73,26 @@ class TCPServerConnection(TCPConnection):
             public_key = public_key_bytes.decode("utf-8")
             logger.debug("Public key of the client: {}".format(public_key))
             self.connections[public_key] = (reader, writer)
-            task = self._loop.create_task(self._recv_loop(reader))
-            self._read_tasks.add(task)
+            task = self._run_task(self._recv_loop(reader))
+            self._read_tasks[public_key] = task
 
     def setup(self):
         """Set the connection up."""
-        future = self._run_task(asyncio.start_server(self.handle, host=self.host, port=self.port,
-                                                     loop=self._loop, start_serving=False))
+        future = self._run_task(asyncio.start_server(self.handle, host=self.host, port=self.port, loop=self._loop))
         self._server = future.result()
         self._server_task = self._run_task(self._server.serve_forever())
         self._fetch_task = self._run_task(self._send_loop())
 
     def teardown(self):
         """Tear the connection down."""
-        self.out_queue.put(None)
+        self.out_queue.put_nowait(None)
         self._fetch_task.result()
-        for t in self._read_tasks:
+
+        for pbk, (reader, _) in self.connections.items():
+            reader.feed_eof()
+            t = self._read_tasks.get(pbk)
             t.cancel()
+
         self._server.close()
 
     def select_writer_from_envelope(self, envelope: Envelope):
