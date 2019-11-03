@@ -95,6 +95,7 @@ Release History
 0.1.12 (2019-11-01)
 -------------------
 
+- Adds TCP connection (server and client)
 - Fixes some examples and docs
 - Refactors crypto modules and adds additional tests
 - Multiple additional minor fixes and changes
