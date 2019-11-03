@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the TCP server."""
+"""Implementation of the TCP client."""
 import asyncio
 import logging
 from asyncio import AbstractEventLoop, Task, StreamWriter, StreamReader
@@ -35,7 +35,7 @@ STUB_DIALOGUE_ID = 0
 
 
 class TCPClientConnection(TCPConnection):
-    """Abstract TCP channel."""
+    """This class implements a TCP client."""
 
     def __init__(self,
                  public_key: str,

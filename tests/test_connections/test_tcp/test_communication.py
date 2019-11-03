@@ -31,7 +31,6 @@ class TestTCPCommunication:
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
-
         cls.host = "127.0.0.1"
         cls.port = 8082
 

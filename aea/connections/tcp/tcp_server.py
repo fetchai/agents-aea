@@ -36,7 +36,7 @@ STUB_DIALOGUE_ID = 0
 
 
 class TCPServerConnection(TCPConnection):
-    """Abstract TCP channel."""
+    """This class implements a TCP server."""
 
     def __init__(self,
                  public_key: str,
@@ -80,7 +80,6 @@ class TCPServerConnection(TCPConnection):
         """Set the connection up."""
         future = self._run_task(asyncio.start_server(self.handle, host=self.host, port=self.port, loop=self._loop))
         self._server = future.result()
-        self._server_task = self._run_task(self._server.serve_forever())
         self._fetch_task = self._run_task(self._send_loop())
 
     def teardown(self):
