@@ -28,7 +28,10 @@ from aea.skills.base import SharedClass
 DEFAULT_COUNTRY = 'UK'
 SEARCH_TERM = 'country'
 DEFAULT_SEARCH_INTERVAL = 5.0
-DEFAULT_MAX_PRICE = 5
+DEFAULT_MAX_ROW_PRICE = 5
+DEFAULT_MAX_TX_FEE = 2
+DEFAULT_CURRENCY_PBK = 'FET'
+DEFAULT_LEDGER_ID = 'fetchai'
 
 
 class Strategy(SharedClass):
@@ -42,10 +45,24 @@ class Strategy(SharedClass):
         """
         self._country = kwargs.pop('country') if 'country' in kwargs.keys() else DEFAULT_COUNTRY
         self._search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
-        self._max_price = kwargs.pop('max_price') if 'max_price' in kwargs.keys() else DEFAULT_MAX_PRICE
+        self._max_row_price = kwargs.pop('max_row_price') if 'max_row_price' in kwargs.keys() else DEFAULT_MAX_ROW_PRICE
+        self.max_buyer_tx_fee = kwargs.pop('max_tx_fee') if 'max_tx_fee' in kwargs.keys() else DEFAULT_MAX_TX_FEE
+        self._currency_pbk = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
+        self._ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
         super().__init__(**kwargs)
+        self._search_id = 0
         self.is_searching = True
-        self.last_search_time = datetime.datetime.now()
+        self._last_search_time = datetime.datetime.now()
+
+    def get_next_search_id(self) -> int:
+        """
+        Get the next search id and set the search time.
+
+        :return: the next search id
+        """
+        self._search_id += 1
+        self._last_search_time = datetime.datetime.now()
+        return self._search_id
 
     def get_service_query(self) -> Query:
         """
@@ -62,8 +79,10 @@ class Strategy(SharedClass):
 
         :return: whether it is time to search
         """
+        if not self.is_searching:
+            return False
         now = datetime.datetime.now()
-        diff = now - self.last_search_time
+        diff = now - self._last_search_time
         result = diff.total_seconds() > self._search_interval
         return result
 
@@ -73,5 +92,20 @@ class Strategy(SharedClass):
 
         :return: whether it is acceptable
         """
-        result = True if proposal.values["price"] < self._max_price * proposal.values['rows'] else False
+        result = (proposal.values['price'] - proposal.values['seller_tx_fee'] > 0) and \
+            (proposal.values['price'] <= self._max_row_price * proposal.values['rows']) and \
+            (proposal.values['currency_pbk'] == self._currency_pbk) and \
+            (proposal.values['ledger_id'] == self._ledger_id)
         return result
+
+    def is_affordable_proposal(self, proposal: Description) -> bool:
+        """
+        Check whether it is an affordable proposal.
+
+        :return: whether it is affordable
+        """
+        payable = proposal.values['price'] + self.max_buyer_tx_fee
+        ledger_id = proposal.values['ledger_id']
+        address = cast(str, self.context.agent_addresses.get(ledger_id))
+        balance = self.context.ledger_apis.token_balance(ledger_id, address)
+        return balance >= payable

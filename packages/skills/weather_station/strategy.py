@@ -25,11 +25,11 @@ from aea.protocols.oef.models import Description, Query
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
-    from packages.skills.weather_station_ledger.db_communication import DBCommunication
-    from packages.skills.weather_station_ledger.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
+    from packages.skills.weather_station.db_communication import DBCommunication
+    from packages.skills.weather_station.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 else:
-    from weather_station_ledger_skill.db_communication import DBCommunication
-    from weather_station_ledger_skill.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
+    from weather_station_skill.db_communication import DBCommunication
+    from weather_station_skill.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
 DEFAULT_PRICE_PER_ROW = 2
 DEFAULT_SELLER_TX_FEE = 0

@@ -34,10 +34,101 @@ from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_l
     AEAConfigException, _load_env_file
 from aea.cli.install import install
 from aea.connections.base import Connection
-from aea.crypto.helpers import _verify_or_create_private_keys, _verify_ledger_apis_access
-from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import Wallet, DEFAULT
+from aea.configurations.loader import ConfigLoader
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.helpers import _create_default_private_key, _create_fetchai_private_key, _create_ethereum_private_key, DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, _try_validate_private_key_pem_path, _try_validate_fet_private_key_path, _try_validate_ethereum_private_key_path
+from aea.crypto.ledger_apis import LedgerApis, _try_to_instantiate_fetchai_ledger_api, _try_to_instantiate_ethereum_ledger_api, SUPPORTED_LEDGER_APIS
+from aea.crypto.wallet import Wallet, DEFAULT, SUPPORTED_CRYPTOS
 from aea.mail.base import MailBox
+
+
+def _verify_or_create_private_keys(ctx: Context) -> None:
+    """
+    Verify or create private keys.
+
+    :param ctx: Context
+    """
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    fp = open(str(path), mode="r", encoding="utf-8")
+    aea_conf = agent_loader.load(fp)
+
+    for identifier, value in aea_conf.private_key_paths.read_all():
+        if identifier not in SUPPORTED_CRYPTOS:
+            ValueError("Unsupported identifier in private key paths.")
+
+    default_private_key_config = aea_conf.private_key_paths.read(DEFAULT)
+    if default_private_key_config is None:
+        _create_default_private_key()
+        default_private_key_config = PrivateKeyPathConfig(DEFAULT, DEFAULT_PRIVATE_KEY_FILE)
+        aea_conf.private_key_paths.create(default_private_key_config.ledger, default_private_key_config)
+    else:
+        default_private_key_config = cast(PrivateKeyPathConfig, default_private_key_config)
+        try:
+            _try_validate_private_key_pem_path(default_private_key_config.path)
+        except FileNotFoundError:
+            logger.error("File {} for private key {} not found.".format(repr(default_private_key_config.path), default_private_key_config.ledger))
+            sys.exit(1)
+
+    fetchai_private_key_config = aea_conf.private_key_paths.read(FETCHAI)
+    if fetchai_private_key_config is None:
+        _create_fetchai_private_key()
+        fetchai_private_key_config = PrivateKeyPathConfig(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        aea_conf.private_key_paths.create(fetchai_private_key_config.ledger, fetchai_private_key_config)
+    else:
+        fetchai_private_key_config = cast(PrivateKeyPathConfig, fetchai_private_key_config)
+        try:
+            _try_validate_fet_private_key_path(fetchai_private_key_config.path)
+        except FileNotFoundError:
+            logger.error("File {} for private key {} not found.".format(repr(fetchai_private_key_config.path), fetchai_private_key_config.ledger))
+            sys.exit(1)
+
+    ethereum_private_key_config = aea_conf.private_key_paths.read(ETHEREUM)
+    if ethereum_private_key_config is None:
+        _create_ethereum_private_key()
+        ethereum_private_key_config = PrivateKeyPathConfig(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+        aea_conf.private_key_paths.create(ethereum_private_key_config.ledger, ethereum_private_key_config)
+    else:
+        ethereum_private_key_config = cast(PrivateKeyPathConfig, ethereum_private_key_config)
+        try:
+            _try_validate_ethereum_private_key_path(ethereum_private_key_config.path)
+        except FileNotFoundError:
+            logger.error("File {} for private key {} not found.".format(repr(ethereum_private_key_config.path), ethereum_private_key_config.ledger))
+            sys.exit(1)
+
+    # update aea config
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    fp = open(str(path), mode="w", encoding="utf-8")
+    agent_loader.dump(aea_conf, fp)
+    ctx.agent_config = aea_conf
+
+
+def _verify_ledger_apis_access() -> None:
+    """Verify access to ledger apis."""
+    path = Path(DEFAULT_AEA_CONFIG_FILE)
+    agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    fp = open(str(path), mode="r", encoding="utf-8")
+    aea_conf = agent_loader.load(fp)
+
+    for identifier, value in aea_conf.ledger_apis.read_all():
+        if identifier not in SUPPORTED_LEDGER_APIS:
+            ValueError("Unsupported identifier in ledger apis.")
+
+    fetchai_ledger_api_config = aea_conf.ledger_apis.read(FETCHAI)
+    if fetchai_ledger_api_config is None:
+        logger.debug("No fetchai ledger api config specified.")
+    else:
+        fetchai_ledger_api_config = cast(LedgerAPIConfig, fetchai_ledger_api_config)
+        _try_to_instantiate_fetchai_ledger_api(fetchai_ledger_api_config.addr, fetchai_ledger_api_config.port)
+
+    ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
+    if ethereum_ledger_config is None:
+        logger.debug("No ethereum ledger api config specified.")
+    else:
+        ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
+        _try_to_instantiate_ethereum_ledger_api(ethereum_ledger_config.addr, ethereum_ledger_config.port)
 
 
 def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Connection:
@@ -96,7 +187,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     agent_name = cast(str, ctx.agent_config.agent_name)
 
     _verify_or_create_private_keys(ctx)
-    _verify_ledger_apis_access(ctx)
+    _verify_ledger_apis_access()
     private_key_paths = dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()])
     ledger_api_configs = dict([(identifier, (config.addr, config.port)) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
 

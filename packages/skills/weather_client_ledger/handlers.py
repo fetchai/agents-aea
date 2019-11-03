@@ -43,19 +43,11 @@ else:
 
 logger = logging.getLogger("aea.weather_client_ledger_skill")
 
-STARTING_MESSAGE_ID = 1
-STARTING_TARGET_ID = 0
-DEFAULT_MAX_PRICE = 2.0
-
 
 class FIPAHandler(Handler):
     """This class scaffolds a handler."""
 
     SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
-
-    def __init__(self, **kwargs):
-        """Initialise the class."""
-        super().__init__(**kwargs)
 
     def setup(self) -> None:
         """
@@ -82,7 +74,7 @@ class FIPAHandler(Handler):
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
         if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
-            dialogue = dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key)
+            dialogue = dialogues.get_dialogue(dialogue_id, sender, self.context.agent_public_key)
             dialogue.incoming_extend(fipa_msg)
         else:
             self._handle_unidentified_dialogue(fipa_msg, sender)
@@ -117,7 +109,7 @@ class FIPAHandler(Handler):
         default_msg = DefaultMessage(type=DefaultMessage.Type.ERROR,
                                      error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
                                      error_msg="Invalid dialogue.",
-                                     error_data="fipa_message")  # FIPASerializer().encode(msg))
+                                     error_data="fipa_message")  # TODO: send back FIPASerializer().encode(msg))
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
                                         protocol_id=DefaultMessage.protocol_id,
@@ -141,14 +133,12 @@ class FIPAHandler(Handler):
         if proposals is not []:
             # only take the first proposal
             proposal = proposals[0]
-            ledger_id = cast(str, proposal.values.get('ledger_id'))
             logger.info("[{}]: received proposal={} from sender={}".format(self.context.agent_name,
                                                                            proposal.values,
                                                                            sender[-5:]))
             strategy = cast(Strategy, self.context.strategy)
             acceptable = strategy.is_acceptable_proposal(proposal)
-            affordable = self.context.ledger_apis.token_balance(ledger_id, cast(str, self.context.agent_addresses.get(
-                ledger_id))) >= cast(int, proposal.values.get('price'))
+            affordable = strategy.is_affordable_proposal(proposal)
             if acceptable and affordable:
                 strategy.is_searching = False
                 logger.info("[{}]: accepting the proposal from sender={}".format(self.context.agent_name,
@@ -209,6 +199,7 @@ class FIPAHandler(Handler):
         """
         logger.info("[{}]: received MATCH_ACCEPT_W_ADDRESS from sender={}".format(self.context.agent_name, sender[-5:]))
         address = cast(str, msg.get("address"))
+        strategy = cast(Strategy, self.context.strategy)
         proposal = cast(Description, dialogue.proposal)
         ledger_id = cast(str, proposal.values.get("ledger_id"))
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
@@ -217,10 +208,10 @@ class FIPAHandler(Handler):
                                     sender=self.context.agent_public_keys[ledger_id],
                                     counterparty=address,
                                     is_sender_buyer=True,
-                                    currency_pbk=cast(str, proposal.values.get("currency_pbk")),
+                                    currency_pbk=proposal.values['currency_pbk'],
                                     amount=proposal.values['price'],
-                                    sender_tx_fee=2000000,  # TODO to be read from configurations
-                                    counterparty_tx_fee=0,
+                                    sender_tx_fee=strategy.max_buyer_tx_fee,
+                                    counterparty_tx_fee=proposal.values['seller_tx_fee'],
                                     quantities_by_good_pbk={},
                                     dialogue_label=dialogue.dialogue_label.json,
                                     ledger_id=ledger_id)
@@ -256,10 +247,6 @@ class OEFHandler(Handler):
     """This class scaffolds a handler."""
 
     SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
-
-    def __init__(self, **kwargs):
-        """Initialise the oef handler."""
-        super().__init__(**kwargs)
 
     def setup(self) -> None:
         """Call to setup the handler."""
@@ -307,10 +294,10 @@ class OEFHandler(Handler):
             dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key)
             query = strategy.get_service_query()
             logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
-            cfp_msg = FIPAMessage(message_id=STARTING_MESSAGE_ID,
+            cfp_msg = FIPAMessage(message_id=FIPAMessage.STARTING_MESSAGE_ID,
                                   dialogue_id=dialogue.dialogue_label.dialogue_id,
                                   performative=FIPAMessage.Performative.CFP,
-                                  target=STARTING_TARGET_ID,
+                                  target=FIPAMessage.STARTING_TARGET,
                                   query=query)
             dialogue.outgoing_extend(cfp_msg)
             self.context.outbox.put_message(to=opponent_pbk,

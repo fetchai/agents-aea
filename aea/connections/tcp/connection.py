@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,20 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the dataModel for the weather agent."""
+"""Base classes for TCP communication."""
 
-from aea.protocols.oef.models import DataModel, Attribute
-
-SCHEME = {'country': "UK", 'city': "Cambridge"}
-
-
-class WEATHER_STATION_DATAMODEL (DataModel):
-    """Data model for the weather Agent."""
-
-    def __init__(self):
-        """Initialise the dataModel."""
-        self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)
-        self.ATTRIBUTE_CITY = Attribute("city", str, True)
-
-        super().__init__("weather_station_datamodel", [self.ATTRIBUTE_COUNTRY,
-                                                       self.ATTRIBUTE_CITY])
+from .tcp_client import TCPClientConnection  # noqa: F401
+from .tcp_server import TCPServerConnection  # noqa: F401

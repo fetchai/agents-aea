@@ -85,6 +85,15 @@ class DefaultCrypto(Crypto):
         return self._public_key_pem
 
     @property
+    def private_key_pem(self) -> bytes:
+        """
+        Return a PEM encoded private key in base64 format. It consists of an algorithm identifier and the private key as a bit string.
+
+        :return: a private key bytes string
+        """
+        return self._private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())  # type: ignore
+
+    @property
     def address(self) -> str:
         """
         Return a 219 character public key in base58 format.
