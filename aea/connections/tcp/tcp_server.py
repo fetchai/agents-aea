@@ -54,7 +54,6 @@ class TCPServerConnection(TCPConnection):
         super().__init__(public_key, host, port, loop=loop, executor=executor)
 
         self._server = None  # type: Optional[AbstractServer]
-        self._server_task = None  # type: Optional[Task]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
         self._read_tasks = dict()  # type: Dict[str, Task]
 
