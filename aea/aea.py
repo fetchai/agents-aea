@@ -42,10 +42,10 @@ class AEA(Agent):
                  mailbox: MailBox,
                  wallet: Wallet,
                  ledger_apis: LedgerApis,
+                 resources: Optional[Resources] = None,
                  timeout: float = 0.0,
                  debug: bool = False,
                  max_reactions: int = 20,
-                 resources: Optional[Resources] = None,
                  directory: str = '') -> None:
         """
         Instantiate the agent.
@@ -54,12 +54,12 @@ class AEA(Agent):
         :param mailbox: the mailbox of the agent.
         :param wallet: the wallet of the agent.
         :param ledger_apis: the ledger apis of the agent.
-        :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param debug: if True, run the agent in debug mode.
-        :param max_reactions: the processing rate of messages per iteration.
         :param resources: the resources of the agent. If None, the directory parameter will be considered.
         :param directory: the path to the agent's resource directory.
                         | If None, we assume the directory is in the working directory of the interpreter.
+        :param timeout: the time in (fractions of) seconds to time out an agent between act and react
+        :param debug: if True, run the agent in debug mode.
+        :param max_reactions: the processing rate of messages per iteration.
 
         :return: None
         """
@@ -101,6 +101,11 @@ class AEA(Agent):
         """Get resources."""
         assert self._resources is not None, "No resources initialized. Call setup."
         return self._resources
+
+    @resources.setter
+    def resources(self, resources: 'Resources'):
+        """Set resources."""
+        self._resources = resources
 
     @property
     def filter(self) -> Filter:
