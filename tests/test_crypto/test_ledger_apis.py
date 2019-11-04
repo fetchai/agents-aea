@@ -21,19 +21,26 @@
 """This module contains the tests for the crypto/helpers module."""
 import logging
 # from unittest import mock
+import os
+from unittest import mock
 
 import pytest
+from hexbytes import HexBytes
 
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
-from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG  # , _try_to_instantiate_fetchai_ledger_api, _try_to_instantiate_ethereum_ledger_api
-
+from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
+from aea.crypto.fetchai import FETCHAI, FetchAICrypto
+from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG, \
+    _try_to_instantiate_fetchai_ledger_api, \
+    _try_to_instantiate_ethereum_ledger_api
+from tests.conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_ETHEREUM_CONFIG = ("https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe", 3)
 fet_address = "B3t9pv4rYccWqCjeuoXsDoeXLiKxVAQh6Q3CLAiNZZQ2mtqF1"
 eth_address = "0x21795D753752ccC1AC728002D23Ba33cbF13b8b0"
+GAS_PRICE = '50'
+GAS_ID = 'gwei'
 
 
 class TestLedgerApis:
@@ -48,56 +55,102 @@ class TestLedgerApis:
         assert ledger_apis.has_ethereum
         unknown_config = ("UknownPath", 8080)
         with pytest.raises(ValueError):
-            ledger_apis = LedgerApis({"UNKNOWN": unknown_config})
+            LedgerApis({"UNKNOWN": unknown_config})
 
-    # def test_token_balance(self):
-    #     """Test the token_balance for the different tokens."""
-    #     ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
-    #                               FETCHAI: DEFAULT_FETCHAI_CONFIG})
+    def test_token_balance(self):
+        """Test the token_balance for the different tokens."""
+        ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
+                                  FETCHAI: DEFAULT_FETCHAI_CONFIG})
 
-    #     with mock.patch.object(ledger_apis, 'token_balance', return_value=10):
-    #         balance = ledger_apis.token_balance(FETCHAI, eth_address)
-    #         assert balance == 10
-    #         balance = ledger_apis.token_balance(ETHEREUM, eth_address)
-    #         assert balance == 10, "The specific address has some eth"
-    #     with mock.patch.object(ledger_apis, 'token_balance', return_value=0):
-    #         balance = ledger_apis.token_balance(ETHEREUM, fet_address)
-    #         assert balance == 0, "Should trigger the Exception and the balance will be 0"
-    #     with mock.patch.object(ledger_apis, 'token_balance', return_value=Exception):
-    #         balance = ledger_apis.token_balance(ETHEREUM, fet_address)
-    #         assert balance == 0, "Should trigger the Exception and the balance will be 0"
-    #     with pytest.raises(AssertionError):
-    #         balance = ledger_apis.token_balance("UNKNOWN", fet_address)
-    #         assert balance == 0, "Unknown identifier so it will return 0"
-    # def test_transfer(self):
-    #     """Test the transfer function for the supported tokens."""
-    #     private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
-    #     eth_obj = EthereumCrypto(private_key_path=private_key_path)
-    #     private_key_path = os.path.join(CUR_PATH, 'data', "fet_private_key.txt")
-    #     fet_obj = FetchAICrypto(private_key_path=private_key_path)
-    #     ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
-    #                               FETCHAI: DEFAULT_FETCHAI_CONFIG})
-    #
-    #     with mock.patch.object(ledger_apis, 'transfer',
-    #                            return_value= "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"):
-    #         tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
-    #         assert tx_digest is not None
-    #         with mock.patch.object(ledger_apis, 'is_tx_settled', return_value= True):
-    #             assert ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest, amount=10)
-    #         with mock.patch.object(ledger_apis, 'is_tx_settled', return_value= False):
-    #             assert not ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest, amount=10)
-    #     with mock.patch.object(ledger_apis, 'transfer',
-    #                            return_value="97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"):
-    #         tx_digest = ledger_apis.transfer(ETHEREUM, eth_obj, eth_address, amount=10, tx_fee=200000)
-    #         assert tx_digest is not None
-    #         with mock.patch.object(ledger_apis, 'is_tx_settled', return_value= True):
-    #             assert ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest, amount=10)
-    #         with mock.patch.object(ledger_apis, 'is_tx_settled', return_value= False):
-    #             assert not ledger_apis.is_tx_settled(identifier=FETCHAI, tx_digest=tx_digest, amount=10)
-    # def test_try_to_instantiate_fetchai_ledger_api(self):
-    #     """Test the instantiation of the fetchai ledger api."""
-    #     _try_to_instantiate_fetchai_ledger_api(addr="127.0.0.1", port=80)
+        with mock.patch.object(ledger_apis, 'token_balance', return_value=10):
+            balance = ledger_apis.token_balance(FETCHAI, fet_address)
+            assert balance == 10
+            balance = ledger_apis.token_balance(ETHEREUM, eth_address)
+            assert balance == 10
 
-    # def test__try_to_instantiate_ethereum_ledger_api(self):
-    #     """Test the instantiation of the ethereum ledger api."""
-    #     _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1", port=80)
+        balance = ledger_apis.token_balance(FETCHAI, eth_address)
+        assert balance == 0, "This must be 0 since the address is wrong"
+        balance = ledger_apis.token_balance(ETHEREUM, fet_address)
+        assert balance == 0, "This must be 0 since the address is wrong"
+
+        with pytest.raises(AssertionError):
+            balance = ledger_apis.token_balance("UNKNOWN", fet_address)
+            assert balance == 0, "Unknown identifier so it will return 0"
+
+    def test_transfer(self):
+        """Test the transfer function for the supported tokens."""
+        private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
+        eth_obj = EthereumCrypto(private_key_path=private_key_path)
+        private_key_path = os.path.join(CUR_PATH, 'data', "fet_private_key.txt")
+        fet_obj = FetchAICrypto(private_key_path=private_key_path)
+        ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
+                                  FETCHAI: DEFAULT_FETCHAI_CONFIG})
+
+        with mock.patch.object(ledger_apis.apis.get(FETCHAI).tokens, 'transfer',
+                               return_value="97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"):
+            tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
+            assert tx_digest is not None
+
+        with mock.patch.object(ledger_apis.apis.get(ETHEREUM).eth, 'getTransactionCount', return_value=5):
+            transaction = {
+                'nonce': ledger_apis.apis.get(ETHEREUM).eth.getTransactionCount(),
+                'chainId': 3,
+                'to': eth_address,
+                'value': 50,
+                'gas': 2000000,
+                'gasPrice': ledger_apis.apis[ETHEREUM].toWei(GAS_PRICE, GAS_ID)
+            }
+            signed = ledger_apis.apis[ETHEREUM].eth.account.signTransaction(transaction, eth_obj._account.privateKey)
+            with mock.patch.object(ledger_apis.apis.get(ETHEREUM).eth.account, 'signTransaction',
+                                   return_value=signed):
+                with pytest.raises(ValueError):
+                    ledger_apis.apis[ETHEREUM].eth.sendRawTransaction(signed.rawTransaction)
+                result = HexBytes('0xf85f808082c35094d898d5e829717c72e7438bad593076686d7d164a80801ba005c2e99ecee98a12fbf28ab9577423f42e9e88f2291b3acc8228de743884c874a077d6bc77a47ad41ec85c96aac2ad27f05a039c4787fca8a1e5ee2d8c7ec1bb6a')
+                with mock.patch.object(ledger_apis.apis.get(ETHEREUM).eth, 'sendRawTransaction',
+                                       return_value=result):
+                    with mock.patch.object(ledger_apis.apis.get(ETHEREUM).eth, "getTransactionReceipt",
+                                           return_value=b'0xa13f2f926233bc4638a20deeb8aaa7e8d6a96e487392fa55823f925220f6efed'):
+                        tx_digest = ledger_apis.transfer(ETHEREUM, eth_obj, eth_address, amount=10, tx_fee=200000)
+                        assert tx_digest is not None
+
+    def test_is_tx_settled(self):
+        """Test if the transaction is settled."""
+        ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
+                                  FETCHAI: DEFAULT_FETCHAI_CONFIG})
+        tx_digest = "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"
+        with pytest.raises(AssertionError):
+            ledger_apis.is_tx_settled("Unknown", tx_digest=tx_digest, amount=10)
+
+        with mock.patch.object(ledger_apis.apis[FETCHAI].tx, "status", return_value='Submitted'):
+            is_successful = ledger_apis.is_tx_settled(FETCHAI, tx_digest=tx_digest, amount=10)
+            assert is_successful
+
+        with mock.patch.object(ledger_apis.apis[FETCHAI].tx, "status", side_effect=Exception):
+            is_successful = ledger_apis.is_tx_settled(FETCHAI, tx_digest=tx_digest, amount=10)
+            assert not is_successful
+
+        result = HexBytes(
+            '0xf85f808082c35094d898d5e829717c72e7438bad593076686d7d164a80801ba005c2e99ecee98a12fbf28ab9577423f42e9e88f2291b3acc8228de743884c874a077d6bc77a47ad41ec85c96aac2ad27f05a039c4787fca8a1e5ee2d8c7ec1bb6a')
+        with mock.patch.object(ledger_apis.apis[ETHEREUM].eth, "getTransactionReceipt", return_value=result):
+            is_successful = ledger_apis.is_tx_settled(ETHEREUM, tx_digest=tx_digest, amount=10)
+            assert is_successful
+
+        with mock.patch.object(ledger_apis.apis[ETHEREUM].eth, "getTransactionReceipt", side_effect=Exception):
+            is_successful = ledger_apis.is_tx_settled(ETHEREUM, tx_digest=tx_digest, amount=10)
+            assert not is_successful
+
+    def test_try_to_instantiate_fetchai_ledger_api(self):
+        """Test the instantiation of the fetchai ledger api."""
+        _try_to_instantiate_fetchai_ledger_api(addr="127.0.0.1", port=80)
+        from fetchai.ledger.api import LedgerApi
+        with mock.patch.object(LedgerApi, "__init__", side_effect=Exception):
+            with pytest.raises(SystemExit):
+                _try_to_instantiate_fetchai_ledger_api(addr="127.0.0.1", port=80)
+
+    def test__try_to_instantiate_ethereum_ledger_api(self):
+        """Test the instantiation of the ethereum ledger api."""
+        _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1", port=80)
+        from web3 import Web3
+        with mock.patch.object(Web3, "__init__", side_effect=Exception):
+            with pytest.raises(SystemExit):
+                _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1", port=80)

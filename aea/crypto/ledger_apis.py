@@ -112,7 +112,7 @@ class LedgerApis(object):
             except Exception:
                 logger.warning("An error occurred while attempting to get the current balance.")
                 balance = 0
-        else:           # pragma: no cover
+        else:       # pragma: no cover
             balance = 0
         return balance
 
@@ -162,12 +162,12 @@ class LedgerApis(object):
                     logger.info("transaction validated - exiting")
                     tx_digest = hex_value.hex()
                     break
-                except web3.exceptions.TransactionNotFound:
+                except web3.exceptions.TransactionNotFound:     # pragma: no cover
                     logger.info("transaction not found - sleeping for 3.0 seconds")
                     time.sleep(3.0)
 
             return tx_digest
-        else:                   # pragma: no cover
+        else:           # pragma: no cover
             tx_digest = None
         return tx_digest
 
