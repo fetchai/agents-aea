@@ -204,7 +204,6 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
 
         cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
         cls.aea = AEA(cls.agent_name, cls.mailbox, cls.wallet, cls.ledger_apis, cls.resources)
-        cls.resources.load(cls.aea.context)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         cls.connection.receive(Envelope(to="", sender="", protocol_id="default", message=DefaultSerializer().encode(cls.expected_message)))
