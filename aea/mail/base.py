@@ -41,8 +41,8 @@ class EnvelopeContext:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, EnvelopeContext) and\
-               self.connection_id == other.connection_id
+        return isinstance(other, EnvelopeContext) \
+            and self.connection_id == other.connection_id
 
 
 class EnvelopeSerializer(ABC):
@@ -294,7 +294,7 @@ class OutBox(object):
 class Multiplexer:
     """This class can handle multiple connections at once."""
 
-    def __init__(self, connections: List[Connection]):
+    def __init__(self, connections: List['Connection']):
         """
         Initialize the connection multiplexer.
 
