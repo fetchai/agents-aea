@@ -42,11 +42,10 @@ class AEA(Agent):
                  mailbox: MailBox,
                  wallet: Wallet,
                  ledger_apis: LedgerApis,
-                 resources: Optional[Resources] = None,
+                 resources: Resources = None,
                  timeout: float = 0.0,
                  debug: bool = False,
-                 max_reactions: int = 20,
-                 directory: str = '') -> None:
+                 max_reactions: int = 20) -> None:
         """
         Instantiate the agent.
 
@@ -55,8 +54,6 @@ class AEA(Agent):
         :param wallet: the wallet of the agent.
         :param ledger_apis: the ledger apis of the agent.
         :param resources: the resources of the agent. If None, the directory parameter will be considered.
-        :param directory: the path to the agent's resource directory.
-                        | If None, we assume the directory is in the working directory of the interpreter.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
@@ -66,7 +63,6 @@ class AEA(Agent):
         super().__init__(name=name, wallet=wallet, timeout=timeout, debug=debug)
 
         self.max_reactions = max_reactions
-        self._directory = directory if directory else str(Path(".").absolute())
 
         self.mailbox = mailbox
         self._decision_maker = DecisionMaker(self.name,
@@ -119,10 +115,8 @@ class AEA(Agent):
 
         :return: None
         """
-        if self._resources is None:
-            self._resources = Resources.from_resource_dir(self._directory, self.context)
-            assert self._resources is not None, "No resources initialized. Error in setup."
-        self._resources.setup()
+        self.resources.load(self.context)
+        self.resources.setup()
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
     def act(self) -> None:

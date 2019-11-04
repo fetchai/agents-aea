@@ -28,7 +28,7 @@ import re
 from abc import ABC, abstractmethod
 from queue import Queue
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Tuple, cast
+from typing import Optional, List, Dict, Any, Tuple, cast, Union
 
 from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
@@ -458,8 +458,9 @@ class TaskRegistry(Registry):
 class Resources(object):
     """This class implements the resources of an AEA."""
 
-    def __init__(self):
+    def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
         """Instantiate the resources."""
+        self._directory = directory if str(Path(directory).absolute()) is not None else str(Path(".").absolute())
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = BehaviourRegistry()
@@ -467,6 +468,11 @@ class Resources(object):
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
+
+    @property
+    def directory(self) -> str:
+        """Get the directory."""
+        return self._directory
 
     @classmethod
     def from_resource_dir(cls, directory: str, agent_context: AgentContext) -> Optional['Resources']:
@@ -477,15 +483,14 @@ class Resources(object):
         :param agent_context: the agent's context object
         :return: None
         """
-        resources = Resources()
-        try:
-            resources.protocol_registry.populate(directory)
-            resources.populate_skills(directory, agent_context)
-            return resources
-        except Exception as e:
-            logger.warning(str(e))
-            logger.warning("Not loaded")
-            return None
+        resources = Resources(directory)
+        resources.load(agent_context)
+        return resources
+
+    def load(self, agent_context: AgentContext) -> None:
+        """Load all the resources."""
+        self.protocol_registry.populate(self.directory)
+        self.populate_skills(self.directory, agent_context)
 
     def populate_skills(self, directory: str, agent_context: AgentContext) -> None:
         """

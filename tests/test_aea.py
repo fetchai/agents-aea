@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
 import os
+import tempfile
 import time
 from pathlib import Path
 from threading import Thread
@@ -49,7 +50,7 @@ def test_initialise_AEA():
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
     ledger_apis = LedgerApis({})
-    my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, directory=str(Path(CUR_PATH, "aea")))
+    my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
     assert AEA("Agent0", mailbox1, wallet, ledger_apis), "Agent is not initialised"
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
     my_AEA.setup()
@@ -72,7 +73,7 @@ def test_act():
         mailbox,
         wallet,
         ledger_apis,
-        directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
     t = Thread(target=agent.start)
     try:
         t.start()
@@ -109,7 +110,7 @@ def test_react():
         mailbox,
         wallet,
         ledger_apis,
-        directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
     t = Thread(target=agent.start)
     try:
         t.start()
@@ -148,7 +149,7 @@ def test_handle():
         mailbox,
         wallet,
         ledger_apis,
-        directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
     t = Thread(target=agent.start)
     try:
         t.start()
@@ -228,6 +229,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         assert dummy_handler is not None
         assert len(dummy_handler.handled_messages) == 1
         assert dummy_handler.handled_messages[0] == self.expected_message
+
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
@@ -248,7 +250,8 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.connection = DummyConnection()
         cls.mailbox = MailBox(cls.connection)
 
-        cls.resources = Resources()
+        cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
+        cls.resources = Resources(cls.temp)
         cls.aea = AEA(cls.agent_name, cls.mailbox, cls.wallet, cls.ledger_apis, resources=cls.resources)
 
         cls.default_protocol_configuration = ProtocolConfig.from_json(
@@ -291,3 +294,4 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         """Tear the test down."""
         cls.aea.stop()
         cls.t.join()
+        Path(cls.temp).rmdir()
