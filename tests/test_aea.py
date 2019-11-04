@@ -215,14 +215,19 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
     def test_initialize_aea_programmatically(self):
         """Test that we can initialize an AEA programmatically."""
         time.sleep(1.0)
-        dummy_behaviour = self.aea.resources.behaviour_registry.fetch("dummy")[0]
-        dummy_task = self.aea.resources.task_registry.fetch("dummy")[0]
-        dummy_handler = self.aea.resources.handler_registry.fetch("default")[0]
+
+        dummy_behaviour = next(filter(lambda x: x.__class__.__name__ == "DummyBehaviour", self.aea.resources.behaviour_registry.fetch("dummy")), None)
+        assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
+
+        dummy_task = next(filter(lambda x: x.__class__.__name__ == "DummyTask", self.aea.resources.task_registry.fetch("dummy")), None)
+        assert dummy_task is not None
         assert dummy_task.nb_execute_called > 0
+
+        dummy_handler = next(filter(lambda x: x.__class__.__name__ == "DummyHandler", self.aea.resources.handler_registry.fetch("default")), None)
+        assert dummy_handler is not None
         assert len(dummy_handler.handled_messages) == 1
         assert dummy_handler.handled_messages[0] == self.expected_message
-
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
@@ -267,11 +272,17 @@ class TestInitializeAEAProgrammaticallyBuildResources:
     def test_initialize_aea_programmatically(self):
         """Test that we can initialize an AEA programmatically."""
         time.sleep(1.0)
-        dummy_behaviour = self.aea.resources.behaviour_registry.fetch("dummy")[0]
-        dummy_task = self.aea.resources.task_registry.fetch("dummy")[0]
-        dummy_handler = self.aea.resources.handler_registry.fetch("default")[0]
+
+        dummy_behaviour = next(filter(lambda x: x.__class__.__name__ == "DummyBehaviour", self.aea.resources.behaviour_registry.fetch("dummy")), None)
+        assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
+
+        dummy_task = next(filter(lambda x: x.__class__.__name__ == "DummyTask", self.aea.resources.task_registry.fetch("dummy")), None)
+        assert dummy_task is not None
         assert dummy_task.nb_execute_called > 0
+
+        dummy_handler = next(filter(lambda x: x.__class__.__name__ == "DummyHandler", self.aea.resources.handler_registry.fetch("default")), None)
+        assert dummy_handler is not None
         assert len(dummy_handler.handled_messages) == 1
         assert dummy_handler.handled_messages[0] == self.expected_message
 
