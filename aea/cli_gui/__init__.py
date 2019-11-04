@@ -379,9 +379,8 @@ def _kill_running_oef_nodes():
     subprocess.call(['docker', 'kill', oef_node_name])
 
 
-def run():
+def create_app():
     """Run the flask server."""
-    _kill_running_oef_nodes()
     CUR_DIR = os.path.abspath(os.path.dirname(__file__))
     app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
     flask.app.oef_process = None
@@ -410,7 +409,21 @@ def run():
         return flask.send_from_directory(
             os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+    return app
+
+def run():
+
+    _kill_running_oef_nodes()
+    app = create_app()
     app.run(host='127.0.0.1', port=8080, debug=False)
+
+    return app
+
+def run_test():
+
+    #_kill_running_oef_nodes()
+    app = create_app()
+    return app.app.test_client()
 
 
 # If we're running in stand alone mode, run the application
