@@ -51,7 +51,6 @@ def test_initialise_AEA():
     wallet = Wallet({'default': private_key_pem_path})
     ledger_apis = LedgerApis({})
     my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
-    assert AEA("Agent0", mailbox1, wallet, ledger_apis), "Agent is not initialised"
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
     my_AEA.setup()
     assert my_AEA.resources is not None,\
@@ -203,9 +202,9 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.connection = DummyConnection()
         cls.mailbox = MailBox(cls.connection)
 
-        cls.aea = AEA(cls.agent_name, cls.mailbox, cls.wallet, cls.ledger_apis)
-        cls.resources = Resources.from_resource_dir(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.aea.context)
-        cls.aea.resources = cls.resources
+        cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
+        cls.aea = AEA(cls.agent_name, cls.mailbox, cls.wallet, cls.ledger_apis, cls.resources)
+        cls.resources.load(cls.aea.context)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         cls.connection.receive(Envelope(to="", sender="", protocol_id="default", message=DefaultSerializer().encode(cls.expected_message)))

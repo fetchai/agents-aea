@@ -460,7 +460,7 @@ class Resources(object):
 
     def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
         """Instantiate the resources."""
-        self._directory = directory if str(Path(directory).absolute()) is not None else str(Path(".").absolute())
+        self._directory = str(Path(directory).absolute()) if directory is not None else str(Path(".").absolute())
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = BehaviourRegistry()
@@ -473,19 +473,6 @@ class Resources(object):
     def directory(self) -> str:
         """Get the directory."""
         return self._directory
-
-    @classmethod
-    def from_resource_dir(cls, directory: str, agent_context: AgentContext) -> Optional['Resources']:
-        """
-        Parse the resource directory.
-
-        :param directory: the agent's resources directory.
-        :param agent_context: the agent's context object
-        :return: None
-        """
-        resources = Resources(directory)
-        resources.load(agent_context)
-        return resources
 
     def load(self, agent_context: AgentContext) -> None:
         """Load all the resources."""
@@ -577,7 +564,6 @@ class Filter(object):
     @property
     def resources(self) -> Resources:
         """Get resources."""
-        assert self._resources is not None, "No resources initialized. Call setup."
         return self._resources
 
     @property
@@ -585,7 +571,7 @@ class Filter(object):
         """Get decision maker (out) queue."""
         return self._decision_maker_out_queue
 
-    def get_active_handlers(self, protocol_id: str) -> List[Handler]:
+    def get_active_handlers(self, protocol_id: str) -> Optional[List[Handler]]:
         """
         Get active handlers.
 

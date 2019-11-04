@@ -138,8 +138,9 @@ class TestResources:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
-        cls.aea = AEA(cls.agent_name, mailbox, wallet, ledger_apis, resources=Resources(cls.agent_folder))
-        cls.resources = Resources.from_resource_dir(os.path.join(cls.agent_folder), cls.aea.context)
+        cls.resources = Resources(os.path.join(cls.agent_folder))
+        cls.aea = AEA(cls.agent_name, mailbox, wallet, ledger_apis, resources=cls.resources)
+        cls.resources.load(cls.aea.context)
 
         cls.expected_skills = {"dummy", "error"}
 

@@ -19,7 +19,6 @@
 
 """This module contains the implementation of an Autonomous Economic Agent."""
 import logging
-from pathlib import Path
 from typing import Optional, cast
 
 from aea.agent import Agent
@@ -31,7 +30,6 @@ from aea.mail.base import Envelope, MailBox
 from aea.registries.base import Filter, Resources
 from aea.skills.error.handlers import ErrorHandler
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +40,7 @@ class AEA(Agent):
                  mailbox: MailBox,
                  wallet: Wallet,
                  ledger_apis: LedgerApis,
-                 resources: Resources = None,
+                 resources: Resources,
                  timeout: float = 0.0,
                  debug: bool = False,
                  max_reactions: int = 20) -> None:
@@ -53,7 +51,7 @@ class AEA(Agent):
         :param mailbox: the mailbox of the agent.
         :param wallet: the wallet of the agent.
         :param ledger_apis: the ledger apis of the agent.
-        :param resources: the resources of the agent. If None, the directory parameter will be considered.
+        :param resources: the resources of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
@@ -79,8 +77,8 @@ class AEA(Agent):
                                      self.decision_maker.ownership_state,
                                      self.decision_maker.preferences,
                                      self.decision_maker.is_ready_to_pursuit_goals)
-        self._resources = resources  # type: Optional[Resources]
-        self._filter = None  # type: Optional[Filter]
+        self._resources = resources
+        self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
     @property
     def decision_maker(self) -> DecisionMaker:
@@ -95,7 +93,6 @@ class AEA(Agent):
     @property
     def resources(self) -> Resources:
         """Get resources."""
-        assert self._resources is not None, "No resources initialized. Call setup."
         return self._resources
 
     @resources.setter
@@ -106,7 +103,6 @@ class AEA(Agent):
     @property
     def filter(self) -> Filter:
         """Get filter."""
-        assert self._filter is not None, "No filter initialized. Call setup."
         return self._filter
 
     def setup(self) -> None:
@@ -117,7 +113,6 @@ class AEA(Agent):
         """
         self.resources.load(self.context)
         self.resources.setup()
-        self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
     def act(self) -> None:
         """
