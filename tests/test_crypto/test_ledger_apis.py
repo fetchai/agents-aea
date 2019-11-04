@@ -24,7 +24,7 @@ import os
 from unittest import mock
 
 import pytest
-from hexbytes import HexBytes
+from hexbytes import HexBytes   # type: ignore
 
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
 from aea.crypto.fetchai import FETCHAI, FetchAICrypto
