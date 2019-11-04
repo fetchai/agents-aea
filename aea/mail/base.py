@@ -22,7 +22,7 @@
 import logging
 from abc import ABC, abstractmethod
 from queue import Queue
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, List
 
 from aea.configurations.base import Address, ProtocolId
 from aea.mail import base_pb2
@@ -30,6 +30,19 @@ if TYPE_CHECKING:
     from aea.connections.base import Connection  # pragma: no cover
 
 logger = logging.getLogger(__name__)
+
+
+class EnvelopeContext:
+    """Extra information for the handling of an envelope."""
+
+    def __init__(self, connection_id: Optional[str] = None):
+        """Initialize the envelope context."""
+        self.connection_id = connection_id
+
+    def __eq__(self, other):
+        """Compare with another object."""
+        return isinstance(other, EnvelopeContext) and\
+               self.connection_id == other.connection_id
 
 
 class EnvelopeSerializer(ABC):
@@ -84,7 +97,8 @@ class Envelope:
     def __init__(self, to: Address,
                  sender: Address,
                  protocol_id: ProtocolId,
-                 message: bytes):
+                 message: bytes,
+                 context: Optional[EnvelopeContext] = None):
         """
         Initialize a Message object.
 
@@ -97,6 +111,7 @@ class Envelope:
         self._sender = sender
         self._protocol_id = protocol_id
         self._message = message
+        self._context = context if context is not None else EnvelopeContext()  # type: Optional[EnvelopeContext]
 
     @property
     def to(self) -> Address:
@@ -138,13 +153,19 @@ class Envelope:
         """Set the message."""
         self._message = message
 
+    @property
+    def context(self) -> Optional[EnvelopeContext]:
+        """Get the envelope context."""
+        return self._context
+
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, Envelope) \
             and self.to == other.to \
             and self.sender == other.sender \
             and self.protocol_id == other.protocol_id \
-            and self._message == other._message
+            and self._message == other._message \
+            and self.context == other.context
 
     def encode(self, serializer: Optional[EnvelopeSerializer] = None) -> bytes:
         """
@@ -268,6 +289,18 @@ class OutBox(object):
         """
         envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
         self._queue.put(envelope)
+
+
+class Multiplexer:
+    """This class can handle multiple connections at once."""
+
+    def __init__(self, connections: List[Connection]):
+        """
+        Initialize the connection multiplexer.
+
+        :param connections: the connections.
+        """
+        self.connections = connections
 
 
 class MailBox(object):
