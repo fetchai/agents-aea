@@ -45,6 +45,7 @@ class AEA(Agent):
                  timeout: float = 0.0,
                  debug: bool = False,
                  max_reactions: int = 20,
+                 resources: Optional[Resources] = None,
                  directory: str = '') -> None:
         """
         Instantiate the agent.
@@ -56,6 +57,7 @@ class AEA(Agent):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
+        :param resources: the resources of the agent. If None, the directory parameter will be considered.
         :param directory: the path to the agent's resource directory.
                         | If None, we assume the directory is in the working directory of the interpreter.
 
@@ -81,7 +83,7 @@ class AEA(Agent):
                                      self.decision_maker.ownership_state,
                                      self.decision_maker.preferences,
                                      self.decision_maker.is_ready_to_pursuit_goals)
-        self._resources = None  # type: Optional[Resources]
+        self._resources = resources  # type: Optional[Resources]
         self._filter = None  # type: Optional[Filter]
 
     @property
@@ -112,8 +114,9 @@ class AEA(Agent):
 
         :return: None
         """
-        self._resources = Resources.from_resource_dir(self._directory, self.context)
-        assert self._resources is not None, "No resources initialized. Error in setup."
+        if self._resources is None:
+            self._resources = Resources.from_resource_dir(self._directory, self.context)
+            assert self._resources is not None, "No resources initialized. Error in setup."
         self._resources.setup()
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 

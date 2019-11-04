@@ -478,9 +478,14 @@ class Resources(object):
         :return: None
         """
         resources = Resources()
-        resources.protocol_registry.populate(directory)
-        resources.populate_skills(directory, agent_context)
-        return resources
+        try:
+            resources.protocol_registry.populate(directory)
+            resources.populate_skills(directory, agent_context)
+            return resources
+        except Exception as e:
+            logger.warning(str(e))
+            logger.warning("Not loaded")
+            return None
 
     def populate_skills(self, directory: str, agent_context: AgentContext) -> None:
         """
