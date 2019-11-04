@@ -20,7 +20,6 @@
 
 """This module contains the tests for the crypto/helpers module."""
 import logging
-# from unittest import mock
 import os
 from unittest import mock
 
