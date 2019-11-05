@@ -24,7 +24,7 @@ import os
 from unittest import mock
 
 import pytest
-from hexbytes import HexBytes   # type: ignore
+from hexbytes import HexBytes
 
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
 from aea.crypto.fetchai import FETCHAI, FetchAICrypto
@@ -76,10 +76,8 @@ class TestLedgerApis:
             balance = ledger_apis.token_balance("UNKNOWN", fet_address)
             assert balance == 0, "Unknown identifier so it will return 0"
 
-    def test_transfer(self):
-        """Test the transfer function for the supported tokens."""
-        private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
-        eth_obj = EthereumCrypto(private_key_path=private_key_path)
+    def test_transfer_fetchai(self):
+        """Test the transfer function for fetchai token."""
         private_key_path = os.path.join(CUR_PATH, 'data', "fet_private_key.txt")
         fet_obj = FetchAICrypto(private_key_path=private_key_path)
         ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
@@ -90,6 +88,12 @@ class TestLedgerApis:
             tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
             assert tx_digest is not None
 
+    def test_transfer_ethereum(self):
+        """Test the transfer function for ethereum token."""
+        private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
+        eth_obj = EthereumCrypto(private_key_path=private_key_path)
+        ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
+                                  FETCHAI: DEFAULT_FETCHAI_CONFIG})
         with mock.patch.object(ledger_apis.apis.get(ETHEREUM).eth, 'getTransactionCount', return_value=5):
             transaction = {
                 'nonce': ledger_apis.apis.get(ETHEREUM).eth.getTransactionCount(),
@@ -112,8 +116,8 @@ class TestLedgerApis:
                         tx_digest = ledger_apis.transfer(ETHEREUM, eth_obj, eth_address, amount=10, tx_fee=200000)
                         assert tx_digest is not None
 
-    def test_is_tx_settled(self):
-        """Test if the transaction is settled."""
+    def test_is_tx_settled_fetchai(self):
+        """Test if the transaction is settled for fetchai."""
         ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
                                   FETCHAI: DEFAULT_FETCHAI_CONFIG})
         tx_digest = "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"
@@ -128,6 +132,11 @@ class TestLedgerApis:
             is_successful = ledger_apis.is_tx_settled(FETCHAI, tx_digest=tx_digest, amount=10)
             assert not is_successful
 
+    def test_is_tx_settled_ethereum(self):
+        """Test if the transaction is settled for eth."""
+        ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
+                                  FETCHAI: DEFAULT_FETCHAI_CONFIG})
+        tx_digest = "97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"
         result = HexBytes(
             '0xf85f808082c35094d898d5e829717c72e7438bad593076686d7d164a80801ba005c2e99ecee98a12fbf28ab9577423f42e9e88f2291b3acc8228de743884c874a077d6bc77a47ad41ec85c96aac2ad27f05a039c4787fca8a1e5ee2d8c7ec1bb6a')
         with mock.patch.object(ledger_apis.apis[ETHEREUM].eth, "getTransactionReceipt", return_value=result):
