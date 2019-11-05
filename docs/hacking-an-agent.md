@@ -43,38 +43,40 @@ from .conftest import CUR_PATH, DummyConnection
 
 ## Initialise the agent
 
-Create a node.
-
+Create a `Connection` and a `MailBox`.
 ``` python
-node = LocalNode()
+stub_connection = StubConnection(input_file_path='input.txt', output_file_path='output.txt')
+mailbox = MailBox(stub_connection)
 ```
 
-Initialise a `MailBox` object with a public key and grab the private key and add it to a wallet.
-
+Create a wallet with a private key.
 ``` python
-public_key_1 = "mailbox1"
-mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
 private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
 wallet = Wallet({'default': private_key_pem_path})
 ```
 
-Using a variable for accessing running ledgers, initialise the agent. 
+Get the public key from the wallet. You would use this to talk to an OEF or Fetch.ai ledger node.
+``` python
+public_key = wallet.public_keys['default']
+```
 
+For ledger APIs, we simply feed the agent a dictionary. 
 ``` python
 ledger_apis = LedgerApis({})
-my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
+```
+
+Create the resources.
+``` python
+resources = Resources(str(Path(CUR_PATH, "aea")))
+```
+
+Now we have everything we need for initialisation.
+``` python
+my_AEA = AEA("my_agent", mailbox, wallet, ledger_apis, resources)
 ```
 
 
 ## Run the agent
-
-Running the agent invokes the `act()` function in a `Behaviour` object.
-
-Initialise the agent as above and add a mailbox to it.
-
-``` python
-mailbox = MailBox(OEFLocalConnection(public_key, node))
-```
 
 Create a thread and add the agent to it.
 
@@ -99,9 +101,9 @@ assert behaviour[0].nb_act_called > 0, "Act() wasn't called"
 Finalise the agent thread.
 
 ``` python
-finally:
-	agent.stop()
-	t.join()
+agent.stop()
+t.join()
+t = None
 ```
 
 
