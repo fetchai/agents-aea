@@ -10,7 +10,7 @@ Make sure you are running <a href="https://docs.docker.com/install/" target=_bla
 
 ## Quick start
 
-Clone the repo to include submodules.
+Clone the repo to include sub-modules.
 
 ``` bash
 git clone git@github.com:fetchai/agents-tac.git --recursive && cd agents-tac

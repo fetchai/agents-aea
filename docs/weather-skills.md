@@ -1,4 +1,7 @@
-The AEA weather skills demonstrate an interaction between two AEAs; one as the provider of weather data (the weather station), the other as the seller of weather data (the weather client).
+The AEA weather skills demonstrate an interaction between two AEAs.
+
+* The provider of weather data (the weather station).
+* The seller of weather data (the weather client).
 
 
 ## Prerequisites
@@ -26,8 +29,9 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
 ```
 
-## Launch the OEF Node (for search and discovery):
-In a separate terminal, launch an OEF node locally:
+
+## Launch an OEF node
+In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
@@ -38,7 +42,7 @@ Keep it running for all the following demos.
 
 The AEAs negotiate and then transfer the data. No payment takes place. This demo serves as a demonstration of the negotiation steps.
 
-### Create the weather station AEA:
+### Create the weather station AEA
 In the root directory, create the weather station AEA.
 ``` bash
 aea create my_weather_station
@@ -98,7 +102,7 @@ aea delete my_weather_client
 
 ## Demo 2: Fetch.ai ledger payment
 
-A demo to run the same scenario but with a true ledger transaction on Fetch.ai test net. This demo assumes the weather client trusts the weather station to send the weather data upon successful payment.
+A demo to run the same scenario but with a true ledger transaction on Fetch.ai `testnet`. This demo assumes the weather client trusts the weather station to send the weather data upon successful payment.
 
 ### Create the weather station (ledger version)
 
@@ -110,9 +114,9 @@ cd my_weather_station
 aea add skill weather_station_ledger
 ```
 
-### Create the weather client (ledger version):
+### Create the weather client (ledger version)
 
-In another terminal, create the AEA that will query the weather station
+In another terminal, create the AEA that will query the weather station.
 
 ``` bash
 aea create my_weather_client 
@@ -120,7 +124,7 @@ cd my_weather_client
 aea add skill weather_client_ledger
 ```
 
-Additionally, create the private key for the weather client AEA
+Additionally, create the private key for the weather client AEA.
 ```bash
 aea generate-key fetchai
 ```
@@ -128,7 +132,7 @@ aea generate-key fetchai
 ### Update the AEA configs
 
 Both in `weather_station/aea-config.yaml` and
-`weather_client/aea-config.yaml`, replace `ledger_apis: []` with:
+`weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
 
 ``` yaml
 ledger_apis:
@@ -140,7 +144,7 @@ ledger_apis:
 
 ### Fund the weather client AEA
 
-Create some wealth for your weather client on the Fetch.ai test net (it takes a while):
+Create some wealth for your weather client on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
 cd ..
 python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
@@ -149,12 +153,12 @@ cd my_weather_client
 
 ### Run the AEAs
 
-Run both AEAs, from their respective terminals
+Run both AEAs from their respective terminals.
 ``` bash
 aea run
 ```
 
-You will see that the AEAs negotiate and then transact using the Fetch.ai test net.
+You will see that the AEAs negotiate and then transact using the Fetch.ai `testnet`.
 
 ### Delete the AEAs
 
@@ -168,7 +172,7 @@ aea delete my_weather_client
 
 ## Demo 3: Ethereum ledger payment
 
-A demo to run the same scenario but with a true ledger transaction on Fetch.ai test net. This demo assumes the weather client trusts the weather station to send the weather data upon successful payment.
+A demo to run the same scenario but with a true ledger transaction on the Ethereum Ropsten `testnet`. This demo assumes the weather client trusts the weather station to send the weather data upon successful payment.
 
 ### Create the weather station (ledger version)
 
@@ -180,9 +184,9 @@ cd my_weather_station
 aea add skill weather_station_ledger
 ```
 
-### Create the weather client (ledger version):
+### Create the weather client (ledger version)
 
-In another terminal, create the AEA that will query the weather station
+In another terminal, create the AEA that will query the weather station.
 
 ``` bash
 aea create my_weather_client 
@@ -190,7 +194,7 @@ cd my_weather_client
 aea add skill weather_client_ledger
 ```
 
-Additionally, create the private key for the weather client AEA
+Additionally, create the private key for the weather client AEA.
 ```bash
 aea generate-key ethereum
 ```
@@ -198,7 +202,7 @@ aea generate-key ethereum
 ### Update the AEA configs
 
 Both in `weather_station/aea-config.yaml` and
-`weather_client/aea-config.yaml`, replace `ledger_apis: []` with:
+`weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
 
 ``` yaml
 ledger_apis:
@@ -210,41 +214,40 @@ ledger_apis:
 
 ### Update the skill configs
 
-In the weather station skill config (`my_weather_station/skills/weather_station_ledger/skill.yaml`) under strategy change the `currency_pbk` and `ledger_id` as follows:
-```
+In the weather station skill config (`my_weather_station/skills/weather_station_ledger/skill.yaml`) under strategy, amend the `currency_pbk` and `ledger_id` as follows.
+``` bash
 currency_pbk: 'ETH'
 ledger_id: 'ethereum'
 ```
-and under ledgers change to:
-```
+Amend `ledgers` to the following.
+``` bash
 ledgers: ['ethereum']
 ```
 
-In the weather client skill config (`my_weather_client/skills/weather_client_ledger/skill.yaml`) under strategy change the `currency_pbk` and `ledger_id` as follows:
-```
+In the weather client skill config (`my_weather_client/skills/weather_client_ledger/skill.yaml`) under strategy change the `currency_pbk` and `ledger_id`.
+``` bash
 max_buyer_tx_fee: 20000
 currency_pbk: 'ETH'
 ledger_id: 'ethereum'
 ```
-and under ledgers change to:
-```
+Amend `ledgers` to the following.
+``` basgh
 ledgers: ['ethereum']
 ```
 
 ### Fund the weather client AEA
 
-Create some wealth for your weather client on the Ethereum Ropsten test net:
+Create some wealth for your weather client on the Ethereum Ropsten test net.
 
-Go to Metamask [Faucet](https://faucet.metamask.io) and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `weather_client/eth_private_key.txt`.
+Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `weather_client/eth_private_key.txt`.
 
 ### Run the AEAs
 
-Run both AEAs, from their respective terminals
+Run both AEAs, from their respective terminals.
 ``` bash
 aea run
 ```
-
-You will see that the AEAs negotiate and then transact using the Fetch.ai test net.
+You will see that the AEAs negotiate and then transact using the Ethereum `testnet`.
 
 ### Delete the AEAs
 

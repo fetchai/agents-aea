@@ -80,7 +80,7 @@ This class deals with representing potential transactions between agents.
 	FIPA negotiation skill is not fully developed.
 
 
-Follow the Preliminaries and Installation instructions <a href="../quickstart">here</a>.
+Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
 
 
 Then, download the examples and packages directory.

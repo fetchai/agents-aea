@@ -1,4 +1,4 @@
-The <a href="../scaffolding/">scaffolding tool</a> allows you create the folder structure required for a skill.
+The <a href="../scaffolding/">scaffolding tool</a> allows you to create the folder structure required for a skill.
 
 !!!	Note
 	Before developing your first skill, please read the <a href="../skill/">skill guide</a>.
@@ -6,14 +6,16 @@ The <a href="../scaffolding/">scaffolding tool</a> allows you create the folder 
 
 ## Step 1: Setup
 
-Ensure, you have followed the <a href="../quickstart/">preliminaries and installation</a>. We will first create an agent and add a scaffold skill, which we call `my_search`:
+Make sure you have followed the <a href="../quickstart/" target=_blank>preliminaries and installation</a> instructions from the quick start. 
+
+We will first create an agent and add a scaffold skill, which we call `my_search`.
 
 ``` bash
 aea create my_agent && cd my_agent
 aea scaffold skill my_search
 ```
 
-In the following steps, we will replace each one of the scaffolded `Behaviour`, `Handler` and `Task` in `my_agent/skills/my_search` with our implementation. We will build a simple skill which lets the agent send a search query to the [OEF](https://docs.fetch.ai/oef/) and process the resulting response.
+In the following steps, we replace each one of the scaffolded `Behaviour`, `Handler` and `Task` in `my_agent/skills/my_search` with our implementation. We will build a simple skill which lets the agent send a search query to the [OEF](https://docs.fetch.ai/oef/) and process the resulting response.
 
 
 ## Step 2: Develop a Behaviour
@@ -79,7 +81,7 @@ class MySearchBehaviour(Behaviour):
         logger.info("[{}]: tearing down MySearchBehaviour".format(self.context.agent_name))
 ```
 
-Searches are proactive and as such well placed in a `Behaviour`.
+Searches are proactive and, as such, well placed in a `Behaviour`.
 
 We place this code in `my_agent/skills/my_search/behaviours.py`.
 
@@ -200,9 +202,9 @@ We place this code in `my_agent/skills/my_search/tasks.py`.
 
 ## Step 5: Create the config file
 
-Based on our skill components above, we create the following config file:
+Based on our skill components above, we create the following config file.
 
-```yaml
+``` yaml
 name: my_search
 authors: Fetch.ai Limited
 version: 0.1.0
@@ -231,20 +233,20 @@ We place this code in `my_agent/skills/my_search/skill.yaml`.
 
 ## Step 6: Add the oef protocol
 
-Our agent does not have the oef protocol yet. Hence, we add it like so:
+Our agent does not have the oef protocol yet so let's add it.
 ```bash
 aea add protocol oef
 ```
 
 ## Step 7: Run the agent
 
-We first start an oef node (see the <a href="../connection/">connection section</a> for more details) in a separate terminal window:
+We first start an oef node (see the <a href="../connection/" target=_blank>connection section</a> for more details) in a separate terminal window.
 
 ```bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 
-We can then launch our agent:
+We can then launch our agent.
 ```bash
 aea run
 ```
@@ -252,8 +254,9 @@ aea run
 Stop the agent with `CTRL + C`.
 
 
-## Now it's your turn:
+## Now it's your turn
 
-We hope this step by step introduction has helped you to develop your own skill. We are excited to see what you will build.
+We hope this step by step introduction has helped you develop your own skill. We are excited to see what you will build.
+
 
 <br />
