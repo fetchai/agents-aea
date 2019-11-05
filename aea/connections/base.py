@@ -19,61 +19,40 @@
 # ------------------------------------------------------------------------------
 
 """The base connection package."""
-
+import asyncio
 from abc import abstractmethod, ABC
-from queue import Queue
-from typing import Optional, TYPE_CHECKING
+from asyncio import AbstractEventLoop
+from typing import TYPE_CHECKING, Optional
 
 from aea.configurations.base import ConnectionConfig
+
 if TYPE_CHECKING:
     from aea.mail.base import Envelope  # pragma: no cover
 
 
-class Channel(ABC):
-    """Abstract definition of a channel."""
-
-    @abstractmethod
-    def connect(self) -> Optional[Queue]:
-        """
-        Set up the connection.
-
-        :return: A queue or None.
-        """
-
-    @abstractmethod
-    def disconnect(self) -> None:
-        """
-        Tear down the connection.
-
-        :return: None.
-        """
-
-    @abstractmethod
-    def send(self, envelope: 'Envelope') -> None:
-        """
-        Send an envelope.
-
-        :param envelope: the envelope to send.
-        :return: None.
-        """
+class AEAConnectionError(Exception):
+    """Exception class for connection errors."""
 
 
 class Connection(ABC):
     """Abstract definition of a connection."""
 
-    channel: Channel
-
-    def __init__(self):
+    def __init__(self, connection_id: str, loop: Optional[AbstractEventLoop] = None):
         """Initialize the connection."""
-        self.in_queue = Queue()
-        self.out_queue = Queue()
+        self._connection_id = connection_id
+        self._loop = loop if loop is not None else asyncio.get_event_loop()
+
+    @property
+    def connection_id(self) -> str:
+        """Get the id of the connection."""
+        return self._connection_id
 
     @abstractmethod
-    def connect(self):
+    async def connect(self):
         """Set up the connection."""
 
     @abstractmethod
-    def disconnect(self):
+    async def disconnect(self):
         """Tear down the connection."""
 
     @property
@@ -82,8 +61,21 @@ class Connection(ABC):
         """Check if the connection is established."""
 
     @abstractmethod
-    def send(self, envelope: 'Envelope'):
-        """Send a message."""
+    async def send(self, envelope: 'Envelope') -> None:
+        """
+        Send an envelope.
+
+        :param envelope: the envelope to send.
+        :return: None
+        """
+
+    @abstractmethod
+    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+        """
+        Receive an envelope. Blocking.
+
+        :return: the envelope received, or None.
+        """
 
     @classmethod
     @abstractmethod

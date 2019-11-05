@@ -21,6 +21,7 @@
 import base64
 import shutil
 import tempfile
+import time
 from pathlib import Path
 
 from aea.configurations.base import ConnectionConfig
@@ -43,7 +44,7 @@ class TestStubConnection:
         cls.output_file_path = d / "input_file.csv"
 
         cls.connection = StubConnection(cls.input_file_path, cls.output_file_path)
-        cls.mailbox = MailBox(cls.connection)
+        cls.mailbox = MailBox([cls.connection])
         cls.mailbox.connect()
 
     def test_reception(self):
@@ -80,6 +81,7 @@ class TestStubConnection:
         expected_envelope = Envelope(to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
 
         self.mailbox.outbox.put(expected_envelope)
+        time.sleep(0.1)
 
         with open(self.output_file_path, "rb+") as f:
             lines = f.readlines()

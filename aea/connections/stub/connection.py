@@ -20,10 +20,13 @@
 """This module contains the stub connection."""
 import logging
 import os
+import queue
+import threading
+from asyncio import AbstractEventLoop
 from pathlib import Path
 from queue import Empty
 from threading import Thread
-from typing import Union
+from typing import Union, Optional
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
@@ -104,14 +107,15 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path]):
+    def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
+                 connection_id: str = "stub", loop: Optional[AbstractEventLoop] = None):
         """
         Initialize a stub connection.
 
         :param input_file_path: the input file for the incoming messages.
         :param output_file_path: the output file for the outgoing messages.
         """
-        super().__init__()
+        super().__init__(connection_id=connection_id, loop=loop)
 
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -122,8 +126,10 @@ class StubConnection(Connection):
         self.output_file = open(output_file_path, "wb+", buffering=1)
 
         self._stopped = True
+        self._connected = False
+        self.in_queue = queue.Queue()  # type: queue.Queue
+        self._lock = threading.Lock()
         self._observer = Observer()
-        self._fetch_thread = Thread(target=self._fetch)
 
         dir = os.path.dirname(input_file_path.absolute())
         self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
@@ -132,7 +138,7 @@ class StubConnection(Connection):
     @property
     def is_established(self) -> bool:
         """Get the connection status."""
-        return not self._stopped
+        return not self._stopped and self._connected
 
     def receive(self) -> None:
         """Receive new messages, if any."""
@@ -153,52 +159,48 @@ class StubConnection(Connection):
         except ValueError:
             logger.error("Bad formatted line: {}".format(line))
 
-    def connect(self) -> None:
-        """
-        Connect to the channel.
+    async def recv(self) -> Optional['Envelope']:
+        try:
+            future = self._loop.run_in_executor(None, self.in_queue.get, True)
+            envelope = await future
+            return envelope
+        except Exception as e:
+            logger.exception(e)
+            return None
 
-        In this type of connection there's no channel to connect.
-        """
-        if self._stopped:
-            self._stopped = False
-            try:
-                self._observer.start()
-                self._fetch_thread.start()
-            except Exception as e:      # pragma: no cover
-                self._stopped = True
-                raise e
+    async def connect(self) -> None:
+        """Set up the connection."""
+        with self._lock:
+            if self._stopped:
+                self._stopped = False
+                try:
+                    self._observer.start()
+                except Exception as e:      # pragma: no cover
+                    self._stopped = True
+                    raise e
 
-            self.receive()
+                self._connected = True
+                # do a first processing of messages.
+                self.receive()
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """
         Disconnect from the channel.
 
         In this type of connection there's no channel to disconnect.
         """
-        if not self._stopped:
-            self._stopped = True
-            self._fetch_thread.join()
-            try:
-                self._observer.stop()
-            except Exception as e:      # pragma: no cover
-                self._stopped = False
-                raise e
+        with self._lock:
+            if self._connected:
+                self._connected = False
+                try:
+                    self._observer.stop()
+                    self.in_queue.put_nowait(None)
+                except Exception as e:      # pragma: no cover
+                    self._connected = True
+                    raise e
+                self._stopped = True
 
-    def _fetch(self) -> None:
-        """
-        Fetch the messages from the outqueue and send them.
-
-        :return: None
-        """
-        while not self._stopped:
-            try:
-                msg = self.out_queue.get(block=True, timeout=1.0)
-                self.send(msg)
-            except Empty:
-                pass
-
-    def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope):
         """
         Send messages.
 
