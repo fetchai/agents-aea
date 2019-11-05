@@ -101,6 +101,10 @@ class DummyConnection(Connection):
         """Send an envelope."""
         self.out_queue.put(envelope)
 
+    def receive(self, envelope: 'Envelope'):
+        """Receive an envelope."""
+        self.in_queue.put(envelope)
+
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
         """Return a connection obj fom a configuration."""
