@@ -20,6 +20,12 @@ tasks:
 shared_classes:
   - shared_class:
       class_name: Search
+      args:
+        search_interval: 5
+  - shared_class:
+      class_name: Registration
+      args:
+        update_interval: 5
   - shared_class:
       class_name: Strategy
   - shared_class:
