@@ -1,0 +1,11 @@
+name: 'tac_control'
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
+url: ""
+behaviours: []
+handlers: []
+tasks: []
+shared_classes: []
+protocols: ['oef', 'fipa']

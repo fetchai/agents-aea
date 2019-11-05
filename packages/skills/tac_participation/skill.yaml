@@ -1,9 +1,9 @@
-name: tac
+name: tac_participation
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
-description: "The tac skill implements the logic for an AEA to participate in the TAC."
+description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
 behaviours:
   - behaviour:
       class_name: TACBehaviour

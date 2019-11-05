@@ -30,9 +30,9 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.helpers import build_goods_description, build_goods_query
+    from packages.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
 else:
-    from fipa_negotiation_skill.helpers import build_goods_description, build_goods_query
+    from tac_negotiation_skill.helpers import build_goods_description, build_goods_query
 
 
 ROUNDING_ADJUSTMENT = 0.01
@@ -55,7 +55,7 @@ class Strategy(SharedClass):
         BUYERS = 'buyers'
         BOTH = 'both'
 
-    def __init__(self, register_as: 'Strategy'.RegisterAs = 'Strategy'.RegisterAs.BOTH, search_for: 'Strategy'.SearchFor = 'Strategy'.SearchFor.BOTH, **kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -64,9 +64,9 @@ class Strategy(SharedClass):
 
         :return: None
         """
+        self._register_as = Strategy.RegisterAs(kwargs.pop('register_as')) if 'register_as' in kwargs.keys() else Strategy.RegisterAs.BOTH
+        self._search_for = Strategy.SearchFor(kwargs.pop('search_for')) if 'search_for' in kwargs.keys() else Strategy.SearchFor.BOTH
         super().__init__(**kwargs)
-        self._register_as = register_as
-        self._search_for = search_for
 
     @property
     def is_registering_as_seller(self) -> bool:

@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a handler."""
+"""This package contains the handlers."""
 
 import logging
 from typing import List, cast, TYPE_CHECKING
@@ -29,18 +29,18 @@ from aea.skills.base import Handler
 if TYPE_CHECKING:
     from packages.protocols.tac.message import TACMessage
     from packages.protocols.tac.serialization import TACSerializer
-    from packages.skills.tac.game import Game, GamePhase
-    from packages.skills.tac.search import Search
+    from packages.skills.tac_participation.game import Game, GamePhase
+    from packages.skills.tac_participation.search import Search
 else:
     from tac_protocol.message import TACMessage
     from tac_protocol.serialization import TACSerializer
-    from tac_skill.game import Game, GamePhase
-    from tac_skill.search import Search
+    from tac_participation_skill.game import Game, GamePhase
+    from tac_participation_skill.search import Search
 
 
 Address = str
 
-logger = logging.getLogger("aea.tac_skill")
+logger = logging.getLogger("aea.tac_participation_skill")
 
 
 class OEFHandler(Handler):
@@ -73,7 +73,6 @@ class OEFHandler(Handler):
         oef_type = oef_message.get("type")
 
         logger.debug("[{}]: Handling OEF message. type={}".format(self.context.agent_name, oef_type))
-        oef_message = cast(OEFMessage, oef_message)
         if oef_type == OEFMessage.Type.SEARCH_RESULT:
             self._on_search_result(oef_message)
         elif oef_type == OEFMessage.Type.OEF_ERROR:

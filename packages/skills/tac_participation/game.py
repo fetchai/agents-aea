@@ -32,7 +32,7 @@ else:
 
 Address = str
 
-logger = logging.getLogger("aea.tac_skill")
+logger = logging.getLogger("aea.tac_participation_skill")
 
 
 class GamePhase(Enum):

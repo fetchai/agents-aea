@@ -26,17 +26,17 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.registration import Registration
-    from packages.skills.fipa_negotiation.search import Search
-    from packages.skills.fipa_negotiation.strategy import Strategy
-    from packages.skills.fipa_negotiation.transactions import Transactions
+    from packages.skills.tac_negotiation.registration import Registration
+    from packages.skills.tac_negotiation.search import Search
+    from packages.skills.tac_negotiation.strategy import Strategy
+    from packages.skills.tac_negotiation.transactions import Transactions
 else:
-    from fipa_negotiation_skill.registration import Registration
-    from fipa_negotiation_skill.search import Search
-    from fipa_negotiation_skill.strategy import Strategy
-    from fipa_negotiation_skill.transactions import Transactions
+    from tac_negotiation_skill.registration import Registration
+    from tac_negotiation_skill.search import Search
+    from tac_negotiation_skill.strategy import Strategy
+    from tac_negotiation_skill.transactions import Transactions
 
-logger = logging.getLogger("aea.fipa_negotiation_skill")
+logger = logging.getLogger("aea.tac_negotiation_skill")
 
 
 class GoodsRegisterAndSearchBehaviour(Behaviour):

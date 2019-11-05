@@ -39,12 +39,12 @@ from aea.protocols.oef.models import Query
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.helpers import DEMAND_DATAMODEL_NAME
+    from packages.skills.tac_negotiation.helpers import DEMAND_DATAMODEL_NAME
 else:
-    from fipa_negotiation_skill.helpers import DEMAND_DATAMODEL_NAME
+    from tac_negotiation_skill.helpers import DEMAND_DATAMODEL_NAME
 
 Action = Any
-logger = logging.getLogger("aea.fipa_negotiation_skill")
+logger = logging.getLogger("aea.tac_negotiation_skill")
 
 
 class Dialogue(BaseDialogue):

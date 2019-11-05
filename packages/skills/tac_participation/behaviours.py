@@ -28,8 +28,8 @@ if TYPE_CHECKING:
     from packages.skills.tac.game import Game, GamePhase
     from packages.skills.tac.search import Search
 else:
-    from tac_skill.game import Game, GamePhase
-    from tac_skill.search import Search
+    from tac_participation_skill.game import Game, GamePhase
+    from tac_participation_skill.search import Search
 
 
 class TACBehaviour(Behaviour):

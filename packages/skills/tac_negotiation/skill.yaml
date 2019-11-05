@@ -1,8 +1,8 @@
-name: 'fipa_negotiation'
+name: 'tac_negotiation'
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
-description: "The fipa skill implements the logic for an AEA to do fipa negotiation."
+description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
 url: ""
 behaviours:
   - behaviour:
@@ -28,6 +28,9 @@ shared_classes:
         update_interval: 5
   - shared_class:
       class_name: Strategy
+      args:
+        register_as: both
+        search_for: both
   - shared_class:
       class_name: Dialogues
   - shared_class:

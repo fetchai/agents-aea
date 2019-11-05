@@ -36,19 +36,19 @@ from aea.protocols.oef.models import Query, Description
 from aea.decision_maker.messages.transaction import TransactionMessage
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.dialogues import Dialogue, Dialogues
-    from packages.skills.fipa_negotiation.helpers import generate_transaction_id
-    from packages.skills.fipa_negotiation.search import Search
-    from packages.skills.fipa_negotiation.strategy import Strategy
-    from packages.skills.fipa_negotiation.transactions import Transactions
+    from packages.skills.tac_negotiation.dialogues import Dialogue, Dialogues
+    from packages.skills.tac_negotiation.helpers import generate_transaction_id
+    from packages.skills.tac_negotiation.search import Search
+    from packages.skills.tac_negotiation.strategy import Strategy
+    from packages.skills.tac_negotiation.transactions import Transactions
 else:
-    from fipa_negotiation_skill.dialogues import Dialogue, Dialogues
-    from fipa_negotiation_skill.helpers import generate_transaction_id
-    from fipa_negotiation_skill.search import Search
-    from fipa_negotiation_skill.strategy import Strategy
-    from fipa_negotiation_skill.transactions import Transactions
+    from tac_negotiation_skill.dialogues import Dialogue, Dialogues
+    from tac_negotiation_skill.helpers import generate_transaction_id
+    from tac_negotiation_skill.search import Search
+    from tac_negotiation_skill.strategy import Strategy
+    from tac_negotiation_skill.transactions import Transactions
 
-logger = logging.getLogger("aea.fipa_negotiation_skill")
+logger = logging.getLogger("aea.tac_negotiation_skill")
 
 
 class FIPANegotiationHandler(Handler):
@@ -158,7 +158,7 @@ class FIPANegotiationHandler(Handler):
             assert proposal_description is not None
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                                 skill_id="fipa_negotiation_skill",
+                                                 skill_id="tac_negotiation_skill",
                                                  transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
@@ -198,7 +198,7 @@ class FIPANegotiationHandler(Handler):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                                 skill_id="fipa_negotiation_skill",
+                                                 skill_id="tac_negotiation_skill",
                                                  transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
