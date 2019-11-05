@@ -112,8 +112,8 @@ class LedgerApis(object):
             except Exception:
                 logger.warning("An error occurred while attempting to get the current balance.")
                 balance = 0
-        else:           # pragma: no cover
-            balance = 0
+        else:       # pragma: no cover
+            raise Exception("Ledger id is not known")
         return balance
 
     def transfer(self, identifier: str, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
@@ -154,21 +154,20 @@ class LedgerApis(object):
             }
             signed = api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
             hex_value = api.eth.sendRawTransaction(signed.rawTransaction)
-            print("TX Hash: ", hex_value.hex())
-            print("connect_to https://ropsten.etherscan.io/tx/{}".format(hex_value.hex()))
+            logger.info("TX Hash: {}".format(str(hex_value.hex())))
             while True:
                 try:
                     api.eth.getTransactionReceipt(hex_value)
                     logger.info("transaction validated - exiting")
                     tx_digest = hex_value.hex()
                     break
-                except web3.exceptions.TransactionNotFound:
+                except web3.exceptions.TransactionNotFound:     # pragma: no cover
                     logger.info("transaction not found - sleeping for 3.0 seconds")
                     time.sleep(3.0)
 
             return tx_digest
-        else:                   # pragma: no cover
-            tx_digest = None
+        else:           # pragma: no cover
+            raise Exception("Ledger id is not known")
         return tx_digest
 
     def is_tx_settled(self, identifier: str, tx_digest: str, amount: int) -> bool:
