@@ -122,6 +122,7 @@ class ServiceRegistrationBehaviour(Behaviour):
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
         super().__init__(**kwargs)
+        self._was_connected = False
         self._registered = False
 
     def setup(self) -> None:
@@ -130,7 +131,12 @@ class ServiceRegistrationBehaviour(Behaviour):
 
         :return: None
         """
+        strategy = cast(Strategy, self.context.strategy)
+        strategy.db.set_system_status("oef-status", "Disconnected")
+
+
         balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
+        strategy.db.set_system_status("ledger-status", self.context.ledger_apis.get_status('fetchai'))
 
         logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, balance))
 
@@ -140,6 +146,15 @@ class ServiceRegistrationBehaviour(Behaviour):
 
         :return: None
         """
+        # if connection status has changed
+        if self.context.is_connected != self._was_connected:
+            self._was_connected = self.context.is_connected
+            strategy = cast(Strategy, self.context.strategy)
+            if self.context.is_connected:
+                strategy.db.set_system_status("oef-status", "Connected")
+            else:
+                strategy.db.set_system_status("oef-status", "Disconnected")
+
         if self._registered:
             return
 
