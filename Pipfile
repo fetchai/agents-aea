@@ -36,9 +36,9 @@ flask = "*"
 connexion = ">=2.4.0"
 watchdog = "*"
 python-dotenv = "*"
-fetchai-ledger-api = "*"
-web3 = "*"
-eth-account = "*"
+fetchai-ledger-api = "==0.8.1"
+web3 = "==5.2.2"
+eth-account = "==0.4.0"
 
 [requires]
 python_version = "3.7"
