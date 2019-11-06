@@ -540,25 +540,35 @@ class OEFConnection(Connection):
         :return: None
         :raises Exception if the connection to the OEF fails.
         """
+        if self._connection_check_thread is not None:
+            self._connection_check_thread.join()
+            self._connection_check_thread = None
         if self._stopped and not self._connected:
             self._stopped = False
             self._core.run_threaded()
-            not_connected = True
-            while not_connected:
-                try:
-                    if self.channel.connect():
-                        not_connected = False
-                        self._connected = True
-                        self.out_thread = Thread(target=self._fetch)
-                        self.out_thread.start()
-                        self._connection_check_thread = Thread(target=self._connection_check)
-                        self._connection_check_thread.start()
-                    else:
-                        logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
-                        time.sleep(5.0)
-                except Exception as e:
-                    self._core.stop()
-                    raise e
+            while not self._connected:
+                self._try_connect()
+
+    def _try_connect(self) -> None:
+        """
+        Try connect to the channel.
+
+        :return: None
+        :raises Exception if the connection to the OEF fails.
+        """
+        try:
+            if self.channel.connect():
+                self._connected = True
+                self.out_thread = Thread(target=self._fetch)
+                self.out_thread.start()
+                self._connection_check_thread = Thread(target=self._connection_check)
+                self._connection_check_thread.start()
+            else:
+                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
+                time.sleep(5.0)
+        except Exception as e:
+            self._core.stop()
+            raise e
 
     def _connection_check(self) -> None:
         """
@@ -568,8 +578,8 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        assert self.out_thread is not None, "Call connect before _connection_check."
         while self._connected:
+            assert self.out_thread is not None, "Call connect before _connection_check."
             time.sleep(2.0)
             if not self.channel.get_state() == "connected":  # type: ignore
                 logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")

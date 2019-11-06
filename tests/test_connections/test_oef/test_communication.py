@@ -530,12 +530,12 @@ class TestOefConnection:
         mailbox.connect()
         mailbox.disconnect()
 
-    # def test_oef_connect(self):
-    #     """Test the OEFConnection."""
-    #     con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
-    #     assert not con.is_established
-    #     with pytest.raises(ConnectionError):
-    #         con.connect()
+    def test_oef_connect(self):
+        """Test the OEFConnection with a wrong address."""
+        con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
+        assert not con.is_established
+        con._try_connect()
+        assert not con.is_established
 
     def test_oef_from_config(self):
         """Test the Connection from config File."""
