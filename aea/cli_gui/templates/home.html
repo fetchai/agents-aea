@@ -88,14 +88,24 @@
 
                     <div class="section editor">
                         <h2>Running "<span class="localItemHeading">NONE</span>" Agent</h2>
+<!--                        <div class="dropdown">-->
+<!--                          <button class="button">Run with connection: Default</button>-->
+<!--                          <div class="dropdown-content">-->
+<!--                            <a href="#">Default</a>-->
+<!--                            <a href="#">connection 1</a>-->
+<!--                            <a href="#">connection 2</a>-->
+<!--                          </div>-->
+<!--                        </div>-->
                         <button id="startAgent">Start Agent</button>
+                        <label for="runConnectionId">with connection id:
+                            <input id="runConnectionId" type="text" />
+                        </label>
+                        <br>
                         <button id="stopAgent">Stop Agent</button>
                         <h3 id="agentStatus">Agent Status: NONE</h3>
-                        <div class="code" id="agentTTY">
-                        </div>
+                        <div class="code" id="agentTTY"></div>
                         <br>
-                        <div class="codeError" id="agentError">
-                        </div>
+                        <div class="codeError" id="agentError"></div>
                     </div>
 
                     <br>
@@ -129,8 +139,10 @@
                             <br>
                         {% endif %}
                     {% endfor %}
+
                     <div class="section editor">
                         <h2>OEF Node</h2>
+
                         <button id="startOEFNode">Start OEF Node</button>
                         <button id="stopOEFNode">Stop OEF Node</button>
                         <h3 id="oefStatus">OEF Node Status: NONE</h3>

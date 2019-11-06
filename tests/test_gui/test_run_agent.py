@@ -40,16 +40,18 @@ class TestRunAgent(TestBase):
         )
         assert response_add.status_code == 201
 
-        # run the agent
+
+        # run the agent with local connection (as no OEF node is running)
         response_run = self.app.post(
             'api/agent/' + agent_name + "/run",
-            data=None,
             content_type='application/json',
+            data=json.dumps("local")
         )
         assert response_run.status_code == 201
 
         time.sleep(2)
 
+        # Get the running status
         response_status = self.app.get(
             'api/agent/' + agent_name + "/run",
             data=None,
@@ -60,13 +62,26 @@ class TestRunAgent(TestBase):
 
         assert data["error"] == ""
         assert "RUNNING" in data["status"]
-        assert "do connected finished" in data["tty"]
 
+        # Stop the agent running
         response_stop = self.app.delete(
             'api/agent/' + agent_name + "/run",
             data=None,
             content_type='application/json',
         )
         assert response_stop.status_code == 200
+
+        # Get the running status
+        response_status = self.app.get(
+            'api/agent/' + agent_name + "/run",
+            data=None,
+            content_type='application/json',
+        )
+        assert response_status.status_code == 200
+        data = json.loads(response_status.get_data(as_text=True))
+
+        assert "process terminate" in data["error"]
+        assert "NOT_STARTED" in data["status"]
+
 
 
