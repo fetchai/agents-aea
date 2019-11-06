@@ -15,4 +15,4 @@ config:
   port: ${OEF_PORT:10000}
 dependencies:
   - colorlog
-  - oef
+  - oef==0.8.1
