@@ -2,7 +2,7 @@
 
 Do you want to create software to work for you and enrich your life? 
 
-Autonomous Economic Agents -  or AEAs - work continously for your benefit without you having to do anything more than write them and start them up.
+Autonomous Economic Agents (AEAs) work continously for your benefit without you having to do anything more than write them and start them up.
 
 AEAs are able to act independent of your constant input and to autonomously develop new capabilities. Their goal is to create economic gain for you, their owner.
 

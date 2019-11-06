@@ -8,7 +8,7 @@ There are five general application areas for Fetch.ai AEAs.
 * **Digital data sales agents**: pure software agents that attach to data sources and sell it via the open economic framework.
 * **Representative**: an agent which represents an individual's activities on the Fetch.ai network.
 
-## Multi-agent system vs agent-based modelling
+## Multi-agent system versus agent-based modelling
 
 The Fetch.ai multi agent system is a real world multi-agent technological system and, although there is some overlap, it is not the same as agent based modelling where the goal is scientific behaviourial observation rather than practical economic gain.
 

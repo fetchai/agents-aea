@@ -26,8 +26,8 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
 ```
 
-## Launch the OEF Node (for search and discovery):
-In a separate terminal, launch an OEF node locally:
+## Launch the OEF Node:
+In a separate terminal, launch an OEF node (for search and discovery) locally:
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
