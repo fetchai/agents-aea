@@ -20,9 +20,10 @@
 """Mail module abstract base classes."""
 import asyncio
 import logging
+import time
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop, Queue
-from concurrent.futures import CancelledError, TimeoutError
+from asyncio import AbstractEventLoop, Queue, Task
+from concurrent.futures import CancelledError, TimeoutError, Future
 from threading import Thread, Lock
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict
 
@@ -230,6 +231,9 @@ class Multiplexer:
         self._in_queue = Queue()
         self._out_queue = Queue()
 
+        self._recv_loop_task = None  # type: Optional[Future]
+        self._send_loop_task = None  # type: Optional[Future]
+
     @property
     def in_queue(self) -> Queue:
         """Get the in queue"""
@@ -256,12 +260,13 @@ class Multiplexer:
         with self._lock:
             self._start()
             asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
-            asyncio.run_coroutine_threadsafe(self._recv_loop(), loop=self._loop)
-            asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
+            self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._recv_loop(), loop=self._loop)
+            self._send_loop_task = asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
 
     def disconnect(self) -> None:
         """Disconnect the multiplexer."""
         with self._lock:
+            logger.debug("Disconnecting the multiplexer...")
             asyncio.run_coroutine_threadsafe(self._disconnect_all(), loop=self._loop).result()
             self._stop()
 
@@ -269,8 +274,10 @@ class Multiplexer:
         """Run the asyncio loop.
 
         This method is supposed to be run only in the Multiplexer thread."""
+        logger.debug("Starting threaded asyncio loop...")
         asyncio.set_event_loop(self._loop)
         self._loop.run_forever()
+        logger.debug("Asyncio loop has been stopped.")
 
     def _start(self):
         """Start the multiplexer."""
@@ -281,9 +288,10 @@ class Multiplexer:
     def _stop(self):
         """Start the multiplexer."""
         if self._loop.is_running():
-            self._loop.call_soon_threadsafe(self._loop.stop)
+            self._loop.stop()
         if self._thread.is_alive():
-            self._thread.join()
+            self._loop.stop()
+            self._thread.join(0.0)
         logger.debug("Multiplexer stopped.")
 
     async def _connect_all(self):
@@ -336,7 +344,8 @@ class Multiplexer:
 
     async def _send_loop(self):
         """Process the outgoing messages."""
-        loop = asyncio.get_running_loop()
+        if not self.is_connected:
+            return
         try:
             logger.debug("Waiting for outgoing messages...")
             envelope = await self.out_queue.get()
@@ -346,7 +355,8 @@ class Multiplexer:
             logger.debug("Sending loop cancelled.")
             return
         except Exception as e:
-            logger.error("Error: {}".format(str(e)))
+            logger.error("Error in the sending loop: {}".format(str(e)))
+            return
 
         await self._send_loop()
 
@@ -356,7 +366,7 @@ class Multiplexer:
         logger.debug("Waiting for incoming messages...")
         task_to_connection = {asyncio.ensure_future(conn.recv()): conn for conn in self.connections}
 
-        while True:
+        while self.is_connected:
             try:
                 done, pending = await asyncio.wait(task_to_connection.keys(),
                                                    return_when=asyncio.FIRST_COMPLETED,
@@ -371,9 +381,10 @@ class Multiplexer:
 
             except asyncio.CancelledError:
                 logger.debug("Receiving loop cancelled.")
+                return
             except Exception as e:
                 logger.error("Error in the receiving loop: {}".format(str(e)))
-                await asyncio.sleep(1.0)
+                return
 
     async def _send(self, envelope: Envelope) -> None:
         """
@@ -398,18 +409,19 @@ class Multiplexer:
         try:
             await connection.send(envelope)
         except Exception as e:
-            raise AEAConnectionError(e)
+            raise e
 
-    def get(self, timeout: float = 0.0) -> Optional[Envelope]:
+    def get(self, block: bool = False, timeout: Optional[float] = None) -> Optional[Envelope]:
         """
         Get an envelope within a timeout.
 
+        :param block: make the call blocking (ignore the timeout).
         :param timeout: the timeout to wait until an envelope is received.
         :return: the envelope, or None if no envelope is available within a timeout.
         """
         future = asyncio.run_coroutine_threadsafe(self._in_queue.get(), self._loop)
         try:
-            return future.result(timeout)
+            return future.result(timeout=None if block and timeout is None else timeout)
         except (CancelledError, TimeoutError):
             return None
 
@@ -434,17 +446,18 @@ class InBox(object):
         """
         return self._multiplexer.in_queue.empty()
 
-    def get(self, timeout: float = 0.0) -> Envelope:
+    def get(self, block: bool = False, timeout: Optional[float] = None) -> Envelope:
         """
         Check for a envelope on the in queue.
 
+        :param block: make the call blocking (ignore the timeout).
         :param timeout: times out the block after timeout seconds.
 
         :return: the envelope object.
         :raises Empty: if the attempt to get a message fails.
         """
         logger.debug("Checks for message from the in queue...")
-        envelope = self._multiplexer.get(timeout=timeout)
+        envelope = self._multiplexer.get(block=block, timeout=timeout)
         if envelope is None:
             raise Empty()
         logger.debug("Incoming message: to='{}' sender='{}' protocol_id='{}' message='{}'"
@@ -457,7 +470,7 @@ class InBox(object):
 
         :return: the envelope object
         """
-        envelope = self.get(0.0)
+        envelope = self.get()
         return envelope
 
 
@@ -504,17 +517,17 @@ class OutBox(object):
         :return: None
         """
         envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
-        self._multiplexer.out_queue.put(envelope)
+        self._multiplexer.out_queue.put_nowait(envelope)
 
 
 class MailBox(object):
     """Abstract definition of a mailbox."""
 
-    def __init__(self, connections: List['Connection']):
+    def __init__(self, connections: List['Connection'], loop: Optional[AbstractEventLoop] = None):
         """Initialize the mailbox."""
         self._connections = connections
 
-        self._multiplexer = Multiplexer(connections)
+        self._multiplexer = Multiplexer(connections, loop=loop)
         self.inbox = InBox(self._multiplexer)
         self.outbox = OutBox(self._multiplexer)
 

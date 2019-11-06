@@ -138,7 +138,7 @@ class StubConnection(Connection):
     @property
     def is_established(self) -> bool:
         """Get the connection status."""
-        return not self._stopped and self._connected
+        return self._connected
 
     def receive(self) -> None:
         """Receive new messages, if any."""
@@ -176,8 +176,9 @@ class StubConnection(Connection):
                 try:
                     self._observer.start()
                 except Exception as e:      # pragma: no cover
-                    self._stopped = True
                     raise e
+                finally:
+                    self._stopped = True
 
                 self._connected = True
                 # do a first processing of messages.
@@ -192,12 +193,8 @@ class StubConnection(Connection):
         with self._lock:
             if self._connected:
                 self._connected = False
-                try:
-                    self._observer.stop()
-                    self.in_queue.put_nowait(None)
-                except Exception as e:      # pragma: no cover
-                    self._connected = True
-                    raise e
+                self._observer.stop()
+                self.in_queue.put_nowait(None)
                 self._stopped = True
 
     async def send(self, envelope: Envelope):

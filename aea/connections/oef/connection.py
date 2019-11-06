@@ -19,11 +19,14 @@
 # ------------------------------------------------------------------------------
 
 """Extension to the OEF Python SDK."""
+import asyncio
 import datetime
 import logging
 import pickle
-from queue import Empty, Queue
-from threading import Thread
+import queue
+import threading
+from asyncio import AbstractEventLoop
+from queue import Queue
 from typing import List, Dict, Optional, cast
 
 import oef
@@ -41,7 +44,7 @@ from oef.query import (
 from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Channel, Connection
+from aea.connections.base import Connection
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
@@ -234,7 +237,7 @@ class MailStats(object):
         self._search_result_counts[search_id] = nb_search_results
 
 
-class OEFChannel(OEFAgent, Channel):
+class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
     def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore, in_queue: Queue):
@@ -496,7 +499,8 @@ class OEFChannel(OEFAgent, Channel):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000):
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000,
+                 connection_id: str = "oef", loop: Optional[AbstractEventLoop] = None):
         """
         Initialize.
 
@@ -504,75 +508,77 @@ class OEFConnection(Connection):
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
         """
-        super().__init__()
-        core = AsyncioCore(logger=logger)
-        self._core = core  # type: AsyncioCore
-        self.channel = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
+        super().__init__(connection_id=connection_id, loop=loop)
+        self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
+        self.in_queue = queue.Queue()
+        self.channel = OEFChannel(public_key, oef_addr, oef_port, core=self._core, in_queue=self.in_queue)
 
+        self._lock = threading.Lock()
         self._stopped = True
         self._connected = False
-        self.out_thread = None  # type: Optional[Thread]
 
     @property
     def is_established(self) -> bool:
         """Get the connection status."""
         return self._connected
 
-    def _fetch(self) -> None:
-        """
-        Fetch the messages from the outqueue and send them.
-
-        :return: None
-        """
-        while self._connected:
-            try:
-                msg = self.out_queue.get(block=True, timeout=1.0)
-                self.send(msg)
-            except Empty:
-                pass
-
-    def connect(self) -> None:
+    async def connect(self) -> None:
         """
         Connect to the channel.
 
         :return: None
         :raises ConnectionError if the connection to the OEF fails.
         """
-        if self._stopped and not self._connected:
-            self._stopped = False
-            self._core.run_threaded()
-            try:
-                if not self.channel.connect():
-                    raise ConnectionError("Cannot connect to OEFChannel.")
-                self._connected = True
-                self.out_thread = Thread(target=self._fetch)
-                self.out_thread.start()
-            except ConnectionError as e:
-                self._core.stop()
-                raise e
+        with self._lock:
+            if self._stopped:
+                self._stopped = False
+                try:
+                    self._core.run_threaded()
+                    if not self.channel.connect():
+                        raise ConnectionError("Cannot connect to OEFChannel.")
+                except Exception as e:  # pragma: no cover
+                    self._stopped = True
+                    self._core.stop()
+                    raise e
 
-    def disconnect(self) -> None:
+                self._connected = True
+
+    async def disconnect(self) -> None:
         """
         Disconnect from the channel.
 
         :return: None
         """
-        assert self.out_thread is not None, "Call connect before disconnect."
-        if not self._stopped and self._connected:
-            self._connected = False
-            self.out_thread.join()
-            self.out_thread = None
-            self.channel.disconnect()
-            self._core.stop()
-            self._stopped = True
+        with self._lock:
+            if self._connected:
+                self._connected = False
+                self.channel.disconnect()
+                self.in_queue.put(None)
+                self._core.stop()
+                self._stopped = True
 
-    def send(self, envelope: Envelope):
+    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
         """
-        Send messages.
+        Receive an envelope. Blocking.
 
+        :return: the envelope received, or None.
+        """
+        try:
+            future = self._loop.run_in_executor(None, self.in_queue.get, True)
+            envelope = await future
+            return envelope
+        except Exception as e:
+            logger.exception(e)
+            return None
+
+    async def send(self, envelope: 'Envelope') -> None:
+        """
+        Send an envelope.
+
+        :param envelope: the envelope to send.
         :return: None
         """
-        if self._connected:
+        if self.is_established:
             self.channel.send(envelope)
 
     @classmethod
@@ -592,7 +598,7 @@ class OEFConnection(Connection):
 class OEFMailBox(MailBox):
     """The OEF mail box."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000):
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, loop=None):
         """
         Initialize.
 
@@ -600,10 +606,10 @@ class OEFMailBox(MailBox):
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
         """
-        connection = OEFConnection(public_key, oef_addr, oef_port)
-        super().__init__(connection)
+        connection = OEFConnection(public_key, oef_addr, oef_port, loop=loop)
+        super().__init__([connection], loop=loop)
 
     @property
-    def mail_stats(self) -> MailStats:
+    def mail_stats(self) -> MailStats:  # TODO: is it still needed?
         """Get the mail stats object."""
         return self._connection.channel.mail_stats  # type: ignore
