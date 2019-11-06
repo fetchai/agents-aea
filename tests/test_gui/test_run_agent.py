@@ -44,7 +44,7 @@ class TestRunAgent(TestBase):
         # run the agent with local connection (as no OEF node is running)
         response_run = self.app.post(
             'api/agent/' + agent_name + "/run",
-            content_type='application/json',6
+            content_type='application/json',
             data=json.dumps("local")
         )
         assert response_run.status_code == 201
