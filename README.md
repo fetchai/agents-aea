@@ -21,7 +21,7 @@ A framework for autonomous economic agent (AEA) development
 
 This repository contains submodules. Clone with recursive strategy:
 
-	  git clone git@github.com:fetchai/agents-aea.git --recursive && cd agents-aea
+	  git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
 
 ### Dependencies
 
