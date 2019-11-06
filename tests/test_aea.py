@@ -52,6 +52,7 @@ def test_initialise_AEA():
     ledger_apis = LedgerApis({})
     my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
+    assert not my_AEA.context.is_connected, "AEA should not be connected."
     my_AEA.setup()
     assert my_AEA.resources is not None,\
         "Resources must not be None after setup"
