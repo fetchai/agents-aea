@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "33dd1ea904a7472cf897c06dbbf09f03d99d1d6549c87123d9a99aea6811e2dc"
+            "sha256": "8ab3d8accc84f8a69a75f0264cb346c03fb35358281f88999a1bca9fe570420a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -244,11 +244,11 @@
         },
         "fetchai-ledger-api": {
             "hashes": [
-                "sha256:719d2987a1b05388e69971fe1c677fcbebd024f07dd9e1d9f6a39b06c622ff1a",
-                "sha256:9b8b119d865efae4dc477c91628280c6fb434e1f2db0fdaa562ed31642ac6a51"
+                "sha256:097272a2032d9db93422cf690808e063e70786ab896ef2910fb281ebee29ef9f",
+                "sha256:6a300e76503055634cecc86d4782fbed9a63b3590e7421ff26434ff6b39184ee"
             ],
             "index": "pypi",
-            "version": "==0.9.1"
+            "version": "==0.8.1"
         },
         "flask": {
             "hashes": [
@@ -320,12 +320,6 @@
             ],
             "index": "pypi",
             "version": "==3.1.1"
-        },
-        "lark-parser": {
-            "hashes": [
-                "sha256:26215ebb157e6fb2ee74319aa4445b9f3b7e456e26be215ce19fdaaa901c20a4"
-            ],
-            "version": "==0.7.8"
         },
         "lru-dict": {
             "hashes": [
@@ -556,13 +550,6 @@
                 "sha256:ebe80a03c50e3d6aac47f44ddd45048bb99e411203cd764f5da1330e6d83821c"
             ],
             "version": "==1.1.0"
-        },
-        "semver": {
-            "hashes": [
-                "sha256:132754afc6c32ef8e721a58a56a0cc67b0b6755bf8975c5973cbcde99b7f2e71",
-                "sha256:a4ddba31ec15601e77ea784f6abc4b0f0703769989512788369134437a404bb8"
-            ],
-            "version": "==2.9.1"
         },
         "six": {
             "hashes": [
