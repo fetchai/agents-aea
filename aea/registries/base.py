@@ -28,7 +28,7 @@ import re
 from abc import ABC, abstractmethod
 from queue import Queue
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Tuple, cast
+from typing import Optional, List, Dict, Any, Tuple, cast, Union
 
 from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
@@ -458,8 +458,9 @@ class TaskRegistry(Registry):
 class Resources(object):
     """This class implements the resources of an AEA."""
 
-    def __init__(self):
+    def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
         """Instantiate the resources."""
+        self._directory = str(Path(directory).absolute()) if directory is not None else str(Path(".").absolute())
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = BehaviourRegistry()
@@ -468,19 +469,15 @@ class Resources(object):
 
         self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
 
-    @classmethod
-    def from_resource_dir(cls, directory: str, agent_context: AgentContext) -> Optional['Resources']:
-        """
-        Parse the resource directory.
+    @property
+    def directory(self) -> str:
+        """Get the directory."""
+        return self._directory
 
-        :param directory: the agent's resources directory.
-        :param agent_context: the agent's context object
-        :return: None
-        """
-        resources = Resources()
-        resources.protocol_registry.populate(directory)
-        resources.populate_skills(directory, agent_context)
-        return resources
+    def load(self, agent_context: AgentContext) -> None:
+        """Load all the resources."""
+        self.protocol_registry.populate(self.directory)
+        self.populate_skills(self.directory, agent_context)
 
     def populate_skills(self, directory: str, agent_context: AgentContext) -> None:
         """
@@ -567,7 +564,6 @@ class Filter(object):
     @property
     def resources(self) -> Resources:
         """Get resources."""
-        assert self._resources is not None, "No resources initialized. Call setup."
         return self._resources
 
     @property
@@ -575,7 +571,7 @@ class Filter(object):
         """Get decision maker (out) queue."""
         return self._decision_maker_out_queue
 
-    def get_active_handlers(self, protocol_id: str) -> List[Handler]:
+    def get_active_handlers(self, protocol_id: str) -> Optional[List[Handler]]:
         """
         Get active handlers.
 
