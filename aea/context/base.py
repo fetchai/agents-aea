@@ -34,6 +34,7 @@ class AgentContext:
                  public_keys: Dict[str, str],
                  addresses: Dict[str, str],
                  ledger_apis: LedgerApis,
+                 is_connected: bool,
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
@@ -45,6 +46,7 @@ class AgentContext:
         :param agent_name: the agent's name
         :param public_keys: the public keys of the agent
         :param ledger_apis: the ledger apis
+        :param is_connected: the connection status
         :param outbox: the outbox
         :param decision_maker_message_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
@@ -55,6 +57,7 @@ class AgentContext:
         self._public_keys = public_keys
         self._addresses = addresses
         self._ledger_apis = ledger_apis
+        self._is_connected = is_connected
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
         self._ownership_state = ownership_state
@@ -85,6 +88,11 @@ class AgentContext:
     def public_key(self) -> str:
         """Get the default public key."""
         return self._public_keys['default']
+
+    @property
+    def is_connected(self) -> bool:
+        """Get connection status."""
+        return self._is_connected
 
     @property
     def outbox(self) -> OutBox:

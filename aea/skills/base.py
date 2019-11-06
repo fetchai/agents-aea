@@ -79,6 +79,11 @@ class SkillContext:
         return self._agent_context.address
 
     @property
+    def is_connected(self) -> bool:
+        """Get connection status."""
+        return self._agent_context.is_connected
+
+    @property
     def outbox(self) -> OutBox:
         """Get outbox."""
         return self._agent_context.outbox
