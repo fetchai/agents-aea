@@ -546,8 +546,9 @@ class OEFConnection(Connection):
         if self._stopped and not self._connected:
             self._stopped = False
             self._core.run_threaded()
-            while not self._connected:
-                self._try_connect()
+            self._try_connect()
+            self._connection_check_thread = Thread(target=self._connection_check)
+            self._connection_check_thread.start()
 
     def _try_connect(self) -> None:
         """
@@ -557,15 +558,14 @@ class OEFConnection(Connection):
         :raises Exception if the connection to the OEF fails.
         """
         try:
-            if self.channel.connect():
-                self._connected = True
-                self.out_thread = Thread(target=self._fetch)
-                self.out_thread.start()
-                self._connection_check_thread = Thread(target=self._connection_check)
-                self._connection_check_thread.start()
-            else:
-                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
-                time.sleep(5.0)
+            while not self._connected and not self._stopped:
+                if self.channel.connect():
+                    self._connected = True
+                    self.out_thread = Thread(target=self._fetch)
+                    self.out_thread.start()
+                else:
+                    logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
+                    time.sleep(5.0)
         except Exception as e:
             self._core.stop()
             raise e
@@ -586,9 +586,8 @@ class OEFConnection(Connection):
                 self._connected = False
                 self.out_thread.join()
                 self.out_thread = None
-                self._core.stop()
-                self._stopped = True
-                self.connect()
+                self._try_connect()
+                logger.warning("Successfully re-established connection to OEFChannel.")
 
     def disconnect(self) -> None:
         """
@@ -599,9 +598,9 @@ class OEFConnection(Connection):
         assert self.out_thread is not None, "Call connect before disconnect."
         assert self._connection_check_thread is not None, "Call connect before disconnect."
         if not self._stopped and self._connected:
+            self._connected = False
             self._connection_check_thread.join()
             self._connection_check_thread = None
-            self._connected = False
             self.out_thread.join()
             self.out_thread = None
             self.channel.disconnect()
