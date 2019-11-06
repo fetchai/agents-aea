@@ -28,6 +28,7 @@ from typing import Any, Dict, Optional, Tuple, cast
 import web3
 import web3.exceptions
 from fetchai.ledger.api import LedgerApi as FetchLedgerApi
+# from fetchai.ledger.api.tx import TxStatus
 from web3 import Web3, HTTPProvider
 
 from aea.crypto.base import Crypto
@@ -186,7 +187,10 @@ class LedgerApis(object):
                 logger.info("Checking the transaction ...")
                 # tx_status = cast(TxStatus, api.tx.status(tx_digest))
                 tx_status = cast(str, api.tx.status(tx_digest))
+                # if tx_status.successful:
                 if tx_status in SUCCESSFUL_TERMINAL_STATES:
+                    # tx_contents = cast(TxContents, api.tx.contents(tx_digest))
+                    # tx_contents.transfers_to()
                     # TODO: check the amount of the transaction is correct
                     is_successful = True
                 logger.info("Transaction validated ...")
