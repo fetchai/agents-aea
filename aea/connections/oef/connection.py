@@ -24,6 +24,7 @@ import logging
 import pickle
 from queue import Empty, Queue
 from threading import Thread
+import time
 from typing import List, Dict, Optional, cast
 
 import oef
@@ -512,6 +513,7 @@ class OEFConnection(Connection):
         self._stopped = True
         self._connected = False
         self.out_thread = None  # type: Optional[Thread]
+        self._connection_check_thread = None  # type: Optional[Thread]
 
     @property
     def is_established(self) -> bool:
@@ -536,20 +538,56 @@ class OEFConnection(Connection):
         Connect to the channel.
 
         :return: None
-        :raises ConnectionError if the connection to the OEF fails.
+        :raises Exception if the connection to the OEF fails.
         """
+        if self._connection_check_thread is not None:
+            self._connection_check_thread.join()
+            self._connection_check_thread = None
         if self._stopped and not self._connected:
             self._stopped = False
             self._core.run_threaded()
-            try:
-                if not self.channel.connect():
-                    raise ConnectionError("Cannot connect to OEFChannel.")
-                self._connected = True
-                self.out_thread = Thread(target=self._fetch)
-                self.out_thread.start()
-            except ConnectionError as e:
-                self._core.stop()
-                raise e
+            self._try_connect()
+            self._connection_check_thread = Thread(target=self._connection_check)
+            self._connection_check_thread.start()
+
+    def _try_connect(self) -> None:
+        """
+        Try connect to the channel.
+
+        :return: None
+        :raises Exception if the connection to the OEF fails.
+        """
+        try:
+            while not self._connected and not self._stopped:
+                if self.channel.connect():
+                    self._connected = True
+                    self.out_thread = Thread(target=self._fetch)
+                    self.out_thread.start()
+                else:
+                    logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
+                    time.sleep(5.0)
+        except Exception as e:
+            self._core.stop()
+            raise e
+
+    def _connection_check(self) -> None:
+        """
+        Check for connection to the channel.
+
+        Try to reconnect if connection is dropped.
+
+        :return: None
+        """
+        while self._connected:
+            assert self.out_thread is not None, "Call connect before _connection_check."
+            time.sleep(2.0)
+            if not self.channel.get_state() == "connected":  # type: ignore
+                logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
+                self._connected = False
+                self.out_thread.join()
+                self.out_thread = None
+                self._try_connect()
+                logger.warning("Successfully re-established connection to OEFChannel.")
 
     def disconnect(self) -> None:
         """
@@ -558,8 +596,11 @@ class OEFConnection(Connection):
         :return: None
         """
         assert self.out_thread is not None, "Call connect before disconnect."
+        assert self._connection_check_thread is not None, "Call connect before disconnect."
         if not self._stopped and self._connected:
             self._connected = False
+            self._connection_check_thread.join()
+            self._connection_check_thread = None
             self.out_thread.join()
             self.out_thread = None
             self.channel.disconnect()

@@ -23,6 +23,7 @@ import os
 import time
 from queue import Queue
 from typing import cast
+from threading import Thread
 from unittest import mock
 
 import pytest
@@ -531,11 +532,16 @@ class TestOefConnection:
         mailbox.disconnect()
 
     def test_oef_connect(self):
-        """Test the OEFConnection."""
+        """Test the OEFConnection with a wrong address."""
         con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
         assert not con.is_established
-        with pytest.raises(ConnectionError):
-            con.connect()
+        connection_thread = Thread(target=con.connect)
+        connection_thread.start()
+        time.sleep(2.0)
+        assert not con.is_established
+        con._stopped = True
+        con._core.stop()
+        connection_thread.join()
 
     def test_oef_from_config(self):
         """Test the Connection from config File."""
