@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea create` sub-command."""
+"""This test module contains the tests for the `aea gui` sub-commands."""
 import json
 
 from .test_base import TestBase
@@ -41,6 +41,7 @@ class TestCreateAndList(TestBase):
     """Test that we can create an agent and get list of agents."""
 
     def test_agents_create_and_list(self):
+        """Test that we can create an agent and get list of agents."""
         agent_name = "test_agent"
 
         # Make sure there are no agents in the directory
@@ -86,13 +87,11 @@ class TestCreateAndList(TestBase):
         assert len(data) == 0
 
 
-
-
 class TestDuplicateAgentError(TestBase):
-    """Test that we can create an agent and get list of agents."""
+    """Test that if you try and create two agents of the same name we get an error."""
 
     def test_duplicate_agent_error(self):
-        # Make sure there are no agents in the directory
+        """Test that if you try and create two agents of the same name we get an error."""
         response_list = self.app.get(
             'api/agent',
             data=None,
@@ -107,4 +106,3 @@ class TestDuplicateAgentError(TestBase):
 
         # Attempt tp make the same agent again
         assert self.create_agent("test_agent").status_code == 400
-

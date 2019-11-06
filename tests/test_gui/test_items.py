@@ -17,26 +17,29 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea create` sub-command."""
+"""This test module contains the tests for the `aea gui` sub-commands."""
 from .test_base import TestBase
 
 
 class TestCreateConnectionAndList(TestBase):
-    """Test that the gui home page exits and has the correct title."""
+    """Test that we can create connections and list them."""
 
     def test_create_and_list_connections(self):
+        """Test that we can create connections and list them."""
         self._test_create_and_list("connection", "local")
 
+
 class TestCreateProtocolAndList(TestBase):
-    """Test that the gui home page exits and has the correct title."""
+    """Test that we can create protocols and list them."""
 
     def test_create_and_list_protocols(self):
+        """Test that we can create protocols and list them."""
         self._test_create_and_list("protocol", "fipa")
 
 
 class TestCreateSkillAndList(TestBase):
-    """Test that the gui home page exits and has the correct title."""
+    """Test that we can create skills and list them."""
 
     def test_create_and_list_skills(self):
+        """Test that we can create skills and list them."""
         self._test_create_and_list("skill", "scaffold")
-

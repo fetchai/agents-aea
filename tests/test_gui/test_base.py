@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea create` sub-command."""
+"""This test module contains the tests for the `aea gui` sub-commands."""
 import os
 import shutil
 import json
@@ -42,6 +42,7 @@ class TestBase:
         cls.app.testing = True
 
     def create_agent(self, name):
+        """Create an aea project."""
         return self.app.post(
             'api/agent',
             content_type='application/json',

@@ -424,6 +424,7 @@ def create_app():
 
     return app
 
+
 def run():
     """Run the GUI."""
     _kill_running_oef_nodes()
@@ -432,9 +433,9 @@ def run():
 
     return app
 
+
 def run_test():
     """Run the gui in the form where we can run tests against it."""
-    #_kill_running_oef_nodes()
     app = create_app()
     return app.app.test_client()
 

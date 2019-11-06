@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea create` sub-command."""
+"""This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import time
 from .test_base import TestBase
@@ -27,6 +27,7 @@ class TestRunAgent(TestBase):
     """Test for running and agent, reading TTY and errors."""
 
     def test_create_and_run_agent(self):
+        """Test for running and agent, reading TTY and errors."""
         agent_name = "test_agent"
 
         # Make an agent
@@ -40,11 +41,10 @@ class TestRunAgent(TestBase):
         )
         assert response_add.status_code == 201
 
-
         # run the agent with local connection (as no OEF node is running)
         response_run = self.app.post(
             'api/agent/' + agent_name + "/run",
-            content_type='application/json',
+            content_type='application/json',6
             data=json.dumps("local")
         )
         assert response_run.status_code == 201
@@ -82,6 +82,3 @@ class TestRunAgent(TestBase):
 
         assert "process terminate" in data["error"]
         assert "NOT_STARTED" in data["status"]
-
-
-
