@@ -264,7 +264,7 @@ def stop_oef_node():
     return "All fine", 200  # 200 (OK)
 
 
-def start_agent(agent_id):
+def start_agent(agent_id, connection_id):
     """Start a local agent running."""
     # Test if it is already running in some form
     if agent_id in flask.app.agent_processes:
@@ -279,7 +279,20 @@ def start_agent(agent_id):
             return {"detail": "Agent {} is already running".format(agent_id)}, 400  # 400 Bad request
 
     agent_dir = os.path.join(flask.app.agents_dir, agent_id)
-    agent_process = _call_aea_async(["aea", "run"], agent_dir)
+
+    if connection_id is not None and connection_id != "":
+        connections = get_local_items(agent_id, "connection")
+        has_named_connection = False
+        for element in connections:
+            if element["id"] == connection_id:
+                has_named_connection = True
+        if has_named_connection:
+            agent_process = _call_aea_async(["aea", "run", "--connection", connection_id], agent_dir)
+        else:
+            return {"detail": "Trying to run agent {} with non-existant connection: {}".format(agent_id, connection_id)}, 400  # 400 Bad request
+    else:
+        agent_process = _call_aea_async(["aea", "run"], agent_dir)
+
     if agent_process is None:
         return {"detail": "Failed to run agent {}".format(agent_id)}, 400  # 400 Bad request
     else:
@@ -379,9 +392,8 @@ def _kill_running_oef_nodes():
     subprocess.call(['docker', 'kill', oef_node_name])
 
 
-def run():
+def create_app():
     """Run the flask server."""
-    _kill_running_oef_nodes()
     CUR_DIR = os.path.abspath(os.path.dirname(__file__))
     app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
     flask.app.oef_process = None
@@ -410,7 +422,22 @@ def run():
         return flask.send_from_directory(
             os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+    return app
+
+
+def run():
+    """Run the GUI."""
+    _kill_running_oef_nodes()
+    app = create_app()
     app.run(host='127.0.0.1', port=8080, debug=False)
+
+    return app
+
+
+def run_test():
+    """Run the gui in the form where we can run tests against it."""
+    app = create_app()
+    return app.app.test_client()
 
 
 # If we're running in stand alone mode, run the application
