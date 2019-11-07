@@ -52,7 +52,6 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
-        print("*****kwargs: {}".format(kwargs))
         self.image_capture_interval = kwargs.pop('image_capture_interval') if 'image_capture_interval' in kwargs.keys() else DEFAULT_IMAGE_CAPTURE_INTERVAL
         self.default_latitude = kwargs.pop('default_latitude') if 'default_latitude' in kwargs.keys() else DEFAULT_LAT
         self.default_longitude = kwargs.pop('default_longitude') if 'default_longitude' in kwargs.keys() else DEFAULT_LON
@@ -125,7 +124,7 @@ class ServiceRegistrationBehaviour(Behaviour):
         """Initialise the behaviour."""
         self._services_interval = kwargs.pop('services_interval', 30)  # type: int
         super().__init__(**kwargs)
-        self._last_connection_status = self.connection_status.is_connected
+        self._last_connection_status = self.context.connection_status.is_connected
         self._last_update_time = datetime.datetime.now()  # type: datetime.datetime
         self._registered_service_description = None  # type: Optional[Description]
         self._oef_msf_id = 0
@@ -137,7 +136,7 @@ class ServiceRegistrationBehaviour(Behaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        strategy.db.set_system_status("oef-status", "Disconnected")
+        self._record_oef_status()
         balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
         strategy.db.set_system_status("ledger-status", self.context.ledger_apis.last_tx_statuses['fetchai'])
         logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, balance))
@@ -215,12 +214,15 @@ class ServiceRegistrationBehaviour(Behaviour):
         """
         if self.context.connection_status.is_connected != self._last_connection_status:
             self._last_connection_status = self.context.connection_status.is_connected
-            strategy = cast(Strategy, self.context.strategy)
-            if self._last_connection_status:
-                strategy.db.set_system_status("oef-status", "Connected")
-            else:
-                strategy.db.set_system_status("oef-status", "Disconnected")
+            self._record_oef_status()
 
+    def _record_oef_status(self):
+        strategy = cast(Strategy, self.context.strategy)
+        if self._last_connection_status:
+            strategy.db.set_system_status("oef-status", "Connected")
+        else:
+            strategy.db.set_system_status("oef-status", "Disconnected")
+            
     def teardown(self) -> None:
         """
         Implement the task teardown.
