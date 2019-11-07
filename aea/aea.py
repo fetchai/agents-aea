@@ -72,7 +72,7 @@ class AEA(Agent):
                                      self.wallet.public_keys,
                                      self.wallet.addresses,
                                      ledger_apis,
-                                     self.mailbox.is_connected,
+                                     self.mailbox.connection_status,
                                      self.outbox,
                                      self.decision_maker.message_in_queue,
                                      self.decision_maker.ownership_state,

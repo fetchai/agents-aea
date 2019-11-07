@@ -27,7 +27,7 @@ import pytest
 from hexbytes import HexBytes
 
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
-from aea.crypto.fetchai import FETCHAI, FetchAICrypto
+from aea.crypto.fetchai import FETCHAI  # FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG, \
     _try_to_instantiate_fetchai_ledger_api, \
     _try_to_instantiate_ethereum_ledger_api
@@ -76,17 +76,17 @@ class TestLedgerApis:
             balance = ledger_apis.token_balance("UNKNOWN", fet_address)
             assert balance == 0, "Unknown identifier so it will return 0"
 
-    def test_transfer_fetchai(self):
-        """Test the transfer function for fetchai token."""
-        private_key_path = os.path.join(CUR_PATH, 'data', "fet_private_key.txt")
-        fet_obj = FetchAICrypto(private_key_path=private_key_path)
-        ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
-                                  FETCHAI: DEFAULT_FETCHAI_CONFIG})
+    # def test_transfer_fetchai(self):
+    #     """Test the transfer function for fetchai token."""
+    #     private_key_path = os.path.join(CUR_PATH, 'data', "fet_private_key.txt")
+    #     fet_obj = FetchAICrypto(private_key_path=private_key_path)
+    #     ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
+    #                               FETCHAI: DEFAULT_FETCHAI_CONFIG})
 
-        with mock.patch.object(ledger_apis.apis.get(FETCHAI).tokens, 'transfer',
-                               return_value="97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"):
-            tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
-            assert tx_digest is not None
+    #     with mock.patch.object(ledger_apis.apis.get(FETCHAI).tokens, 'transfer',
+    #                            return_value="97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"):
+    #         tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
+    #         assert tx_digest is not None
 
     def test_transfer_ethereum(self):
         """Test the transfer function for ethereum token."""

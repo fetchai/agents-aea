@@ -61,12 +61,14 @@ class Strategy(SharedClass):
         self.data_price_fet = kwargs.pop('data_price_fet') if 'data_price_fet' in kwargs.keys() else DEFAULT_PRICE
         super().__init__(**kwargs)
 
+        self.db = DetectionDatabase(db_dir, False)
+
         balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
+        self.db.set_system_status("ledger-status", self.context.ledger_apis.last_tx_statuses['fetchai'])
 
         if not os.path.isdir(db_dir):
             print("WARNING - DATABASE dir does not exist")
 
-        self.db = DetectionDatabase(db_dir, False)
         self.record_balance(balance)
         self.other_carpark_processes_running = False
 

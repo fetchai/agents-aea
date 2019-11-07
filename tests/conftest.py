@@ -84,6 +84,11 @@ def tcpping(ip, port) -> bool:
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
+    def __init__(self):
+        """Initialize."""
+        super().__init__()
+        self.connection_status.is_connected = True
+
     def connect(self):
         """Connect."""
         pass
@@ -91,11 +96,6 @@ class DummyConnection(Connection):
     def disconnect(self):
         """Disconnect."""
         pass
-
-    @property
-    def is_established(self) -> bool:
-        """Check if the connection is established."""
-        return True
 
     def send(self, envelope: 'Envelope'):
         """Send an envelope."""

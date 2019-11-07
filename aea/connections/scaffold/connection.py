@@ -81,11 +81,6 @@ class MyScaffoldConnection(Connection):
         self.public_key = public_key
         self.channel = MyScaffoldChannel(public_key)
 
-    @property
-    def is_established(self) -> bool:
-        """Return True if the connection has been established, False otherwise."""
-        raise NotImplementedError  # pragma: no cover
-
     def connect(self) -> None:
         """
         Connect to the gym.

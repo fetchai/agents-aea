@@ -28,6 +28,7 @@ from pathlib import Path
 from queue import Queue
 from typing import Optional, List, Dict, Any, cast
 
+from aea.connections.base import ConnectionStatus
 from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, \
     ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
@@ -79,9 +80,9 @@ class SkillContext:
         return self._agent_context.address
 
     @property
-    def is_connected(self) -> bool:
+    def connection_status(self) -> ConnectionStatus:
         """Get connection status."""
-        return self._agent_context.is_connected
+        return self._agent_context.connection_status
 
     @property
     def outbox(self) -> OutBox:
