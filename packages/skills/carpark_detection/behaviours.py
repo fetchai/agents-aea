@@ -222,7 +222,7 @@ class ServiceRegistrationBehaviour(Behaviour):
             strategy.db.set_system_status("oef-status", "Connected")
         else:
             strategy.db.set_system_status("oef-status", "Disconnected")
-            
+
     def teardown(self) -> None:
         """
         Implement the task teardown.
