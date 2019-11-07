@@ -511,14 +511,8 @@ class OEFConnection(Connection):
         self.channel = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
 
         self._stopped = True
-        self._connected = False
         self.out_thread = None  # type: Optional[Thread]
         self._connection_check_thread = None  # type: Optional[Thread]
-
-    @property
-    def is_established(self) -> bool:
-        """Get the connection status."""
-        return self._connected
 
     def _fetch(self) -> None:
         """
@@ -526,7 +520,7 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        while self._connected:
+        while self.connection_status.is_connected:
             try:
                 msg = self.out_queue.get(block=True, timeout=1.0)
                 self.send(msg)
@@ -543,7 +537,7 @@ class OEFConnection(Connection):
         if self._connection_check_thread is not None:
             self._connection_check_thread.join()
             self._connection_check_thread = None
-        if self._stopped and not self._connected:
+        if self._stopped and not self.connection_status.is_connected:
             self._stopped = False
             self._core.run_threaded()
             self._try_connect()
@@ -558,9 +552,9 @@ class OEFConnection(Connection):
         :raises Exception if the connection to the OEF fails.
         """
         try:
-            while not self._connected and not self._stopped:
+            while not self.connection_status.is_connected and not self._stopped:
                 if self.channel.connect():
-                    self._connected = True
+                    self.connection_status.is_connected = True
                     self.out_thread = Thread(target=self._fetch)
                     self.out_thread.start()
                 else:
@@ -578,12 +572,12 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        while self._connected:
+        while self.connection_status.is_connected:
             assert self.out_thread is not None, "Call connect before _connection_check."
             time.sleep(2.0)
             if not self.channel.get_state() == "connected":  # type: ignore
                 logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
-                self._connected = False
+                self.connection_status.is_connected = False
                 self.out_thread.join()
                 self.out_thread = None
                 self._try_connect()
@@ -597,8 +591,8 @@ class OEFConnection(Connection):
         """
         assert self.out_thread is not None, "Call connect before disconnect."
         assert self._connection_check_thread is not None, "Call connect before disconnect."
-        if not self._stopped and self._connected:
-            self._connected = False
+        if not self._stopped and self.connection_status.is_connected:
+            self.connection_status.is_connected = False
             self._connection_check_thread.join()
             self._connection_check_thread = None
             self.out_thread.join()
@@ -613,7 +607,7 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        if self._connected:
+        if self.connection_status.is_connected:
             self.channel.send(envelope)
 
     @classmethod

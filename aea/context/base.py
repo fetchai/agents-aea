@@ -22,6 +22,7 @@
 from queue import Queue
 from typing import Dict
 
+from aea.connections.base import ConnectionStatus
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
 from aea.crypto.ledger_apis import LedgerApis
@@ -34,7 +35,7 @@ class AgentContext:
                  public_keys: Dict[str, str],
                  addresses: Dict[str, str],
                  ledger_apis: LedgerApis,
-                 is_connected: bool,
+                 connection_status: ConnectionStatus,
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
@@ -46,7 +47,7 @@ class AgentContext:
         :param agent_name: the agent's name
         :param public_keys: the public keys of the agent
         :param ledger_apis: the ledger apis
-        :param is_connected: the connection status
+        :param connection_status: the connection status
         :param outbox: the outbox
         :param decision_maker_message_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
@@ -57,7 +58,7 @@ class AgentContext:
         self._public_keys = public_keys
         self._addresses = addresses
         self._ledger_apis = ledger_apis
-        self._is_connected = is_connected
+        self._connection_status = connection_status
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
         self._ownership_state = ownership_state
@@ -90,9 +91,9 @@ class AgentContext:
         return self._public_keys['default']
 
     @property
-    def is_connected(self) -> bool:
+    def connection_status(self) -> ConnectionStatus:
         """Get connection status."""
-        return self._is_connected
+        return self._connection_status
 
     @property
     def outbox(self) -> OutBox:
