@@ -219,7 +219,6 @@ class ServiceRegistrationBehaviour(Behaviour):
             self._record_oef_status()
 
     def _record_oef_status(self):
-        print("********_record_oef_status self._last_connection_status {}".format(self._last_connection_status))
         strategy = cast(Strategy, self.context.strategy)
         if self._last_connection_status:
             strategy.db.set_system_status("oef-status", "Connected")
