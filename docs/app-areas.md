@@ -10,7 +10,7 @@ There are five general application areas for Fetch.ai AEAs.
 
 ## Multi-agent system versus agent-based modelling
 
-The Fetch.ai multi agent system is a real world multi-agent technological system and, although there is some overlap, it is not the same as agent based modelling where the goal is scientific behaviourial observation rather than practical economic gain.
+The Fetch.ai multi agent system is a real world multi-agent technological system and, although there is some overlap, it is not the same as agent based modelling where the goal is scientific behavioural observation rather than practical economic gain.
 
 Moreover, there is no restriction to *multi*. Single-agent applications are also possible.
 

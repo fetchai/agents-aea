@@ -70,7 +70,7 @@ Set up your Pi to physically view the car park. We'll leave that to you.
 
 ### Potential issues
 
-1. Make sure you use the first port, `HDMI 0` on the Pi for the initial setup monitor.
+1. Make sure you use the first port, `HDMI 0` on the Pi for the initial set up monitor.
 2. If you install the Pi with a used SD card, you will need to reformat the card with NOOBS: <a href="https://www.raspberrypi.org/downloads/noobs/" target=_blank>https://www.raspberrypi.org/downloads/noobs/</a>.
 3. Fix the screen resolution issues by editing the configuration.
 
@@ -196,7 +196,7 @@ Add the Pi's ip address. You will be prompted for the Raspberry Pi password. The
 
 ### Get your remote desktop ip
 
-Follow the <a href="https://www.tp-link.com/uk/support/faq/838/?utm_medium=select-local" target=_blank>instructiona</a> to get your remote ip address.
+Follow the <a href="https://www.tp-link.com/uk/support/faq/838/?utm_medium=select-local" target=_blank>instructions</a> to get your remote ip address.
 
 ### Connect to the Raspberry Pi
 
