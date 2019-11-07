@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 
 """Scaffold connection and channel."""
-import json
 import logging
 import queue
 from queue import Queue
@@ -47,8 +46,8 @@ class PeerToPeerChannel(Channel):
         self.public_key = public_key
         self.provider_addr = provider_addr
         self.provider_port = provider_port
-        self.in_queue = Queue()
-        self._httpCall = None
+        self.in_queue = Queue()  # type: Queue
+        self._httpCall = None  # type: HttpCalls
         logger.info("Initialised the peer to peer channel")
 
     def connect(self) -> Optional[Queue]:
@@ -59,16 +58,18 @@ class PeerToPeerChannel(Channel):
         """
         self._httpCall = HttpCalls(server_address=self.provider_addr, port=self.provider_port)
         logger.info("Connected")
-        self.register()
+        self.try_register()
         return self.in_queue
 
-    def register(self) -> bool:
-        logger.info(self.public_key)
-        query = self._httpCall.register(sender_address=self.public_key, mailbox= True)
-        response = json.loads(query)
-        assert response['status'] == "OK", "Please check you internet connection"
-        logger.info("Registered!")
-        return True
+    def try_register(self) -> bool:
+        """Try to register to the provider."""
+        try:
+            logger.info(self.public_key)
+            query = self._httpCall.register(sender_address=self.public_key, mailbox=True)
+            return query['status'] == "OK"
+        except Exception:
+            logger.warning("Could not register to the provider.")
+            return False
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -84,12 +85,14 @@ class PeerToPeerChannel(Channel):
                                     payload=envelope.message)
 
     def receive(self) -> None:
+        """Receive the messages from the provider."""
         messages = self._httpCall.get_messages(sender_address=self.public_key)  # type: List[Dict[str, Any]]
         for message in messages:
+            logger.info(message)
             envelope = Envelope(to=message['TO']['RECEIVER_ADDRESS'],
                                 sender=message['FROM']['SENDER_ADDRESS'],
                                 protocol_id=message['PROTOCOL'],
-                                message=messages['PAYLOAD'])
+                                message=message['PAYLOAD'])
             self.in_queue.put(envelope)
 
     def disconnect(self) -> None:
@@ -115,7 +118,6 @@ class PeerToPeerConnection(Connection):
         self.public_key = public_key
 
         self.channel = PeerToPeerChannel(public_key, provider_addr, provider_port)
-        self._stopped = True
         self._connection = None  # type: Optional[Queue]
         self.in_thread = None  # type: Optional[Thread]
         self.out_thread = None  # type: Optional[Thread]
@@ -126,7 +128,7 @@ class PeerToPeerConnection(Connection):
 
         :return: None
         """
-        while not self._stopped:
+        while self.connection_status.is_connected:
             try:
                 envelope = self.out_queue.get(block=True, timeout=2.0)
                 self.send(envelope)
@@ -140,8 +142,9 @@ class PeerToPeerConnection(Connection):
         :return: None
         """
         assert self._connection is not None, "Call connect before calling _receive_loop."
-        while not self._stopped:
+        while self.connection_status.is_connected:
             try:
+                self.channel.receive()
                 envelope = self._connection.get(timeout=2.0)
                 self.in_queue.put_nowait(envelope)
             except queue.Empty:
@@ -153,8 +156,8 @@ class PeerToPeerConnection(Connection):
 
         :return: None
         """
-        if self._stopped:
-            self._stopped = False
+        if not self.connection_status.is_connected:
+            self.connection_status.is_connected = True
             self._connection = self.channel.connect()
             self.in_thread = Thread(target=self._receive_loop)
             self.out_thread = Thread(target=self._fetch)
@@ -169,8 +172,8 @@ class PeerToPeerConnection(Connection):
         """
         assert self.in_thread is not None, "Call connect before disconnect."
         assert self.out_thread is not None, "Call connect before disconnect."
-        if not self._stopped:
-            self._stopped = True
+        if self.connection_status.is_connected:
+            self.connection_status.is_connected = False
             self.in_thread.join()
             self.out_thread.join()
             self.in_thread = None
@@ -185,7 +188,7 @@ class PeerToPeerConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.is_established:
+        if not self.connection_status.is_connected:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         self.channel.send(envelope)
 

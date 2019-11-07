@@ -151,7 +151,6 @@ class GymConnection(Connection):
 
         self._connection = None  # type: Optional[Queue]
 
-        self._stopped = True
         self.in_thread = None  # type: Optional[Thread]
         self.out_thread = None  # type: Optional[Thread]
 
@@ -161,7 +160,7 @@ class GymConnection(Connection):
 
         :return: None
         """
-        while not self._stopped:
+        while self.connection_status.is_connected:
             try:
                 envelope = self.out_queue.get(block=True, timeout=2.0)
                 self.send(envelope)
@@ -175,17 +174,12 @@ class GymConnection(Connection):
         :return: None
         """
         assert self._connection is not None, "Call connect before calling _receive_loop."
-        while not self._stopped:
+        while self.connection_status.is_connected:
             try:
                 data = self._connection.get(timeout=2.0)
                 self.in_queue.put_nowait(data)
             except queue.Empty:
                 pass
-
-    @property
-    def is_established(self) -> bool:
-        """Return True if the connection has been established, False otherwise."""
-        return self._connection is not None
 
     def connect(self) -> None:
         """
@@ -193,8 +187,8 @@ class GymConnection(Connection):
 
         :return: None
         """
-        if self._stopped:
-            self._stopped = False
+        if not self.connection_status.is_connected:
+            self.connection_status.is_connected = True
             self._connection = self.channel.connect()
             self.in_thread = Thread(target=self._receive_loop)
             self.out_thread = Thread(target=self._fetch)
@@ -209,8 +203,8 @@ class GymConnection(Connection):
         """
         assert self.in_thread is not None, "Call connect before disconnect."
         assert self.out_thread is not None, "Call connect before disconnect."
-        if not self._stopped:
-            self._stopped = True
+        if self.connection_status.is_connected:
+            self.connection_status.is_connected = False
             self.in_thread.join()
             self.out_thread.join()
             self.in_thread = None
@@ -225,7 +219,7 @@ class GymConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        if not self.is_established:
+        if not self.connection_status.is_connected:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         self.channel.send(envelope)
 

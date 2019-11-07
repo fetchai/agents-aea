@@ -57,6 +57,13 @@ class Channel(ABC):
         :return: None.
         """
 
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+
 
 class ConnectionStatus(object):
     """The connection status class."""

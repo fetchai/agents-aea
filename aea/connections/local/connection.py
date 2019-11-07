@@ -382,6 +382,14 @@ class OEFLocalConnection(Connection):
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         self.channel.send(envelope)
 
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+        pass
+
     def stop(self):
         """Tear down the connection."""
         self._connection = None

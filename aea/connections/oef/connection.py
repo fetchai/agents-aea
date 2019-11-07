@@ -493,6 +493,14 @@ class OEFChannel(OEFAgent, Channel):
         else:
             raise ValueError("OEF request not recognized.")
 
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+        pass
+
 
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
