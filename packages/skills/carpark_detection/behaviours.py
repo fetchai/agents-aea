@@ -139,7 +139,7 @@ class ServiceRegistrationBehaviour(Behaviour):
         strategy = cast(Strategy, self.context.strategy)
         strategy.db.set_system_status("oef-status", "Disconnected")
         balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
-        strategy.db.set_system_status("ledger-status", self.context.ledger_apis.get_status('fetchai'))
+        strategy.db.set_system_status("ledger-status", self.context.ledger_apis.last_tx_statuses['fetchai'])
         logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, balance))
         self._register_service()
 
