@@ -10,8 +10,8 @@ behaviours:
   - behaviour:
       class_name: CarParkDetectionAndGUIBehaviour
       args:
-        default_longitude: -73.967491
         default_latitude: 40.780343
+        default_longitude: -73.967491
         image_capture_interval: 120
 
 handlers:

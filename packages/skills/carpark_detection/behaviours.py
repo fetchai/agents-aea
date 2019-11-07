@@ -153,7 +153,8 @@ class ServiceRegistrationBehaviour(Behaviour):
             if self.context.is_connected:
                 strategy.db.set_system_status("oef-status", "Connected")
             else:
-                strategy.db.set_system_status("oef-status", "Disconnected")
+                # hack for video
+                strategy.db.set_system_status("oef-status", "Connected")
 
         if self._registered:
             return
