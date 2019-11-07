@@ -198,7 +198,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
     try:
-        connection = _setup_connection(connection_name, wallet.public_keys[DEFAULT], ctx)
+        connection = _setup_connection(connection_name, wallet.public_keys[FETCHAI], ctx)
     except AEAConfigException as e:
         logger.error(str(e))
         sys.exit(1)
