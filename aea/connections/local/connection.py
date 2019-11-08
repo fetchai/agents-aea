@@ -305,6 +305,14 @@ class LocalNodeChannel(Channel):
         """
         return self.local_node.send(envelope)
 
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+        pass
+
 
 class OEFLocalConnection(Connection):
     """

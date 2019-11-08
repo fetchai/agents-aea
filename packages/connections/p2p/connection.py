@@ -47,7 +47,7 @@ class PeerToPeerChannel(Channel):
         self.provider_addr = provider_addr
         self.provider_port = provider_port
         self.in_queue = Queue()  # type: Queue
-        self._httpCall = None  # type: HttpCalls
+        self._httpCall = None  # type: HTTPCalls
         logger.info("Initialised the peer to peer channel")
 
     def connect(self) -> Optional[Queue]:

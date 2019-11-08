@@ -125,6 +125,14 @@ class GymChannel(Channel):
         destination = envelope.to
         self._queues[destination].put_nowait(envelope)
 
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+        pass
+
     def disconnect(self) -> None:
         """
         Disconnect.
