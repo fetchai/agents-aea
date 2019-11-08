@@ -27,6 +27,7 @@ from queue import Queue
 
 import aea.registries.base
 from aea.aea import AEA, Resources
+from aea.connections.base import ConnectionStatus
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences
@@ -77,6 +78,10 @@ class TestSkillContext:
     def test_agent_address(self):
         """Test the default agent's address."""
         assert self.skill_context.agent_address == self.my_aea.wallet.addresses['default']
+
+    def test_connection_status(self):
+        """Test the default agent's connection status."""
+        assert isinstance(self.skill_context.connection_status, ConnectionStatus)
 
     def test_decision_maker_message_queue(self):
         """Test the decision maker's queue."""
