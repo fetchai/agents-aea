@@ -26,7 +26,8 @@ from queue import Queue
 
 
 import aea.registries.base
-from aea.aea import AEA
+from aea.aea import AEA, Resources
+from aea.connections.base import ConnectionStatus
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences
@@ -41,7 +42,7 @@ def test_agent_context_ledger_apis():
     wallet = Wallet({'default': private_key_pem_path})
     mailbox1 = MailBox(DummyConnection())
     ledger_apis = LedgerApis({"fetchai": ('alpha.fetch-ai.com', 80)})
-    my_aea = AEA("Agent0", mailbox1, wallet, ledger_apis, directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+    my_aea = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
 
     assert set(my_aea.context.ledger_apis.apis.keys()) == {"fetchai"}
     fetchai_ledger_api_obj = my_aea.context.ledger_apis.apis["fetchai"]
@@ -59,7 +60,7 @@ class TestSkillContext:
         cls.wallet = Wallet({'default': private_key_pem_path})
         cls.ledger_apis = LedgerApis({"fetchai": ("alpha.fetch-ai.com", 80)})
         cls.mailbox1 = MailBox(DummyConnection())
-        cls.my_aea = AEA("Agent0", cls.mailbox1, cls.wallet, cls.ledger_apis, directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        cls.my_aea = AEA("Agent0", cls.mailbox1, cls.wallet, cls.ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
         cls.skill_context = SkillContext(cls.my_aea.context)
 
     def test_agent_name(self):
@@ -77,6 +78,10 @@ class TestSkillContext:
     def test_agent_address(self):
         """Test the default agent's address."""
         assert self.skill_context.agent_address == self.my_aea.wallet.addresses['default']
+
+    def test_connection_status(self):
+        """Test the default agent's connection status."""
+        assert isinstance(self.skill_context.connection_status, ConnectionStatus)
 
     def test_decision_maker_message_queue(self):
         """Test the decision maker's queue."""
@@ -137,7 +142,7 @@ class TestSkillFromDir:
         cls.wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
         cls.mailbox1 = MailBox(DummyConnection())
-        cls.my_aea = AEA("agent_name", cls.mailbox1, cls.wallet, ledger_apis, directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        cls.my_aea = AEA("agent_name", cls.mailbox1, cls.wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
         cls.agent_context = cls.my_aea.context
 
     def test_missing_handler(self):

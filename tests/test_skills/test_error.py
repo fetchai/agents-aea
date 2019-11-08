@@ -30,6 +30,7 @@ from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
+from aea.registries.base import Resources
 from aea.skills.base import SkillContext
 from aea.skills.error.behaviours import ErrorBehaviour
 from aea.skills.error.handlers import ErrorHandler
@@ -53,7 +54,7 @@ class TestSkillError:
         cls.connection = DummyConnection()
         cls.mailbox1 = MailBox(cls.connection)
         cls.my_aea = AEA(cls.agent_name, cls.mailbox1, cls.wallet, cls.ledger_apis, timeout=2.0,
-                         directory=str(Path(CUR_PATH, "data/dummy_aea")))
+                         resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))))
 
         cls.skill_context = SkillContext(cls.my_aea._context)
         cls.my_error_handler = ErrorHandler(skill_context=cls.skill_context)

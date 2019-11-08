@@ -23,6 +23,7 @@ import os
 import time
 from queue import Queue
 from typing import cast
+from threading import Thread
 from unittest import mock
 
 import pytest
@@ -517,7 +518,7 @@ class TestFIPA:
 
 
 class TestOefConnection:
-    """Tests the con.is_established property."""
+    """Tests the con.connection_status.is_connected property."""
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
@@ -531,16 +532,21 @@ class TestOefConnection:
         mailbox.disconnect()
 
     def test_oef_connect(self):
-        """Test the OEFConnection."""
+        """Test the OEFConnection with a wrong address."""
         con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
-        assert not con.is_established
-        with pytest.raises(ConnectionError):
-            con.connect()
+        assert not con.connection_status.is_connected
+        connection_thread = Thread(target=con.connect)
+        connection_thread.start()
+        time.sleep(2.0)
+        assert not con.connection_status.is_connected
+        con._stopped = True
+        con._core.stop()
+        connection_thread.join()
 
     def test_oef_from_config(self):
         """Test the Connection from config File."""
         con = OEFConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
-        assert not con.is_established, "We are connected..."
+        assert not con.connection_status.is_connected, "We are connected..."
 
 
 class TestOefConstraint:

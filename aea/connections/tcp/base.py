@@ -55,7 +55,6 @@ class TCPConnection(Connection, ABC):
 
         self._lock = threading.Lock()
         self._stopped = True
-        self._connected = False
         self._thread_loop = None  # type: Optional[Thread]
         self._recv_task = None  # type: Optional[Future]
         self._fetch_task = None  # type: Optional[Future]
@@ -102,11 +101,6 @@ class TCPConnection(Connection, ABC):
         :return: the stream writer to communicate with the recipient. None if it cannot be determined.
         """
 
-    @property
-    def is_established(self):
-        """Check if the connection is established."""
-        return not self._stopped and self._connected
-
     def connect(self):
         """
         Set up the connection.
@@ -116,7 +110,7 @@ class TCPConnection(Connection, ABC):
         """
         with self._lock:
             try:
-                if self.is_established:
+                if self.connection_status.is_connected:
                     logger.warning("Connection already set up.")
                     return
 
@@ -126,12 +120,12 @@ class TCPConnection(Connection, ABC):
 
                 self.setup()
 
-                self._connected = True
+                self.connection_status.is_connected = True
             except Exception as e:
                 logger.error(str(e))
                 if not self._is_threaded:
                     self._stop_loop()
-                self._connected = False
+                self.connection_status.is_connected = False
                 self._stopped = True
 
     def disconnect(self) -> None:
@@ -141,11 +135,11 @@ class TCPConnection(Connection, ABC):
         :return: None.
         """
         with self._lock:
-            if not self.is_established:
+            if not self.connection_status.is_connected:
                 logger.warning("Connection is not set up.")
                 return
 
-            self._connected = False
+            self.connection_status.is_connected = False
             self.teardown()
             if not self._is_threaded:
                 self._stop_loop()
@@ -155,7 +149,7 @@ class TCPConnection(Connection, ABC):
         """Receive bytes."""
         try:
             data = await reader.read(len(struct.pack("I", 0)))
-            if not self._connected:
+            if not self.connection_status.is_connected:
                 return None
             nbytes = struct.unpack("I", data)[0]
             nbytes_read = 0

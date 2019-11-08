@@ -305,6 +305,14 @@ class LocalNodeChannel(Channel):
         """
         return self.local_node.send(envelope)
 
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+        pass
+
 
 class OEFLocalConnection(Connection):
     """
@@ -353,16 +361,12 @@ class OEFLocalConnection(Connection):
             except queue.Empty:
                 pass
 
-    @property
-    def is_established(self) -> bool:
-        """Return True if the connection has been established, False otherwise."""
-        return self._connection is not None
-
     def connect(self):
         """Connect to the local OEF Node."""
         if self._stopped:
             self._stopped = False
             self._connection = self.channel.connect()
+            self.connection_status.is_connected = True
             self.in_thread = Thread(target=self._receive_loop)
             self.out_thread = Thread(target=self._fetch)
             self.in_thread.start()
@@ -376,14 +380,23 @@ class OEFLocalConnection(Connection):
             self.out_thread.join()
             self.in_thread = None
             self.out_thread = None
+            self.connection_status.is_connected = False
             self.channel.disconnect()
             self.stop()
 
     def send(self, envelope: Envelope):
         """Send a message."""
-        if not self.is_established:
+        if not self.connection_status.is_connected:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         self.channel.send(envelope)
+
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+        pass
 
     def stop(self):
         """Tear down the connection."""
