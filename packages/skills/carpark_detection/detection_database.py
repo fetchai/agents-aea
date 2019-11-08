@@ -18,11 +18,14 @@
 # ------------------------------------------------------------------------------
 """Communicate between the database and the python objects."""
 
-import sqlite3
+import logging
 import os
 import shutil
+import sqlite3
 import skimage  # type: ignore
 import time
+
+logger = logging.getLogger("aea.carpark_detection_skill")
 
 
 class DetectionDatabase:
@@ -57,7 +60,7 @@ class DetectionDatabase:
     def reset_database(self):
         """Reset the database and remove all data."""
         # If we need to reset the database, then remove the table and any stored images
-        print("Database being reset")
+        logger.info("Database being reset.")
 
         # Remove the actual database file
         if os.path.isfile(self.database_path):
@@ -68,14 +71,14 @@ class DetectionDatabase:
         shutil.rmtree(self.processed_image_dir)
 
         # Recreate them
-        print("initialise_backend")
+        logger.info("Initialising backend ...")
         self.initialise_backend()
-        print("FINISH initialise_backend")
+        logger.info("Finished initialising backend!")
 
     def reset_mask(self):
         """Just reset the detection mask."""
         # If we need to reset the database, then remove the table and any stored images
-        print("Database being reset")
+        logger.info("Mask being reset.")
 
         # Remove the actual database file
         if os.path.isfile(self.mask_image_path):
@@ -114,8 +117,6 @@ class DetectionDatabase:
             self.set_system_status("lat", "UNKNOWN")
             self.set_system_status("lon", "UNKNOWN")
         self.set_system_status("db", "Exists")
-
-        print("**** backend initialised")
 
     def set_fet(self, amount, t):
         """Record how much FET we have and when we last read it from the ledger."""
@@ -317,7 +318,7 @@ class DetectionDatabase:
             conn.commit()
         except Exception as e:
             if print_exceptions:
-                print("Exception in database: {}".format(e))
+                logger.warning("Exception in database: {}".format(e))
         finally:
             if conn is not None:
                 conn.close()
