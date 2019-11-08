@@ -24,6 +24,7 @@ from abc import ABC, abstractmethod
 from queue import Queue
 from typing import Optional, TYPE_CHECKING
 
+from aea.connections.base import ConnectionStatus
 from aea.configurations.base import Address, ProtocolId
 from aea.mail import base_pb2
 if TYPE_CHECKING:
@@ -283,7 +284,12 @@ class MailBox(object):
     @property
     def is_connected(self) -> bool:
         """Check whether the mailbox is processing messages."""
-        return self._connection.is_established
+        return self._connection.connection_status.is_connected
+
+    @property
+    def connection_status(self) -> ConnectionStatus:
+        """Get the connection status."""
+        return self._connection.connection_status
 
     def connect(self) -> None:
         """Connect."""

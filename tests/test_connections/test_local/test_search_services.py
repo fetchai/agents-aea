@@ -287,7 +287,7 @@ class TestOEFConnectionFromJson:
     def test_from_config(self):
         """Test the configuration loading."""
         con = OEFLocalConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
-        assert not con.is_established, "We are connected..."
+        assert not con.connection_status.is_connected, "We are connected..."
 
     @classmethod
     def teardown_class(cls):

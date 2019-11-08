@@ -42,6 +42,7 @@ from aea.crypto.helpers import _create_default_private_key, _create_fetchai_priv
 from aea.crypto.ledger_apis import LedgerApis, _try_to_instantiate_fetchai_ledger_api, _try_to_instantiate_ethereum_ledger_api, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet, DEFAULT, SUPPORTED_CRYPTOS
 from aea.mail.base import MailBox
+from aea.registries.base import Resources
 
 
 def _verify_or_create_private_keys(ctx: Context) -> None:
@@ -197,7 +198,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
     _try_to_load_protocols(ctx)
     try:
-        connection = _setup_connection(connection_name, wallet.public_keys[DEFAULT], ctx)
+        connection = _setup_connection(connection_name, wallet.public_keys[FETCHAI], ctx)
     except AEAConfigException as e:
         logger.error(str(e))
         sys.exit(1)
@@ -209,7 +210,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
             click_context.invoke(install)
 
     mailbox = MailBox(connection)
-    agent = AEA(agent_name, mailbox, wallet, ledger_apis, directory=str(Path(".")))
+    agent = AEA(agent_name, mailbox, wallet, ledger_apis, resources=Resources(str(Path("."))))
     try:
         agent.start()
     except KeyboardInterrupt:

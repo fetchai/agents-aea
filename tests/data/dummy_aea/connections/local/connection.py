@@ -44,7 +44,7 @@ class LocalNode:
 
     def __init__(self):
         """Initialize a local (i.e. non-networked) implementation of an OEF Node."""
-        self.agents = dict()  # type: Dict[str, Description]
+        self.agents = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self._lock = threading.Lock()
 
@@ -99,8 +99,12 @@ class LocalNode:
         oef_type = OEFMessage.Type(oef_message.get("type"))
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
             self.register_service(sender, cast(Description, oef_message.get("service_description")))
+        elif oef_type == OEFMessage.Type.REGISTER_AGENT:
+            self.register_agent(sender, cast(Description, oef_message.get("agent_description")))
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
             self.unregister_service(sender, request_id, cast(Description, oef_message.get("service_description")))
+        elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
+            self.unregister_agent(sender, request_id, cast(Description, oef_message.get("agent_description")))
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
             self.search_agents(sender, request_id, cast(Query, oef_message.get("query")))
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
@@ -121,7 +125,7 @@ class LocalNode:
         if destination not in self._queues:
             msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR, id=STUB_DIALOGUE_ID, dialogue_id=STUB_DIALOGUE_ID, origin=destination)
             msg_bytes = OEFSerializer().encode(msg)
-            error_envelope = Envelope(to=destination, sender=envelope.sender, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            error_envelope = Envelope(to=envelope.sender, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
             self._send(error_envelope)
             return
         else:
@@ -138,9 +142,20 @@ class LocalNode:
         with self._lock:
             self.services[public_key].append(service_description)
 
+    def register_agent(self, public_key: str, agent_description: Description):
+        """
+        Register a service agent in the service directory of the node.
+
+        :param public_key: the public key of the service agent to be registered.
+        :param agent_description: the description of the service agent to be registered.
+        :return: None
+        """
+        with self._lock:
+            self.agents[public_key].append(agent_description)
+
     def register_service_wide(self, public_key: str, service_description: Description):
         """Register service wide."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def unregister_service(self, public_key: str, msg_id: int, service_description: Description) -> None:
         """
@@ -162,6 +177,26 @@ class LocalNode:
                 if len(self.services[public_key]) == 0:
                     self.services.pop(public_key)
 
+    def unregister_agent(self, public_key: str, msg_id: int, agent_description: Description) -> None:
+        """
+        Unregister an agent.
+
+        :param agent_description:
+        :param public_key: the public key of the service agent to be unregistered.
+        :param msg_id: the message id of the request.
+        :return: None
+        """
+        with self._lock:
+            if public_key not in self.agents:
+                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT)
+                msg_bytes = OEFSerializer().encode(msg)
+                envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                self._send(envelope)
+            else:
+                self.agents[public_key].remove(agent_description)
+                if len(self.agents[public_key]) == 0:
+                    self.agents.pop(public_key)
+
     def search_agents(self, public_key: str, search_id: int, query: Query) -> None:
         """
         Search the agents in the local Agent Directory, and send back the result.
@@ -178,9 +213,10 @@ class LocalNode:
         if query.model is None:
             result = list(set(self.services.keys()))
         else:
-            for agent_public_key, description in self.agents.items():
-                if query.model == description.data_model:
-                    result.append(agent_public_key)
+            for agent_public_key, descriptions in self.agents.items():
+                for description in descriptions:
+                    if query.model == description.data_model:
+                        result.append(agent_public_key)
 
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
         msg_bytes = OEFSerializer().encode(msg)
@@ -317,16 +353,12 @@ class OEFLocalConnection(Connection):
             except queue.Empty:
                 pass
 
-    @property
-    def is_established(self) -> bool:
-        """Return True if the connection has been established, False otherwise."""
-        return self._connection is not None
-
     def connect(self):
         """Connect to the local OEF Node."""
         if self._stopped:
             self._stopped = False
             self._connection = self.channel.connect()
+            self.connection_status.is_connected = True
             self.in_thread = Thread(target=self._receive_loop)
             self.out_thread = Thread(target=self._fetch)
             self.in_thread.start()
@@ -340,12 +372,13 @@ class OEFLocalConnection(Connection):
             self.out_thread.join()
             self.in_thread = None
             self.out_thread = None
+            self.connection_status.is_connected = False
             self.channel.disconnect()
             self.stop()
 
     def send(self, envelope: Envelope):
         """Send a message."""
-        if not self.is_established:
+        if not self.connection_status.is_connected:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         self.channel.send(envelope)
 

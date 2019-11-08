@@ -59,6 +59,14 @@ class MyScaffoldChannel(Channel):
         """
         raise NotImplementedError  # pragma: no cover
 
+    def receive(self) -> None:
+        """
+        Process the envelopes.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
     def disconnect(self) -> None:
         """
         Disconnect.
@@ -80,11 +88,6 @@ class MyScaffoldConnection(Connection):
         super().__init__()
         self.public_key = public_key
         self.channel = MyScaffoldChannel(public_key)
-
-    @property
-    def is_established(self) -> bool:
-        """Return True if the connection has been established, False otherwise."""
-        raise NotImplementedError  # pragma: no cover
 
     def connect(self) -> None:
         """
