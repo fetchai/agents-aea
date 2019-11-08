@@ -59,6 +59,10 @@ class TACBehaviour(Behaviour):
         game = cast(Game, self.context.game)
         if game.game_phase == GamePhase.PRE_GAME:
             self._register_tac()
+        elif game.game_phase == GamePhase.PRE_SETUP and game.time_to_start:
+            self._start_tac()
+        elif 
+        elif game.game_phase == GamePhase.POST_GAME
 
     def teardown(self) -> None:
         """
@@ -79,3 +83,46 @@ class TACBehaviour(Behaviour):
         msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
         msg_bytes = OEFSerializer().encode(msg)
         self.mailbox.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto.public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+
+    def _start_tac(self):
+        """Create a game and send the game configuration to every registered agent."""
+        game = cast(Game, self.context.game)
+        game.create()
+        logger.debug("[{}]: Started competition:\n{}".format(self.context.agent_name, game.get_holdings_summary()))
+        logger.debug("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.get_equilibrium_summary()))
+        for public_key in game.configuration.agent_pbks:
+            agent_state = game.get_agent_state_from_agent_pbk(public_key)
+            game_data_response = GameData(
+                public_key,
+                agent_state.balance,
+                agent_state.current_holdings,
+                agent_state.utility_params,
+                self.current_game.configuration.nb_agents,
+                self.current_game.configuration.nb_goods,
+                self.current_game.configuration.tx_fee,
+                self.current_game.configuration.agent_pbk_to_name,
+                self.current_game.configuration.good_pbk_to_name,
+                self.current_game.configuration.version_id
+            )
+            msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
+                             money=agent_state.balance,
+                             endowment=agent_state.current_holdings,
+                             utility_params=agent_state.utility_params,
+                             nb_agents=game.configuration.nb_agents,
+                             nb_goods=game.configuration.nb_goods,
+                             tx_fee=game.configuration.tx_fee,
+                             agent_pbk_to_name=game.configuration.agent_pbk_to_name,
+                             good_pbk_to_name=game.configuration.good_pbk_to_name,
+                             version_id=game.configuration.version_id
+                             )
+            logger.debug("[{}]: sending game data to '{}': {}"
+                         .format(self.context.agent_name, public_key, str(msg)))
+            self.mailbox.outbox.put_message(to=public_key, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(msg))
+
+    def _cancel_tac(self):
+        """Notify agents that the TAC is cancelled."""
+        game = cast(Game, self.context.game)
+        logger.debug("[{}]: Notifying agents that TAC is cancelled.".format(self.context.agent_name))
+        for agent_pbk in game.registered_agents:
+            tac_msg = TACMessage(tac_type=TACMessage.Type.CANCELLED)
+            self.mailbox.outbox.put_message(to=agent_pbk, sender=self.crypto.public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
