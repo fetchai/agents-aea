@@ -59,6 +59,14 @@ class MyScaffoldChannel(Channel):
         """
         raise NotImplementedError  # pragma: no cover
 
+    def receive(self) -> None:
+        """
+        Process the envelopes.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
+
     def disconnect(self) -> None:
         """
         Disconnect.

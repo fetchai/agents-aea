@@ -18,120 +18,82 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Gym connector and gym channel."""
+"""Peer to Peer connection and channel."""
 import logging
 import queue
-import threading
 from queue import Queue
 from threading import Thread
-from typing import Dict, Optional, cast, TYPE_CHECKING
-
-import gym
+from typing import Optional, cast, Dict, List, Any
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Channel, Connection
-from aea.helpers.base import locate
 from aea.mail.base import Envelope
 
-if TYPE_CHECKING:
-    from packages.protocols.gym.message import GymMessage
-    from packages.protocols.gym.serialization import GymSerializer
-else:
-    from gym_protocol.message import GymMessage
-    from gym_protocol.serialization import GymSerializer
+from fetch.p2p.api.http_calls import HTTPCalls
 
 logger = logging.getLogger(__name__)
 
 
-"""default 'to' field for Gym envelopes."""
-DEFAULT_GYM = "gym"
+class PeerToPeerChannel(Channel):
+    """A wrapper for an SDK or API."""
 
+    def __init__(self, public_key: str, provider_addr: str, provider_port: int):
+        """
+        Initialize a channel.
 
-class GymChannel(Channel):
-    """A wrapper of the gym environment."""
-
-    def __init__(self, public_key: str, gym_env: gym.Env):
-        """Initialize a gym channel."""
+        :param public_key: the public key
+        """
         self.public_key = public_key
-        self.gym_env = gym_env
-        self._lock = threading.Lock()
-
-        self._queues = {}  # type: Dict[str, Queue]
+        self.provider_addr = provider_addr
+        self.provider_port = provider_port
+        self.in_queue = Queue()  # type: Queue
+        self._httpCall = None  # type: HTTPCalls
+        logger.info("Initialised the peer to peer channel")
 
     def connect(self) -> Optional[Queue]:
         """
-        Connect a public key to the gym.
+        Connect.
 
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        if self.public_key in self._queues:
-            return None
+        self._httpCall = HTTPCalls(server_address=self.provider_addr, port=self.provider_port)
+        logger.info("Connected")
+        self.try_register()
+        return self.in_queue
 
-        assert len(self._queues.keys()) == 0, "Only one public key can register to a gym."
-        q = Queue()  # type: Queue
-        self._queues[self.public_key] = q
-        return q
+    def try_register(self) -> bool:
+        """Try to register to the provider."""
+        try:
+            logger.info(self.public_key)
+            query = self._httpCall.register(sender_address=self.public_key, mailbox=True)
+            return query['status'] == "OK"
+        except Exception:
+            logger.warning("Could not register to the provider.")
+            return False
 
     def send(self, envelope: Envelope) -> None:
         """
-        Process the envelopes to the gym.
-
-        :return: None
-        """
-        sender = envelope.sender
-        logger.debug("Processing message from {}: {}".format(sender, envelope))
-        self._decode_envelope(envelope)
-
-    def _decode_envelope(self, envelope: Envelope) -> None:
-        """
-        Decode the envelope.
+        Process the envelopes.
 
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == "gym":
-            self.handle_gym_message(envelope)
-        else:
-            raise ValueError('This protocol is not valid for gym.')
-
-    def handle_gym_message(self, envelope: Envelope) -> None:
-        """
-        Forward a message to gym.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        gym_message = GymSerializer().decode(envelope.message)
-        performative = gym_message.get("performative")
-        if GymMessage.Performative(performative) == GymMessage.Performative.ACT:
-            action = gym_message.get("action")
-            step_id = gym_message.get("step_id")
-            observation, reward, done, info = self.gym_env.step(action)  # type: ignore
-            msg = GymMessage(performative=GymMessage.Performative.PERCEPT, observation=observation, reward=reward, done=done, info=info, step_id=step_id)
-            msg_bytes = GymSerializer().encode(msg)
-            envelope = Envelope(to=envelope.sender, sender=DEFAULT_GYM, protocol_id=GymMessage.protocol_id, message=msg_bytes)
-            self._send(envelope)
-        elif GymMessage.Performative(performative) == GymMessage.Performative.RESET:
-            self.gym_env.reset()  # type: ignore
-        elif GymMessage.Performative(performative) == GymMessage.Performative.CLOSE:
-            self.gym_env.close()  # type: ignore
-
-    def _send(self, envelope: Envelope) -> None:
-        """Send a message.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        destination = envelope.to
-        self._queues[destination].put_nowait(envelope)
+        self._httpCall.send_message(sender_address=envelope.sender,
+                                    receiver_address=envelope.to,
+                                    protocol=envelope.protocol_id,
+                                    context=b"None",
+                                    payload=envelope.message)
 
     def receive(self) -> None:
-        """
-        Receives an envelope.
-
-        :return: None.
-        """
-        pass
+        """Receive the messages from the provider."""
+        messages = self._httpCall.get_messages(sender_address=self.public_key)  # type: List[Dict[str, Any]]
+        for message in messages:
+            logger.info(message)
+            envelope = Envelope(to=message['TO']['RECEIVER_ADDRESS'],
+                                sender=message['FROM']['SENDER_ADDRESS'],
+                                protocol_id=message['PROTOCOL'],
+                                message=message['PAYLOAD'])
+            self.in_queue.put(envelope)
 
     def disconnect(self) -> None:
         """
@@ -139,26 +101,24 @@ class GymChannel(Channel):
 
         :return: None
         """
-        with self._lock:
-            self._queues.pop(self.public_key, None)
+        self._httpCall.unregister(self.public_key)
+        self._httpCall.disconnect()
 
 
-class GymConnection(Connection):
-    """Proxy to the functionality of the gym."""
+class PeerToPeerConnection(Connection):
+    """Proxy to the functionality of the SDK or API."""
 
-    def __init__(self, public_key: str, gym_env: gym.Env):
+    def __init__(self, public_key: str, provider_addr: str, provider_port: int = 8000):
         """
-        Initialize a connection to a local gym environment.
+        Initialize a connection to an SDK or API.
 
         :param public_key: the public key used in the protocols.
-        :param gym: the gym environment.
         """
         super().__init__()
         self.public_key = public_key
-        self.channel = GymChannel(public_key, gym_env)
 
+        self.channel = PeerToPeerChannel(public_key, provider_addr, provider_port)
         self._connection = None  # type: Optional[Queue]
-
         self.in_thread = None  # type: Optional[Thread]
         self.out_thread = None  # type: Optional[Thread]
 
@@ -184,8 +144,9 @@ class GymConnection(Connection):
         assert self._connection is not None, "Call connect before calling _receive_loop."
         while self.connection_status.is_connected:
             try:
-                data = self._connection.get(timeout=2.0)
-                self.in_queue.put_nowait(data)
+                self.channel.receive()
+                envelope = self._connection.get(timeout=2.0)
+                self.in_queue.put_nowait(envelope)
             except queue.Empty:
                 pass
 
@@ -248,6 +209,6 @@ class GymConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        gym_env_package = cast(str, connection_configuration.config.get('env'))
-        gym_env = locate(gym_env_package)
-        return GymConnection(public_key, gym_env())
+        addr = cast(str, connection_configuration.config.get("addr"))
+        port = cast(int, connection_configuration.config.get("port"))
+        return PeerToPeerConnection(public_key, addr, port)
