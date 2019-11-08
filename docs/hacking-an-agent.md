@@ -26,8 +26,6 @@ from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
 from aea.registries.base import Resources
 ```
 
@@ -37,13 +35,13 @@ from aea.registries.base import Resources
 
 Create a private key.
 ``` bash
-python scripts/generate_private_key.py my_key
+python scripts/generate_private_key.py my_key.txt
 ```
 
 Create a wallet object with a private key.
 ``` python
-wallet = Wallet({'default': 'my_key'})
-    ```
+wallet = Wallet({'default': 'my_key.txt'})
+```
 
 Create a `Connection` and a `MailBox`.
 ``` python
@@ -56,58 +54,43 @@ For ledger APIs, we simply feed the agent an empty dictionary (meaning we do not
 ledger_apis = LedgerApis({})
 ```
 
-Create the resources.
+Create the resources pointing to the working directory.
 ``` python
 resources = Resources('')
 ```
 
 Now we have everything we need for initialisation.
 ``` python
-my_AEA = AEA("my_agent", mailbox, wallet, ledger_apis, resources)
+my_agent = AEA("my_agent", mailbox, wallet, ledger_apis, resources)
 ```
 
 ## Add skills and protocols
 
 We can add the echo skill as follows...
 
+!!! Note
+    Work in progress.
+
 ## Run the agent
 
 Create a thread and add the agent to it.
 
 ``` python
-t = Thread(target=my_AEA.start)
+t = Thread(target=my_agent.start)
 ```
 
-Start the agent and sleep it.
+Start the agent.
 
 ``` python
 t.start()
 ```
-
-## Create an envelope
-
-An envelope carries an encoded message. Create the message object with contents then serialise it.
-
-After that, add the serialised message to an envelope object.
-
-``` python
-msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-message_bytes = DefaultSerializer().encode(msg)
-
-envelope = Envelope(
-        to="Agent1",
-        sender=public_key,
-        protocol_id="default",
-        message=message_bytes)
-```
-
 
 ## Terminate the agent
 
 Finalise the agent thread.
 
 ``` python
-agent.stop()
+my_agent.stop()
 t.join()
 t = None
 ```
