@@ -29,7 +29,7 @@ from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Channel, Connection
 from aea.mail.base import Envelope
 
-from fetchai_p2p.http_calls import HttpCalls
+from fetch.p2p.api.http_calls import HTTPCalls
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class PeerToPeerChannel(Channel):
 
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        self._httpCall = HttpCalls(server_address=self.provider_addr, port=self.provider_port)
+        self._httpCall = HTTPCalls(server_address=self.provider_addr, port=self.provider_port)
         logger.info("Connected")
         self.try_register()
         return self.in_queue
@@ -81,7 +81,7 @@ class PeerToPeerChannel(Channel):
         self._httpCall.send_message(sender_address=envelope.sender,
                                     receiver_address=envelope.to,
                                     protocol=envelope.protocol_id,
-                                    context="None",
+                                    context=b"None",
                                     payload=envelope.message)
 
     def receive(self) -> None:

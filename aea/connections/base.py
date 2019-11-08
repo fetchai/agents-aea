@@ -57,6 +57,7 @@ class Channel(ABC):
         :return: None.
         """
 
+    @abstractmethod
     def receive(self) -> None:
         """
         Receives an envelope.
