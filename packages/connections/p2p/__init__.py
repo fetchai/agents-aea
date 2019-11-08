@@ -18,4 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Scaffold of a connection."""
+"""Peer to Peer connection and channel."""

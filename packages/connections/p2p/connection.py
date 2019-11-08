@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Scaffold connection and channel."""
+"""Peer to Peer connection and channel."""
 import logging
 import queue
 from queue import Queue
