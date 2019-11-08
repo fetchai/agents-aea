@@ -87,17 +87,17 @@ class LedgerApis(object):
         return self._apis
 
     @property
-    def has_fetchai(self):
+    def has_fetchai(self) -> bool:
         """Check if it has the fetchai API."""
         return FETCHAI in self.apis.keys()
 
     @property
-    def has_ethereum(self):
+    def has_ethereum(self) -> bool:
         """Check if it has the ethereum API."""
         return ETHEREUM in self.apis.keys()
 
     @property
-    def last_tx_statuses(self):
+    def last_tx_statuses(self) -> Dict[str, str]:
         """Get the statuses for the last transaction."""
         return self._last_tx_statuses
 
@@ -157,35 +157,38 @@ class LedgerApis(object):
                 tx_digest = None
                 self._last_tx_statuses[identifier] = ERROR
         elif identifier == ETHEREUM:
-
-            nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
-            # TODO : handle misconfiguration
-            chain_id = self.configs.get(identifier)[1]  # type: ignore
-            transaction = {
-                'nonce': nonce,
-                'chainId': chain_id,
-                'to': destination_address,
-                'value': amount,
-                'gas': tx_fee,
-                'gasPrice': api.toWei(GAS_PRICE, GAS_ID)
-            }
-            signed = api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
-            hex_value = api.eth.sendRawTransaction(signed.rawTransaction)
-            logger.info("TX Hash: {}".format(str(hex_value.hex())))
-            while True:
-                try:
-                    api.eth.getTransactionReceipt(hex_value)
-                    logger.info("transaction validated - exiting")
-                    tx_digest = hex_value.hex()
-                    self._last_tx_statuses[identifier] = OK
-                    break
-                except web3.exceptions.TransactionNotFound:     # pragma: no cover
-                    logger.info("transaction not found - sleeping for 3.0 seconds")
-                    self._last_tx_statuses[identifier] = ERROR
-                    time.sleep(3.0)
-
-            return tx_digest
-        else:           # pragma: no cover
+            try:
+                nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
+                # TODO : handle misconfiguration
+                chain_id = self.configs.get(identifier)[1]  # type: ignore
+                transaction = {
+                    'nonce': nonce,
+                    'chainId': chain_id,
+                    'to': destination_address,
+                    'value': amount,
+                    'gas': tx_fee,
+                    'gasPrice': api.toWei(GAS_PRICE, GAS_ID)
+                }
+                signed = api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
+                hex_value = api.eth.sendRawTransaction(signed.rawTransaction)
+                logger.info("TX Hash: {}".format(str(hex_value.hex())))
+                while True:
+                    try:
+                        api.eth.getTransactionReceipt(hex_value)
+                        logger.info("transaction validated - exiting")
+                        tx_digest = hex_value.hex()
+                        self._last_tx_statuses[identifier] = OK
+                        break
+                    except web3.exceptions.TransactionNotFound:     # pragma: no cover
+                        logger.info("transaction not found - sleeping for 3.0 seconds")
+                        self._last_tx_statuses[identifier] = ERROR
+                        time.sleep(3.0)
+                return tx_digest
+            except Exception:
+                logger.warning("An error occurred while attempting the transfer.")
+                tx_digest = None
+                self._last_tx_statuses[identifier] = ERROR
+        else:  # pragma: no cover
             raise Exception("Ledger id is not known")
         return tx_digest
 
