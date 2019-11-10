@@ -9,22 +9,22 @@ handlers: []
 tasks: []
 shared_classes:
   - shared_class:
-      parameters: parameters
+      class_name: Parameters
       args:
         min_nb_agents: 2
-        money_endowment: 200
+        money_endowment: 2000000
         nb_goods: 10
         tx_fee: 1
         base_good_endowment: 2
         lower_bound_factor: 1
         upper_bound_factor: 1
-        start_time: Nov 9 2019  22:00PM
-        registration_timeout: 10
-        competition_timeout: 200
-        inactivity_timeout: 10
-        whitelist:
+        start_time: 10 11 2019  11:07
+        registration_timeout: 60
+        competition_timeout: 180
+        inactivity_timeout: 60
+        whitelist: []
         version_id: v1
   - shared_class:
       class_name: Game
       args: {}
-protocols: ['oef', 'fipa']
+protocols: ['oef', 'tac']

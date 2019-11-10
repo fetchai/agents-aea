@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the tac participation skill."""
+"""This module contains the implementation of the tac control skill."""

@@ -20,9 +20,12 @@
 """This package contains a class representing the game parameters."""
 
 import datetime
+import logging
 from typing import Set
 
 from aea.skills.base import SharedClass
+
+logger = logging.getLogger("aea.tac_control_skill")
 
 
 class Parameters(SharedClass):
@@ -37,13 +40,15 @@ class Parameters(SharedClass):
         self._base_good_endowment = kwargs.pop('base_good_endowment', 2)  # type: int
         self._lower_bound_factor = kwargs.pop('lower_bound_factor', 1)  # type: int
         self._upper_bound_factor = kwargs.pop('upper_bound_factor', 1)  # type: int
-        self._start_time = datetime.strptime(kwargs.pop('start_time', 'Jun 1 2005  1:33PM'), '%b %d %Y %I:%M%p')  # type: datetime.datetime
+        start_time = kwargs.pop('start_time', '01 01 2020  00:01')  # type: str
+        self._start_time = datetime.datetime.strptime(start_time, '%d %m %Y %H:%M')  # type: datetime.datetime
         self._registration_timeout = kwargs.pop('registration_timeout', 10)  # type: int
         self._competition_timeout = kwargs.pop('competition_timeout', 20)  # type: int
         self._inactivity_timeout = kwargs.pop('inactivity_timeout', 10)  # type: int
-        self._whitelist = Set(kwargs.pop('whitelist', []))  # type: Set[str]
+        self._whitelist = set(kwargs.pop('whitelist', []))  # type: Set[str]
         self._version_id = kwargs.pop('version_id', 'v1')  # type: str
         super().__init__(**kwargs)
+        logger.info("TAC registation start time: {}, and start time: {}, and end time: {}".format(self.registration_start_time, self.start_time, self.end_time))
 
     @property
     def min_nb_agents(self) -> int:
@@ -81,6 +86,11 @@ class Parameters(SharedClass):
         return self._upper_bound_factor
 
     @property
+    def registration_start_time(self) -> datetime.datetime:
+        """TAC registration start time."""
+        return self._start_time - datetime.timedelta(0, self._registration_timeout)
+
+    @property
     def start_time(self) -> datetime.datetime:
         """TAC start time."""
         return self._start_time
@@ -88,7 +98,7 @@ class Parameters(SharedClass):
     @property
     def end_time(self) -> datetime.datetime:
         """TAC end time."""
-        return self._start_time + datetime.timedelta(0, self._registration_timeout) + datetime.timedelta(0, self._competition_timedelta)
+        return self._start_time + datetime.timedelta(0, self._competition_timeout)
 
     @property
     def inactivity_timeout(self):

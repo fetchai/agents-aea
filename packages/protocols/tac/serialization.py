@@ -84,10 +84,14 @@ class TACSerializer(Serializer):
         elif tac_type == TACMessage.Type.TRANSACTION:
             tac_msg = tac_pb2.TACAgent.Transaction()  # type: ignore
             tac_msg.transaction_id = msg.get("transaction_id")
-            tac_msg.is_sender_buyer = msg.get("is_sender_buyer")
             tac_msg.counterparty = msg.get("counterparty")
+            tac_msg.is_sender_buyer = msg.get("is_sender_buyer")
+            tac_msg.currency_pbk = msg.get("currency_pbk")
             tac_msg.amount = msg.get("amount")
+            tac_msg.sender_tx_fee = msg.get("sender_tx_fee")
+            tac_msg.counterparty_tx_fee = msg.get("counterparty_tx_fee")
             tac_msg.quantities.extend(_from_dict_to_pairs(msg.get("quantities_by_good_pbk")))
+            tac_msg.ledger_id = msg.get("ledger_id")
             tac_container.transaction.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.GET_STATE_UPDATE:
             tac_msg = tac_pb2.TACAgent.GetStateUpdate()  # type: ignore
@@ -173,10 +177,14 @@ class TACSerializer(Serializer):
         elif tac_type == "transaction":
             new_body["type"] = TACMessage.Type.TRANSACTION
             new_body["transaction_id"] = tac_container.transaction.transaction_id
-            new_body["is_sender_buyer"] = tac_container.transaction.is_sender_buyer
             new_body["counterparty"] = tac_container.transaction.counterparty
+            new_body["is_sender_buyer"] = tac_container.transaction.is_sender_buyer
+            new_body["currency_pbk"] = tac_container.transaction.currency_pbk
             new_body["amount"] = tac_container.transaction.amount
+            new_body["sender_tx_fee"] = tac_container.transaction.sender_tx_fee
+            new_body["counterparty_tx_fee"] = tac_container.transaction.counterparty_tx_fee
             new_body["quantities_by_good_pbk"] = _from_pairs_to_dict(tac_container.transaction.quantities)
+            new_body["ledger_id"] = tac_container.transaction.ledger_id
         elif tac_type == "get_state_update":
             new_body["type"] = TACMessage.Type.GET_STATE_UPDATE
         elif tac_type == "cancelled":

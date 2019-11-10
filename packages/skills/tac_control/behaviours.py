@@ -19,11 +19,12 @@
 
 """This package contains a the behaviours."""
 
+import datetime
 import logging
 from typing import cast, TYPE_CHECKING
 
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.model import Description, DataModel, Attribute
+from aea.protocols.oef.models import Description, DataModel, Attribute
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
 
@@ -63,18 +64,19 @@ class TACBehaviour(Behaviour):
         :return: None
         """
         game = cast(Game, self.context.game)
-        if game.phase == Phase.PRE_GAME and game.time_to_register:
+        parameters = cast(Parameters, self.context.parameters)
+        now = datetime.datetime.now()
+        if game.phase == Phase.PRE_GAME and parameters.registration_start_time > now:
             game.phase = Phase.GAME_REGISTRATION
             self._register_tac()
-        elif game.phase == Phase.GAME_REGISTRATION and game.time_to_start:
-            parameters = cast(Parameters, self.context.parameters)
+        elif game.phase == Phase.GAME_REGISTRATION and parameters.start_time > now:
             if game.registration.nb_agents < parameters.min_nb_agents:
                 game.phase = Phase.POST_GAME
                 self._cancel_tac()
             else:
                 game.phase = Phase.GAME_SETUP
                 self._start_tac()
-        elif game.phase == Phase.GAME and game.time_to_stop:
+        elif game.phase == Phase.GAME and parameters.end_time > now:
             game.phase = Phase.POST_GAME
             self._cancel_tac()
 
@@ -92,11 +94,10 @@ class TACBehaviour(Behaviour):
 
         :return: None.
         """
-        desc = Description({"version": self.tac_version_id}, data_model=CONTROLLER_DATAMODEL)
-        logger.debug("[{}]: Registering with {} data model".format(self.context.agent_name, desc.data_model.name))
+        desc = Description({"version": self.context.parameters.version_id}, data_model=CONTROLLER_DATAMODEL)
+        logger.debug("[{}]: Registering with data model".format(self.context.agent_name))
         msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
-        msg_bytes = OEFSerializer().encode(msg)
-        self.mailbox.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto.public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(msg))
 
     def _start_tac(self):
         """Create a game and send the game configuration to every registered agent."""
@@ -105,7 +106,7 @@ class TACBehaviour(Behaviour):
         logger.debug("[{}]: Started competition:\n{}".format(self.context.agent_name, game.get_holdings_summary()))
         logger.debug("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.get_equilibrium_summary()))
         for agent_public_key in game.configuration.agent_pbks:
-            agent_state = game.get_agent_state_from_agent_pbk(agent_public_key)
+            agent_state = game.current_agent_states[agent_public_key]
             msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
                              money=agent_state.balance,
                              endowment=agent_state.current_holdings,
