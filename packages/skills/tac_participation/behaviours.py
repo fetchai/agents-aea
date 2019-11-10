@@ -25,8 +25,8 @@ from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
 
 if TYPE_CHECKING:
-    from packages.skills.tac.game import Game, GamePhase
-    from packages.skills.tac.search import Search
+    from packages.skills.tac_participation.game import Game, GamePhase
+    from packages.skills.tac_participation.search import Search
 else:
     from tac_participation_skill.game import Game, GamePhase
     from tac_participation_skill.search import Search
