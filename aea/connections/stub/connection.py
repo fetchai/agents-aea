@@ -18,14 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the stub connection."""
+import asyncio
 import logging
 import os
-import queue
 import threading
 from asyncio import AbstractEventLoop
 from pathlib import Path
-from queue import Empty
-from threading import Thread
 from typing import Union, Optional
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
@@ -127,7 +125,7 @@ class StubConnection(Connection):
 
         self._stopped = True
         self._connected = False
-        self.in_queue = queue.Queue()  # type: queue.Queue
+        self.in_queue = asyncio.Queue()  # type: asyncio.Queue
         self._lock = threading.Lock()
         self._observer = Observer()
 
@@ -155,14 +153,13 @@ class StubConnection(Connection):
         """
         try:
             envelope = _decode(line, separator=SEPARATOR)
-            self.in_queue.put(envelope)
+            asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
         except ValueError:
             logger.error("Bad formatted line: {}".format(line))
 
     async def recv(self) -> Optional['Envelope']:
         try:
-            future = self._loop.run_in_executor(None, self.in_queue.get, True)
-            envelope = await future
+            envelope = await self.in_queue.get()
             return envelope
         except Exception as e:
             logger.exception(e)
@@ -194,6 +191,7 @@ class StubConnection(Connection):
             if self._connected:
                 self._connected = False
                 self._observer.stop()
+                self._observer.join()
                 self.in_queue.put_nowait(None)
                 self._stopped = True
 

@@ -58,7 +58,7 @@ class TestStubConnection:
             f.write(encoded_envelope + b"\n")
             f.flush()
 
-        actual_envelope = self.mailbox.inbox.get(timeout=2.0)
+        actual_envelope = self.mailbox.inbox.get(block=True, timeout=2.0)
         assert expected_envelope == actual_envelope
 
     def test_connection_is_established(self):
@@ -69,11 +69,6 @@ class TestStubConnection:
         encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
         self.connection._process_line(encoded_envelope)
         assert self.mailbox.inbox.empty(), "The inbox must be empty due to bad encoded message"
-
-    def test_connection_from_config(self):
-        """Test loading a connection from config file."""
-        stub_con = StubConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
-        assert not stub_con.is_established
 
     def test_send_message(self):
         """Test that the messages in the outbox are posted on the output file."""
@@ -101,3 +96,18 @@ class TestStubConnection:
         """Tear down the test."""
         shutil.rmtree(cls.tmpdir, ignore_errors=True)
         cls.mailbox.disconnect()
+
+
+def test_connection_from_config():
+    """Test loading a connection from config file."""
+    tmpdir = Path(tempfile.mktemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+    stub_con = StubConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig(
+        input_file=input_file_path,
+        output_file=output_file_path
+    ))
+    assert not stub_con.is_established
+    shutil.rmtree(tmpdir, ignore_errors=True)

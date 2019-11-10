@@ -20,6 +20,7 @@
 """Mail module abstract base classes."""
 import asyncio
 import logging
+import queue
 import time
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, Queue, Task
@@ -210,8 +211,8 @@ class Envelope:
 class Multiplexer:
     """This class can handle multiple connections at once."""
 
-    def __init__(self, connections: List['Connection'], default_connection_index: int = 0,
-                 loop: Optional[AbstractEventLoop] = None):
+    def __init__(self, connections: List['Connection'], in_queue: queue.Queue,
+                 default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None):
         """
         Initialize the connection multiplexer.
 
@@ -228,19 +229,19 @@ class Multiplexer:
         self._loop = loop if loop is not None else asyncio.get_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = Queue()
-        self._out_queue = Queue()
+        self._in_queue = in_queue
+        self._out_queue = asyncio.Queue()
 
         self._recv_loop_task = None  # type: Optional[Future]
         self._send_loop_task = None  # type: Optional[Future]
 
     @property
-    def in_queue(self) -> Queue:
+    def in_queue(self) -> queue.Queue:
         """Get the in queue"""
         return self._in_queue
 
     @property
-    def out_queue(self) -> Queue:
+    def out_queue(self) -> asyncio.Queue:
         """Get the out queue"""
         return self._out_queue
 
@@ -419,11 +420,14 @@ class Multiplexer:
         :param timeout: the timeout to wait until an envelope is received.
         :return: the envelope, or None if no envelope is available within a timeout.
         """
-        future = asyncio.run_coroutine_threadsafe(self._in_queue.get(), self._loop)
         try:
-            return future.result(timeout=None if block and timeout is None else timeout)
-        except (CancelledError, TimeoutError):
+            return self.in_queue.get(block=block, timeout=timeout)
+        except Empty:
             return None
+
+    def put(self, envelope: Envelope):
+        fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
+        return fut.result()
 
 
 class InBox(object):
@@ -503,7 +507,7 @@ class OutBox(object):
         """
         logger.debug("Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}'..."
                      .format(envelope.to, envelope.sender, envelope.protocol_id, envelope.message))
-        self._multiplexer.out_queue.put_nowait(envelope)
+        self._multiplexer.put(envelope)
 
     def put_message(self, to: Address, sender: Address,
                     protocol_id: ProtocolId, message: bytes) -> None:
@@ -527,7 +531,8 @@ class MailBox(object):
         """Initialize the mailbox."""
         self._connections = connections
 
-        self._multiplexer = Multiplexer(connections, loop=loop)
+        in_queue = queue.Queue()
+        self._multiplexer = Multiplexer(connections, in_queue, loop=loop)
         self.inbox = InBox(self._multiplexer)
         self.outbox = OutBox(self._multiplexer)
 
