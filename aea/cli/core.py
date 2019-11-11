@@ -67,27 +67,28 @@ def create(click_context, agent_name):
     """Create an agent."""
     ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
-    logger.info("Creating agent's directory in '{}'".format(path))
+    logger.info("Initializing AEA project '{}'".format(agent_name))
+    logger.info("Creating project directory '/{}'".format(agent_name))
 
     # create the agent's directory
     try:
         path.mkdir(exist_ok=False)
 
         # create a config file inside it
+        logger.info("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
         agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", registry_path=DEFAULT_REGISTRY_PATH, description="")
         agent_config.default_connection = DEFAULT_CONNECTION
         ctx.agent_loader.dump(agent_config, config_file)
-        logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))
 
         # next commands must be done from the agent's directory -> overwrite ctx.cwd
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
 
-        logger.info("Adding default connection '{}' to the agent...".format(DEFAULT_CONNECTION))
+        logger.info("Default connections:")
         click_context.invoke(connection, connection_name=DEFAULT_CONNECTION)
 
-        logger.info("Adding default skill '{}' to the agent...".format(DEFAULT_SKILL))
+        logger.info("Default skills:")
         click_context.invoke(skill, skill_name=DEFAULT_SKILL)
 
     except OSError:
@@ -123,7 +124,7 @@ def delete(ctx: Context, agent_name):
     finally:
         os.chdir(cwd)
 
-    logger.info("Deleting agent's directory in '{}'...".format(path))
+    logger.info("Deleting agent project directory '/{}'...".format(path))
 
     # delete the agent's directory
     try:

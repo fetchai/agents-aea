@@ -49,10 +49,10 @@ def connection(click_context, connection_name):
     """Add a connection to the configuration file."""
     ctx = cast(Context, click_context.obj)
     agent_name = ctx.agent_config.agent_name
-    logger.debug("Adding connection {} to the agent {}...".format(connection_name, agent_name))
+    logger.info("Adding connection '{}' to the agent '{}'...".format(connection_name, agent_name))
 
     # check if we already have a connection with the same name
-    logger.debug("Connection already supported by the agent: {}".format(ctx.agent_config.connections))
+    logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
     if connection_name in ctx.agent_config.connections:
         logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
         sys.exit(1)
@@ -72,7 +72,7 @@ def connection(click_context, connection_name):
     # try to load the connection configuration file
     try:
         connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
-        logger.info("Connection supports the following protocols: {}".format(connection_configuration.supported_protocols))
+        logger.info("Connection '{}' supports the following protocols: {}".format(connection_name, connection_configuration.supported_protocols))
     except ValidationError as e:
         logger.error("Connection configuration file not valid: {}".format(str(e)))
         sys.exit(1)
@@ -80,7 +80,7 @@ def connection(click_context, connection_name):
     # copy the connection package into the agent's supported connections.
     src = str(Path(os.path.join(registry_path, "connections", connection_name)).absolute())
     dest = os.path.join(ctx.cwd, "connections", connection_name)
-    logger.info("Copying connection modules. src={} dst={}".format(src, dest))
+    logger.debug("Copying connection modules. src={} dst={}".format(src, dest))
     try:
         shutil.copytree(src, dest)
     except Exception as e:
@@ -105,7 +105,7 @@ def protocol(click_context, protocol_name):
     """Add a protocol to the agent."""
     ctx = cast(Context, click_context.obj)
     agent_name = cast(str, ctx.agent_config.agent_name)
-    logger.debug("Adding protocol {} to the agent {}...".format(protocol_name, agent_name))
+    logger.info("Adding protocol '{}' to the agent '{}'...".format(protocol_name, agent_name))
 
     # check if we already have a protocol with the same name
     logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
@@ -128,7 +128,7 @@ def protocol(click_context, protocol_name):
     # try to load the protocol configuration file
     try:
         protocol_configuration = ctx.protocol_loader.load(open(str(protocol_configuration_filepath)))
-        logger.info("Protocol available: {}".format(protocol_configuration.name))
+        logger.debug("Protocol available: {}".format(protocol_configuration.name))
     except ValidationError as e:
         logger.error("Protocol configuration file not valid: {}".format(str(e)))
         sys.exit(1)
@@ -136,7 +136,7 @@ def protocol(click_context, protocol_name):
     # copy the protocol package into the agent's supported connections.
     src = str(Path(os.path.join(registry_path, "protocols", protocol_name)).absolute())
     dest = os.path.join(ctx.cwd, "protocols", protocol_name)
-    logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
+    logger.debug("Copying protocol modules. src={} dst={}".format(src, dest))
     try:
         shutil.copytree(src, dest)
     except Exception as e:
@@ -160,7 +160,7 @@ def skill(click_context, skill_name):
     """Add a skill to the agent."""
     ctx = cast(Context, click_context.obj)
     agent_name = ctx.agent_config.agent_name
-    logger.debug("Adding skill {} to the agent {}...".format(skill_name, agent_name))
+    logger.info("Adding skill '{}' to the agent '{}'...".format(skill_name, agent_name))
 
     # check if we already have a skill with the same name
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
@@ -190,7 +190,7 @@ def skill(click_context, skill_name):
     # copy the skill package into the agent's supported skills.
     src = str(Path(os.path.join(registry_path, "skills", skill_name)).absolute())
     dest = os.path.join(ctx.cwd, "skills", skill_name)
-    logger.info("Copying skill modules. src={} dst={}".format(src, dest))
+    logger.debug("Copying skill modules. src={} dst={}".format(src, dest))
     try:
         shutil.copytree(src, dest)
     except Exception as e:
@@ -205,7 +205,7 @@ def skill(click_context, skill_name):
     # check for not supported protocol, and add it.
     for protocol_name in skill_configuration.protocols:
         if protocol_name not in ctx.agent_config.protocols:
-            logger.info("Adding protocol '{}' to the agent...".format(protocol_name))
+            logger.debug("Adding protocol '{}' to the agent...".format(protocol_name))
             click_context.invoke(protocol, protocol_name=protocol_name)
 
     # add the skill to the configurations.
