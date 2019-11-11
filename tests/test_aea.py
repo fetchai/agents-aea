@@ -16,21 +16,30 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests for aea.aea.py."""
+"""This module contains the tests for aea/aea.py."""
 import os
+import tempfile
 import time
 from pathlib import Path
 from threading import Thread
 
+import yaml
+
+from aea import AEA_DIR
 from aea.aea import AEA
+from aea.configurations.base import ProtocolConfig
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.mail.base import MailBox, Envelope
+from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from .conftest import CUR_PATH
+from aea.registries.base import Resources
+from aea.skills.base import Skill
+from .conftest import CUR_PATH, DummyConnection
 
 
 def test_initialise_AEA():
@@ -40,12 +49,16 @@ def test_initialise_AEA():
     mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    my_AEA = AEA("Agent0", mailbox1, wallet, directory=str(Path(CUR_PATH, "aea")))
-    assert AEA("Agent0", mailbox1, wallet), "Agent is not initialised"
+    ledger_apis = LedgerApis({})
+    my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
+    assert not my_AEA.context.connection_status.is_connected, "AEA should not be connected."
     my_AEA.setup()
     assert my_AEA.resources is not None,\
         "Resources must not be None after setup"
+    my_AEA.resources = Resources(str(Path(CUR_PATH, "aea")))
+    assert my_AEA.resources is not None,\
+        "Resources must not be None after set"
 
 
 def test_act():
@@ -54,6 +67,7 @@ def test_act():
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
     public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
@@ -61,7 +75,8 @@ def test_act():
         agent_name,
         mailbox,
         wallet,
-        directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        ledger_apis,
+        resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
     t = Thread(target=agent.start)
     try:
         t.start()
@@ -80,6 +95,7 @@ def test_react():
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
     public_key = wallet.public_keys['default']
     mailbox = MailBox(OEFLocalConnection(public_key, node))
 
@@ -96,7 +112,8 @@ def test_react():
         agent_name,
         mailbox,
         wallet,
-        directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        ledger_apis,
+        resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
     t = Thread(target=agent.start)
     try:
         t.start()
@@ -113,12 +130,13 @@ def test_react():
 
 def test_handle():
     """Tests handle method of an agent."""
-    node = LocalNode()
     agent_name = "MyAgent"
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
+    ledger_apis = LedgerApis({})
     public_key = wallet.public_keys['default']
-    mailbox = MailBox(OEFLocalConnection(public_key, node))
+    connection = DummyConnection()
+    mailbox = MailBox(connection)
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     message_bytes = DefaultSerializer().encode(msg)
@@ -133,14 +151,15 @@ def test_handle():
         agent_name,
         mailbox,
         wallet,
-        directory=str(Path(CUR_PATH, "data", "dummy_aea")))
+        ledger_apis,
+        resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
     t = Thread(target=agent.start)
     try:
         t.start()
-        agent.mailbox.inbox._queue.put(envelope)
-        env = agent.mailbox.outbox._queue.get(block=True, timeout=10.0)
-        assert env.protocol_id == "default", \
-            "The envelope is not the expected protocol (Unsupported protocol)"
+        time.sleep(1.0)
+        connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default"
 
         #   DECODING ERROR
         msg = "hello".encode("utf-8")
@@ -149,7 +168,10 @@ def test_handle():
             sender=public_key,
             protocol_id='default',
             message=msg)
-        agent.mailbox.inbox._queue.put(envelope)
+        connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default"
+
         #   UNSUPPORTED SKILL
         msg = FIPASerializer().encode(
             FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
@@ -162,7 +184,116 @@ def test_handle():
             sender=public_key,
             protocol_id="fipa",
             message=msg)
-        agent.mailbox.inbox._queue.put(envelope)
+        connection.in_queue.put(envelope)
+        env = connection.out_queue.get(block=True, timeout=5.0)
+        assert env.protocol_id == "default"
+
     finally:
         agent.stop()
         t.join()
+
+
+class TestInitializeAEAProgrammaticallyFromResourcesDir:
+    """Test that we can initialize the agent by providing the resource object loaded from dir."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.agent_name = "MyAgent"
+        cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        cls.wallet = Wallet({'default': cls.private_key_pem_path})
+        cls.ledger_apis = LedgerApis({})
+        cls.connection = DummyConnection()
+        cls.mailbox = MailBox(cls.connection)
+
+        cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
+        cls.aea = AEA(cls.agent_name, cls.mailbox, cls.wallet, cls.ledger_apis, cls.resources)
+
+        cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        cls.connection.receive(Envelope(to="", sender="", protocol_id="default", message=DefaultSerializer().encode(cls.expected_message)))
+
+        cls.t = Thread(target=cls.aea.start)
+        cls.t.start()
+
+    def test_initialize_aea_programmatically(self):
+        """Test that we can initialize an AEA programmatically."""
+        time.sleep(1.0)
+
+        dummy_behaviour = next(filter(lambda x: x.__class__.__name__ == "DummyBehaviour", self.aea.resources.behaviour_registry.fetch("dummy")), None)
+        assert dummy_behaviour is not None
+        assert dummy_behaviour.nb_act_called > 0
+
+        dummy_task = next(filter(lambda x: x.__class__.__name__ == "DummyTask", self.aea.resources.task_registry.fetch("dummy")), None)
+        assert dummy_task is not None
+        assert dummy_task.nb_execute_called > 0
+
+        dummy_handler = next(filter(lambda x: x.__class__.__name__ == "DummyHandler", self.aea.resources.handler_registry.fetch("default")), None)
+        assert dummy_handler is not None
+        assert len(dummy_handler.handled_messages) == 1
+        assert dummy_handler.handled_messages[0] == self.expected_message
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        cls.aea.stop()
+        cls.t.join()
+
+
+class TestInitializeAEAProgrammaticallyBuildResources:
+    """Test that we can initialize the agent by building the resource object."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.agent_name = "MyAgent"
+        cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        cls.wallet = Wallet({'default': cls.private_key_pem_path})
+        cls.ledger_apis = LedgerApis({})
+        cls.connection = DummyConnection()
+        cls.mailbox = MailBox(cls.connection)
+
+        cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
+        cls.resources = Resources(cls.temp)
+        cls.aea = AEA(cls.agent_name, cls.mailbox, cls.wallet, cls.ledger_apis, resources=cls.resources)
+
+        cls.default_protocol_configuration = ProtocolConfig.from_json(
+            yaml.safe_load(open(Path(AEA_DIR, "protocols", "default", "protocol.yaml"))))
+        cls.default_protocol = Protocol("default",
+                                        DefaultSerializer(),
+                                        cls.default_protocol_configuration)
+        cls.resources.protocol_registry.register(("default", None), cls.default_protocol)
+
+        cls.error_skill = Skill.from_dir(Path(AEA_DIR, "skills", "error"), cls.aea.context)
+        cls.dummy_skill = Skill.from_dir(Path(CUR_PATH, "data", "dummy_skill"), cls.aea.context)
+        cls.resources.add_skill(cls.dummy_skill)
+        cls.resources.add_skill(cls.error_skill)
+
+        cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        cls.connection.receive(Envelope(to="", sender="", protocol_id="default", message=DefaultSerializer().encode(cls.expected_message)))
+
+        cls.t = Thread(target=cls.aea.start)
+        cls.t.start()
+
+    def test_initialize_aea_programmatically(self):
+        """Test that we can initialize an AEA programmatically."""
+        time.sleep(1.0)
+
+        dummy_behaviour = next(filter(lambda x: x.__class__.__name__ == "DummyBehaviour", self.aea.resources.behaviour_registry.fetch("dummy")), None)
+        assert dummy_behaviour is not None
+        assert dummy_behaviour.nb_act_called > 0
+
+        dummy_task = next(filter(lambda x: x.__class__.__name__ == "DummyTask", self.aea.resources.task_registry.fetch("dummy")), None)
+        assert dummy_task is not None
+        assert dummy_task.nb_execute_called > 0
+
+        dummy_handler = next(filter(lambda x: x.__class__.__name__ == "DummyHandler", self.aea.resources.handler_registry.fetch("default")), None)
+        assert dummy_handler is not None
+        assert len(dummy_handler.handled_messages) == 1
+        assert dummy_handler.handled_messages[0] == self.expected_message
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        cls.aea.stop()
+        cls.t.join()
+        Path(cls.temp).rmdir()

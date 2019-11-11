@@ -22,8 +22,12 @@
 from queue import Queue
 from typing import Dict
 
+from aea.connections.base import ConnectionStatus
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
+from aea.crypto.default import DEFAULT
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.ledger_apis import LedgerApis
 
 
 class AgentContext:
@@ -32,6 +36,8 @@ class AgentContext:
     def __init__(self, agent_name: str,
                  public_keys: Dict[str, str],
                  addresses: Dict[str, str],
+                 ledger_apis: LedgerApis,
+                 connection_status: ConnectionStatus,
                  outbox: OutBox,
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
@@ -42,9 +48,10 @@ class AgentContext:
 
         :param agent_name: the agent's name
         :param public_keys: the public keys of the agent
-        :param public_key: the default public key
+        :param ledger_apis: the ledger apis
+        :param connection_status: the connection status
         :param outbox: the outbox
-        :param decision_maker_queue: the (in) queue of the decision maker
+        :param decision_maker_message_queue: the (in) queue of the decision maker
         :param ownership_state: the ownership state of the agent
         :param preferences: the preferences of the agent
         :param is_ready_to_pursuit_goals: whether the agent is ready to pursuit its goals
@@ -52,6 +59,8 @@ class AgentContext:
         self._agent_name = agent_name
         self._public_keys = public_keys
         self._addresses = addresses
+        self._ledger_apis = ledger_apis
+        self._connection_status = connection_status
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
         self._ownership_state = ownership_state
@@ -76,12 +85,17 @@ class AgentContext:
     @property
     def address(self) -> str:
         """Get the defualt address."""
-        return self._addresses['default']
+        return self._addresses[FETCHAI] if FETCHAI in self._addresses.keys() else self._addresses[DEFAULT]
 
     @property
     def public_key(self) -> str:
         """Get the default public key."""
-        return self._public_keys['default']
+        return self._public_keys[FETCHAI] if FETCHAI in self._public_keys.keys() else self._public_keys[DEFAULT]
+
+    @property
+    def connection_status(self) -> ConnectionStatus:
+        """Get connection status."""
+        return self._connection_status
 
     @property
     def outbox(self) -> OutBox:
@@ -107,3 +121,8 @@ class AgentContext:
     def is_ready_to_pursuit_goals(self) -> bool:
         """Get the goal pursuit readiness."""
         return self._is_ready_to_pursuit_goals
+
+    @property
+    def ledger_apis(self) -> LedgerApis:
+        """Get the ledger APIs."""
+        return self._ledger_apis

@@ -24,6 +24,7 @@ import logging
 import pickle
 from queue import Empty, Queue
 from threading import Thread
+import time
 from typing import List, Dict, Optional, cast
 
 import oef
@@ -246,7 +247,8 @@ class OEFChannel(OEFAgent, Channel):
         :param oef_port: the OEF port.
         :param in_queue: the in queue.
         """
-        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core)
+        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core,
+                         logger=lambda *x: None, logger_debug=lambda *x: None)
         self.in_queue = in_queue
         self.mail_stats = MailStats()
 
@@ -452,8 +454,12 @@ class OEFChannel(OEFAgent, Channel):
             self.send_accept(id, dialogue_id, destination, target)
         elif performative == FIPAMessage.Performative.DECLINE:
             self.send_decline(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS or \
+                performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS or \
+                performative == FIPAMessage.Performative.INFORM:
+            self.send_default_message(envelope)
         else:
-            raise ValueError("OEF FIPA message not recognized.")
+            raise ValueError("OEF FIPA message not recognized.")  # pragma: no cover
 
     def send_oef_message(self, envelope: Envelope) -> None:
         """
@@ -487,6 +493,14 @@ class OEFChannel(OEFAgent, Channel):
         else:
             raise ValueError("OEF request not recognized.")
 
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+        pass
+
 
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
@@ -505,13 +519,8 @@ class OEFConnection(Connection):
         self.channel = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
 
         self._stopped = True
-        self._connected = False
         self.out_thread = None  # type: Optional[Thread]
-
-    @property
-    def is_established(self) -> bool:
-        """Get the connection status."""
-        return self._connected
+        self._connection_check_thread = None  # type: Optional[Thread]
 
     def _fetch(self) -> None:
         """
@@ -519,7 +528,7 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        while self._connected:
+        while self.connection_status.is_connected:
             try:
                 msg = self.out_queue.get(block=True, timeout=1.0)
                 self.send(msg)
@@ -531,20 +540,56 @@ class OEFConnection(Connection):
         Connect to the channel.
 
         :return: None
-        :raises ConnectionError if the connection to the OEF fails.
+        :raises Exception if the connection to the OEF fails.
         """
-        if self._stopped and not self._connected:
+        if self._connection_check_thread is not None:
+            self._connection_check_thread.join()
+            self._connection_check_thread = None
+        if self._stopped and not self.connection_status.is_connected:
             self._stopped = False
             self._core.run_threaded()
-            try:
-                if not self.channel.connect():
-                    raise ConnectionError("Cannot connect to OEFChannel.")
-                self._connected = True
-                self.out_thread = Thread(target=self._fetch)
-                self.out_thread.start()
-            except ConnectionError as e:
-                self._core.stop()
-                raise e
+            self._try_connect()
+            self._connection_check_thread = Thread(target=self._connection_check)
+            self._connection_check_thread.start()
+
+    def _try_connect(self) -> None:
+        """
+        Try connect to the channel.
+
+        :return: None
+        :raises Exception if the connection to the OEF fails.
+        """
+        try:
+            while not self.connection_status.is_connected and not self._stopped:
+                if self.channel.connect():
+                    self.connection_status.is_connected = True
+                    self.out_thread = Thread(target=self._fetch)
+                    self.out_thread.start()
+                else:
+                    logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
+                    time.sleep(5.0)
+        except Exception as e:
+            self._core.stop()
+            raise e
+
+    def _connection_check(self) -> None:
+        """
+        Check for connection to the channel.
+
+        Try to reconnect if connection is dropped.
+
+        :return: None
+        """
+        while self.connection_status.is_connected:
+            assert self.out_thread is not None, "Call connect before _connection_check."
+            time.sleep(2.0)
+            if not self.channel.get_state() == "connected":  # type: ignore
+                logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
+                self.connection_status.is_connected = False
+                self.out_thread.join()
+                self.out_thread = None
+                self._try_connect()
+                logger.warning("Successfully re-established connection to OEFChannel.")
 
     def disconnect(self) -> None:
         """
@@ -553,8 +598,11 @@ class OEFConnection(Connection):
         :return: None
         """
         assert self.out_thread is not None, "Call connect before disconnect."
-        if not self._stopped and self._connected:
-            self._connected = False
+        assert self._connection_check_thread is not None, "Call connect before disconnect."
+        if not self._stopped and self.connection_status.is_connected:
+            self.connection_status.is_connected = False
+            self._connection_check_thread.join()
+            self._connection_check_thread = None
             self.out_thread.join()
             self.out_thread = None
             self.channel.disconnect()
@@ -567,7 +615,7 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        if self._connected:
+        if self.connection_status.is_connected:
             self.channel.send(envelope)
 
     @classmethod

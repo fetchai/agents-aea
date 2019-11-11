@@ -1,117 +1,186 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "description": "Schema for the skill configuration file.",
-    "additionalProperties": false,
-    "type": "object",
-    "required": [
-        "name",
-        "authors",
-        "version",
-        "license",
-        "url",
-        "protocols"
-    ],
-    "properties": {
-        "name": {"$ref": "definitions.json#/definitions/resource_name"},
-        "authors": {"type": "string"},
-        "version": {"type": "string"},
-        "license": {"type": "string"},
-        "url": {"type": "string"},
-        "protocols": {
-            "type": "array",
-            "additionalProperties": false,
-            "uniqueItems": true,
-            "items": {"type": "string"}
-        },
-        "handlers": {
-            "type": "array",
-            "additionalProperties": false,
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "required": ["handler"],
-              "properties": {
-                "handler": { "$ref": "#/definitions/handler" }
-              }
-            }
-        },
-        "behaviours": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["behaviour"],
-              "properties": {
-                "behaviour": { "$ref": "#/definitions/behaviour" }
-              }
-            }
-        },
-        "tasks": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["task"],
-              "properties": {
-                "task": { "$ref": "#/definitions/task" }
-              }
-            }
-        },
-        "shared_classes": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "properties": {
-                "task": { "$ref": "#/definitions/shared_class" }
-              }
-            }
-        },
-        "dependencies": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": { "$ref": "definitions.json#/definitions/requirement" }
-        },
-        "description": {"type": "string"}
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for the skill configuration file.",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "name",
+    "authors",
+    "version",
+    "license",
+    "url",
+    "protocols"
+  ],
+  "properties": {
+    "name": {
+      "$ref": "#/definitions/resource_name"
     },
-    "definitions": {
-        "behaviour": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["class_name"],
-            "properties": {
-                "class_name": {"type": "string"},
-                "args": {"type": "object"}
-            }
-        },
-        "task": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["class_name"],
-            "properties": {
-                "class_name": {"type": "string"},
-                "args": {"type": "object"}
-            }
-        },
-        "handler": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["class_name"],
-            "properties": {
-                "class_name": {"type": "string"},
-                "args": {"type": "object"}
-            }
-        },
-        "shared_class": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["class_name"],
-            "properties": {
-                "class_name": {"type": "string"},
-                "args": {"type": "object"}
-            }
+    "authors": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "license": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "protocols": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "handlers": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": [
+          "handler"
+        ],
+        "properties": {
+          "handler": {
+            "$ref": "#/definitions/handler"
+          }
         }
+      }
+    },
+    "behaviours": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "behaviour"
+        ],
+        "properties": {
+          "behaviour": {
+            "$ref": "#/definitions/behaviour"
+          }
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "task"
+        ],
+        "properties": {
+          "task": {
+            "$ref": "#/definitions/task"
+          }
+        }
+      }
+    },
+    "shared_classes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/definitions/shared_class"
+          }
+        }
+      }
+    },
+    "ledgers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/requirement"
+      }
+    },
+    "description": {
+      "type": "string"
     }
+  },
+  "definitions": {
+    "behaviour": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class_name"
+      ],
+      "properties": {
+        "class_name": {
+          "type": "string"
+        },
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class_name"
+      ],
+      "properties": {
+        "class_name": {
+          "type": "string"
+        },
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "handler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class_name"
+      ],
+      "properties": {
+        "class_name": {
+          "type": "string"
+        },
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "shared_class": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class_name"
+      ],
+      "properties": {
+        "class_name": {
+          "type": "string"
+        },
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "requirement": {
+      "type": "string",
+      "pattern": "([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9])( *(~=|==|>=|<=|!=|<|>) *v?(?:(?:(?P<epoch>[0-9]+)!)?(?P<release>[0-9]+(?:\\.[0-9]+)*)(?P<pre>[-_\\.]?(?P<pre_l>(a|b|c|rc|alpha|beta|pre|preview))[-_\\.]?(?P<pre_n>[0-9]+)?)?(?P<post>(?:-(?P<post_n1>[0-9]+))|(?:[-_\\.]?(?P<post_l>post|rev|r)[-_\\.]?(?P<post_n2>[0-9]+)?))?(?P<dev>[-_\\.]?(?P<dev_l>dev)[-_\\.]?(?P<dev_n>[0-9]+)?)?)(?:\\+(?P<local>[a-z0-9]+(?:[-_\\.][a-z0-9]+)*))?)?$"
+    },
+    "resource_name": {
+      "type": "string",
+      "pattern": "[a-zA-Z_][a-zA-Z0-9_]*"
+    }
+  }
 }

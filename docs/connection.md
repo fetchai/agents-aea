@@ -12,7 +12,7 @@ The `connection.yaml` file in the agent directory contains protocol details and 
 
 ``` json
 name: oef
-authors: Fetch.AI Limited
+authors: Fetch.ai Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""

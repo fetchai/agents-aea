@@ -19,14 +19,15 @@
 
 """This module contains the tests of the messages module."""
 
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
-
-from unittest import mock
-import pytest
 import base64
 import json
 from typing import cast
+from unittest import mock
+
+import pytest
+
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 
 
 def test_default_bytes_serialization():
@@ -46,7 +47,7 @@ def test_default_bytes_serialization():
 
 def test_default_error_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""
-    msg = DefaultMessage(type=DefaultMessage.Type.ERROR, error_code=-1, error_msg="An error", error_data=None)
+    msg = DefaultMessage(type=DefaultMessage.Type.ERROR, error_code=-10001, error_msg="An error", error_data='Some data')
     msg_bytes = DefaultSerializer().encode(msg)
     actual_msg = DefaultSerializer().decode(msg_bytes)
     expected_msg = msg
@@ -73,3 +74,11 @@ def test_default_message_str_values():
         "DefaultMessage.Type.BYTES must be bytes"
     assert str(DefaultMessage.Type.ERROR) == "error",\
         "DefaultMessage.Type.ERROR must be error"
+
+
+def test_check_consistency_raises_exception_when_type_not_recognized():
+    """Test that we raise exception when the type of the message is not recognized."""
+    message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    # mock the __eq__ method such that any kind of matching is going to fail.
+    with mock.patch.object(DefaultMessage.Type, "__eq__", return_value=False):
+        assert not message.check_consistency()

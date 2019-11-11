@@ -1,0 +1,35 @@
+name: weather_client_ledger
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+behaviours:
+  - behaviour:
+      class_name: MySearchBehaviour
+      args: {}
+handlers:
+  - handler:
+      class_name: FIPAHandler
+      args: {}
+  - handler:
+      class_name: OEFHandler
+      args: {}
+  - handler:
+      class_name: MyTransactionHandler
+      args: {}
+tasks: []
+shared_classes:
+  - shared_class:
+      class_name: Strategy
+      args:
+        country: UK
+        search_interval: 5
+        max_row_price: 4
+        max_buyer_tx_fee: 1
+        currency_pbk: 'FET'
+        ledger_id: 'fetchai'
+  - shared_class:
+      class_name: Dialogues
+      args: {}
+protocols: ['fipa','default','oef']
+ledgers: ['fetchai']

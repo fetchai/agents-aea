@@ -23,6 +23,7 @@ _Put an `x` in the boxes that apply._
 - [ ] I am making a pull request against the `develop` branch (left side). Also you should start your branch off our `develop`.
 - [ ] Lint and unit tests pass locally with my changes
 - [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] I have checked that code coverage does not decrease.
 - [ ] I have checked that the documentation about the `aea cli` tool works
 - [ ] I have added necessary documentation (if appropriate)
 - [ ] Any dependent changes have been merged and published in downstream modules
@@ -53,7 +54,9 @@ _Put an `x` in the boxes that apply._
 - [ ] I built the documentation and updated it with the latest changes
 - [ ] I've added an item in `HISTORY.rst` for this release
 - [ ] I bumped the version number in the `aea/__version__.py` file.
-- [ ] I bumped the version number in every Docker image of the repo and published it. Also, I built and published them with tag `latest` 
+- [ ] I bumped the version number in every Docker image of the repo and published it. Also, I built and published them with tag `latest`  
+      (check the READMEs of [`aea-develop`](../develop-image/README.md#publish) 
+      and [`aea-deploy`](../deploy-image/README.md#publish))
 - [ ] I have checked that the documentation about the `aea cli` tool works
 
 ## Further comments

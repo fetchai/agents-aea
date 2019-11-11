@@ -9,7 +9,7 @@ The FIPA skill `skill.yaml` configuration file looks like this.
 
 ``` yaml
 name: 'fipa_negotiation'
-authors: Fetch.AI Limited
+authors: Fetch.ai Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
@@ -77,10 +77,10 @@ This class deals with representing potential transactions between agents.
 ## Demo instructions
 
 !!!	Warn
-	Fipa negotiation skill is not fully developed.
+	FIPA negotiation skill is not fully developed.
 
 
-Follow the Preliminaries and Installation instructions <a href="../quickstart">here</a>.
+Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
 
 
 Then, download the examples and packages directory.
@@ -89,13 +89,13 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 ### Create the agent
-In the root directory, create the fipa agent.
+In the root directory, create the FIPA agent.
 ``` bash
 aea create my_fipa_agent
 ```
 
 
-### Add the fipa skill 
+### Add the FIPA skill 
 ``` bash
 cd my_fipa_agent
 aea add skill fipa_negotiation
@@ -113,7 +113,7 @@ aea run --connection local
 ```
 
 <!--
-You will see the fipa logs.
+You will see the FIPA logs.
 
 <center>![FIPA logs](assets/gym-training.png)</center>
 -->

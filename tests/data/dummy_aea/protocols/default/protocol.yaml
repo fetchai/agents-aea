@@ -3,4 +3,5 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
-description: "dummy_aea protocol description [Fill in]"
+description: "The default protocol allows for any bytes message."
+dependencies: []

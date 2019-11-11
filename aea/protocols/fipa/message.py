@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Optional, Union
+from typing import Dict, List, Optional, Union
 
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
@@ -30,6 +30,9 @@ class FIPAMessage(Message):
     """The FIPA message class."""
 
     protocol_id = "fipa"
+
+    STARTING_MESSAGE_ID = 1
+    STARTING_TARGET = 0
 
     class Performative(Enum):
         """FIPA performatives."""
@@ -75,9 +78,11 @@ class FIPAMessage(Message):
             assert self.is_set("target")
             performative = FIPAMessage.Performative(self.get("performative"))
             if performative == FIPAMessage.Performative.CFP:
+                assert self.is_set("query")
                 query = self.get("query")
                 assert isinstance(query, Query) or isinstance(query, bytes) or query is None
             elif performative == FIPAMessage.Performative.PROPOSE:
+                assert self.is_set("proposal")
                 proposal = self.get("proposal")
                 assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
             elif performative == FIPAMessage.Performative.ACCEPT \
@@ -88,8 +93,9 @@ class FIPAMessage(Message):
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
                 assert self.is_set("address")
             elif performative == FIPAMessage.Performative.INFORM:
-                data = self.get("data")
-                assert isinstance(data, bytes)
+                assert self.is_set("json_data")
+                json_data = self.get("json_data")
+                assert isinstance(json_data, dict)
             else:
                 raise ValueError("Performative not recognized.")
 
@@ -97,3 +103,15 @@ class FIPAMessage(Message):
             return False
 
         return True
+
+
+VALID_PREVIOUS_PERFORMATIVES = {
+    FIPAMessage.Performative.CFP: [None],
+    FIPAMessage.Performative.PROPOSE: [FIPAMessage.Performative.CFP],
+    FIPAMessage.Performative.ACCEPT: [FIPAMessage.Performative.PROPOSE],
+    FIPAMessage.Performative.ACCEPT_W_ADDRESS: [FIPAMessage.Performative.PROPOSE],
+    FIPAMessage.Performative.MATCH_ACCEPT: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS],
+    FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS],
+    FIPAMessage.Performative.INFORM: [FIPAMessage.Performative.MATCH_ACCEPT, FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS, FIPAMessage.Performative.INFORM],
+    FIPAMessage.Performative.DECLINE: [FIPAMessage.Performative.CFP, FIPAMessage.Performative.PROPOSE, FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS]
+}  # type: Dict[FIPAMessage.Performative, List[Union[None, FIPAMessage.Performative]]]

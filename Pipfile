@@ -28,17 +28,17 @@ base58 = "*"
 docker = "*"
 click = "*"
 pyyaml = ">=4.2b1"
-oef = {index = "test-pypi",version = "==0.6.10"}
+oef = "==0.8.1"
 colorlog = "*"
 jsonschema = "*"
 protobuf = "*"
 flask = "*"
-connexion = {git = "https://github.com/neverpanic/connexion.git",editable = true,ref = "jsonschema-3"}
+connexion = ">=2.4.0"
 watchdog = "*"
 python-dotenv = "*"
-fetchai-ledger-api = "*"
-web3 = "*"
-eth-account = "*"
+fetchai-ledger-api = "==0.8.1"
+web3 = "==5.2.2"
+eth-account = "==0.4.0"
 
 [requires]
 python_version = "3.7"

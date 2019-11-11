@@ -48,7 +48,7 @@ class MyScaffoldChannel(Channel):
 
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -57,7 +57,15 @@ class MyScaffoldChannel(Channel):
         :param envelope: the envelope
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
+
+    def receive(self) -> None:
+        """
+        Process the envelopes.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: no cover
 
     def disconnect(self) -> None:
         """
@@ -65,7 +73,7 @@ class MyScaffoldChannel(Channel):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class MyScaffoldConnection(Connection):
@@ -81,18 +89,13 @@ class MyScaffoldConnection(Connection):
         self.public_key = public_key
         self.channel = MyScaffoldChannel(public_key)
 
-    @property
-    def is_established(self) -> bool:
-        """Return True if the connection has been established, False otherwise."""
-        raise NotImplementedError
-
     def connect(self) -> None:
         """
         Connect to the gym.
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def disconnect(self) -> None:
         """
@@ -100,7 +103,7 @@ class MyScaffoldConnection(Connection):
 
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -109,7 +112,7 @@ class MyScaffoldConnection(Connection):
         :param envelope: the envelop
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
@@ -120,4 +123,4 @@ class MyScaffoldConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover

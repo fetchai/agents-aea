@@ -3,21 +3,27 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
-description: "The weather station skill offers weather data for sale."
 behaviours:
   - behaviour:
-      class_name: MyWeatherBehaviour
-      args:
-        foo: bar
+      class_name: ServiceRegistrationBehaviour
+      args: {}
 handlers:
   - handler:
-      class_name: MyWeatherHandler
+      class_name: FIPAHandler
+      args: {}
+tasks: []
+shared_classes:
+  - shared_class:
+      class_name: Strategy
       args:
-        foo: bar
-tasks:
-  - task:
-      class_name: MyWeatherTask
-      args:
-        foo: bar
-shared_classes: []
-protocols: ['fipa']
+        date_one: "1/10/2019"
+        date_two: "1/12/2019"
+        price_per_row: 1
+        seller_tx_fee: 0
+        currency_pbk: 'FET'
+        ledger_id: 'None'
+  - shared_class:
+      class_name: Dialogues
+      args: {}
+protocols: ['fipa', 'oef', 'default']
+ledgers: []

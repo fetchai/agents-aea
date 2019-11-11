@@ -11,7 +11,6 @@ Release History
 
 - Provides examples and fixes.
 
-
 0.1.2 (2019-09-16)
 -------------------
 
@@ -60,4 +59,54 @@ Release History
 - Adds new connection stub to read from/write to file
 - Adds ledger entities (fetchai and ethereum); creates wallet for ledger entities
 - Adds more documentation and fixes old one
+- Multiple additional minor fixes and changes
+
+0.1.8 (2019-10-18)
+-------------------
+
+- Multiple bug fixes and improvements to gui of cli
+- Adds full test coverage on cli
+- Improves docs
+- Multiple additional minor fixes and changes
+
+0.1.9 (2019-10-18)
+-------------------
+
+- Stability improvements
+- Higher test coverage, including on Python 3.6
+- Multiple additional minor fixes and changes
+
+0.1.10 (2019-10-19)
+-------------------
+
+- Compatibility fixes for Ubuntu and Windows platforms
+- Multiple additional minor fixes and changes
+
+0.1.11 (2019-10-30)
+-------------------
+
+- Adds python3.8 test coverage
+- Adds almost complete test coverage on aea package
+- Adds filter concept for message routing
+- Adds ledger integrations for fetch.ai and ethereum
+- Adds carpark examples and ledger examples
+- Multiple additional minor fixes and changes
+
+0.1.12 (2019-11-01)
+-------------------
+
+- Adds TCP connection (server and client)
+- Fixes some examples and docs
+- Refactors crypto modules and adds additional tests
+- Multiple additional minor fixes and changes
+
+0.1.13 (2019-11-08)
+-------------------
+
+- Adds envelope serializer
+- Adds support for programmatically initializing an AEA
+- Adds some tests for the gui and other components
+- Exposes connection status to skills
+- Updates oef connection to re-establish dropped connections
+- Updates the car park agent
 - Multiple additional minor fixes and changes

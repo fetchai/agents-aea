@@ -121,7 +121,6 @@ class StubConnection(Connection):
         self.input_file = open(input_file_path, "rb+", buffering=1)
         self.output_file = open(output_file_path, "wb+", buffering=1)
 
-        self._stopped = True
         self._observer = Observer()
         self._fetch_thread = Thread(target=self._fetch)
 
@@ -129,15 +128,10 @@ class StubConnection(Connection):
         self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
         self._observer.schedule(self._event_handler, dir)
 
-    @property
-    def is_established(self) -> bool:
-        """Get the connection status."""
-        return not self._stopped
-
     def receive(self) -> None:
         """Receive new messages, if any."""
         line = self.input_file.readline()
-        logger.debug("read line: {}".format(line))
+        logger.debug("read line: {!r}".format(line))
         while len(line) > 0:
             self._process_line(line[:-1])
             line = self.input_file.readline()
@@ -159,13 +153,13 @@ class StubConnection(Connection):
 
         In this type of connection there's no channel to connect.
         """
-        if self._stopped:
-            self._stopped = False
+        if not self.connection_status.is_connected:
+            self.connection_status.is_connected = True
             try:
                 self._observer.start()
                 self._fetch_thread.start()
-            except Exception as e:
-                self._stopped = True
+            except Exception as e:      # pragma: no cover
+                self.connection_status.is_connected = False
                 raise e
 
             self.receive()
@@ -176,13 +170,13 @@ class StubConnection(Connection):
 
         In this type of connection there's no channel to disconnect.
         """
-        if not self._stopped:
-            self._stopped = True
+        if self.connection_status.is_connected:
+            self.connection_status.is_connected = False
             self._fetch_thread.join()
             try:
                 self._observer.stop()
-            except Exception as e:
-                self._stopped = False
+            except Exception as e:      # pragma: no cover
+                self.connection_status.is_connected = True
                 raise e
 
     def _fetch(self) -> None:
@@ -191,7 +185,7 @@ class StubConnection(Connection):
 
         :return: None
         """
-        while not self._stopped:
+        while self.connection_status.is_connected:
             try:
                 msg = self.out_queue.get(block=True, timeout=1.0)
                 self.send(msg)

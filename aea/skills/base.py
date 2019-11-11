@@ -28,9 +28,12 @@ from pathlib import Path
 from queue import Queue
 from typing import Optional, List, Dict, Any, cast
 
-from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, ProtocolId, DEFAULT_SKILL_CONFIG_FILE
+from aea.connections.base import ConnectionStatus
+from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, \
+    ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
+from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
@@ -48,6 +51,7 @@ class SkillContext:
         :param agent_context: the agent's context
         """
         self._agent_context = agent_context
+        self._in_queue = Queue()  # type: Queue
         self._skill = None  # type: Optional[Skill]
 
     @property
@@ -76,9 +80,19 @@ class SkillContext:
         return self._agent_context.address
 
     @property
+    def connection_status(self) -> ConnectionStatus:
+        """Get connection status."""
+        return self._agent_context.connection_status
+
+    @property
     def outbox(self) -> OutBox:
         """Get outbox."""
         return self._agent_context.outbox
+
+    @property
+    def message_in_queue(self) -> Queue:
+        """Get message in queue."""
+        return self._in_queue
 
     @property
     def decision_maker_message_queue(self) -> Queue:
@@ -101,6 +115,11 @@ class SkillContext:
         return self._agent_context.is_ready_to_pursuit_goals
 
     @property
+    def ledger_apis(self) -> LedgerApis:
+        """Get ledger APIs."""
+        return self._agent_context.ledger_apis
+
+    @property
     def handlers(self) -> Optional[List['Handler']]:
         """Get handlers of the skill."""
         assert self._skill is not None, "Skill not initialized."
@@ -120,7 +139,7 @@ class SkillContext:
 
     def __getattr__(self, item) -> Any:
         """Get attribute."""
-        return super().__getattribute__(item)
+        return super().__getattribute__(item)  # pragma: no cover
 
 
 class Behaviour(ABC):
@@ -193,7 +212,7 @@ class Behaviour(ABC):
             logger.debug("Processing behaviour {}".format(behaviour_class_name))
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
-                logger.warning("Behaviour '{}' cannot be found.".format(behaviour_class))
+                logger.warning("Behaviour '{}' cannot be found.".format(behaviour_class_name))
             else:
                 args = behaviour_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
@@ -359,7 +378,7 @@ class Task(ABC):
             logger.debug("Processing task {}".format(task_class_name))
             task_class = name_to_class.get(task_class_name, None)
             if task_class is None:
-                logger.warning("Task '{}' cannot be found.".format(task_class))
+                logger.warning("Task '{}' cannot be found.".format(task_class_name))
             else:
                 args = task_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
@@ -434,7 +453,7 @@ class SharedClass(ABC):
             logger.debug("Processing shared class {}".format(shared_class_name))
             shared_class = name_to_class.get(shared_class_name, None)
             if shared_class is None:
-                logger.warning("SharedClass '{}' cannot be found.".format(shared_class))
+                logger.warning("Shared class '{}' cannot be found.".format(shared_class_name))
             else:
                 args = shared_class_config.args
                 assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
@@ -471,28 +490,23 @@ class Skill:
         self.shared_classes = shared_classes
 
     @classmethod
-    def from_dir(cls, directory: str, agent_context: AgentContext) -> Optional['Skill']:
+    def from_dir(cls, directory: str, agent_context: AgentContext) -> 'Skill':
         """
         Load a skill from a directory.
 
         :param directory: the skill
         :param agent_context: the agent's context
-        :return: the Skill object. None if the parsing failed.
+        :return: the Skill object.
+        :raises Exception: if the parsing failed.
         """
         # check if there is the config file. If not, then return None.
         skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         skill_config = skill_loader.load(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
-        if skill_config is None:
-            return None
-
         skills_spec = importlib.util.spec_from_file_location(skill_config.name, os.path.join(directory, "__init__.py"))
-        if skills_spec is None:
-            logger.warning("No skill found.")
-            return None
-
         skill_module = importlib.util.module_from_spec(skills_spec)
         sys.modules[skill_config.name + "_skill"] = skill_module
-        skills_packages = list(filter(lambda x: not x.startswith("__"), skills_spec.loader.contents()))  # type: ignore
+        loader_contents = [path.name for path in Path(directory).iterdir()]
+        skills_packages = list(filter(lambda x: not x.startswith("__"), loader_contents))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
 
         skill_context = SkillContext(agent_context)

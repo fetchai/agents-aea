@@ -22,6 +22,8 @@ import asyncio
 import inspect
 import logging
 import os
+import socket
+import sys
 import time
 from threading import Timer
 from typing import Optional
@@ -31,13 +33,18 @@ import pytest
 from docker.models.containers import Container
 from oef.agents import AsyncioCore, OEFAgent
 
+from aea.configurations.base import ConnectionConfig
+from aea.connections.base import Connection
+from aea.mail.base import Envelope
+from aea import AEA_DIR
+
 logger = logging.getLogger(__name__)
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 CLI_LOG_OPTION = ["-v", "OFF"]
 
-CONFIGURATION_SCHEMA_DIR = os.path.join(ROOT_DIR, "aea", "configurations", "schemas")
+CONFIGURATION_SCHEMA_DIR = os.path.join(AEA_DIR, "configurations", "schemas")
 AGENT_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "aea-config_schema.json")
 SKILL_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "skill-config_schema.json")
 CONNECTION_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "connection-config_schema.json")
@@ -60,6 +67,47 @@ def oef_addr() -> str:
 def oef_port() -> int:
     """Port of the connection to the OEF Node to use during the tests."""
     return 10000
+
+
+def tcpping(ip, port) -> bool:
+    """Ping TCP port."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.connect((ip, int(port)))
+        s.shutdown(2)
+        return True
+    except Exception as e:
+        logger.exception(e)
+        return False
+
+
+class DummyConnection(Connection):
+    """A dummy connection that just stores the messages."""
+
+    def __init__(self):
+        """Initialize."""
+        super().__init__()
+        self.connection_status.is_connected = True
+
+    def connect(self):
+        """Connect."""
+        pass
+
+    def disconnect(self):
+        """Disconnect."""
+        pass
+
+    def send(self, envelope: 'Envelope'):
+        """Send an envelope."""
+        self.out_queue.put(envelope)
+
+    def receive(self, envelope: 'Envelope'):
+        """Receive an envelope."""
+        self.in_queue.put(envelope)
+
+    @classmethod
+    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+        """Return a connection obj fom a configuration."""
 
 
 class OEFHealthCheck(object):
@@ -182,6 +230,8 @@ def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
 @pytest.fixture(scope="session")
 def network_node(oef_addr, oef_port, pytestconfig):
     """Network node initialization."""
+    if sys.version_info < (3, 7):
+        pytest.skip("Python version < 3.7 not supported by the OEF.")
     if pytestconfig.getoption("no_integration_tests"):
         pytest.skip('skipped: no OEF running')
         return

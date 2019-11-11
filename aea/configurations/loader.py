@@ -45,7 +45,8 @@ class ConfigLoader(Generic[T]):
     def __init__(self, schema_filename: str, configuration_type: Type[T]):
         """Initialize the parser for configuration files."""
         self.schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
-        self.resolver = jsonschema.RefResolver("file://{}/".format(Path(_SCHEMAS_DIR).absolute()), self.schema)
+        root_path = "file://{}{}".format(Path(_SCHEMAS_DIR).absolute(), os.path.sep)
+        self.resolver = jsonschema.RefResolver(root_path, self.schema)
         self.validator = Draft4Validator(self.schema, resolver=self.resolver)
         self.configuration_type = configuration_type  # type: Type[T]
 

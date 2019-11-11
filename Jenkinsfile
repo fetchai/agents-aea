@@ -7,6 +7,10 @@ pipeline {
 
     }
 
+    options {
+        timeout(time: 2, unit: 'HOURS')
+    }
+
     stages {
 
         stage('Unit Tests & Code Style Check') {
@@ -37,21 +41,29 @@ pipeline {
 
                 } // docs
 
-//                 stage('Unit Tests: Python 3.6') {
-//
-//                     steps {
-//                         sh 'tox -e py36 -- --no-integration-tests'
-//                     }
-//
-//                 }  // unit tests: python 3.6
+                stage('Unit Tests: Python 3.6') {
+
+                    steps {
+                        sh 'tox -e py36 -- --no-integration-tests --ci'
+                    }
+
+                }  // unit tests: python 3.6
 
                 stage('Unit Tests: Python 3.7') {
 
                     steps {
-                        sh 'tox -e py37 -- --no-integration-tests'
+                        sh 'tox -e py37 -- --no-integration-tests --ci'
                     }
 
                 } // unit tests: python 3.7
+
+                stage('Unit Tests: Python 3.8') {
+
+                    steps {
+                        sh 'tox -e py38 -- --no-integration-tests --ci'
+                    }
+
+                } // unit tests: python 3.8
 
             } // parallel
 

@@ -1,0 +1,15 @@
+name: tcp
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+url: ""
+class_name: TCPClientConnection  # this can be eitehr TCPClientConnection or TCPServerConnection
+supported_protocols:
+  - oef
+  - default
+  - fipa
+  - gym
+  - tac
+config:
+  address: 127.0.0.1
+  port: 8082

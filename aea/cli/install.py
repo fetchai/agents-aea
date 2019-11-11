@@ -44,10 +44,11 @@ def install(ctx: Context, requirement: Optional[str]):
         dependencies = ctx.get_dependencies()
 
     for d in dependencies:
-        logger.debug("Installing {}...".format(d))
+        logger.info("Installing {}...".format(d))
         try:
             subp = subprocess.Popen([sys.executable, "-m", "pip", "install", d])
             subp.wait(30.0)
+            assert subp.returncode == 0
         except Exception:
             logger.error("An error occurred while installing {}. Stopping...".format(d))
-            exit(-1)
+            sys.exit(1)

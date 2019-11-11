@@ -24,7 +24,7 @@ import click
 import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger
 from aea.cli.registry.utils import format_items, format_skills
 
 
@@ -43,6 +43,7 @@ def search(ctx: Context, registry):
     else:
         registry = os.path.join(AEA_DIR, DEFAULT_REGISTRY_PATH)
         ctx.set_config("registry", registry)
+        logger.debug("Using registry {}".format(registry))
 
 
 @search.command()
@@ -71,7 +72,7 @@ def connections(ctx: Context):
     try:
         for r in Path(registry).glob("connections/[!_]*[!.py]/"):
             result.add(r.name)
-    except Exception:
+    except Exception:  # pragma: no cover
         pass
 
     if "scaffold" in result: result.remove("scaffold")
@@ -108,7 +109,7 @@ def protocols(ctx: Context):
     try:
         for r in Path(registry).glob("protocols/[!_]*[!.py]/"):
             result.add(r.name)
-    except Exception:
+    except Exception:  # pragma: no cover
         pass
 
     if "scaffold" in result: result.remove("scaffold")
@@ -144,7 +145,7 @@ def skills(ctx: Context):
     try:
         for r in Path(registry).glob("skills/[!_]*[!.py]/"):
             result.add(r.name)
-    except Exception:
+    except Exception:  # pragma: no cover
         pass
 
     if "scaffold" in result: result.remove("scaffold")

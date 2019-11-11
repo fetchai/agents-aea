@@ -1,13 +1,8 @@
-## Logging
+The AEA framework supports flexible logging capabilities with the standard <a href="https://docs.python.org/3/library/logging.html" target=_blank>Python logging library</a>.
 
-The framework supports flexible logging capabilities by 
-relying on the standard [Python logging library](https://docs.python.org/3/library/logging.html).
+In this tutorial, we configure logging for an agent.
 
-In this tutorial, you'll see how you can configure 
-logging for your agent.
-
-
-First of all, create your agent:
+First of all, create your agent.
 
 
 ``` bash
@@ -15,9 +10,9 @@ aea create my_agent
 cd my_agent
 ```
 
+The `aea-config.yaml` file should look like this.
 
-The `aea-config.yaml` file should look like:
-```yaml
+``` yaml
 aea_version: 0.1.6
 agent_name: my_agent
 authors: ''
@@ -38,16 +33,14 @@ logging_config:
   version: 1
 ```
 
-By updating the `logging_config` section, you can configure 
-the loggers of your application.
+By updating the `logging_config` section, you can configure the loggers of your application.
 
-The format of this section is specified in the 
-[`logging.config`](https://docs.python.org/3/library/logging.config.html)
-module.
-At [this section](https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema) 
+The format of this section is specified in the <a href="https://docs.python.org/3/library/logging.config.html" target=_blank>`logging.config`</a> module.
+
+At <a href="https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema" target=_blank>this section</a> 
 you'll find the definition of the configuration dictionary schema.
 
-An example of `logging_config` value is reported below:
+Below is an example of the `logging_config` value.
 
 ```yaml
 logging_config:
@@ -75,7 +68,7 @@ logging_config:
       propagate: true
 ```
 
-This configuration wiill set up a logger with name `aea`,
-print both on console (see `console` handler) and on file
-(see `logfile` handler) with format specified by the 
-`standard` formatter.
+This configuration will set up a logger with name `aea`. It prints both on console and on file with a format specified by the `standard` formatter.
+
+
+<br />

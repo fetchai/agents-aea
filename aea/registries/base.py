@@ -26,17 +26,21 @@ import os
 import pprint
 import re
 from abc import ABC, abstractmethod
+from queue import Queue
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Tuple, cast
+from typing import Optional, List, Dict, Any, Tuple, cast, Union
 
 from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Protocol
 from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext
 
 logger = logging.getLogger(__name__)
 
 PACKAGE_NAME_REGEX = re.compile("^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE)
+INTERNAL_PROTOCOL_ID = 'internal'
+DECISION_MAKER = 'decision_maker'
 
 
 class Registry(ABC):
@@ -146,7 +150,8 @@ class ProtocolRegistry(Registry):
             logger.warning("No protocol found.")
             return
 
-        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), protocols_spec.loader.contents()))  # type: ignore
+        loader_contents = [path.name for path in Path(directory, "protocols").iterdir()]
+        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), loader_contents))  # type: ignore
         logger.debug("Processing the following protocol package: {}".format(protocols_packages))
         for protocol_name in protocols_packages:
             try:
@@ -156,7 +161,7 @@ class ProtocolRegistry(Registry):
 
     def setup(self) -> None:
         """
-        Teardown the registry.
+        Set up the registry.
 
         :return: None
         """
@@ -232,11 +237,16 @@ class HandlerRegistry(Registry):
         :param skill_id: the skill id.
         :return: None
         """
+        protocol_ids_to_remove = set()
         for protocol_id, skill_to_handler_dict in self._handlers.items():
             if skill_id in skill_to_handler_dict.keys():
                 self._handlers[protocol_id].pop(skill_id, None)
             if len(self._handlers[protocol_id]) == 0:
-                self._handlers.pop(protocol_id, None)
+                protocol_ids_to_remove.add(protocol_id)
+
+        # clean the dictionary up
+        for protocol_id in protocol_ids_to_remove:
+            self._handlers.pop(protocol_id, None)
 
     def fetch(self, protocol_id: ProtocolId) -> Optional[List[Handler]]:
         """
@@ -260,22 +270,28 @@ class HandlerRegistry(Registry):
         :param skill_id: the skill id
         :return: the handlers registered for the protocol_id and skill_id
         """
-        result = self._handlers.get(protocol_id, None)
-        if result is None:
-            return None
-        else:
-            return result.get(skill_id, None)
+        return self._handlers.get(protocol_id, {}).get(skill_id, None)
 
-    def fetch_all(self) -> Optional[List[Handler]]:
-        """Fetch all the handlers."""
-        if self._handlers.values() is None:
-            return None
-        else:
-            result = []
-            for skill_id_to_handler_dict in self._handlers.values():
-                for handler in skill_id_to_handler_dict.values():
-                    result.append(handler)
-            return result
+    def fetch_all(self) -> List[Handler]:
+        """
+        Fetch all the handlers.
+
+        :return: the list of handlers.
+        """
+        result = []
+        for skill_id_to_handler_dict in self._handlers.values():
+            for handler in skill_id_to_handler_dict.values():
+                result.append(handler)
+        return result
+
+    def fetch_internal_handler(self, skill_id: SkillId) -> Optional[Handler]:
+        """
+        Fetch the internal handler.
+
+        :param skill_id: the skill id
+        :return: the internal handler registered for the skill id
+        """
+        return self._handlers.get(INTERNAL_PROTOCOL_ID, {}).get(skill_id, None)
 
     def setup(self) -> None:
         """
@@ -316,7 +332,7 @@ class BehaviourRegistry(Registry):
         """
         Register a behaviour.
 
-        :param skill_id: the skill id.
+        :param ids: the skill id.
         :param behaviours: the behaviours of the skill.
         :return: None
         """
@@ -383,7 +399,7 @@ class TaskRegistry(Registry):
         """
         Register a task.
 
-        :param skill_id: the skill id.
+        :param ids: the skill id.
         :param tasks: the tasks list.
         :return: None
         """
@@ -442,8 +458,9 @@ class TaskRegistry(Registry):
 class Resources(object):
     """This class implements the resources of an AEA."""
 
-    def __init__(self):
+    def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
         """Instantiate the resources."""
+        self._directory = str(Path(directory).absolute()) if directory is not None else str(Path(".").absolute())
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = BehaviourRegistry()
@@ -452,19 +469,15 @@ class Resources(object):
 
         self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
 
-    @classmethod
-    def from_resource_dir(cls, directory: str, agent_context: AgentContext) -> Optional['Resources']:
-        """
-        Parse the resource directory.
+    @property
+    def directory(self) -> str:
+        """Get the directory."""
+        return self._directory
 
-        :param directory: the agent's resources directory.
-        :param agent_context: the agent's context object
-        :return: None
-        """
-        resources = Resources()
-        resources.protocol_registry.populate(directory)
-        resources.populate_skills(directory, agent_context)
-        return resources
+    def load(self, agent_context: AgentContext) -> None:
+        """Load all the resources."""
+        self.protocol_registry.populate(self.directory)
+        self.populate_skills(self.directory, agent_context)
 
     def populate_skills(self, directory: str, agent_context: AgentContext) -> None:
         """
@@ -479,7 +492,8 @@ class Resources(object):
             logger.warning("No skill found.")
             return
 
-        skill_directories = [str(x) for x in Path(root_skill_directory).iterdir() if x.is_dir()]
+        skill_directories = [str(x) for x in Path(root_skill_directory).iterdir()
+                             if x.is_dir() and re.match(PACKAGE_NAME_REGEX, x.name)]
         logger.debug("Processing the following skill directories: {}".format(pprint.pformat(skill_directories)))
         for skill_directory in skill_directories:
             try:
@@ -500,6 +514,10 @@ class Resources(object):
             self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], skill.behaviours))
         if skill.tasks is not None:
             self.task_registry.register((None, skill_id), cast(List[Task], skill.tasks))
+
+    def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
+        """Get the skill."""
+        return self._skills.get(skill_id, None)
 
     def remove_skill(self, skill_id: SkillId):
         """Remove a skill from the set of resources."""
@@ -525,3 +543,75 @@ class Resources(object):
         """
         for r in self._registries:
             r.teardown()
+
+
+class Filter(object):
+    """This class implements the filter of an AEA."""
+
+    def __init__(self, resources: Resources, decision_maker_out_queue: Queue):
+        """
+        Instantiate the filter.
+
+        :param resources: the resources
+        :param decision_maker_out_queue: the decision maker queue
+        """
+        self._resources = resources
+        self._decision_maker_out_queue = decision_maker_out_queue
+        # TODO: self._inactive_handlers = {}  # type: Dict[SkillId, List[HandlerId]]
+        # TODO: self._inactive_behaviours = {}  # type: Dict[SkillId, List[BehaviourId]]
+        # TODO: self._inactive_tasks = {}  # type: Dict[SkillId, List[TaskId]]
+
+    @property
+    def resources(self) -> Resources:
+        """Get resources."""
+        return self._resources
+
+    @property
+    def decision_maker_out_queue(self) -> Queue:
+        """Get decision maker (out) queue."""
+        return self._decision_maker_out_queue
+
+    def get_active_handlers(self, protocol_id: str) -> Optional[List[Handler]]:
+        """
+        Get active handlers.
+
+        :param protocol_id: the protocol id
+        :return: list of handlers
+        """
+        handlers = self.resources.handler_registry.fetch(protocol_id)
+        # TODO: add option for advanced filtering, currently each handler independently acts on the message
+        return handlers
+
+    def get_active_tasks(self) -> List[Task]:
+        """
+        Get the active tasks.
+
+        :return: the list of tasks currently active
+        """
+        tasks = self.resources.task_registry.fetch_all()
+        # TODO: add filtering, remove inactive tasks
+        return tasks
+
+    def get_active_behaviours(self) -> List[Behaviour]:
+        """
+        Get the active behaviours.
+
+        :return: the list of behaviours currently active
+        """
+        behaviours = self.resources.behaviour_registry.fetch_all()
+        # TODO: add filtering, remove inactive behaviours
+        return behaviours
+
+    def handle_internal_messages(self) -> None:
+        """
+        Handle the messages from the decision maker.
+
+        :return: None
+        """
+        while not self.decision_maker_out_queue.empty():
+            tx_message = self.decision_maker_out_queue.get_nowait()  # type: Optional[TransactionMessage]
+            if tx_message is not None:
+                skill_id = cast(str, tx_message.get("skill_id"))
+                handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
+                if handler is not None:
+                    handler.handle(tx_message, DECISION_MAKER)

@@ -220,12 +220,14 @@ class Model{
             self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
         })
     }
-    startAgent(agentId){
+    startAgent(agentId, runConnectionId){
         var ajax_options = {
             type: 'POST',
             url: 'api/agent/' + agentId + '/run',
             accepts: 'application/json',
-            contentType: 'plain/text'
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(runConnectionId)
         };
         var self = this;
         $.ajax(ajax_options)
@@ -525,8 +527,9 @@ class Controller{
         $('#startAgent').click({el: element}, function(e) {
             e.preventDefault();
             var agentId = $('#localAgentsSelectionId').html()
+            var connectionId = $('#runConnectionId').val()
             if (self.validateId(agentId)){
-                self.model.startAgent(agentId)
+                self.model.startAgent(agentId, connectionId)
             }
             else{
                 alert('Error: Attempting to start agent with ID: ' + agentId);
@@ -681,5 +684,6 @@ class Controller{
 
 }
 
-
-c = new Controller(new Model(), new View())
+$( document ).ready(function() {
+    c = new Controller(new Model(), new View())
+});

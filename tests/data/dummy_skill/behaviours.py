@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the behaviours for the 'echo' skill."""
+"""This module contains the behaviours for the 'dummy' skill."""
 
 from aea.skills.base import Behaviour
 

@@ -26,7 +26,7 @@ from typing import Optional, TYPE_CHECKING
 
 from aea.configurations.base import ConnectionConfig
 if TYPE_CHECKING:
-    from aea.mail.base import Envelope
+    from aea.mail.base import Envelope  # pragma: no cover
 
 
 class Channel(ABC):
@@ -57,6 +57,31 @@ class Channel(ABC):
         :return: None.
         """
 
+    @abstractmethod
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+
+
+class ConnectionStatus(object):
+    """The connection status class."""
+
+    def __init__(self):
+        """Initialize the connection status."""
+        self._is_connected = False
+
+    @property
+    def is_connected(self) -> bool:
+        """Check if the connection is established."""
+        return self._is_connected
+
+    @is_connected.setter
+    def is_connected(self, is_connected: bool) -> None:
+        self._is_connected = is_connected
+
 
 class Connection(ABC):
     """Abstract definition of a connection."""
@@ -67,6 +92,12 @@ class Connection(ABC):
         """Initialize the connection."""
         self.in_queue = Queue()
         self.out_queue = Queue()
+        self._connection_status = ConnectionStatus()
+
+    @property
+    def connection_status(self) -> ConnectionStatus:
+        """Get the connection status."""
+        return self._connection_status
 
     @abstractmethod
     def connect(self):
@@ -75,11 +106,6 @@ class Connection(ABC):
     @abstractmethod
     def disconnect(self):
         """Tear down the connection."""
-
-    @property
-    @abstractmethod
-    def is_established(self) -> bool:
-        """Check if the connection is established."""
 
     @abstractmethod
     def send(self, envelope: 'Envelope'):

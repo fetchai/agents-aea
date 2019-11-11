@@ -3,21 +3,25 @@ A framework for autonomous economic agent (AEA) development
 
 ## Get started
 
-First, install the package from [pypi](https://pypi.org/project/aea/):
+- Create and launch a virtual environment with Python 3.7:
 
-`
-pip install aea
-`
+      pipenv --python 3.7 && pipenv shell
 
-Then, build your agent as described in the [AEA CLI readme](../master/aea/cli/README.md) or in the [examples](../master/examples).
+- Install the package from [pypi](https://pypi.org/project/aea/):
 
-## Install from Source
 
-## Cloning
+      pip install aea[all]
+
+
+- Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
+
+## Alternatively: Install from Source
+
+### Cloning
 
 This repository contains submodules. Clone with recursive strategy:
 
-	  git clone git@github.com:fetchai/agents-aea.git --recursive && cd agents-aea
+	  git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
 
 ### Dependencies
 
@@ -39,16 +43,12 @@ Or, you can have more control on the installed dependencies by leveraging the se
 
       pip install .[cli]
 
-## Contribute
+### Contribute
 
 The following dependency is only relevant if you intend to contribute to the repository:
 - the project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
 The following steps are only relevant if you intend to contribute to the repository. They are not required for agent development.
-
-- Clear cache
-
-      pipenv --clear
 
 - Install development dependencies:
 
@@ -76,5 +76,6 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 - Docs:
 
-	* `mkdocs serve` - Start the live-reloading docs server.
-	* `mkdocs build --clean` - Build the documentation site.
+	* `mkdocs serve` - Start the live-reloading docs server on localhost.
+
+To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
