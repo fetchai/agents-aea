@@ -29,7 +29,7 @@ from aea.cli.registry.utils import format_items, format_skills
 
 
 @click.group()
-@click.option('--registry', is_flag=True)
+@click.option('--registry', is_flag=True, help="For Registry search.")
 @pass_ctx
 def search(ctx: Context, registry):
     """Search for components in the registry.
