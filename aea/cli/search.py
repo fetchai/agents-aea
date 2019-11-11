@@ -25,10 +25,11 @@ import os
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH
+from aea.cli.registry.utils import format_items, format_skills
 
 
 @click.group()
-@click.option("--registry", type=str, default=None, help="Path/URL to the registry.")
+@click.option('--registry', is_flag=True)
 @pass_ctx
 def search(ctx: Context, registry):
     """Search for components in the registry.
@@ -37,15 +38,31 @@ def search(ctx: Context, registry):
 
         aea search --registry packages/ skills
     """
-    if registry is None:
+    if registry:
+        ctx.set_config("is_registry", True)
+    else:
         registry = os.path.join(AEA_DIR, DEFAULT_REGISTRY_PATH)
-    ctx.set_config("registry", registry)
+        ctx.set_config("registry", registry)
 
 
 @search.command()
+@click.option('--query', prompt='Connection search query',
+              help='Query string to search Connections by name.')
 @pass_ctx
 def connections(ctx: Context):
-    """List all the connections available in the registry."""
+    """Search for Connections."""
+    if ctx.config.get("is_registry"):
+        click.echo('Searching for "{}"...'.format(query))
+        resp = request_api(
+            'GET', '/connections', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No connections found.')
+        else:
+            click.echo('Connections found:\n')
+            click.echo(format_items(resp))
+            return
+
     registry = cast(str, ctx.config.get("registry"))
     result = set()  # type: Set[str]
     for r in Path(AEA_DIR).glob("connections/[!_]*[!.py]/"):
@@ -65,9 +82,24 @@ def connections(ctx: Context):
 
 
 @search.command()
+@click.option('--query', prompt='Protocol search query',
+              help='Query string to search Protocols by name.')
 @pass_ctx
+@click.option('--query', prompt='Protocol search query',
 def protocols(ctx: Context):
-    """List all the protocols available in the registry."""
+    """Search for Protocols."""
+    if ctx.config.get("is_registry"):
+        click.echo('Searching for "{}"...'.format(query))
+        resp = request_api(
+            'GET', '/protocols', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No protocols found.')
+        else:
+            click.echo('Protocols found:\n')
+            click.echo(format_items(resp))
+            return
+
     registry = cast(str, ctx.config.get("registry"))
     result = set()  # type: Set[str]
     for r in Path(AEA_DIR).glob("protocols/[!_]*[!.py]"):
@@ -87,9 +119,23 @@ def protocols(ctx: Context):
 
 
 @search.command()
+@click.option('--query', prompt='Skill search query',
+              help='Query string to search Skills by name.')
 @pass_ctx
 def skills(ctx: Context):
-    """List all the skills available in the registry."""
+    """Search for Skills."""
+    if ctx.config.get("is_registry"):
+        click.echo('Searching for "{}"...'.format(query))
+        resp = request_api(
+            'GET', '/skills', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No skills found.')
+        else:
+            click.echo('Skills found:\n')
+            click.echo(format_skills(resp))
+            return
+
     registry = cast(str, ctx.config.get("registry"))
     result = set()  # type: Set[str]
     for r in Path(AEA_DIR).glob("skills/[!_]*[!.py]"):
