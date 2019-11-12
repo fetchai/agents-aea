@@ -52,7 +52,18 @@ class TestListProtocols:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = "default\t[The default protocol allows for any bytes message.]\n" + "fipa\t[fipa protocol description [Fill in]]\n"
+        compare_text = """------------------------------
+Name: default
+Description: None
+Version: None
+------------------------------
+------------------------------
+Name: fipa
+Description: None
+Version: None
+------------------------------
+
+"""
         assert self.result.output == compare_text
 
     @classmethod
@@ -83,7 +94,13 @@ class TestListConnections:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = "local\t[local connection description [Fill in]]\n"
+        compare_text = """------------------------------
+Name: local
+Description: local connection description [Fill in]
+Version: 0.1.0
+------------------------------
+
+"""
         assert self.result.output == compare_text
 
     @classmethod
@@ -114,7 +131,18 @@ class TestListSkills:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = "dummy\t[a dummy_skill for testing purposes.]\n" + "error\t[The error skill implements basic error handling required by all AEAs.]\n"
+        compare_text = """------------------------------
+Name: dummy
+Description: None
+Version: None
+------------------------------
+------------------------------
+Name: error
+Description: None
+Version: None
+------------------------------
+
+"""
         assert self.result.output == compare_text
 
     @classmethod
