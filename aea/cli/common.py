@@ -141,6 +141,22 @@ def _load_env_file(env_file: str):
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
+def format_items(items):
+    list_str = ''
+    for item in items:
+        list_str += (
+            '{line}\n'
+            'Name: {name}\n'
+            'Description: {description}\n'
+            'Version: {version}\n'
+            '{line}\n'.format(
+                name=item['name'],
+                description=item['description'],
+                version=item['version'],
+                line='-' * 30
+            ))
+    return list_str
+
 
 def retrieve_description(loader: ConfigLoader, config_filepath: str):
     """Return description of a protocol, skill or connection."""
@@ -149,6 +165,15 @@ def retrieve_description(loader: ConfigLoader, config_filepath: str):
         return config.description
     except ValidationError as e:
         return None
+
+def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
+    """Return description of a protocol, skill or connection."""
+    try:
+        config = loader.load(open(str(config_filepath)))
+        assert config.name == name
+        return {"name": config.name, "description": config.description, "version": config.version}
+    except ValidationError as e:
+        return {"name": name, "description": None, "version": None}
 
 
 class AEAConfigException(Exception):

@@ -24,7 +24,7 @@ import click
 import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_description
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, format_items, ConfigLoader
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE
 
@@ -45,33 +45,34 @@ def search(ctx: Context, registry):
     ctx.set_config("registry", str(registry))
 
 
+def _is_invalid_item(name, dir_path, config_path):
+    """returns true if this protocol, connection or skill should not be returned in the list"""
+    return ".py" in name or "__" in name or name == "scaffold" or os.path.isfile(dir_path) or not os.path.isfile(config_path)
+
+
+def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_name: str, config_filename: str, results: []):
+    for r in Path(root_path).glob(sub_dir_name + "/*/"):
+        dir_path = os.path.join(root_path, sub_dir_name, r.name)
+        config_path = os.path.join(root_path, sub_dir_name, r.name, config_filename)
+
+        if _is_invalid_item(r.name, dir_path, config_path):
+            continue
+
+        details = retrieve_details(r.name, loader, config_path)
+        results.append(details)
+
+
 @search.command()
 @pass_ctx
 def connections(ctx: Context):
     """List all the connections available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[(str, str)]
-    for r in Path(AEA_DIR).glob("connections/*/"):
-        if ".py" in r.name or "__" in r.name:
-            continue
-        configuration_path = os.path.join(AEA_DIR, "connections", r.name, DEFAULT_CONNECTION_CONFIG_FILE)
-        result.add((r.name, retrieve_description(ctx.connection_loader, configuration_path)))
+    result = []
+    _get_details_from_dir(ctx.connection_loader, AEA_DIR, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.connection_loader, registry, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
 
-    for r in Path(registry).glob("connections/*/"):
-        if ".py" in r.name or "__" in r.name:
-            continue
-        try:
-            configuration_path = os.path.join(registry, "connections", r.name, DEFAULT_CONNECTION_CONFIG_FILE)
-            result.add((r.name, retrieve_description(ctx.connection_loader, configuration_path)))
-
-        except Exception:  # pragma: no cover
-            pass
-
-    if "scaffold" in result: result.remove("scaffold")
-    if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available connections:")
-    for conn in sorted(result):
-        print("{}\t[{}]".format(conn[0], conn[1]))
+    print(format_items(sorted(result, key=lambda k: k['name'])))
 
 
 @search.command()
@@ -79,27 +80,12 @@ def connections(ctx: Context):
 def protocols(ctx: Context):
     """List all the protocols available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[(str, str)]
-    for r in Path(AEA_DIR).glob("protocols/*"):
-        if ".py" in r.name or "__" in r.name:
-            continue
-        configuration_path = os.path.join(AEA_DIR, "protocols", r.name, DEFAULT_PROTOCOL_CONFIG_FILE)
-        result.add((r.name, retrieve_description(ctx.protocol_loader, configuration_path)))
+    result = []
+    _get_details_from_dir(ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.protocol_loader, registry, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
 
-    for r in Path(registry).glob("protocols/*/"):
-        if ".py" in r.name or "__" in r.name:
-            continue
-        try:
-            configuration_path = os.path.join(registry, "protocols", r.name, DEFAULT_PROTOCOL_CONFIG_FILE)
-            result.add((r.name, retrieve_description(ctx.protocol_loader, configuration_path)))
-        except Exception:  # pragma: no cover
-            pass
-
-    if "scaffold" in result: result.remove("scaffold")
-    if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available protocols:")
-    for protocol in sorted(result):
-        print("{}\t[{}]".format(protocol[0], protocol[1]))
+    print(format_items(sorted(result, key=lambda k: k['name'])))
 
 
 @search.command()
@@ -107,24 +93,9 @@ def protocols(ctx: Context):
 def skills(ctx: Context):
     """List all the skills available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[(str, str)]
-    for r in Path(AEA_DIR).glob("skills/*/"):
-        if ".py" in r.name or "__" in r.name:
-            continue
-        configuration_path = os.path.join(AEA_DIR, "skills", r.name, DEFAULT_SKILL_CONFIG_FILE)
-        result.add((r.name, retrieve_description(ctx.skill_loader, configuration_path)))
+    result = []
+    _get_details_from_dir(ctx.skill_loader, AEA_DIR, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.skill_loader, registry, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
 
-    for r in Path(registry).glob("skills/*/"):
-        if ".py" in r.name or "__" in r.name:
-            continue
-        try:
-            configuration_path = os.path.join(registry, "skills", r.name, DEFAULT_SKILL_CONFIG_FILE)
-            result.add((r.name, retrieve_description(ctx.skill_loader, configuration_path)))
-        except Exception:  # pragma: no cover
-            pass
-
-    if "scaffold" in result: result.remove("scaffold")
-    if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available skills:")
-    for skill in sorted(result):
-        print("{}\t[{}]".format(skill[0], skill[1]))
+    print(format_items(sorted(result, key=lambda k: k['name'])))
