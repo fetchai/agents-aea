@@ -18,10 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea list' subcommand."""
+import os
 
 import click
 
-from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config
+
+from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config, retrieve_description
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
+    DEFAULT_PROTOCOL_CONFIG_FILE
 
 
 @click.group()
@@ -36,7 +40,8 @@ def list(ctx: Context):
 def connections(ctx: Context):
     """List all the installed connections."""
     for connection_id in sorted(ctx.agent_config.connections):
-        print(connection_id)
+        connection_configuration_filepath = os.path.join("connections", connection_id, DEFAULT_CONNECTION_CONFIG_FILE)
+        print("{}\t[{}]".format(connection_id, retrieve_description(ctx.connection_loader, connection_configuration_filepath)))
 
 
 @list.command()
@@ -44,7 +49,8 @@ def connections(ctx: Context):
 def protocols(ctx: Context):
     """List all the installed protocols."""
     for protocol_id in sorted(ctx.agent_config.protocols):
-        print(protocol_id)
+        protocol_configuration_filepath = os.path.join("protocols", protocol_id, DEFAULT_PROTOCOL_CONFIG_FILE)
+        print("{}\t[{}]".format(protocol_id, retrieve_description(ctx.protocol_loader, protocol_configuration_filepath)))
 
 
 @list.command()
@@ -52,4 +58,5 @@ def protocols(ctx: Context):
 def skills(ctx: Context):
     """List all the installed skills."""
     for skill_id in sorted(ctx.agent_config.skills):
-        print(skill_id)
+        skill_configuration_filepath = os.path.join("skills", skill_id, DEFAULT_SKILL_CONFIG_FILE)
+        print("{}\t[{}]".format(skill_id, retrieve_description(ctx.skill_loader, skill_configuration_filepath)))

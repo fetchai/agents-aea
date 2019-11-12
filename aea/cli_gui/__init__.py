@@ -134,7 +134,7 @@ def delete_agent(agent_id):
     if _call_aea(["aea", "delete", agent_id], flask.app.agents_dir) == 0:
         return 'Agent {} deleted'.format(agent_id), 200   # 200 (OK)
     else:
-        return {"detail": "Failed to delete Agent {} - it ay not exist".format(agent_id)}, 400   # 400 Bad request
+        return {"detail": "Failed to delete Agent {} - it may not exist".format(agent_id)}, 400   # 400 Bad request
 
 
 def add_item(agent_id, item_type, item_id):
@@ -203,13 +203,16 @@ def _call_aea_async(param_list, dir):
     return ret
 
 
-def start_oef_node(dummy):
+def start_oef_node():
     """Start an OEF node running."""
     _kill_running_oef_nodes()
+    temp_dir = os.getcwd()
+
+    print("cwd = {}".format(temp_dir))
 
     param_list = [
         "python",
-        "scripts/oef/launch.py",
+        "./scripts/oef/launch.py",
         "--disable_stdin",
         "--name",
         oef_node_name,
@@ -228,7 +231,7 @@ def start_oef_node(dummy):
         error_read_thread = threading.Thread(target=_read_error, args=(flask.app.oef_process, flask.app.oef_error))
         error_read_thread.start()
 
-        return "All fine {}".format(dummy), 200   # 200 (OK)
+        return "OEF Node started", 200   # 200 (OK)
     else:
         return {"detail": "Failed to start OEF Node"}, 400  # 400 Bad request
 

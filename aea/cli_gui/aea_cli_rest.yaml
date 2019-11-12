@@ -228,13 +228,6 @@ paths:
       tags:
       - oef
       summary: Start an OEF node that our agents can communicate with
-      parameters:
-        - name: dummy
-          in: body
-          description: Seeing if this makes it work
-          schema:
-            type: string
-          required: True
       responses:
         201:
           description: Start the OEF Nodoe

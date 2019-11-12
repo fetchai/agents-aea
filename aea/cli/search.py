@@ -24,8 +24,9 @@ import click
 import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger
-
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_description
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
+    DEFAULT_PROTOCOL_CONFIG_FILE
 
 @click.group()
 @click.option("--registry", type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True, resolve_path=True),
@@ -39,7 +40,7 @@ def search(ctx: Context, registry):
         aea search --registry packages/ skills
     """
     if registry is None:
-        registry = os.path.join(AEA_DIR, DEFAULT_REGISTRY_PATH)
+        registry = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
     logger.debug("Using registry {}".format(registry))
     ctx.set_config("registry", str(registry))
 
@@ -49,21 +50,28 @@ def search(ctx: Context, registry):
 def connections(ctx: Context):
     """List all the connections available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[str]
-    for r in Path(AEA_DIR).glob("connections/[!_]*[!.py]/"):
-        result.add(r.name)
+    result = set()  # type: Set[(str, str)]
+    for r in Path(AEA_DIR).glob("connections/*/"):
+        if ".py" in r.name or "__" in r.name:
+            continue
+        configuration_path = os.path.join(AEA_DIR, "connections", r.name, DEFAULT_CONNECTION_CONFIG_FILE)
+        result.add((r.name, retrieve_description(ctx.connection_loader, configuration_path)))
 
-    try:
-        for r in Path(registry).glob("connections/[!_]*[!.py]/"):
-            result.add(r.name)
-    except Exception:  # pragma: no cover
-        pass
+    for r in Path(registry).glob("connections/*/"):
+        if ".py" in r.name or "__" in r.name:
+            continue
+        try:
+            configuration_path = os.path.join(registry, "connections", r.name, DEFAULT_CONNECTION_CONFIG_FILE)
+            result.add((r.name, retrieve_description(ctx.connection_loader, configuration_path)))
+
+        except Exception:  # pragma: no cover
+            pass
 
     if "scaffold" in result: result.remove("scaffold")
     if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available connections:")
     for conn in sorted(result):
-        print("- " + conn)
+        print("{}\t[{}]".format(conn[0], conn[1]))
 
 
 @search.command()
@@ -71,21 +79,27 @@ def connections(ctx: Context):
 def protocols(ctx: Context):
     """List all the protocols available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[str]
-    for r in Path(AEA_DIR).glob("protocols/[!_]*[!.py]"):
-        result.add(r.name)
+    result = set()  # type: Set[(str, str)]
+    for r in Path(AEA_DIR).glob("protocols/*"):
+        if ".py" in r.name or "__" in r.name:
+            continue
+        configuration_path = os.path.join(AEA_DIR, "protocols", r.name, DEFAULT_PROTOCOL_CONFIG_FILE)
+        result.add((r.name, retrieve_description(ctx.protocol_loader, configuration_path)))
 
-    try:
-        for r in Path(registry).glob("protocols/[!_]*[!.py]/"):
-            result.add(r.name)
-    except Exception:  # pragma: no cover
-        pass
+    for r in Path(registry).glob("protocols/*/"):
+        if ".py" in r.name or "__" in r.name:
+            continue
+        try:
+            configuration_path = os.path.join(registry, "protocols", r.name, DEFAULT_PROTOCOL_CONFIG_FILE)
+            result.add((r.name, retrieve_description(ctx.protocol_loader, configuration_path)))
+        except Exception:  # pragma: no cover
+            pass
 
     if "scaffold" in result: result.remove("scaffold")
     if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available protocols:")
     for protocol in sorted(result):
-        print("- " + protocol)
+        print("{}\t[{}]".format(protocol[0], protocol[1]))
 
 
 @search.command()
@@ -93,18 +107,24 @@ def protocols(ctx: Context):
 def skills(ctx: Context):
     """List all the skills available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[str]
-    for r in Path(AEA_DIR).glob("skills/[!_]*[!.py]"):
-        result.add(r.name)
+    result = set()  # type: Set[(str, str)]
+    for r in Path(AEA_DIR).glob("skills/*/"):
+        if ".py" in r.name or "__" in r.name:
+            continue
+        configuration_path = os.path.join(AEA_DIR, "skills", r.name, DEFAULT_SKILL_CONFIG_FILE)
+        result.add((r.name, retrieve_description(ctx.skill_loader, configuration_path)))
 
-    try:
-        for r in Path(registry).glob("skills/[!_]*[!.py]/"):
-            result.add(r.name)
-    except Exception:  # pragma: no cover
-        pass
+    for r in Path(registry).glob("skills/*/"):
+        if ".py" in r.name or "__" in r.name:
+            continue
+        try:
+            configuration_path = os.path.join(registry, "skills", r.name, DEFAULT_SKILL_CONFIG_FILE)
+            result.add((r.name, retrieve_description(ctx.skill_loader, configuration_path)))
+        except Exception:  # pragma: no cover
+            pass
 
     if "scaffold" in result: result.remove("scaffold")
     if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available skills:")
     for skill in sorted(result):
-        print("- " + skill)
+        print("{}\t[{}]".format(skill[0], skill[1]))

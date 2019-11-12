@@ -45,19 +45,29 @@ class TestSearchProtocols:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
+    def _generated_expected_output(self):
+        expected_output = "Available protocols:\n"
+        expected_output += "default\t[The default protocol allows for any bytes message.]\n"
+        expected_output += "fipa\t[The fipa protocol implements the FIPA ACL.]\n"
+        expected_output += "gym\t[The gym protocol implements the messages an agent needs to engage with a gym connection.]\n"
+        expected_output += "oef\t[The oef protocol implements the OEF specific messages.]\n"
+        expected_output += "scaffold\t[The scaffold protocol scaffolds a protocol to be implemented by the developer.]\n"
+        expected_output += "tac\t[The tac protocol implements the messages an AEA needs to participate in the TAC.]\n"
+        return expected_output
+
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"])
-        expected_output = "Available protocols:\n- " + "\n- ".join(["default", "fipa", "gym", "oef", "tac"]) + "\n"
-        assert self.result.output == expected_output
+
+        assert self.result.output == self._generated_expected_output()
 
     def test_correct_output_custom_registry(self):
         """Test that the command has printed the correct output when using a custom registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "protocols"])
-        expected_output = "Available protocols:\n- " + "\n- ".join(["default", "fipa", "gym", "oef", "tac"]) + "\n"
-        assert self.result.output == expected_output
+        test = self._generated_expected_output()
+        assert self.result.output == test
 
     @classmethod
     def teardown_class(cls):
@@ -78,19 +88,29 @@ class TestSearchConnections:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
+
+    def _generated_expected_output(self):
+        expected_output = "Available connections:\n"
+        expected_output += "gym\t[The gym connection wraps an OpenAI gym.]\n"
+        expected_output += "local\t[The local connection provides a stub for an OEF node.]\n"
+        expected_output += "oef\t[The oef connection provides a wrapper around the OEF sdk.]\n"
+        expected_output += "p2p\t[The p2p connection provides a connection with the fetch.ai mail provider.]\n"
+        expected_output += "scaffold\t[The scaffold connection provides a scaffold for a connection to be implemented by the developer.]\n"
+        expected_output += "stub\t[The stub connection implements a connection stub which reads/writes messages from/to file.]\n"
+        expected_output += "tcp\t[None]\n"
+        return expected_output
+
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "connections"])
-        expected_output = "Available connections:\n- " + "\n- ".join(["gym", "local", "oef", "stub"]) + "\n"
-        assert self.result.output == expected_output
+        assert self.result.output == self._generated_expected_output()
 
     def test_correct_output_custom_registry(self):
         """Test that the command has printed the correct output when using a custom registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "connections"])
-        expected_output = "Available connections:\n- " + "\n- ".join(["gym", "local", "oef", "stub"]) + "\n"
-        assert self.result.output == expected_output
+        assert self.result.output == self._generated_expected_output()
 
     @classmethod
     def teardown_class(cls):
@@ -111,43 +131,37 @@ class TestSearchSkills:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
+    def _generated_expected_output(self):
+        expected_output = "Available skills:\n"
+        expected_output += "carpark_client\t[None]\n"
+        expected_output += "carpark_detection\t[None]\n"
+        expected_output += "echo\t[The echo skill implements simple echo functionality.]\n"
+        expected_output += "error\t[The error skill implements basic error handling required by all AEAs.]\n"
+        expected_output += "fipa_negotiation\t[The fipa skill implements the logic for an AEA to do fipa negotiation.]\n"
+        expected_output += "gym\t[The gym skill wraps an RL agent.]\n"
+        expected_output += "scaffold\t[The scaffold skill is a scaffold for your own skill implementation.]\n"
+        expected_output += "tac\t[The tac skill implements the logic for an AEA to participate in the TAC.]\n"
+        expected_output += "weather_client\t[None]\n"
+        expected_output += "weather_client_ledger\t[None]\n"
+        expected_output += "weather_station\t[None]\n"
+        expected_output += "weather_station_ledger\t[None]\n"
+
+        return expected_output
+
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"])
-        expected_output = """Available skills:
-- carpark_client
-- carpark_detection
-- echo
-- error
-- fipa_negotiation
-- gym
-- tac
-- weather_client
-- weather_client_ledger
-- weather_station
-- weather_station_ledger
-"""
-        assert self.result.output == expected_output
+
+        test = self._generated_expected_output()
+        assert self.result.output == self._generated_expected_output()
 
     def test_correct_output_custom_registry(self):
         """Test that the command has printed the correct output when using a custom registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "skills"])
-        expected_output = """Available skills:
-- carpark_client
-- carpark_detection
-- echo
-- error
-- fipa_negotiation
-- gym
-- tac
-- weather_client
-- weather_client_ledger
-- weather_station
-- weather_station_ledger
-"""
-        assert self.result.output == expected_output
+
+        assert self.result.output == self._generated_expected_output()
 
     @classmethod
     def teardown_class(cls):

@@ -29,6 +29,7 @@ from typing import Dict, List, cast
 
 import click
 import jsonschema  # type: ignore
+from jsonschema import ValidationError
 from dotenv import load_dotenv
 
 from aea.cli.loggers import default_logging_config
@@ -138,6 +139,16 @@ def _load_env_file(env_file: str):
     :return: None.
     """
     load_dotenv(dotenv_path=Path(env_file), override=False)
+
+
+
+def retrieve_description(loader: ConfigLoader, config_filepath: str):
+    """Return description of a protocol, skill or connection."""
+    try:
+        config = loader.load(open(str(config_filepath)))
+        return config.description
+    except ValidationError as e:
+        return None
 
 
 class AEAConfigException(Exception):
