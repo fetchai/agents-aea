@@ -16,5 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Settings for operating Registry with CLI."""
+
 
 REGISTRY_API_URL = 'http://localhost:8000'

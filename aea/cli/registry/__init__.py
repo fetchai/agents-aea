@@ -16,3 +16,5 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
+"""This module contains tools for operating Registry with CLI."""

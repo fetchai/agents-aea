@@ -16,14 +16,17 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Utils used for operating Registry with CLI."""
+
 
 import click
 import requests
 
-from settings import REGISTRY_API_URL
+from aea.cli.registry.settings import REGISTRY_API_URL
 
 
 def request_api(method, path, params=None):
+    """Request Registry API."""
     resp = requests.request(
         method=method,
         url='{}{}'.format(REGISTRY_API_URL, path),
@@ -40,6 +43,7 @@ def request_api(method, path, params=None):
 
 
 def format_items(items):
+    """Format list of items (protocols/connections) to a string for CLI output."""
     list_str = ''
     for item in items:
         list_str += (
@@ -49,12 +53,13 @@ def format_items(items):
             '{line}\n'.format(
                 name=item['name'],
                 description=item['description'],
-                line='-'*30
-        ))
+                line='-' * 30
+            ))
     return list_str
 
 
 def format_skills(items):
+    """Format list of skills to a string for CLI output."""
     list_str = ''
     for item in items:
         list_str += (
@@ -68,6 +73,6 @@ def format_skills(items):
                 protocols=''.join(
                     name + ' | ' for name in item['protocol_names']
                 ),
-                line='-'*30
-        ))
+                line='-' * 30
+            ))
     return list_str

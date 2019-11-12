@@ -25,7 +25,7 @@ import os
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger
-from aea.cli.registry.utils import format_items, format_skills
+from aea.cli.registry.utils import format_items, format_skills, request_api
 
 
 @click.group()
@@ -50,7 +50,7 @@ def search(ctx: Context, registry):
 @click.option('--query', prompt='Connection search query',
               help='Query string to search Connections by name.')
 @pass_ctx
-def connections(ctx: Context):
+def connections(ctx: Context, query):
     """Search for Connections."""
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
@@ -86,8 +86,7 @@ def connections(ctx: Context):
 @click.option('--query', prompt='Protocol search query',
               help='Query string to search Protocols by name.')
 @pass_ctx
-@click.option('--query', prompt='Protocol search query',
-def protocols(ctx: Context):
+def protocols(ctx: Context, query):
     """Search for Protocols."""
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
@@ -123,7 +122,7 @@ def protocols(ctx: Context):
 @click.option('--query', prompt='Skill search query',
               help='Query string to search Skills by name.')
 @pass_ctx
-def skills(ctx: Context):
+def skills(ctx: Context, query):
     """Search for Skills."""
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
