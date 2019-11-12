@@ -48,7 +48,11 @@ class Parameters(SharedClass):
         self._whitelist = set(kwargs.pop('whitelist', []))  # type: Set[str]
         self._version_id = kwargs.pop('version_id', 'v1')  # type: str
         super().__init__(**kwargs)
-        logger.info("TAC registation start time: {}, and start time: {}, and end time: {}".format(self.registration_start_time, self.start_time, self.end_time))
+        now = datetime.datetime.now()
+        if now > self.registration_start_time:
+            logger.warning("[{}]: TAC registration start time {} is in the past!".format(self.context.agent_name, self.registration_start_time))
+        else:
+            logger.info("[{}]: TAC registation start time: {}, and start time: {}, and end time: {}".format(self.context.agent_name, self.registration_start_time, self.start_time, self.end_time))
 
     @property
     def min_nb_agents(self) -> int:
@@ -88,7 +92,7 @@ class Parameters(SharedClass):
     @property
     def registration_start_time(self) -> datetime.datetime:
         """TAC registration start time."""
-        return self._start_time - datetime.timedelta(0, self._registration_timeout)
+        return self._start_time - datetime.timedelta(seconds=self._registration_timeout)
 
     @property
     def start_time(self) -> datetime.datetime:
@@ -98,7 +102,7 @@ class Parameters(SharedClass):
     @property
     def end_time(self) -> datetime.datetime:
         """TAC end time."""
-        return self._start_time + datetime.timedelta(0, self._competition_timeout)
+        return self._start_time + datetime.timedelta(seconds=self._competition_timeout)
 
     @property
     def inactivity_timeout(self):

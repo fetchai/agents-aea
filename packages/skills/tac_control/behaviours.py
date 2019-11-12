@@ -21,7 +21,7 @@
 
 import datetime
 import logging
-from typing import cast, TYPE_CHECKING
+from typing import cast, Optional, TYPE_CHECKING
 
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, DataModel, Attribute
@@ -49,13 +49,20 @@ logger = logging.getLogger("aea.tac_control_skill")
 class TACBehaviour(Behaviour):
     """This class implements the TAC control behaviour."""
 
+    def __init__(self, **kwargs):
+        """Instantiate the behaviour."""
+        super().__init__(**kwargs)
+        self._oef_msg_id = 0
+        self._registered_desc = None  # type: Optional[Description]
+
     def setup(self) -> None:
         """
         Implement the setup.
 
         :return: None
         """
-        pass
+        if self._registered_desc is None:
+            self._register_tac()
 
     def act(self) -> None:
         """
@@ -66,19 +73,22 @@ class TACBehaviour(Behaviour):
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         now = datetime.datetime.now()
-        if game.phase == Phase.PRE_GAME and parameters.registration_start_time > now:
+        if game.phase.value == Phase.PRE_GAME.value and now > parameters.registration_start_time and now < parameters.start_time:
             game.phase = Phase.GAME_REGISTRATION
-            self._register_tac()
-        elif game.phase == Phase.GAME_REGISTRATION and parameters.start_time > now:
+            logger.info("[{}]: TAC open for registration until: {}".format(self.context.agent_name, parameters.start_time))
+        elif game.phase.value == Phase.GAME_REGISTRATION.value and now > parameters.start_time and now < parameters.end_time:
             if game.registration.nb_agents < parameters.min_nb_agents:
                 game.phase = Phase.POST_GAME
                 self._cancel_tac()
+                self._unregister_tac()
             else:
-                game.phase = Phase.GAME_SETUP
+                game.phase.value = Phase.GAME_SETUP
                 self._start_tac()
-        elif game.phase == Phase.GAME and parameters.end_time > now:
+                self._unregister_tac()
+        elif game.phase == Phase.GAME and now > parameters.end_time:
             game.phase = Phase.POST_GAME
             self._cancel_tac()
+            self._unregister_tac()
 
     def teardown(self) -> None:
         """
@@ -86,7 +96,8 @@ class TACBehaviour(Behaviour):
 
         :return: None
         """
-        pass
+        if self._registered_desc is not None:
+            self._unregister_tac()
 
     def _register_tac(self) -> None:
         """
@@ -94,17 +105,31 @@ class TACBehaviour(Behaviour):
 
         :return: None.
         """
+        self._oef_msg_id += 1
         desc = Description({"version": self.context.parameters.version_id}, data_model=CONTROLLER_DATAMODEL)
-        logger.debug("[{}]: Registering with data model".format(self.context.agent_name))
-        msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
+        logger.info("[{}]: Registering TAC data model".format(self.context.agent_name))
+        msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=self._oef_msg_id, service_description=desc, service_id="")
         self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(msg))
+        self._registered_desc = desc
+
+    def _unregister_tac(self) -> None:
+        """
+        Unregister from the OEF as a TAC controller agent.
+
+        :return: None.
+        """
+        self._oef_msg_id += 1
+        logger.info("[{}]: Unregistering TAC data model".format(self.context.agent_name))
+        msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=self._oef_msg_id, service_description=self._registered_desc, service_id="")
+        self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(msg))
+        self._registered_desc = None
 
     def _start_tac(self):
         """Create a game and send the game configuration to every registered agent."""
         game = cast(Game, self.context.game)
         game.create()
-        logger.debug("[{}]: Started competition:\n{}".format(self.context.agent_name, game.get_holdings_summary()))
-        logger.debug("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.get_equilibrium_summary()))
+        logger.info("[{}]: Started competition:\n{}".format(self.context.agent_name, game.get_holdings_summary()))
+        logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.get_equilibrium_summary()))
         for agent_public_key in game.configuration.agent_pbks:
             agent_state = game.current_agent_states[agent_public_key]
             msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
@@ -116,8 +141,7 @@ class TACBehaviour(Behaviour):
                              tx_fee=game.configuration.tx_fee,
                              agent_pbk_to_name=game.configuration.agent_pbk_to_name,
                              good_pbk_to_name=game.configuration.good_pbk_to_name,
-                             version_id=game.configuration.version_id
-                             )
+                             version_id=game.configuration.version_id)
             logger.debug("[{}]: sending game data to '{}': {}"
                          .format(self.context.agent_name, agent_public_key, str(msg)))
             self.mailbox.outbox.put_message(to=agent_public_key, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(msg))
@@ -125,7 +149,7 @@ class TACBehaviour(Behaviour):
     def _cancel_tac(self):
         """Notify agents that the TAC is cancelled."""
         game = cast(Game, self.context.game)
-        logger.debug("[{}]: Notifying agents that TAC is cancelled.".format(self.context.agent_name))
+        logger.info("[{}]: Notifying agents that TAC is cancelled.".format(self.context.agent_name))
         for agent_pbk in game.registration.agent_pbk_to_name.keys():
             tac_msg = TACMessage(tac_type=TACMessage.Type.CANCELLED)
             self.mailbox.outbox.put_message(to=agent_pbk, sender=self.crypto.public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))

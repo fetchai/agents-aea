@@ -205,6 +205,14 @@ class TACHandler(Handler):
         tac_bytes = TACSerializer().encode(tac_msg)
         self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
 
 class OEFRegistrationHandler(Handler):
     """Handle the message exchange with the OEF."""

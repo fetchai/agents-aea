@@ -7,25 +7,22 @@ description: "The tac participation skill implements the logic for an AEA to par
 behaviours:
   - behaviour:
       class_name: TACBehaviour
-      args:
-        foo: bar
+      args: {}
 handlers:
   - handler:
       class_name: OEFHandler
-      args:
-        foo: bar
+      args: {}
   - handler:
       class_name: TACHandler
-      args:
-        foo: bar
+      args: {}
 tasks: []
 shared_classes:
   - shared_class:
       class_name: Search
       args:
-        foo: bar
+        search_interval: 5
   - shared_class:
       class_name: Game
       args:
-        expected_version_id: 1
+        expected_version_id: v1
 protocols: ['oef', 'tac']

@@ -4,8 +4,17 @@ version: 0.1.0
 license: Apache 2.0
 description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
 url: ""
-behaviours: []
-handlers: []
+behaviours:
+  - behaviour:
+      class_name: TACBehaviour
+      args: {}
+handlers:
+  - handler:
+      class_name: TACHandler
+      args: {}
+  - handler:
+      class_name: OEFRegistrationHandler
+      args: {}
 tasks: []
 shared_classes:
   - shared_class:
@@ -18,7 +27,7 @@ shared_classes:
         base_good_endowment: 2
         lower_bound_factor: 1
         upper_bound_factor: 1
-        start_time: 10 11 2019  11:07
+        start_time: 12 11 2019  15:01
         registration_timeout: 60
         competition_timeout: 180
         inactivity_timeout: 60

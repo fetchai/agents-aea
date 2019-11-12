@@ -29,12 +29,12 @@ from aea.skills.base import Handler
 if TYPE_CHECKING:
     from packages.protocols.tac.message import TACMessage
     from packages.protocols.tac.serialization import TACSerializer
-    from packages.skills.tac_participation.game import Game, GamePhase
+    from packages.skills.tac_participation.game import Game, Phase
     from packages.skills.tac_participation.search import Search
 else:
     from tac_protocol.message import TACMessage
     from tac_protocol.serialization import TACSerializer
-    from tac_participation_skill.game import Game, GamePhase
+    from tac_participation_skill.game import Game, Phase
     from tac_participation_skill.search import Search
 
 
@@ -51,7 +51,7 @@ class OEFHandler(Handler):
     def __init__(self, **kwargs):
         """Initialize the echo behaviour."""
         super().__init__(**kwargs)
-        self._rejoin = False
+        # self._rejoin = False
 
     def setup(self) -> None:
         """
@@ -137,20 +137,20 @@ class OEFHandler(Handler):
         :return: None
         """
         game = cast(Game, self.context.game)
-        if game.game_phase != GamePhase.PRE_GAME:
+        if game.phase.value != Phase.PRE_GAME.value:
             logger.debug("[{}]: Ignoring controller search result, the agent is already competing.".format(self.context.agent_name))
             return
 
         if len(agent_pbks) == 0:
             logger.debug("[{}]: Couldn't find the TAC controller. Retrying...".format(self.context.agent_name))
         elif len(agent_pbks) > 1:
-            logger.error("[{}]: Found more than one TAC controller. Stopping...".format(self.context.agent_name))
-        elif self._rejoin:
-            logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
-            controller_pbk = agent_pbks[0]
-            self._rejoin_tac(controller_pbk)
+            logger.error("[{}]: Found more than one TAC controller. Retrying...".format(self.context.agent_name))
+        # elif self._rejoin:
+        #     logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
+        #     controller_pbk = agent_pbks[0]
+        #     self._rejoin_tac(controller_pbk)
         else:
-            logger.debug("[{}]: Found the TAC controller. Registering...".format(self.context.agent_name))
+            logger.info("[{}]: Found the TAC controller. Registering...".format(self.context.agent_name))
             controller_pbk = agent_pbks[0]
             self._register_to_tac(controller_pbk)
 
@@ -164,25 +164,25 @@ class OEFHandler(Handler):
         """
         game = cast(Game, self.context.game)
         game.update_expected_controller_pbk(controller_pbk)
-        game.update_game_phase(GamePhase.GAME_SETUP)
+        game.update_game_phase(Phase.GAME_REGISTRATION)
         tac_msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
         tac_bytes = TACSerializer().encode(tac_msg)
         self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
-    def _rejoin_tac(self, controller_pbk: Address) -> None:
-        """
-        Rejoin the TAC run by a Controller.
+    # def _rejoin_tac(self, controller_pbk: Address) -> None:
+    #     """
+    #     Rejoin the TAC run by a Controller.
 
-        :param controller_pbk: the public key of the controller.
+    #     :param controller_pbk: the public key of the controller.
 
-        :return: None
-        """
-        game = cast(Game, self.context.game)
-        game.update_expected_controller_pbk(controller_pbk)
-        game.update_game_phase(GamePhase.GAME_SETUP)
-        tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
-        tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+    #     :return: None
+    #     """
+    #     game = cast(Game, self.context.game)
+    #     game.update_expected_controller_pbk(controller_pbk)
+    #     game.update_game_phase(Phase.GAME_SETUP)
+    #     tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
+    #     tac_bytes = TACSerializer().encode(tac_msg)
+    #     self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
 
 class TACHandler(Handler):
@@ -216,21 +216,21 @@ class TACHandler(Handler):
 
             if tac_msg_type == TACMessage.Type.TAC_ERROR:
                 self._on_tac_error(tac_msg, sender)
-            elif game.game_phase == GamePhase.PRE_GAME:
+            elif game.phase.value == Phase.PRE_GAME.value:
                 raise ValueError("We do not expect a controller agent message in the pre game phase.")
-            elif game.game_phase == GamePhase.GAME_SETUP:
+            elif game.phase.value == Phase.GAME_SETUP.value:
                 if tac_msg_type == TACMessage.Type.GAME_DATA:
                     self._on_start(tac_msg, sender)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
-            elif game.game_phase == GamePhase.GAME:
+            elif game.phase.value == Phase.GAME.value:
                 if tac_msg_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
                     self._on_transaction_confirmed(tac_msg, sender)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
                 elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
                     self._on_state_update(tac_msg, sender)
-            elif game.game_phase == GamePhase.POST_GAME:
+            elif game.phase.value == Phase.POST_GAME.value:
                 raise ValueError("We do not expect a controller agent message in the post game phase.")
         except ValueError as e:
             logger.warning(str(e))
@@ -269,7 +269,7 @@ class TACHandler(Handler):
         logger.debug("[{}]: Received start event from the controller. Starting to compete...".format(self.context.agent_name))
         game = cast(Game, self.context.game)
         game.init(tac_message, controller_pbk)
-        game.update_game_phase(GamePhase.GAME)
+        game.update_game_phase(Phase.GAME)
 
     def _on_cancelled(self) -> None:
         """
@@ -279,7 +279,7 @@ class TACHandler(Handler):
         """
         logger.debug("[{}]: Received cancellation from the controller.".format(self.context.agent_name))
         game = cast(Game, self.context.game)
-        game.update_game_phase(GamePhase.POST_GAME)
+        game.update_game_phase(Phase.POST_GAME)
 
     def _on_transaction_confirmed(self, message: TACMessage, controller_pbk: Address) -> None:
         """
@@ -312,7 +312,7 @@ class TACHandler(Handler):
         """
         game = cast(Game, self.context.game)
         game.init(tac_message, controller_pbk)
-        game.update_game_phase(GamePhase.GAME)
+        game.update_game_phase(Phase.GAME)
         # # for tx in message.get("transactions"):
         # #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))
         # self.context.state_update_queue =
