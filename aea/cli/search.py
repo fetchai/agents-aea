@@ -47,7 +47,7 @@ def search(ctx: Context, registry):
 
 
 @search.command()
-@click.option('--query', prompt='Connection search query',
+@click.option('--query', default='',
               help='Query string to search Connections by name.')
 @pass_ctx
 def connections(ctx: Context, query):
@@ -83,7 +83,7 @@ def connections(ctx: Context, query):
 
 
 @search.command()
-@click.option('--query', prompt='Protocol search query',
+@click.option('--query', default='',
               help='Query string to search Protocols by name.')
 @pass_ctx
 def protocols(ctx: Context, query):
@@ -119,7 +119,7 @@ def protocols(ctx: Context, query):
 
 
 @search.command()
-@click.option('--query', prompt='Skill search query',
+@click.option('--query', default='',
               help='Query string to search Skills by name.')
 @pass_ctx
 def skills(ctx: Context, query):
