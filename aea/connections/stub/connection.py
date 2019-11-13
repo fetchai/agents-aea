@@ -22,7 +22,6 @@ import asyncio
 import logging
 import os
 import threading
-from asyncio import AbstractEventLoop
 from pathlib import Path
 from typing import Union, Optional
 
@@ -106,14 +105,14 @@ class StubConnection(Connection):
     """
 
     def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
-                 connection_id: str = "stub", loop: Optional[AbstractEventLoop] = None):
+                 connection_id: str = "stub"):
         """
         Initialize a stub connection.
 
         :param input_file_path: the input file for the incoming messages.
         :param output_file_path: the output file for the outgoing messages.
         """
-        super().__init__(connection_id=connection_id, loop=loop)
+        super().__init__(connection_id=connection_id)
 
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -125,7 +124,7 @@ class StubConnection(Connection):
 
         self._stopped = True
         self._connected = False
-        self.in_queue = asyncio.Queue()  # type: asyncio.Queue
+        self.in_queue = None  # type: Optional[asyncio.Queue]
         self._lock = threading.Lock()
         self._observer = Observer()
 
@@ -171,6 +170,10 @@ class StubConnection(Connection):
             if self._stopped:
                 self._stopped = False
                 try:
+                    # initialize the queue here because the queue
+                    # must be initialized with the right event loop
+                    # which is known only at connection time.
+                    self.in_queue = asyncio.Queue()
                     self._observer.start()
                 except Exception as e:      # pragma: no cover
                     raise e
