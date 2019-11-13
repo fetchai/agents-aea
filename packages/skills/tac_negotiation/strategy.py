@@ -30,34 +30,32 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.helpers import build_goods_description, build_goods_query
+    from packages.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
 else:
-    from fipa_negotiation_skill.helpers import build_goods_description, build_goods_query
+    from tac_negotiation_skill.helpers import build_goods_description, build_goods_query
 
 
 ROUNDING_ADJUSTMENT = 0.01
 
 
-class RegisterAs(Enum):
-    """This class defines the service registration options."""
-
-    SELLER = 'seller'
-    BUYER = 'buyer'
-    BOTH = 'both'
-
-
-class SearchFor(Enum):
-    """This class defines the service search options."""
-
-    SELLERS = 'sellers'
-    BUYERS = 'buyers'
-    BOTH = 'both'
-
-
 class Strategy(SharedClass):
     """This class defines an abstract strategy for the agent."""
 
-    def __init__(self, register_as: RegisterAs = RegisterAs.BOTH, search_for: SearchFor = SearchFor.BOTH, **kwargs) -> None:
+    class RegisterAs(Enum):
+        """This class defines the service registration options."""
+
+        SELLER = 'seller'
+        BUYER = 'buyer'
+        BOTH = 'both'
+
+    class SearchFor(Enum):
+        """This class defines the service search options."""
+
+        SELLERS = 'sellers'
+        BUYERS = 'buyers'
+        BOTH = 'both'
+
+    def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -66,29 +64,29 @@ class Strategy(SharedClass):
 
         :return: None
         """
+        self._register_as = Strategy.RegisterAs(kwargs.pop('register_as')) if 'register_as' in kwargs.keys() else Strategy.RegisterAs.BOTH
+        self._search_for = Strategy.SearchFor(kwargs.pop('search_for')) if 'search_for' in kwargs.keys() else Strategy.SearchFor.BOTH
         super().__init__(**kwargs)
-        self._register_as = register_as
-        self._search_for = search_for
 
     @property
     def is_registering_as_seller(self) -> bool:
         """Check if the agent registers as a seller on the OEF."""
-        return self._register_as == RegisterAs.SELLER or self._register_as == RegisterAs.BUYER
+        return self._register_as == Strategy.RegisterAs.SELLER or self._register_as == Strategy.RegisterAs.BUYER
 
     @property
     def is_searching_for_sellers(self) -> bool:
         """Check if the agent searches for sellers on the OEF."""
-        return self._search_for == SearchFor.SELLERS or self._search_for == SearchFor.BOTH
+        return self._search_for == Strategy.SearchFor.SELLERS or self._search_for == Strategy.SearchFor.BOTH
 
     @property
     def is_registering_as_buyer(self) -> bool:
         """Check if the agent registers as a buyer on the OEF."""
-        return self._register_as == RegisterAs.BUYER or self._register_as == RegisterAs.BOTH
+        return self._register_as == Strategy.RegisterAs.BUYER or self._register_as == Strategy.RegisterAs.BOTH
 
     @property
     def is_searching_for_buyers(self) -> bool:
         """Check if the agent searches for buyers on the OEF."""
-        return self._search_for == SearchFor.BUYERS or self._search_for == SearchFor.BOTH
+        return self._search_for == Strategy.SearchFor.BUYERS or self._search_for == Strategy.SearchFor.BOTH
 
     def get_own_service_description(self, ownership_state_after_locks: OwnershipState, is_supply: bool) -> Description:
         """

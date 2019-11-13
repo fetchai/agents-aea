@@ -19,19 +19,24 @@
 
 """This package contains a class representing the search state."""
 
-from typing import Set
+import datetime
+from typing import cast, Set
 
 from aea.skills.base import SharedClass
+
+DEFAULT_SEARCH_INTERVAL = 30
 
 
 class Search(SharedClass):
     """This class deals with the search state."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """Instantiate the search class."""
-        super().__init__(*args, **kwargs)
+        self._search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
+        super().__init__(**kwargs)
         self._id = 0
         self.ids_for_tac = set()  # type: Set[int]
+        self._last_search_time = datetime.datetime.now()
 
     @property
     def id(self) -> int:
@@ -47,4 +52,16 @@ class Search(SharedClass):
         self._id += 1
         self.ids_for_tac.add(self._id)
         return self._id
-        # TODO: we need to make sure dialogue and search ids are unique across skills;
+
+    def is_time_to_search(self) -> bool:
+        """
+        Check whether it is time to search.
+
+        :return: whether it is time to search
+        """
+        now = datetime.datetime.now()
+        diff = now - self._last_search_time
+        result = diff.total_seconds() > self._search_interval
+        if result:
+            self._last_search_time = now
+        return result
