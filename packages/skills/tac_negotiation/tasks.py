@@ -23,9 +23,9 @@ from typing import cast, TYPE_CHECKING
 from aea.skills.base import Task
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.transactions import Transactions
+    from packages.skills.tac_negotiation.transactions import Transactions
 else:
-    from fipa_negotiation_skill.transactions import Transactions
+    from tac_negotiation_skill.transactions import Transactions
 
 
 class TransactionCleanUpTask(Task):

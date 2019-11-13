@@ -19,25 +19,38 @@
 
 """This package contains a class representing the search state."""
 
+import datetime
 from typing import Set
 
 from aea.skills.base import SharedClass
 
 
 class Search(SharedClass):
-    """This class deals with the search state."""
+    """This class deals with the services search state."""
 
     def __init__(self, **kwargs):
         """Instantiate the search class."""
+        self._search_interval = kwargs.pop('search_interval', 5)  # type: int
         super().__init__(**kwargs)
         self._id = 0
-        self.ids_for_sellers = set()  # type: Set[int]
-        self.ids_for_buyers = set()  # type: Set[int]
+        self._ids_for_sellers = set()  # type: Set[int]
+        self._ids_for_buyers = set()  # type: Set[int]
+        self._last_search_time = datetime.datetime.now()  # type: datetime.datetime
 
     @property
     def id(self) -> int:
         """Get the search id."""
         return self._id
+
+    @property
+    def ids_for_sellers(self) -> Set[int]:
+        """Get search ids for the sellers."""
+        return self._ids_for_sellers
+
+    @property
+    def ids_for_buyers(self) -> Set[int]:
+        """Get search ids for the buyers."""
+        return self._ids_for_buyers
 
     def get_next_id(self, is_searching_for_sellers: bool) -> int:
         """
@@ -48,8 +61,20 @@ class Search(SharedClass):
         """
         self._id += 1
         if is_searching_for_sellers:
-            self.ids_for_sellers.add(self._id)
+            self._ids_for_sellers.add(self.id)
         else:
-            self.ids_for_buyers.add(self._id)
-        return self._id
-        # TODO: we need to make sure dialogue and search ids are unique across skills;
+            self._ids_for_buyers.add(self.id)
+        return self.id
+
+    def is_time_to_search_services(self) -> bool:
+        """
+        Check if the agent should search the service directory.
+
+        :return: bool indicating the action
+        """
+        now = datetime.datetime.now()
+        diff = now - self._last_search_time
+        result = diff.total_seconds() > self._search_interval
+        if result:
+            self._last_search_time = now
+        return result

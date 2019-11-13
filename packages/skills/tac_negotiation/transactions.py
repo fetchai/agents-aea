@@ -30,11 +30,11 @@ from aea.decision_maker.messages.transaction import TransactionMessage, Transact
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.dialogues import DialogueLabel
+    from packages.skills.tac_negotiation.dialogues import DialogueLabel
 else:
-    from fipa_negotiation_skill.dialogues import DialogueLabel
+    from tac_negotiation_skill.dialogues import DialogueLabel
 
-logger = logging.getLogger("aea.fipa_negotiation_skill")
+logger = logging.getLogger("aea.tac_negotiation_skill")
 
 MESSAGE_ID = int
 
@@ -42,12 +42,12 @@ MESSAGE_ID = int
 class Transactions(SharedClass):
     """Class to handle pending transaction proposals/acceptances and locked transactions."""
 
-    def __init__(self, pending_transaction_timeout: int, **kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
         """Initialize the transactions."""
+        self._pending_transaction_timeout = kwargs.pop('pending_transaction_timeout') if 'pending_transaction_timeout' in kwargs.keys() else 30
         super().__init__(**kwargs)
         self._pending_proposals = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
         self._pending_initial_acceptances = defaultdict(lambda: {})  # type: Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]
-        self._pending_transaction_timeout = pending_transaction_timeout
 
         self._locked_txs = {}  # type: Dict[TransactionId, TransactionMessage]
         self._locked_txs_as_buyer = {}  # type: Dict[TransactionId, TransactionMessage]

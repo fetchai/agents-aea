@@ -74,10 +74,14 @@ message TACAgent {
 
     message Transaction {
         string transaction_id = 1;
-        bool is_sender_buyer = 2;  // is the sender of this message a buyer?
-        string counterparty = 3;
-        double amount = 4;
-        repeated StrIntPair quantities = 5;
+        string counterparty = 2;
+        bool is_sender_buyer = 3;  // is the sender of this message a buyer?
+        string currency_pkk = 4;
+        int64 amount = 5;
+        int64 sender_tx_fee = 6;
+        int64 counterparty_tx_fee = 7;
+        repeated StrIntPair quantities = 8;
+        string ledger_id = 9;
     }
 
     message GetStateUpdate {

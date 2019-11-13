@@ -25,9 +25,9 @@ from aea.protocols.oef.models import Attribute, DataModel, Description, Query, C
     ConstraintExpr
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.dialogues import DialogueLabel
+    from packages.skills.tac_negotiation.dialogues import DialogueLabel
 else:
-    from fipa_negotiation_skill.dialogues import DialogueLabel
+    from tac_negotiation_skill.dialogues import DialogueLabel
 
 Address = str
 TransactionId = str

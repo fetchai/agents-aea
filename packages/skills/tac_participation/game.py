@@ -32,13 +32,14 @@ else:
 
 Address = str
 
-logger = logging.getLogger("aea.tac_skill")
+logger = logging.getLogger("aea.tac_participation_skill")
 
 
-class GamePhase(Enum):
-    """This class defines the TAC game stages."""
+class Phase(Enum):
+    """This class defines the phases of the game."""
 
     PRE_GAME = 'pre_game'
+    GAME_REGISTRATION = 'game_registration'
     GAME_SETUP = 'game_setup'
     GAME = 'game'
     POST_GAME = 'post_game'
@@ -146,12 +147,12 @@ class GameConfiguration:
 class Game(SharedClass):
     """This class deals with the game."""
 
-    def __init__(self, expected_version_id: str, expected_controller_pbk: Optional[Address] = None, **kwargs):
+    def __init__(self, **kwargs):
         """Instantiate the game class."""
+        self._expected_version_id = kwargs.pop('expected_version_id', '')  # type: str
+        self._expected_controller_pbk = kwargs.pop('expected_controller_pbk', None)  # type: Optional[str]
         super().__init__(**kwargs)
-        self._expected_version_id = expected_version_id
-        self._game_phase = GamePhase.PRE_GAME
-        self._expected_controller_pbk = expected_controller_pbk
+        self._phase = Phase.PRE_GAME
         self._game_configuration = None  # type: Optional[GameConfiguration]
 
     @property
@@ -160,9 +161,9 @@ class Game(SharedClass):
         return self._expected_version_id
 
     @property
-    def game_phase(self) -> GamePhase:
+    def phase(self) -> Phase:
         """Get the game phase."""
-        return self._game_phase
+        return self._phase
 
     @property
     def expected_controller_pbk(self) -> Address:
@@ -207,13 +208,13 @@ class Game(SharedClass):
         logger.warning("TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.")
         self._expected_controller_pbk = controller_pbk
 
-    def update_game_phase(self, game_phase: GamePhase) -> None:
+    def update_game_phase(self, phase: Phase) -> None:
         """
         Update the game phase.
 
-        :param game_phase: the game phase
+        :param phase: the game phase
         """
-        self._game_phase = game_phase
+        self._phase = phase
 
     def get_game_query(self) -> Query:
         """

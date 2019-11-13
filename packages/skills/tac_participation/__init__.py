@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the state modules."""
+"""This module contains the implementation of the tac participation skill."""

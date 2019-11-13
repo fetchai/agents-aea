@@ -195,18 +195,23 @@ Description: The error skill implements basic error handling required by all AEA
 Version: 0.1.0
 ------------------------------
 ------------------------------
-Name: fipa_negotiation
-Description: The fipa skill implements the logic for an AEA to do fipa negotiation.
-Version: 0.1.0
-------------------------------
-------------------------------
 Name: gym
 Description: The gym skill wraps an RL agent.
 Version: 0.1.0
 ------------------------------
 ------------------------------
-Name: tac
-Description: The tac skill implements the logic for an AEA to participate in the TAC.
+Name: tac_control
+Description: The tac control skill implements the logic for an AEA to control an instance of the TAC.
+Version: 0.1.0
+------------------------------
+------------------------------
+Name: tac_negotiation
+Description: The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC.
+Version: 0.1.0
+------------------------------
+------------------------------
+Name: tac_participation
+Description: The tac participation skill implements the logic for an AEA to participate in the TAC.
 Version: 0.1.0
 ------------------------------
 ------------------------------
