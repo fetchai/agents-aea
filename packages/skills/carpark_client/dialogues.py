@@ -160,7 +160,6 @@ class Dialogues(SharedClass):
         """
         SharedClass.__init__(self, **kwargs)
         self._dialogues = {}  # type: Dict[DialogueLabel, Dialogue]
-        self._dialogue_id = 0
         self._dialogue_stats = DialogueStats()
 
     @property
@@ -179,9 +178,7 @@ class Dialogues(SharedClass):
 
         :return: the next id
         """
-        self._dialogue_id = random.randint(1, 10000000)
-        print("_next_dialogue_id: _dialogue_id  = {}".format(self._dialogue_id))
-        return self._dialogue_id
+        return random.randint(1, 10000000)
 
     def is_belonging_to_registered_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> bool:
         """

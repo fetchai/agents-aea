@@ -111,8 +111,6 @@ class DialogueStats(object):
         self._other_initiated = {Dialogue.EndState.SUCCESSFUL: 0,
                                  Dialogue.EndState.DECLINED_PROPOSE: 0}  # type: Dict[Dialogue.EndState, int]
 
-        print("__init__: self._other_initiated = {}".format(self._other_initiated))
-
     @property
     def other_initiated(self) -> Dict[Dialogue.EndState, int]:
         """Get the stats dictionary on other initiated dialogues."""

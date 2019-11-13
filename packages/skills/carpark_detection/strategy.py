@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
+
+import logging
 import os
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING, cast
 import time
@@ -36,6 +38,8 @@ else:
 DEFAULT_PRICE = 2000
 DEFAULT_DB_IS_REL_TO_CWD = False
 DEFAULT_DB_REL_DIR = "temp_files_placeholder"
+
+logger = logging.getLogger("aea.carpark_detection_skill")
 
 
 class Strategy(SharedClass):
@@ -67,7 +71,7 @@ class Strategy(SharedClass):
         self.db.set_system_status("ledger-status", self.context.ledger_apis.last_tx_statuses['fetchai'])
 
         if not os.path.isdir(db_dir):
-            print("WARNING - DATABASE dir does not exist")
+            logger.warning("Database directory does not exist!")
 
         self.record_balance(balance)
         self.other_carpark_processes_running = False

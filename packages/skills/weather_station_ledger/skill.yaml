@@ -6,7 +6,8 @@ url: ""
 behaviours:
   - behaviour:
       class_name: ServiceRegistrationBehaviour
-      args: {}
+      args:
+        services_interval: 60
 handlers:
   - handler:
       class_name: FIPAHandler
