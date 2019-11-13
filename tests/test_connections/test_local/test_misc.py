@@ -32,11 +32,8 @@ def test_connection():
     """Test that two mailbox can connect to the node."""
     node = LocalNode()
 
-    node._queues['m_key'] = "m_key"
-    assert node.connect("m_key") is None, "The connect function must return None."
-
-    mailbox1 = MailBox(OEFLocalConnection("mailbox1", node))
-    mailbox2 = MailBox(OEFLocalConnection("mailbox2", node))
+    mailbox1 = MailBox([OEFLocalConnection("mailbox1", node)])
+    mailbox2 = MailBox([OEFLocalConnection("mailbox2", node)])
 
     mailbox1.connect()
     mailbox2.connect()
@@ -48,8 +45,8 @@ def test_connection():
 def test_communication():
     """Test that two mailbox can communicate through the node."""
     node = LocalNode()
-    mailbox1 = MailBox(OEFLocalConnection("mailbox1", node))
-    mailbox2 = MailBox(OEFLocalConnection("mailbox2", node))
+    mailbox1 = MailBox([OEFLocalConnection("mailbox1", node)])
+    mailbox2 = MailBox([OEFLocalConnection("mailbox2", node)])
 
     mailbox1.connect()
     mailbox2.connect()

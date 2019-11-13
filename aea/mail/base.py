@@ -211,7 +211,7 @@ class Envelope:
 class Multiplexer:
     """This class can handle multiple connections at once."""
 
-    def __init__(self, connections: List['Connection'], in_queue: queue.Queue,
+    def __init__(self, connections: List['Connection'],
                  default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None):
         """
         Initialize the connection multiplexer.
@@ -226,11 +226,11 @@ class Multiplexer:
         self.default_connection = self._connections[default_connection_index]  # type: Connection
 
         self._lock = Lock()
-        self._loop = loop if loop is not None else asyncio.get_event_loop()
+        self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = in_queue
-        self._out_queue = asyncio.Queue()
+        self._in_queue = queue.Queue()
+        self._out_queue = asyncio.Queue(loop=self._loop)
 
         self._recv_loop_task = None  # type: Optional[Future]
         self._send_loop_task = None  # type: Optional[Future]
@@ -253,14 +253,14 @@ class Multiplexer:
     @property
     def is_connected(self) -> bool:
         """Check whether the multiplexer is processing messages."""
-        with self._lock:
-            return self._thread.is_alive() and all(c.is_established for c in self._connections)
+        return self._loop.is_running() and all(c.is_established for c in self._connections)
 
     def connect(self) -> None:
         """Connect the multiplexer."""
         with self._lock:
             self._start()
             asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
+            assert self.is_connected
             self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._recv_loop(), loop=self._loop)
             self._send_loop_task = asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
 
@@ -288,11 +288,17 @@ class Multiplexer:
 
     def _stop(self):
         """Start the multiplexer."""
+        self._recv_loop_task.cancel()
+
+        # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing messages.
+        asyncio.run_coroutine_threadsafe(self.out_queue.put(None), self._loop).result()
+        self._send_loop_task.result()
+
         if self._loop.is_running():
-            self._loop.stop()
+            self._loop.call_soon_threadsafe(self._loop.stop)
         if self._thread.is_alive():
-            self._loop.stop()
-            self._thread.join(0.0)
+            self._loop.call_soon_threadsafe(self._loop.stop)
+            self._thread.join()
         logger.debug("Multiplexer stopped.")
 
     async def _connect_all(self):
@@ -316,6 +322,7 @@ class Multiplexer:
         if connection.is_established:
             logger.debug("Connection {} already established.".format(connection.connection_id))
         else:
+            connection.loop = self._loop
             await connection.connect()
             logger.debug("Connection {} has been set up successfully.".format(connection.connection_id))
 
@@ -326,7 +333,7 @@ class Multiplexer:
             try:
                 await self._disconnect_one(connection_id)
             except Exception as e:
-                logger.error("Error while connecting {}: {}".format(str(type(connection)), str(e)))
+                logger.error("Error while disconnecting {}: {}".format(str(type(connection)), str(e)))
 
     async def _disconnect_one(self, connection_id: str) -> None:
         """
@@ -350,6 +357,8 @@ class Multiplexer:
         try:
             logger.debug("Waiting for outgoing messages...")
             envelope = await self.out_queue.get()
+            if envelope is None:
+                return logger.debug("Received empty message. Quitting...")
             logger.debug("Sending envelope {}".format(str(envelope)))
             await self._send(envelope)
         except asyncio.CancelledError:
@@ -363,19 +372,18 @@ class Multiplexer:
 
     async def _recv_loop(self):
         """Process incoming messages."""
-        loop = asyncio.get_running_loop()
         logger.debug("Waiting for incoming messages...")
         task_to_connection = {asyncio.ensure_future(conn.recv()): conn for conn in self.connections}
 
         while self.is_connected:
             try:
                 done, pending = await asyncio.wait(task_to_connection.keys(),
-                                                   return_when=asyncio.FIRST_COMPLETED,
-                                                   loop=loop)
+                                                   return_when=asyncio.FIRST_COMPLETED)
 
                 for task in done:
                     envelope = task.result()
-                    self.in_queue.put_nowait(envelope)
+                    if envelope is not None:
+                        self.in_queue.put_nowait(envelope)
                     connection = task_to_connection.pop(task)
                     new_task = asyncio.ensure_future(connection.recv())
                     task_to_connection[new_task] = connection
@@ -530,9 +538,7 @@ class MailBox(object):
     def __init__(self, connections: List['Connection'], loop: Optional[AbstractEventLoop] = None):
         """Initialize the mailbox."""
         self._connections = connections
-
-        in_queue = queue.Queue()
-        self._multiplexer = Multiplexer(connections, in_queue, loop=loop)
+        self._multiplexer = Multiplexer(connections, loop=loop)
         self.inbox = InBox(self._multiplexer)
         self.outbox = OutBox(self._multiplexer)
 

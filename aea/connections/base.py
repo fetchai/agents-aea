@@ -37,10 +37,21 @@ class AEAConnectionError(Exception):
 class Connection(ABC):
     """Abstract definition of a connection."""
 
-    def __init__(self, connection_id: str, loop: Optional[AbstractEventLoop] = None):
+    def __init__(self, connection_id: str):
         """Initialize the connection."""
         self._connection_id = connection_id
-        self._loop = loop if loop is not None else asyncio.get_event_loop()
+        self._loop = None  # type: Optional[AbstractEventLoop]
+
+    @property
+    def loop(self) -> Optional[AbstractEventLoop]:
+        """Get the event loop."""
+        return self._loop
+
+    @loop.setter
+    def loop(self, loop: AbstractEventLoop):
+        """Get the event loop."""
+        assert self._loop is None or not self._loop.is_running(), "Cannot set the loop while it is running."
+        self._loop = loop
 
     @property
     def connection_id(self) -> str:

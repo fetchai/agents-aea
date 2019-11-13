@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the TCP connection communication."""
+
 from aea.connections.tcp.tcp_client import TCPClientConnection
 from aea.connections.tcp.tcp_server import TCPServerConnection
 from aea.mail.base import MailBox, Envelope
@@ -37,13 +38,14 @@ class TestTCPCommunication:
         cls.server_pbk = "server_pbk"
         cls.client_pbk_1 = "client_pbk_1"
         cls.client_pbk_2 = "client_pbk_2"
+
         cls.server_conn = TCPServerConnection(cls.server_pbk, cls.host, cls.port)
         cls.client_conn_1 = TCPClientConnection(cls.client_pbk_1, cls.host, cls.port)
         cls.client_conn_2 = TCPClientConnection(cls.client_pbk_2, cls.host, cls.port)
 
-        cls.server_mailbox = MailBox(cls.server_conn)
-        cls.client_1_mailbox = MailBox(cls.client_conn_1)
-        cls.client_2_mailbox = MailBox(cls.client_conn_2)
+        cls.server_mailbox = MailBox([cls.server_conn])
+        cls.client_1_mailbox = MailBox([cls.client_conn_1])
+        cls.client_2_mailbox = MailBox([cls.client_conn_2])
 
         cls.server_mailbox.connect()
         cls.client_1_mailbox.connect()

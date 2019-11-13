@@ -41,21 +41,19 @@ class TCPServerConnection(TCPConnection):
     def __init__(self,
                  public_key: str,
                  host: str,
-                 port: int,
-                 loop: Optional[AbstractEventLoop] = None,
-                 executor: Optional[Executor] = None):
+                 port: int):
         """
         Initialize a TCP channel.
 
         :param public_key: public key.
         :param host: the socket bind address.
-         :param loop: the asyncio loop.
         """
-        super().__init__(public_key, host, port, loop=loop, executor=executor)
+        super().__init__(public_key, host, port)
 
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
-        self._read_tasks = dict()  # type: Dict[str, Task]
+
+        self._read_tasks_to_public_key = dict()  # type: Dict[Task, str]
 
     async def handle(self, reader: StreamReader, writer: StreamWriter) -> None:
         """
@@ -72,24 +70,50 @@ class TCPServerConnection(TCPConnection):
             public_key = public_key_bytes.decode("utf-8")
             logger.debug("Public key of the client: {}".format(public_key))
             self.connections[public_key] = (reader, writer)
-            task = self._run_task(self._recv_loop(reader))
-            self._read_tasks[public_key] = task
+            read_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
+            self._read_tasks_to_public_key[read_task] = public_key
 
-    def setup(self):
+    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+        if len(self._read_tasks_to_public_key) == 0:
+            return None
+
+        try:
+            logger.debug("Waiting for incoming messages...")
+            done, pending = await asyncio.wait(self._read_tasks_to_public_key.keys(),
+                                               return_when=asyncio.FIRST_COMPLETED)
+
+            # take the first
+            task = next(iter(done))
+            envelope_bytes = task.result()
+            if envelope_bytes is None:
+                logger.debug("[{}]: No data received.")
+                return None
+            envelope = Envelope.decode(envelope_bytes)
+            public_key = self._read_tasks_to_public_key.pop(task)
+            reader = self.connections[public_key][0]
+            new_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
+            self._read_tasks_to_public_key[new_task] = public_key
+            return envelope
+        except asyncio.CancelledError:
+            logger.debug("Receiving loop cancelled.")
+            return
+        except Exception as e:
+            logger.error("Error in the receiving loop: {}".format(str(e)))
+            return
+
+    async def setup(self):
         """Set the connection up."""
-        future = self._run_task(asyncio.start_server(self.handle, host=self.host, port=self.port, loop=self._loop))
-        self._server = future.result()
-        self._fetch_task = self._run_task(self._send_loop())
+        self._server = await asyncio.start_server(self.handle, host=self.host, port=self.port, loop=self._loop)
+        logger.debug("Start listening on {}:{}".format(self.host, self.port))
 
-    def teardown(self):
+    async def teardown(self):
         """Tear the connection down."""
-        self.out_queue.put_nowait(None)
-        self._fetch_task.result()
-
         for pbk, (reader, _) in self.connections.items():
             reader.feed_eof()
-            t = self._read_tasks.get(pbk)
+
+        for t in self._read_tasks_to_public_key:
             t.cancel()
+            # await t
 
         self._server.close()
 

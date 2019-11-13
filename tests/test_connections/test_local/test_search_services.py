@@ -40,7 +40,7 @@ class TestEmptySearch:
         cls.node = LocalNode()
 
         cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = MailBox(OEFLocalConnection(cls.public_key_1, cls.node))
+        cls.mailbox1 = MailBox([OEFLocalConnection(cls.public_key_1, cls.node)])
 
         cls.mailbox1.connect()
 
@@ -95,7 +95,7 @@ class TestSimpleSearchResult:
         cls.node = LocalNode()
 
         cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = MailBox(OEFLocalConnection(cls.public_key_1, cls.node))
+        cls.mailbox1 = MailBox([OEFLocalConnection(cls.public_key_1, cls.node)])
 
         cls.mailbox1.connect()
 
@@ -147,9 +147,9 @@ class TestUnregister:
         cls.node = LocalNode()
 
         cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = MailBox(OEFLocalConnection(cls.public_key_1, cls.node))
+        cls.mailbox1 = MailBox([OEFLocalConnection(cls.public_key_1, cls.node)])
         cls.public_key_2 = "mailbox2"
-        cls.mailbox2 = MailBox(OEFLocalConnection(cls.public_key_2, cls.node))
+        cls.mailbox2 = MailBox([OEFLocalConnection(cls.public_key_2, cls.node)])
         cls.mailbox1.connect()
         cls.mailbox2.connect()
 
