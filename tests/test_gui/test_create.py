@@ -20,12 +20,9 @@
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 
-
 import unittest.mock
 
 from .test_base import create_app, TempCWD
-
-
 
 
 def test_home_page_exits():
@@ -39,6 +36,7 @@ def test_home_page_exits():
     # assert the status code of the response
     assert result.status_code == 200
     assert "Fetch.AI AEA CLI REST API" in str(result.data)
+
 
 def test_create_agent():
     """Test creating an agent."""
@@ -61,8 +59,9 @@ def test_create_agent():
     data = json.loads(response_create.get_data(as_text=True))
     assert data == agent_name
 
+
 def test_create_agent_fail():
-    """Test creating an agent and failing"""
+    """Test creating an agent and failing."""
     app = create_app()
     agent_name = "test_agent_id"
 
@@ -81,7 +80,6 @@ def test_create_agent_fail():
     assert response_create.status_code == 400
     data = json.loads(response_create.get_data(as_text=True))
     assert data['detail'] == 'Failed to create Agent {} - a folder of this name may exist already'.format(agent_name)
-
 
 
 def test_real_create():
@@ -113,5 +111,3 @@ def test_real_create():
 
     # Destroy the temporary current working directory and put cwd back to what it was before
     temp_cwd.destroy()
-
-

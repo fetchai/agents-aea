@@ -47,8 +47,9 @@ def test_create_agent():
     data = json.loads(response_create.get_data(as_text=True))
     assert data == agent_name
 
+
 def test_create_agent_fail():
-    """Test creating an agent and failing"""
+    """Test creating an agent and failing."""
     app = create_app()
     agent_name = "test_agent_id"
 
@@ -67,6 +68,3 @@ def test_create_agent_fail():
     assert response_create.status_code == 400
     data = json.loads(response_create.get_data(as_text=True))
     assert data['detail'] == 'Failed to create Agent {} - a folder of this name may exist already'.format(agent_name)
-
-
-

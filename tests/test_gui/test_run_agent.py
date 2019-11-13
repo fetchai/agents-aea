@@ -22,6 +22,7 @@ import json
 import time
 from .test_base import create_app, TempCWD
 
+
 def test_create_and_run_agent():
     """Test for running and agent, reading TTY and errors."""
     # Set up a temporary current working directory to make agents in
@@ -92,4 +93,3 @@ def test_create_and_run_agent():
 
     # Destroy the temporary current working directory and put cwd back to what it was before
     temp_cwd.destroy()
-

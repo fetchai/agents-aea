@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea gui` sub-commands."""
-import io
 import json
 
 import unittest.mock
@@ -42,9 +41,8 @@ Version: 0.1.0
 dummy_error = """dummy error"""
 
 
-
 def _test_search_items(item_type: str):
-    """Utility for listing generic items supported by an agent."""
+    """Test searching of generic items in registry."""
     app = create_app()
 
     pid = DummyPID(0, dummy_output, "")
@@ -66,13 +64,11 @@ def _test_search_items(item_type: str):
 
 
 def _test_search_items_fail(item_type: str):
-    """Utility for listing generic items supported by an agent."""
+    """Test searching of generic items in registry failing."""
     app = create_app()
 
     pid = DummyPID(1, "", dummy_error)
 
-    # Test for actual agent
-    agent_name = "test_agent_id"
     with unittest.mock.patch("aea.cli_gui._call_aea_async", return_value=pid):
         response_list = app.get(
             'api/' + item_type,
@@ -102,8 +98,9 @@ def test_list_skills():
     _test_search_items('skill')
     _test_search_items_fail('skill')
 
+
 def test_real_search():
-    """Call at least one function that actually calls call_aea_async"""
+    """Call at least one function that actually calls call_aea_async."""
     app = create_app()
 
     # Test for actual agent

@@ -21,7 +21,6 @@
 import io
 import os
 import shutil
-import json
 
 import tempfile
 
@@ -29,6 +28,7 @@ import aea.cli_gui
 
 
 def create_app():
+    """Create a debug version of the flask app for testing against."""
     app = aea.cli_gui.run_test()
     app.debug = True
     app.testing = True
@@ -36,25 +36,30 @@ def create_app():
 
 
 class DummyPID:
-    """Mimics the behaviour of a process id"""
+    """Mimics the behaviour of a process id."""
+
     def __init__(self, return_code, stdout_str, stderr_str):
+        """Initialise the class."""
         self.return_code = return_code
         self.stdout = io.BytesIO(stdout_str.encode(encoding='UTF-8'))
         self.stderr = io.BytesIO(stderr_str.encode(encoding='UTF-8'))
 
     def poll(self):
+        """Mimic the process id poll function."""
         return self.return_code
 
 
-
 class TempCWD:
+    """Create a temporary current working directory."""
 
     def __init__(self):
+        """Initialise the class."""
         self.temp_dir = tempfile.mkdtemp()
         self.cwd = os.getcwd()
         os.chdir(self.temp_dir)
 
     def destroy(self):
+        """Destroy the cwd and restore the old one."""
         os.chdir(self.cwd)
         try:
             shutil.rmtree(self.temp_dir)

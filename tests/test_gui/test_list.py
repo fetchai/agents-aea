@@ -18,14 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea gui` sub-commands."""
-import io
 import json
 
 import unittest.mock
 
 from .test_base import create_app, DummyPID
-
-
 
 dummy_output = """------------------------------
 Name: default
@@ -71,6 +68,7 @@ def _test_list_items(item_type: str):
     assert data[1]['id'] == 'oef'
     assert data[1]['description'] == 'The oef item implements the OEF specific logic.'
 
+
 def _test_list_items_none(item_type: str):
     """Test for listing generic items supported by an "NONE" - should be empty."""
     app = create_app()
@@ -95,7 +93,7 @@ def _test_list_items_none(item_type: str):
 
 
 def _test_list_items_fail(item_type: str):
-    """Utility for listing generic items supported by an agent."""
+    """Test listing of generic items supported by an agent."""
     app = create_app()
     pid = DummyPID(1, "", dummy_error)
     agent_name = "test_agent_id"

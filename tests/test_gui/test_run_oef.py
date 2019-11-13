@@ -20,7 +20,7 @@
 """This test module contains the tests for the `aea gui` sub-commands."""
 # import json
 # import time
-from .test_base import create_app
+# from .test_base import create_app
 
 
 def test_create_and_run_oef():
