@@ -79,6 +79,7 @@ class TCPConnection(Connection, ABC):
         return not self._stopped and self._connected
 
     async def connect(self):
+
         """
         Set up the connection.
 
@@ -87,16 +88,18 @@ class TCPConnection(Connection, ABC):
         """
         with self._lock:
             try:
-                if self.is_established:
+                if self.connection_status.is_connected:
                     logger.warning("Connection already set up.")
                     return
 
                 self._stopped = False
                 await self.setup()
                 self._connected = True
+                self.connection_status.is_connected = True
             except Exception as e:
                 logger.error(str(e))
                 self._connected = False
+                self.connection_status.is_connected = False
                 self._stopped = True
 
     async def disconnect(self) -> None:
@@ -106,18 +109,19 @@ class TCPConnection(Connection, ABC):
         :return: None.
         """
         with self._lock:
-            if not self.is_established:
+            if not self.connection_status.is_connected:
                 logger.warning("Connection is not set up.")
                 return
 
             self._connected = False
+            self.connection_status.is_connected = False
             await self.teardown()
             self._stopped = True
 
     async def _recv(self, reader: StreamReader) -> Optional[bytes]:
         """Receive bytes."""
         data = await reader.read(len(struct.pack("I", 0)))
-        if not self._connected:
+        if not self._connected or not self.connection_status.is_connected:
             return None
         nbytes = struct.unpack("I", data)[0]
         nbytes_read = 0

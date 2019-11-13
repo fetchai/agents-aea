@@ -112,3 +112,5 @@ data/*
 temp_private_key.pem
 .idea/
 
+input_file
+output_file

@@ -88,7 +88,7 @@ A `models.py` module is provided by the `oef` protocol which includes classes an
 
 The `fipa` protocol definition includes a `FIPAMessage` class which gets a `protocol_id` of `fipa`.
 
-It defines FIPA negotiating terms by way of a `Peformative(Enum)`.
+It defines FIPA negotiating terms by way of a `Performative(Enum)`.
 
 ``` python
 class Performative(Enum):

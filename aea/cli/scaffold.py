@@ -51,6 +51,8 @@ def connection(ctx: Context, connection_name: str) -> None:
         sys.exit(1)
 
     try:
+        agent_name = ctx.agent_config.agent_name
+        logger.info("Adding connection scaffold '{}' to the agent '{}'...".format(connection_name, agent_name))
 
         Path("connections").mkdir(exist_ok=True)
 
@@ -59,12 +61,12 @@ def connection(ctx: Context, connection_name: str) -> None:
 
         # copy the skill package into the agent's supported skills.
         src = Path(os.path.join(AEA_DIR, "connections", "scaffold"))
-        logger.info("Copying connection modules. src={} dst={}".format(src, dest))
+        logger.debug("Copying connection modules. src={} dst={}".format(src, dest))
 
         shutil.copytree(src, dest)
 
         # add the connection to the configurations.
-        logger.info("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
+        logger.debug("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
         ctx.agent_config.connections.add(connection_name)
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
@@ -93,6 +95,9 @@ def protocol(ctx: Context, protocol_name: str):
         sys.exit(1)
 
     try:
+        agent_name = ctx.agent_config.agent_name
+        logger.info("Adding protocol scaffold '{}' to the agent '{}'...".format(protocol_name, agent_name))
+
         # create the 'protocols' folder if it doesn't exist:
         Path("protocols").mkdir(exist_ok=True)
 
@@ -101,12 +106,12 @@ def protocol(ctx: Context, protocol_name: str):
 
         # copy the skill package into the agent's supported skills.
         src = Path(os.path.join(AEA_DIR, "protocols", "scaffold"))
-        logger.info("Copying protocol modules. src={} dst={}".format(src, dest))
+        logger.debug("Copying protocol modules. src={} dst={}".format(src, dest))
 
         shutil.copytree(src, dest)
 
         # add the protocol to the configurations.
-        logger.info("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
+        logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
         ctx.agent_config.protocols.add(protocol_name)
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
@@ -135,6 +140,9 @@ def skill(ctx: Context, skill_name: str):
         sys.exit(1)
 
     try:
+        agent_name = ctx.agent_config.agent_name
+        logger.info("Adding skill scaffold '{}' to the agent '{}'...".format(skill_name, agent_name))
+
         # create the 'skills' folder if it doesn't exist:
         Path("skills").mkdir(exist_ok=True)
 
@@ -143,12 +151,12 @@ def skill(ctx: Context, skill_name: str):
 
         # copy the skill package into the agent's supported skills.
         src = Path(os.path.join(AEA_DIR, "skills", "scaffold"))
-        logger.info("Copying skill modules. src={} dst={}".format(src, dest))
+        logger.debug("Copying skill modules. src={} dst={}".format(src, dest))
 
         shutil.copytree(src, dest)
 
         # add the skill to the configurations.
-        logger.info("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
+        logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
         ctx.agent_config.skills.add(skill_name)
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 

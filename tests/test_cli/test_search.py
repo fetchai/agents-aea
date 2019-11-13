@@ -120,9 +120,10 @@ class TestSearchSkills:
 - carpark_detection
 - echo
 - error
-- fipa_negotiation
 - gym
-- tac
+- tac_control
+- tac_negotiation
+- tac_participation
 - weather_client
 - weather_client_ledger
 - weather_station
@@ -139,9 +140,10 @@ class TestSearchSkills:
 - carpark_detection
 - echo
 - error
-- fipa_negotiation
 - gym
-- tac
+- tac_control
+- tac_negotiation
+- tac_participation
 - weather_client
 - weather_client_ledger
 - weather_station

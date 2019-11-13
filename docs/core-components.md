@@ -56,7 +56,7 @@ A skill encapsulates implementations of the abstract base classes `Handler`, `Be
 
 * `Handler`: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement agents' reactive behaviour. If the agent understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages.
 * `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the agent. Behaviours implement agents' proactiveness.
-* `Task`: none, one or more Tasks encapsulate background work internal to the agent.
+* `Task`: none, one or more `Tasks` encapsulate background work internal to the agent.
 
 
 ## Agent 

@@ -287,15 +287,14 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    def __init__(self, public_key: str, local_node: LocalNode, connection_id: str = "local",
-                 loop: Optional[AbstractEventLoop] = None):
+    def __init__(self, public_key: str, local_node: LocalNode, connection_id: str = "local"):
         """
         Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
 
         :param public_key: the public key used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
         """
-        super().__init__(connection_id, loop=loop)
+        super().__init__(connection_id)
         self._public_key = public_key
         self._local_node = local_node
 

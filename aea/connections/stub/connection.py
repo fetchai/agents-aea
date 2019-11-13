@@ -126,11 +126,12 @@ class StubConnection(Connection):
         self._connected = False
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self._lock = threading.Lock()
+
         self._observer = Observer()
 
-        dir = os.path.dirname(input_file_path.absolute())
+        directory = os.path.dirname(input_file_path.absolute())
         self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
-        self._observer.schedule(self._event_handler, dir)
+        self._observer.schedule(self._event_handler, directory)
 
     @property
     def is_established(self) -> bool:
@@ -166,6 +167,9 @@ class StubConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
+        # TODO
+        # if not self.connection_status.is_connected:
+        #     self.connection_status.is_connected = True
         with self._lock:
             if self._stopped:
                 self._stopped = False
@@ -185,6 +189,7 @@ class StubConnection(Connection):
                 self.receive()
 
     async def disconnect(self) -> None:
+
         """
         Disconnect from the channel.
 

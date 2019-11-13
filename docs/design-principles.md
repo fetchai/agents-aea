@@ -1,6 +1,6 @@
-We have collated 8 principles which guide AEA framework development:
+Eight principles guide AEA framework development:
 
-* **Accessibility**: easy of use.
+* **Accessibility**: ease of use.
 * **Modularity**: encourages module creation and sharing and reuse.
 * **Openness**: easily extensible with third party libraries.
 * **Conciseness**: conceptually simple.

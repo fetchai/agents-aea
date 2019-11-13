@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Swap the following lines if you want to work with 'latest'
-DOCKER_IMAGE_TAG=aea-deploy:0.1.12
+DOCKER_IMAGE_TAG=aea-deploy:0.1.13
 # DOCKER_IMAGE_TAG=aea-deploy:latest
 
 DOCKER_BUILD_CONTEXT_DIR=..

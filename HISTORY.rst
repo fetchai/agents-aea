@@ -99,3 +99,14 @@ Release History
 - Fixes some examples and docs
 - Refactors crypto modules and adds additional tests
 - Multiple additional minor fixes and changes
+
+0.1.13 (2019-11-08)
+-------------------
+
+- Adds envelope serializer
+- Adds support for programmatically initializing an AEA
+- Adds some tests for the gui and other components
+- Exposes connection status to skills
+- Updates oef connection to re-establish dropped connections
+- Updates the car park agent
+- Multiple additional minor fixes and changes

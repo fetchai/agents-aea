@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 
 """The base connection package."""
-import asyncio
 from abc import abstractmethod, ABC
 from asyncio import AbstractEventLoop
 from typing import TYPE_CHECKING, Optional
@@ -33,6 +32,31 @@ if TYPE_CHECKING:
 class AEAConnectionError(Exception):
     """Exception class for connection errors."""
 
+    @abstractmethod
+    def receive(self) -> None:
+        """
+        Receives an envelope.
+
+        :return: None.
+        """
+
+
+class ConnectionStatus(object):
+    """The connection status class."""
+
+    def __init__(self):
+        """Initialize the connection status."""
+        self._is_connected = False
+
+    @property
+    def is_connected(self) -> bool:
+        """Check if the connection is established."""
+        return self._is_connected
+
+    @is_connected.setter
+    def is_connected(self, is_connected: bool) -> None:
+        self._is_connected = is_connected
+
 
 class Connection(ABC):
     """Abstract definition of a connection."""
@@ -40,7 +64,9 @@ class Connection(ABC):
     def __init__(self, connection_id: str):
         """Initialize the connection."""
         self._connection_id = connection_id
+
         self._loop = None  # type: Optional[AbstractEventLoop]
+        self._connection_status = ConnectionStatus()
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
@@ -58,6 +84,11 @@ class Connection(ABC):
         """Get the id of the connection."""
         return self._connection_id
 
+    @property
+    def connection_status(self) -> ConnectionStatus:
+        """Get the connection status."""
+        return self._connection_status
+
     @abstractmethod
     async def connect(self):
         """Set up the connection."""
@@ -65,11 +96,6 @@ class Connection(ABC):
     @abstractmethod
     async def disconnect(self):
         """Tear down the connection."""
-
-    @property
-    @abstractmethod
-    def is_established(self) -> bool:
-        """Check if the connection is established."""
 
     @abstractmethod
     async def send(self, envelope: 'Envelope') -> None:

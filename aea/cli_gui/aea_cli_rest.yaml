@@ -292,17 +292,21 @@ paths:
           description: id of agent to run
           type: string
           required: True
+        - name: connection_id
+          in: body
+          description: id f the connection to activate when running
+          schema:
+            type: string
+          required: True
       responses:
         201:
           description: Start the OEF Nodoe
           schema:
             type: string
-
         400:
           description: Cannot start agent
           schema:
             type: string
-
     get:
       operationId: aea.cli_gui.get_agent_status
       tags:

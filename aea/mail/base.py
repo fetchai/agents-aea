@@ -28,6 +28,7 @@ from concurrent.futures import CancelledError, TimeoutError, Future
 from threading import Thread, Lock
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict
 
+from aea.connections.base import ConnectionStatus
 from aea.configurations.base import Address, ProtocolId
 from aea.mail import base_pb2
 
@@ -558,6 +559,12 @@ class MailBox(object):
     def is_connected(self) -> bool:
         """Check whether the mailbox is processing messages."""
         return self._multiplexer.is_connected
+        # return self._connection.connection_status.is_connected
+
+    # @property
+    # def connection_status(self) -> ConnectionStatus:
+    #     """Get the connection status."""
+    #     return self._connection.connection_status
 
     def connect(self) -> None:
         """Connect."""
