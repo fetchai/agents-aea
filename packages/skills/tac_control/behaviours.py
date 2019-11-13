@@ -144,7 +144,7 @@ class TACBehaviour(Behaviour):
                              version_id=game.configuration.version_id)
             logger.debug("[{}]: sending game data to '{}': {}"
                          .format(self.context.agent_name, agent_public_key, str(msg)))
-            self.mailbox.outbox.put_message(to=agent_public_key, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(msg))
+            self.context.outbox.put_message(to=agent_public_key, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(msg))
 
     def _cancel_tac(self):
         """Notify agents that the TAC is cancelled."""
@@ -152,4 +152,4 @@ class TACBehaviour(Behaviour):
         logger.info("[{}]: Notifying agents that TAC is cancelled.".format(self.context.agent_name))
         for agent_pbk in game.registration.agent_pbk_to_name.keys():
             tac_msg = TACMessage(tac_type=TACMessage.Type.CANCELLED)
-            self.mailbox.outbox.put_message(to=agent_pbk, sender=self.crypto.public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
+            self.context.outbox.put_message(to=agent_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))

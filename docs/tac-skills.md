@@ -47,7 +47,6 @@ In the root directory, create the tac controller AEA.
 aea create tac_controller
 ```
 
-
 ### Add the tac control skill
 ``` bash
 cd tac_controller
@@ -59,7 +58,24 @@ You can change the game parameters in `skill.yaml` under `Parameters`.
 
 You must set the start time to a point in the future `start_time: Nov 10 2019  10:40AM`.
 
-### Run the weather station AEA
+### Run the TAC controller AEA
+``` bash
+aea run
+```
+
+### Create the TAC participant AEA
+In a separate terminal, in the root directory, create the tac participant AEA.
+``` bash
+aea create tac_participant
+```
+
+### Add the tac participation skill
+``` bash
+cd tac_participant
+aea add skill tac_participation
+```
+
+### Run the TAC participant AEA
 ``` bash
 aea run
 ```

@@ -80,7 +80,7 @@ class TACBehaviour(Behaviour):
         query = game.get_game_query()
         search_id = search.get_next_id()
         search.ids_for_tac.add(search_id)
-        logger.debug("[{}]: Searching for TAC, search_id={}".format(self.context.agent_name, search_id))
+        logger.info("[{}]: Searching for TAC, search_id={}".format(self.context.agent_name, search_id))
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
         msg_bytes = OEFSerializer().encode(msg)
         self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)

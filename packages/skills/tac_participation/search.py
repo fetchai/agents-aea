@@ -30,10 +30,10 @@ DEFAULT_SEARCH_INTERVAL = 30
 class Search(SharedClass):
     """This class deals with the search state."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """Instantiate the search class."""
         self._search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self._id = 0
         self.ids_for_tac = set()  # type: Set[int]
         self._last_search_time = datetime.datetime.now()
@@ -62,4 +62,6 @@ class Search(SharedClass):
         now = datetime.datetime.now()
         diff = now - self._last_search_time
         result = diff.total_seconds() > self._search_interval
+        if result:
+            self._last_search_time = now
         return result

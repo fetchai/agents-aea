@@ -93,27 +93,25 @@ class TACHandler(Handler):
         """
         parameters = cast(Parameters, self.context.parameters)
         agent_name = cast(str, message.get("agent_name"))
-        if parameters.whitelist is not set() and agent_name not in parameters.whitelist:
+        if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
             logger.error("[{}]: Agent name not in whitelist: '{}'".format(self.context.agent_name, agent_name))
             tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST)
-            tac_bytes = TACSerializer().encode(tac_msg)
-            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
+            return
 
         game = cast(Game, self.context.game)
         if sender in game.registration.agent_pbk_to_name:
             logger.error("[{}]: Agent already registered: '{}'".format(self.context.agent_name, game.registration.agent_pbk_to_name[sender]))
             tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.AGENT_PBK_ALREADY_REGISTERED)
-            tac_bytes = TACSerializer().encode(tac_msg)
-            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
 
         if agent_name in game.registration.agent_pbk_to_name.values():
             logger.error("[{}]: Agent with this name already registered: '{}'".format(self.context.agent_name, agent_name))
             tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED)
-            tac_bytes = TACSerializer().encode(tac_msg)
-            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
 
         game.registration.register_agent(sender, agent_name)
-        logger.debug("[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name))
+        logger.info("[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name))
 
     def _on_unregister(self, message: TACMessage, sender: Address) -> None:
         """

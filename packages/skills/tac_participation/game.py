@@ -147,12 +147,12 @@ class GameConfiguration:
 class Game(SharedClass):
     """This class deals with the game."""
 
-    def __init__(self, expected_version_id: str, expected_controller_pbk: Optional[Address] = None, **kwargs):
+    def __init__(self, **kwargs):
         """Instantiate the game class."""
+        self._expected_version_id = kwargs.pop('expected_version_id', '')  # type: str
+        self._expected_controller_pbk = kwargs.pop('expected_controller_pbk', None)  # type: Optional[str]
         super().__init__(**kwargs)
-        self._expected_version_id = expected_version_id
         self._phase = Phase.PRE_GAME
-        self._expected_controller_pbk = expected_controller_pbk
         self._game_configuration = None  # type: Optional[GameConfiguration]
 
     @property
