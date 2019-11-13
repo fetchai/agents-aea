@@ -163,16 +163,6 @@ def format_items_dc(items):
     return list_str
 
 
-def retrieve_description(loader: ConfigLoader, config_filepath: str):
-    """Return description of a protocol, skill or connection."""
-    try:
-        config = loader.load(open(str(config_filepath)))
-        return config.description
-    except ValidationError as e:
-        logger.error(str(e))
-        return None
-
-
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
     """Return description of a protocol, skill or connection."""
     try:

@@ -129,7 +129,6 @@ def _sync_extract_items_from_tty(pid):
     if pid.poll() == 0:
         return output, 200  # 200 (Success)
     else:
-        print("Err = " + err)
         return err, 400  # 400 Bad request
 
 
@@ -206,8 +205,7 @@ def _call_aea_async(param_list, dir):
     # Should lock here to prevet multiple calls coming in at once and changing the current working directory weirdly
     with lock:
         old_cwd = os.getcwd()
-        if not os.path.exists(dir):
-            print("Errorr")
+
         os.chdir(dir)
         env = os.environ.copy()
         env["PYTHONUNBUFFERED"] = "1"
@@ -219,9 +217,6 @@ def _call_aea_async(param_list, dir):
 def start_oef_node():
     """Start an OEF node running."""
     _kill_running_oef_nodes()
-    temp_dir = os.getcwd()
-
-    print("cwd = {}".format(temp_dir))
 
     param_list = [
         "python",
