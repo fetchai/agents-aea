@@ -95,15 +95,23 @@ class TACMessage(Message):
                 pass
             elif tac_type == TACMessage.Type.TRANSACTION:
                 assert self.is_set("transaction_id")
-                assert self.is_set("is_sender_buyer")
                 assert self.is_set("counterparty")
+                assert self.is_set("is_sender_buyer")
+                assert self.is_set("currency_pbk")
                 assert self.is_set("amount")
-                amount = cast(float, self.get("amount"))
-                assert amount >= 0.0
+                amount = cast(int, self.get("amount"))
+                assert amount >= 0
+                assert self.is_set("sender_tx_fee")
+                sender_tx_fee = cast(int, self.get("sender_tx_fee"))
+                assert sender_tx_fee >= 0
+                assert self.is_set("counterparty_tx_fee")
+                counterparty_tx_fee = cast(int, self.get("counterparty_tx_fee"))
+                assert counterparty_tx_fee >= 0
                 assert self.is_set("quantities_by_good_pbk")
                 quantities_by_good_pbk = cast(Dict[str, int], self.get("quantities_by_good_pbk"))
                 assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
                 assert all(quantity >= 0 for quantity in quantities_by_good_pbk.values())
+                assert self.is_set("ledger_id")
             elif tac_type == TACMessage.Type.GET_STATE_UPDATE:
                 pass
             elif tac_type == TACMessage.Type.CANCELLED:

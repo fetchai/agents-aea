@@ -31,21 +31,24 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
+from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Query, Description
 from aea.decision_maker.messages.transaction import TransactionMessage
 
 if TYPE_CHECKING:
-    from packages.skills.fipa_negotiation.dialogues import Dialogue, Dialogues
-    from packages.skills.fipa_negotiation.helpers import generate_transaction_id
-    from packages.skills.fipa_negotiation.strategy import Strategy
-    from packages.skills.fipa_negotiation.transactions import Transactions
+    from packages.skills.tac_negotiation.dialogues import Dialogue, Dialogues
+    from packages.skills.tac_negotiation.helpers import generate_transaction_id
+    from packages.skills.tac_negotiation.search import Search
+    from packages.skills.tac_negotiation.strategy import Strategy
+    from packages.skills.tac_negotiation.transactions import Transactions
 else:
-    from fipa_negotiation_skill.dialogues import Dialogue, Dialogues
-    from fipa_negotiation_skill.helpers import generate_transaction_id
-    from fipa_negotiation_skill.strategy import Strategy
-    from fipa_negotiation_skill.transactions import Transactions
+    from tac_negotiation_skill.dialogues import Dialogue, Dialogues
+    from tac_negotiation_skill.helpers import generate_transaction_id
+    from tac_negotiation_skill.search import Search
+    from tac_negotiation_skill.strategy import Strategy
+    from tac_negotiation_skill.transactions import Transactions
 
-logger = logging.getLogger("aea.fipa_negotiation_skill")
+logger = logging.getLogger("aea.tac_negotiation_skill")
 
 
 class FIPANegotiationHandler(Handler):
@@ -70,7 +73,7 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         fipa_msg = cast(FIPAMessage, message)
-        fipa_msg_performative = fipa_msg.get("performative")  # FIPAMessage.Performative(fipa_msg.get("performative"))
+        fipa_msg_performative = fipa_msg.get("performative")
 
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
         dialogues = cast(Dialogues, self.context.dialogues)
@@ -99,6 +102,8 @@ class FIPANegotiationHandler(Handler):
             self._on_accept(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.MATCH_ACCEPT:
             self._on_match_accept(fipa_msg, dialogue)
+        # elif fipa_msg_performative == FIPAMessage.Performative.INFORM:
+        #     self._on_inform(fipa_msg, dialogue)
 
     def teardown(self) -> None:
         """
@@ -153,7 +158,7 @@ class FIPANegotiationHandler(Handler):
             assert proposal_description is not None
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                                 skill_id="fipa_negotiation_skill",
+                                                 skill_id="tac_negotiation_skill",
                                                  transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
@@ -193,7 +198,7 @@ class FIPANegotiationHandler(Handler):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                                 skill_id="fipa_negotiation_skill",
+                                                 skill_id="tac_negotiation_skill",
                                                  transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
@@ -270,10 +275,6 @@ class FIPANegotiationHandler(Handler):
             logger.debug("[{}]: Locking the current state (as {}).".format(self.context.agent_name, dialogue.role))
             transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
             self.context.decision_maker_message_queue.put(transaction_msg)
-            msg = FIPAMessage(message_id=new_msg_id, dialogue_id=accept.get("dialogue_id"), target=accept.get("message_id"), performative=FIPAMessage.Performative.MATCH_ACCEPT)
-            dialogue.outgoing_extend(msg)
-            msg_bytes = FIPASerializer().encode(msg)
-            result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         else:
             logger.debug("[{}]: Decline the accept (as {}).".format(self.context.agent_name, dialogue.role))
             msg = FIPAMessage(message_id=new_msg_id, dialogue_id=accept.get("dialogue_id"), target=accept.get("message_id"), performative=FIPAMessage.Performative.DECLINE)
@@ -282,7 +283,7 @@ class FIPANegotiationHandler(Handler):
             result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
-        self.context.outbox.put(result)
+            self.context.outbox.put(result)
 
     def _on_match_accept(self, match_accept: FIPAMessage, dialogue: Dialogue) -> None:
         """
@@ -299,3 +300,113 @@ class FIPANegotiationHandler(Handler):
                      .format(self.context.agent_name, match_accept.get("message_id"), match_accept.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, match_accept.get("target")))
         transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.get("target")))
         self.context.decision_maker_message_queue.put(transaction_msg)
+
+
+class TransactionHandler(Handler):
+    """This class implements the transaction handler."""
+
+    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def handle(self, message: Message, sender: str) -> None:
+        """
+        Dispatch message to relevant handler and respond.
+
+        :param message: the message
+        :param sender: the sender
+        :return: None
+        """
+        # msg = FIPAMessage(message_id=new_msg_id, dialogue_id=accept.get("dialogue_id"), target=accept.get("message_id"), performative=FIPAMessage.Performative.MATCH_ACCEPT)
+        # dialogue.outgoing_extend(msg)
+        # msg_bytes = FIPASerializer().encode(msg)
+        # result = Envelope(to=dialogue.dialogue_label.dialogue_opponent_pbk, sender=self.context.agent_public_key, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+
+class OEFSearchHandler(Handler):
+    """This class implements the oef search handler."""
+
+    SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def handle(self, message: Message, sender: str) -> None:
+        """
+        Implement the reaction to a message.
+
+        :param message: the message
+        :param sender: the sender
+        :return: None
+        """
+        # convenience representations
+        oef_msg = cast(OEFMessage, message)
+        oef_msg_type = OEFMessage.Type(oef_msg.get("type"))
+
+        if oef_msg_type is OEFMessage.Type.SEARCH_RESULT:
+            agents = cast(List[str], oef_msg.get("agents"))
+            search_id = oef_msg.get("id")
+            search = cast(Search, self.context.search)
+            if search_id in search.ids_for_sellers:
+                self._handle_search(agents, is_searching_for_sellers=True)
+            elif search_id in search.ids_for_buyers:
+                self._handle_search(agents, is_searching_for_sellers=False)
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass
+
+    def _handle_search(self, agents: List[str], is_searching_for_sellers: bool) -> None:
+        """
+        Handle the search response.
+
+        :param agents: the agents returned by the search
+        :param is_searching_for_sellers: whether the agent is searching for sellers
+        :return: None
+        """
+        searched_for = 'sellers' if is_searching_for_sellers else 'buyers'
+        if len(agents) > 0:
+            logger.info("[{}]: found potential {} agents={}.".format(self.context.agent_name, searched_for, list(map(lambda x: x[-5:], agents))))
+            strategy = cast(Strategy, self.context.strategy)
+            dialogues = cast(Dialogues, self.context.dialogues)
+            transactions = cast(Transactions, self.context.transactions)
+            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=not is_searching_for_sellers)
+            query = strategy.get_own_services_query(ownership_state_after_locks, is_searching_for_sellers)
+            for opponent_pbk in agents:
+                dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key, not is_searching_for_sellers)
+                logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
+                cfp_msg = FIPAMessage(message_id=FIPAMessage.STARTING_MESSAGE_ID,
+                                      dialogue_id=dialogue.dialogue_label.dialogue_id,
+                                      performative=FIPAMessage.Performative.CFP,
+                                      target=FIPAMessage.STARTING_TARGET,
+                                      query=query)
+                dialogue.outgoing_extend(cfp_msg)
+                self.context.outbox.put_message(to=opponent_pbk,
+                                                sender=self.context.agent_public_key,
+                                                protocol_id=FIPAMessage.protocol_id,
+                                                message=FIPASerializer().encode(cfp_msg))
+        else:
+            logger.info("[{}]: found no {} agents, continue searching.".format(self.context.agent_name, searched_for))
