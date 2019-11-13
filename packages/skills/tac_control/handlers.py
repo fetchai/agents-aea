@@ -182,10 +182,10 @@ class TACHandler(Handler):
         game.settle_transaction(transaction)
 
         # send the transaction confirmation.
-        tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION, transaction_id=transaction.transaction_id)
-        tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=sender, sender=self.context.public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
-        self.context.outbox.put_message(to=cast(str, message.get("counterparty")), sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        sender_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION, transaction_id=transaction.transaction_id)
+        counterparty_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION, transaction_id=transaction.transaction_id)
+        self.context.outbox.put_message(to=sender, sender=self.context.public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(sender_tac_msg))
+        self.context.outbox.put_message(to=cast(str, message.get("counterparty")), sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(counterparty_tac_msg))
 
         # log messages
         logger.debug("[{}]: Transaction '{}' settled successfully.".format(self.context.agent_name, transaction.transaction_id))

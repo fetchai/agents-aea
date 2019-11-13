@@ -240,7 +240,7 @@ class Initialization:
 class GoodState:
     """Represent the state of a good during the game."""
 
-    def __init__(self, price: float) -> None:
+    def __init__(self, price: float = 0.0) -> None:
         """
         Instantiate an agent state object.
 
@@ -258,7 +258,7 @@ class GoodState:
         :return: None
         :raises: AssertionError: if some constraint is not satisfied.
         """
-        assert self.price >= 0, "The price must be non-negative."
+        assert self.price >= 0.0, "The price must be non-negative."
 
 
 class Transaction:
@@ -349,16 +349,15 @@ class Transaction:
         :return: Transaction
         """
         assert message.get('type') == TACMessage.Type.TRANSACTION
+        amount_by_currency = cast(Dict[str, int], message.get("amount_by_currency"))
         return Transaction(cast(str, message.get("transaction_id")),
                            sender,
                            cast(str, message.get("counterparty")),
-                           cast(bool, message.get("is_sender_buyer")),
-                           cast(str, message.get("currency_pbk")),
-                           cast(int, message.get("amount")),
+                           any(value <= 0 for value in amount_by_currency.values()),
+                           amount_by_currency,
                            cast(int, message.get("sender_tx_fee")),
                            cast(int, message.get("counterparty_tx_fee")),
-                           cast(Dict[str, int], message.get("quantities_by_good_pbk")),
-                           cast(str, message.get("ledger_id")))
+                           cast(Dict[str, int], message.get("quantities_by_good_pbk")))
 
     def matches(self, other: 'Transaction') -> bool:
         """

@@ -82,10 +82,11 @@ class TACBehaviour(Behaviour):
                 self._cancel_tac()
                 self._unregister_tac()
             else:
-                game.phase.value = Phase.GAME_SETUP
+                game.phase = Phase.GAME_SETUP
                 self._start_tac()
                 self._unregister_tac()
-        elif game.phase == Phase.GAME and now > parameters.end_time:
+                game.phase = Phase.GAME
+        elif game.phase.value == Phase.GAME.value and now > parameters.end_time:
             game.phase = Phase.POST_GAME
             self._cancel_tac()
             self._unregister_tac()
@@ -128,16 +129,15 @@ class TACBehaviour(Behaviour):
         """Create a game and send the game configuration to every registered agent."""
         game = cast(Game, self.context.game)
         game.create()
-        logger.info("[{}]: Started competition:\n{}".format(self.context.agent_name, game.get_holdings_summary()))
-        logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.get_equilibrium_summary()))
+        logger.info("[{}]: Started competition:\n{}".format(self.context.agent_name, game.holdings_summary))
+        logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))
         for agent_public_key in game.configuration.agent_pbks:
             agent_state = game.current_agent_states[agent_public_key]
             msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
-                             money=agent_state.balance,
-                             endowment=agent_state.current_holdings,
-                             utility_params=agent_state.utility_params,
-                             nb_agents=game.configuration.nb_agents,
-                             nb_goods=game.configuration.nb_goods,
+                             amount_by_currency=agent_state.amount_by_currency,
+                             exchange_params_by_currency=agent_state.exchange_params_by_currency,
+                             quantities_by_good_pbk=agent_state.quantities_by_good_pbk,
+                             utility_params_by_good_pbk=agent_state.utility_params_by_good_pbk,
                              tx_fee=game.configuration.tx_fee,
                              agent_pbk_to_name=game.configuration.agent_pbk_to_name,
                              good_pbk_to_name=game.configuration.good_pbk_to_name,

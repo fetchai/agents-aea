@@ -96,11 +96,9 @@ class TACMessage(Message):
             elif tac_type == TACMessage.Type.TRANSACTION:
                 assert self.is_set("transaction_id")
                 assert self.is_set("counterparty")
-                assert self.is_set("is_sender_buyer")
-                assert self.is_set("currency_pbk")
-                assert self.is_set("amount")
-                amount = cast(int, self.get("amount"))
-                assert amount >= 0
+                assert self.is_set("amount_by_currency")
+                amount_by_currency = cast(Dict[str, int], self.get("amount_by_currency"))
+                assert len(amount_by_currency.keys()) == len(set(amount_by_currency.keys()))
                 assert self.is_set("sender_tx_fee")
                 sender_tx_fee = cast(int, self.get("sender_tx_fee"))
                 assert sender_tx_fee >= 0
@@ -110,25 +108,29 @@ class TACMessage(Message):
                 assert self.is_set("quantities_by_good_pbk")
                 quantities_by_good_pbk = cast(Dict[str, int], self.get("quantities_by_good_pbk"))
                 assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
-                assert all(quantity >= 0 for quantity in quantities_by_good_pbk.values())
-                assert self.is_set("ledger_id")
             elif tac_type == TACMessage.Type.GET_STATE_UPDATE:
                 pass
             elif tac_type == TACMessage.Type.CANCELLED:
                 pass
             elif tac_type == TACMessage.Type.GAME_DATA:
-                assert self.is_set("money")
-                assert self.is_set("endowment")
-                assert self.is_set("utility_params")
-                assert self.is_set("nb_agents")
-                assert self.is_set("nb_goods")
+                assert self.is_set("amount_by_currency")
+                assert self.is_set("exchange_params_by_currency")
+                assert self.is_set("quantities_by_good_pbk")
+                assert self.is_set("utility_params_by_good_pbk")
                 assert self.is_set("tx_fee")
                 assert self.is_set("agent_pbk_to_name")
                 assert self.is_set("good_pbk_to_name")
+                assert self.is_set("version_id")
             elif tac_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
                 assert self.is_set("transaction_id")
+                assert self.is_set("amount_by_currency")
+                amount_by_currency = cast(Dict[str, int], self.get("amount_by_currency"))
+                assert len(amount_by_currency.keys()) == len(set(amount_by_currency.keys()))
+                assert self.is_set("quantities_by_good_pbk")
+                quantities_by_good_pbk = cast(Dict[str, int], self.get("quantities_by_good_pbk"))
+                assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
             elif tac_type == TACMessage.Type.STATE_UPDATE:
-                assert self.is_set("initial_state")
+                assert self.is_set("game_data")
                 assert self.is_set("transactions")
             elif tac_type == TACMessage.Type.TAC_ERROR:
                 assert self.is_set("error_code")

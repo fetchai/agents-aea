@@ -52,7 +52,7 @@ class GameConfiguration:
                  version_id: str,
                  nb_agents: int,
                  nb_goods: int,
-                 tx_fee: float,
+                 tx_fee: int,
                  agent_pbk_to_name: Dict[Address, str],
                  good_pbk_to_name: Dict[Address, str],
                  controller_pbk: Address):
@@ -93,7 +93,7 @@ class GameConfiguration:
         return self._nb_goods
 
     @property
-    def tx_fee(self) -> float:
+    def tx_fee(self) -> int:
         """Transaction fee for the TAC instance."""
         return self._tx_fee
 
@@ -192,7 +192,7 @@ class Game(SharedClass):
         self._game_configuration = GameConfiguration(cast(str, tac_message.get("version_id")),
                                                      cast(int, tac_message.get("nb_agents")),
                                                      cast(int, tac_message.get("nb_goods")),
-                                                     cast(float, tac_message.get("tx_fee")),
+                                                     cast(int, tac_message.get("tx_fee")),
                                                      cast(Dict[str, str], tac_message.get("agent_pbk_to_name")),
                                                      cast(Dict[str, str], tac_message.get("good_pbk_to_name")),
                                                      controller_pbk)
