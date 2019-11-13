@@ -163,6 +163,46 @@ def format_items_dc(items):
     return list_str
 
 
+def format_items(items):
+    """Format list of items (protocols/connections) to a string for CLI output."""
+    list_str = ''
+    for item in items:
+        list_str += (
+            '{line}\n'
+            'Name: {name}\n'
+            'Description: {description}\n'
+            'Version: {version}\n'
+            '{line}\n'.format(
+                name=item['name'],
+                description=item['description'],
+                version=item['version'],
+                line='-' * 30
+            ))
+    return list_str
+
+
+def format_skills(items):
+    """Format list of skills to a string for CLI output."""
+    list_str = ''
+    for item in items:
+        list_str += (
+            '{line}\n'
+            'Name: {name}\n'
+            'Description: {description}\n'
+            'Protocols: {protocols}\n'
+            'Version: {version}\n'
+            '{line}\n'.format(
+                name=item['name'],
+                description=item['description'],
+                version=item['version'],
+                protocols=''.join(
+                    name + ' | ' for name in item['protocol_names']
+                ),
+                line='-' * 30
+            ))
+    return list_str
+
+
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
     """Return description of a protocol, skill or connection."""
     try:

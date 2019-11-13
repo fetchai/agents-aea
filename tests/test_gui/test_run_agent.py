@@ -91,5 +91,27 @@ def test_create_and_run_agent():
     # assert "process terminate" in data["error"]
     assert "NOT_STARTED" in data["status"]
 
+    # run the agent again (takes a different path through code)
+    response_run = app.post(
+        'api/agent/' + agent_id + "/run",
+        content_type='application/json',
+        data=json.dumps("local")
+    )
+    assert response_run.status_code == 201
+
+    time.sleep(2)
+
+    # Get the running status
+    response_status = app.get(
+        'api/agent/' + agent_id + "/run",
+        data=None,
+        content_type='application/json',
+    )
+    assert response_status.status_code == 200
+    data = json.loads(response_status.get_data(as_text=True))
+
+    assert data["error"] == ""
+    assert "RUNNING" in data["status"]
+
     # Destroy the temporary current working directory and put cwd back to what it was before
     temp_cwd.destroy()

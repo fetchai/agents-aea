@@ -30,7 +30,6 @@ import time
 
 import connexion
 import flask
-import yaml
 
 
 elements = [['local', 'agent', 'localAgents'],
@@ -57,35 +56,12 @@ max_log_lines = 100
 lock = threading.Lock()
 
 
-def read_description(dir_name, yaml_name):
-    """Return true if this directory contains an items in an AEA project i.e.  protocol, skill or connection."""
-    assert os.path.isdir(dir_name)
-    file_path = os.path.join(dir_name, yaml_name + ".yaml")
-    assert os.path.isfile(file_path)
-    with open(file_path, 'r') as stream:
-        try:
-            yaml_data = yaml.safe_load(stream)
-            if "description" in yaml_data:
-                return yaml_data["description"]
-        except yaml.YAMLError as exc:
-            logging.error(exc)
-    return "Placeholder description"
-
-
 def is_agent_dir(dir_name):
     """Return trye if this directory contains an AEA project (an agent)."""
     if not os.path.isdir(dir_name):
         return False
     else:
         return os.path.isfile(os.path.join(dir_name, "aea-config.yaml"))
-
-
-def is_item_dir(dir_name, item_type):
-    """Return true if this directory contains an items in an AEA project i.e.  protocol, skill or connection."""
-    if not os.path.isdir(dir_name):
-        return False
-    else:
-        return os.path.isfile(os.path.join(dir_name, item_type + ".yaml"))
 
 
 def get_agents():

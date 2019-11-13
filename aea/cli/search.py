@@ -24,13 +24,13 @@ import click
 import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, format_items_dc, ConfigLoader
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, format_items_dc, ConfigLoader, format_items, format_skills
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.cli.registry.utils import request_api
 
 
 @click.group()
-@click.option("--registry", type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True, resolve_path=True),
-              default=None, help="Path/URL to the registry.")
+@click.option('--registry', is_flag=True, help="For Registry search.")
 @pass_ctx
 def search(ctx: Context, registry):
     """Search for components in the registry.
@@ -39,10 +39,12 @@ def search(ctx: Context, registry):
 
         aea search --registry packages/ skills
     """
-    if registry is None:
+    if registry:
+        ctx.set_config("is_registry", True)
+    else:
         registry = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
-    logger.debug("Using registry {}".format(registry))
-    ctx.set_config("registry", str(registry))
+        ctx.set_config("registry", registry)
+        logger.debug("Using registry {}".format(registry))
 
 
 def _is_invalid_item(name, dir_path, config_path):
@@ -63,9 +65,23 @@ def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_name: st
 
 
 @search.command()
+@click.option('--query', default='',
+              help='Query string to search Connections by name.')
 @pass_ctx
-def connections(ctx: Context):
-    """List all the connections available in the registry."""
+def connections(ctx: Context, query):
+    """Search for Connections."""
+    if ctx.config.get("is_registry"):
+        click.echo('Searching for "{}"...'.format(query))
+        resp = request_api(
+            'GET', '/connections', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No connections found.')
+        else:
+            click.echo('Connections found:\n')
+            click.echo(format_items(resp))
+        return
+
     registry = cast(str, ctx.config.get("registry"))
     result: List[Dict] = []
     _get_details_from_dir(ctx.connection_loader, AEA_DIR, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
@@ -76,9 +92,23 @@ def connections(ctx: Context):
 
 
 @search.command()
+@click.option('--query', default='',
+              help='Query string to search Protocols by name.')
 @pass_ctx
-def protocols(ctx: Context):
-    """List all the protocols available in the registry."""
+def protocols(ctx: Context, query):
+    """Search for Protocols."""
+    if ctx.config.get("is_registry"):
+        click.echo('Searching for "{}"...'.format(query))
+        resp = request_api(
+            'GET', '/protocols', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No protocols found.')
+        else:
+            click.echo('Protocols found:\n')
+            click.echo(format_items(resp))
+        return
+
     registry = cast(str, ctx.config.get("registry"))
     result: List[Dict] = []
     _get_details_from_dir(ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
@@ -89,9 +119,23 @@ def protocols(ctx: Context):
 
 
 @search.command()
+@click.option('--query', default='',
+              help='Query string to search Skills by name.')
 @pass_ctx
-def skills(ctx: Context):
-    """List all the skills available in the registry."""
+def skills(ctx: Context, query):
+    """Search for Skills."""
+    if ctx.config.get("is_registry"):
+        click.echo('Searching for "{}"...'.format(query))
+        resp = request_api(
+            'GET', '/skills', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No skills found.')
+        else:
+            click.echo('Skills found:\n')
+            click.echo(format_skills(resp))
+        return
+
     registry = cast(str, ctx.config.get("registry"))
     result: List[Dict] = []
     _get_details_from_dir(ctx.skill_loader, AEA_DIR, "skills", DEFAULT_SKILL_CONFIG_FILE, result)

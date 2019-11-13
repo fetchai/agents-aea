@@ -20,6 +20,7 @@
 """This test module contains the tests for the `aea search` sub-command."""
 import json
 import os
+from unittest import mock
 from pathlib import Path
 
 import jsonschema
@@ -28,7 +29,6 @@ from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
-from aea.cli.common import DEFAULT_REGISTRY_PATH
 from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
 
 
@@ -79,13 +79,42 @@ Version: 0.1.0
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"])
+
         assert self.result.output == self._generated_expected_output()
 
-    def test_correct_output_custom_registry(self):
-        """Test that the command has printed the correct output when using a custom registry."""
-        os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "protocols"])
-        assert self.result.output == self._generated_expected_output()
+    def test_correct_output_registry_api(self):
+        """Test that the command has printed the correct output when using Registry API."""
+        resp = [
+            {
+                "name": "protocol-1",
+                "description": "Protocol 1",
+                "version": "1",
+            }
+        ]
+        with mock.patch('aea.cli.search.request_api', return_value=resp):
+            self.result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"]
+            )
+        expected_output = (
+            'Searching for "some"...\n'
+            'Protocols found:\n\n'
+            '------------------------------\n'
+            'Name: protocol-1\n'
+            'Description: Protocol 1\n'
+            'Version: 1\n'
+            '------------------------------\n\n'
+        )
+        assert self.result.output == expected_output
+
+        with mock.patch('aea.cli.search.request_api', return_value=[]):
+            self.result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"]
+            )
+        expected_output = (
+            'Searching for "some"...\n'
+            'No protocols found.\n'
+        )
+        assert self.result.output == expected_output
 
     @classmethod
     def teardown_class(cls):
@@ -147,11 +176,40 @@ Version: 0.1.0
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "connections"])
         assert self.result.output == self._generated_expected_output()
 
-    def test_correct_output_custom_registry(self):
-        """Test that the command has printed the correct output when using a custom registry."""
-        os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "connections"])
-        assert self.result.output == self._generated_expected_output()
+    def test_correct_output_registry_api(self):
+        """Test that the command has printed the correct output when using Registry API."""
+        resp = [
+            {
+                "name": "connection-1",
+                "description": "Connection 1",
+                "version": "1",
+            }
+        ]
+        with mock.patch('aea.cli.search.request_api', return_value=resp):
+            self.result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"]
+            )
+
+        expected_output = (
+            'Searching for "some"...\n'
+            'Connections found:\n\n'
+            '------------------------------\n'
+            'Name: connection-1\n'
+            'Description: Connection 1\n'
+            'Version: 1\n'
+            '------------------------------\n\n'
+        )
+        assert self.result.output == expected_output
+
+        with mock.patch('aea.cli.search.request_api', return_value=[]):
+            self.result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"]
+            )
+        expected_output = (
+            'Searching for "some"...\n'
+            'No connections found.\n'
+        )
+        assert self.result.output == expected_output
 
     @classmethod
     def teardown_class(cls):
@@ -243,11 +301,42 @@ Version: 0.1.0
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"])
         assert self.result.output == self._generated_expected_output()
 
-    def test_correct_output_custom_registry(self):
-        """Test that the command has printed the correct output when using a custom registry."""
-        os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "skills"])
-        assert self.result.output == self._generated_expected_output()
+    def test_correct_output_registry_api(self):
+        """Test that the command has printed the correct output when using Registry API."""
+        resp = [
+            {
+                "name": "skill-1",
+                "description": "Skill 1",
+                "version": "1",
+                "protocol_names": ['p1', 'p2'],
+            }
+        ]
+        with mock.patch('aea.cli.search.request_api', return_value=resp):
+            self.result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"]
+            )
+            expected_output = (
+                'Searching for "some"...\n'
+                'Skills found:\n\n'
+                '------------------------------\n'
+                'Name: skill-1\n'
+                'Description: Skill 1\n'
+                'Protocols: p1 | p2 | \n'
+                'Version: 1\n'
+                '------------------------------\n\n'
+            )
+
+            assert self.result.output == expected_output
+
+        with mock.patch('aea.cli.search.request_api', return_value=[]):
+            self.result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"]
+            )
+        expected_output = (
+            'Searching for "some"...\n'
+            'No skills found.\n'
+        )
+        assert self.result.output == expected_output
 
     @classmethod
     def teardown_class(cls):
