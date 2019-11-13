@@ -54,13 +54,13 @@ class TestListProtocols:
         """Test that the command has printed the correct output."""
         compare_text = """------------------------------
 Name: default
-Description: None
-Version: None
+Description: The default protocol allows for any bytes message.
+Version: 0.1.0
 ------------------------------
 ------------------------------
 Name: fipa
-Description: None
-Version: None
+Description: fipa protocol description [Fill in]
+Version: 0.1.0
 ------------------------------
 
 """
@@ -133,13 +133,13 @@ class TestListSkills:
         """Test that the command has printed the correct output."""
         compare_text = """------------------------------
 Name: dummy
-Description: None
-Version: None
+Description: a dummy_skill for testing purposes.
+Version: 0.1.0
 ------------------------------
 ------------------------------
 Name: error
-Description: None
-Version: None
+Description: The error skill implements basic error handling required by all AEAs.
+Version: 0.1.0
 ------------------------------
 
 """

@@ -471,7 +471,7 @@ class Controller{
             this.$event_pump.on('model_'+ combineName + 'DeleteSuccess', {el: element}, function(e, data) {
                 self.model.readData(e.data.el);
 
-                self.refreshAgentData(data)
+                self.refreshAgentData("NONE")
                 self.handleButtonStates()
 
             });

@@ -26,6 +26,7 @@ import logging
 import os
 import subprocess
 import threading
+import time
 
 import connexion
 import flask
@@ -101,24 +102,42 @@ def get_agents():
     return agent_list
 
 
-def _add_items(item_dir, item_type, items_list):
-    file_list = glob.glob(os.path.join(item_dir, '*'))
-    for path in file_list:
-        if is_item_dir(path, item_type):
-            head, tail = os.path.split(path)
-            desc = read_description(path, item_type)
-            if not {"id": tail, "description": desc} in items_list:
-                items_list.append({"id": tail, "description": desc})
+def _sync_extract_items_from_tty(pid):
+    item_ids = []
+    item_descs = []
+    output = []
+    err = ""
+    for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
+        if line[:6] == "Name: ":
+            item_ids.append(line[6:-1])
+
+        if line[:13] == "Description: ":
+            item_descs.append(line[13:-1])
+
+    if len(item_ids) != len(item_descs):
+        return "Inconsistent output from CLI tool!", 400  # 400 Bad request
+
+    for i in range(0, len(item_ids)):
+        output.append({"id": item_ids[i], "description": item_descs[i]})
+
+    for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
+        err += line + "\n"
+
+    while pid.poll() is None:
+        time.sleep(0.5)
+
+    if pid.poll() == 0:
+        return output, 200  # 200 (Success)
+    else:
+        print("Err = " + err)
+        return err, 400  # 400 Bad request
 
 
 def get_registered_items(item_type):
-    """Return list of all protocols, connections or skills in the registry."""
-    items_list = []
-
-    _add_items(os.path.join(flask.app.agents_dir, "packages/" + item_type + "s"), item_type, items_list)
-    _add_items(os.path.join(flask.app.module_dir, "aea/" + item_type + "s"), item_type, items_list)
-
-    return items_list
+    """Create a new AEA project."""
+    # need to place ourselves one directory down so the searcher can find the packages
+    pid = _call_aea_async(["aea", "search", item_type + "s"], os.path.join(flask.app.module_dir, "aea"))
+    return _sync_extract_items_from_tty(pid)
 
 
 def create_agent(agent_id):
@@ -157,19 +176,12 @@ def remove_local_item(agent_id, item_type, item_id):
 
 def get_local_items(agent_id, item_type):
     """Return a list of protocols, skills or connections supported by a local agent."""
-    items_dir = os.path.join(os.path.join(flask.app.agents_dir, agent_id), item_type + "s")
+    if agent_id == "NONE":
+        return [], 200  # 200 (Success)
 
-    file_list = glob.glob(os.path.join(items_dir, '*'))
-
-    items_list = []
-
-    for path in file_list:
-        if is_item_dir(path, item_type):
-            head, tail = os.path.split(path)
-            desc = read_description(path, item_type)
-            items_list.append({"id": tail, "description": desc})
-
-    return items_list
+    # need to place ourselves one directory down so the searcher can find the packages
+    pid = _call_aea_async(["aea", "list", item_type + "s"], os.path.join(flask.app.agents_dir, agent_id))
+    return _sync_extract_items_from_tty(pid)
 
 
 def scaffold_item(agent_id, item_type, item_id):
@@ -182,7 +194,6 @@ def scaffold_item(agent_id, item_type, item_id):
 
 
 def _call_aea(param_list, dir):
-    # Should lock here to prevet multiple calls coming in at once and changing the current working directory weirdly
     with lock:
         old_cwd = os.getcwd()
         os.chdir(dir)
@@ -195,6 +206,8 @@ def _call_aea_async(param_list, dir):
     # Should lock here to prevet multiple calls coming in at once and changing the current working directory weirdly
     with lock:
         old_cwd = os.getcwd()
+        if not os.path.exists(dir):
+            print("Errorr")
         os.chdir(dir)
         env = os.environ.copy()
         env["PYTHONUNBUFFERED"] = "1"
@@ -284,7 +297,7 @@ def start_agent(agent_id, connection_id):
     agent_dir = os.path.join(flask.app.agents_dir, agent_id)
 
     if connection_id is not None and connection_id != "":
-        connections = get_local_items(agent_id, "connection")
+        connections = get_local_items(agent_id, "connection")[0]
         has_named_connection = False
         for element in connections:
             if element["id"] == connection_id:
@@ -292,7 +305,7 @@ def start_agent(agent_id, connection_id):
         if has_named_connection:
             agent_process = _call_aea_async(["aea", "run", "--connection", connection_id], agent_dir)
         else:
-            return {"detail": "Trying to run agent {} with non-existant connection: {}".format(agent_id, connection_id)}, 400  # 400 Bad request
+            return {"detail": "Trying to run agent {} with non-existent connection: {}".format(agent_id, connection_id)}, 400  # 400 Bad request
     else:
         agent_process = _call_aea_async(["aea", "run"], agent_dir)
 

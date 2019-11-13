@@ -23,8 +23,8 @@ import os
 import click
 
 
-from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config, retrieve_details, format_items
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
+from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config, retrieve_details, format_items_dc
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE
 
 
@@ -45,7 +45,7 @@ def connections(ctx: Context):
         details = retrieve_details(connection_id, ctx.connection_loader, connection_configuration_filepath)
         result.append(details)
 
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items_dc(sorted(result, key=lambda k: k['name'])))
 
 
 @list.command()
@@ -55,10 +55,10 @@ def protocols(ctx: Context):
     result = []
     for protocol_id in sorted(ctx.agent_config.protocols):
         protocol_configuration_filepath = os.path.join("protocols", protocol_id, DEFAULT_PROTOCOL_CONFIG_FILE)
-        details = retrieve_details(protocol_id, ctx.connection_loader, protocol_configuration_filepath)
+        details = retrieve_details(protocol_id, ctx.protocol_loader, protocol_configuration_filepath)
         result.append(details)
 
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items_dc(sorted(result, key=lambda k: k['name'])))
 
 
 @list.command()
@@ -68,7 +68,7 @@ def skills(ctx: Context):
     result = []
     for skill_id in sorted(ctx.agent_config.skills):
         skill_configuration_filepath = os.path.join("skills", skill_id, DEFAULT_SKILL_CONFIG_FILE)
-        details = retrieve_details(skill_id, ctx.connection_loader, skill_configuration_filepath)
+        details = retrieve_details(skill_id, ctx.skill_loader, skill_configuration_filepath)
         result.append(details)
 
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items_dc(sorted(result, key=lambda k: k['name'])))

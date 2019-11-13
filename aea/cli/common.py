@@ -141,7 +141,12 @@ def _load_env_file(env_file: str):
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
-def format_items(items):
+def format_items_dc(items):
+    """
+    Format information about a protocol, connection or skill in a human readable form.
+
+    This is a placeholder until Oleg's function is merged in.
+    """
     list_str = ''
     for item in items:
         list_str += (
@@ -164,15 +169,20 @@ def retrieve_description(loader: ConfigLoader, config_filepath: str):
         config = loader.load(open(str(config_filepath)))
         return config.description
     except ValidationError as e:
+        logger.error(str(e))
         return None
+
 
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
     """Return description of a protocol, skill or connection."""
     try:
         config = loader.load(open(str(config_filepath)))
+        if config.name != name:
+            logger.error("Mismatch of config name and folder name. config.name = {}, name = {}".format(config.name, name))
         assert config.name == name
         return {"name": config.name, "description": config.description, "version": config.version}
     except ValidationError as e:
+        logger.error(str(e))
         return {"name": name, "description": None, "version": None}
 
 

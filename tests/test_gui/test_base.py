@@ -100,13 +100,13 @@ class TestBase:
         data = json.loads(response_list.get_data(as_text=True))
         assert response_list.status_code == 200
         assert len(data) == prev_count + 1
-        new_connection_exists = False
+        new_item_exists = False
         for element in data:
             assert element['id'] != ""
             assert element['description'] != ""
             if element['id'] == new_item_name:
-                new_connection_exists = True
-        assert new_connection_exists
+                new_item_exists = True
+        assert new_item_exists
 
         # Remove the item
         response_delete = self.app.delete(
@@ -144,10 +144,10 @@ class TestBase:
         data = json.loads(response_list.get_data(as_text=True))
         assert response_list.status_code == 200
         assert len(data) == prev_count + 1
-        new_connection_exists = False
+        new_item_exists = False
         for element in data:
             assert element['id'] != ""
             assert element['description'] != ""
             if element['id'] == scaffold_item_name:
-                new_connection_exists = True
-        assert new_connection_exists
+                new_item_exists = True
+        assert new_item_exists

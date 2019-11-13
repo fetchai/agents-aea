@@ -18,8 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea gui` sub-commands."""
-import json
-import time
+# import json
+# import time
 from .test_base import TestBase
 
 
@@ -27,6 +27,7 @@ class TestRunOEF(TestBase):
     """Test for running oef, reading TTY and errors."""
 
     def test_create_and_run_oef(self):
+        """Test for running oef, reading TTY and errors."""
         pass
         # """Test for running oef, reading TTY and errors."""
         #
@@ -55,4 +56,3 @@ class TestRunOEF(TestBase):
         #     time.sleep(2)
         #
         # assert oef_started
-

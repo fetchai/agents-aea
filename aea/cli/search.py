@@ -19,14 +19,14 @@
 
 """Implementation of the 'aea search' subcommand."""
 from pathlib import Path
-from typing import Set, cast
+from typing import cast, List, Dict
 import click
 import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, format_items, ConfigLoader
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
-    DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, format_items_dc, ConfigLoader
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE
+
 
 @click.group()
 @click.option("--registry", type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True, resolve_path=True),
@@ -46,11 +46,11 @@ def search(ctx: Context, registry):
 
 
 def _is_invalid_item(name, dir_path, config_path):
-    """returns true if this protocol, connection or skill should not be returned in the list"""
+    """Return true if this protocol, connection or skill should not be returned in the list."""
     return ".py" in name or "__" in name or name == "scaffold" or os.path.isfile(dir_path) or not os.path.isfile(config_path)
 
 
-def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_name: str, config_filename: str, results: []):
+def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_name: str, config_filename: str, results: List[Dict]):
     for r in Path(root_path).glob(sub_dir_name + "/*/"):
         dir_path = os.path.join(root_path, sub_dir_name, r.name)
         config_path = os.path.join(root_path, sub_dir_name, r.name, config_filename)
@@ -67,12 +67,12 @@ def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_name: st
 def connections(ctx: Context):
     """List all the connections available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = []
+    result: List[Dict] = []
     _get_details_from_dir(ctx.connection_loader, AEA_DIR, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
     _get_details_from_dir(ctx.connection_loader, registry, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
 
     print("Available connections:")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items_dc(sorted(result, key=lambda k: k['name'])))
 
 
 @search.command()
@@ -80,12 +80,12 @@ def connections(ctx: Context):
 def protocols(ctx: Context):
     """List all the protocols available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = []
+    result: List[Dict] = []
     _get_details_from_dir(ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
     _get_details_from_dir(ctx.protocol_loader, registry, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
 
     print("Available protocols:")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items_dc(sorted(result, key=lambda k: k['name'])))
 
 
 @search.command()
@@ -93,9 +93,9 @@ def protocols(ctx: Context):
 def skills(ctx: Context):
     """List all the skills available in the registry."""
     registry = cast(str, ctx.config.get("registry"))
-    result = []
+    result: List[Dict] = []
     _get_details_from_dir(ctx.skill_loader, AEA_DIR, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
     _get_details_from_dir(ctx.skill_loader, registry, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
 
     print("Available skills:")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items_dc(sorted(result, key=lambda k: k['name'])))
