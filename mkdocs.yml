@@ -30,9 +30,9 @@ nav:
       - "Gym demo": 'gym-plugin.md'
       - "Gym skill": 'gym-skill.md'
       - "Weather skills": 'weather-skills.md'
+      - "TAC skills": 'tac-skills.md'
       - "TAC external app": 'tac.md'
       # - "FIPA skill": 'fipa-skill.md'
-      # - "TAC skill": 'tac-skill.md'
       - "Car park agent": 'car-park.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
