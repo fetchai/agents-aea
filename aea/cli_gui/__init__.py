@@ -129,7 +129,7 @@ def _sync_extract_items_from_tty(pid):
     if pid.poll() == 0:
         return output, 200  # 200 (Success)
     else:
-        return err, 400  # 400 Bad request
+        return {"detail": err}, 400  # 400 Bad request
 
 
 def get_registered_items(item_type):
@@ -192,21 +192,21 @@ def scaffold_item(agent_id, item_type, item_id):
         return {"detail": "Failed to scaffold a new {} in to agent {}".format(item_type, agent_id)}, 400  # 400 Bad request
 
 
-def _call_aea(param_list, dir):
+def _call_aea(param_list, dir_arg):
     with lock:
         old_cwd = os.getcwd()
-        os.chdir(dir)
+        os.chdir(dir_arg)
         ret = subprocess.call(param_list)
         os.chdir(old_cwd)
     return ret
 
 
-def _call_aea_async(param_list, dir):
+def _call_aea_async(param_list, dir_arg):
     # Should lock here to prevet multiple calls coming in at once and changing the current working directory weirdly
     with lock:
         old_cwd = os.getcwd()
 
-        os.chdir(dir)
+        os.chdir(dir_arg)
         env = os.environ.copy()
         env["PYTHONUNBUFFERED"] = "1"
         ret = subprocess.Popen(param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
