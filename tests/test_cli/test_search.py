@@ -20,6 +20,7 @@
 """This test module contains the tests for the `aea search` sub-command."""
 import json
 import os
+from unittest import mock
 from pathlib import Path
 
 import jsonschema
@@ -56,6 +57,28 @@ class TestSearchProtocols:
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"])
         expected_output = "Available protocols:\n- " + "\n- ".join(["default", "fipa", "gym", "oef", "tac"]) + "\n"
+        assert self.result.output == expected_output
+
+    def test_correct_output_registry_api(self):
+        """Test that the command has printed the correct output when using Registry API."""
+        resp = [
+            {
+                "name": "protocol-1",
+                "description": "Protocol 1",
+                "version": "1",
+            },
+            {
+                "name": "protocol-2",
+                "description": "Protocol 2",
+                "version": "2",
+            }
+        ]
+        with mock.patch('aea.cli.registry.utils.request_api', return_value=resp):
+            self.result = self.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=1"]
+            )
+        expected_output = "any"
+        # for some reason self.result.output equals only the first line of output
         assert self.result.output == expected_output
 
     @classmethod
