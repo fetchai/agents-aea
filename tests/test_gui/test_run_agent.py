@@ -112,6 +112,14 @@ def test_create_and_run_agent():
 
     assert data["error"] == ""
     assert "RUNNING" in data["status"]
+    
+    # Stop the agent running
+    response_stop = app.delete(
+        'api/agent/' + agent_id + "/run",
+        data=None,
+        content_type='application/json',
+    )
+    assert response_stop.status_code == 200
 
     # Destroy the temporary current working directory and put cwd back to what it was before
     temp_cwd.destroy()
