@@ -62,7 +62,7 @@ def connections(ctx: Context, query):
         else:
             click.echo('Connections found:\n')
             click.echo(format_items(resp))
-            return
+        return
 
     registry = cast(str, ctx.config.get("registry"))
     result = set()  # type: Set[str]
@@ -98,7 +98,7 @@ def protocols(ctx: Context, query):
         else:
             click.echo('Protocols found:\n')
             click.echo(format_items(resp))
-            return
+        return
 
     registry = cast(str, ctx.config.get("registry"))
     result = set()  # type: Set[str]
@@ -134,7 +134,7 @@ def skills(ctx: Context, query):
         else:
             click.echo('Skills found:\n')
             click.echo(format_skills(resp))
-            return
+        return
 
     registry = cast(str, ctx.config.get("registry"))
     result = set()  # type: Set[str]
