@@ -288,11 +288,14 @@ class Multiplexer:
 
     def _stop(self):
         """Start the multiplexer."""
-        self._recv_loop_task.cancel()
+        if not self._recv_loop_task.done():
+            self._recv_loop_task.cancel()
 
-        # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing messages.
-        asyncio.run_coroutine_threadsafe(self.out_queue.put(None), self._loop).result()
-        self._send_loop_task.result()
+        if not self._send_loop_task.done():
+            # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing messages.
+            asyncio.run_coroutine_threadsafe(self.out_queue.put(None), self._loop).result()
+            self._send_loop_task.result(2.0)
+            self._send_loop_task.cancel()
 
         if self._loop.is_running():
             self._loop.call_soon_threadsafe(self._loop.stop)
@@ -353,12 +356,14 @@ class Multiplexer:
     async def _send_loop(self):
         """Process the outgoing messages."""
         if not self.is_connected:
+            logger.debug("Sending loop not started. The multiplexer is not connected.")
             return
         try:
             logger.debug("Waiting for outgoing messages...")
             envelope = await self.out_queue.get()
             if envelope is None:
-                return logger.debug("Received empty message. Quitting...")
+                logger.debug("Received empty message. Quitting the sending loop...")
+                return None
             logger.debug("Sending envelope {}".format(str(envelope)))
             await self._send(envelope)
         except asyncio.CancelledError:
@@ -372,11 +377,12 @@ class Multiplexer:
 
     async def _recv_loop(self):
         """Process incoming messages."""
-        logger.debug("Waiting for incoming messages...")
+        logger.debug("Starting receving loop...")
         task_to_connection = {asyncio.ensure_future(conn.recv()): conn for conn in self.connections}
 
         while self.is_connected:
             try:
+                logger.debug("Waiting for incoming messages...")
                 done, pending = await asyncio.wait(task_to_connection.keys(),
                                                    return_when=asyncio.FIRST_COMPLETED)
 
@@ -390,10 +396,16 @@ class Multiplexer:
 
             except asyncio.CancelledError:
                 logger.debug("Receiving loop cancelled.")
+                for t in task_to_connection.keys():
+                    await t
                 return
             except Exception as e:
                 logger.error("Error in the receiving loop: {}".format(str(e)))
                 return
+
+        for t in task_to_connection.keys():
+            t.cancel()
+        logger.debug("Receiving loop terminated.")
 
     async def _send(self, envelope: Envelope) -> None:
         """
@@ -529,7 +541,7 @@ class OutBox(object):
         :return: None
         """
         envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
-        self._multiplexer.out_queue.put_nowait(envelope)
+        self._multiplexer.put(envelope)
 
 
 class MailBox(object):

@@ -442,32 +442,24 @@ class TestFIPA:
 
     def test_on_oef_error(self):
         """Test the oef error."""
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path})
-        in_queue = Queue()
-        core = AsyncioCore(logger=logger)
-        my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
-                                oef_port=10000, in_queue=in_queue)
+        oef_connection = self.mailbox1._multiplexer.connections[0]
+        oef_channel = oef_connection.channel
 
         with pytest.raises(ValueError):
-            my_channel.on_propose(msg_id=0, dialogue_id=0, origin="me", target=1, b_proposals="hello")
+            oef_channel.on_propose(msg_id=0, dialogue_id=0, origin="me", target=1, b_proposals="hello")
 
-        my_channel.on_oef_error(answer_id=0, operation=OEFErrorOperation.SEARCH_AGENTS)
-        envelope = in_queue.get_nowait()
+        oef_channel.on_oef_error(answer_id=0, operation=OEFErrorOperation.SEARCH_AGENTS)
+        envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
         dec_msg = OEFSerializer().decode(envelope.message)
         assert dec_msg.get("type") is OEFMessage.Type.OEF_ERROR, "It should be an error message"
 
     def test_on_dialogue_error(self):
         """Test the dialogue error."""
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path})
-        in_queue = Queue()
-        core = AsyncioCore(logger=logger)
-        my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
-                                oef_port=10000, in_queue=in_queue)
+        oef_connection = self.mailbox1._multiplexer.connections[0]
+        oef_channel = oef_connection.channel
 
-        my_channel.on_dialogue_error(answer_id=0, dialogue_id=0, origin="me")
-        envelope = in_queue.get_nowait()
+        oef_channel.on_dialogue_error(answer_id=0, dialogue_id=0, origin="me")
+        envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
         dec_msg = OEFSerializer().decode(envelope.message)
         assert dec_msg.get("type") is OEFMessage.Type.DIALOGUE_ERROR, "It should be a dialogue error"
 
@@ -480,18 +472,13 @@ class TestFIPA:
         envelope = Envelope(to="mailbox", sender="me", protocol_id="unknown", message=b'Hello')
         self.mailbox1.send(envelope)
 
-    # def test_oef_mail_box(self):
-    #     """Test the mail stats."""
-    #     assert self.mailbox1.mail_stats.search_count == 0
-
     def test_send_oef_message(self):
         """Test the send oef message."""
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
-        in_queue = Queue()
         core = AsyncioCore(logger=logger)
         my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
-                                oef_port=10000, in_queue=in_queue)
+                                oef_port=10000)
 
         msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
                          operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
@@ -530,12 +517,13 @@ class TestOefConnection:
         mailbox.connect()
         mailbox.disconnect()
 
-    def test_oef_connect(self):
+    @pytest.mark.asyncio
+    async def test_oef_connect(self):
         """Test the OEFConnection."""
         con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
         assert not con.is_established
         with pytest.raises(ConnectionError):
-            con.connect()
+            await con.connect()
 
     def test_oef_from_config(self):
         """Test the Connection from config File."""
