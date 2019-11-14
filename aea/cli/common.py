@@ -29,7 +29,6 @@ from typing import Dict, List, cast
 
 import click
 import jsonschema  # type: ignore
-from jsonschema import ValidationError
 from dotenv import load_dotenv
 
 from aea.cli.loggers import default_logging_config
