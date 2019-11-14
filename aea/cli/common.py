@@ -141,28 +141,6 @@ def _load_env_file(env_file: str):
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
-def format_items_dc(items):
-    """
-    Format information about a protocol, connection or skill in a human readable form.
-
-    This is a placeholder until Oleg's function is merged in.
-    """
-    list_str = ''
-    for item in items:
-        list_str += (
-            '{line}\n'
-            'Name: {name}\n'
-            'Description: {description}\n'
-            'Version: {version}\n'
-            '{line}\n'.format(
-                name=item['name'],
-                description=item['description'],
-                version=item['version'],
-                line='-' * 30
-            ))
-    return list_str
-
-
 def format_items(items):
     """Format list of items (protocols/connections) to a string for CLI output."""
     list_str = ''
@@ -205,15 +183,11 @@ def format_skills(items):
 
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
     """Return description of a protocol, skill or connection."""
-    try:
-        config = loader.load(open(str(config_filepath)))
-        if config.name != name:
-            logger.error("Mismatch of config name and folder name. config.name = {}, name = {}".format(config.name, name))
-        assert config.name == name
-        return {"name": config.name, "description": config.description, "version": config.version}
-    except ValidationError as e:
-        logger.error(str(e))
-        return {"name": name, "description": None, "version": None}
+    config = loader.load(open(str(config_filepath)))
+    if config.name != name:
+        logger.error("Mismatch of config name and folder name. config.name = {}, name = {}".format(config.name, name))
+    assert config.name == name
+    return {"name": config.name, "description": config.description, "version": config.version}
 
 
 class AEAConfigException(Exception):

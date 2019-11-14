@@ -112,7 +112,7 @@ def test_create_and_run_agent():
 
     assert data["error"] == ""
     assert "RUNNING" in data["status"]
-    
+
     # Stop the agent running
     response_stop = app.delete(
         'api/agent/' + agent_id + "/run",

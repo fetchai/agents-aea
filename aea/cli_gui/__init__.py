@@ -27,6 +27,7 @@ import os
 import subprocess
 import threading
 import time
+from typing import List, Dict
 
 import connexion
 import flask
@@ -56,7 +57,7 @@ max_log_lines = 100
 lock = threading.Lock()
 
 
-def is_agent_dir(dir_name):
+def is_agent_dir(dir_name: str) -> bool:
     """Return trye if this directory contains an AEA project (an agent)."""
     if not os.path.isdir(dir_name):
         return False
@@ -64,7 +65,7 @@ def is_agent_dir(dir_name):
         return os.path.isfile(os.path.join(dir_name, "aea-config.yaml"))
 
 
-def get_agents():
+def get_agents() -> List[str]:
     """Return list of all local agents."""
     file_list = glob.glob(os.path.join(flask.app.agents_dir, '*'))
 
@@ -78,7 +79,7 @@ def get_agents():
     return agent_list
 
 
-def _sync_extract_items_from_tty(pid):
+def _sync_extract_items_from_tty(pid: subprocess.Popen):
     item_ids = []
     item_descs = []
     output = []
@@ -108,14 +109,14 @@ def _sync_extract_items_from_tty(pid):
         return {"detail": err}, 400  # 400 Bad request
 
 
-def get_registered_items(item_type):
+def get_registered_items(item_type: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
     pid = _call_aea_async(["aea", "search", item_type + "s"], os.path.join(flask.app.module_dir, "aea"))
     return _sync_extract_items_from_tty(pid)
 
 
-def create_agent(agent_id):
+def create_agent(agent_id: str):
     """Create a new AEA project."""
     if _call_aea(["aea", "create", agent_id], flask.app.agents_dir) == 0:
         return agent_id, 201  # 201 (Created)
@@ -123,7 +124,7 @@ def create_agent(agent_id):
         return {"detail": "Failed to create Agent {} - a folder of this name may exist already".format(agent_id)}, 400  # 400 Bad request
 
 
-def delete_agent(agent_id):
+def delete_agent(agent_id: str):
     """Delete an existing AEA project."""
     if _call_aea(["aea", "delete", agent_id], flask.app.agents_dir) == 0:
         return 'Agent {} deleted'.format(agent_id), 200   # 200 (OK)
@@ -131,7 +132,7 @@ def delete_agent(agent_id):
         return {"detail": "Failed to delete Agent {} - it may not exist".format(agent_id)}, 400   # 400 Bad request
 
 
-def add_item(agent_id, item_type, item_id):
+def add_item(agent_id: str, item_type: str, item_id: str):
     """Add a protocol, skill or connection to the register to a local agent."""
     agent_dir = os.path.join(flask.app.agents_dir, agent_id)
     if _call_aea(["aea", "add", item_type, item_id], agent_dir) == 0:
@@ -140,7 +141,7 @@ def add_item(agent_id, item_type, item_id):
         return {"detail": "Failed to add protocol {} to agent {}".format(item_id, agent_id)}, 400  # 400 Bad request
 
 
-def remove_local_item(agent_id, item_type, item_id):
+def remove_local_item(agent_id: str, item_type: str, item_id: str):
     """Remove a protocol, skill or connection from a local agent."""
     agent_dir = os.path.join(flask.app.agents_dir, agent_id)
     if _call_aea(["aea", "remove", item_type, item_id], agent_dir) == 0:
@@ -149,7 +150,7 @@ def remove_local_item(agent_id, item_type, item_id):
         return {"detail": "Failed to remove {} {} from agent {}".format(item_type, item_id, agent_id)}, 400  # 400 Bad request
 
 
-def get_local_items(agent_id, item_type):
+def get_local_items(agent_id: str, item_type: str):
     """Return a list of protocols, skills or connections supported by a local agent."""
     if agent_id == "NONE":
         return [], 200  # 200 (Success)
@@ -159,7 +160,7 @@ def get_local_items(agent_id, item_type):
     return _sync_extract_items_from_tty(pid)
 
 
-def scaffold_item(agent_id, item_type, item_id):
+def scaffold_item(agent_id: str, item_type: str, item_id: str):
     """Scaffold a moslty empty item on an agent (either protocol, skill or connection)."""
     agent_dir = os.path.join(flask.app.agents_dir, agent_id)
     if _call_aea(["aea", "scaffold", item_type, item_id], agent_dir) == 0:
@@ -168,7 +169,7 @@ def scaffold_item(agent_id, item_type, item_id):
         return {"detail": "Failed to scaffold a new {} in to agent {}".format(item_type, agent_id)}, 400  # 400 Bad request
 
 
-def _call_aea(param_list, dir_arg):
+def _call_aea(param_list: List[Dict], dir_arg: str) -> int:
     with lock:
         old_cwd = os.getcwd()
         os.chdir(dir_arg)
@@ -177,7 +178,7 @@ def _call_aea(param_list, dir_arg):
     return ret
 
 
-def _call_aea_async(param_list, dir_arg):
+def _call_aea_async(param_list: List[Dict], dir_arg: str) -> subprocess.Popen:
     # Should lock here to prevet multiple calls coming in at once and changing the current working directory weirdly
     with lock:
         old_cwd = os.getcwd()
@@ -251,7 +252,7 @@ def stop_oef_node():
     return "All fine", 200  # 200 (OK)
 
 
-def start_agent(agent_id, connection_id):
+def start_agent(agent_id: str, connection_id: str):
     """Start a local agent running."""
     # Test if it is already running in some form
     if agent_id in flask.app.agent_processes:
@@ -296,23 +297,23 @@ def start_agent(agent_id, connection_id):
     return agent_id, 201  # 200 (OK)
 
 
-def _read_tty(process, str_list):
-    for line in io.TextIOWrapper(process.stdout, encoding="utf-8"):
+def _read_tty(pid: subprocess.Popen, str_list: List[str]):
+    for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
         logging.info("stdout: " + line.replace("\n", ""))
         str_list.append(line)
 
     str_list.append("process terminated\n")
 
 
-def _read_error(process, str_list):
-    for line in io.TextIOWrapper(process.stderr, encoding="utf-8"):
+def _read_error(pid: subprocess.Popen, str_list: List[str]):
+    for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
         logging.error("stderr: " + line.replace("\n", ""))
         str_list.append(line)
 
     str_list.append("process terminated\n")
 
 
-def get_agent_status(agent_id):
+def get_agent_status(agent_id: str):
     """Get the status of the running agent Node."""
     status_str = str(ProcessState.NOT_STARTED).replace('ProcessState.', '')
     tty_str = ""
@@ -345,7 +346,7 @@ def get_agent_status(agent_id):
     return {"status": status_str, "tty": tty_str, "error": error_str}, 200  # (OK)
 
 
-def stop_agent(agent_id):
+def stop_agent(agent_id: str):
     """Stop agent running."""
     # Test if we have the process id
     if agent_id not in flask.app.agent_processes:
@@ -358,7 +359,7 @@ def stop_agent(agent_id):
     return "stop_agent: All fine {}".format(agent_id), 200  # 200 (OK)
 
 
-def get_process_status(process_id) -> ProcessState:
+def get_process_status(process_id: subprocess.Popen) -> ProcessState:
     """Return the state of the execution."""
     if process_id is None:
         return ProcessState.NOT_STARTED

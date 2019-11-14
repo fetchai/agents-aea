@@ -39,8 +39,12 @@ def scaffold(ctx: Context):
     _try_to_load_agent_config(ctx)
 
 
-def _scaffold_item(ctx: Context, item_type, item_name, existing_item_list, loader, default_config_filename):
+def _scaffold_item(ctx: Context, item_type, item_name):
     """Add an item scaffolding to the configuration file and agent."""
+    existing_item_list = getattr(ctx.agent_config, "{}s".format(item_type))
+    loader = getattr(ctx, "{}_loader".format(item_type))
+    default_config_filename = globals()["DEFAULT_{}_CONFIG_FILE".format(item_type.upper())]
+
     item_type_plural = item_type + "s"
 
     # check if we already have an item with the same name
@@ -93,13 +97,7 @@ def _scaffold_item(ctx: Context, item_type, item_name, existing_item_list, loade
 @pass_ctx
 def connection(ctx: Context, connection_name: str) -> None:
     """Add a connection scaffolding to the configuration file and agent."""
-    _scaffold_item(
-        ctx,
-        "connection",
-        connection_name,
-        ctx.agent_config.connections,
-        ctx.connection_loader,
-        DEFAULT_CONNECTION_CONFIG_FILE)
+    _scaffold_item(ctx, "connection", connection_name)
 
 
 @scaffold.command()
@@ -107,13 +105,7 @@ def connection(ctx: Context, connection_name: str) -> None:
 @pass_ctx
 def protocol(ctx: Context, protocol_name: str):
     """Add a protocol scaffolding to the configuration file and agent."""
-    _scaffold_item(
-        ctx,
-        "protocol",
-        protocol_name,
-        ctx.agent_config.protocols,
-        ctx.protocol_loader,
-        DEFAULT_PROTOCOL_CONFIG_FILE)
+    _scaffold_item(ctx, "protocol", protocol_name)
 
 
 @scaffold.command()
@@ -121,10 +113,4 @@ def protocol(ctx: Context, protocol_name: str):
 @pass_ctx
 def skill(ctx: Context, skill_name: str):
     """Add a skill scaffolding to the configuration file and agent."""
-    _scaffold_item(
-        ctx,
-        "skill",
-        skill_name,
-        ctx.agent_config.skills,
-        ctx.skill_loader,
-        DEFAULT_SKILL_CONFIG_FILE)
+    _scaffold_item(ctx, "skill", skill_name)

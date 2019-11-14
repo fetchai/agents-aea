@@ -24,7 +24,7 @@ import click
 import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, format_items_dc, ConfigLoader, format_items, format_skills
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, format_items, ConfigLoader, format_items, format_skills
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.cli.registry.utils import request_api
 
@@ -88,7 +88,7 @@ def connections(ctx: Context, query):
     _get_details_from_dir(ctx.connection_loader, registry, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
 
     print("Available connections:")
-    print(format_items_dc(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k['name'])))
 
 
 @search.command()
@@ -115,7 +115,7 @@ def protocols(ctx: Context, query):
     _get_details_from_dir(ctx.protocol_loader, registry, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
 
     print("Available protocols:")
-    print(format_items_dc(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k['name'])))
 
 
 @search.command()
@@ -142,4 +142,4 @@ def skills(ctx: Context, query):
     _get_details_from_dir(ctx.skill_loader, registry, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
 
     print("Available skills:")
-    print(format_items_dc(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k['name'])))
