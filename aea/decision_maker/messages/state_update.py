@@ -46,25 +46,25 @@ class StateUpdateMessage(Message):
         APPLY = "apply"
 
     def __init__(self, performative: Union[str, Performative],
-                 amount_by_currency_pbk: Currencies,
+                 amount_by_currency: Currencies,
                  quantities_by_good_pbk: Goods,
-                 utility_params: Optional[UtilityParams] = None,
-                 exchange_params: Optional[ExchangeParams] = None,
+                 exchange_params_by_currency: Optional[ExchangeParams] = None,
+                 utility_params_by_good_pbk: Optional[UtilityParams] = None,
                  **kwargs):
         """
         Instantiate transaction message.
 
         :param performative: the performative
-        :param amount_by_currency_pbk: the amounts of currencies.
+        :param amount_by_currency: the amounts of currencies.
         :param quantities_by_good_pbk: the quantities of goods.
-        :param utility_params: the utility params.
-        :param exchange_params: the exchange params.
+        :param exchange_params_by_currency: the exchange params.
+        :param utility_params_by_good_pbk: the utility params.
         """
         super().__init__(performative=performative,
-                         amount_by_currency_pbk=amount_by_currency_pbk,
+                         amount_by_currency=amount_by_currency,
                          quantities_by_good_pbk=quantities_by_good_pbk,
-                         utility_params=utility_params,
-                         exchange_params=exchange_params,
+                         exchange_params_by_currency=exchange_params_by_currency,
+                         utility_params_by_good_pbk=utility_params_by_good_pbk,
                          **kwargs)
         assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
 
@@ -84,14 +84,14 @@ class StateUpdateMessage(Message):
             quantities_by_good_pbk = self.get("quantities_by_good_pbk")
             quantities_by_good_pbk = cast(Goods, quantities_by_good_pbk)
             if performative == self.Performative.RESET:
-                assert self.is_set("exchange_params")
-                exchange_params = self.get("exchange_params")
-                exchange_params = cast(ExchangeParams, exchange_params)
-                assert amount_by_currency_pbk.keys() == exchange_params.keys()
-                assert self.is_set("utility_params")
-                utility_params = self.get("utility_params")
-                utility_params = cast(UtilityParams, utility_params)
-                assert quantities_by_good_pbk.keys() == utility_params.keys()
+                assert self.is_set("exchange_params_by_currency")
+                exchange_params_by_currency = self.get("exchange_params_by_currency")
+                exchange_params_by_currency = cast(ExchangeParams, exchange_params_by_currency)
+                assert amount_by_currency_pbk.keys() == exchange_params_by_currency.keys()
+                assert self.is_set("utility_params_by_good_pbk")
+                utility_params_by_good_pbk = self.get("utility_params_by_good_pbk")
+                utility_params_by_good_pbk = cast(UtilityParams, utility_params_by_good_pbk)
+                assert quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
         except (AssertionError, KeyError):
             return False
         return True

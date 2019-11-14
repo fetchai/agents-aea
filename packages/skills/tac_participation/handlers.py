@@ -292,7 +292,7 @@ class TACHandler(Handler):
         """
         logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.get("transaction_id")))
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY,
-                                              amount_by_currency_pbk=cast(Dict[str, int], message.get("amount_by_currency_pbk")),
+                                              amount_by_currency=cast(Dict[str, int], message.get("amount_by_currency")),
                                               quantities_by_good_pbk=cast(Dict[str, int], message.get("quantities_by_good_pbk")))
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
