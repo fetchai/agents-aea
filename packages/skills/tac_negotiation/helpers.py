@@ -48,7 +48,7 @@ def build_goods_datamodel(good_pbks: List[str], currency: str, is_supply: bool) 
     """
     goods_quantities_attributes = [Attribute(good_pbk, int, False)
                                    for good_pbk in good_pbks]
-    price_attribute = Attribute(currency, float, False)
+    price_attribute = Attribute(currency, int, False)
     description = SUPPLY_DATAMODEL_NAME if is_supply else DEMAND_DATAMODEL_NAME
     attributes = goods_quantities_attributes + [price_attribute]
     data_model = DataModel(description, attributes)

@@ -85,13 +85,10 @@ class TACSerializer(Serializer):
             tac_msg = tac_pb2.TACAgent.Transaction()  # type: ignore
             tac_msg.transaction_id = msg.get("transaction_id")
             tac_msg.counterparty = msg.get("counterparty")
-            tac_msg.is_sender_buyer = msg.get("is_sender_buyer")
-            tac_msg.currency_pbk = msg.get("currency_pbk")
-            tac_msg.amount = msg.get("amount")
+            tac_msg.amount_by_currency.extend(_from_dict_to_pairs(msg.get("amount_by_currency")))
             tac_msg.sender_tx_fee = msg.get("sender_tx_fee")
             tac_msg.counterparty_tx_fee = msg.get("counterparty_tx_fee")
             tac_msg.quantities.extend(_from_dict_to_pairs(msg.get("quantities_by_good_pbk")))
-            tac_msg.ledger_id = msg.get("ledger_id")
             tac_container.transaction.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.GET_STATE_UPDATE:
             tac_msg = tac_pb2.TACAgent.GetStateUpdate()  # type: ignore
@@ -101,28 +98,29 @@ class TACSerializer(Serializer):
             tac_container.cancelled.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.GAME_DATA:
             tac_msg = tac_pb2.TACController.GameData()  # type: ignore
-            tac_msg.money = msg.get("money")
-            tac_msg.endowment.extend(msg.get("endowment"))
-            tac_msg.utility_params.extend(msg.get("utility_params"))
-            tac_msg.nb_agents = msg.get("nb_agents")
-            tac_msg.nb_goods = msg.get("nb_goods")
+            tac_msg.amount_by_currency.extend(msg.get("amount_by_currency"))
+            tac_msg.exchange_params_by_currency.extend(msg.get("exchange_params_by_currency"))
+            tac_msg.quantities_by_good_pbk.extend(msg.get("quantities_by_good_pbk"))
+            tac_msg.utility_params_by_good_pbk.extend(msg.get("utility_params_by_good_pbk"))
             tac_msg.tx_fee = msg.get("tx_fee")
             tac_msg.agent_pbk_to_name.extend(_from_dict_to_pairs(msg.get("agent_pbk_to_name")))
             tac_msg.good_pbk_to_name.extend(_from_dict_to_pairs(msg.get("good_pbk_to_name")))
+            tac_msg.version_id = msg.get("version_id")
             tac_container.game_data.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
             tac_msg = tac_pb2.TACController.TransactionConfirmation()  # type: ignore
             tac_msg.transaction_id = msg.get("transaction_id")
+            tac_msg.amount_by_currency.extend(msg.get("amount_by_currency"))
+            tac_msg.quantities_by_good_pbk.extend(msg.get("quantities_by_good_pbk"))
             tac_container.transaction_confirmation.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.STATE_UPDATE:
             tac_msg = tac_pb2.TACController.StateUpdate()  # type: ignore
-            game_data_json = msg.get("initial_state")
+            game_data_json = msg.get("game_data")
             game_data = tac_pb2.TACController.GameData()  # type: ignore
-            game_data.money = game_data_json["money"]  # type: ignore
-            game_data.endowment.extend(game_data_json["endowment"])  # type: ignore
-            game_data.utility_params.extend(game_data_json["utility_params"])  # type: ignore
-            game_data.nb_agents = game_data_json["nb_agents"]  # type: ignore
-            game_data.nb_goods = game_data_json["nb_goods"]  # type: ignore
+            game_data.amount_by_currency.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["amount_by_currency"])))  # type: ignore
+            game_data.exchange_params_by_currency.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["exchange_params_by_currency"])))  # type: ignore
+            game_data.quantities_by_good_pbk.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["quantities_by_good_pbk"])))  # type: ignore
+            game_data.utility_params_by_good_pbk.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["utility_params_by_good_pbk"])))  # type: ignore
             game_data.tx_fee = game_data_json["tx_fee"]  # type: ignore
             game_data.agent_pbk_to_name.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["agent_pbk_to_name"])))  # type: ignore
             game_data.good_pbk_to_name.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["good_pbk_to_name"])))  # type: ignore
@@ -134,10 +132,11 @@ class TACSerializer(Serializer):
             for t in msg_transactions:
                 tx = tac_pb2.TACAgent.Transaction()  # type: ignore
                 tx.transaction_id = t.get("transaction_id")
-                tx.is_sender_buyer = t.get("is_sender_buyer")
                 tx.counterparty = t.get("counterparty")
-                tx.amount = t.get("amount")
-                tx.quantities.extend(_from_dict_to_pairs(t.get("quantities_by_good_pbk")))
+                tx.amount_by_currency.extend(_from_dict_to_pairs(t.get("amount_by_currency")))
+                tx.sender_tx_fee = t.get("sender_tx_fee")
+                tx.counterparty_tx_fee = t.get("counterparty_tx_fee")
+                tx.quantities_by_good_pbk.extend(_from_dict_to_pairs(t.get("quantities_by_good_pbk")))
                 transactions.append(tx)
             tac_msg.txs.extend(transactions)
             tac_container.state_update.CopyFrom(tac_msg)
@@ -178,51 +177,49 @@ class TACSerializer(Serializer):
             new_body["type"] = TACMessage.Type.TRANSACTION
             new_body["transaction_id"] = tac_container.transaction.transaction_id
             new_body["counterparty"] = tac_container.transaction.counterparty
-            new_body["is_sender_buyer"] = tac_container.transaction.is_sender_buyer
-            new_body["currency_pbk"] = tac_container.transaction.currency_pbk
-            new_body["amount"] = tac_container.transaction.amount
+            new_body["amount_by_currency"] = _from_pairs_to_dict(tac_container.transaction.amount_by_currency)
             new_body["sender_tx_fee"] = tac_container.transaction.sender_tx_fee
             new_body["counterparty_tx_fee"] = tac_container.transaction.counterparty_tx_fee
-            new_body["quantities_by_good_pbk"] = _from_pairs_to_dict(tac_container.transaction.quantities)
-            new_body["ledger_id"] = tac_container.transaction.ledger_id
+            new_body["quantities_by_good_pbk"] = _from_pairs_to_dict(tac_container.transaction.quantities_by_good_pbk)
         elif tac_type == "get_state_update":
             new_body["type"] = TACMessage.Type.GET_STATE_UPDATE
         elif tac_type == "cancelled":
             new_body["type"] = TACMessage.Type.CANCELLED
         elif tac_type == "game_data":
             new_body["type"] = TACMessage.Type.GAME_DATA
-            new_body["money"] = tac_container.game_data.money
-            new_body["endowment"] = list(tac_container.game_data.endowment)
-            new_body["utility_params"] = list(tac_container.game_data.utility_params)
-            new_body["nb_agents"] = tac_container.game_data.nb_agents
-            new_body["nb_goods"] = tac_container.game_data.nb_goods
+            new_body["amount_by_currency"] = _from_pairs_to_dict(tac_container.game_data.amount_by_currency)
+            new_body["exchange_params_by_currency"] = _from_pairs_to_dict(tac_container.game_data.exchange_params_by_currency)
+            new_body["quantities_by_good_pbk"] = _from_pairs_to_dict(tac_container.game_data.quantities_by_good_pbk)
+            new_body["utility_params_by_good_pbk"] = _from_pairs_to_dict(tac_container.game_data.utility_params_by_good_pbk)
             new_body["tx_fee"] = tac_container.game_data.tx_fee
             new_body["agent_pbk_to_name"] = _from_pairs_to_dict(tac_container.game_data.agent_pbk_to_name)
             new_body["good_pbk_to_name"] = _from_pairs_to_dict(tac_container.game_data.good_pbk_to_name)
+            new_body["version_id"] = tac_container.game_data.version_id
         elif tac_type == "transaction_confirmation":
             new_body["type"] = TACMessage.Type.TRANSACTION_CONFIRMATION
             new_body["transaction_id"] = tac_container.transaction_confirmation.transaction_id
         elif tac_type == "state_update":
             new_body["type"] = TACMessage.Type.STATE_UPDATE
             game_data = dict(
-                money=tac_container.state_update.initial_state.money,
-                endowment=tac_container.state_update.initial_state.endowment,
-                utility_params=tac_container.state_update.initial_state.utility_params,
-                nb_agents=tac_container.state_update.initial_state.nb_agents,
-                nb_goods=tac_container.state_update.initial_state.nb_goods,
-                tx_fee=tac_container.state_update.initial_state.tx_fee,
-                agent_pbk_to_name=_from_pairs_to_dict(tac_container.state_update.initial_state.agent_pbk_to_name),
-                good_pbk_to_name=_from_pairs_to_dict(tac_container.state_update.initial_state.good_pbk_to_name),
+                amount_by_currency=_from_pairs_to_dict(tac_container.state_update.game_data.amount_by_currency),
+                exchange_params_by_currency=_from_pairs_to_dict(tac_container.state_update.game_data.exchange_params_by_currency),
+                quantities_by_good_pbk=_from_pairs_to_dict(tac_container.state_update.game_data.quantities_by_good_pbk),
+                utility_params_by_good_pbk=_from_pairs_to_dict(tac_container.state_update.game_data.utility_params_by_good_pbk),
+                tx_fee=tac_container.state_update.game_data.tx_fee,
+                agent_pbk_to_name=_from_pairs_to_dict(tac_container.state_update.game_data.agent_pbk_to_name),
+                good_pbk_to_name=_from_pairs_to_dict(tac_container.state_update.game_data.good_pbk_to_name),
+                version_id=tac_container.state_update.game_data.version_id
             )
-            new_body["initial_state"] = game_data
+            new_body["game_data"] = game_data
             transactions = []
-            for t in tac_container.state_update.txs:
+            for transaction in tac_container.state_update.transactions:
                 tx_json = dict(
-                    transaction_id=t.transaction_id,
-                    is_sender_buyer=t.is_sender_buyer,
-                    counterparty=t.counterparty,
-                    amount=t.amount,
-                    quantities_by_good_pbk=_from_pairs_to_dict(t.quantities),
+                    transaction_id=transaction.transaction_id,
+                    counterparty=transaction.counterparty,
+                    amount_by_currency=_from_pairs_to_dict(transaction.amount_by_currency),
+                    sender_tx_fee=transaction.sender_tx_fee,
+                    counterparty_tx_fee=transaction.counterparty_tx_fee,
+                    quantities_by_good_pbk=_from_pairs_to_dict(transaction.quantities_by_good_pbk),
                 )
                 transactions.append(tx_json)
             new_body["transactions"] = transactions

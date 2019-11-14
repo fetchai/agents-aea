@@ -135,7 +135,7 @@ class FIPANegotiationHandler(Handler):
             decline = True
             logger.debug("[{}]: Current holdings do not satisfy CFP query.".format(self.context.agent_name))
         else:
-            proposal_description = strategy.get_proposal_for_query(cfp_query, self.context.preferences, ownership_state_after_locks, is_seller=dialogue.is_seller, tx_fee=1.0)
+            proposal_description = strategy.get_proposal_for_query(cfp_query, self.context.preferences, ownership_state_after_locks, is_seller=dialogue.is_seller, tx_fee=1)
             if proposal_description is None:
                 decline = True
                 logger.debug("[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(self.context.agent_name))

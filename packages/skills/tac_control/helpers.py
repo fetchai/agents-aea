@@ -146,7 +146,7 @@ def generate_money_endowments(nb_agents: int, money_endowment: int) -> List[floa
     return [money_endowment * 1.0] * nb_agents
 
 
-def generate_equilibrium_prices_and_holdings(endowments: List[List[int]], utility_function_params: List[List[float]], money_endowment: float, scaling_factor: float, quantity_shift: int = QUANTITY_SHIFT) -> Tuple[List[float], List[List[float]], List[float]]:
+def generate_equilibrium_prices_and_holdings(endowments: List[List[int]], utility_function_params: List[List[float]], money_endowment: int, scaling_factor: float, quantity_shift: int = QUANTITY_SHIFT) -> Tuple[List[float], List[List[float]], List[float]]:
     """
     Compute the competitive equilibrium prices and allocation.
 

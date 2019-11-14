@@ -240,7 +240,7 @@ class Initialization:
 class GoodState:
     """Represent the state of a good during the game."""
 
-    def __init__(self, price: float) -> None:
+    def __init__(self, price: float = 0.0) -> None:
         """
         Instantiate an agent state object.
 
@@ -258,7 +258,7 @@ class GoodState:
         :return: None
         :raises: AssertionError: if some constraint is not satisfied.
         """
-        assert self.price >= 0, "The price must be non-negative."
+        assert self.price >= 0.0, "The price must be non-negative."
 
 
 class Transaction:
@@ -268,38 +268,30 @@ class Transaction:
                  transaction_id: TransactionId,
                  sender: Address,
                  counterparty: Address,
-                 is_sender_buyer: bool,
-                 currency_pbk: str,
-                 amount: int,
+                 amount_by_currency: Dict[str, int],
                  sender_tx_fee: int,
                  counterparty_tx_fee: int,
-                 quantities_by_good_pbk: Dict[str, int],
-                 ledger_id: str) -> None:
+                 quantities_by_good_pbk: Dict[str, int]) -> None:
         """
         Instantiate transaction request.
 
         :param transaction_id: the id of the transaction.
         :param sender: the sender of the transaction.
         :param counterparty: the counterparty of the transaction.
-        :param is_sender_buyer: whether the transaction is sent by a buyer.
-        :param currency_pbk: the currencry used.
-        :param amount: the amount of money involved.
+        :param amount_by_currency: the currency used.
         :param sender_tx_fee: the transaction fee covered by the sender.
         :param counterparty_tx_fee: the transaction fee covered by the counterparty.
         :param quantities_by_good_pbk: a map from good pbk to the quantity of that good involved in the transaction.
-        :param ledger_id: the ledger used for transacting.
         :return: None
         """
         self.transaction_id = transaction_id
         self.sender = sender
         self.counterparty = counterparty
-        self.is_sender_buyer = is_sender_buyer
-        self.currency_pbk = currency_pbk
-        self.amount = amount
+        self.is_sender_buyer = any(value <= 0 for value in amount_by_currency.values())
+        self.amount_by_currency = amount_by_currency
         self.sender_tx_fee = sender_tx_fee
         self.counterparty_tx_fee = counterparty_tx_fee
         self.quantities_by_good_pbk = quantities_by_good_pbk
-        self.ledger_id = ledger_id
         self._check_consistency()
 
     @property
@@ -334,11 +326,10 @@ class Transaction:
         :raises AssertionError if some constraint is not satisfied.
         """
         assert self.sender != self.counterparty
-        assert self.amount >= 0
+        assert len(self.amount_by_currency.keys()) == len(set(self.amount_by_currency.keys()))
         assert self.sender_tx_fee >= 0
         assert self.counterparty_tx_fee >= 0
         assert len(self.quantities_by_good_pbk.keys()) == len(set(self.quantities_by_good_pbk.keys()))
-        assert all(quantity >= 0 for quantity in self.quantities_by_good_pbk.values())
 
     @classmethod
     def from_message(cls, message: TACMessage, sender: Address) -> 'Transaction':
@@ -352,13 +343,10 @@ class Transaction:
         return Transaction(cast(str, message.get("transaction_id")),
                            sender,
                            cast(str, message.get("counterparty")),
-                           cast(bool, message.get("is_sender_buyer")),
-                           cast(str, message.get("currency_pbk")),
-                           cast(int, message.get("amount")),
+                           cast(Dict[str, int], message.get("amount_by_currency")),
                            cast(int, message.get("sender_tx_fee")),
                            cast(int, message.get("counterparty_tx_fee")),
-                           cast(Dict[str, int], message.get("quantities_by_good_pbk")),
-                           cast(str, message.get("ledger_id")))
+                           cast(Dict[str, int], message.get("quantities_by_good_pbk")))
 
     def matches(self, other: 'Transaction') -> bool:
         """
@@ -377,12 +365,10 @@ class Transaction:
             and self.sender == other.counterparty \
             and self.counterparty == other.sender \
             and self.is_sender_buyer != other.is_sender_buyer \
-            and self.currency_pbk == other.currency_pbk \
-            and self.amount == other.amount \
+            and self.amount_by_currency == - other.amount_by_currency \
             and self.sender_tx_fee == other.counterparty_tx_fee \
             and self.counterparty_tx_fee == other.sender_tx_fee \
-            and self.quantities_by_good_pbk == other.quantities_by_good_pbk \
-            and self.ledger_id == other.ledger_id
+            and self.quantities_by_good_pbk == - other.quantities_by_good_pbk
 
     def __eq__(self, other):
         """Compare to another object."""
@@ -391,12 +377,10 @@ class Transaction:
             and self.sender == other.sender \
             and self.counterparty == other.counterparty \
             and self.is_sender_buyer == other.is_sender_buyer \
-            and self.currency_pbk == other.currency_pbk \
-            and self.amount == other.amount \
+            and self.amount_by_currency == other.amount_by_currency \
             and self.sender_tx_fee == other.sender_tx_fee \
             and self.counterparty_tx_fee == other.counterparty_tx_fee \
-            and self.quantities_by_good_pbk == other.quantities_by_good_pbk \
-            and self.ledger_id == other.ledger_id
+            and self.quantities_by_good_pbk == other.quantities_by_good_pbk
 
 
 class AgentState:

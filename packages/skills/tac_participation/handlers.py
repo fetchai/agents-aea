@@ -20,8 +20,9 @@
 """This package contains the handlers."""
 
 import logging
-from typing import List, cast, TYPE_CHECKING
+from typing import Dict, List, cast, TYPE_CHECKING
 
+from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.protocols.base import Message
 from aea.protocols.oef.message import OEFMessage
 from aea.skills.base import Handler
@@ -218,7 +219,7 @@ class TACHandler(Handler):
                 self._on_tac_error(tac_msg, sender)
             elif game.phase.value == Phase.PRE_GAME.value:
                 raise ValueError("We do not expect a controller agent message in the pre game phase.")
-            elif game.phase.value == Phase.GAME_SETUP.value:
+            elif game.phase.value == Phase.GAME_REGISTRATION.value:
                 if tac_msg_type == TACMessage.Type.GAME_DATA:
                     self._on_start(tac_msg, sender)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
@@ -228,8 +229,8 @@ class TACHandler(Handler):
                     self._on_transaction_confirmed(tac_msg, sender)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
-                elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
-                    self._on_state_update(tac_msg, sender)
+                # elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
+                #     self._on_state_update(tac_msg, sender)
             elif game.phase.value == Phase.POST_GAME.value:
                 raise ValueError("We do not expect a controller agent message in the post game phase.")
         except ValueError as e:
@@ -266,7 +267,7 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.debug("[{}]: Received start event from the controller. Starting to compete...".format(self.context.agent_name))
+        logger.info("[{}]: Received start event from the controller. Starting to compete...".format(self.context.agent_name))
         game = cast(Game, self.context.game)
         game.init(tac_message, controller_pbk)
         game.update_game_phase(Phase.GAME)
@@ -277,7 +278,7 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.debug("[{}]: Received cancellation from the controller.".format(self.context.agent_name))
+        logger.info("[{}]: Received cancellation from the controller.".format(self.context.agent_name))
         game = cast(Game, self.context.game)
         game.update_game_phase(Phase.POST_GAME)
 
@@ -289,39 +290,33 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.debug("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.get("transaction_id")))
-        # if message.get("transaction_id") not in self.transactions.locked_txs:
-        #     logger.debug("[{}]: transaction not found - ask the controller an update of the state.".format(self.context.agent_name))
-        #     self._request_state_update()
-        #     return
+        logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.get("transaction_id")))
+        state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY,
+                                              amount_by_currency=cast(Dict[str, int], message.get("amount_by_currency")),
+                                              quantities_by_good_pbk=cast(Dict[str, int], message.get("quantities_by_good_pbk")))
+        self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
-        # self.context.transaction_queue =
-        # transaction = self.game_instance.transaction_manager.pop_locked_tx(message.get("transaction_id"))
-        # self.game_instance.agent_state.update(transaction, self.game_instance.game_configuration.tx_fee)
-        # dialogue_label = dialogue_label_from_transaction_id(self.crypto.public_key, message.get("transaction_id"))
-        # self.game_instance.stats_manager.add_dialogue_endstate(EndState.SUCCESSFUL, self.crypto.public_key == dialogue_label.dialogue_starter_pbk)
+    # def _on_state_update(self, tac_message: TACMessage, controller_pbk: Address) -> None:
+    #     """
+    #     Update the game instance with a State Update from the controller.
 
-    def _on_state_update(self, tac_message: TACMessage, controller_pbk: Address) -> None:
-        """
-        Update the game instance with a State Update from the controller.
+    #     :param tac_message: the state update
+    #     :param controller_pbk: the public key of the controller
 
-        :param tac_message: the state update
-        :param controller_pbk: the public key of the controller
-
-        :return: None
-        """
-        game = cast(Game, self.context.game)
-        game.init(tac_message, controller_pbk)
-        game.update_game_phase(Phase.GAME)
-        # # for tx in message.get("transactions"):
-        # #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))
-        # self.context.state_update_queue =
-        # self._initial_agent_state = AgentStateUpdate(game_data.money, game_data.endowment, game_data.utility_params)
-        # self._agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
-        # # if self.strategy.is_world_modeling:
-        # #     opponent_pbks = self.game_configuration.agent_pbks
-        # #     opponent_pbks.remove(agent_pbk)
-        # #     self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
+    #     :return: None
+    #     """
+    #     game = cast(Game, self.context.game)
+    #     game.init(tac_message, controller_pbk)
+    #     game.update_game_phase(Phase.GAME)
+    #     # for tx in message.get("transactions"):
+    #     #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))
+    #     self.context.state_update_queue =
+    #     self._initial_agent_state = AgentStateUpdate(game_data.money, game_data.endowment, game_data.utility_params)
+    #     self._agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
+    #     # if self.strategy.is_world_modeling:
+    #     #     opponent_pbks = self.game_configuration.agent_pbks
+    #     #     opponent_pbks.remove(agent_pbk)
+    #     #     self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
 
     def _on_dialogue_error(self, tac_message: TACMessage, controller_pbk: Address) -> None:
         """
@@ -334,13 +329,13 @@ class TACHandler(Handler):
         """
         logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name, tac_message.get("details"), controller_pbk))
 
-    def _request_state_update(self) -> None:
-        """
-        Request current agent state from TAC Controller.
+    # def _request_state_update(self) -> None:
+    #     """
+    #     Request current agent state from TAC Controller.
 
-        :return: None
-        """
-        tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
-        tac_bytes = TACSerializer().encode(tac_msg)
-        game = cast(Game, self.context.game)
-        self.context.outbox.put_message(to=game.expected_controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+    #     :return: None
+    #     """
+    #     tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
+    #     tac_bytes = TACSerializer().encode(tac_msg)
+    #     game = cast(Game, self.context.game)
+    #     self.context.outbox.put_message(to=game.expected_controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)

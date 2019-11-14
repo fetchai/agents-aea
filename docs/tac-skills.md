@@ -63,19 +63,26 @@ You must set the start time to a point in the future `start_time: Nov 10 2019  1
 aea run
 ```
 
-### Create the TAC participant AEA
+### Create the TAC participants AEA
 In a separate terminal, in the root directory, create the tac participant AEA.
 ``` bash
-aea create tac_participant
+aea create tac_participant_one
+aea create tac_participant_two
 ```
 
-### Add the tac participation skill
+### Add the tac participation skill to participant one
 ``` bash
-cd tac_participant
+cd tac_participant_one
 aea add skill tac_participation
 ```
 
-### Run the TAC participant AEA
+### Add the tac participation skill to participant two
+``` bash
+cd tac_participant_two
+aea add skill tac_participation
+```
+
+### Run both the TAC participant AEAs
 ``` bash
 aea run
 ```

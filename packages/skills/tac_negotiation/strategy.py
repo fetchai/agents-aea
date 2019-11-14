@@ -142,7 +142,7 @@ class Strategy(SharedClass):
         query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), is_searching_for_sellers=is_searching_for_sellers)
         return query
 
-    def get_proposal_for_query(self, query: Query, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: float) -> Optional[Description]:
+    def get_proposal_for_query(self, query: Query, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: int) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
 
@@ -163,7 +163,7 @@ class Strategy(SharedClass):
         else:
             return random.choice(proposals)
 
-    def _generate_candidate_proposals(self, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: float):
+    def _generate_candidate_proposals(self, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: int):
         """
         Generate proposals from the agent in the role of seller/buyer.
 
