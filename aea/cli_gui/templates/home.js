@@ -191,9 +191,7 @@ class Model{
             type: 'POST',
             url: 'api/oef',
             accepts: 'application/json',
-            contentType: 'application/json',
-            dataType: 'json',
-            data: JSON.stringify("Test dummy")
+            contentType: 'plain/text'
         };
         var self = this;
         $.ajax(ajax_options)
@@ -473,7 +471,7 @@ class Controller{
             this.$event_pump.on('model_'+ combineName + 'DeleteSuccess', {el: element}, function(e, data) {
                 self.model.readData(e.data.el);
 
-                self.refreshAgentData(data)
+                self.refreshAgentData("NONE")
                 self.handleButtonStates()
 
             });

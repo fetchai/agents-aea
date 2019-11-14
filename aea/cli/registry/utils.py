@@ -40,39 +40,3 @@ def request_api(method, path, params=None):
         raise click.ClickException(
             'Wrong server response. Status code: {}'.format(resp.status_code)
         )
-
-
-def format_items(items):
-    """Format list of items (protocols/connections) to a string for CLI output."""
-    list_str = ''
-    for item in items:
-        list_str += (
-            '{line}\n'
-            'Name: {name}\n'
-            'Description: {description}\n'
-            '{line}\n'.format(
-                name=item['name'],
-                description=item['description'],
-                line='-' * 30
-            ))
-    return list_str
-
-
-def format_skills(items):
-    """Format list of skills to a string for CLI output."""
-    list_str = ''
-    for item in items:
-        list_str += (
-            '{line}\n'
-            'Name: {name}\n'
-            'Description: {description}\n'
-            'Protocols: {protocols}\n'
-            '{line}\n'.format(
-                name=item['name'],
-                description=item['description'],
-                protocols=''.join(
-                    name + ' | ' for name in item['protocol_names']
-                ),
-                line='-' * 30
-            ))
-    return list_str

@@ -19,13 +19,14 @@
 
 """Implementation of the 'aea search' subcommand."""
 from pathlib import Path
-from typing import Set, cast
+from typing import cast, List, Dict
 import click
 import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger
-from aea.cli.registry.utils import format_items, format_skills, request_api
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, ConfigLoader, format_items, format_skills
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.cli.registry.utils import request_api
 
 
 @click.group()
@@ -41,9 +42,26 @@ def search(ctx: Context, registry):
     if registry:
         ctx.set_config("is_registry", True)
     else:
-        registry = os.path.join(AEA_DIR, DEFAULT_REGISTRY_PATH)
+        registry = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
         ctx.set_config("registry", registry)
         logger.debug("Using registry {}".format(registry))
+
+
+def _is_invalid_item(name, dir_path, config_path):
+    """Return true if this protocol, connection or skill should not be returned in the list."""
+    return ".py" in name or "__" in name or name == "scaffold" or os.path.isfile(dir_path) or not os.path.isfile(config_path)
+
+
+def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_name: str, config_filename: str, results: List[Dict]):
+    for r in Path(root_path).glob(sub_dir_name + "/*/"):
+        dir_path = os.path.join(root_path, sub_dir_name, r.name)
+        config_path = os.path.join(root_path, sub_dir_name, r.name, config_filename)
+
+        if _is_invalid_item(r.name, dir_path, config_path):
+            continue
+
+        details = retrieve_details(r.name, loader, config_path)
+        results.append(details)
 
 
 @search.command()
@@ -65,21 +83,12 @@ def connections(ctx: Context, query):
         return
 
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[str]
-    for r in Path(AEA_DIR).glob("connections/[!_]*[!.py]/"):
-        result.add(r.name)
+    result: List[Dict] = []
+    _get_details_from_dir(ctx.connection_loader, AEA_DIR, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.connection_loader, registry, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
 
-    try:
-        for r in Path(registry).glob("connections/[!_]*[!.py]/"):
-            result.add(r.name)
-    except Exception:  # pragma: no cover
-        pass
-
-    if "scaffold" in result: result.remove("scaffold")
-    if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available connections:")
-    for conn in sorted(result):
-        print("- " + conn)
+    print(format_items(sorted(result, key=lambda k: k['name'])))
 
 
 @search.command()
@@ -101,21 +110,12 @@ def protocols(ctx: Context, query):
         return
 
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[str]
-    for r in Path(AEA_DIR).glob("protocols/[!_]*[!.py]"):
-        result.add(r.name)
+    result: List[Dict] = []
+    _get_details_from_dir(ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.protocol_loader, registry, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
 
-    try:
-        for r in Path(registry).glob("protocols/[!_]*[!.py]/"):
-            result.add(r.name)
-    except Exception:  # pragma: no cover
-        pass
-
-    if "scaffold" in result: result.remove("scaffold")
-    if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available protocols:")
-    for protocol in sorted(result):
-        print("- " + protocol)
+    print(format_items(sorted(result, key=lambda k: k['name'])))
 
 
 @search.command()
@@ -137,18 +137,9 @@ def skills(ctx: Context, query):
         return
 
     registry = cast(str, ctx.config.get("registry"))
-    result = set()  # type: Set[str]
-    for r in Path(AEA_DIR).glob("skills/[!_]*[!.py]"):
-        result.add(r.name)
+    result: List[Dict] = []
+    _get_details_from_dir(ctx.skill_loader, AEA_DIR, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.skill_loader, registry, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
 
-    try:
-        for r in Path(registry).glob("skills/[!_]*[!.py]/"):
-            result.add(r.name)
-    except Exception:  # pragma: no cover
-        pass
-
-    if "scaffold" in result: result.remove("scaffold")
-    if ".DS_Store" in result: result.remove(".DS_Store")
     print("Available skills:")
-    for skill in sorted(result):
-        print("- " + skill)
+    print(format_items(sorted(result, key=lambda k: k['name'])))

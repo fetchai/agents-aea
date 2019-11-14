@@ -29,7 +29,7 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE  # noqa: F401
 
 
 @click.group()
@@ -39,48 +39,65 @@ def scaffold(ctx: Context):
     _try_to_load_agent_config(ctx)
 
 
+def _scaffold_item(ctx: Context, item_type, item_name):
+    """Add an item scaffolding to the configuration file and agent."""
+    existing_item_list = getattr(ctx.agent_config, "{}s".format(item_type))
+    loader = getattr(ctx, "{}_loader".format(item_type))
+    default_config_filename = globals()["DEFAULT_{}_CONFIG_FILE".format(item_type.upper())]
+
+    item_type_plural = item_type + "s"
+
+    # check if we already have an item with the same name
+    logger.debug("{} already supported by the agent: {}".format(item_type_plural, existing_item_list))
+    if item_name in existing_item_list:
+        logger.error("A {} with name '{}' already exists. Aborting...".format(item_type, item_name))
+        sys.exit(1)
+
+    try:
+        agent_name = ctx.agent_config.agent_name
+        logger.info("Adding {} scaffold '{}' to the agent '{}'...".format(item_type, item_name, agent_name))
+
+        Path(item_type_plural).mkdir(exist_ok=True)
+
+        # create the connection folder
+        dest = Path(os.path.join(item_type_plural, item_name))
+
+        # copy the skill package into the agent's supported skills.
+        src = Path(os.path.join(AEA_DIR, item_type_plural, "scaffold"))
+        logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
+
+        shutil.copytree(src, dest)
+
+        # add the connection to the configurations.
+        logger.debug("Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
+        existing_item_list.add(item_name)
+        ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
+
+        # ensure the name in the yaml and the name of the folder are the same
+        config_filepath = os.path.join(ctx.cwd, item_type_plural, item_name, default_config_filename)
+        config = loader.load(open(str(config_filepath)))
+        config.name = item_name
+        loader.dump(config, open(config_filepath, "w"))
+
+    except FileExistsError:
+        logger.error("A {} with this name already exists. Please choose a different name and try again.".format(item_type))
+        sys.exit(1)
+    except ValidationError:
+        logger.error("Error when validating the skill configuration file.")
+        shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
+        sys.exit(1)
+    except Exception as e:
+        logger.exception(e)
+        shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
+        sys.exit(1)
+
+
 @scaffold.command()
 @click.argument('connection_name', type=str, required=True)
 @pass_ctx
 def connection(ctx: Context, connection_name: str) -> None:
     """Add a connection scaffolding to the configuration file and agent."""
-    # check if we already have a connection with the same name
-    logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
-    if connection_name in ctx.agent_config.connections:
-        logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
-        sys.exit(1)
-
-    try:
-        agent_name = ctx.agent_config.agent_name
-        logger.info("Adding connection scaffold '{}' to the agent '{}'...".format(connection_name, agent_name))
-
-        Path("connections").mkdir(exist_ok=True)
-
-        # create the connection folder
-        dest = Path(os.path.join("connections", connection_name))
-
-        # copy the skill package into the agent's supported skills.
-        src = Path(os.path.join(AEA_DIR, "connections", "scaffold"))
-        logger.debug("Copying connection modules. src={} dst={}".format(src, dest))
-
-        shutil.copytree(src, dest)
-
-        # add the connection to the configurations.
-        logger.debug("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
-        ctx.agent_config.connections.add(connection_name)
-        ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
-
-    except FileExistsError:
-        logger.error("A connection with this name already exists. Please choose a different name and try again.")
-        sys.exit(1)
-    except ValidationError:
-        logger.error("Error when validating the skill configuration file.")
-        shutil.rmtree(os.path.join("connections", connection_name), ignore_errors=True)
-        sys.exit(1)
-    except Exception as e:
-        logger.exception(e)
-        shutil.rmtree(os.path.join("connections", connection_name), ignore_errors=True)
-        sys.exit(1)
+    _scaffold_item(ctx, "connection", connection_name)
 
 
 @scaffold.command()
@@ -88,44 +105,7 @@ def connection(ctx: Context, connection_name: str) -> None:
 @pass_ctx
 def protocol(ctx: Context, protocol_name: str):
     """Add a protocol scaffolding to the configuration file and agent."""
-    # check if we already have a protocol with the same name
-    logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
-    if protocol_name in ctx.agent_config.protocols:
-        logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
-        sys.exit(1)
-
-    try:
-        agent_name = ctx.agent_config.agent_name
-        logger.info("Adding protocol scaffold '{}' to the agent '{}'...".format(protocol_name, agent_name))
-
-        # create the 'protocols' folder if it doesn't exist:
-        Path("protocols").mkdir(exist_ok=True)
-
-        # create the protocol folder
-        dest = Path(os.path.join("protocols", protocol_name))
-
-        # copy the skill package into the agent's supported skills.
-        src = Path(os.path.join(AEA_DIR, "protocols", "scaffold"))
-        logger.debug("Copying protocol modules. src={} dst={}".format(src, dest))
-
-        shutil.copytree(src, dest)
-
-        # add the protocol to the configurations.
-        logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
-        ctx.agent_config.protocols.add(protocol_name)
-        ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
-
-    except FileExistsError:
-        logger.error("A protocol with this name already exists. Please choose a different name and try again.")
-        sys.exit(1)
-    except ValidationError:
-        logger.error("Error when validating the skill configuration file.")
-        shutil.rmtree(os.path.join("protocols", protocol_name), ignore_errors=True)
-        sys.exit(1)
-    except Exception as e:
-        logger.exception(e)
-        shutil.rmtree(os.path.join("protocols", protocol_name), ignore_errors=True)
-        sys.exit(1)
+    _scaffold_item(ctx, "protocol", protocol_name)
 
 
 @scaffold.command()
@@ -133,41 +113,4 @@ def protocol(ctx: Context, protocol_name: str):
 @pass_ctx
 def skill(ctx: Context, skill_name: str):
     """Add a skill scaffolding to the configuration file and agent."""
-    # check if we already have a skill with the same name
-    logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
-    if skill_name in ctx.agent_config.skills:
-        logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
-        sys.exit(1)
-
-    try:
-        agent_name = ctx.agent_config.agent_name
-        logger.info("Adding skill scaffold '{}' to the agent '{}'...".format(skill_name, agent_name))
-
-        # create the 'skills' folder if it doesn't exist:
-        Path("skills").mkdir(exist_ok=True)
-
-        # create the skill folder
-        dest = Path(os.path.join("skills", skill_name))
-
-        # copy the skill package into the agent's supported skills.
-        src = Path(os.path.join(AEA_DIR, "skills", "scaffold"))
-        logger.debug("Copying skill modules. src={} dst={}".format(src, dest))
-
-        shutil.copytree(src, dest)
-
-        # add the skill to the configurations.
-        logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
-        ctx.agent_config.skills.add(skill_name)
-        ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
-
-    except FileExistsError:
-        logger.error("A skill with this name already exists. Please choose a different name and try again.")
-        sys.exit(1)
-    except ValidationError:
-        logger.error("Error when validating the skill configuration file.")
-        shutil.rmtree(os.path.join("skills", skill_name), ignore_errors=True)
-        sys.exit(1)
-    except Exception as e:
-        logger.exception(e)
-        shutil.rmtree(os.path.join("skills", skill_name), ignore_errors=True)
-        sys.exit(1)
+    _scaffold_item(ctx, "skill", skill_name)
