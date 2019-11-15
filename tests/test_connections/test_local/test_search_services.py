@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the search feature of the local OEF node."""
+import time
 
 import pytest
 
@@ -231,6 +232,8 @@ class TestUnregister:
         envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.mailbox1.send(envelope)
 
+        time.sleep(0.1)
+
         # Search for the register agent
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
         msg_bytes = OEFSerializer().encode(msg)
@@ -250,6 +253,8 @@ class TestUnregister:
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         self.mailbox1.send(envelope)
+
+        time.sleep(0.1  )
 
         # Trigger error message.
         msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_AGENT, id=0, agent_description=agent_description,

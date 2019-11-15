@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the TCP connection communication."""
+import time
 
 from aea.connections.tcp.tcp_client import TCPClientConnection
 from aea.connections.tcp.tcp_server import TCPServerConnection

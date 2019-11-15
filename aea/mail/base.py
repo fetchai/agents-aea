@@ -465,10 +465,8 @@ class Multiplexer:
 
     def put(self, envelope: Envelope):
         """Schedule an envelope for sending it."""
-        self._loop.call_soon_threadsafe(self.out_queue.put_nowait, envelope)
-        return
-        # fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
-        # return fut.result()
+        fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
+        return fut.result()
 
 
 class InBox(object):
