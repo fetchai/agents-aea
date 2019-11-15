@@ -74,6 +74,7 @@ class TCPClientConnection(TCPConnection):
     async def recv(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive bytes."""
         try:
+            assert self._reader is not None
             data = await self._recv(self._reader)
             if data is None:
                 logger.debug("[{}] No data received.".format(self.public_key))

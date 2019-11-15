@@ -266,6 +266,8 @@ class OEFChannel(OEFAgent):
         """
         # We are not using the 'origin' parameter because 'content' contains a serialized instance of 'Envelope',
         # hence it already contains the address of the sender.
+        assert self.in_queue is not None
+        assert self.loop is not None
         envelope = Envelope.decode(content)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
@@ -280,6 +282,8 @@ class OEFChannel(OEFAgent):
         :param query: the query.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         try:
             query = pickle.loads(query)
         except Exception:
@@ -304,6 +308,8 @@ class OEFChannel(OEFAgent):
         :param b_proposals: the proposals.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         if type(b_proposals) == bytes:
             proposals = pickle.loads(b_proposals)  # type: List[Description]
         else:
@@ -328,6 +334,8 @@ class OEFChannel(OEFAgent):
         :param target: the message target.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         performative = FIPAMessage.Performative.MATCH_ACCEPT if msg_id == 4 and target == 3 else FIPAMessage.Performative.ACCEPT
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
@@ -347,6 +355,8 @@ class OEFChannel(OEFAgent):
         :param target: the message target.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
                           target=target,
@@ -363,6 +373,8 @@ class OEFChannel(OEFAgent):
         :param agents: the list of agents.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         self.mail_stats.search_end(search_id, len(agents))
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
@@ -377,6 +389,8 @@ class OEFChannel(OEFAgent):
         :param operation: the error operation.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         try:
             operation = OEFMessage.OEFErrorOperation(operation)
         except ValueError:
@@ -396,6 +410,8 @@ class OEFChannel(OEFAgent):
         :param origin: the message sender.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR,
                          id=answer_id,
                          dialogue_id=dialogue_id,
@@ -592,6 +608,7 @@ class OEFConnection(Connection):
         """
         with self._lock:
             assert self._connection_check_thread is not None, "Call connect before disconnect."
+            assert self.in_queue is not None
             self.connection_status.is_connected = False
             self._connection_check_thread.join()
             self._connection_check_thread = None
@@ -606,6 +623,7 @@ class OEFConnection(Connection):
         :return: the envelope received, or None.
         """
         try:
+            assert self.in_queue is not None
             envelope = await self.in_queue.get()
             if envelope is None:
                 logger.debug("Received None.")

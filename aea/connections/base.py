@@ -32,14 +32,6 @@ if TYPE_CHECKING:
 class AEAConnectionError(Exception):
     """Exception class for connection errors."""
 
-    @abstractmethod
-    def receive(self) -> None:
-        """
-        Receives an envelope.
-
-        :return: None.
-        """
-
 
 class ConnectionStatus(object):
     """The connection status class."""

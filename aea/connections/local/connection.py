@@ -49,7 +49,7 @@ class LocalNode:
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = Queue(loop=self._loop)
+        self._in_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
         self._receiving_loop_task = None  # type: Optional[asyncio.Task]
@@ -294,7 +294,7 @@ class LocalNode:
         """Send a message."""
         destination = envelope.to
         destination_queue = self._out_queues[destination]
-        destination_queue._loop.call_soon_threadsafe(destination_queue.put_nowait, envelope)
+        destination_queue._loop.call_soon_threadsafe(destination_queue.put_nowait, envelope)  # type: ignore
         logger.debug("Send envelope {}".format(envelope))
 
     async def disconnect(self, public_key: str) -> None:
@@ -347,6 +347,7 @@ class OEFLocalConnection(Connection):
     async def disconnect(self) -> None:
         """Disconnect from the local OEF Node."""
         if self.connection_status.is_connected:
+            assert self._reader is not None
             await self._local_node.disconnect(self.public_key)
             await self._reader.put(None)
             self._reader, self._writer = None, None
@@ -356,10 +357,9 @@ class OEFLocalConnection(Connection):
         """Send a message."""
         if not self.connection_status.is_connected:
             raise AEAConnectionError("Connection not established yet. Please use 'connect()'.")
-        # asyncio.run_coroutine_threadsafe(self._writer.put(envelope), self._writer._loop).result()
-        self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)
+        self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore
 
-    async def recv(self) -> Optional['Envelope']:
+    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
         """
         Receive an envelope. Blocking.
 
@@ -368,9 +368,10 @@ class OEFLocalConnection(Connection):
         if not self.connection_status.is_connected:
             raise AEAConnectionError("Connection not established yet. Please use 'connect()'.")
         try:
+            assert self._reader is not None
             envelope = await self._reader.get()
             if envelope is None:
-                logger.debug("Receiving task terminated.".format(envelope))
+                logger.debug("Receiving task terminated.")
                 return None
             logger.debug("Received envelope {}".format(envelope))
             return envelope

@@ -146,13 +146,18 @@ class StubConnection(Connection):
         """
         try:
             envelope = _decode(line, separator=SEPARATOR)
+            assert self.in_queue is not None, "Input queue not initialized."
+            assert self._loop is not None, "Loop not initialized."
             asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
         except ValueError:
             logger.error("Bad formatted line: {}".format(line))
+        except Exception as e:
+            logger.error("Error when processing a line. Message: {}".format(str(e)))
 
-    async def recv(self) -> Optional['Envelope']:
+    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive an envelope."""
         try:
+            assert self.in_queue is not None
             envelope = await self.in_queue.get()
             return envelope
         except Exception as e:
@@ -187,6 +192,7 @@ class StubConnection(Connection):
 
         In this type of connection there's no channel to disconnect.
         """
+        assert self.in_queue is not None, "Input queue not initialized."
         with self._lock:
             if not self.connection_status.is_connected:
                 return

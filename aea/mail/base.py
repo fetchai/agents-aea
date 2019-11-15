@@ -25,7 +25,7 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from concurrent.futures import Future
 from threading import Thread, Lock
-from typing import Optional, TYPE_CHECKING, List, Tuple, Dict
+from typing import Optional, TYPE_CHECKING, List, Tuple, Dict, cast
 
 from aea.configurations.base import Address, ProtocolId
 from aea.connections.base import ConnectionStatus
@@ -221,7 +221,7 @@ class Multiplexer:
         assert len(connections) > 0, "List of connections cannot be empty."
         assert 0 <= default_connection_index <= len(connections) - 1, "Default connection index out of range."
         assert len(set(c.connection_id for c in connections)) == len(connections), "Connection names must be unique."
-        self._connections = connections  # type: List[Connection]
+        self._connections = connections  # type: List['Connection']
         self._name_to_connection = {c.connection_id: c for c in connections}  # type: Dict[str, Connection]
         self.default_connection = self._connections[default_connection_index]  # type: Connection
         self._connection_status = ConnectionStatus()
@@ -230,8 +230,8 @@ class Multiplexer:
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = queue.Queue()
-        self._out_queue = asyncio.Queue(loop=self._loop)
+        self._in_queue = queue.Queue()  # type: queue.Queue
+        self._out_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
 
         self._recv_loop_task = None  # type: Optional[Future]
         self._send_loop_task = None  # type: Optional[Future]
@@ -249,7 +249,7 @@ class Multiplexer:
     @property
     def connections(self) -> Tuple['Connection']:
         """Get the connections."""
-        return tuple(self._connections)
+        return cast(Tuple['Connection'], tuple(self._connections))
 
     @property
     def is_connected(self) -> bool:
@@ -435,14 +435,15 @@ class Multiplexer:
         :raises AEAConnectionError: if the connection id provided is not valid.
         """
         envelope_context = envelope.context
-        connection_id = envelope_context.connection_id
+        connection_id = envelope_context.connection_id if envelope_context is not None else None
 
         if connection_id is not None and connection_id not in self._name_to_connection:
             raise AEAConnectionError("No connection registered with id: {}.".format(connection_id))
 
+        connection_id = cast(str, connection_id)
         connection = self._name_to_connection.get(connection_id, None)
         if connection is None:
-            logger.debug("Using default connection.".format(connection_id))
+            logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
 
         try:
@@ -503,7 +504,7 @@ class InBox(object):
         envelope = self._multiplexer.get(block=block, timeout=timeout)
         if envelope is None:
             raise Empty()
-        logger.debug("Incoming message: to='{}' sender='{}' protocol_id='{}' message='{}'"
+        logger.debug("Incoming message: to='{}' sender='{}' protocol_id='{}' message='{!r}'"
                      .format(envelope.to, envelope.sender, envelope.protocol_id, envelope.message))
         return envelope
 

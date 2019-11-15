@@ -21,7 +21,7 @@
 """Implementation of the TCP server."""
 import asyncio
 import logging
-from asyncio import StreamReader, StreamWriter, Task, AbstractServer
+from asyncio import StreamReader, StreamWriter, AbstractServer, Future
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ConnectionConfig
@@ -52,7 +52,7 @@ class TCPServerConnection(TCPConnection):
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
 
-        self._read_tasks_to_public_key = dict()  # type: Dict[Task, str]
+        self._read_tasks_to_public_key = dict()  # type: Dict[Future, str]
 
     async def handle(self, reader: StreamReader, writer: StreamWriter) -> None:
         """
@@ -96,10 +96,10 @@ class TCPServerConnection(TCPConnection):
             return envelope
         except asyncio.CancelledError:
             logger.debug("Receiving loop cancelled.")
-            return
+            return None
         except Exception as e:
             logger.error("Error in the receiving loop: {}".format(str(e)))
-            return
+            return None
 
     async def setup(self):
         """Set the connection up."""
