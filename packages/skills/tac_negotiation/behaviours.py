@@ -142,13 +142,12 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 logger.warning("[{}]: Not searching the OEF for sellers because the agent demands no goods.".format(self.context.agent_name))
                 return None
             else:
-                logger.debug("[{}]: Searching for sellers which match the demand of the agent.".format(self.context.agent_name))
                 search = cast(Search, self.context.search)
                 search_id = search.get_next_id(is_searching_for_sellers=True)
+                logger.info("[{}]: Searching for sellers which match the demand of the agent, search_id={}.".format(self.context.agent_name, search_id))
 
                 msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
-                msg_bytes = OEFSerializer().encode(msg)
-                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(msg))
         if strategy.is_searching_for_buyers:
             ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=True)
             query = strategy.get_own_services_query(ownership_state_after_locks, is_searching_for_sellers=False)
@@ -156,10 +155,9 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 logger.warning("[{}]: Not searching the OEF for buyers because the agent supplies no goods.".format(self.context.agent_name))
                 return None
             else:
-                logger.debug("[{}]: Searching for buyers which match the supply of the agent.".format(self.context.agent_name))
                 search = cast(Search, self.context.search)
                 search_id = search.get_next_id(is_searching_for_sellers=False)
+                logger.info("[{}]: Searching for buyers which match the supply of the agent, search_id={}.".format(self.context.agent_name, search_id))
 
                 msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query)
-                msg_bytes = OEFSerializer().encode(msg)
-                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(msg))

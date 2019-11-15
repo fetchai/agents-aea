@@ -275,7 +275,8 @@ class TACHandler(Handler):
                                               amount_by_currency=cast(Dict[str, int], tac_message.get("amount_by_currency")),
                                               quantities_by_good_pbk=cast(Dict[str, int], tac_message.get("quantities_by_good_pbk")),
                                               exchange_params_by_currency=cast(Dict[str, float], tac_message.get("exchange_params_by_currency")),
-                                              utility_params_by_good_pbk=cast(Dict[str, float], tac_message.get("utility_params_by_good_pbk")))
+                                              utility_params_by_good_pbk=cast(Dict[str, float], tac_message.get("utility_params_by_good_pbk")),
+                                              tx_fee=cast(int, tac_message.get("tx_fee")))
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
     def _on_cancelled(self) -> None:

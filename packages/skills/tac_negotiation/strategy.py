@@ -142,18 +142,17 @@ class Strategy(SharedClass):
         query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), is_searching_for_sellers=is_searching_for_sellers)
         return query
 
-    def get_proposal_for_query(self, query: Query, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: int) -> Optional[Description]:
+    def get_proposal_for_query(self, query: Query, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
 
         :param query: the query for which to build the proposal
         :param ownership_state_after_locks: the ownership state after the transaction messages applied.
         :is_seller: whether the agent making the proposal is a seller or not
-        :tx_fee: the transaction fee
 
         :return: a description
         """
-        candidate_proposals = self._generate_candidate_proposals(preferences, ownership_state_after_locks, is_seller, tx_fee)
+        candidate_proposals = self._generate_candidate_proposals(preferences, ownership_state_after_locks, is_seller)
         proposals = []
         for proposal in candidate_proposals:
             if not query.check(proposal): continue
@@ -163,7 +162,7 @@ class Strategy(SharedClass):
         else:
             return random.choice(proposals)
 
-    def _generate_candidate_proposals(self, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool, tx_fee: int):
+    def _generate_candidate_proposals(self, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool):
         """
         Generate proposals from the agent in the role of seller/buyer.
 
@@ -174,9 +173,10 @@ class Strategy(SharedClass):
         :return: a list of proposals in Description form
         """
         good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_seller else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
-        share_of_tx_fee = round(tx_fee / 2.0, 2)
-        nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities}  # type: Dict[str, int]
+        nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities.items()}  # type: Dict[str, int]
         proposals = []
+        seller_tx_fee = self.context.preferences.transaction_fees['seller_tx_fee']
+        buyer_tx_fee = self.context.preferences.transaction_fees['buyer_tx_fee']
         for good_pbk, quantity in good_pbk_to_quantities:
             if is_seller and quantity == 0: continue
             proposal_dict = nil_proposal_dict
@@ -190,11 +190,11 @@ class Strategy(SharedClass):
             switch = -1 if is_seller else 1
             breakeven_price = round(marginal_utility_from_delta_good_holdings, 2) * switch
             if is_seller:
-                proposal.values["price"] = breakeven_price + share_of_tx_fee + ROUNDING_ADJUSTMENT
+                proposal.values["price"] = breakeven_price + seller_tx_fee + ROUNDING_ADJUSTMENT
             else:
-                proposal.values["price"] = breakeven_price - share_of_tx_fee - ROUNDING_ADJUSTMENT
-            proposal.values["seller_tx_fee"] = share_of_tx_fee
-            proposal.values["buyer_tx_fee"] = share_of_tx_fee
+                proposal.values["price"] = breakeven_price - buyer_tx_fee - ROUNDING_ADJUSTMENT
+            proposal.values["seller_tx_fee"] = seller_tx_fee
+            proposal.values["buyer_tx_fee"] = buyer_tx_fee
             if not proposal.values["price"] > 0: continue
             proposals.append(proposal)
         return proposals

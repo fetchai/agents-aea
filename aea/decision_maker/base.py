@@ -21,6 +21,7 @@
 
 import copy
 from enum import Enum
+import math
 import logging
 from queue import Queue
 from typing import Dict, List, Optional, cast
@@ -41,6 +42,7 @@ GoodHoldings = Dict[str, int]
 UtilityParams = Dict[str, float]   # a map from identifier to quantity
 ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
+SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
 INTERNAL_PROTOCOL_ID = 'internal'
 
@@ -196,9 +198,10 @@ class Preferences:
         """Instantiate an agent preference object."""
         self._exchange_params_by_currency = None  # type: ExchangeParams
         self._utility_params_by_good_pbk = None  # type: UtilityParams
+        self._transaction_fees = None  # type: Dict[str, int]
         self._quantity_shift = QUANTITY_SHIFT
 
-    def init(self, exchange_params_by_currency: ExchangeParams, utility_params_by_good_pbk: UtilityParams, agent_name: str = ''):
+    def init(self, exchange_params_by_currency: ExchangeParams, utility_params_by_good_pbk: UtilityParams, tx_fee: int, agent_name: str = ''):
         """
         Instantiate an agent preference object.
 
@@ -209,6 +212,7 @@ class Preferences:
         logger.warning("[{}]: Careful! Preferences are being initialized!".format(agent_name))
         self._exchange_params_by_currency = exchange_params_by_currency
         self._utility_params_by_good_pbk = utility_params_by_good_pbk
+        self._transaction_fees = self._split_tx_fees(tx_fee)
 
     @property
     def is_initialized(self) -> bool:
@@ -226,6 +230,12 @@ class Preferences:
         """Get utility parameter for each good."""
         assert self._utility_params_by_good_pbk is not None, "UtilityParams not set!"
         return self._utility_params_by_good_pbk
+
+    @property
+    def transaction_fees(self) -> Dict[str, int]:
+        """Get the transaction fee."""
+        assert self._transaction_fees is not None, "Transaction fee not set!"
+        return self._transaction_fees
 
     def logarithmic_utility(self, quantities_by_good_pbk: GoodHoldings) -> float:
         """
@@ -281,6 +291,19 @@ class Preferences:
         new_score = self.get_score(quantities_by_good_pbk=new_ownership_state.quantities_by_good_pbk,
                                    amount_by_currency=new_ownership_state.amount_by_currency)
         return new_score - current_score
+
+    def _split_tx_fees(self, tx_fee: int) -> Dict[str, int]:
+        """
+        Split the transaction fee.
+
+        :param tx_fee: the tx fee
+        :return: the split into buyer and seller part
+        """
+        buyer_part = math.ceil(tx_fee * SENDER_TX_SHARE)
+        seller_part = math.ceil(tx_fee * (1 - SENDER_TX_SHARE))
+        if buyer_part + seller_part > tx_fee:
+            seller_part -= 1
+        return {'seller_tx_fee': seller_part, 'buyer_tx_fee': buyer_part}
 
 
 class DecisionMaker:
@@ -446,7 +469,8 @@ class DecisionMaker:
             self.ownership_state.init(amount_by_currency=amount_by_currency, quantities_by_good_pbk=quantities_by_good_pbk, agent_name=self._agent_name)
             exchange_params_by_currency = cast(Dict[str, float], state_update_message.get("exchange_params_by_currency"))
             utility_params_by_good_pbk = cast(Dict[str, float], state_update_message.get("utility_params_by_good_pbk"))
-            self.preferences.init(exchange_params_by_currency=exchange_params_by_currency, utility_params_by_good_pbk=utility_params_by_good_pbk, agent_name=self._agent_name)
+            tx_fee = cast(int, state_update_message.get("tx_fee"))
+            self.preferences.init(exchange_params_by_currency=exchange_params_by_currency, utility_params_by_good_pbk=utility_params_by_good_pbk, tx_fee=tx_fee, agent_name=self._agent_name)
             self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
         elif performative == StateUpdateMessage.Performative.APPLY:
             amount_by_currency = cast(Dict[str, int], state_update_message.get("amount_by_currency"))

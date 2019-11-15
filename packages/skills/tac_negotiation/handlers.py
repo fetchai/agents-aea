@@ -125,7 +125,7 @@ class FIPANegotiationHandler(Handler):
         """
         strategy = cast(Strategy, self.context.strategy)
         transactions = cast(Transactions, self.context.transactions)
-        ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=dialogue.is_seller)
+        ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=dialogue.is_seller)
         own_service_description = strategy.get_own_service_description(ownership_state_after_locks, is_supply=dialogue.is_seller)
         new_msg_id = cast(int, cfp.get("message_id")) + 1
         cfp_query = cfp.get("query")
@@ -135,7 +135,7 @@ class FIPANegotiationHandler(Handler):
             decline = True
             logger.debug("[{}]: Current holdings do not satisfy CFP query.".format(self.context.agent_name))
         else:
-            proposal_description = strategy.get_proposal_for_query(cfp_query, self.context.preferences, ownership_state_after_locks, is_seller=dialogue.is_seller, tx_fee=1)
+            proposal_description = strategy.get_proposal_for_query(cfp_query, self.context.agent_preferences, ownership_state_after_locks, is_seller=dialogue.is_seller)
             if proposal_description is None:
                 decline = True
                 logger.debug("[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(self.context.agent_name))
@@ -157,6 +157,8 @@ class FIPANegotiationHandler(Handler):
         else:
             assert proposal_description is not None
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
+            sender_tx_fee = proposal_description.values['seller_tx_fee'] if dialogue.is_seller else proposal_description.values['buyer_tx_fee']
+            counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if dialogue.is_seller else proposal_description.values['seller_tx_fee']
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                                  skill_id="tac_negotiation_skill",
                                                  transaction_id=transaction_id,
@@ -165,8 +167,8 @@ class FIPANegotiationHandler(Handler):
                                                  currency_pbk='FET',
                                                  amount=proposal_description.values['amount'],
                                                  is_sender_buyer=not dialogue.is_seller,
-                                                 sender_tx_fee=1,
-                                                 counterparty_tx_fee=1,
+                                                 sender_tx_fee=sender_tx_fee,
+                                                 counterparty_tx_fee=counterparty_tx_fee,
                                                  quantities_by_good_pbk=proposal_description.values['description'])
             transactions = cast(Transactions, self.context.transactions)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
@@ -197,6 +199,8 @@ class FIPANegotiationHandler(Handler):
         for num, proposal_description in enumerate(proposals):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
+            sender_tx_fee = proposal_description.values['seller_tx_fee'] if dialogue.is_seller else proposal_description.values['buyer_tx_fee']
+            counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if dialogue.is_seller else proposal_description.values['seller_tx_fee']
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                                  skill_id="tac_negotiation_skill",
                                                  transaction_id=transaction_id,
@@ -205,14 +209,14 @@ class FIPANegotiationHandler(Handler):
                                                  currency_pbk='FET',
                                                  amount=proposal_description.values['amount'],
                                                  is_sender_buyer=not dialogue.is_seller,
-                                                 sender_tx_fee=1,
-                                                 counterparty_tx_fee=1,
+                                                 sender_tx_fee=sender_tx_fee,
+                                                 counterparty_tx_fee=counterparty_tx_fee,
                                                  quantities_by_good_pbk=proposal_description.values['description'])
             new_msg_id = cast(int, propose.get("message_id")) + 1
             strategy = cast(Strategy, self.context.strategy)
             transactions = cast(Transactions, self.context.transactions)
-            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=dialogue.is_seller)
-            if strategy.is_profitable_transaction(self.context.preferences, ownership_state_after_locks, transaction_msg):
+            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=dialogue.is_seller)
+            if strategy.is_profitable_transaction(self.context.agent_preferences, ownership_state_after_locks, transaction_msg):
                 logger.debug("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))
                 transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
                 transactions.add_pending_initial_acceptance(dialogue.dialogue_label, new_msg_id, transaction_msg)
@@ -270,8 +274,8 @@ class FIPANegotiationHandler(Handler):
         new_msg_id = cast(int, accept.get("message_id")) + 1
         transaction_msg = transactions.pop_pending_proposal(dialogue.dialogue_label, cast(int, accept.get("target")))
         strategy = cast(Strategy, self.context.strategy)
-        ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=dialogue.is_seller)
-        if strategy.is_profitable_transaction(self.context.preferences, ownership_state_after_locks, transaction_msg):
+        ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=dialogue.is_seller)
+        if strategy.is_profitable_transaction(self.context.agent_preferences, ownership_state_after_locks, transaction_msg):
             logger.debug("[{}]: Locking the current state (as {}).".format(self.context.agent_name, dialogue.role))
             transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
             self.context.decision_maker_message_queue.put(transaction_msg)
@@ -364,12 +368,14 @@ class OEFSearchHandler(Handler):
 
         if oef_msg_type is OEFMessage.Type.SEARCH_RESULT:
             agents = cast(List[str], oef_msg.get("agents"))
-            search_id = oef_msg.get("id")
+            search_id = cast(int, oef_msg.get("id"))
             search = cast(Search, self.context.search)
+            if self.context.agent_public_key in agents:
+                agents.remove(self.context.agent_public_key)
             if search_id in search.ids_for_sellers:
-                self._handle_search(agents, is_searching_for_sellers=True)
+                self._handle_search(agents, search_id, is_searching_for_sellers=True)
             elif search_id in search.ids_for_buyers:
-                self._handle_search(agents, is_searching_for_sellers=False)
+                self._handle_search(agents, search_id, is_searching_for_sellers=False)
 
     def teardown(self) -> None:
         """
@@ -379,7 +385,7 @@ class OEFSearchHandler(Handler):
         """
         pass
 
-    def _handle_search(self, agents: List[str], is_searching_for_sellers: bool) -> None:
+    def _handle_search(self, agents: List[str], search_id: int, is_searching_for_sellers: bool) -> None:
         """
         Handle the search response.
 
@@ -389,12 +395,13 @@ class OEFSearchHandler(Handler):
         """
         searched_for = 'sellers' if is_searching_for_sellers else 'buyers'
         if len(agents) > 0:
-            logger.info("[{}]: found potential {} agents={}.".format(self.context.agent_name, searched_for, list(map(lambda x: x[-5:], agents))))
+            logger.info("[{}]: found potential {} agents={} on search_id={}.".format(self.context.agent_name, searched_for, list(map(lambda x: x[-5:], agents)), search_id))
             strategy = cast(Strategy, self.context.strategy)
             dialogues = cast(Dialogues, self.context.dialogues)
             transactions = cast(Transactions, self.context.transactions)
-            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=not is_searching_for_sellers)
+            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=not is_searching_for_sellers)
             query = strategy.get_own_services_query(ownership_state_after_locks, is_searching_for_sellers)
+
             for opponent_pbk in agents:
                 dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key, not is_searching_for_sellers)
                 logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
@@ -409,4 +416,4 @@ class OEFSearchHandler(Handler):
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(cfp_msg))
         else:
-            logger.info("[{}]: found no {} agents, continue searching.".format(self.context.agent_name, searched_for))
+            logger.info("[{}]: found no {} agents on search_id={}, continue searching.".format(self.context.agent_name, searched_for, search_id))

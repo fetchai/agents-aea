@@ -50,6 +50,7 @@ class StateUpdateMessage(Message):
                  quantities_by_good_pbk: Goods,
                  exchange_params_by_currency: Optional[ExchangeParams] = None,
                  utility_params_by_good_pbk: Optional[UtilityParams] = None,
+                 tx_fee: Optional[int] = None,
                  **kwargs):
         """
         Instantiate transaction message.
@@ -59,12 +60,14 @@ class StateUpdateMessage(Message):
         :param quantities_by_good_pbk: the quantities of goods.
         :param exchange_params_by_currency: the exchange params.
         :param utility_params_by_good_pbk: the utility params.
+        :param tx_fee: the tx fee.
         """
         super().__init__(performative=performative,
                          amount_by_currency=amount_by_currency,
                          quantities_by_good_pbk=quantities_by_good_pbk,
                          exchange_params_by_currency=exchange_params_by_currency,
                          utility_params_by_good_pbk=utility_params_by_good_pbk,
+                         tx_fee=tx_fee,
                          **kwargs)
         assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
 
@@ -92,9 +95,11 @@ class StateUpdateMessage(Message):
                 utility_params_by_good_pbk = self.get("utility_params_by_good_pbk")
                 utility_params_by_good_pbk = cast(UtilityParams, utility_params_by_good_pbk)
                 assert quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
+                assert self.is_set("tx_fee")
             elif performative == self.Performative.APPLY:
                 assert self.get("exchange_params_by_currency") is None
                 assert self.get("utility_params_by_good_pbk") is None
+                assert self.get("tx_fee") is None
         except (AssertionError, KeyError):
             return False
         return True
