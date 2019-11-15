@@ -67,6 +67,9 @@ class AppContext:
     agent_processes: Dict[str, subprocess.Popen] = {}
     agent_tty: Dict[str, List[str]] = {}
     agent_error: Dict[str, List[str]] = {}
+    oef_tty: List[str] = []
+    oef_error: List[str] = []
+
     ui_is_starting = False
     agents_dir = os.path.abspath(os.getcwd())
     module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
@@ -109,8 +112,7 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
         if line[:13] == "Description: ":
             item_descs.append(line[13:-1])
 
-    if len(item_ids) != len(item_descs):
-        return "Inconsistent output from CLI tool!", 400  # 400 Bad request
+    assert len(item_ids) == len(item_descs)
 
     for i in range(0, len(item_ids)):
         output.append({"id": item_ids[i], "description": item_descs[i]})
@@ -156,7 +158,7 @@ def add_item(agent_id: str, item_type: str, item_id: str):
     if _call_aea(["aea", "add", item_type, item_id], agent_dir) == 0:
         return agent_id, 201  # 200 (OK)
     else:
-        return {"detail": "Failed to add protocol {} to agent {}".format(item_id, agent_id)}, 400  # 400 Bad request
+        return {"detail": "Failed to add {} {} to agent {}".format(item_type, item_id, agent_id)}, 400  # 400 Bad request
 
 
 def remove_local_item(agent_id: str, item_type: str, item_id: str):
@@ -222,16 +224,16 @@ def start_oef_node():
         "-c",
         "./scripts/oef/launch_config.json"]
 
-    flask.app.oef_process = _call_aea_async(param_list, app_context.agents_dir)
+    app_context.oef_process = _call_aea_async(param_list, app_context.agents_dir)
 
-    if flask.app.oef_process is not None:
-        flask.app.oef_tty = []
-        flask.app.oef_error = []
+    if app_context.oef_process is not None:
+        app_context.oef_tty = []
+        app_context.oef_error = []
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(flask.app.oef_process, flask.app.oef_tty))
+        tty_read_thread = threading.Thread(target=_read_tty, args=(app_context.oef_process, app_context.oef_tty))
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=_read_error, args=(flask.app.oef_process, flask.app.oef_error))
+        error_read_thread = threading.Thread(target=_read_error, args=(app_context.oef_process, app_context.oef_error))
         error_read_thread.start()
 
         return "OEF Node started", 200   # 200 (OK)
@@ -245,18 +247,18 @@ def get_oef_node_status():
     error_str = ""
     status_str = str(ProcessState.NOT_STARTED).replace('ProcessState.', '')
 
-    if flask.app.oef_process is not None:
-        status_str = str(get_process_status(flask.app.oef_process)).replace('ProcessState.', '')
+    if app_context.oef_process is not None:
+        status_str = str(get_process_status(app_context.oef_process)).replace('ProcessState.', '')
 
-        total_num_lines = len(flask.app.oef_tty)
+        total_num_lines = len(app_context.oef_tty)
         for i in range(max(0, total_num_lines - max_log_lines), total_num_lines):
-            tty_str += flask.app.oef_tty[i]
+            tty_str += app_context.oef_tty[i]
 
         tty_str = tty_str.replace("\n", "<br>")
 
-        total_num_lines = len(flask.app.oef_error)
+        total_num_lines = len(app_context.oef_error)
         for i in range(max(0, total_num_lines - max_log_lines), total_num_lines):
-            error_str += flask.app.oef_error[i]
+            error_str += app_context.oef_error[i]
 
         error_str = error_str.replace("\n", "<br>")
 
@@ -266,7 +268,7 @@ def get_oef_node_status():
 def stop_oef_node():
     """Stop an OEF node running."""
     _kill_running_oef_nodes()
-    flask.app.oef_process = None
+    app_context.oef_process = None
     return "All fine", 200  # 200 (OK)
 
 
@@ -366,6 +368,11 @@ def get_agent_status(agent_id: str):
 
 def stop_agent(agent_id: str):
     """Stop agent running."""
+    # pass to private function to make it easier to mock
+    return _stop_agent(agent_id)
+
+
+def _stop_agent(agent_id: str):
     # Test if we have the process id
     if agent_id not in app_context.agent_processes:
         return {"detail": "Agent {} is not running".format(agent_id)}, 400  # 400 Bad request
@@ -387,10 +394,8 @@ def get_process_status(process_id: subprocess.Popen) -> ProcessState:
         return ProcessState.RUNNING
     elif return_code <= 0:
         return ProcessState.FINISHED
-    elif return_code > 0:
-        return ProcessState.FAILED
     else:
-        raise ValueError("Unexpected return code.")
+        return ProcessState.FAILED
 
 
 def _kill_running_oef_nodes():
@@ -405,7 +410,7 @@ def create_app():
     global app_context
     app_context = AppContext()
 
-    flask.app.oef_process = None
+    app_context.oef_process = None
     app_context.agent_processes = {}
     app_context.agent_tty = {}
     app_context.agent_error = {}
@@ -437,6 +442,7 @@ def create_app():
 def run():
     """Run the GUI."""
     _kill_running_oef_nodes()
+
     app = create_app()
     app.run(host='127.0.0.1', port=8080, debug=False)
 

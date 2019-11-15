@@ -20,6 +20,10 @@
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
 import time
+
+import unittest.mock
+import aea
+
 from .test_base import create_app, TempCWD
 
 
@@ -70,13 +74,23 @@ def test_create_and_run_agent():
     assert data["error"] == ""
     assert "RUNNING" in data["status"]
 
-    # Stop the agent running
-    response_stop = app.delete(
-        'api/agent/' + agent_id + "/run",
-        data=None,
-        content_type='application/json',
-    )
-    assert response_stop.status_code == 200
+    # Create a stop agent function that behaves as if the agent had stopped itself
+    def _stop_agent_override(loc_agent_id: str):
+        # Test if we have the process id
+        assert loc_agent_id in aea.cli_gui.app_context.agent_processes
+
+        aea.cli_gui.app_context.agent_processes[loc_agent_id].terminate()
+        aea.cli_gui.app_context.agent_processes[loc_agent_id].wait()
+
+        return "stop_agent: All fine {}".format(loc_agent_id), 200  # 200 (OK)
+
+    with unittest.mock.patch("aea.cli_gui._stop_agent", _stop_agent_override):
+        app.delete(
+            'api/agent/' + agent_id + "/run",
+            data=None,
+            content_type='application/json',
+        )
+    time.sleep(1)
 
     # Get the running status
     response_status = app.get(
@@ -86,10 +100,8 @@ def test_create_and_run_agent():
     )
     assert response_status.status_code == 200
     data = json.loads(response_status.get_data(as_text=True))
-
-    # this is flakey - just remove for the moment.
-    # assert "process terminate" in data["error"]
-    assert "NOT_STARTED" in data["status"]
+    assert "process terminate" in data["error"]
+    assert "FINISHED" in data["status"]
 
     # run the agent again (takes a different path through code)
     response_run = app.post(
@@ -120,6 +132,19 @@ def test_create_and_run_agent():
         content_type='application/json',
     )
     assert response_stop.status_code == 200
+    time.sleep(2)
+
+    # Get the running status
+    response_status = app.get(
+        'api/agent/' + agent_id + "/run",
+        data=None,
+        content_type='application/json',
+    )
+    assert response_status.status_code == 200
+    data = json.loads(response_status.get_data(as_text=True))
+
+    assert "process terminate" in data["error"]
+    assert "NOT_STARTED" in data["status"]
 
     # Destroy the temporary current working directory and put cwd back to what it was before
     temp_cwd.destroy()

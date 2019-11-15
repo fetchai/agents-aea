@@ -18,38 +18,93 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea gui` sub-commands."""
-# import json
-# import time
-# from .test_base import create_app
+import json
+import time
+import unittest.mock
+
+from .test_base import create_app, DummyPID
 
 
 def test_create_and_run_oef():
     """Test for running oef, reading TTY and errors."""
-    pass
-    # """Test for running oef, reading TTY and errors."""
-    #
-    # response_start = self.app.post(
-    #     'api/oef',
-    #     data=None,
-    #     content_type='application/json',
-    # )
-    # assert response_start.status_code == 200
-    #
-    # # Wait for key message to appear
-    # start_time = time.time()
-    # oef_startup_timeout = 60
-    # oef_started = False
-    # while time.time() - start_time < oef_startup_timeout and not oef_started:
-    #     response_status = self.app.get(
-    #         'api/oef',
-    #         data=None,
-    #         content_type='application/json',
-    #     )
-    #     assert response_status.status_code == 200
-    #     data = json.loads(response_status.get_data(as_text=True))
-    #     assert "RUNNING" in data["status"]
-    #     if "A thing of beauty is a joy forever" in data["tty"]:
-    #         oef_started = True
-    #     time.sleep(2)
-    #
-    # assert oef_started
+    app = create_app()
+
+    pid = DummyPID(None, "A thing of beauty is a joy forever", "")
+
+    def _dummy_call_aea_async(param_list, dir_arg):
+        assert param_list[0] == "python"
+        assert "launch.py" in param_list[1]
+        return pid
+
+    # need to wait in case there is an old nod shutting down
+
+    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+        response_start = app.post(
+            'api/oef',
+            data=None,
+            content_type='application/json',
+        )
+    assert response_start.status_code == 200
+
+    # Wait for key message to appear
+    start_time = time.time()
+    # wait for a bit to ensure polling
+    oef_startup_timeout = 60
+    oef_started = False
+    while time.time() - start_time < oef_startup_timeout and not oef_started:
+        response_status = app.get(
+            'api/oef',
+            data=None,
+            content_type='application/json',
+        )
+        assert response_status.status_code == 200
+        data = json.loads(response_status.get_data(as_text=True))
+        assert "RUNNING" in data["status"]
+        if "A thing of beauty is a joy forever" in data["tty"]:
+            oef_started = True
+
+    assert oef_started
+
+    # get the status if failed
+    pid.return_code = 1
+    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+        response_status = app.get(
+            'api/oef',
+            data=None,
+            content_type='application/json',
+        )
+    assert response_status.status_code == 200
+    data = json.loads(response_status.get_data(as_text=True))
+    assert "FAILED" in data["status"]
+
+    # get the status if finished
+    pid.return_code = 0
+    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+        response_status = app.get(
+            'api/oef',
+            data=None,
+            content_type='application/json',
+        )
+    assert response_status.status_code == 200
+    data = json.loads(response_status.get_data(as_text=True))
+    assert "FINISHED" in data["status"]
+
+    # Stop the OEF Node
+    response_stop = app.delete(
+        'api/oef',
+        data=None,
+        content_type='application/json',
+    )
+    assert response_stop.status_code == 200
+
+    # get the status
+    pid.return_code = 0
+    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+        response_status = app.get(
+            'api/oef',
+            data=None,
+            content_type='application/json',
+        )
+    assert response_status.status_code == 200
+    data = json.loads(response_status.get_data(as_text=True))
+    assert "NOT_STARTED" in data["status"]

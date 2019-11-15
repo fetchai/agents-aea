@@ -26,45 +26,59 @@ import unittest.mock
 from .test_base import create_app
 
 
-def test_delete_agent():
-    """Test creating an agent."""
+def test_scaffold_item():
+    """Test remove a skill/connection/protocol.
+
+    Actually we just do connection as code coverage is the same.
+    """
     app = create_app()
+
     agent_name = "test_agent_id"
+    connection_name = "test_connection"
 
     def _dummy_call_aea(param_list, dir):
         assert param_list[0] == "aea"
-        assert param_list[1] == "delete"
-        assert param_list[2] == agent_name
+        assert param_list[1] == "scaffold"
+        assert param_list[2] == "connection"
+        assert param_list[3] == connection_name
+        assert agent_name in dir
         return 0
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
-        response_delete = app.delete(
-            'api/agent/' + agent_name,
-            data=None,
-            content_type='application/json')
-    assert response_delete.status_code == 200
-    data = json.loads(response_delete.get_data(as_text=True))
-    assert data == "Agent {} deleted".format(agent_name)
+        response_remove = app.post(
+            'api/agent/' + agent_name + "/connection/scaffold",
+            content_type='application/json',
+            data=json.dumps(connection_name))
+    assert response_remove.status_code == 201
+    data = json.loads(response_remove.get_data(as_text=True))
+    assert data == agent_name
 
 
-def test_delete_agent_fail():
-    """Test creating an agent and failing."""
+def test_scaffold_agent_fail():
+    """Test remove a skill/connection/protocol when it fails.
+
+    Actually we just do connection as code coverage is the same.
+    """
     app = create_app()
+
     agent_name = "test_agent_id"
+    connection_name = "test_connection"
 
     def _dummy_call_aea(param_list, dir):
         assert param_list[0] == "aea"
-        assert param_list[1] == "delete"
-        assert param_list[2] == agent_name
+        assert param_list[1] == "scaffold"
+        assert param_list[2] == "connection"
+        assert param_list[3] == connection_name
+        assert agent_name in dir
         return 1
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
-        response_delete = app.delete(
-            'api/agent/' + agent_name,
-            data=None,
-            content_type='application/json')
-    assert response_delete.status_code == 400
-    data = json.loads(response_delete.get_data(as_text=True))
-    assert data['detail'] == 'Failed to delete Agent {} - it may not exist'.format(agent_name)
+        response_remove = app.post(
+            'api/agent/' + agent_name + "/connection/scaffold",
+            content_type='application/json',
+            data=json.dumps(connection_name))
+    assert response_remove.status_code == 400
+    data = json.loads(response_remove.get_data(as_text=True))
+    assert data["detail"] == "Failed to scaffold a new connection in to agent {}".format(agent_name)

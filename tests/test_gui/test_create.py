@@ -25,19 +25,6 @@ import unittest.mock
 from .test_base import create_app, TempCWD
 
 
-def test_home_page_exits():
-    """Test that the home-page exits."""
-    app = create_app()
-
-    # sends HTTP GET request to the application
-    # on the specified path
-    result = app.get('/')
-
-    # assert the status code of the response
-    assert result.status_code == 200
-    assert "Fetch.AI AEA CLI REST API" in str(result.data)
-
-
 def test_create_agent():
     """Test creating an agent."""
     app = create_app()

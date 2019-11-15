@@ -1,0 +1,7 @@
+authors: Fetch.AI Limited
+dependencies: []
+description: The scaffold protocol scaffolds a protocol to be implemented by the developer.
+license: Apache 2.0
+name: test
+url: ''
+version: 0.1.0
