@@ -61,8 +61,7 @@ class TACBehaviour(Behaviour):
 
         :return: None
         """
-        if self._registered_desc is None:
-            self._register_tac()
+        pass
 
     def act(self) -> None:
         """
@@ -75,6 +74,7 @@ class TACBehaviour(Behaviour):
         now = datetime.datetime.now()
         if game.phase.value == Phase.PRE_GAME.value and now > parameters.registration_start_time and now < parameters.start_time:
             game.phase = Phase.GAME_REGISTRATION
+            self._register_tac()
             logger.info("[{}]: TAC open for registration until: {}".format(self.context.agent_name, parameters.start_time))
         elif game.phase.value == Phase.GAME_REGISTRATION.value and now > parameters.start_time and now < parameters.end_time:
             if game.registration.nb_agents < parameters.min_nb_agents:
@@ -134,7 +134,7 @@ class TACBehaviour(Behaviour):
         for agent_public_key in game.configuration.agent_pbks:
             agent_state = game.current_agent_states[agent_public_key]
             msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
-                             amount_by_currency=agent_state.amount_by_currency,
+                             amount_by_currency=agent_state.balance_by_currency,
                              exchange_params_by_currency=agent_state.exchange_params_by_currency,
                              quantities_by_good_pbk=agent_state.quantities_by_good_pbk,
                              utility_params_by_good_pbk=agent_state.utility_params_by_good_pbk,

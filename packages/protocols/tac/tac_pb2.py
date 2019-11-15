@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='fetch.oef.pb',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\ttac.proto\x12\x0c\x66\x65tch.oef.pb\x1a\x1cgoogle/protobuf/struct.proto\"+\n\nStrIntPair\x12\r\n\x05\x66irst\x18\x01 \x01(\t\x12\x0e\n\x06second\x18\x02 \x01(\x05\".\n\rStrDoublePair\x12\r\n\x05\x66irst\x18\x01 \x01(\t\x12\x0e\n\x06second\x18\x02 \x01(\x01\"+\n\nStrStrPair\x12\r\n\x05\x66irst\x18\x01 \x01(\t\x12\x0e\n\x06second\x18\x02 \x01(\t\"\x95\t\n\rTACController\x1a\x0c\n\nRegistered\x1a\x0e\n\x0cUnregistered\x1a\x0b\n\tCancelled\x1a\x8a\x03\n\x08GameData\x12\x34\n\x12\x61mount_by_currency\x18\x01 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x12@\n\x1b\x65xchange_params_by_currency\x18\x02 \x03(\x0b\x32\x1b.fetch.oef.pb.StrDoublePair\x12\x38\n\x16quantities_by_good_pbk\x18\x03 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x12?\n\x1autility_params_by_good_pbk\x18\x04 \x03(\x0b\x32\x1b.fetch.oef.pb.StrDoublePair\x12\x0e\n\x06tx_fee\x18\x05 \x01(\x03\x12\x33\n\x11\x61gent_pbk_to_name\x18\x06 \x03(\x0b\x32\x18.fetch.oef.pb.StrStrPair\x12\x32\n\x10good_pbk_to_name\x18\x07 \x03(\x0b\x32\x18.fetch.oef.pb.StrStrPair\x12\x12\n\nversion_id\x18\x08 \x01(\t\x1a\xa1\x01\n\x17TransactionConfirmation\x12\x16\n\x0etransaction_id\x18\x01 \x01(\t\x12\x34\n\x12\x61mount_by_currency\x18\x02 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x12\x38\n\x16quantities_by_good_pbk\x18\x03 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x1aw\n\x0bStateUpdate\x12\x37\n\tgame_data\x18\x01 \x01(\x0b\x32$.fetch.oef.pb.TACController.GameData\x12/\n\x03txs\x18\x02 \x03(\x0b\x32\".fetch.oef.pb.TACAgent.Transaction\x1a\xae\x03\n\x05\x45rror\x12?\n\nerror_code\x18\x01 \x01(\x0e\x32+.fetch.oef.pb.TACController.Error.ErrorCode\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12(\n\x07\x64\x65tails\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\"\xa6\x02\n\tErrorCode\x12\x11\n\rGENERIC_ERROR\x10\x00\x12\x15\n\x11REQUEST_NOT_VALID\x10\x01\x12 \n\x1c\x41GENT_PBK_ALREADY_REGISTERED\x10\x02\x12!\n\x1d\x41GENT_NAME_ALREADY_REGISTERED\x10\x03\x12\x18\n\x14\x41GENT_NOT_REGISTERED\x10\x04\x12\x19\n\x15TRANSACTION_NOT_VALID\x10\x05\x12\x1c\n\x18TRANSACTION_NOT_MATCHING\x10\x06\x12\x1f\n\x1b\x41GENT_NAME_NOT_IN_WHITELIST\x10\x07\x12\x1b\n\x17\x43OMPETITION_NOT_RUNNING\x10\x08\x12\x19\n\x15\x44IALOGUE_INCONSISTENT\x10\t\"\xac\x02\n\x08TACAgent\x1a\x1e\n\x08Register\x12\x12\n\nagent_name\x18\x01 \x01(\t\x1a\x0c\n\nUnregister\x1a\xdf\x01\n\x0bTransaction\x12\x16\n\x0etransaction_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63ounterparty\x18\x02 \x01(\t\x12\x34\n\x12\x61mount_by_currency\x18\x03 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x12\x15\n\rsender_tx_fee\x18\x04 \x01(\x03\x12\x1b\n\x13\x63ounterparty_tx_fee\x18\x05 \x01(\x03\x12\x38\n\x16quantities_by_good_pbk\x18\x06 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x1a\x10\n\x0eGetStateUpdate\"\xc8\x05\n\nTACMessage\x12\x33\n\x08register\x18\x01 \x01(\x0b\x32\x1f.fetch.oef.pb.TACAgent.RegisterH\x00\x12\x37\n\nunregister\x18\x02 \x01(\x0b\x32!.fetch.oef.pb.TACAgent.UnregisterH\x00\x12\x39\n\x0btransaction\x18\x03 \x01(\x0b\x32\".fetch.oef.pb.TACAgent.TransactionH\x00\x12\x41\n\x10get_state_update\x18\x04 \x01(\x0b\x32%.fetch.oef.pb.TACAgent.GetStateUpdateH\x00\x12<\n\nregistered\x18\x05 \x01(\x0b\x32&.fetch.oef.pb.TACController.RegisteredH\x00\x12@\n\x0cunregistered\x18\x06 \x01(\x0b\x32(.fetch.oef.pb.TACController.UnregisteredH\x00\x12:\n\tcancelled\x18\x07 \x01(\x0b\x32%.fetch.oef.pb.TACController.CancelledH\x00\x12\x39\n\tgame_data\x18\x08 \x01(\x0b\x32$.fetch.oef.pb.TACController.GameDataH\x00\x12W\n\x18transaction_confirmation\x18\t \x01(\x0b\x32\x33.fetch.oef.pb.TACController.TransactionConfirmationH\x00\x12?\n\x0cstate_update\x18\n \x01(\x0b\x32\'.fetch.oef.pb.TACController.StateUpdateH\x00\x12\x32\n\x05\x65rror\x18\x0b \x01(\x0b\x32!.fetch.oef.pb.TACController.ErrorH\x00\x42\t\n\x07\x63ontentb\x06proto3')
+  serialized_pb=_b('\n\ttac.proto\x12\x0c\x66\x65tch.oef.pb\x1a\x1cgoogle/protobuf/struct.proto\"+\n\nStrIntPair\x12\r\n\x05\x66irst\x18\x01 \x01(\t\x12\x0e\n\x06second\x18\x02 \x01(\x05\"-\n\x0cStrFloatPair\x12\r\n\x05\x66irst\x18\x01 \x01(\t\x12\x0e\n\x06second\x18\x02 \x01(\x01\"+\n\nStrStrPair\x12\r\n\x05\x66irst\x18\x01 \x01(\t\x12\x0e\n\x06second\x18\x02 \x01(\t\"\x93\t\n\rTACController\x1a\x0c\n\nRegistered\x1a\x0e\n\x0cUnregistered\x1a\x0b\n\tCancelled\x1a\x88\x03\n\x08GameData\x12\x34\n\x12\x61mount_by_currency\x18\x01 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x12?\n\x1b\x65xchange_params_by_currency\x18\x02 \x03(\x0b\x32\x1a.fetch.oef.pb.StrFloatPair\x12\x38\n\x16quantities_by_good_pbk\x18\x03 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x12>\n\x1autility_params_by_good_pbk\x18\x04 \x03(\x0b\x32\x1a.fetch.oef.pb.StrFloatPair\x12\x0e\n\x06tx_fee\x18\x05 \x01(\x03\x12\x33\n\x11\x61gent_pbk_to_name\x18\x06 \x03(\x0b\x32\x18.fetch.oef.pb.StrStrPair\x12\x32\n\x10good_pbk_to_name\x18\x07 \x03(\x0b\x32\x18.fetch.oef.pb.StrStrPair\x12\x12\n\nversion_id\x18\x08 \x01(\t\x1a\xa1\x01\n\x17TransactionConfirmation\x12\x16\n\x0etransaction_id\x18\x01 \x01(\t\x12\x34\n\x12\x61mount_by_currency\x18\x02 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x12\x38\n\x16quantities_by_good_pbk\x18\x03 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x1aw\n\x0bStateUpdate\x12\x37\n\tgame_data\x18\x01 \x01(\x0b\x32$.fetch.oef.pb.TACController.GameData\x12/\n\x03txs\x18\x02 \x03(\x0b\x32\".fetch.oef.pb.TACAgent.Transaction\x1a\xae\x03\n\x05\x45rror\x12?\n\nerror_code\x18\x01 \x01(\x0e\x32+.fetch.oef.pb.TACController.Error.ErrorCode\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12(\n\x07\x64\x65tails\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\"\xa6\x02\n\tErrorCode\x12\x11\n\rGENERIC_ERROR\x10\x00\x12\x15\n\x11REQUEST_NOT_VALID\x10\x01\x12 \n\x1c\x41GENT_PBK_ALREADY_REGISTERED\x10\x02\x12!\n\x1d\x41GENT_NAME_ALREADY_REGISTERED\x10\x03\x12\x18\n\x14\x41GENT_NOT_REGISTERED\x10\x04\x12\x19\n\x15TRANSACTION_NOT_VALID\x10\x05\x12\x1c\n\x18TRANSACTION_NOT_MATCHING\x10\x06\x12\x1f\n\x1b\x41GENT_NAME_NOT_IN_WHITELIST\x10\x07\x12\x1b\n\x17\x43OMPETITION_NOT_RUNNING\x10\x08\x12\x19\n\x15\x44IALOGUE_INCONSISTENT\x10\t\"\xac\x02\n\x08TACAgent\x1a\x1e\n\x08Register\x12\x12\n\nagent_name\x18\x01 \x01(\t\x1a\x0c\n\nUnregister\x1a\xdf\x01\n\x0bTransaction\x12\x16\n\x0etransaction_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63ounterparty\x18\x02 \x01(\t\x12\x34\n\x12\x61mount_by_currency\x18\x03 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x12\x15\n\rsender_tx_fee\x18\x04 \x01(\x03\x12\x1b\n\x13\x63ounterparty_tx_fee\x18\x05 \x01(\x03\x12\x38\n\x16quantities_by_good_pbk\x18\x06 \x03(\x0b\x32\x18.fetch.oef.pb.StrIntPair\x1a\x10\n\x0eGetStateUpdate\"\xc8\x05\n\nTACMessage\x12\x33\n\x08register\x18\x01 \x01(\x0b\x32\x1f.fetch.oef.pb.TACAgent.RegisterH\x00\x12\x37\n\nunregister\x18\x02 \x01(\x0b\x32!.fetch.oef.pb.TACAgent.UnregisterH\x00\x12\x39\n\x0btransaction\x18\x03 \x01(\x0b\x32\".fetch.oef.pb.TACAgent.TransactionH\x00\x12\x41\n\x10get_state_update\x18\x04 \x01(\x0b\x32%.fetch.oef.pb.TACAgent.GetStateUpdateH\x00\x12<\n\nregistered\x18\x05 \x01(\x0b\x32&.fetch.oef.pb.TACController.RegisteredH\x00\x12@\n\x0cunregistered\x18\x06 \x01(\x0b\x32(.fetch.oef.pb.TACController.UnregisteredH\x00\x12:\n\tcancelled\x18\x07 \x01(\x0b\x32%.fetch.oef.pb.TACController.CancelledH\x00\x12\x39\n\tgame_data\x18\x08 \x01(\x0b\x32$.fetch.oef.pb.TACController.GameDataH\x00\x12W\n\x18transaction_confirmation\x18\t \x01(\x0b\x32\x33.fetch.oef.pb.TACController.TransactionConfirmationH\x00\x12?\n\x0cstate_update\x18\n \x01(\x0b\x32\'.fetch.oef.pb.TACController.StateUpdateH\x00\x12\x32\n\x05\x65rror\x18\x0b \x01(\x0b\x32!.fetch.oef.pb.TACController.ErrorH\x00\x42\t\n\x07\x63ontentb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,])
 
@@ -76,8 +76,8 @@ _TACCONTROLLER_ERROR_ERRORCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1075,
-  serialized_end=1369,
+  serialized_start=1072,
+  serialized_end=1366,
 )
 _sym_db.RegisterEnumDescriptor(_TACCONTROLLER_ERROR_ERRORCODE)
 
@@ -120,22 +120,22 @@ _STRINTPAIR = _descriptor.Descriptor(
 )
 
 
-_STRDOUBLEPAIR = _descriptor.Descriptor(
-  name='StrDoublePair',
-  full_name='fetch.oef.pb.StrDoublePair',
+_STRFLOATPAIR = _descriptor.Descriptor(
+  name='StrFloatPair',
+  full_name='fetch.oef.pb.StrFloatPair',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='first', full_name='fetch.oef.pb.StrDoublePair.first', index=0,
+      name='first', full_name='fetch.oef.pb.StrFloatPair.first', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='second', full_name='fetch.oef.pb.StrDoublePair.second', index=1,
+      name='second', full_name='fetch.oef.pb.StrFloatPair.second', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -154,7 +154,7 @@ _STRDOUBLEPAIR = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=102,
-  serialized_end=148,
+  serialized_end=147,
 )
 
 
@@ -191,8 +191,8 @@ _STRSTRPAIR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=150,
-  serialized_end=193,
+  serialized_start=149,
+  serialized_end=192,
 )
 
 
@@ -215,8 +215,8 @@ _TACCONTROLLER_REGISTERED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=213,
-  serialized_end=225,
+  serialized_start=212,
+  serialized_end=224,
 )
 
 _TACCONTROLLER_UNREGISTERED = _descriptor.Descriptor(
@@ -238,8 +238,8 @@ _TACCONTROLLER_UNREGISTERED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=227,
-  serialized_end=241,
+  serialized_start=226,
+  serialized_end=240,
 )
 
 _TACCONTROLLER_CANCELLED = _descriptor.Descriptor(
@@ -261,8 +261,8 @@ _TACCONTROLLER_CANCELLED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=243,
-  serialized_end=254,
+  serialized_start=242,
+  serialized_end=253,
 )
 
 _TACCONTROLLER_GAMEDATA = _descriptor.Descriptor(
@@ -340,8 +340,8 @@ _TACCONTROLLER_GAMEDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=257,
-  serialized_end=651,
+  serialized_start=256,
+  serialized_end=648,
 )
 
 _TACCONTROLLER_TRANSACTIONCONFIRMATION = _descriptor.Descriptor(
@@ -384,8 +384,8 @@ _TACCONTROLLER_TRANSACTIONCONFIRMATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=654,
-  serialized_end=815,
+  serialized_start=651,
+  serialized_end=812,
 )
 
 _TACCONTROLLER_STATEUPDATE = _descriptor.Descriptor(
@@ -421,8 +421,8 @@ _TACCONTROLLER_STATEUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=817,
-  serialized_end=936,
+  serialized_start=814,
+  serialized_end=933,
 )
 
 _TACCONTROLLER_ERROR = _descriptor.Descriptor(
@@ -466,8 +466,8 @@ _TACCONTROLLER_ERROR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=939,
-  serialized_end=1369,
+  serialized_start=936,
+  serialized_end=1366,
 )
 
 _TACCONTROLLER = _descriptor.Descriptor(
@@ -489,8 +489,8 @@ _TACCONTROLLER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=196,
-  serialized_end=1369,
+  serialized_start=195,
+  serialized_end=1366,
 )
 
 
@@ -520,8 +520,8 @@ _TACAGENT_REGISTER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1384,
-  serialized_end=1414,
+  serialized_start=1381,
+  serialized_end=1411,
 )
 
 _TACAGENT_UNREGISTER = _descriptor.Descriptor(
@@ -543,8 +543,8 @@ _TACAGENT_UNREGISTER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1416,
-  serialized_end=1428,
+  serialized_start=1413,
+  serialized_end=1425,
 )
 
 _TACAGENT_TRANSACTION = _descriptor.Descriptor(
@@ -608,8 +608,8 @@ _TACAGENT_TRANSACTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1431,
-  serialized_end=1654,
+  serialized_start=1428,
+  serialized_end=1651,
 )
 
 _TACAGENT_GETSTATEUPDATE = _descriptor.Descriptor(
@@ -631,8 +631,8 @@ _TACAGENT_GETSTATEUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1656,
-  serialized_end=1672,
+  serialized_start=1653,
+  serialized_end=1669,
 )
 
 _TACAGENT = _descriptor.Descriptor(
@@ -654,8 +654,8 @@ _TACAGENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1372,
-  serialized_end=1672,
+  serialized_start=1369,
+  serialized_end=1669,
 )
 
 
@@ -758,17 +758,17 @@ _TACMESSAGE = _descriptor.Descriptor(
       name='content', full_name='fetch.oef.pb.TACMessage.content',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1675,
-  serialized_end=2387,
+  serialized_start=1672,
+  serialized_end=2384,
 )
 
 _TACCONTROLLER_REGISTERED.containing_type = _TACCONTROLLER
 _TACCONTROLLER_UNREGISTERED.containing_type = _TACCONTROLLER
 _TACCONTROLLER_CANCELLED.containing_type = _TACCONTROLLER
 _TACCONTROLLER_GAMEDATA.fields_by_name['amount_by_currency'].message_type = _STRINTPAIR
-_TACCONTROLLER_GAMEDATA.fields_by_name['exchange_params_by_currency'].message_type = _STRDOUBLEPAIR
+_TACCONTROLLER_GAMEDATA.fields_by_name['exchange_params_by_currency'].message_type = _STRFLOATPAIR
 _TACCONTROLLER_GAMEDATA.fields_by_name['quantities_by_good_pbk'].message_type = _STRINTPAIR
-_TACCONTROLLER_GAMEDATA.fields_by_name['utility_params_by_good_pbk'].message_type = _STRDOUBLEPAIR
+_TACCONTROLLER_GAMEDATA.fields_by_name['utility_params_by_good_pbk'].message_type = _STRFLOATPAIR
 _TACCONTROLLER_GAMEDATA.fields_by_name['agent_pbk_to_name'].message_type = _STRSTRPAIR
 _TACCONTROLLER_GAMEDATA.fields_by_name['good_pbk_to_name'].message_type = _STRSTRPAIR
 _TACCONTROLLER_GAMEDATA.containing_type = _TACCONTROLLER
@@ -833,7 +833,7 @@ _TACMESSAGE.oneofs_by_name['content'].fields.append(
   _TACMESSAGE.fields_by_name['error'])
 _TACMESSAGE.fields_by_name['error'].containing_oneof = _TACMESSAGE.oneofs_by_name['content']
 DESCRIPTOR.message_types_by_name['StrIntPair'] = _STRINTPAIR
-DESCRIPTOR.message_types_by_name['StrDoublePair'] = _STRDOUBLEPAIR
+DESCRIPTOR.message_types_by_name['StrFloatPair'] = _STRFLOATPAIR
 DESCRIPTOR.message_types_by_name['StrStrPair'] = _STRSTRPAIR
 DESCRIPTOR.message_types_by_name['TACController'] = _TACCONTROLLER
 DESCRIPTOR.message_types_by_name['TACAgent'] = _TACAGENT
@@ -847,12 +847,12 @@ StrIntPair = _reflection.GeneratedProtocolMessageType('StrIntPair', (_message.Me
   ))
 _sym_db.RegisterMessage(StrIntPair)
 
-StrDoublePair = _reflection.GeneratedProtocolMessageType('StrDoublePair', (_message.Message,), dict(
-  DESCRIPTOR = _STRDOUBLEPAIR,
+StrFloatPair = _reflection.GeneratedProtocolMessageType('StrFloatPair', (_message.Message,), dict(
+  DESCRIPTOR = _STRFLOATPAIR,
   __module__ = 'tac_pb2'
-  # @@protoc_insertion_point(class_scope:fetch.oef.pb.StrDoublePair)
+  # @@protoc_insertion_point(class_scope:fetch.oef.pb.StrFloatPair)
   ))
-_sym_db.RegisterMessage(StrDoublePair)
+_sym_db.RegisterMessage(StrFloatPair)
 
 StrStrPair = _reflection.GeneratedProtocolMessageType('StrStrPair', (_message.Message,), dict(
   DESCRIPTOR = _STRSTRPAIR,

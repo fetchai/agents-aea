@@ -42,8 +42,10 @@ def _from_dict_to_pairs(d):
             pair = tac_pb2.StrIntPair()
         elif type(value) == str:
             pair = tac_pb2.StrStrPair()
+        elif type(value) == float:
+            pair = tac_pb2.StrFloatPair()
         else:
-            raise ValueError("Either 'int' or 'str', not {}".format(type(value)))
+            raise ValueError("Either 'int' or 'str' or 'float', not {}".format(type(value)))
         pair.first = key
         pair.second = value
         result.append(pair)
@@ -51,7 +53,7 @@ def _from_dict_to_pairs(d):
 
 
 def _from_pairs_to_dict(pairs):
-    """Convert a list of StrStrPair or StrIntPair into a flat dictionary."""
+    """Convert a list of StrStrPair or StrIntPair or StrFloatPair into a flat dictionary."""
     result = {}
     for pair in pairs:
         key = pair.first
@@ -98,10 +100,10 @@ class TACSerializer(Serializer):
             tac_container.cancelled.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.GAME_DATA:
             tac_msg = tac_pb2.TACController.GameData()  # type: ignore
-            tac_msg.amount_by_currency.extend(msg.get("amount_by_currency"))
-            tac_msg.exchange_params_by_currency.extend(msg.get("exchange_params_by_currency"))
-            tac_msg.quantities_by_good_pbk.extend(msg.get("quantities_by_good_pbk"))
-            tac_msg.utility_params_by_good_pbk.extend(msg.get("utility_params_by_good_pbk"))
+            tac_msg.amount_by_currency.extend(_from_dict_to_pairs(msg.get("amount_by_currency")))
+            tac_msg.exchange_params_by_currency.extend(_from_dict_to_pairs(msg.get("exchange_params_by_currency")))
+            tac_msg.quantities_by_good_pbk.extend(_from_dict_to_pairs(msg.get("quantities_by_good_pbk")))
+            tac_msg.utility_params_by_good_pbk.extend(_from_dict_to_pairs(msg.get("utility_params_by_good_pbk")))
             tac_msg.tx_fee = msg.get("tx_fee")
             tac_msg.agent_pbk_to_name.extend(_from_dict_to_pairs(msg.get("agent_pbk_to_name")))
             tac_msg.good_pbk_to_name.extend(_from_dict_to_pairs(msg.get("good_pbk_to_name")))
@@ -110,8 +112,8 @@ class TACSerializer(Serializer):
         elif tac_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
             tac_msg = tac_pb2.TACController.TransactionConfirmation()  # type: ignore
             tac_msg.transaction_id = msg.get("transaction_id")
-            tac_msg.amount_by_currency.extend(msg.get("amount_by_currency"))
-            tac_msg.quantities_by_good_pbk.extend(msg.get("quantities_by_good_pbk"))
+            tac_msg.amount_by_currency.extend(_from_dict_to_pairs(msg.get("amount_by_currency")))
+            tac_msg.quantities_by_good_pbk.extend(_from_dict_to_pairs(msg.get("quantities_by_good_pbk")))
             tac_container.transaction_confirmation.CopyFrom(tac_msg)
         elif tac_type == TACMessage.Type.STATE_UPDATE:
             tac_msg = tac_pb2.TACController.StateUpdate()  # type: ignore

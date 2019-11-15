@@ -9,7 +9,7 @@ message StrIntPair {
     int32 second = 2;
 }
 
-message StrDoublePair {
+message StrFloatPair {
     string first = 1;
     double second = 2;
 }
@@ -30,9 +30,9 @@ message TACController {
 
     message GameData {
         repeated StrIntPair amount_by_currency = 1;
-        repeated StrDoublePair exchange_params_by_currency = 2;
+        repeated StrFloatPair exchange_params_by_currency = 2;
         repeated StrIntPair quantities_by_good_pbk = 3;
-        repeated StrDoublePair utility_params_by_good_pbk = 4;
+        repeated StrFloatPair utility_params_by_good_pbk = 4;
         int64 tx_fee = 5;
         repeated StrStrPair agent_pbk_to_name = 6;
         repeated StrStrPair good_pbk_to_name = 7;

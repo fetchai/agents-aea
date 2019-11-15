@@ -114,9 +114,17 @@ class TACMessage(Message):
                 pass
             elif tac_type == TACMessage.Type.GAME_DATA:
                 assert self.is_set("amount_by_currency")
+                for key, value in cast(Dict, self.get("amount_by_currency")):
+                    assert type(key) == str and type(value) == int
                 assert self.is_set("exchange_params_by_currency")
+                for key, value in cast(Dict, self.get("exchange_params_by_currency")):
+                    assert type(key) == str and type(value) == float
                 assert self.is_set("quantities_by_good_pbk")
+                for key, value in cast(Dict, self.get("quantities_by_good_pbk")):
+                    assert type(key) == str and type(value) == int
                 assert self.is_set("utility_params_by_good_pbk")
+                for key, value in cast(Dict, self.get("utility_params_by_good_pbk")):
+                    assert type(key) == str and type(value) == float
                 assert self.is_set("tx_fee")
                 assert self.is_set("agent_pbk_to_name")
                 assert self.is_set("good_pbk_to_name")

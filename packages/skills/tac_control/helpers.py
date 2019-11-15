@@ -135,7 +135,7 @@ def _sample_good_instances(nb_agents: int, nb_goods: int, base_amount: int,
     return nb_instances
 
 
-def generate_money_endowments(nb_agents: int, money_endowment: int) -> List[float]:
+def generate_money_endowments(nb_agents: int, money_endowment: int) -> List[int]:
     """
     Compute the initial money amounts for each agent.
 
@@ -143,7 +143,7 @@ def generate_money_endowments(nb_agents: int, money_endowment: int) -> List[floa
     :param money_endowment: money endowment per agent.
     :return: the list of initial money amounts.
     """
-    return [money_endowment * 1.0] * nb_agents
+    return [money_endowment] * nb_agents
 
 
 def generate_equilibrium_prices_and_holdings(endowments: List[List[int]], utility_function_params: List[List[float]], money_endowment: int, scaling_factor: float, quantity_shift: int = QUANTITY_SHIFT) -> Tuple[List[float], List[List[float]], List[float]]:
@@ -167,30 +167,27 @@ def generate_equilibrium_prices_and_holdings(endowments: List[List[int]], utilit
     return eq_prices.tolist(), eq_good_holdings.tolist(), eq_money_holdings.tolist()
 
 
-def logarithmic_utility(utility_function_params: List[float], good_bundle: List[int], quantity_shift: int = QUANTITY_SHIFT) -> float:
+def logarithmic_utility(utility_params_by_good_pbk: Dict[str, float], quantities_by_good_pbk: Dict[str, int], quantity_shift: int = QUANTITY_SHIFT) -> float:
     """
     Compute agent's utility given her utility function params and a good bundle.
 
-    :param utility_function_params: utility function params of the agent
-    :param good_bundle: a bundle of goods with the quantity for each good
+    :param utility_params_by_good_pbk: utility params by good identifier
+    :param quantities_by_good_pbk: quantities by good identifier
     :param quantity_shift: a factor to shift the quantities in the utility function (to ensure the natural logarithm can be used on the entire range of quantities)
     :return: utility value
     """
-    goodwise_utility = [param * math.log(quantity + quantity_shift) if quantity + quantity_shift > 0 else -10000
-                        for param, quantity in zip(utility_function_params, good_bundle)]
+    goodwise_utility = [utility_params_by_good_pbk[good_pbk] * math.log(quantity + quantity_shift) if quantity + quantity_shift > 0 else -10000
+                        for good_pbk, quantity in quantities_by_good_pbk.items()]
     return sum(goodwise_utility)
 
 
-def marginal_utility(utility_function_params: List[float], current_holdings: List[int], delta_holdings: List[int]) -> float:
+def linear_utility(exchange_params_by_currency: Dict[str, float], balance_by_currency: Dict[str, int]) -> float:
     """
     Compute agent's utility given her utility function params and a good bundle.
 
-    :param utility_function_params: utility function params of the agent
-    :param current_holdings: a list of goods with the quantity for each good
-    :param delta_holdings: a list of goods with the quantity for each good (can be positive or negative)
-    :return: utility difference between new and current utility
+    :param exchange_params_by_currency: exchange params by currency
+    :param balance_by_currency: balance by currency
+    :return: utility value
     """
-    current_utility = logarithmic_utility(utility_function_params, current_holdings)
-    new_holdings = [sum(x) for x in zip(current_holdings, delta_holdings)]
-    new_utility = logarithmic_utility(utility_function_params, new_holdings)
-    return new_utility - current_utility
+    money_utility = [exchange_params_by_currency[currency] * balance for currency, balance in balance_by_currency.items()]
+    return sum(money_utility)

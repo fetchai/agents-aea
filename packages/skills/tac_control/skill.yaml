@@ -37,3 +37,5 @@ shared_classes:
       class_name: Game
       args: {}
 protocols: ['oef', 'tac']
+dependencies:
+  - numpy
