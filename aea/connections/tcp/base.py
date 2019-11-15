@@ -20,13 +20,10 @@
 """Base classes for TCP communication."""
 import asyncio
 import logging
-import queue
 import struct
 import threading
 from abc import ABC, abstractmethod
-from asyncio import CancelledError, StreamWriter, StreamReader, AbstractEventLoop, Future
-from concurrent.futures import Executor, ThreadPoolExecutor
-from threading import Thread
+from asyncio import CancelledError, StreamWriter, StreamReader
 from typing import Optional
 
 from aea.connections.base import Connection
@@ -50,8 +47,6 @@ class TCPConnection(Connection, ABC):
         self.port = port
 
         self._lock = threading.Lock()
-        self._stopped = True
-        self._connected = False
 
     def _run_task(self, coro):
         return asyncio.run_coroutine_threadsafe(coro=coro, loop=self._loop)
@@ -73,13 +68,7 @@ class TCPConnection(Connection, ABC):
         :return: the stream writer to communicate with the recipient. None if it cannot be determined.
         """
 
-    @property
-    def is_established(self):
-        """Check if the connection is established."""
-        return not self._stopped and self._connected
-
     async def connect(self):
-
         """
         Set up the connection.
 
@@ -87,20 +76,16 @@ class TCPConnection(Connection, ABC):
         :raises ConnectionError: if a problem occurred during the connection.
         """
         with self._lock:
-            try:
-                if self.connection_status.is_connected:
-                    logger.warning("Connection already set up.")
-                    return
+            if self.connection_status.is_connected:
+                logger.warning("Connection already set up.")
+                return
 
-                self._stopped = False
+            try:
                 await self.setup()
-                self._connected = True
                 self.connection_status.is_connected = True
             except Exception as e:
                 logger.error(str(e))
-                self._connected = False
                 self.connection_status.is_connected = False
-                self._stopped = True
 
     async def disconnect(self) -> None:
         """
@@ -110,18 +95,16 @@ class TCPConnection(Connection, ABC):
         """
         with self._lock:
             if not self.connection_status.is_connected:
-                logger.warning("Connection is not set up.")
+                logger.warning("Connection already disconnected.")
                 return
 
-            self._connected = False
-            self.connection_status.is_connected = False
             await self.teardown()
-            self._stopped = True
+            self.connection_status.is_connected = False
 
     async def _recv(self, reader: StreamReader) -> Optional[bytes]:
         """Receive bytes."""
         data = await reader.read(len(struct.pack("I", 0)))
-        if not self._connected or not self.connection_status.is_connected:
+        if not self.connection_status.is_connected:
             return None
         nbytes = struct.unpack("I", data)[0]
         nbytes_read = 0
@@ -155,4 +138,3 @@ class TCPConnection(Connection, ABC):
             await self._send(writer, data)
         else:
             logger.error("[{}]: Cannot send envelope {}".format(self.public_key, envelope))
-

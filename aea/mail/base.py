@@ -21,15 +21,14 @@
 import asyncio
 import logging
 import queue
-import time
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop, Queue, Task
-from concurrent.futures import CancelledError, TimeoutError, Future
+from asyncio import AbstractEventLoop
+from concurrent.futures import Future
 from threading import Thread, Lock
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict
 
-from aea.connections.base import ConnectionStatus
 from aea.configurations.base import Address, ProtocolId
+from aea.connections.base import ConnectionStatus
 from aea.mail import base_pb2
 
 if TYPE_CHECKING:
@@ -225,6 +224,7 @@ class Multiplexer:
         self._connections = connections  # type: List[Connection]
         self._name_to_connection = {c.connection_id: c for c in connections}  # type: Dict[str, Connection]
         self.default_connection = self._connections[default_connection_index]  # type: Connection
+        self._connection_status = ConnectionStatus()
 
         self._lock = Lock()
         self._loop = loop if loop is not None else asyncio.new_event_loop()
@@ -238,12 +238,12 @@ class Multiplexer:
 
     @property
     def in_queue(self) -> queue.Queue:
-        """Get the in queue"""
+        """Get the in queue."""
         return self._in_queue
 
     @property
     def out_queue(self) -> asyncio.Queue:
-        """Get the out queue"""
+        """Get the out queue."""
         return self._out_queue
 
     @property
@@ -254,28 +254,44 @@ class Multiplexer:
     @property
     def is_connected(self) -> bool:
         """Check whether the multiplexer is processing messages."""
-        return self._loop.is_running() and all(c.is_established for c in self._connections)
+        return self._loop.is_running() and all(c.connection_status.is_connected for c in self._connections)
+
+    @property
+    def connection_status(self) -> ConnectionStatus:
+        """Get the connection status."""
+        return self._connection_status
 
     def connect(self) -> None:
         """Connect the multiplexer."""
         with self._lock:
+            if self.connection_status.is_connected:
+                logger.debug("Multiplexer already connected.")
+                return
             self._start()
             asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
             assert self.is_connected
+            self._connection_status.is_connected = True
             self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._recv_loop(), loop=self._loop)
             self._send_loop_task = asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
 
     def disconnect(self) -> None:
         """Disconnect the multiplexer."""
         with self._lock:
+            if not self.connection_status.is_connected:
+                logger.debug("Multiplexer already disconnected.")
+                return
             logger.debug("Disconnecting the multiplexer...")
             asyncio.run_coroutine_threadsafe(self._disconnect_all(), loop=self._loop).result()
             self._stop()
+            assert not self.is_connected
+            self._connection_status.is_connected = False
 
     def _run_loop(self):
-        """Run the asyncio loop.
+        """
+        Run the asyncio loop.
 
-        This method is supposed to be run only in the Multiplexer thread."""
+        This method is supposed to be run only in the Multiplexer thread.
+        """
         logger.debug("Starting threaded asyncio loop...")
         asyncio.set_event_loop(self._loop)
         self._loop.run_forever()
@@ -323,7 +339,7 @@ class Multiplexer:
         """
         connection = self._name_to_connection[connection_id]
         logger.debug("Processing connection {}".format(connection.connection_id))
-        if connection.is_established:
+        if connection.connection_status.is_connected:
             logger.debug("Connection {} already established.".format(connection.connection_id))
         else:
             connection.loop = self._loop
@@ -348,7 +364,7 @@ class Multiplexer:
         """
         connection = self._name_to_connection[connection_id]
         logger.debug("Processing connection {}".format(connection.connection_id))
-        if not connection.is_established:
+        if not connection.connection_status.is_connected:
             logger.debug("Connection {} already disconnected.".format(connection.connection_id))
         else:
             await connection.disconnect()
@@ -404,6 +420,7 @@ class Multiplexer:
                 logger.error("Error in the receiving loop: {}".format(str(e)))
                 return
 
+        # cancel all the receiving tasks.
         for t in task_to_connection.keys():
             t.cancel()
         logger.debug("Receiving loop terminated.")
@@ -447,8 +464,11 @@ class Multiplexer:
             return None
 
     def put(self, envelope: Envelope):
-        fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
-        return fut.result()
+        """Schedule an envelope for sending it."""
+        self._loop.call_soon_threadsafe(self.out_queue.put_nowait, envelope)
+        return
+        # fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
+        # return fut.result()
 
 
 class InBox(object):
@@ -556,15 +576,14 @@ class MailBox(object):
         self.outbox = OutBox(self._multiplexer)
 
     @property
-    def is_connected(self) -> bool:
-        """Check whether the mailbox is processing messages."""
-        return self._multiplexer.is_connected
-        # return self._connection.connection_status.is_connected
+    def connection_status(self) -> ConnectionStatus:
+        """Get the connection status."""
+        return self._multiplexer.connection_status
 
-    # @property
-    # def connection_status(self) -> ConnectionStatus:
-    #     """Get the connection status."""
-    #     return self._connection.connection_status
+    @property
+    def is_connected(self) -> bool:
+        """Check whether the multiplexer is connected."""
+        return self._multiplexer.is_connected
 
     def connect(self) -> None:
         """Connect."""

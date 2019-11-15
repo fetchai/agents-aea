@@ -18,7 +18,9 @@
 # ------------------------------------------------------------------------------
 """The test error skill module contains the tests of the error skill."""
 import os
+import time
 from pathlib import Path
+from threading import Thread
 
 from aea.aea import AEA
 from aea.connections.local.connection import LocalNode
@@ -52,9 +54,12 @@ class TestSkillError:
         cls.public_key = cls.wallet.public_keys['default']
 
         cls.connection = DummyConnection()
-        cls.mailbox1 = MailBox(cls.connection)
+        cls.mailbox1 = MailBox([cls.connection])
         cls.my_aea = AEA(cls.agent_name, cls.mailbox1, cls.wallet, cls.ledger_apis, timeout=2.0,
                          resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))))
+        cls.t = Thread(target=cls.my_aea.start)
+        cls.t.start()
+        time.sleep(0.5)
 
         cls.skill_context = SkillContext(cls.my_aea._context)
         cls.my_error_handler = ErrorHandler(skill_context=cls.skill_context)
@@ -76,7 +81,7 @@ class TestSkillError:
 
         self.my_error_handler.send_unsupported_protocol(envelope)
 
-        envelope = self.connection.out_queue.get(block=True, timeout=1.0)
+        envelope = self.mailbox1.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL.value
@@ -90,7 +95,7 @@ class TestSkillError:
 
         self.my_error_handler.send_decoding_error(envelope)
 
-        envelope = self.connection.out_queue.get(block=True, timeout=1.0)
+        envelope = self.mailbox1.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.DECODING_ERROR.value
@@ -104,7 +109,7 @@ class TestSkillError:
 
         self.my_error_handler.send_invalid_message(envelope)
 
-        envelope = self.connection.out_queue.get(block=True, timeout=1.0)
+        envelope = self.mailbox1.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.INVALID_MESSAGE.value
@@ -118,7 +123,7 @@ class TestSkillError:
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)
 
-        envelope = self.connection.out_queue.get(block=True, timeout=1.0)
+        envelope = self.mailbox1.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value
@@ -134,4 +139,5 @@ class TestSkillError:
     @classmethod
     def teardown_class(cls):
         """Teardown method."""
-        pass
+        cls.my_aea.stop()
+        cls.t.join()

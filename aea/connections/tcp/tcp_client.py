@@ -21,8 +21,8 @@
 import asyncio
 import logging
 import struct
-from asyncio import AbstractEventLoop, Task, StreamWriter, StreamReader
-from concurrent.futures import CancelledError, Executor
+from asyncio import Task, StreamWriter, StreamReader
+from concurrent.futures import CancelledError
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig

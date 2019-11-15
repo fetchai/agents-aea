@@ -47,9 +47,19 @@ class TestTCPCommunication:
         cls.client_1_mailbox = MailBox([cls.client_conn_1])
         cls.client_2_mailbox = MailBox([cls.client_conn_2])
 
+        assert not cls.server_conn.connection_status.is_connected
+        assert not cls.client_conn_1.connection_status.is_connected
+        assert not cls.client_conn_2.connection_status.is_connected
+
         cls.server_mailbox.connect()
         cls.client_1_mailbox.connect()
         cls.client_2_mailbox.connect()
+
+    def test_is_connected(self):
+        """Test that the connection status are connected."""
+        assert self.server_conn.connection_status.is_connected
+        assert self.client_conn_1.connection_status.is_connected
+        assert self.client_conn_2.connection_status.is_connected
 
     def test_communication_client_server(self):
         """Test that envelopes can be sent from a client to a server."""

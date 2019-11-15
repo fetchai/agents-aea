@@ -86,24 +86,35 @@ class DummyConnection(Connection):
 
     def __init__(self):
         """Initialize."""
-        super().__init__()
+        super().__init__(connection_id="dummy")
+        self.connection_status.is_connected = False
+        self._queue = None
+
+    async def connect(self, *args, **kwargs):
+        """Connect."""
+        self._queue = asyncio.Queue(loop=self.loop)
         self.connection_status.is_connected = True
 
-    def connect(self):
-        """Connect."""
-        pass
-
-    def disconnect(self):
+    async def disconnect(self, *args, **kwargs):
         """Disconnect."""
-        pass
+        self.connection_status.is_connected = False
 
-    def send(self, envelope: 'Envelope'):
+    async def send(self, envelope: 'Envelope'):
         """Send an envelope."""
-        self.out_queue.put(envelope)
+        self._queue.put_nowait(envelope)
 
-    def receive(self, envelope: 'Envelope'):
+    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive an envelope."""
-        self.in_queue.put(envelope)
+        try:
+            return await self._queue.get()
+        except Exception as e:
+            print(str(e))
+            await asyncio.sleep(0.5)
+            return None
+
+    def put(self, envelope: Envelope):
+        """Put an envelope in the queue."""
+        self._queue.put_nowait(envelope)
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':

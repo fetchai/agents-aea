@@ -18,20 +18,19 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF communication using an OEF."""
+import asyncio
 import logging
 import os
 import time
-from threading import Thread
 from typing import cast
 from unittest import mock
 
 import pytest
-from oef.core import AsyncioCore
 from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.oef.connection import OEFMailBox, OEFConnection, OEFChannel
+from aea.connections.oef.connection import OEFMailBox, OEFConnection
 from aea.connections.oef.connection import OEFObjectTranslator
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
@@ -158,6 +157,7 @@ class TestOEF:
             msg_bytes = OEFSerializer().encode(msg)
             self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
                                              protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            time.sleep(0.5)
 
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=2,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel))
@@ -472,30 +472,6 @@ class TestFIPA:
         envelope = Envelope(to="mailbox", sender="me", protocol_id="unknown", message=b'Hello')
         self.mailbox1.send(envelope)
 
-    def test_send_oef_message(self):
-        """Test the send oef message."""
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path})
-        core = AsyncioCore(logger=logger)
-        my_channel = OEFChannel(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", core=core,
-                                oef_port=10000)
-
-        msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
-                         operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=DEFAULT_OEF, sender="me", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        with pytest.raises(ValueError):
-            my_channel.send_oef_message(envelope)
-
-        data_model = DataModel("foobar", attributes=[])
-        query = Query(constraints=[], model=data_model)
-
-        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        my_channel.conn = OEFConnection(public_key="pk", oef_addr="192.0.0.1")
-        my_channel.send_oef_message(envelope)
-
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
@@ -517,25 +493,14 @@ class TestOefConnection:
         mailbox.connect()
         mailbox.disconnect()
 
-    @pytest.mark.asyncio
-    async def test_oef_connect(self):
-        """Test the OEFConnection."""
-        con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
-        assert not con.is_established
-        with pytest.raises(ConnectionError):
-            await con.connect()
-
-    # def test_oef_connect(self):
-    #     """Test the OEFConnection with a wrong address."""
+    # TODO connection error has been removed
+    # @pytest.mark.asyncio
+    # async def test_oef_connect(self):
+    #     """Test the OEFConnection."""
     #     con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
     #     assert not con.connection_status.is_connected
-    #     connection_thread = Thread(target=con.connect)
-    #     connection_thread.start()
-    #     time.sleep(2.0)
-    #     assert not con.connection_status.is_connected
-    #     con._stopped = True
-    #     con._core.stop()
-    #     connection_thread.join()
+    #     with pytest.raises(ConnectionError):
+    #         await con.connect()
 
     def test_oef_from_config(self):
         """Test the Connection from config File."""
@@ -659,3 +624,29 @@ class DummyConstrainExpr(ConstraintExpr):
     @property
     def _node(self):
         pass
+
+
+@pytest.mark.asyncio
+async def test_send_oef_message(network_node):
+    """Test the send oef message."""
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
+    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection.loop = asyncio.get_event_loop()
+    await oef_connection.connect()
+
+    msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
+                     operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
+    msg_bytes = OEFSerializer().encode(msg)
+    envelope = Envelope(to=DEFAULT_OEF, sender="me", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    with pytest.raises(ValueError):
+        await oef_connection.send(envelope)
+
+    data_model = DataModel("foobar", attributes=[])
+    query = Query(constraints=[], model=data_model)
+
+    msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
+    msg_bytes = OEFSerializer().encode(msg)
+    envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    await oef_connection.send(envelope)
+    await oef_connection.disconnect()

@@ -21,10 +21,10 @@
 """Extension to the Local Node."""
 import asyncio
 import logging
-from asyncio import Lock, Queue, AbstractEventLoop
+from asyncio import Queue, AbstractEventLoop
 from collections import defaultdict
 from threading import Thread
-from typing import Dict, List, Optional, cast, Tuple
+from typing import Dict, List, Optional, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection, AEAConnectionError
@@ -45,14 +45,36 @@ class LocalNode:
         """Initialize a local (i.e. non-networked) implementation of an OEF Node."""
         self.agents = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
-        self._lock = Lock()
-        self._loop = loop if loop is not None else asyncio.get_event_loop()
-        self._thread = Thread(target=self._loop.run_forever)
+        self._lock = asyncio.Lock()
+        self._loop = loop if loop is not None else asyncio.new_event_loop()
+        self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = Queue()
-        self._out_queues = {}  # type: Dict[str, Queue]
+        self._in_queue = Queue(loop=self._loop)
+        self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
-    async def connect(self, public_key: str, writer: Queue) -> Optional[asyncio.Queue]:
+        self._receiving_loop_task = None  # type: Optional[asyncio.Task]
+
+    def __enter__(self):
+        """Start the local node."""
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Stop the local node."""
+        self.stop()
+
+    def _run_loop(self):
+        """
+        Run the asyncio loop.
+
+        This method is supposed to be run only in the Multiplexer thread.
+        """
+        logger.debug("Starting threaded asyncio loop...")
+        asyncio.set_event_loop(self._loop)
+        self._loop.run_forever()
+        logger.debug("Asyncio loop has been stopped.")
+
+    async def connect(self, public_key: str, writer: asyncio.Queue) -> Optional[asyncio.Queue]:
         """
         Connect a public key to the node.
 
@@ -63,17 +85,23 @@ class LocalNode:
         if public_key in self._out_queues.keys():
             return None
 
-        q = Queue()  # type: Queue
+        q = self._in_queue  # type: asyncio.Queue
         self._out_queues[public_key] = writer
 
         return q
 
     def start(self):
+        """Start the node."""
         if not self._loop.is_running() and not self._thread.is_alive():
             self._thread.start()
-        asyncio.run_coroutine_threadsafe(self.receiving_loop, loop=self._loop)
+        self._receiving_loop_task = asyncio.run_coroutine_threadsafe(self.receiving_loop(), loop=self._loop)
+        logger.debug("Local node has been started.")
 
     def stop(self):
+        """Stop the node."""
+        asyncio.run_coroutine_threadsafe(self._in_queue.put(None), self._loop).result()
+        self._receiving_loop_task.result()
+
         if self._loop.is_running():
             self._loop.call_soon_threadsafe(self._loop.stop)
         if self._thread.is_alive():
@@ -83,11 +111,14 @@ class LocalNode:
         """Process incoming messages."""
         while True:
             envelope = await self._in_queue.get()
+            if envelope is None:
+                logger.debug("Receiving loop terminated.")
+                return
+            logger.debug("Handling envelope: {}".format(envelope))
             await self._handle_envelope(envelope)
 
     async def _handle_envelope(self, envelope: Envelope) -> None:
-        """
-        Handle an envelope.
+        """Handle an envelope.
 
         :param envelope: the envelope
         :return: None
@@ -98,8 +129,7 @@ class LocalNode:
             await self._handle_agent_message(envelope)
 
     async def _handle_oef_message(self, envelope: Envelope) -> None:
-        """
-        Handle oef messages.
+        """Handle oef messages.
 
         :param envelope: the envelope
         :return: None
@@ -150,7 +180,7 @@ class LocalNode:
         :param service_description: the description of the service agent to be registered.
         :return: None
         """
-        with self._lock:
+        async with self._lock:
             self.services[public_key].append(service_description)
 
     async def _register_agent(self, public_key: str, agent_description: Description):
@@ -197,7 +227,7 @@ class LocalNode:
         :param msg_id: the message id of the request.
         :return: None
         """
-        with self._lock:
+        async with self._lock:
             if public_key not in self.agents:
                 msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT)
                 msg_bytes = OEFSerializer().encode(msg)
@@ -265,6 +295,7 @@ class LocalNode:
         destination = envelope.to
         destination_queue = self._out_queues[destination]
         destination_queue._loop.call_soon_threadsafe(destination_queue.put_nowait, envelope)
+        logger.debug("Send envelope {}".format(envelope))
 
     async def disconnect(self, public_key: str) -> None:
         """
@@ -273,7 +304,7 @@ class LocalNode:
         :param public_key: the public key
         :return: None
         """
-        with self._lock:
+        async with self._lock:
             self._out_queues.pop(public_key, None)
             self.services.pop(public_key, None)
             self.agents.pop(public_key, None)
@@ -302,31 +333,31 @@ class OEFLocalConnection(Connection):
         self._writer = None  # type: Optional[Queue]
 
     @property
-    def is_established(self) -> bool:
-        """Return True if the connection has been established, False otherwise."""
-        return self._writer is not None
-
-    @property
     def public_key(self) -> str:
         """Get the public key."""
         return self._public_key
 
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
-        if not self.is_established:
+        if not self.connection_status.is_connected:
             self._reader = Queue(loop=self._loop)
-            self._writer = self._local_node.connect(self._public_key, self._reader)
+            self._writer = await self._local_node.connect(self._public_key, self._reader)
+            self.connection_status.is_connected = True
 
     async def disconnect(self) -> None:
         """Disconnect from the local OEF Node."""
-        await self._local_node.disconnect(self.public_key)
-        self._reader, self._writer = None, None
+        if self.connection_status.is_connected:
+            await self._local_node.disconnect(self.public_key)
+            await self._reader.put(None)
+            self._reader, self._writer = None, None
+            self.connection_status.is_connected = False
 
     async def send(self, envelope: Envelope):
         """Send a message."""
-        if not self.is_established:
+        if not self.connection_status.is_connected:
             raise AEAConnectionError("Connection not established yet. Please use 'connect()'.")
-        self._writer._loop.call_soon_threadsafe(self._writer.put_nowait(envelope))
+        # asyncio.run_coroutine_threadsafe(self._writer.put(envelope), self._writer._loop).result()
+        self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)
 
     async def recv(self) -> Optional['Envelope']:
         """
@@ -334,10 +365,15 @@ class OEFLocalConnection(Connection):
 
         :return: the envelope received, or None.
         """
-        if not self.is_established:
+        if not self.connection_status.is_connected:
             raise AEAConnectionError("Connection not established yet. Please use 'connect()'.")
         try:
-            return await self._reader.get()
+            envelope = await self._reader.get()
+            if envelope is None:
+                logger.debug("Receiving task terminated.".format(envelope))
+                return None
+            logger.debug("Received envelope {}".format(envelope))
+            return envelope
         except Exception:
             return None
 

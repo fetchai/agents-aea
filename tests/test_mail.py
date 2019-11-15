@@ -18,13 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for Envelope of mail.base.py."""
-
-from queue import Queue
+import time
 
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.mail.base import Envelope, MailBox, InBox, OutBox
+from aea.mail.base import Envelope, MailBox, InBox, OutBox, Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
+from .conftest import DummyConnection
 
 
 def test_envelope_initialisation():
@@ -53,8 +53,8 @@ def test_envelope_initialisation():
 
 def test_inbox_empty():
     """Tests if the inbox is empty."""
-    my_queue = Queue()
-    _inbox = InBox(my_queue)
+    multiplexer = Multiplexer([DummyConnection()])
+    _inbox = InBox(multiplexer)
     assert _inbox.empty(), "Inbox is not empty"
 
 
@@ -62,12 +62,12 @@ def test_inbox_nowait():
     """Tests the inbox without waiting."""
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
-    my_queue = Queue()
+    multiplexer = Multiplexer([DummyConnection()])
     envelope = Envelope(to="Agent1", sender="Agent0",
                         protocol_id="my_own_protocol", message=message_bytes)
-    my_queue.put(envelope)
-    _inbox = InBox(my_queue)
-    assert _inbox.get_nowait(
+    multiplexer.in_queue.put(envelope)
+    inbox = InBox(multiplexer)
+    assert inbox.get_nowait(
     ) == envelope, "Check for a message on the in queue and wait for no time."
 
 
@@ -75,57 +75,56 @@ def test_inbox_get():
     """Tests for a envelope on the in queue."""
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
-    my_queue = Queue()
+    multiplexer = Multiplexer([DummyConnection()])
     envelope = Envelope(to="Agent1", sender="Agent0",
                         protocol_id="my_own_protocol", message=message_bytes)
-    my_queue.put(envelope)
-    _inbox = InBox(my_queue)
+    multiplexer.in_queue.put(envelope)
+    inbox = InBox(multiplexer)
 
-    assert _inbox.get() == envelope,\
-        "Checks if the returned envelope is the same with the queued envelope."
+    assert inbox.get() == envelope, "Checks if the returned envelope is the same with the queued envelope."
 
 
 def test_outbox_put():
     """Tests that an envelope is putted into the queue."""
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
-    my_queue = Queue()
-    envelope = Envelope(to="Agent1", sender="Agent0",
-                        protocol_id="my_own_protocol", message=message_bytes)
-    my_queue.put(envelope)
-    _outbox = OutBox(my_queue)
-    _outbox.put(envelope)
-    assert _outbox.empty() is False,\
-        "Oubox must not be empty after putting an envelope"
+    multiplexer = Multiplexer([DummyConnection()])
+    outbox = OutBox(multiplexer)
+    inbox = InBox(multiplexer)
+    multiplexer.connect()
+    envelope = Envelope(to="Agent1", sender="Agent0", protocol_id="my_own_protocol", message=message_bytes)
+    outbox.put(envelope)
+    time.sleep(0.1)
+    assert not inbox.empty(), "Inbox must not be empty after putting an envelope"
+    multiplexer.disconnect()
 
 
 def test_outbox_put_message():
     """Tests that an envelope is created from the message is in the queue."""
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
-    my_queue = Queue()
-    envelope = Envelope(to="Agent1", sender="Agent0",
-                        protocol_id="my_own_protocol", message=message_bytes)
-    my_queue.put(envelope)
-    _outbox = OutBox(my_queue)
-    _outbox.put_message("Agent1", "Agent0", "my_own_protocol", message_bytes)
-    assert _outbox.empty() is False,\
-        "Outbox will not be empty after putting a message."
+    multiplexer = Multiplexer([DummyConnection()])
+    outbox = OutBox(multiplexer)
+    inbox = InBox(multiplexer)
+    multiplexer.connect()
+    outbox.put_message("Agent1", "Agent0", "my_own_protocol", message_bytes)
+    time.sleep(0.1)
+    assert not inbox.empty(), "Inbox will not be empty after putting a message."
+    multiplexer.disconnect()
 
 
 def test_outbox_empty():
     """Test thet the outbox queue is empty."""
-    my_queue = Queue()
-    _outbox = OutBox(my_queue)
-    assert _outbox.empty(), "The outbox is not empty"
+    multiplexer = Multiplexer([DummyConnection()])
+    outbox = OutBox(multiplexer)
+    assert outbox.empty(), "The outbox is not empty"
 
 
 def test_mailBox():
     """Tests if the mailbox is connected."""
     node = LocalNode()
     public_key_1 = "mailbox1"
-    mailbox1 = MailBox(OEFLocalConnection(public_key_1, node))
+    mailbox1 = MailBox([OEFLocalConnection(public_key_1, node)])
     mailbox1.connect()
-    assert mailbox1.is_connected,\
-        "Mailbox cannot connect to the specific Connection(OEFLocalConnection)"
+    assert mailbox1.is_connected, "Mailbox cannot connect to the specific Connection(OEFLocalConnection)"
     mailbox1.disconnect()

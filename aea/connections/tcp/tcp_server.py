@@ -21,8 +21,7 @@
 """Implementation of the TCP server."""
 import asyncio
 import logging
-from asyncio import AbstractEventLoop, StreamReader, StreamWriter, Task, AbstractServer
-from concurrent.futures import Executor
+from asyncio import StreamReader, StreamWriter, Task, AbstractServer
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ConnectionConfig
@@ -74,6 +73,7 @@ class TCPServerConnection(TCPConnection):
             self._read_tasks_to_public_key[read_task] = public_key
 
     async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+        """Receive an envelope."""
         if len(self._read_tasks_to_public_key) == 0:
             return None
 

@@ -18,381 +18,641 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Extension to the Local Node."""
+"""Extension to the OEF Python SDK."""
+import asyncio
+import datetime
 import logging
-import queue
+import pickle
 import threading
-from collections import defaultdict
-from queue import Queue
+import time
+from asyncio import AbstractEventLoop, CancelledError
 from threading import Thread
-from typing import Dict, List, Optional, cast
+from typing import List, Dict, Optional, cast
+
+import oef
+from oef.agents import OEFAgent
+from oef.core import AsyncioCore
+from oef.messages import CFP_TYPES, PROPOSE_TYPES
+from oef.query import (
+    Query as OEFQuery,
+    ConstraintExpr as OEFConstraintExpr,
+    And as OEFAnd,
+    Or as OEFOr,
+    Not as OEFNot,
+    Constraint as OEFConstraint,
+    ConstraintType as OEFConstraintType, Eq, NotEq, Lt, LtEq, Gt, GtEq, Range, In, NotIn)
+from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Channel, Connection
-from aea.mail.base import Envelope
+from aea.connections.base import Connection
+from aea.mail.base import MailBox, Envelope
+from aea.protocols.fipa.message import FIPAMessage
+from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description, Query
+from aea.protocols.oef.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint, \
+    ConstraintType, ConstraintTypes
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
 
+
+STUB_MESSSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 
 
-class LocalNode:
-    """A light-weight local implementation of a OEF Node."""
+class OEFObjectTranslator:
+    """Translate our OEF object to object of OEF SDK classes."""
 
-    def __init__(self):
-        """Initialize a local (i.e. non-networked) implementation of an OEF Node."""
-        self.agents = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
-        self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
-        self._lock = threading.Lock()
+    @classmethod
+    def to_oef_description(cls, desc: Description) -> OEFDescription:
+        """From our description to OEF description."""
+        oef_data_model = cls.to_oef_data_model(desc.data_model) if desc.data_model is not None else None
+        return OEFDescription(desc.values, oef_data_model)
 
-        self._queues = {}  # type: Dict[str, Queue]
+    @classmethod
+    def to_oef_data_model(cls, data_model: DataModel) -> OEFDataModel:
+        """From our data model to OEF data model."""
+        oef_attributes = [cls.to_oef_attribute(attribute) for attribute in data_model.attributes]
+        return OEFDataModel(data_model.name, oef_attributes, data_model.description)
 
-    def connect(self, public_key: str) -> Optional[Queue]:
+    @classmethod
+    def to_oef_attribute(cls, attribute: Attribute) -> OEFAttribute:
+        """From our attribute to OEF attribute."""
+        return OEFAttribute(attribute.name, attribute.type, attribute.is_required, attribute.description)
+
+    @classmethod
+    def to_oef_query(cls, query: Query) -> OEFQuery:
+        """From our query to OEF query."""
+        oef_data_model = cls.to_oef_data_model(query.model) if query.model is not None else None
+        constraints = [cls.to_oef_constraint_expr(c) for c in query.constraints]
+        return OEFQuery(constraints, oef_data_model)
+
+    @classmethod
+    def to_oef_constraint_expr(cls, constraint_expr: ConstraintExpr) -> OEFConstraintExpr:
+        """From our constraint expression to the OEF constraint expression."""
+        if isinstance(constraint_expr, And):
+            return OEFAnd([cls.to_oef_constraint_expr(c) for c in constraint_expr.constraints])
+        elif isinstance(constraint_expr, Or):
+            return OEFOr([cls.to_oef_constraint_expr(c) for c in constraint_expr.constraints])
+        elif isinstance(constraint_expr, Not):
+            return OEFNot(cls.to_oef_constraint_expr(constraint_expr.constraint))
+        elif isinstance(constraint_expr, Constraint):
+            oef_constraint_type = cls.to_oef_constraint_type(constraint_expr.constraint_type)
+            return OEFConstraint(constraint_expr.attribute_name, oef_constraint_type)
+        else:
+            raise ValueError("Constraint expression not supported.")
+
+    @classmethod
+    def to_oef_constraint_type(cls, constraint_type: ConstraintType) -> OEFConstraintType:
+        """From our constraint type to OEF constraint type."""
+        value = constraint_type.value
+        if constraint_type.type == ConstraintTypes.EQUAL:
+            return Eq(value)
+        elif constraint_type.type == ConstraintTypes.NOT_EQUAL:
+            return NotEq(value)
+        elif constraint_type.type == ConstraintTypes.LESS_THAN:
+            return Lt(value)
+        elif constraint_type.type == ConstraintTypes.LESS_THAN_EQ:
+            return LtEq(value)
+        elif constraint_type.type == ConstraintTypes.GREATER_THAN:
+            return Gt(value)
+        elif constraint_type.type == ConstraintTypes.GREATER_THAN_EQ:
+            return GtEq(value)
+        elif constraint_type.type == ConstraintTypes.WITHIN:
+            return Range(value)
+        elif constraint_type.type == ConstraintTypes.IN:
+            return In(value)
+        elif constraint_type.type == ConstraintTypes.NOT_IN:
+            return NotIn(value)
+        else:
+            raise ValueError("Constraint type not recognized.")
+
+    @classmethod
+    def from_oef_description(cls, oef_desc: OEFDescription) -> Description:
+        """From an OEF description to our description."""
+        data_model = cls.from_oef_data_model(oef_desc.data_model) if oef_desc.data_model is not None else None
+        return Description(oef_desc.values, data_model=data_model)
+
+    @classmethod
+    def from_oef_data_model(cls, oef_data_model: OEFDataModel) -> DataModel:
+        """From an OEF data model to our data model."""
+        attributes = [cls.from_oef_attribute(oef_attribute) for oef_attribute in oef_data_model.attribute_schemas]
+        return DataModel(oef_data_model.name, attributes, oef_data_model.description)
+
+    @classmethod
+    def from_oef_attribute(cls, oef_attribute: OEFAttribute) -> Attribute:
+        """From an OEF attribute to our attribute."""
+        return Attribute(oef_attribute.name, oef_attribute.type, oef_attribute.required, oef_attribute.description)
+
+    @classmethod
+    def from_oef_query(cls, oef_query: OEFQuery) -> Query:
+        """From our query to OrOEF query."""
+        data_model = cls.from_oef_data_model(oef_query.model) if oef_query.model is not None else None
+        constraints = [cls.from_oef_constraint_expr(c) for c in oef_query.constraints]
+        return Query(constraints, data_model)
+
+    @classmethod
+    def from_oef_constraint_expr(cls, oef_constraint_expr: OEFConstraintExpr) -> ConstraintExpr:
+        """From our query to OEF query."""
+        if isinstance(oef_constraint_expr, OEFAnd):
+            return And([cls.from_oef_constraint_expr(c) for c in oef_constraint_expr.constraints])
+        elif isinstance(oef_constraint_expr, OEFOr):
+            return Or([cls.from_oef_constraint_expr(c) for c in oef_constraint_expr.constraints])
+        elif isinstance(oef_constraint_expr, OEFNot):
+            return Not(cls.from_oef_constraint_expr(oef_constraint_expr.constraint))
+        elif isinstance(oef_constraint_expr, OEFConstraint):
+            constraint_type = cls.from_oef_constraint_type(oef_constraint_expr.constraint)
+            return Constraint(oef_constraint_expr.attribute_name, constraint_type)
+        else:
+            raise ValueError("OEF Constraint not supported.")
+
+    @classmethod
+    def from_oef_constraint_type(cls, constraint_type: OEFConstraintType) -> ConstraintType:
+        """From OEF constraint type to our constraint type."""
+        if isinstance(constraint_type, Eq):
+            return ConstraintType(ConstraintTypes.EQUAL, constraint_type.value)
+        elif isinstance(constraint_type, NotEq):
+            return ConstraintType(ConstraintTypes.NOT_EQUAL, constraint_type.value)
+        elif isinstance(constraint_type, Lt):
+            return ConstraintType(ConstraintTypes.LESS_THAN, constraint_type.value)
+        elif isinstance(constraint_type, LtEq):
+            return ConstraintType(ConstraintTypes.LESS_THAN_EQ, constraint_type.value)
+        elif isinstance(constraint_type, Gt):
+            return ConstraintType(ConstraintTypes.GREATER_THAN, constraint_type.value)
+        elif isinstance(constraint_type, GtEq):
+            return ConstraintType(ConstraintTypes.GREATER_THAN_EQ, constraint_type.value)
+        elif isinstance(constraint_type, Range):
+            return ConstraintType(ConstraintTypes.WITHIN, constraint_type.values)
+        elif isinstance(constraint_type, In):
+            return ConstraintType(ConstraintTypes.IN, constraint_type.values)
+        elif isinstance(constraint_type, NotIn):
+            return ConstraintType(ConstraintTypes.NOT_IN, constraint_type.values)
+        else:
+            raise ValueError("Constraint type not recognized.")
+
+
+class MailStats(object):
+    """The MailStats class tracks statistics on messages processed by MailBox."""
+
+    def __init__(self) -> None:
         """
-        Connect a public key to the node.
+        Instantiate mail stats.
+
+        :return: None
+        """
+        self._search_count = 0
+        self._search_start_time = {}  # type: Dict[int, datetime.datetime]
+        self._search_timedelta = {}  # type: Dict[int, float]
+        self._search_result_counts = {}  # type: Dict[int, int]
+
+    @property
+    def search_count(self) -> int:
+        """Get the search count."""
+        return self._search_count
+
+    def search_start(self, search_id: int) -> None:
+        """
+        Add a search id and start time.
+
+        :param search_id: the search id
+
+        :return: None
+        """
+        assert search_id not in self._search_start_time
+        self._search_count += 1
+        self._search_start_time[search_id] = datetime.datetime.now()
+
+    def search_end(self, search_id: int, nb_search_results: int) -> None:
+        """
+        Add end time for a search id.
+
+        :param search_id: the search id
+        :param nb_search_results: the number of agents returned in the search result
+
+        :return: None
+        """
+        assert search_id in self._search_start_time
+        assert search_id not in self._search_timedelta
+        self._search_timedelta[search_id] = (datetime.datetime.now() - self._search_start_time[search_id]).total_seconds() * 1000
+        self._search_result_counts[search_id] = nb_search_results
+
+
+class OEFChannel(OEFAgent):
+    """The OEFChannel connects the OEF Agent with the connection."""
+
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore):
+        """
+        Initialize.
 
         :param public_key: the public key of the agent.
-        :return: an asynchronous queue, that constitutes the communication channel.
+        :param oef_addr: the OEF IP address.
+        :param oef_port: the OEF port.
         """
-        if public_key in self._queues:
-            return None
+        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core,
+                         logger=lambda *x: None, logger_debug=lambda *x: None)
+        self.in_queue = None  # type: Optional[asyncio.Queue]
+        self.loop = None  # type: Optional[AbstractEventLoop]
+        self.mail_stats = MailStats()
 
-        q = Queue()  # type: Queue
-        self._queues[public_key] = q
-        return q
+    def on_message(self, msg_id: int, dialogue_id: int, origin: str, content: bytes) -> None:
+        """
+        On message event handler.
+
+        :param msg_id: the message id.
+        :param dialogue_id: the dialogue id.
+        :param origin: the public key of the sender.
+        :param content: the bytes content.
+        :return: None
+        """
+        # We are not using the 'origin' parameter because 'content' contains a serialized instance of 'Envelope',
+        # hence it already contains the address of the sender.
+        envelope = Envelope.decode(content)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+
+    def on_cfp(self, msg_id: int, dialogue_id: int, origin: str, target: int, query: CFP_TYPES) -> None:
+        """
+        On cfp event handler.
+
+        :param msg_id: the message id.
+        :param dialogue_id: the dialogue id.
+        :param origin: the public key of the sender.
+        :param target: the message target.
+        :param query: the query.
+        :return: None
+        """
+        try:
+            query = pickle.loads(query)
+        except Exception:
+            pass
+        msg = FIPAMessage(message_id=msg_id,
+                          dialogue_id=dialogue_id,
+                          target=target,
+                          performative=FIPAMessage.Performative.CFP,
+                          query=query if query != b"" else None)
+        msg_bytes = FIPASerializer().encode(msg)
+        envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+
+    def on_propose(self, msg_id: int, dialogue_id: int, origin: str, target: int, b_proposals: PROPOSE_TYPES) -> None:
+        """
+        On propose event handler.
+
+        :param msg_id: the message id.
+        :param dialogue_id: the dialogue id.
+        :param origin: the public key of the sender.
+        :param target: the message target.
+        :param b_proposals: the proposals.
+        :return: None
+        """
+        if type(b_proposals) == bytes:
+            proposals = pickle.loads(b_proposals)  # type: List[Description]
+        else:
+            raise ValueError("No support for non-bytes proposals.")
+
+        msg = FIPAMessage(message_id=msg_id,
+                          dialogue_id=dialogue_id,
+                          target=target,
+                          performative=FIPAMessage.Performative.PROPOSE,
+                          proposal=proposals)
+        msg_bytes = FIPASerializer().encode(msg)
+        envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+
+    def on_accept(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
+        """
+        On accept event handler.
+
+        :param msg_id: the message id.
+        :param dialogue_id: the dialogue id.
+        :param origin: the public key of the sender.
+        :param target: the message target.
+        :return: None
+        """
+        performative = FIPAMessage.Performative.MATCH_ACCEPT if msg_id == 4 and target == 3 else FIPAMessage.Performative.ACCEPT
+        msg = FIPAMessage(message_id=msg_id,
+                          dialogue_id=dialogue_id,
+                          target=target,
+                          performative=performative)
+        msg_bytes = FIPASerializer().encode(msg)
+        envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+
+    def on_decline(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
+        """
+        On decline event handler.
+
+        :param msg_id: the message id.
+        :param dialogue_id: the dialogue id.
+        :param origin: the public key of the sender.
+        :param target: the message target.
+        :return: None
+        """
+        msg = FIPAMessage(message_id=msg_id,
+                          dialogue_id=dialogue_id,
+                          target=target,
+                          performative=FIPAMessage.Performative.DECLINE)
+        msg_bytes = FIPASerializer().encode(msg)
+        envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+
+    def on_search_result(self, search_id: int, agents: List[str]) -> None:
+        """
+        On accept event handler.
+
+        :param search_id: the search id.
+        :param agents: the list of agents.
+        :return: None
+        """
+        self.mail_stats.search_end(search_id, len(agents))
+        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+
+    def on_oef_error(self, answer_id: int, operation: oef.messages.OEFErrorOperation) -> None:
+        """
+        On oef error event handler.
+
+        :param answer_id: the answer id.
+        :param operation: the error operation.
+        :return: None
+        """
+        try:
+            operation = OEFMessage.OEFErrorOperation(operation)
+        except ValueError:
+            operation = OEFMessage.OEFErrorOperation.OTHER
+
+        msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+
+    def on_dialogue_error(self, answer_id: int, dialogue_id: int, origin: str) -> None:
+        """
+        On dialogue error event handler.
+
+        :param answer_id: the answer id.
+        :param dialogue_id: the dialogue id.
+        :param origin: the message sender.
+        :return: None
+        """
+        msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR,
+                         id=answer_id,
+                         dialogue_id=dialogue_id,
+                         origin=origin)
+        msg_bytes = OEFSerializer().encode(msg)
+        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def send(self, envelope: Envelope) -> None:
         """
-        Process the incoming messages.
+        Send message handler.
 
+        :param envelope: the message.
         :return: None
         """
-        sender = envelope.sender
-        logger.debug("Processing message from {}: {}".format(sender, envelope))
-        self._decode_envelope(envelope)
-
-    def _decode_envelope(self, envelope: Envelope) -> None:
-        """
-        Decode the envelope.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        if envelope.protocol_id == "oef":
-            self.handle_oef_message(envelope)
+        if envelope.protocol_id == "default":
+            self.send_default_message(envelope)
+        elif envelope.protocol_id == "fipa":
+            self.send_fipa_message(envelope)
+        elif envelope.protocol_id == "oef":
+            self.send_oef_message(envelope)
+        elif envelope.protocol_id == "tac":
+            self.send_default_message(envelope)
         else:
-            self.handle_agent_message(envelope)
+            logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
+            raise ValueError("Cannot send message.")
 
-    def handle_oef_message(self, envelope: Envelope) -> None:
+    def send_default_message(self, envelope: Envelope):
+        """Send a 'default' message."""
+        self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
+
+    def send_fipa_message(self, envelope: Envelope) -> None:
         """
-        Handle oef messages.
+        Send fipa message handler.
 
-        :param envelope: the envelope
+        :param envelope: the message.
+        :return: None
+        """
+        fipa_message = FIPASerializer().decode(envelope.message)
+        id = fipa_message.get("message_id")
+        dialogue_id = fipa_message.get("dialogue_id")
+        destination = envelope.to
+        target = fipa_message.get("target")
+        performative = FIPAMessage.Performative(fipa_message.get("performative"))
+        if performative == FIPAMessage.Performative.CFP:
+            query = fipa_message.get("query")
+            query = b"" if query is None else query
+            if type(query) == Query:
+                query = pickle.dumps(query)
+            self.send_cfp(id, dialogue_id, destination, target, query)
+        elif performative == FIPAMessage.Performative.PROPOSE:
+            proposal = cast(List[Description], fipa_message.get("proposal"))
+            proposal_b = pickle.dumps(proposal)  # type: bytes
+            self.send_propose(id, dialogue_id, destination, target, proposal_b)
+        elif performative == FIPAMessage.Performative.ACCEPT:
+            self.send_accept(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT:
+            self.send_accept(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.DECLINE:
+            self.send_decline(id, dialogue_id, destination, target)
+        elif performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS or \
+                performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS or \
+                performative == FIPAMessage.Performative.INFORM:
+            self.send_default_message(envelope)
+        else:
+            raise ValueError("OEF FIPA message not recognized.")  # pragma: no cover
+
+    def send_oef_message(self, envelope: Envelope) -> None:
+        """
+        Send oef message handler.
+
+        :param envelope: the message.
         :return: None
         """
         oef_message = OEFSerializer().decode(envelope.message)
-        sender = envelope.sender
-        request_id = cast(int, oef_message.get("id"))
         oef_type = OEFMessage.Type(oef_message.get("type"))
+        oef_msg_id = cast(int, oef_message.get("id"))
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
-            self.register_service(sender, cast(Description, oef_message.get("service_description")))
-        elif oef_type == OEFMessage.Type.REGISTER_AGENT:
-            self.register_agent(sender, cast(Description, oef_message.get("agent_description")))
+            service_description = cast(Description, oef_message.get("service_description"))
+            service_id = cast(int, oef_message.get("service_id"))
+            oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
+            self.register_service(oef_msg_id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
-            self.unregister_service(sender, request_id, cast(Description, oef_message.get("service_description")))
-        elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
-            self.unregister_agent(sender, request_id, cast(Description, oef_message.get("agent_description")))
+            service_description = cast(Description, oef_message.get("service_description"))
+            service_id = cast(int, oef_message.get("service_id"))
+            oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
+            self.unregister_service(oef_msg_id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-            self.search_agents(sender, request_id, cast(Query, oef_message.get("query")))
+            query = cast(Query, oef_message.get("query"))
+            oef_query = OEFObjectTranslator.to_oef_query(query)
+            self.search_agents(oef_msg_id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
-            self.search_services(sender, request_id, cast(Query, oef_message.get("query")))
+            query = cast(Query, oef_message.get("query"))
+            oef_query = OEFObjectTranslator.to_oef_query(query)
+            self.mail_stats.search_start(oef_msg_id)
+            self.search_services(oef_msg_id, oef_query)
         else:
-            # request not recognized
-            pass
+            raise ValueError("OEF request not recognized.")
 
-    def handle_agent_message(self, envelope: Envelope) -> None:
+    def receive(self) -> None:
         """
-        Forward an envelope to the right agent.
-
-        :param envelope: the envelope
-        :return: None
-        """
-        destination = envelope.to
-
-        if destination not in self._queues:
-            msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR, id=STUB_DIALOGUE_ID, dialogue_id=STUB_DIALOGUE_ID, origin=destination)
-            msg_bytes = OEFSerializer().encode(msg)
-            error_envelope = Envelope(to=envelope.sender, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-            self._send(error_envelope)
-            return
-        else:
-            self._send(envelope)
-
-    def register_service(self, public_key: str, service_description: Description):
-        """
-        Register a service agent in the service directory of the node.
-
-        :param public_key: the public key of the service agent to be registered.
-        :param service_description: the description of the service agent to be registered.
-        :return: None
-        """
-        with self._lock:
-            self.services[public_key].append(service_description)
-
-    def register_agent(self, public_key: str, agent_description: Description):
-        """
-        Register a service agent in the service directory of the node.
-
-        :param public_key: the public key of the service agent to be registered.
-        :param agent_description: the description of the service agent to be registered.
-        :return: None
-        """
-        with self._lock:
-            self.agents[public_key].append(agent_description)
-
-    def register_service_wide(self, public_key: str, service_description: Description):
-        """Register service wide."""
-        raise NotImplementedError  # pragma: no cover
-
-    def unregister_service(self, public_key: str, msg_id: int, service_description: Description) -> None:
-        """
-        Unregister a service agent.
-
-        :param public_key: the public key of the service agent to be unregistered.
-        :param msg_id: the message id of the request.
-        :param service_description: the description of the service agent to be unregistered.
-        :return: None
-        """
-        with self._lock:
-            if public_key not in self.services:
-                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE)
-                msg_bytes = OEFSerializer().encode(msg)
-                envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-                self._send(envelope)
-            else:
-                self.services[public_key].remove(service_description)
-                if len(self.services[public_key]) == 0:
-                    self.services.pop(public_key)
-
-    def unregister_agent(self, public_key: str, msg_id: int, agent_description: Description) -> None:
-        """
-        Unregister an agent.
-
-        :param agent_description:
-        :param public_key: the public key of the service agent to be unregistered.
-        :param msg_id: the message id of the request.
-        :return: None
-        """
-        with self._lock:
-            if public_key not in self.agents:
-                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT)
-                msg_bytes = OEFSerializer().encode(msg)
-                envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-                self._send(envelope)
-            else:
-                self.agents[public_key].remove(agent_description)
-                if len(self.agents[public_key]) == 0:
-                    self.agents.pop(public_key)
-
-    def search_agents(self, public_key: str, search_id: int, query: Query) -> None:
-        """
-        Search the agents in the local Agent Directory, and send back the result.
-
-        This is actually a dummy search, it will return all the registered agents with the specified data model.
-        If the data model is not specified, it will return all the agents.
-
-        :param public_key: the source of the search request.
-        :param search_id: the search identifier associated with the search request.
-        :param query: the query that constitutes the search.
-        :return: None
-        """
-        result = []  # type: List[str]
-        if query.model is None:
-            result = list(set(self.services.keys()))
-        else:
-            for agent_public_key, descriptions in self.agents.items():
-                for description in descriptions:
-                    if query.model == description.data_model:
-                        result.append(agent_public_key)
-
-        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self._send(envelope)
-
-    def search_services(self, public_key: str, search_id: int, query: Query) -> None:
-        """
-        Search the agents in the local Service Directory, and send back the result.
-
-        This is actually a dummy search, it will return all the registered agents with the specified data model.
-        If the data model is not specified, it will return all the agents.
-
-        :param public_key: the source of the search request.
-        :param search_id: the search identifier associated with the search request.
-        :param query: the query that constitutes the search.
-        :return: None
-        """
-        result = []  # type: List[str]
-        if query.model is None:
-            result = list(set(self.services.keys()))
-        else:
-            for agent_public_key, descriptions in self.services.items():
-                for description in descriptions:
-                    if description.data_model == query.model:
-                        result.append(agent_public_key)
-
-        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
-        msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self._send(envelope)
-
-    def _send(self, envelope: Envelope):
-        """Send a message."""
-        destination = envelope.to
-        self._queues[destination].put_nowait(envelope)
-
-    def disconnect(self, public_key: str) -> None:
-        """
-        Disconnect.
-
-        :param public_key: the public key
-        :return: None
-        """
-        with self._lock:
-            self._queues.pop(public_key, None)
-            self.services.pop(public_key, None)
-            self.agents.pop(public_key, None)
-
-
-class LocalNodeChannel(Channel):
-    """Channel implementation for the local node."""
-
-    def __init__(self, public_key: str, local_node: LocalNode):
-        """
-        Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
-
-        :param public_key: the public key used in the protocols.
-        :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
-        """
-        self.public_key = public_key
-        self.local_node = local_node
-
-    def connect(self) -> Optional[Queue]:
-        """
-        Set up the connection.
-
-        :return: A queue or None.
-        """
-        return self.local_node.connect(self.public_key)
-
-    def disconnect(self) -> None:
-        """
-        Tear down the connection.
+        Receives an envelope.
 
         :return: None.
         """
-        return self.local_node.disconnect(self.public_key)
+        pass
 
-    def send(self, envelope: Envelope) -> None:
+
+class OEFConnection(Connection):
+    """The OEFConnection connects the to the mailbox."""
+
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef"):
+        """
+        Initialize.
+
+        :param public_key: the public key of the agent.
+        :param oef_addr: the OEF IP address.
+        :param oef_port: the OEF port.
+        :param connection_id: the identifier of the connection object.
+        """
+        super().__init__(connection_id=connection_id)
+        self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
+        self.in_queue = None  # type: Optional[asyncio.Queue]
+        self.channel = OEFChannel(public_key, oef_addr, oef_port, core=self._core)
+
+        self._lock = threading.Lock()
+        self._connection_check_thread = None  # type: Optional[Thread]
+
+    async def connect(self) -> None:
+        """
+        Connect to the channel.
+
+        :return: None
+        :raises Exception if the connection to the OEF fails.
+        """
+        if self._connection_check_thread is not None:
+            self._connection_check_thread.join()
+            self._connection_check_thread = None
+
+        with self._lock:
+            try:
+                self._core.run_threaded()
+                loop = asyncio.get_event_loop()
+                self.in_queue = asyncio.Queue(loop=loop)
+                await self._try_connect()
+                self.connection_status.is_connected = True
+                self.channel.loop = loop
+                self.channel.in_queue = self.in_queue
+                self._connection_check_thread = Thread(target=self._connection_check)
+                self._connection_check_thread.start()
+            except Exception as e:  # pragma: no cover
+                self._core.stop()
+                self.connection_status.is_connected = False
+                raise e
+
+    async def _try_connect(self) -> None:
+        """
+        Try connect to the channel.
+
+        :return: None
+        :raises Exception if the connection to the OEF fails.
+        """
+        while not self.connection_status.is_connected:
+            if not self.channel.connect():
+                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
+                await asyncio.sleep(5.0)
+            else:
+                break
+
+    def _connection_check(self) -> None:
+        """
+        Check for connection to the channel.
+
+        Try to reconnect if connection is dropped.
+
+        :return: None
+        """
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        while self.connection_status.is_connected:
+            time.sleep(2.0)
+            if not self.channel.get_state() == "connected":  # type: ignore
+                self.connection_status.is_connected = False
+                logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
+                loop.run_until_complete(self._try_connect())
+                self.connection_status.is_connected = True
+                logger.warning("Successfully re-established connection to OEFChannel.")
+
+    async def disconnect(self) -> None:
+        """
+        Disconnect from the channel.
+
+        :return: None
+        """
+        with self._lock:
+            assert self._connection_check_thread is not None, "Call connect before disconnect."
+            self.connection_status.is_connected = False
+            self._connection_check_thread.join()
+            self._connection_check_thread = None
+            self.channel.disconnect()
+            await self.in_queue.put(None)
+            self._core.stop()
+
+    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+        """
+        Receive an envelope. Blocking.
+
+        :return: the envelope received, or None.
+        """
+        try:
+            envelope = await self.in_queue.get()
+            if envelope is None:
+                logger.debug("Received None.")
+                return None
+            logger.debug("Received envelope: {}".format(envelope))
+            return envelope
+        except CancelledError:
+            logger.debug("Receive cancelled.")
+            return None
+        except Exception as e:
+            logger.exception(e)
+            return None
+
+    async def send(self, envelope: 'Envelope') -> None:
         """
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None.
-        """
-        return self.local_node.send(envelope)
-
-
-class OEFLocalConnection(Connection):
-    """
-    Proxy to the functionality of the OEF.
-
-    It allows the interaction between agents, but not the search functionality.
-    It is useful for local testing.
-    """
-
-    def __init__(self, public_key: str, local_node: LocalNode):
-        """
-        Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
-
-        :param public_key: the public key used in the protocols.
-        :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
-        """
-        super().__init__()
-        self.public_key = public_key
-        self.channel = LocalNodeChannel(public_key, local_node)
-
-        self._connection = None  # type: Optional[Queue]
-
-        self._stopped = True
-        self.in_thread = None
-        self.out_thread = None
-
-    def _fetch(self) -> None:
-        """
-        Fetch the messages from the outqueue and send them.
-
         :return: None
         """
-        while not self._stopped:
-            try:
-                msg = self.out_queue.get(block=True, timeout=2.0)
-                self.send(msg)
-            except queue.Empty:
-                pass
-
-    def _receive_loop(self):
-        """Receive messages."""
-        while not self._stopped:
-            try:
-                data = self._connection.get(timeout=2.0)
-                self.in_queue.put_nowait(data)
-            except queue.Empty:
-                pass
-
-    def connect(self):
-        """Connect to the local OEF Node."""
-        if self._stopped:
-            self._stopped = False
-            self._connection = self.channel.connect()
-            self.connection_status.is_connected = True
-            self.in_thread = Thread(target=self._receive_loop)
-            self.out_thread = Thread(target=self._fetch)
-            self.in_thread.start()
-            self.out_thread.start()
-
-    def disconnect(self):
-        """Disconnect from the local OEF Node."""
-        if not self._stopped:
-            self._stopped = True
-            self.in_thread.join()
-            self.out_thread.join()
-            self.in_thread = None
-            self.out_thread = None
-            self.connection_status.is_connected = False
-            self.channel.disconnect()
-            self.stop()
-
-    def send(self, envelope: Envelope):
-        """Send a message."""
-        if not self.connection_status.is_connected:
-            raise ConnectionError("Connection not established yet. Please use 'connect()'.")
-        self.channel.send(envelope)
-
-    def stop(self):
-        """Tear down the connection."""
-        self._connection = None
+        if self.connection_status.is_connected:
+            self.channel.send(envelope)
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
-        """Get the Local OEF connection from the connection configuration.
+        """
+        Get the OEF connection from the connection configuration.
 
         :param public_key: the public key of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        local_node = LocalNode()
-        return OEFLocalConnection(public_key, local_node)
+        oef_addr = cast(str, connection_configuration.config.get("addr"))
+        oef_port = cast(int, connection_configuration.config.get("port"))
+        return OEFConnection(public_key, oef_addr, oef_port)
+
+
+class OEFMailBox(MailBox):
+    """The OEF mail box."""
+
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, loop: Optional[AbstractEventLoop] = None):
+        """
+        Initialize.
+
+        :param public_key: the public key of the agent.
+        :param oef_addr: the OEF IP address.
+        :param oef_port: the OEF port.
+        """
+        connection = OEFConnection(public_key, oef_addr, oef_port)
+        super().__init__([connection], loop=loop)

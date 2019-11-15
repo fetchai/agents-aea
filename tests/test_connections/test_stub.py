@@ -114,5 +114,5 @@ def test_connection_from_config():
         input_file=input_file_path,
         output_file=output_file_path
     ))
-    assert not stub_con.is_established
+    assert not stub_con.connection_status.is_connected
     shutil.rmtree(tmpdir, ignore_errors=True)

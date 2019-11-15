@@ -46,7 +46,7 @@ class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
     def on_modified(self, event: FileModifiedEvent):
         modified_file_path = Path(event.src_path).absolute()
         if modified_file_path == self._file_to_observe:
-            self._connection.receive()
+            self._connection.read_messages()
 
 
 def _encode(e: Envelope, separator: bytes = SEPARATOR):
@@ -122,8 +122,6 @@ class StubConnection(Connection):
         self.input_file = open(input_file_path, "rb+", buffering=1)
         self.output_file = open(output_file_path, "wb+", buffering=1)
 
-        self._stopped = True
-        self._connected = False
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self._lock = threading.Lock()
 
@@ -133,12 +131,7 @@ class StubConnection(Connection):
         self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
         self._observer.schedule(self._event_handler, directory)
 
-    @property
-    def is_established(self) -> bool:
-        """Get the connection status."""
-        return self._connected
-
-    def receive(self) -> None:
+    def read_messages(self) -> None:
         """Receive new messages, if any."""
         line = self.input_file.readline()
         logger.debug("read line: {!r}".format(line))
@@ -158,6 +151,7 @@ class StubConnection(Connection):
             logger.error("Bad formatted line: {}".format(line))
 
     async def recv(self) -> Optional['Envelope']:
+        """Receive an envelope."""
         try:
             envelope = await self.in_queue.get()
             return envelope
@@ -167,41 +161,41 @@ class StubConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
-        # TODO
-        # if not self.connection_status.is_connected:
-        #     self.connection_status.is_connected = True
         with self._lock:
-            if self._stopped:
-                self._stopped = False
-                try:
-                    # initialize the queue here because the queue
-                    # must be initialized with the right event loop
-                    # which is known only at connection time.
-                    self.in_queue = asyncio.Queue()
-                    self._observer.start()
-                except Exception as e:      # pragma: no cover
-                    raise e
-                finally:
-                    self._stopped = True
+            if self.connection_status.is_connected:
+                return
 
-                self._connected = True
-                # do a first processing of messages.
-                self.receive()
+            try:
+                # initialize the queue here because the queue
+                # must be initialized with the right event loop
+                # which is known only at connection time.
+                self.in_queue = asyncio.Queue()
+                self._observer.start()
+            except Exception as e:      # pragma: no cover
+                raise e
+            finally:
+                self.connection_status.is_connected = False
+
+            self.connection_status.is_connected = True
+
+        # do a first processing of messages.
+        self.read_messages()
 
     async def disconnect(self) -> None:
-
         """
         Disconnect from the channel.
 
         In this type of connection there's no channel to disconnect.
         """
         with self._lock:
-            if self._connected:
-                self._connected = False
-                self._observer.stop()
-                self._observer.join()
-                self.in_queue.put_nowait(None)
-                self._stopped = True
+            if not self.connection_status.is_connected:
+                return
+
+            self._observer.stop()
+            self._observer.join()
+            self.in_queue.put_nowait(None)
+
+            self.connection_status.is_connected = False
 
     async def send(self, envelope: Envelope):
         """

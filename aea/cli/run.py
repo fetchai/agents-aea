@@ -209,7 +209,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
         else:
             click_context.invoke(install)
 
-    mailbox = MailBox(connection)
+    mailbox = MailBox([connection])
     agent = AEA(agent_name, mailbox, wallet, ledger_apis, resources=Resources(str(Path("."))))
     try:
         agent.start()

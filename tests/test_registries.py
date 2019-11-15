@@ -134,7 +134,7 @@ class TestResources:
         yaml.safe_dump(agent_config, open(agent_config_path, "w"))
         Path(cls.agent_folder, "skills", cls.fake_skill_id).mkdir()
 
-        mailbox = MailBox(DummyConnection())
+        mailbox = MailBox([DummyConnection()])
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
@@ -295,7 +295,7 @@ class TestFilter:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        mailbox = MailBox(DummyConnection())
+        mailbox = MailBox([DummyConnection()])
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})

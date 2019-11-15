@@ -21,6 +21,7 @@ mkdocs = "*"
 mkdocs-material = "*"
 pymdown-extensions = "*"
 pygments = "*"
+pytest-asyncio = "*"
 
 [packages]
 cryptography = "*"

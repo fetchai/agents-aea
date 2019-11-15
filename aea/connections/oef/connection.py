@@ -24,6 +24,7 @@ import datetime
 import logging
 import pickle
 import threading
+import time
 from asyncio import AbstractEventLoop, CancelledError
 from threading import Thread
 from typing import List, Dict, Optional, cast
@@ -521,14 +522,7 @@ class OEFConnection(Connection):
         self.channel = OEFChannel(public_key, oef_addr, oef_port, core=self._core)
 
         self._lock = threading.Lock()
-        self._stopped = True
-        self._connected = False
         self._connection_check_thread = None  # type: Optional[Thread]
-
-    @property
-    def is_established(self) -> bool:
-        """Get the connection status."""
-        return self._connected
 
     async def connect(self) -> None:
         """
@@ -542,69 +536,53 @@ class OEFConnection(Connection):
             self._connection_check_thread = None
 
         with self._lock:
-            if self._stopped:
-                self._stopped = False
-                try:
-                    self._core.run_threaded()
-                    if not self.channel.connect():
-                        raise ConnectionError("Cannot connect to OEFChannel.")
-                    loop = asyncio.get_event_loop()
-                    self.in_queue = asyncio.Queue(loop=loop)
-                    self.channel.loop = loop
-                    self.channel.in_queue = self.in_queue
-                    self._stopped = True
-                except Exception as e:  # pragma: no cover
-                    self._core.stop()
-                    raise e
+            try:
+                self._core.run_threaded()
+                loop = asyncio.get_event_loop()
+                self.in_queue = asyncio.Queue(loop=loop)
+                await self._try_connect()
+                self.connection_status.is_connected = True
+                self.channel.loop = loop
+                self.channel.in_queue = self.in_queue
+                self._connection_check_thread = Thread(target=self._connection_check)
+                self._connection_check_thread.start()
+            except Exception as e:  # pragma: no cover
+                self._core.stop()
+                self.connection_status.is_connected = False
+                raise e
 
-                self._connected = True
+    async def _try_connect(self) -> None:
+        """
+        Try connect to the channel.
 
-        # if self._stopped and not self.connection_status.is_connected:
-        #     self._stopped = False
-        #     self._core.run_threaded()
-        #     self._try_connect()
-        #     self._connection_check_thread = Thread(target=self._connection_check)
-        #     self._connection_check_thread.start()
+        :return: None
+        :raises Exception if the connection to the OEF fails.
+        """
+        while not self.connection_status.is_connected:
+            if not self.channel.connect():
+                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
+                await asyncio.sleep(5.0)
+            else:
+                break
 
-    #
-    # def _try_connect(self) -> None:
-    #     """
-    #     Try connect to the channel.
-    #
-    #     :return: None
-    #     :raises Exception if the connection to the OEF fails.
-    #     """
-    #     try:
-    #         while not self.connection_status.is_connected and not self._stopped:
-    #             if self.channel.connect():
-    #                 self.connection_status.is_connected = True
-    #                 self.out_thread = Thread(target=self._fetch)
-    #                 self.out_thread.start()
-    #             else:
-    #                 logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
-    #                 time.sleep(5.0)
-    #     except Exception as e:
-    #         self._core.stop()
-    #         raise e
+    def _connection_check(self) -> None:
+        """
+        Check for connection to the channel.
 
-    # def _connection_check(self) -> None:
-    #     """
-    #     Check for connection to the channel.
-    #
-    #     Try to reconnect if connection is dropped.
-    #
-    #     :return: None
-    #     """
-    #     while self.connection_status.is_connected:
-    #         assert self.out_thread is not None, "Call connect before _connection_check."
-    #         time.sleep(2.0)
-    #         if not self.channel.get_state() == "connected":  # type: ignore
-    #             logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
-    #             self.connection_status.is_connected = False
-    #             self.out_thread.join()
-    #             self.out_thread = None
-    #             self._try_connect()
-    #             logger.warning("Successfully re-established connection to OEFChannel.")
+        Try to reconnect if connection is dropped.
+
+        :return: None
+        """
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        while self.connection_status.is_connected:
+            time.sleep(2.0)
+            if not self.channel.get_state() == "connected":  # type: ignore
+                self.connection_status.is_connected = False
+                logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
+                loop.run_until_complete(self._try_connect())
+                self.connection_status.is_connected = True
+                logger.warning("Successfully re-established connection to OEFChannel.")
 
     async def disconnect(self) -> None:
         """
@@ -613,22 +591,13 @@ class OEFConnection(Connection):
         :return: None
         """
         with self._lock:
-            if self._connected:
-                self._connected = False
-                self.channel.disconnect()
-                await self.in_queue.put(None)
-                self._core.stop()
-                self._stopped = True
-        # assert self._connection_check_thread is not None, "Call connect before disconnect."
-        # if not self._stopped and self.connection_status.is_connected:
-        #     self.connection_status.is_connected = False
-        #     self._connection_check_thread.join()
-        #     self._connection_check_thread = None
-        #     self.out_thread.join()
-        #     self.out_thread = None
-        #     self.channel.disconnect()
-        #     self._core.stop()
-        #     self._stopped = True
+            assert self._connection_check_thread is not None, "Call connect before disconnect."
+            self.connection_status.is_connected = False
+            self._connection_check_thread.join()
+            self._connection_check_thread = None
+            self.channel.disconnect()
+            await self.in_queue.put(None)
+            self._core.stop()
 
     async def recv(self, *args, **kwargs) -> Optional['Envelope']:
         """
@@ -641,6 +610,7 @@ class OEFConnection(Connection):
             if envelope is None:
                 logger.debug("Received None.")
                 return None
+            logger.debug("Received envelope: {}".format(envelope))
             return envelope
         except CancelledError:
             logger.debug("Receive cancelled.")
@@ -656,8 +626,7 @@ class OEFConnection(Connection):
         :param envelope: the envelope to send.
         :return: None
         """
-        if self.is_established:
-        # if self.connection_status.is_connected:
+        if self.connection_status.is_connected:
             self.channel.send(envelope)
 
     @classmethod

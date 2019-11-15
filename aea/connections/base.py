@@ -46,16 +46,7 @@ class ConnectionStatus(object):
 
     def __init__(self):
         """Initialize the connection status."""
-        self._is_connected = False
-
-    @property
-    def is_connected(self) -> bool:
-        """Check if the connection is established."""
-        return self._is_connected
-
-    @is_connected.setter
-    def is_connected(self, is_connected: bool) -> None:
-        self._is_connected = is_connected
+        self.is_connected = False
 
 
 class Connection(ABC):
