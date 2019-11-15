@@ -56,7 +56,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
-        if self.context.agent_is_ready_to_pursuit_goals:
+        if self.context.agent_goal_pursuit_readiness.is_ready:
             registration = cast(Registration, self.context.registration)
             if registration.is_time_to_update_services():
                 self._unregister_service()
@@ -107,7 +107,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         transactions = cast(Transactions, self.context.transactions)
         if strategy.is_registering_as_seller:
             logger.debug("[{}]: Updating service directory as seller with goods supplied.".format(self.context.agent_name))
-            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=True)
+            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=True)
             goods_supplied_description = strategy.get_own_service_description(ownership_state_after_locks, is_supply=True)
             registration.registered_goods_supplied_description = goods_supplied_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=registration.get_next_id(), service_description=goods_supplied_description, service_id="")
@@ -115,7 +115,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         if strategy.is_registering_as_buyer:
             logger.debug("[{}]: Updating service directory as buyer with goods demanded.".format(self.context.agent_name))
-            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=False)
+            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=False)
             goods_demanded_description = strategy.get_own_service_description(ownership_state_after_locks, is_supply=False)
             registration.registered_goods_demanded_description = goods_demanded_description
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=registration.get_next_id(), service_description=goods_demanded_description, service_id="")
@@ -136,7 +136,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         strategy = cast(Strategy, self.context.strategy)
         transactions = cast(Transactions, self.context.transactions)
         if strategy.is_searching_for_sellers:
-            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=False)
+            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=False)
             query = strategy.get_own_services_query(ownership_state_after_locks, is_searching_for_sellers=True)
             if query is None:
                 logger.warning("[{}]: Not searching the OEF for sellers because the agent demands no goods.".format(self.context.agent_name))
@@ -150,7 +150,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                 msg_bytes = OEFSerializer().encode(msg)
                 self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         if strategy.is_searching_for_buyers:
-            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.ownership_state, is_seller=True)
+            ownership_state_after_locks = transactions.ownership_state_after_locks(self.context.agent_ownership_state, is_seller=True)
             query = strategy.get_own_services_query(ownership_state_after_locks, is_searching_for_sellers=False)
             if query is None:
                 logger.warning("[{}]: Not searching the OEF for buyers because the agent supplies no goods.".format(self.context.agent_name))

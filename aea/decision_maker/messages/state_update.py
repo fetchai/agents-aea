@@ -42,7 +42,7 @@ class StateUpdateMessage(Message):
     class Performative(Enum):
         """State update performative."""
 
-        RESET = "reset"
+        INITIALIZE = "initialize"
         APPLY = "apply"
 
     def __init__(self, performative: Union[str, Performative],
@@ -77,21 +77,24 @@ class StateUpdateMessage(Message):
         try:
             assert self.is_set("performative")
             performative = self.get("performative")
-            assert self.is_set("amount_by_currency_pbk")
-            amount_by_currency_pbk = self.get("amount_by_currency_pbk")
-            amount_by_currency_pbk = cast(Currencies, amount_by_currency_pbk)
+            assert self.is_set("amount_by_currency")
+            amount_by_currency = self.get("amount_by_currency")
+            amount_by_currency = cast(Currencies, amount_by_currency)
             assert self.is_set("quantities_by_good_pbk")
             quantities_by_good_pbk = self.get("quantities_by_good_pbk")
             quantities_by_good_pbk = cast(Goods, quantities_by_good_pbk)
-            if performative == self.Performative.RESET:
+            if performative == self.Performative.INITIALIZE:
                 assert self.is_set("exchange_params_by_currency")
                 exchange_params_by_currency = self.get("exchange_params_by_currency")
                 exchange_params_by_currency = cast(ExchangeParams, exchange_params_by_currency)
-                assert amount_by_currency_pbk.keys() == exchange_params_by_currency.keys()
+                assert amount_by_currency.keys() == exchange_params_by_currency.keys()
                 assert self.is_set("utility_params_by_good_pbk")
                 utility_params_by_good_pbk = self.get("utility_params_by_good_pbk")
                 utility_params_by_good_pbk = cast(UtilityParams, utility_params_by_good_pbk)
                 assert quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
+            elif performative == self.Performative.APPLY:
+                assert self.get("exchange_params_by_currency") is None
+                assert self.get("utility_params_by_good_pbk") is None
         except (AssertionError, KeyError):
             return False
         return True

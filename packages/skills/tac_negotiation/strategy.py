@@ -97,7 +97,7 @@ class Strategy(SharedClass):
 
         :return: the description (to advertise on the Service Directory).
         """
-        good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.good_holdings) if is_supply else self._demanded_goods(ownership_state_after_locks.good_holdings)
+        good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_supply else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
         desc = build_goods_description(good_pbk_to_quantities=good_pbk_to_quantities, is_supply=is_supply)
         return desc
 
@@ -138,7 +138,7 @@ class Strategy(SharedClass):
 
         :return: the Query, or None.
         """
-        good_pbk_to_quantities = self._demanded_goods(ownership_state_after_locks.good_holdings) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.good_holdings)
+        good_pbk_to_quantities = self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk)
         query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), is_searching_for_sellers=is_searching_for_sellers)
         return query
 
@@ -173,7 +173,7 @@ class Strategy(SharedClass):
 
         :return: a list of proposals in Description form
         """
-        good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.good_holdings) if is_seller else self._demanded_goods(ownership_state_after_locks.good_holdings)
+        good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_seller else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
         share_of_tx_fee = round(tx_fee / 2.0, 2)
         nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities}  # type: Dict[str, int]
         proposals = []

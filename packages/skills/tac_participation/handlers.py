@@ -143,7 +143,7 @@ class OEFHandler(Handler):
             return
 
         if len(agent_pbks) == 0:
-            logger.debug("[{}]: Couldn't find the TAC controller. Retrying...".format(self.context.agent_name))
+            logger.info("[{}]: Couldn't find the TAC controller. Retrying...".format(self.context.agent_name))
         elif len(agent_pbks) > 1:
             logger.error("[{}]: Found more than one TAC controller. Retrying...".format(self.context.agent_name))
         # elif self._rejoin:
@@ -271,6 +271,12 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         game.init(tac_message, controller_pbk)
         game.update_game_phase(Phase.GAME)
+        state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE,
+                                              amount_by_currency=cast(Dict[str, int], tac_message.get("amount_by_currency")),
+                                              quantities_by_good_pbk=cast(Dict[str, int], tac_message.get("quantities_by_good_pbk")),
+                                              exchange_params_by_currency=cast(Dict[str, float], tac_message.get("exchange_params_by_currency")),
+                                              utility_params_by_good_pbk=cast(Dict[str, float], tac_message.get("utility_params_by_good_pbk")))
+        self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
     def _on_cancelled(self) -> None:
         """

@@ -25,19 +25,18 @@ from enum import Enum
 import pprint
 from typing import cast, Dict, List, Optional, TYPE_CHECKING
 
+from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
     from packages.protocols.tac.message import TACMessage
     from packages.skills.tac_control.helpers import generate_good_pbk_to_name, determine_scaling_factor, \
-        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings, \
-        logarithmic_utility, linear_utility
+        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings
     from packages.skills.tac_control.parameters import Parameters
 else:
     from tac_protocol.message import TACMessage
     from tac_control_skill.helpers import generate_good_pbk_to_name, determine_scaling_factor, \
-        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings, \
-        logarithmic_utility, linear_utility
+        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings
     from tac_control_skill.parameters import Parameters
 
 Address = str

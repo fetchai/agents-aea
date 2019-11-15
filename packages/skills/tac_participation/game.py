@@ -50,8 +50,6 @@ class GameConfiguration:
 
     def __init__(self,
                  version_id: str,
-                 nb_agents: int,
-                 nb_goods: int,
                  tx_fee: int,
                  agent_pbk_to_name: Dict[Address, str],
                  good_pbk_to_name: Dict[Address, str],
@@ -60,16 +58,14 @@ class GameConfiguration:
         Instantiate a game configuration.
 
         :param version_id: the version of the game.
-        :param nb_agents: the number of agents.
-        :param nb_goods: the number of goods.
         :param tx_fee: the fee for a transaction.
         :param agent_pbk_to_name: a dictionary mapping agent public keys to agent names (as strings).
         :param good_pbk_to_name: a dictionary mapping good public keys to good names (as strings).
         :param controller_pbk: the public key of the controller
         """
         self._version_id = version_id
-        self._nb_agents = nb_agents
-        self._nb_goods = nb_goods
+        self._nb_agents = len(agent_pbk_to_name)
+        self._nb_goods = len(good_pbk_to_name)
         self._tx_fee = tx_fee
         self._agent_pbk_to_name = agent_pbk_to_name
         self._good_pbk_to_name = good_pbk_to_name
@@ -190,8 +186,6 @@ class Game(SharedClass):
         assert controller_pbk == self.expected_controller_pbk, "TACMessage from unexpected controller."
         assert tac_message.get("version_id") == self.expected_version_id, "TACMessage for unexpected game."
         self._game_configuration = GameConfiguration(cast(str, tac_message.get("version_id")),
-                                                     cast(int, tac_message.get("nb_agents")),
-                                                     cast(int, tac_message.get("nb_goods")),
                                                      cast(int, tac_message.get("tx_fee")),
                                                      cast(Dict[str, str], tac_message.get("agent_pbk_to_name")),
                                                      cast(Dict[str, str], tac_message.get("good_pbk_to_name")),

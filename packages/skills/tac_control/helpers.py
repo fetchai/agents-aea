@@ -165,29 +165,3 @@ def generate_equilibrium_prices_and_holdings(endowments: List[List[int]], utilit
     eq_good_holdings = np.divide(scaled_utility_function_params_a, eq_prices) - quantity_shift
     eq_money_holdings = np.transpose(np.dot(eq_prices, np.transpose(endowments_a + quantity_shift))) + money_endowment - scaling_factor
     return eq_prices.tolist(), eq_good_holdings.tolist(), eq_money_holdings.tolist()
-
-
-def logarithmic_utility(utility_params_by_good_pbk: Dict[str, float], quantities_by_good_pbk: Dict[str, int], quantity_shift: int = QUANTITY_SHIFT) -> float:
-    """
-    Compute agent's utility given her utility function params and a good bundle.
-
-    :param utility_params_by_good_pbk: utility params by good identifier
-    :param quantities_by_good_pbk: quantities by good identifier
-    :param quantity_shift: a factor to shift the quantities in the utility function (to ensure the natural logarithm can be used on the entire range of quantities)
-    :return: utility value
-    """
-    goodwise_utility = [utility_params_by_good_pbk[good_pbk] * math.log(quantity + quantity_shift) if quantity + quantity_shift > 0 else -10000
-                        for good_pbk, quantity in quantities_by_good_pbk.items()]
-    return sum(goodwise_utility)
-
-
-def linear_utility(exchange_params_by_currency: Dict[str, float], balance_by_currency: Dict[str, int]) -> float:
-    """
-    Compute agent's utility given her utility function params and a good bundle.
-
-    :param exchange_params_by_currency: exchange params by currency
-    :param balance_by_currency: balance by currency
-    :return: utility value
-    """
-    money_utility = [exchange_params_by_currency[currency] * balance for currency, balance in balance_by_currency.items()]
-    return sum(money_utility)

@@ -30,7 +30,7 @@ from aea.aea import AEA, Resources
 from aea.connections.base import ConnectionStatus
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
-from aea.decision_maker.base import OwnershipState, Preferences
+from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
 from aea.mail.base import MailBox
 from aea.skills.base import SkillContext, Skill
 from tests.conftest import CUR_PATH, DummyConnection
@@ -97,7 +97,7 @@ class TestSkillContext:
 
     def test_agent_is_ready_to_pursuit_goals(self):
         """Test if the agent is ready to pursuit his goals."""
-        assert not self.skill_context.agent_is_ready_to_pursuit_goals
+        assert isinstance(self.skill_context.agent_goal_pursuit_readiness, GoalPursuitReadiness)
 
     def test_message_in_queue(self):
         """Test the 'message_in_queue' property."""

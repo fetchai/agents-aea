@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the decision maker class."""
-import math
 
 import copy
+from enum import Enum
 import logging
 from queue import Queue
 from typing import Dict, List, Optional, cast
@@ -30,11 +30,12 @@ from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
+from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
 from aea.mail.base import OutBox  # , Envelope
 from aea.protocols.base import Message
 
-CurrencyEndowment = Dict[str, float]  # a map from identifier to quantity
-CurrencyHoldings = Dict[str, float]
+CurrencyEndowment = Dict[str, int]  # a map from identifier to quantity
+CurrencyHoldings = Dict[str, int]
 GoodEndowment = Dict[str, int]   # a map from identifier to quantity
 GoodHoldings = Dict[str, int]
 UtilityParams = Dict[str, float]   # a map from identifier to quantity
@@ -46,36 +47,65 @@ INTERNAL_PROTOCOL_ID = 'internal'
 logger = logging.getLogger(__name__)
 
 
+class GoalPursuitReadiness:
+    """The goal pursuit readiness."""
+
+    class Status(Enum):
+        """The enum of status."""
+
+        READY = 'ready'
+        NOT_READY = 'not_ready'
+
+    def __init__(self):
+        """Instantiate an ownership state object."""
+        self._status = GoalPursuitReadiness.Status.NOT_READY
+
+    @property
+    def is_ready(self) -> bool:
+        """Get the readiness."""
+        return self._status.value == GoalPursuitReadiness.Status.READY.value
+
+    def update(self, new_status: Status) -> None:
+        """Update the goal pursuit readiness."""
+        self._status = new_status
+
+
 class OwnershipState:
     """Represent the ownership state of an agent."""
 
     def __init__(self):
         """Instantiate an ownership state object."""
-        self._currency_holdings = None  # type: CurrencyHoldings
-        self._good_holdings = None  # type: GoodHoldings
+        self._amount_by_currency = None  # type: CurrencyHoldings
+        self._quantities_by_good_pbk = None  # type: GoodHoldings
 
-    def init(self, currency_endowment: CurrencyEndowment, good_endowment: GoodEndowment):
+    def init(self, amount_by_currency: CurrencyEndowment, quantities_by_good_pbk: GoodEndowment, agent_name: str = ''):
         """
         Instantiate an ownership state object.
 
-        :param currency_endowment: the currency endowment of the agent in this state.
-        :param good_endowment: the good endowment of the agent in this state.
+        :param amount_by_currency: the currency endowment of the agent in this state.
+        :param quantities_by_good_pbk: the good endowment of the agent in this state.
+        :param agent_name: the agent name
         """
-        logger.warning("Careful! OwnershipState is being updated!")
-        self._currency_holdings = copy.copy(currency_endowment)
-        self._good_holdings = copy.copy(good_endowment)
+        logger.warning("[{}]: Careful! OwnershipState are being initialized!".format(agent_name))
+        self._amount_by_currency = copy.copy(amount_by_currency)
+        self._quantities_by_good_pbk = copy.copy(quantities_by_good_pbk)
 
     @property
-    def currency_holdings(self) -> CurrencyHoldings:
+    def is_initialized(self) -> bool:
+        """Get the initialization status."""
+        return self._amount_by_currency is not None and self._quantities_by_good_pbk is not None
+
+    @property
+    def amount_by_currency(self) -> CurrencyHoldings:
         """Get currency holdings in this state."""
-        assert self._currency_holdings is not None, "CurrencyHoldings not set!"
-        return copy.copy(self._currency_holdings)
+        assert self._amount_by_currency is not None, "CurrencyHoldings not set!"
+        return copy.copy(self._amount_by_currency)
 
     @property
-    def good_holdings(self) -> GoodHoldings:
+    def quantities_by_good_pbk(self) -> GoodHoldings:
         """Get good holdings in this state."""
-        assert self._good_holdings is not None, "GoodHoldings not set!"
-        return copy.copy(self._good_holdings)
+        assert self._quantities_by_good_pbk is not None, "GoodHoldings not set!"
+        return copy.copy(self._quantities_by_good_pbk)
 
     def check_transaction_is_consistent(self, tx_message: TransactionMessage) -> bool:
         """
@@ -85,21 +115,37 @@ class OwnershipState:
         or enough holdings if it is a seller.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        currency_pbk = tx_message.get("currency_pbk")
-        currency_pbk = cast(str, currency_pbk)
+        currency_pbk = cast(str, tx_message.get("currency_pbk"))
         if tx_message.get("is_sender_buyer"):
             # check if we have the money to cover amount and tx fee.
-            result = self.currency_holdings[currency_pbk] >= cast(float, tx_message.get("amount")) + cast(float, tx_message.get("sender_tx_fee"))
+            result = self.amount_by_currency[currency_pbk] >= cast(int, tx_message.get("amount")) + cast(int, tx_message.get("sender_tx_fee"))
         else:
             # check if we have the goods.
             result = True
-            quantities_by_good_pbk = tx_message.get("quantities_by_good_pbk")
-            quantities_by_good_pbk = cast(Dict[str, int], quantities_by_good_pbk)
+            quantities_by_good_pbk = cast(Dict[str, int], tx_message.get("quantities_by_good_pbk"))
             for good_pbk, quantity in quantities_by_good_pbk.items():
-                result = result and (self.currency_holdings[good_pbk] >= quantity)
+                result = result and (self.quantities_by_good_pbk[good_pbk] >= quantity)
             # check if we have the money to cover tx fee.
-            result = self.currency_holdings[currency_pbk] + cast(float, tx_message.get("amount")) >= cast(float, tx_message.get("sender_tx_fee"))
+            result = self.amount_by_currency[currency_pbk] + cast(int, tx_message.get("amount")) >= cast(int, tx_message.get("sender_tx_fee"))
         return result
+
+    def apply_state_update(self, amount_deltas_by_currency: Dict[str, int], quantity_deltas_by_good_pbk: Dict[str, int]) -> 'OwnershipState':
+        """
+        Apply a list of transactions to the current state.
+
+        :param amount_deltas_by_currency: the delta in the currency amounts
+        :param quantity_deltas_by_good_pbk: the delta in the quantities by good
+        :return: the final state.
+        """
+        new_state = copy.copy(self)
+
+        for currency, amount_delta in amount_deltas_by_currency.items():
+            new_state._amount_by_currency[currency] += amount_delta
+
+        for good_pbk, quantity_delta in quantity_deltas_by_good_pbk.items():
+            new_state._quantities_by_good_pbk[good_pbk] += quantity_delta
+
+        return new_state
 
     def apply(self, transactions: List[TransactionMessage]) -> 'OwnershipState':
         """
@@ -121,26 +167,25 @@ class OwnershipState:
         :param tx_message:
         :return: None
         """
-        currency_pbk = tx_message.get("currency_pbk")
-        currency_pbk = cast(str, currency_pbk)
+        currency_pbk = cast(str, tx_message.get("currency_pbk"))
         if tx_message.get("is_sender_buyer"):
-            diff = cast(float, tx_message.get("amount")) + cast(float, tx_message.get("sender_tx_fee"))
-            self._currency_holdings[currency_pbk] -= diff
+            diff = cast(int, tx_message.get("amount")) + cast(int, tx_message.get("sender_tx_fee"))
+            self._amount_by_currency[currency_pbk] -= diff
         else:
-            diff = cast(float, tx_message.get("amount")) - cast(float, tx_message.get("sender_tx_fee"))
-            self._currency_holdings[currency_pbk] += diff
+            diff = cast(int, tx_message.get("amount")) - cast(int, tx_message.get("sender_tx_fee"))
+            self._amount_by_currency[currency_pbk] += diff
 
-        quantities_by_good_pbk = tx_message.get("quantities_by_good_pbk")
-        quantities_by_good_pbk = cast(Dict[str, int], quantities_by_good_pbk)
+        quantities_by_good_pbk = cast(Dict[str, int], tx_message.get("quantities_by_good_pbk"))
         for good_pbk, quantity in quantities_by_good_pbk.items():
             quantity_delta = quantity if tx_message.get("is_sender_buyer") else -quantity
-            self._good_holdings[good_pbk] += quantity_delta
+            self._quantities_by_good_pbk[good_pbk] += quantity_delta
 
     def __copy__(self):
         """Copy the object."""
         state = OwnershipState()
-        if self.currency_holdings is not None and self.good_holdings is not None:
-            state.init(self.currency_holdings, self.good_holdings)
+        if self.amount_by_currency is not None and self.quantities_by_good_pbk is not None:
+            state._amount_by_currency = self.amount_by_currency
+            state._quantities_by_good_pbk = self.quantities_by_good_pbk
         return state
 
 
@@ -149,66 +194,69 @@ class Preferences:
 
     def __init__(self):
         """Instantiate an agent preference object."""
-        self._utility_params = None  # type: UtilityParams
-        self._exchange_params = None  # type: ExchangeParams
+        self._exchange_params_by_currency = None  # type: ExchangeParams
+        self._utility_params_by_good_pbk = None  # type: UtilityParams
         self._quantity_shift = QUANTITY_SHIFT
 
-    def init(self, utility_params: UtilityParams, exchange_params: ExchangeParams):
+    def init(self, exchange_params_by_currency: ExchangeParams, utility_params_by_good_pbk: UtilityParams, agent_name: str = ''):
         """
         Instantiate an agent preference object.
 
-        :param utility_params: the utility params for every asset.
-        :param exchange_params: the exchange params.
+        :param exchange_params_by_currency: the exchange params.
+        :param utility_params_by_good_pbk: the utility params for every asset.
+        :param agent_name: the agent name
         """
-        logger.warning("Careful! Preferences are being updated!")
-        self._utility_params = utility_params
-        self._exchange_params = exchange_params
+        logger.warning("[{}]: Careful! Preferences are being initialized!".format(agent_name))
+        self._exchange_params_by_currency = exchange_params_by_currency
+        self._utility_params_by_good_pbk = utility_params_by_good_pbk
 
     @property
-    def utility_params(self) -> UtilityParams:
-        """Get utility parameter for each good."""
-        assert self._utility_params is not None, "UtilityParams not set!"
-        return self._utility_params
+    def is_initialized(self) -> bool:
+        """Get the initialization status."""
+        return self._exchange_params_by_currency is not None and self._utility_params_by_good_pbk is not None
 
     @property
-    def exchange_params(self) -> ExchangeParams:
+    def exchange_params_by_currency(self) -> ExchangeParams:
         """Get exchange parameter for each currency."""
-        assert self._exchange_params is not None, "ExchangeParams not set!"
-        return self._exchange_params
+        assert self._exchange_params_by_currency is not None, "ExchangeParams not set!"
+        return self._exchange_params_by_currency
 
-    def logarithmic_utility(self, good_holdings: GoodHoldings) -> float:
+    @property
+    def utility_params_by_good_pbk(self) -> UtilityParams:
+        """Get utility parameter for each good."""
+        assert self._utility_params_by_good_pbk is not None, "UtilityParams not set!"
+        return self._utility_params_by_good_pbk
+
+    def logarithmic_utility(self, quantities_by_good_pbk: GoodHoldings) -> float:
         """
         Compute agent's utility given her utility function params and a good bundle.
 
-        :param good_holdings: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
+        :param quantities_by_good_pbk: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
         :return: utility value
         """
-        goodwise_utility = [self.utility_params[good_pbk] * math.log(
-            quantity + self._quantity_shift) if quantity + self._quantity_shift > 0 else -10000
-            for good_pbk, quantity in good_holdings.items()]
-        return sum(goodwise_utility)
+        result = logarithmic_utility(self.utility_params_by_good_pbk, quantities_by_good_pbk, self._quantity_shift)
+        return result
 
-    def linear_utility(self, currency_holdings: CurrencyHoldings) -> float:
+    def linear_utility(self, amount_by_currency: CurrencyHoldings) -> float:
         """
         Compute agent's utility given her utility function params and a currency bundle.
 
-        :param currency_holdings: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
+        :param amount_by_currency: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
         :return: utility value
         """
-        currencywise_utility = [self.exchange_params[currency_pbk] for currency_pbk, quantity in
-                                currency_holdings.items()]
-        return sum(currencywise_utility)
+        result = linear_utility(self.exchange_params_by_currency, amount_by_currency)
+        return result
 
-    def get_score(self, good_holdings: GoodHoldings, currency_holdings: CurrencyHoldings) -> float:
+    def get_score(self, quantities_by_good_pbk: GoodHoldings, amount_by_currency: CurrencyHoldings) -> float:
         """
         Compute the score given the good and currency holdings.
 
-        :param good_holdings: the good holdings
+        :param quantities_by_good_pbk: the good holdings
         :param currency_holdings: the currency holdings
         :return: the score.
         """
-        goods_score = self.logarithmic_utility(good_holdings)
-        currency_score = self.linear_utility(currency_holdings)
+        goods_score = self.logarithmic_utility(quantities_by_good_pbk)
+        currency_score = self.linear_utility(amount_by_currency)
         score = goods_score + currency_score
         return score
 
@@ -227,11 +275,11 @@ class Preferences:
         :param tx_message: a transaction object.
         :return: the score.
         """
-        current_score = self.get_score(good_holdings=ownership_state.good_holdings,
-                                       currency_holdings=ownership_state.currency_holdings)
+        current_score = self.get_score(quantities_by_good_pbk=ownership_state.quantities_by_good_pbk,
+                                       amount_by_currency=ownership_state.amount_by_currency)
         new_ownership_state = ownership_state.apply([tx_message])
-        new_score = self.get_score(good_holdings=new_ownership_state.good_holdings,
-                                   currency_holdings=new_ownership_state.currency_holdings)
+        new_score = self.get_score(quantities_by_good_pbk=new_ownership_state.quantities_by_good_pbk,
+                                   amount_by_currency=new_ownership_state.amount_by_currency)
         return new_score - current_score
 
 
@@ -257,7 +305,7 @@ class DecisionMaker:
         self._message_out_queue = Queue()  # type: Queue
         self._ownership_state = OwnershipState()
         self._preferences = Preferences()
-        self._is_ready_to_pursuit_goals = False
+        self._goal_pursuit_readiness = GoalPursuitReadiness()
 
     @property
     def message_in_queue(self) -> Queue:
@@ -290,9 +338,9 @@ class DecisionMaker:
         return self._preferences
 
     @property
-    def is_ready_to_pursuit_goals(self) -> bool:
+    def goal_pursuit_readiness(self) -> GoalPursuitReadiness:
         """Get readiness of agent to pursuit its goals."""
-        return self._is_ready_to_pursuit_goals
+        return self._goal_pursuit_readiness
 
     def execute(self) -> None:
         """
@@ -306,7 +354,7 @@ class DecisionMaker:
                 if message.protocol_id == INTERNAL_PROTOCOL_ID:
                     self.handle(message)
                 else:
-                    logger.warning("Message received by the decision maker is not of protocol_id=internal.")
+                    logger.warning("[{}]: Message received by the decision maker is not of protocol_id=internal.".format(self._agent_name))
 
     def handle(self, message: Message) -> None:
         """
@@ -327,6 +375,9 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
+        if not self.goal_pursuit_readiness.is_ready:
+            logger.warning("[{}]: Preferences and ownership state not initialized. Refusing to process transaction!".format(self._agent_name))
+            return
         # get variables
         crypto_identifier = tx_message.get("ledger_id")
         crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
@@ -388,9 +439,17 @@ class DecisionMaker:
         :param state_update_message: the state update message
         :return: None
         """
-        currency_endowment = cast(CurrencyEndowment, state_update_message.get("currency_endowment"))
-        good_endowment = cast(GoodEndowment, state_update_message.get("good_endowment"))
-        self.ownership_state.init(currency_endowment=currency_endowment, good_endowment=good_endowment)
-        utility_params = cast(UtilityParams, state_update_message.get("utility_params"))
-        exchange_params = cast(ExchangeParams, state_update_message.get("exchange_params"))
-        self.preferences.init(exchange_params=exchange_params, utility_params=utility_params)
+        performative = state_update_message.get("performative")
+        if performative == StateUpdateMessage.Performative.INITIALIZE:
+            amount_by_currency = cast(Dict[str, int], state_update_message.get("amount_by_currency"))
+            quantities_by_good_pbk = cast(Dict[str, int], state_update_message.get("quantities_by_good_pbk"))
+            self.ownership_state.init(amount_by_currency=amount_by_currency, quantities_by_good_pbk=quantities_by_good_pbk, agent_name=self._agent_name)
+            exchange_params_by_currency = cast(Dict[str, float], state_update_message.get("exchange_params_by_currency"))
+            utility_params_by_good_pbk = cast(Dict[str, float], state_update_message.get("utility_params_by_good_pbk"))
+            self.preferences.init(exchange_params_by_currency=exchange_params_by_currency, utility_params_by_good_pbk=utility_params_by_good_pbk, agent_name=self._agent_name)
+            self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
+        elif performative == StateUpdateMessage.Performative.APPLY:
+            amount_by_currency = cast(Dict[str, int], state_update_message.get("amount_by_currency"))
+            quantities_by_good_pbk = cast(Dict[str, int], state_update_message.get("quantities_by_good_pbk"))
+            new_ownership_state = self.ownership_state.apply_state_update(amount_deltas_by_currency=amount_by_currency, quantity_deltas_by_good_pbk=quantities_by_good_pbk)
+            self._ownership_state = new_ownership_state

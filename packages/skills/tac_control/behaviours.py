@@ -89,7 +89,6 @@ class TACBehaviour(Behaviour):
         elif game.phase.value == Phase.GAME.value and now > parameters.end_time:
             game.phase = Phase.POST_GAME
             self._cancel_tac()
-            self._unregister_tac()
 
     def teardown(self) -> None:
         """
