@@ -461,8 +461,8 @@ class Multiplexer:
         """
         try:
             return self.in_queue.get(block=block, timeout=timeout)
-        except Empty:
-            return None
+        except queue.Empty:
+            raise Empty
 
     def put(self, envelope: Envelope):
         """Schedule an envelope for sending it."""
@@ -514,7 +514,10 @@ class InBox(object):
 
         :return: the envelope object
         """
-        envelope = self.get()
+        try:
+            envelope = self.get()
+        except Empty:
+            return None
         return envelope
 
 
