@@ -19,10 +19,11 @@
 
 """This module contains the tests for Envelope of mail.base.py."""
 import time
+import unittest.mock
 
-import aea
 import pytest
 
+import aea
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import Envelope, MailBox, InBox, OutBox, Multiplexer
 from aea.protocols.base import Message
@@ -93,7 +94,8 @@ def test_inbox_get_raises_exception_when_empty():
     inbox = InBox(multiplexer)
 
     with pytest.raises(aea.mail.base.Empty):
-        inbox.get()
+        with unittest.mock.patch.object(multiplexer, "get", return_value=None):
+            inbox.get()
 
 
 def test_inbox_get_nowait_returns_none():
