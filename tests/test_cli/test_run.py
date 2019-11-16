@@ -30,7 +30,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 
 import aea.cli.common
 from aea.cli import cli

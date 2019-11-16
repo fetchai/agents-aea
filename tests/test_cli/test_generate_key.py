@@ -23,7 +23,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 
 from aea.cli import cli
 from aea.crypto.default import DefaultCrypto

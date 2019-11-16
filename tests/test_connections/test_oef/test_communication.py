@@ -21,6 +21,7 @@
 import asyncio
 import logging
 import os
+import sys
 import time
 import unittest
 from typing import cast
@@ -731,6 +732,7 @@ async def test_exception_during_receive(network_node):
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="Python version < 3.7 not supported by the OEF.")
 async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")

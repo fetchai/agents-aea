@@ -31,7 +31,7 @@ from unittest.mock import patch
 import jsonschema
 import pytest
 import yaml
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
 
 import aea

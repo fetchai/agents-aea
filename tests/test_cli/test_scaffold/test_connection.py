@@ -28,7 +28,7 @@ from pathlib import Path
 
 import jsonschema
 import yaml
-from click.testing import CliRunner
+from ...common.click_testing import CliRunner
 from jsonschema import ValidationError, Draft4Validator
 
 from aea import AEA_DIR

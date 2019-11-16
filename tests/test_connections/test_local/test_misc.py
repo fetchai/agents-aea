@@ -62,9 +62,11 @@ async def test_connection_twice_return_none():
 
         assert expected_envelope == actual_envelope
 
+        await connection.disconnect()
+
 
 @pytest.mark.asyncio
-async def test_receiving_when_not_connected_raised_exception():
+async def test_receiving_when_not_connected_raise_exception():
     """Test that when we try to receive an envelope from a not connected connection we raise exception."""
     with pytest.raises(AEAConnectionError, match="Connection not established yet."):
         with LocalNode() as node:

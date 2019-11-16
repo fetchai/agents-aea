@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 
 import jsonschema
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
 
 from aea.cli import cli

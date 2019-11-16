@@ -19,7 +19,7 @@
 
 """This test module contains the tests for the `aea` sub-commands."""
 
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 
 import aea
 from aea.cli import cli

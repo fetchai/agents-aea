@@ -108,7 +108,7 @@ def test_outbox_put_message():
     inbox = InBox(multiplexer)
     multiplexer.connect()
     outbox.put_message("Agent1", "Agent0", "my_own_protocol", message_bytes)
-    time.sleep(0.1)
+    time.sleep(0.5)
     assert not inbox.empty(), "Inbox will not be empty after putting a message."
     multiplexer.disconnect()
 

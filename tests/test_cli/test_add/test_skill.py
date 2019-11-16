@@ -25,7 +25,7 @@ import unittest.mock
 from pathlib import Path
 
 import yaml
-from click.testing import CliRunner
+from ...common.click_testing import CliRunner
 from jsonschema import ValidationError
 
 import aea
