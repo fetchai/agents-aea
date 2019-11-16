@@ -33,7 +33,7 @@ import contextlib
 import shlex
 
 import click
-from click._compat import iteritems, PY2, string_types
+from click._compat import iteritems, PY2, string_types  # type: ignore
 
 clickpkg = click
 

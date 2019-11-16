@@ -375,22 +375,22 @@ class Multiplexer:
         if not self.is_connected:
             logger.debug("Sending loop not started. The multiplexer is not connected.")
             return
-        try:
-            logger.debug("Waiting for outgoing messages...")
-            envelope = await self.out_queue.get()
-            if envelope is None:
-                logger.debug("Received empty message. Quitting the sending loop...")
-                return None
-            logger.debug("Sending envelope {}".format(str(envelope)))
-            await self._send(envelope)
-        except asyncio.CancelledError:
-            logger.debug("Sending loop cancelled.")
-            return
-        except Exception as e:
-            logger.error("Error in the sending loop: {}".format(str(e)))
-            return
 
-        await self._send_loop()
+        while self.is_connected:
+            try:
+                logger.debug("Waiting for outgoing messages...")
+                envelope = await self.out_queue.get()
+                if envelope is None:
+                    logger.debug("Received empty message. Quitting the sending loop...")
+                    return None
+                logger.debug("Sending envelope {}".format(str(envelope)))
+                await self._send(envelope)
+            except asyncio.CancelledError:
+                logger.debug("Sending loop cancelled.")
+                return
+            except Exception as e:
+                logger.error("Error in the sending loop: {}".format(str(e)))
+                return
 
     async def _recv_loop(self):
         """Process incoming messages."""
