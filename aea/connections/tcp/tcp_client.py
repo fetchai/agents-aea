@@ -56,7 +56,7 @@ class TCPClientConnection(TCPConnection):
 
     async def setup(self):
         """Set the connection up."""
-        self._reader, self._writer = await asyncio.open_connection(self.host, self.port, loop=self._loop)
+        self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
         public_key_bytes = self.public_key.encode("utf-8")
         await self._send(self._writer, public_key_bytes)
 

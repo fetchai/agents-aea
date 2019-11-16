@@ -705,7 +705,7 @@ async def test_cancelled_receive(network_node):
     async def receive():
         await oef_connection.recv()
 
-    task = asyncio.ensure_future(receive(), loop=asyncio.get_running_loop())
+    task = asyncio.ensure_future(receive(), loop=asyncio.get_event_loop())
     await asyncio.sleep(0.1)
     task.cancel()
     await asyncio.sleep(0.1)
@@ -716,7 +716,7 @@ async def test_cancelled_receive(network_node):
 
 @pytest.mark.asyncio
 async def test_exception_during_receive(network_node):
-    """Test the case when there is an exception during a receive request"""
+    """Test the case when there is an exception during a receive request."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
     oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
@@ -744,7 +744,7 @@ async def test_cannot_connect_to_oef():
     async def try_to_connect():
         await oef_connection.connect()
 
-    task = asyncio.ensure_future(try_to_connect(), loop=asyncio.get_running_loop())
+    task = asyncio.ensure_future(try_to_connect(), loop=asyncio.get_event_loop())
     await asyncio.sleep(1.0)
     mocked_logger_warning.assert_called_with("Cannot connect to OEFChannel. Retrying in 5 seconds...")
     task.cancel()

@@ -103,7 +103,7 @@ class TCPServerConnection(TCPConnection):
 
     async def setup(self):
         """Set the connection up."""
-        self._server = await asyncio.start_server(self.handle, host=self.host, port=self.port, loop=self._loop)
+        self._server = await asyncio.start_server(self.handle, host=self.host, port=self.port)
         logger.debug("Start listening on {}:{}".format(self.host, self.port))
 
     async def teardown(self):
