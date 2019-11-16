@@ -25,6 +25,7 @@ import os
 import socket
 import sys
 import time
+from asyncio import CancelledError
 from threading import Timer
 from typing import Optional
 
@@ -84,9 +85,9 @@ def tcpping(ip, port) -> bool:
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
-    def __init__(self):
+    def __init__(self, connection_id: str = "dummy"):
         """Initialize."""
-        super().__init__(connection_id="dummy")
+        super().__init__(connection_id=connection_id)
         self.connection_status.is_connected = False
         self._queue = None
 
@@ -107,9 +108,10 @@ class DummyConnection(Connection):
         """Receive an envelope."""
         try:
             return await self._queue.get()
+        except CancelledError:
+            return None
         except Exception as e:
             print(str(e))
-            await asyncio.sleep(0.5)
             return None
 
     def put(self, envelope: Envelope):

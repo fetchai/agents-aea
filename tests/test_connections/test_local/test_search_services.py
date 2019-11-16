@@ -23,9 +23,8 @@ import time
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.base import AEAConnectionError
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.mail.base import MailBox, Envelope
+from aea.mail.base import MailBox, Envelope, AEAConnectionError
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage

@@ -23,9 +23,8 @@ import unittest.mock
 
 import pytest
 
-from aea.connections.base import AEAConnectionError
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.mail.base import Envelope, MailBox
+from aea.mail.base import Envelope, MailBox, AEAConnectionError
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage

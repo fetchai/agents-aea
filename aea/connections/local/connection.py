@@ -27,8 +27,8 @@ from threading import Thread
 from typing import Dict, List, Optional, cast
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Connection, AEAConnectionError
-from aea.mail.base import Envelope
+from aea.connections.base import Connection
+from aea.mail.base import Envelope, AEAConnectionError
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description, Query
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF

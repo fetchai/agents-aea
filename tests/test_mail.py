@@ -20,6 +20,9 @@
 """This module contains the tests for Envelope of mail.base.py."""
 import time
 
+import aea
+import pytest
+
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import Envelope, MailBox, InBox, OutBox, Multiplexer
 from aea.protocols.base import Message
@@ -82,6 +85,23 @@ def test_inbox_get():
     inbox = InBox(multiplexer)
 
     assert inbox.get() == envelope, "Checks if the returned envelope is the same with the queued envelope."
+
+
+def test_inbox_get_raises_exception_when_empty():
+    """Test that getting an envelope from an empty inbox raises an exception."""
+    multiplexer = Multiplexer([DummyConnection()])
+    inbox = InBox(multiplexer)
+
+    with pytest.raises(aea.mail.base.Empty):
+        inbox.get()
+
+
+def test_inbox_get_nowait_returns_none():
+    """Test that getting an envelope from an empty inbox returns None."""
+    # TODO get_nowait in this case should raise an exception, like it's done in queue.Queue
+    multiplexer = Multiplexer([DummyConnection()])
+    inbox = InBox(multiplexer)
+    assert inbox.get_nowait() is None
 
 
 def test_outbox_put():

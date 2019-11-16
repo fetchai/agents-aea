@@ -29,10 +29,6 @@ if TYPE_CHECKING:
     from aea.mail.base import Envelope  # pragma: no cover
 
 
-class AEAConnectionError(Exception):
-    """Exception class for connection errors."""
-
-
 class ConnectionStatus(object):
     """The connection status class."""
 

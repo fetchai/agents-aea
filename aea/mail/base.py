@@ -22,7 +22,7 @@ import asyncio
 import logging
 import queue
 from abc import ABC, abstractmethod
-from asyncio import AbstractEventLoop
+from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Thread, Lock
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict, cast
@@ -32,9 +32,13 @@ from aea.connections.base import ConnectionStatus
 from aea.mail import base_pb2
 
 if TYPE_CHECKING:
-    from aea.connections.base import Connection, AEAConnectionError  # pragma: no cover
+    from aea.connections.base import Connection  # pragma: no cover
 
 logger = logging.getLogger(__name__)
+
+
+class AEAConnectionError(Exception):
+    """Exception class for connection errors."""
 
 
 class Empty(Exception):
@@ -268,11 +272,16 @@ class Multiplexer:
                 logger.debug("Multiplexer already connected.")
                 return
             self._start()
-            asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
-            assert self.is_connected
-            self._connection_status.is_connected = True
-            self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._recv_loop(), loop=self._loop)
-            self._send_loop_task = asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
+            try:
+                asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
+                assert self.is_connected
+                self._connection_status.is_connected = True
+                self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._recv_loop(), loop=self._loop)
+                self._send_loop_task = asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
+            except (CancelledError, Exception):
+                self._connection_status.is_connected = False
+                self._stop()
+                raise AEAConnectionError("Failed to connect the multiplexer.")
 
     def disconnect(self) -> None:
         """Disconnect the multiplexer."""
@@ -280,11 +289,15 @@ class Multiplexer:
             if not self.connection_status.is_connected:
                 logger.debug("Multiplexer already disconnected.")
                 return
-            logger.debug("Disconnecting the multiplexer...")
-            asyncio.run_coroutine_threadsafe(self._disconnect_all(), loop=self._loop).result()
-            self._stop()
-            assert not self.is_connected
-            self._connection_status.is_connected = False
+            try:
+                logger.debug("Disconnecting the multiplexer...")
+                asyncio.run_coroutine_threadsafe(self._disconnect_all(), loop=self._loop).result()
+                self._stop()
+                assert not self.is_connected
+                self._connection_status.is_connected = False
+            except (CancelledError, Exception):
+                self._stop()
+                raise AEAConnectionError("Failed to disconnect the multiplexer.")
 
     def _run_loop(self):
         """
@@ -305,10 +318,10 @@ class Multiplexer:
 
     def _stop(self):
         """Start the multiplexer."""
-        if not self._recv_loop_task.done():
+        if self._recv_loop_task is not None and not self._recv_loop_task.done():
             self._recv_loop_task.cancel()
 
-        if not self._send_loop_task.done():
+        if self._send_loop_task is not None and not self._send_loop_task.done():
             # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing messages.
             asyncio.run_coroutine_threadsafe(self.out_queue.put(None), self._loop).result()
             self._send_loop_task.result(2.0)
@@ -324,11 +337,15 @@ class Multiplexer:
     async def _connect_all(self):
         """Set all the connection up."""
         logger.debug("Start multiplexer connections.")
+        connected = []  # type: List[str]
         for connection_id, connection in self._name_to_connection.items():
             try:
                 await self._connect_one(connection_id)
+                connected.append(connection_id)
             except Exception as e:
                 logger.error("Error while connecting {}: {}".format(str(type(connection)), str(e)))
+                for c in connected: await self._disconnect_one(c)
+                break
 
     async def _connect_one(self, connection_id: str) -> None:
         """
@@ -388,6 +405,8 @@ class Multiplexer:
             except asyncio.CancelledError:
                 logger.debug("Sending loop cancelled.")
                 return
+            except AEAConnectionError as e:
+                logger.error(str(e))
             except Exception as e:
                 logger.error("Error in the sending loop: {}".format(str(e)))
                 return
@@ -397,7 +416,7 @@ class Multiplexer:
         logger.debug("Starting receving loop...")
         task_to_connection = {asyncio.ensure_future(conn.recv()): conn for conn in self.connections}
 
-        while self.is_connected:
+        while self.connection_status.is_connected:
             try:
                 logger.debug("Waiting for incoming messages...")
                 done, pending = await asyncio.wait(task_to_connection.keys(),
