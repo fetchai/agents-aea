@@ -545,16 +545,17 @@ class OEFConnection(Connection):
             try:
                 self._core.run_threaded()
                 loop = asyncio.get_event_loop()
-                self.in_queue = asyncio.Queue(loop=loop)
+                self.in_queue = asyncio.Queue()
                 await self._try_connect()
                 self.connection_status.is_connected = True
                 self.channel.loop = loop
                 self.channel.in_queue = self.in_queue
                 self._connection_check_thread = Thread(target=self._connection_check)
                 self._connection_check_thread.start()
-            except Exception as e:  # pragma: no cover
+            except (CancelledError, Exception) as e:  # pragma: no cover
                 self._core.stop()
                 self.connection_status.is_connected = False
+                self.is_connecting = False
                 raise e
 
     async def _try_connect(self) -> None:
