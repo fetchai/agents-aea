@@ -18,7 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the local OEF node implementation."""
+import asyncio
+import unittest.mock
 
+import pytest
+
+from aea.connections.base import AEAConnectionError
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import Envelope, MailBox
 from aea.protocols.default.message import DefaultMessage
@@ -39,6 +44,48 @@ def test_connection():
 
     mailbox1.disconnect()
     mailbox2.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_connection_twice_return_none():
+    """Test that connecting twice works."""
+    with LocalNode() as node:
+        public_key = "mailbox"
+        connection = OEFLocalConnection(public_key, node)
+        await connection.connect()
+        await node.connect(public_key, connection._reader)
+        message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        message_bytes = DefaultSerializer().encode(message)
+        expected_envelope = Envelope(to=public_key, sender=public_key, protocol_id="default", message=message_bytes)
+        await connection.send(expected_envelope)
+        actual_envelope = await connection.recv()
+
+        assert expected_envelope == actual_envelope
+
+
+@pytest.mark.asyncio
+async def test_receiving_when_not_connected_raised_exception():
+    """Test that when we try to receive an envelope from a not connected connection we raise exception."""
+    with pytest.raises(AEAConnectionError, match="Connection not established yet."):
+        with LocalNode() as node:
+            public_key = "mailbox"
+            connection = OEFLocalConnection(public_key, node)
+            await connection.recv()
+
+
+@pytest.mark.asyncio
+async def test_receiving_returns_none_when_error_occurs():
+    """Test that when we try to receive an envelope and an error occurs we return None."""
+    with LocalNode() as node:
+        public_key = "mailbox"
+        connection = OEFLocalConnection(public_key, node)
+        await connection.connect()
+
+        with unittest.mock.patch.object(connection._reader, "get", side_effect=Exception):
+            result = await connection.recv()
+            assert result is None
+
+        await connection.disconnect()
 
 
 def test_communication():
@@ -98,3 +145,16 @@ def test_communication():
         assert msg.get("performative") == FIPAMessage.Performative.DECLINE
         mailbox1.disconnect()
         mailbox2.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_connecting_to_node_with_same_key():
+    """Test that connecting twice with the same key works correctly."""
+    node = LocalNode()
+    public_key = "my_public_key"
+    my_queue = asyncio.Queue()
+
+    ret = await node.connect(public_key, my_queue)
+    assert ret is not None and isinstance(ret, asyncio.Queue)
+    ret = await node.connect(public_key, my_queue)
+    assert ret is None

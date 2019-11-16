@@ -511,14 +511,6 @@ class OEFChannel(OEFAgent):
         else:
             raise ValueError("OEF request not recognized.")
 
-    def receive(self) -> None:
-        """
-        Receives an envelope.
-
-        :return: None.
-        """
-        pass
-
 
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
@@ -547,11 +539,9 @@ class OEFConnection(Connection):
         :return: None
         :raises Exception if the connection to the OEF fails.
         """
-        if self._connection_check_thread is not None:
-            self._connection_check_thread.join()
-            self._connection_check_thread = None
-
         with self._lock:
+            if self.connection_status.is_connected:
+                return
             try:
                 self._core.run_threaded()
                 loop = asyncio.get_event_loop()
@@ -576,7 +566,7 @@ class OEFConnection(Connection):
         """
         while not self.connection_status.is_connected:
             if not self.channel.connect():
-                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
+                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds...")
                 await asyncio.sleep(5.0)
             else:
                 break
@@ -593,7 +583,7 @@ class OEFConnection(Connection):
         asyncio.set_event_loop(loop)
         while self.connection_status.is_connected:
             time.sleep(2.0)
-            if not self.channel.get_state() == "connected":  # type: ignore
+            if not self.channel.get_state() == "connected":  # pragma: no cover
                 self.connection_status.is_connected = False
                 logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
                 loop.run_until_complete(self._try_connect())

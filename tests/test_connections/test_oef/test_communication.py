@@ -22,6 +22,7 @@ import asyncio
 import logging
 import os
 import time
+import unittest
 from typing import cast
 from unittest import mock
 
@@ -29,6 +30,7 @@ import pytest
 from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
 
+import aea
 from aea.configurations.base import ConnectionConfig
 from aea.connections.oef.connection import OEFMailBox, OEFConnection
 from aea.connections.oef.connection import OEFObjectTranslator
@@ -249,6 +251,42 @@ class TestOEF:
         @classmethod
         def teardown_class(cls):
             """Teardown the test."""
+            cls.mailbox1.disconnect()
+
+    class TestMailStats:
+        """This class contains tests for the mail stats component."""
+
+        @classmethod
+        def setup_class(cls):
+            """Set the tests up."""
+            cls.crypto1 = DefaultCrypto()
+            cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.mailbox1.connect()
+
+            cls.connection = cls.mailbox1._multiplexer.connections[0]
+            assert cls.connection.channel.mail_stats.search_count == 0
+
+        def test_search_count_increases(self):
+            """Test that the search count increases."""
+            request_id = 1
+            search_query_empty_model = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
+            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
+                                        query=search_query_empty_model)
+            self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+                                             protocol_id=OEFMessage.protocol_id,
+                                             message=OEFSerializer().encode(search_request))
+
+            envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+            search_result = OEFSerializer().decode(envelope.message)
+            assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
+            assert search_result.get("id")
+            assert request_id and search_result.get("agents") == []
+
+            assert self.connection.channel.mail_stats.search_count == 1
+
+        @classmethod
+        def teardown_class(cls):
+            """Tear the tests down."""
             cls.mailbox1.disconnect()
 
 
@@ -649,4 +687,82 @@ async def test_send_oef_message(network_node):
     msg_bytes = OEFSerializer().encode(msg)
     envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     await oef_connection.send(envelope)
+    await oef_connection.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_cancelled_receive(network_node):
+    """Test the case when a receive request is cancelled."""
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
+    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection.loop = asyncio.get_event_loop()
+    await oef_connection.connect()
+
+    patch = unittest.mock.patch.object(aea.connections.oef.connection.logger, 'debug')
+    mocked_logger_debug = patch.__enter__()
+
+    async def receive():
+        await oef_connection.recv()
+
+    task = asyncio.ensure_future(receive(), loop=asyncio.get_running_loop())
+    await asyncio.sleep(0.1)
+    task.cancel()
+    await asyncio.sleep(0.1)
+    await oef_connection.disconnect()
+
+    mocked_logger_debug.assert_called_once_with("Receive cancelled.")
+
+
+@pytest.mark.asyncio
+async def test_exception_during_receive(network_node):
+    """Test the case when there is an exception during a receive request"""
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
+    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection.loop = asyncio.get_event_loop()
+    await oef_connection.connect()
+
+    with unittest.mock.patch.object(oef_connection.in_queue, "get", side_effect=Exception):
+        result = await oef_connection.recv()
+        assert result is None
+
+    await oef_connection.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_cannot_connect_to_oef():
+    """Test the case when we can't connect to the OEF."""
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
+    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="a_fake_address", oef_port=10000)
+    oef_connection.loop = asyncio.get_event_loop()
+
+    patch = unittest.mock.patch.object(aea.connections.oef.connection.logger, 'warning')
+    mocked_logger_warning = patch.__enter__()
+
+    async def try_to_connect():
+        await oef_connection.connect()
+
+    task = asyncio.ensure_future(try_to_connect(), loop=asyncio.get_running_loop())
+    await asyncio.sleep(1.0)
+    mocked_logger_warning.assert_called_with("Cannot connect to OEFChannel. Retrying in 5 seconds...")
+    task.cancel()
+    await asyncio.sleep(1.0)
+
+
+@pytest.mark.asyncio
+async def test_connecting_twice_is_ok(network_node):
+    """Test that calling 'connect' twice works as expected."""
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
+    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection.loop = asyncio.get_event_loop()
+
+    assert not oef_connection.connection_status.is_connected
+    await oef_connection.connect()
+    assert oef_connection.connection_status.is_connected
+    await oef_connection.connect()
+    assert oef_connection.connection_status.is_connected
+
     await oef_connection.disconnect()

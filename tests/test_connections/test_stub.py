@@ -22,8 +22,12 @@ import base64
 import shutil
 import tempfile
 import time
+import unittest.mock
 from pathlib import Path
 
+import pytest
+
+import aea
 from aea.configurations.base import ConnectionConfig
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import MailBox, Envelope
@@ -60,6 +64,16 @@ class TestStubConnection:
 
         actual_envelope = self.mailbox.inbox.get(block=True, timeout=2.0)
         assert expected_envelope == actual_envelope
+
+    def test_reception_fails(self):
+        """Test the case when an error occurs during the processing of a line."""
+        patch = unittest.mock.patch.object(aea.connections.stub.connection.logger, 'error')
+        mocked_logger_error = patch.__enter__()
+        with unittest.mock.patch('aea.connections.stub.connection._decode', side_effect=Exception("an error.")):
+            self.connection._process_line(b"")
+            mocked_logger_error.assert_called_with("Error when processing a line. Message: an error.")
+
+        patch.__exit__()
 
     def test_connection_is_established(self):
         """Test the stub connection is established and then bad formatted messages."""
@@ -116,3 +130,51 @@ def test_connection_from_config():
     ))
     assert not stub_con.connection_status.is_connected
     shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+@pytest.mark.asyncio
+async def test_disconnection_when_already_disconnected():
+    """Test the case when disconnecting a connection already disconnected."""
+    tmpdir = Path(tempfile.mktemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+    stub_con = StubConnection(input_file_path, output_file_path)
+
+    assert not stub_con.connection_status.is_connected
+    await stub_con.disconnect()
+    assert not stub_con.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_connection_when_already_connected():
+    """Test the case when connecting a connection already connected."""
+    tmpdir = Path(tempfile.mktemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+    stub_con = StubConnection(input_file_path, output_file_path)
+
+    assert not stub_con.connection_status.is_connected
+    await stub_con.connect()
+    assert stub_con.connection_status.is_connected
+    await stub_con.connect()
+    assert stub_con.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_receiving_returns_none_when_error_occurs():
+    """Test that when we try to receive an envelope and an error occurs we return None."""
+    tmpdir = Path(tempfile.mktemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+    stub_con = StubConnection(input_file_path, output_file_path)
+
+    await stub_con.connect()
+    with unittest.mock.patch.object(stub_con.in_queue, "get", side_effect=Exception):
+        ret = await stub_con.recv()
+        assert ret is None
