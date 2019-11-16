@@ -102,11 +102,13 @@ class DummyConnection(Connection):
 
     async def send(self, envelope: 'Envelope'):
         """Send an envelope."""
+        assert self._queue is not None
         self._queue.put_nowait(envelope)
 
     async def recv(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive an envelope."""
         try:
+            assert self._queue is not None
             return await self._queue.get()
         except CancelledError:
             return None
@@ -116,6 +118,7 @@ class DummyConnection(Connection):
 
     def put(self, envelope: Envelope):
         """Put an envelope in the queue."""
+        assert self._queue is not None
         self._queue.put_nowait(envelope)
 
     @classmethod

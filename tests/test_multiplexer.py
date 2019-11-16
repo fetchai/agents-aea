@@ -251,8 +251,9 @@ async def test_send_envelope_with_non_registered_connection():
 
     multiplexer.disconnect()
 
+
 def test_send_envelope_error_is_logged_by_send_loop():
-    """Test that the AEAConnectionError in the '_send' method is logged by the '_send_loop'"""
+    """Test that the AEAConnectionError in the '_send' method is logged by the '_send_loop'."""
     connection = DummyConnection(connection_id="dummy")
     multiplexer = Multiplexer([connection])
     multiplexer.connect()
