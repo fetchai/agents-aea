@@ -174,9 +174,12 @@ class TestUtilityPreferencesBase:
         """Test the preferences init()."""
         utility_params = {"good_pbk": 20.0}
         exchange_params = {"FET": 10.0}
-        self.preferences.init(exchange_params_by_currency=exchange_params, utility_params_by_good_pbk=utility_params)
+        tx_fee = 9
+        self.preferences.init(exchange_params_by_currency=exchange_params, utility_params_by_good_pbk=utility_params, tx_fee=tx_fee)
         assert self.preferences.utility_params_by_good_pbk is not None
         assert self.preferences.exchange_params_by_currency is not None
+        assert self.preferences.transaction_fees['seller_tx_fee'] == 4
+        assert self.preferences.transaction_fees['buyer_tx_fee'] == 5
 
     def test_utilities(self):
         """Test the utilities."""
@@ -184,7 +187,8 @@ class TestUtilityPreferencesBase:
         currency_holdings = {"FET": 100}
         utility_params = {"good_pbk": 20.0}
         exchange_params = {"FET": 10.0}
-        self.preferences.init(utility_params_by_good_pbk=utility_params, exchange_params_by_currency=exchange_params)
+        tx_fee = 9
+        self.preferences.init(utility_params_by_good_pbk=utility_params, exchange_params_by_currency=exchange_params, tx_fee=tx_fee)
         log_utility = self.preferences.logarithmic_utility(quantities_by_good_pbk=good_holdings)
         assert log_utility is not None
 
@@ -194,14 +198,21 @@ class TestUtilityPreferencesBase:
         score = self.preferences.get_score(quantities_by_good_pbk=good_holdings, amount_by_currency=currency_holdings)
         assert score == log_utility + linear_utility
 
+        delta_good_holdings = {"good_pbk": 1}
+        delta_currency_holdings = {"FET": -5}
+        self.ownership_state.init(amount_by_currency=currency_holdings, quantities_by_good_pbk=good_holdings)
+        marginal_utility = self.preferences.marginal_utility(ownership_state=self.ownership_state, delta_good_holdings=delta_good_holdings, delta_currency_holdings=delta_currency_holdings)
+        assert marginal_utility is not None
+
     def test_score_diff_from_transaction(self):
         """Test the difference between the scores."""
         good_holdings = {"good_pbk": 2}
         currency_holdings = {"FET": 100}
         utility_params = {"good_pbk": 20.0}
         exchange_params = {"FET": 10.0}
+        tx_fee = 3
         self.ownership_state.init(amount_by_currency=currency_holdings, quantities_by_good_pbk=good_holdings)
-        self.preferences.init(utility_params_by_good_pbk=utility_params, exchange_params_by_currency=exchange_params)
+        self.preferences.init(utility_params_by_good_pbk=utility_params, exchange_params_by_currency=exchange_params, tx_fee=tx_fee)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                         skill_id="default",
                                         transaction_id="transaction0",
@@ -210,8 +221,8 @@ class TestUtilityPreferencesBase:
                                         is_sender_buyer=False,
                                         currency_pbk="FET",
                                         amount=20,
-                                        sender_tx_fee=5,
-                                        counterparty_tx_fee=0,
+                                        sender_tx_fee=self.preferences.transaction_fees['seller_tx_fee'],
+                                        counterparty_tx_fee=self.preferences.transaction_fees['buyer_tx_fee'],
                                         quantities_by_good_pbk={"good_pbk": 10},
                                         ledger_id="fetchai")
 
@@ -283,11 +294,13 @@ class TestDecisionMaker:
         currency_holdings = {"FET": 100}
         utility_params = {"good_pbk": 20.0}
         exchange_params = {"FET": 10.0}
+        tx_fee = 1
         state_update_message = StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE,
                                                   amount_by_currency=currency_holdings,
                                                   quantities_by_good_pbk=good_holdings,
                                                   exchange_params_by_currency=exchange_params,
-                                                  utility_params_by_good_pbk=utility_params)
+                                                  utility_params_by_good_pbk=utility_params,
+                                                  tx_fee=tx_fee)
         self.decision_maker.handle(state_update_message)
         assert self.decision_maker.ownership_state.amount_by_currency is not None
         assert self.decision_maker.ownership_state.quantities_by_good_pbk is not None

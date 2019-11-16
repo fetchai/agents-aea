@@ -646,7 +646,7 @@ class OEFMailBox(MailBox):
         connection = OEFConnection(public_key, oef_addr, oef_port)
         super().__init__(connection)
 
-    @property
-    def mail_stats(self) -> MailStats:
-        """Get the mail stats object."""
-        return self._connection.channel.mail_stats  # type: ignore
+    # @property
+    # def mail_stats(self) -> MailStats:
+    #     """Get the mail stats object."""
+    #     return self._connection.channel.mail_stats  # type: ignore

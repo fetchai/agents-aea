@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a handler."""
 
+import copy
 import logging
 import pprint
 from typing import List, Optional, cast, TYPE_CHECKING
@@ -159,17 +160,19 @@ class FIPANegotiationHandler(Handler):
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             sender_tx_fee = proposal_description.values['seller_tx_fee'] if dialogue.is_seller else proposal_description.values['buyer_tx_fee']
             counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if dialogue.is_seller else proposal_description.values['seller_tx_fee']
+            goods_component = copy.copy(proposal_description.values)
+            [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency']]
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                                  skill_id="tac_negotiation_skill",
                                                  transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
-                                                 currency_pbk='FET',
-                                                 amount=proposal_description.values['amount'],
+                                                 currency_pbk=proposal_description.values['currency'],
+                                                 amount=proposal_description.values['price'],
                                                  is_sender_buyer=not dialogue.is_seller,
                                                  sender_tx_fee=sender_tx_fee,
                                                  counterparty_tx_fee=counterparty_tx_fee,
-                                                 quantities_by_good_pbk=proposal_description.values['description'])
+                                                 quantities_by_good_pbk=goods_component)
             transactions = cast(Transactions, self.context.transactions)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
             logger.debug("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk,
@@ -201,17 +204,19 @@ class FIPANegotiationHandler(Handler):
             transaction_id = generate_transaction_id(self.context.agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
             sender_tx_fee = proposal_description.values['seller_tx_fee'] if dialogue.is_seller else proposal_description.values['buyer_tx_fee']
             counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if dialogue.is_seller else proposal_description.values['seller_tx_fee']
+            goods_component = copy.copy(proposal_description.values)
+            [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency']]
             transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                                  skill_id="tac_negotiation_skill",
                                                  transaction_id=transaction_id,
                                                  sender=self.context.agent_public_key,
                                                  counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
-                                                 currency_pbk='FET',
-                                                 amount=proposal_description.values['amount'],
+                                                 currency_pbk=proposal_description.values['currency'],
+                                                 amount=proposal_description.values['price'],
                                                  is_sender_buyer=not dialogue.is_seller,
                                                  sender_tx_fee=sender_tx_fee,
                                                  counterparty_tx_fee=counterparty_tx_fee,
-                                                 quantities_by_good_pbk=proposal_description.values['description'])
+                                                 quantities_by_good_pbk=goods_component)
             new_msg_id = cast(int, propose.get("message_id")) + 1
             strategy = cast(Strategy, self.context.strategy)
             transactions = cast(Transactions, self.context.transactions)

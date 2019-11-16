@@ -74,12 +74,14 @@ aea create tac_participant_two
 ``` bash
 cd tac_participant_one
 aea add skill tac_participation
+aea add skill tac_negotiation
 ```
 
 ### Add the tac participation skill to participant two
 ``` bash
 cd tac_participant_two
 aea add skill tac_participation
+aea add skill tac_negotiation
 ```
 
 ### Run both the TAC participant AEAs

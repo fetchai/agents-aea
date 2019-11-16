@@ -144,10 +144,11 @@ class DialogueStats(object):
 
         :return: None
         """
-        if is_self_initiated:
-            self._self_initiated[end_state] += 1
-        else:
-            self._other_initiated[end_state] += 1
+        pass
+        # if is_self_initiated:
+        #     self._self_initiated[end_state.value] += 1
+        # else:
+        #     self._other_initiated[end_state.value] += 1
 
 
 class Dialogues(SharedClass):

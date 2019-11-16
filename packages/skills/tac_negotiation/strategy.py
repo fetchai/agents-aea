@@ -35,7 +35,7 @@ else:
     from tac_negotiation_skill.helpers import build_goods_description, build_goods_query
 
 
-ROUNDING_ADJUSTMENT = 0.01
+ROUNDING_ADJUSTMENT = 1
 
 
 class Strategy(SharedClass):
@@ -98,7 +98,8 @@ class Strategy(SharedClass):
         :return: the description (to advertise on the Service Directory).
         """
         good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_supply else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
-        desc = build_goods_description(good_pbk_to_quantities=good_pbk_to_quantities, is_supply=is_supply)
+        currency = list(ownership_state_after_locks.amount_by_currency.keys())[0]
+        desc = build_goods_description(good_pbk_to_quantities=good_pbk_to_quantities, currency=currency, is_supply=is_supply)
         return desc
 
     def _supplied_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
@@ -139,7 +140,8 @@ class Strategy(SharedClass):
         :return: the Query, or None.
         """
         good_pbk_to_quantities = self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk)
-        query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), is_searching_for_sellers=is_searching_for_sellers)
+        currency = list(ownership_state_after_locks.amount_by_currency.keys())[0]
+        query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), currency=currency, is_searching_for_sellers=is_searching_for_sellers)
         return query
 
     def get_proposal_for_query(self, query: Query, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool) -> Optional[Description]:
@@ -175,24 +177,25 @@ class Strategy(SharedClass):
         good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_seller else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
         nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities.items()}  # type: Dict[str, int]
         proposals = []
-        seller_tx_fee = self.context.preferences.transaction_fees['seller_tx_fee']
-        buyer_tx_fee = self.context.preferences.transaction_fees['buyer_tx_fee']
-        for good_pbk, quantity in good_pbk_to_quantities:
+        seller_tx_fee = self.context.agent_preferences.transaction_fees['seller_tx_fee']
+        buyer_tx_fee = self.context.agent_preferences.transaction_fees['buyer_tx_fee']
+        currency = list(self.context.agent_ownership_state.amount_by_currency.keys())[0]
+        for good_pbk, quantity in good_pbk_to_quantities.items():
             if is_seller and quantity == 0: continue
             proposal_dict = nil_proposal_dict
             proposal_dict[good_pbk] = 1
-            proposal = build_goods_description(good_pbk_to_quantities=proposal_dict, is_supply=is_seller)
+            proposal = build_goods_description(good_pbk_to_quantities=proposal_dict, currency=currency, is_supply=is_seller)
             if is_seller:
                 delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict.items()}  # type: Dict[str, int]
             else:
                 delta_good_holdings = proposal_dict
-            marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state_after_locks, delta_good_holdings)
+            marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state=ownership_state_after_locks, delta_good_holdings=delta_good_holdings)
             switch = -1 if is_seller else 1
-            breakeven_price = round(marginal_utility_from_delta_good_holdings, 2) * switch
+            breakeven_price_rounded = round(marginal_utility_from_delta_good_holdings) * switch
             if is_seller:
-                proposal.values["price"] = breakeven_price + seller_tx_fee + ROUNDING_ADJUSTMENT
+                proposal.values["price"] = breakeven_price_rounded + seller_tx_fee + ROUNDING_ADJUSTMENT
             else:
-                proposal.values["price"] = breakeven_price - buyer_tx_fee - ROUNDING_ADJUSTMENT
+                proposal.values["price"] = breakeven_price_rounded - buyer_tx_fee - ROUNDING_ADJUSTMENT
             proposal.values["seller_tx_fee"] = seller_tx_fee
             proposal.values["buyer_tx_fee"] = buyer_tx_fee
             if not proposal.values["price"] > 0: continue

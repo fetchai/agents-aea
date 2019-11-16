@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This class contains the helpers for FIPA negotiation."""
-from typing import Dict, List, TYPE_CHECKING, cast
+from typing import Dict, List, Union, TYPE_CHECKING, cast
 
 from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
     ConstraintExpr
@@ -36,7 +36,7 @@ SUPPLY_DATAMODEL_NAME = 'supply'
 DEMAND_DATAMODEL_NAME = 'demand'
 
 
-def build_goods_datamodel(good_pbks: List[str], currency: str, is_supply: bool) -> DataModel:
+def build_goods_datamodel(good_pbks: List[str], is_supply: bool) -> DataModel:
     """
     Build a data model for supply and demand of goods (i.e. for offered or requested goods).
 
@@ -46,30 +46,35 @@ def build_goods_datamodel(good_pbks: List[str], currency: str, is_supply: bool) 
 
     :return: the data model.
     """
-    goods_quantities_attributes = [Attribute(good_pbk, int, False)
-                                   for good_pbk in good_pbks]
-    price_attribute = Attribute(currency, int, False)
+    good_quantities_attributes = [Attribute(good_pbk, int, True, "A good on offer.") for good_pbk in good_pbks]
+    currency_attribute = Attribute('currency', str, True, "The currency for pricing and transacting the goods.")
+    price_attribute = Attribute('price', int, False, "The price of the goods in the currency.")
+    seller_tx_fee_attribute = Attribute('seller_tx_fee', int, False, "The transaction fee payable by the seller in the currency.")
+    buyer_tx_fee_attribute = Attribute('buyer_tx_fee', int, False, "The transaction fee payable by the buyer in the currency.")
     description = SUPPLY_DATAMODEL_NAME if is_supply else DEMAND_DATAMODEL_NAME
-    attributes = goods_quantities_attributes + [price_attribute]
+    attributes = good_quantities_attributes + [currency_attribute, price_attribute, seller_tx_fee_attribute, buyer_tx_fee_attribute]
     data_model = DataModel(description, attributes)
     return data_model
 
 
-def build_goods_description(good_pbk_to_quantities: Dict[str, int], is_supply: bool) -> Description:
+def build_goods_description(good_pbk_to_quantities: Dict[str, int], currency: str, is_supply: bool) -> Description:
     """
     Get the service description (good quantities supplied or demanded and their price).
 
     :param good_pbk_to_quantities: a dictionary mapping the public keys of the goods to the quantities.
+    :param currency: the currency used for pricing and transacting.
     :param is_supply: True if the description is indicating supply, False if it's indicating demand.
 
     :return: the description to advertise on the Service Directory.
     """
-    data_model = build_goods_datamodel(good_pbks=list(good_pbk_to_quantities.keys()), currency='FET', is_supply=is_supply)
-    desc = Description(good_pbk_to_quantities, data_model=data_model)
+    data_model = build_goods_datamodel(good_pbks=list(good_pbk_to_quantities.keys()), is_supply=is_supply)
+    values = cast(Dict[str, Union[int, str]], good_pbk_to_quantities)
+    values.update({'currency': currency})
+    desc = Description(values, data_model=data_model)
     return desc
 
 
-def build_goods_query(good_pbks: List[str], is_searching_for_sellers: bool) -> Query:
+def build_goods_query(good_pbks: List[str], currency: str, is_searching_for_sellers: bool) -> Query:
     """
     Build buyer or seller search query.
 
@@ -85,12 +90,14 @@ def build_goods_query(good_pbks: List[str], is_searching_for_sellers: bool) -> Q
     (assuming that the sellers are registered with the data model specified).
 
     :param good_pbks: the list of good public keys to put in the query
+    :param currency: the currency used for pricing and transacting.
     :param is_searching_for_sellers: Boolean indicating whether the query is for sellers (supply) or buyers (demand).
 
     :return: the query
     """
-    data_model = build_goods_datamodel(good_pbks, currency='FET', is_supply=is_searching_for_sellers)
+    data_model = build_goods_datamodel(good_pbks=good_pbks, is_supply=is_searching_for_sellers)
     constraints = [Constraint(good_pbk, ConstraintType(">=", 1)) for good_pbk in good_pbks]
+    constraints.append(Constraint('currency', ConstraintType("==", currency)))
     constraint_expr = cast(List[ConstraintExpr], constraints)
 
     if len(good_pbks) > 1:

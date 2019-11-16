@@ -26,7 +26,6 @@ import logging
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
-from aea.crypto.base import Crypto
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -270,13 +269,26 @@ class Preferences:
         score = goods_score + currency_score
         return score
 
-    def marginal_utility(self, ownership_state: OwnershipState, delta_good_holdings: GoodHoldings) -> float:
+    def marginal_utility(self, ownership_state: OwnershipState, delta_good_holdings: Optional[GoodHoldings] = None, delta_currency_holdings: Optional[CurrencyHoldings] = None) -> float:
         """
         Compute the marginal utility.
 
+        :param ownership_state: the current ownership state
+        :param delta_good_holdings: the change in good holdings
+        :param delta_currency_holdings: the change in money holdings
         :return: the marginal utility score
         """
-        pass    # pragma: no cover
+        current_goods_score = self.logarithmic_utility(ownership_state.quantities_by_good_pbk)
+        current_currency_score = self.linear_utility(ownership_state.amount_by_currency)
+        new_goods_score = current_goods_score
+        new_currency_score = current_currency_score
+        if delta_good_holdings is not None:
+            new_quantities_by_good_pbk = {good_pbk: quantity + delta_good_holdings[good_pbk] for good_pbk, quantity in ownership_state.quantities_by_good_pbk.items()}
+            new_goods_score = self.logarithmic_utility(new_quantities_by_good_pbk)
+        if delta_currency_holdings is not None:
+            new_amount_by_currency = {currency: amount + delta_currency_holdings[currency] for currency, amount in ownership_state.amount_by_currency.items()}
+            new_currency_score = self.linear_utility(new_amount_by_currency)
+        return new_goods_score + new_currency_score - current_goods_score - current_currency_score
 
     def get_score_diff_from_transaction(self, ownership_state: OwnershipState, tx_message: TransactionMessage) -> float:
         """
@@ -401,21 +413,10 @@ class DecisionMaker:
         if not self.goal_pursuit_readiness.is_ready:
             logger.warning("[{}]: Preferences and ownership state not initialized. Refusing to process transaction!".format(self._agent_name))
             return
-        # get variables
-        crypto_identifier = tx_message.get("ledger_id")
-        crypto_object = self._wallet.crypto_objects.get(crypto_identifier)
-        amount = cast(int, tx_message.get("amount"))
-        counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
-        sender_tx_fee = cast(int, tx_message.get("sender_tx_fee"))
-        counterparty_address = cast(str, tx_message.get("counterparty"))
 
-        # adjust payment amount to reflect transaction fee split
-        amount -= counterparty_tx_fee
-        tx_fee = counterparty_tx_fee + sender_tx_fee
-        payable = amount + tx_fee
         # check if the transaction is acceptable and process it accordingly
-        if self._is_acceptable_tx(crypto_object, payable):
-            tx_digest = self._settle_tx(crypto_object, counterparty_address, amount, tx_fee)
+        if self._is_acceptable_tx(tx_message):
+            tx_digest = self._settle_tx(tx_message)
             if tx_digest is not None:
                 tx_message_response = TransactionMessage.respond_with(tx_message,
                                                                       performative=TransactionMessage.Performative.ACCEPT,
@@ -428,31 +429,50 @@ class DecisionMaker:
                                                                   performative=TransactionMessage.Performative.REJECT)
         self.message_out_queue.put(tx_message_response)
 
-    def _is_acceptable_tx(self, crypto_object: Crypto, payable: int) -> bool:
+    def _is_acceptable_tx(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the tx is acceptable.
 
-        :param crypto_object: the crypto object
-        :param payable: the payable amount
+        :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        is_correct_format = isinstance(payable, int)
-        balance = self.ledger_apis.token_balance(crypto_object.identifier, cast(str, crypto_object.address))
-        is_affordable = payable <= balance
-        # TODO check against preferences and other constraints
-        return is_correct_format and is_affordable
+        if tx_message.get("ledger_id") is not None:
+            amount = cast(int, tx_message.get("amount"))
+            counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
+            sender_tx_fee = cast(int, tx_message.get("sender_tx_fee"))
+            # adjust payment amount to reflect transaction fee split
+            amount -= counterparty_tx_fee
+            tx_fee = counterparty_tx_fee + sender_tx_fee
+            payable = amount + tx_fee
+            is_correct_format = isinstance(payable, int)
+            crypto_object = self._wallet.crypto_objects.get(tx_message.get("ledger_id"))
+            balance = self.ledger_apis.token_balance(crypto_object.identifier, cast(str, crypto_object.address))
+            is_affordable = payable <= balance
+            # TODO check against preferences and other constraints
+            is_acceptable = is_correct_format and is_affordable
+        else:
+            is_acceptable = self.preferences.get_score_diff_from_transaction(self.ownership_state, tx_message) >= 0.0
+        return is_acceptable
 
-    def _settle_tx(self, crypto_object: Crypto, counterparty_address: str, amount: int, tx_fee: int) -> Optional[str]:
+    def _settle_tx(self, tx_message: TransactionMessage) -> Optional[str]:
         """
         Settle the tx.
 
-        :param crypto_object: the crypto object
-        :param counterparty_address: the counterparty address
-        :param amount: the tx amount
-        :param tx_fee: the tx fee
+        :param tx_message: the transaction message
         :return: the transaction digest
         """
-        tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object, counterparty_address, amount, tx_fee)
+        if tx_message.get("ledger_id") is not None:
+            amount = cast(int, tx_message.get("amount"))
+            counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
+            sender_tx_fee = cast(int, tx_message.get("sender_tx_fee"))
+            counterparty_address = cast(str, tx_message.get("counterparty"))
+            # adjust payment amount to reflect transaction fee split
+            amount -= counterparty_tx_fee
+            tx_fee = counterparty_tx_fee + sender_tx_fee
+            crypto_object = self._wallet.crypto_objects.get(tx_message.get("ledger_id"))
+            tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object, counterparty_address, amount, tx_fee)
+        else:
+            tx_digest = cast(str, tx_message.get("transaction_id"))
         return tx_digest
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
