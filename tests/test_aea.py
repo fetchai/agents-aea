@@ -161,11 +161,14 @@ async def test_handle():
         t = Thread(target=agent.start)
         try:
             t.start()
-            time.sleep(0.1)
+            time.sleep(0.5)
+            dummy_skill = agent.resources.get_skill("dummy")
+            dummy_handler = dummy_skill.handlers[0]
+
             expected_envelope = envelope
             mailbox.outbox.put(expected_envelope)
-            actual_envelope = mailbox.inbox.get(block=True, timeout=1.0)
-            assert expected_envelope == actual_envelope
+            time.sleep(0.5)
+            assert len(dummy_handler.handled_messages) == 1
 
             #   DECODING ERROR
             msg = "hello".encode("utf-8")
@@ -176,8 +179,8 @@ async def test_handle():
                 message=msg)
             expected_envelope = envelope
             mailbox.outbox.put(expected_envelope)
-            envelope = mailbox.inbox.get(block=True, timeout=1.0)
-            assert envelope.protocol_id == "default"
+            time.sleep(0.5)
+            assert len(dummy_handler.handled_messages) == 2
 
             #   UNSUPPORTED SKILL
             msg = FIPASerializer().encode(
@@ -193,8 +196,8 @@ async def test_handle():
                 message=msg)
             expected_envelope = envelope
             mailbox.outbox.put(expected_envelope)
-            envelope = mailbox.inbox.get(block=True, timeout=1.0)
-            assert envelope.protocol_id == "fipa"
+            time.sleep(0.5)
+            assert len(dummy_handler.handled_messages) == 3
 
         finally:
             agent.stop()
