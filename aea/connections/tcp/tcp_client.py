@@ -21,8 +21,7 @@
 import asyncio
 import logging
 import struct
-from asyncio import Task, StreamWriter, StreamReader
-from concurrent.futures import CancelledError
+from asyncio import StreamWriter, StreamReader, CancelledError
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
@@ -47,12 +46,11 @@ class TCPClientConnection(TCPConnection):
 
         :param public_key: public key.
         :param host: the socket bind address.
-        :param loop: the event loop.
+        :param port: the socket bind port.
         """
         super().__init__(public_key, host, port)
 
         self._reader, self._writer = (None, None)  # type: Optional[StreamReader], Optional[StreamWriter]
-        self._read_task = None  # type: Optional[Task]
 
     async def setup(self):
         """Set the connection up."""
@@ -62,13 +60,8 @@ class TCPClientConnection(TCPConnection):
 
     async def teardown(self):
         """Tear the connection down."""
-        try:
-            if self._reader:
-                self._reader.feed_eof()
-            if self._read_task:
-                self._read_task.cancel()
-        except CancelledError:
-            pass
+        if self._reader:
+            self._reader.feed_eof()
         self._writer.close()
 
     async def recv(self, *args, **kwargs) -> Optional['Envelope']:

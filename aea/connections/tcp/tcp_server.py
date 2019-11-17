@@ -85,7 +85,7 @@ class TCPServerConnection(TCPConnection):
             # take the first
             task = next(iter(done))
             envelope_bytes = task.result()
-            if envelope_bytes is None:
+            if envelope_bytes is None:  # pragma: no cover
                 logger.debug("[{}]: No data received.")
                 return None
             envelope = Envelope.decode(envelope_bytes)
@@ -113,7 +113,6 @@ class TCPServerConnection(TCPConnection):
 
         for t in self._read_tasks_to_public_key:
             t.cancel()
-            # await t
 
         self._server.close()
 

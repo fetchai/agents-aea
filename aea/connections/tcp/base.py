@@ -48,9 +48,6 @@ class TCPConnection(Connection, ABC):
 
         self._lock = threading.Lock()
 
-    def _run_task(self, coro):
-        return asyncio.run_coroutine_threadsafe(coro=coro, loop=self._loop)
-
     @abstractmethod
     async def setup(self):
         """Set the TCP connection up."""
