@@ -212,7 +212,6 @@ class Preferences:
         self._exchange_params_by_currency = exchange_params_by_currency
         self._utility_params_by_good_pbk = utility_params_by_good_pbk
         self._transaction_fees = self._split_tx_fees(tx_fee)
-        import pdb; pdb.set_trace()
 
     @property
     def is_initialized(self) -> bool:
