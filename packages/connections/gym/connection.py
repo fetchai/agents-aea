@@ -186,7 +186,7 @@ class GymConnection(Connection):
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         self.channel.send(envelope)
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive an envelope."""
         if not self.connection_status.is_connected:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")

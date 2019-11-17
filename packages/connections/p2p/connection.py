@@ -150,7 +150,7 @@ class PeerToPeerConnection(Connection):
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         self.channel.send(envelope)
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """
         Receive an envelope.
 

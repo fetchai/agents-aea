@@ -116,7 +116,7 @@ class TestTCPClientConnection:
         await tcp_client.connect()
 
         with unittest.mock.patch.object(aea.connections.tcp.tcp_client.logger, "debug") as mock_logger_debug:
-            task = asyncio.ensure_future(tcp_client.recv())
+            task = asyncio.ensure_future(tcp_client.receive())
             await asyncio.sleep(0.1)
             task.cancel()
             await asyncio.sleep(0.1)
@@ -137,7 +137,7 @@ class TestTCPClientConnection:
 
         with unittest.mock.patch.object(aea.connections.tcp.tcp_client.logger, "debug") as mock_logger_debug:
             with unittest.mock.patch.object(tcp_client, "_recv", side_effect=struct.error):
-                task = asyncio.ensure_future(tcp_client.recv())
+                task = asyncio.ensure_future(tcp_client.receive())
                 await asyncio.sleep(0.1)
                 mock_logger_debug.assert_called_with("Struct error: ")
                 assert task.result() is None
@@ -156,7 +156,7 @@ class TestTCPClientConnection:
 
         with pytest.raises(Exception, match="generic exception"):
             with unittest.mock.patch.object(tcp_client, "_recv", side_effect=Exception("generic exception")):
-                task = asyncio.ensure_future(tcp_client.recv())
+                task = asyncio.ensure_future(tcp_client.receive())
                 await asyncio.sleep(0.1)
                 assert task.result() is None
 
@@ -183,7 +183,7 @@ class TestTCPServerConnection:
         await asyncio.sleep(0.1)
         with unittest.mock.patch.object(aea.connections.tcp.tcp_server.logger, "error") as mock_logger_error:
             with unittest.mock.patch("asyncio.wait", side_effect=Exception("generic exception")):
-                result = await tcp_server.recv()
+                result = await tcp_server.receive()
                 assert result is None
                 mock_logger_error.assert_called_with("Error in the receiving loop: generic exception")
 

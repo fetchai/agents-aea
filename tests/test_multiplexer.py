@@ -43,7 +43,7 @@ async def test_receiving_loop_terminated():
 
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
         multiplexer.connection_status.is_connected = False
-        await multiplexer._recv_loop()
+        await multiplexer._receiving_loop()
         mock_logger_debug.assert_called_with("Receiving loop terminated.")
         multiplexer.connection_status.is_connected = True
         multiplexer.disconnect()

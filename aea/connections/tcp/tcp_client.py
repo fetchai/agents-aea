@@ -64,7 +64,7 @@ class TCPClientConnection(TCPConnection):
             self._reader.feed_eof()
         self._writer.close()
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive bytes."""
         try:
             assert self._reader is not None

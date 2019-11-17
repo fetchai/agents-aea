@@ -64,7 +64,7 @@ class MyScaffoldConnection(Connection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """
         Receive an envelope. Blocking.
 

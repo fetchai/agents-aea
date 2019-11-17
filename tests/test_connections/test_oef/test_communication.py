@@ -704,7 +704,7 @@ async def test_cancelled_receive(network_node):
     mocked_logger_debug = patch.__enter__()
 
     async def receive():
-        await oef_connection.recv()
+        await oef_connection.receive()
 
     task = asyncio.ensure_future(receive(), loop=asyncio.get_event_loop())
     await asyncio.sleep(0.1)
@@ -725,7 +725,7 @@ async def test_exception_during_receive(network_node):
     await oef_connection.connect()
 
     with unittest.mock.patch.object(oef_connection.in_queue, "get", side_effect=Exception):
-        result = await oef_connection.recv()
+        result = await oef_connection.receive()
         assert result is None
 
     await oef_connection.disconnect()

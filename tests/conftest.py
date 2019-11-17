@@ -105,7 +105,7 @@ class DummyConnection(Connection):
         assert self._queue is not None
         self._queue.put_nowait(envelope)
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive an envelope."""
         try:
             assert self._queue is not None

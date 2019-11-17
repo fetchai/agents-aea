@@ -280,7 +280,7 @@ class Multiplexer:
                 asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
                 assert self.is_connected
                 self._connection_status.is_connected = True
-                self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._recv_loop(), loop=self._loop)
+                self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._receiving_loop(), loop=self._loop)
                 self._send_loop_task = asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
             except (CancelledError, Exception):
                 self._connection_status.is_connected = False
@@ -415,10 +415,10 @@ class Multiplexer:
                 logger.error("Error in the sending loop: {}".format(str(e)))
                 return
 
-    async def _recv_loop(self):
+    async def _receiving_loop(self):
         """Process incoming messages."""
         logger.debug("Starting receving loop...")
-        task_to_connection = {asyncio.ensure_future(conn.recv()): conn for conn in self.connections}
+        task_to_connection = {asyncio.ensure_future(conn.receive()): conn for conn in self.connections}
 
         while self.connection_status.is_connected:
             try:
@@ -434,7 +434,7 @@ class Multiplexer:
 
                     # reinstantiate receiving task.
                     connection = task_to_connection.pop(task)
-                    new_task = asyncio.ensure_future(connection.recv())
+                    new_task = asyncio.ensure_future(connection.receive())
                     task_to_connection[new_task] = connection
 
             except asyncio.CancelledError:

@@ -72,7 +72,7 @@ class TCPServerConnection(TCPConnection):
             read_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
             self._read_tasks_to_public_key[read_task] = public_key
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive an envelope."""
         if len(self._read_tasks_to_public_key) == 0:
             return None

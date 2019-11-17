@@ -57,7 +57,7 @@ async def test_connection_twice_return_none():
         message_bytes = DefaultSerializer().encode(message)
         expected_envelope = Envelope(to=public_key, sender=public_key, protocol_id="default", message=message_bytes)
         await connection.send(expected_envelope)
-        actual_envelope = await connection.recv()
+        actual_envelope = await connection.receive()
 
         assert expected_envelope == actual_envelope
 
@@ -71,7 +71,7 @@ async def test_receiving_when_not_connected_raise_exception():
         with LocalNode() as node:
             public_key = "mailbox"
             connection = OEFLocalConnection(public_key, node)
-            await connection.recv()
+            await connection.receive()
 
 
 @pytest.mark.asyncio
@@ -83,7 +83,7 @@ async def test_receiving_returns_none_when_error_occurs():
         await connection.connect()
 
         with unittest.mock.patch.object(connection._reader, "get", side_effect=Exception):
-            result = await connection.recv()
+            result = await connection.receive()
             assert result is None
 
         await connection.disconnect()

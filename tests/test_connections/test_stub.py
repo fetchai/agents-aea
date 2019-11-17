@@ -176,5 +176,5 @@ async def test_receiving_returns_none_when_error_occurs():
 
     await stub_con.connect()
     with unittest.mock.patch.object(stub_con.in_queue, "get", side_effect=Exception):
-        ret = await stub_con.recv()
+        ret = await stub_con.receive()
         assert ret is None

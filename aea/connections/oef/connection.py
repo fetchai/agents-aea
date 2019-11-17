@@ -607,7 +607,7 @@ class OEFConnection(Connection):
             await self.in_queue.put(None)
             self._core.stop()
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """
         Receive an envelope. Blocking.
 

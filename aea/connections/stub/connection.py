@@ -154,7 +154,7 @@ class StubConnection(Connection):
         except Exception as e:
             logger.error("Error when processing a line. Message: {}".format(str(e)))
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive an envelope."""
         try:
             assert self.in_queue is not None

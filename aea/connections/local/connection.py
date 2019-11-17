@@ -359,7 +359,7 @@ class OEFLocalConnection(Connection):
             raise AEAConnectionError("Connection not established yet. Please use 'connect()'.")
         self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore
 
-    async def recv(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """
         Receive an envelope. Blocking.
 
