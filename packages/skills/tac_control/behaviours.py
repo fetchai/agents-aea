@@ -108,8 +108,14 @@ class TACBehaviour(Behaviour):
         self._oef_msg_id += 1
         desc = Description({"version": self.context.parameters.version_id}, data_model=CONTROLLER_DATAMODEL)
         logger.info("[{}]: Registering TAC data model".format(self.context.agent_name))
-        msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=self._oef_msg_id, service_description=desc, service_id="")
-        self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(msg))
+        oef_msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
+                             id=self._oef_msg_id,
+                             service_description=desc,
+                             service_id="")
+        self.context.outbox.put_message(to=DEFAULT_OEF,
+                                        sender=self.context.agent_public_key,
+                                        protocol_id=OEFMessage.protocol_id,
+                                        message=OEFSerializer().encode(oef_msg))
         self._registered_desc = desc
 
     def _unregister_tac(self) -> None:
@@ -120,8 +126,14 @@ class TACBehaviour(Behaviour):
         """
         self._oef_msg_id += 1
         logger.info("[{}]: Unregistering TAC data model".format(self.context.agent_name))
-        msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=self._oef_msg_id, service_description=self._registered_desc, service_id="")
-        self.context.outbox.put_message(to=DEFAULT_OEF, sender=self.context.agent_public_key, protocol_id=OEFMessage.protocol_id, message=OEFSerializer().encode(msg))
+        oef_msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE,
+                             id=self._oef_msg_id,
+                             service_description=self._registered_desc,
+                             service_id="")
+        self.context.outbox.put_message(to=DEFAULT_OEF,
+                                        sender=self.context.agent_public_key,
+                                        protocol_id=OEFMessage.protocol_id,
+                                        message=OEFSerializer().encode(oef_msg))
         self._registered_desc = None
 
     def _start_tac(self):
@@ -132,18 +144,21 @@ class TACBehaviour(Behaviour):
         logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))
         for agent_public_key in game.configuration.agent_pbks:
             agent_state = game.current_agent_states[agent_public_key]
-            msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
-                             amount_by_currency=agent_state.balance_by_currency,
-                             exchange_params_by_currency=agent_state.exchange_params_by_currency,
-                             quantities_by_good_pbk=agent_state.quantities_by_good_pbk,
-                             utility_params_by_good_pbk=agent_state.utility_params_by_good_pbk,
-                             tx_fee=game.configuration.tx_fee,
-                             agent_pbk_to_name=game.configuration.agent_pbk_to_name,
-                             good_pbk_to_name=game.configuration.good_pbk_to_name,
-                             version_id=game.configuration.version_id)
+            tac_msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
+                                 amount_by_currency=agent_state.balance_by_currency,
+                                 exchange_params_by_currency=agent_state.exchange_params_by_currency,
+                                 quantities_by_good_pbk=agent_state.quantities_by_good_pbk,
+                                 utility_params_by_good_pbk=agent_state.utility_params_by_good_pbk,
+                                 tx_fee=game.configuration.tx_fee,
+                                 agent_pbk_to_name=game.configuration.agent_pbk_to_name,
+                                 good_pbk_to_name=game.configuration.good_pbk_to_name,
+                                 version_id=game.configuration.version_id)
             logger.debug("[{}]: sending game data to '{}': {}"
-                         .format(self.context.agent_name, agent_public_key, str(msg)))
-            self.context.outbox.put_message(to=agent_public_key, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(msg))
+                         .format(self.context.agent_name, agent_public_key, str(tac_msg)))
+            self.context.outbox.put_message(to=agent_public_key,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=TACMessage.protocol_id,
+                                            message=TACSerializer().encode(tac_msg))
 
     def _cancel_tac(self):
         """Notify agents that the TAC is cancelled."""
@@ -151,4 +166,7 @@ class TACBehaviour(Behaviour):
         logger.info("[{}]: Notifying agents that TAC is cancelled.".format(self.context.agent_name))
         for agent_pbk in game.registration.agent_pbk_to_name.keys():
             tac_msg = TACMessage(tac_type=TACMessage.Type.CANCELLED)
-            self.context.outbox.put_message(to=agent_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
+            self.context.outbox.put_message(to=agent_pbk,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=TACMessage.protocol_id,
+                                            message=TACSerializer().encode(tac_msg))

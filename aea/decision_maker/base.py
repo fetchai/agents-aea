@@ -212,11 +212,14 @@ class Preferences:
         self._exchange_params_by_currency = exchange_params_by_currency
         self._utility_params_by_good_pbk = utility_params_by_good_pbk
         self._transaction_fees = self._split_tx_fees(tx_fee)
+        import pdb; pdb.set_trace()
 
     @property
     def is_initialized(self) -> bool:
         """Get the initialization status."""
-        return self._exchange_params_by_currency is not None and self._utility_params_by_good_pbk is not None
+        return (self._exchange_params_by_currency is not None) and \
+            (self._utility_params_by_good_pbk is not None) and \
+            (self._transaction_fees is not None)
 
     @property
     def exchange_params_by_currency(self) -> ExchangeParams:
@@ -461,6 +464,7 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: the transaction digest
         """
+        logger.info("[{}]: Settling transaction!".format(self._agent_name))
         if tx_message.get("ledger_id") is not None:
             amount = cast(int, tx_message.get("amount"))
             counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))

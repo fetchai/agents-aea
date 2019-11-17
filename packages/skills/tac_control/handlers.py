@@ -20,7 +20,7 @@
 """This package contains the handlers."""
 
 import logging
-from typing import List, cast, TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 from aea.protocols.base import Message
 from aea.protocols.oef.message import OEFMessage
@@ -95,20 +95,32 @@ class TACHandler(Handler):
         agent_name = cast(str, message.get("agent_name"))
         if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
             logger.error("[{}]: Agent name not in whitelist: '{}'".format(self.context.agent_name, agent_name))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST)
-            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
+            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+                                 error_code=TACMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST)
+            self.context.outbox.put_message(to=sender,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=TACMessage.protocol_id,
+                                            message=TACSerializer().encode(tac_msg))
             return
 
         game = cast(Game, self.context.game)
         if sender in game.registration.agent_pbk_to_name:
             logger.error("[{}]: Agent already registered: '{}'".format(self.context.agent_name, game.registration.agent_pbk_to_name[sender]))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.AGENT_PBK_ALREADY_REGISTERED)
-            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
+            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+                                 error_code=TACMessage.ErrorCode.AGENT_PBK_ALREADY_REGISTERED)
+            self.context.outbox.put_message(to=sender,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=TACMessage.protocol_id,
+                                            message=TACSerializer().encode(tac_msg))
 
         if agent_name in game.registration.agent_pbk_to_name.values():
             logger.error("[{}]: Agent with this name already registered: '{}'".format(self.context.agent_name, agent_name))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED)
-            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(tac_msg))
+            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+                                 error_code=TACMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED)
+            self.context.outbox.put_message(to=sender,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=TACMessage.protocol_id,
+                                            message=TACSerializer().encode(tac_msg))
 
         game.registration.register_agent(sender, agent_name)
         logger.info("[{}]: Agent registered: '{}'".format(self.context.agent_name, agent_name))
@@ -126,9 +138,12 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         if sender not in game.registration.agent_pbk_to_name:
             logger.error("[{}]: Agent not registered: '{}'".format(self.context.agent_name, sender))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.AGENT_NOT_REGISTERED)
-            tac_bytes = TACSerializer().encode(tac_msg)
-            self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+                                 error_code=TACMessage.ErrorCode.AGENT_NOT_REGISTERED)
+            self.context.outbox.put_message(to=sender,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=TACMessage.protocol_id,
+                                            message=TACSerializer().encode(tac_msg))
         else:
             logger.debug("[{}]: Agent unregistered: '{}'".format(self.context.agent_name, game.configuration.agent_pbk_to_name[sender]))
             game.registration.unregister_agent(sender)
@@ -147,23 +162,10 @@ class TACHandler(Handler):
         logger.debug("[{}]: Handling transaction: {}".format(self.context.agent_name, transaction))
 
         game = cast(Game, self.context.game)
-        # if transaction arrives first time then put it into the pending pool
-        if transaction.transaction_id not in game.transactions.pending:
-            if game.is_transaction_valid(transaction):
-                logger.debug("[{}]: Put transaction TACMessage in the pool: {}".format(self.context.agent_name, transaction.transaction_id))
-                game.transactions.add_pending(transaction)
-            else:
-                self._handle_invalid_transaction(message, sender)
-        # if transaction arrives second time then process it
+        if game.is_transaction_valid(transaction):
+            self._handle_valid_transaction(message, sender, transaction)
         else:
-            pending_tx = game.transactions.pop_pending(transaction.transaction_id)
-            if transaction.matches(pending_tx):
-                if game.is_transaction_valid(transaction):
-                    self._handle_valid_transaction(message, sender, transaction)
-                else:
-                    self._handle_invalid_transaction(message, sender)
-            else:
-                self._handle_non_matching_transaction(message, sender)
+            self._handle_invalid_transaction(message, sender)
 
     def _handle_valid_transaction(self, message: TACMessage, sender: Address, transaction: Transaction) -> None:
         """
@@ -182,10 +184,18 @@ class TACHandler(Handler):
         game.settle_transaction(transaction)
 
         # send the transaction confirmation.
-        sender_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION, transaction_id=transaction.transaction_id)
-        counterparty_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION, transaction_id=transaction.transaction_id)
-        self.context.outbox.put_message(to=sender, sender=self.context.public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(sender_tac_msg))
-        self.context.outbox.put_message(to=cast(str, message.get("counterparty")), sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=TACSerializer().encode(counterparty_tac_msg))
+        sender_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+                                    transaction_id=transaction.transaction_id)
+        counterparty_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+                                          transaction_id=transaction.transaction_id)
+        self.context.outbox.put_message(to=sender,
+                                        sender=self.context.public_key,
+                                        protocol_id=TACMessage.protocol_id,
+                                        message=TACSerializer().encode(sender_tac_msg))
+        self.context.outbox.put_message(to=cast(str, message.get("counterparty")),
+                                        sender=self.context.agent_public_key,
+                                        protocol_id=TACMessage.protocol_id,
+                                        message=TACSerializer().encode(counterparty_tac_msg))
 
         # log messages
         logger.debug("[{}]: Transaction '{}' settled successfully.".format(self.context.agent_name, transaction.transaction_id))
@@ -193,15 +203,13 @@ class TACHandler(Handler):
 
     def _handle_invalid_transaction(self, message: TACMessage, sender: Address) -> None:
         """Handle an invalid transaction."""
-        tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID, details={"transaction_id": message.get("transaction_id")})
-        tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
-
-    def _handle_non_matching_transaction(self, message: TACMessage, sender: Address) -> None:
-        """Handle non-matching transaction."""
-        tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR, error_code=TACMessage.ErrorCode.TRANSACTION_NOT_MATCHING)
-        tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=sender, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+                             error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID,
+                             details={"transaction_id": message.get("transaction_id")})
+        self.context.outbox.put_message(to=sender,
+                                        sender=self.context.agent_public_key,
+                                        protocol_id=TACMessage.protocol_id,
+                                        message=TACSerializer().encode(tac_msg))
 
     def teardown(self) -> None:
         """
@@ -237,9 +245,7 @@ class OEFRegistrationHandler(Handler):
         oef_type = oef_message.get("type")
 
         logger.debug("[{}]: Handling OEF message. type={}".format(self.context.agent_name, oef_type))
-        if oef_type == OEFMessage.Type.SEARCH_RESULT:
-            self._on_search_result(oef_message)
-        elif oef_type == OEFMessage.Type.OEF_ERROR:
+        if oef_type == OEFMessage.Type.OEF_ERROR:
             self._on_oef_error(oef_message)
         elif oef_type == OEFMessage.Type.DIALOGUE_ERROR:
             self._on_dialogue_error(oef_message)
@@ -267,24 +273,6 @@ class OEFRegistrationHandler(Handler):
         """
         logger.error("[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}"
                      .format(self.context.agent_name, dialogue_error.get("id"), dialogue_error.get("dialogue_id"), dialogue_error.get("origin")))
-
-    def _on_search_result(self, search_result: OEFMessage) -> None:
-        """
-        Split the search results from the OEF.
-
-        :param search_result: the search result
-
-        :return: None
-        """
-        # search = cast(Search, self.context.search)
-        search_id = search_result.get("id")
-        agents = cast(List[str], search_result.get("agents"))
-        logger.debug("[{}]: on search result with search_id={} found agents={}".format(self.context.agent_name, search_id, agents))
-        # SEARCH SELF
-        # if search_id in search.ids_for_tac:
-        #     self._on_controller_search_result(agents)
-        # else:
-        #     logger.debug("[{}]: Unknown search id: search_id={}".format(self.context.agent_name, search_id))
 
     def teardown(self) -> None:
         """

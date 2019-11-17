@@ -64,6 +64,7 @@ class TestUtilityPreferencesBase:
         self.ownership_state.init(amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment)
         assert self.ownership_state.amount_by_currency is not None
         assert self.ownership_state.quantities_by_good_pbk is not None
+        assert self.ownership_state.is_initialized
 
     def test_transaction_is_consistent(self):
         """Test the consistency of the transaction message."""
@@ -180,6 +181,7 @@ class TestUtilityPreferencesBase:
         assert self.preferences.exchange_params_by_currency is not None
         assert self.preferences.transaction_fees['seller_tx_fee'] == 4
         assert self.preferences.transaction_fees['buyer_tx_fee'] == 5
+        assert self.preferences.is_initialized
 
     def test_utilities(self):
         """Test the utilities."""
@@ -288,8 +290,12 @@ class TestDecisionMaker:
                                         ledger_id="fetchai")
 
         self.decision_maker.message_in_queue.put_nowait(tx_message)
-        self.decision_maker.execute()
+        with mock.patch.object(self.decision_maker, 'handle'):
+            self.decision_maker.execute()
         assert self.decision_maker.message_in_queue.empty()
+
+    def test_decision_maker_handle_state_update(self):
+        """Test the execute method."""
         good_holdings = {"good_pbk": 2}
         currency_holdings = {"FET": 100}
         utility_params = {"good_pbk": 20.0}
@@ -318,16 +324,48 @@ class TestDecisionMaker:
         assert self.decision_maker.ownership_state.amount_by_currency == expected_amount_by_currency
         assert self.decision_maker.ownership_state.quantities_by_good_pbk == expected_quantities_by_good_pbk
 
-        with mock.patch.object(self.decision_maker, "_is_acceptable_tx", return_value=True):
-            self.decision_maker.handle(tx_message)
-            assert not self.decision_maker.message_out_queue.empty()
-            with mock.patch.object(self.decision_maker, "_settle_tx", return_value="This is a test digest"):
+    def test_decision_maker_handle_tx_message(self):
+        """Test the handle tx meessa method."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                        skill_id="default",
+                                        transaction_id="transaction0",
+                                        sender="agent_1",
+                                        counterparty="pk",
+                                        is_sender_buyer=True,
+                                        currency_pbk="FET",
+                                        amount=2,
+                                        sender_tx_fee=0,
+                                        counterparty_tx_fee=0,
+                                        quantities_by_good_pbk={"good_pbk": 10},
+                                        ledger_id="fetchai")
+
+        with mock.patch.object(self.decision_maker.ledger_apis, "token_balance", return_value=1000000):
+            with mock.patch.object(self.decision_maker.ledger_apis, "transfer", return_value="This is a test digest"):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
 
-        with mock.patch.object(self.decision_maker, "_is_acceptable_tx", return_value=False):
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                        skill_id="default",
+                                        transaction_id="transaction0",
+                                        sender="agent_1",
+                                        counterparty="pk",
+                                        is_sender_buyer=True,
+                                        currency_pbk="FET",
+                                        amount=2,
+                                        sender_tx_fee=0,
+                                        counterparty_tx_fee=0,
+                                        quantities_by_good_pbk={"good_pbk": 10})
+        self.decision_maker.handle(tx_message)
+        assert not self.decision_maker.message_out_queue.empty()
+
+        with mock.patch.object(self.decision_maker, '_is_acceptable_tx', return_value=True):
             self.decision_maker.handle(tx_message)
             assert not self.decision_maker.message_out_queue.empty()
+
+        with mock.patch.object(self.decision_maker, '_is_acceptable_tx', return_value=True):
+            with mock.patch.object(self.decision_maker, '_settle_tx', return_value=None):
+                self.decision_maker.handle(tx_message)
+                assert not self.decision_maker.message_out_queue.empty()
 
     def test_decision_maker_execute_w_wrong_input(self):
         """Test the execute method with wrong input."""

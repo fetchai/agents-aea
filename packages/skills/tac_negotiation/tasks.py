@@ -54,5 +54,4 @@ class TransactionCleanUpTask(Task):
 
         :return: None
         """
-        transactions = cast(Transactions, self.context.transactions)
-        transactions.reset()
+        pass

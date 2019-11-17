@@ -21,19 +21,22 @@
 """This module contains the abstract class defining an agent's strategy for the TAC."""
 
 from enum import Enum
+import logging
 import random
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, Optional, cast, TYPE_CHECKING
 
-from aea.decision_maker.base import OwnershipState, Preferences
 from aea.protocols.oef.models import Query, Description
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
     from packages.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
+    from packages.skills.tac_negotiation.transactions import Transactions
 else:
     from tac_negotiation_skill.helpers import build_goods_description, build_goods_query
+    from tac_negotiation_skill.transactions import Transactions
 
+logger = logging.getLogger("aea.tac_negotiation_skill")
 
 ROUNDING_ADJUSTMENT = 1
 
@@ -88,15 +91,16 @@ class Strategy(SharedClass):
         """Check if the agent searches for buyers on the OEF."""
         return self._search_for == Strategy.SearchFor.BUYERS or self._search_for == Strategy.SearchFor.BOTH
 
-    def get_own_service_description(self, ownership_state_after_locks: OwnershipState, is_supply: bool) -> Description:
+    def get_own_service_description(self, is_supply: bool) -> Description:
         """
         Get the description of the supplied goods (as a seller), or the demanded goods (as a buyer).
 
-        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
         :param is_supply: Boolean indicating whether it is supply or demand.
 
         :return: the description (to advertise on the Service Directory).
         """
+        transactions = cast(Transactions, self.context.transactions)
+        ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=is_supply)
         good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_supply else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
         currency = list(ownership_state_after_locks.amount_by_currency.keys())[0]
         desc = build_goods_description(good_pbk_to_quantities=good_pbk_to_quantities, currency=currency, is_supply=is_supply)
@@ -126,7 +130,7 @@ class Strategy(SharedClass):
             demand[good_pbk] = 1
         return demand
 
-    def get_own_services_query(self, ownership_state_after_locks: OwnershipState, is_searching_for_sellers: bool) -> Query:
+    def get_own_services_query(self, is_searching_for_sellers: bool) -> Query:
         """
         Build a query to search for services.
 
@@ -134,27 +138,27 @@ class Strategy(SharedClass):
             - which supply the agent's demanded goods (i.e. sellers), or
             - which demand the agent's supplied goods (i.e. buyers).
 
-        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
         :param is_searching_for_sellers: Boolean indicating whether the search is for sellers or buyers.
 
         :return: the Query, or None.
         """
+        transactions = cast(Transactions, self.context.transactions)
+        ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=not is_searching_for_sellers)
         good_pbk_to_quantities = self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk)
         currency = list(ownership_state_after_locks.amount_by_currency.keys())[0]
         query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), currency=currency, is_searching_for_sellers=is_searching_for_sellers)
         return query
 
-    def get_proposal_for_query(self, query: Query, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool) -> Optional[Description]:
+    def _get_proposal_for_query(self, query: Query, is_seller: bool) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
 
         :param query: the query for which to build the proposal
-        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
         :is_seller: whether the agent making the proposal is a seller or not
 
         :return: a description
         """
-        candidate_proposals = self._generate_candidate_proposals(preferences, ownership_state_after_locks, is_seller)
+        candidate_proposals = self._generate_candidate_proposals(is_seller)
         proposals = []
         for proposal in candidate_proposals:
             if not query.check(proposal): continue
@@ -164,16 +168,35 @@ class Strategy(SharedClass):
         else:
             return random.choice(proposals)
 
-    def _generate_candidate_proposals(self, preferences: Preferences, ownership_state_after_locks: OwnershipState, is_seller: bool):
+    def get_proposal_for_query(self, query: Query, is_seller: bool) -> Optional[Description]:
+        """
+        Generate proposal (in the form of a description) which matches the query.
+
+        :param query: the query for which to build the proposal
+        :is_seller: whether the agent making the proposal is a seller or not
+
+        :return: a description
+        """
+        own_service_description = self.get_own_service_description(is_supply=is_seller)
+        if not query.check(own_service_description):
+            logger.debug("[{}]: Current holdings do not satisfy CFP query.".format(self.context.agent_name))
+            return None
+        else:
+            proposal_description = self._get_proposal_for_query(query, is_seller=is_seller)
+            if proposal_description is None:
+                logger.debug("[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(self.context.agent_name))
+            return proposal_description
+
+    def _generate_candidate_proposals(self, is_seller: bool):
         """
         Generate proposals from the agent in the role of seller/buyer.
 
-        :param preferences: the preferences of the agent
-        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
         :param is_seller: the bool indicating whether the agent is a seller.
 
         :return: a list of proposals in Description form
         """
+        transactions = cast(Transactions, self.context.transactions)
+        ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=is_seller)
         good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_seller else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
         nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities.items()}  # type: Dict[str, int]
         proposals = []
@@ -189,7 +212,7 @@ class Strategy(SharedClass):
                 delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict.items()}  # type: Dict[str, int]
             else:
                 delta_good_holdings = proposal_dict
-            marginal_utility_from_delta_good_holdings = preferences.marginal_utility(ownership_state=ownership_state_after_locks, delta_good_holdings=delta_good_holdings)
+            marginal_utility_from_delta_good_holdings = self.context.agent_preferences.marginal_utility(ownership_state=ownership_state_after_locks, delta_good_holdings=delta_good_holdings)
             switch = -1 if is_seller else 1
             breakeven_price_rounded = round(marginal_utility_from_delta_good_holdings) * switch
             if is_seller:
@@ -202,7 +225,7 @@ class Strategy(SharedClass):
             proposals.append(proposal)
         return proposals
 
-    def is_profitable_transaction(self, preferences: Preferences, ownership_state_after_locks: OwnershipState, transaction_msg: TransactionMessage) -> bool:
+    def is_profitable_transaction(self, transaction_msg: TransactionMessage, is_seller: bool) -> bool:
         """
         Check if a transaction is profitable.
 
@@ -211,15 +234,16 @@ class Strategy(SharedClass):
         - check if the transaction is consistent with the locks (enough money/holdings)
         - check that we gain score.
 
-        :param preferences: the preferences of the agent
-        :param ownership_state_after_locks: the ownership state after the transaction messages applied.
         :param transaction_msg: the transaction_msg
+        :param is_seller: the bool indicating whether the agent is a seller.
 
         :return: True if the transaction is good (as stated above), False otherwise.
         """
+        transactions = cast(Transactions, self.context.transactions)
+        ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller)
         if not ownership_state_after_locks.check_transaction_is_consistent(transaction_msg):
             return False
-        proposal_delta_score = preferences.get_score_diff_from_transaction(ownership_state_after_locks, transaction_msg)
+        proposal_delta_score = self.context.agent_preferences.get_score_diff_from_transaction(ownership_state_after_locks, transaction_msg)
         if proposal_delta_score >= 0:
             return True
         else:

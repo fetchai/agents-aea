@@ -20,9 +20,11 @@
 """This package contains the handlers."""
 
 import logging
-from typing import Dict, List, cast, TYPE_CHECKING
+from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
+from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.state_update import StateUpdateMessage
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.protocols.oef.message import OEFMessage
 from aea.skills.base import Handler
@@ -346,3 +348,51 @@ class TACHandler(Handler):
     #     tac_bytes = TACSerializer().encode(tac_msg)
     #     game = cast(Game, self.context.game)
     #     self.context.outbox.put_message(to=game.expected_controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+
+
+class TransactionHandler(Handler):
+    """This class implements the transaction handler."""
+
+    SUPPORTED_PROTOCOL = TransactionMessage.protocol_id  # type: Optional[ProtocolId]
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def handle(self, message: Message, sender: str) -> None:
+        """
+        Dispatch message to relevant handler and respond.
+
+        :param message: the message
+        :param sender: the sender
+        :return: None
+        """
+        tx_message = cast(TransactionMessage, message)
+        if TransactionMessage.Performative(tx_message.get("performative")) == TransactionMessage.Performative.ACCEPT:
+            logger.info("[{}]: transaction confirmed by decision maker, sending to controller.".format(self.context.agent_name))
+            game = cast(Game, self.context.game)
+            msg = TACMessage(type=TACMessage.Type.TRANSACTION,
+                             transaction_id=tx_message.get("transaction_digest"),
+                             counterparty=tx_message.get("counterparty"),
+                             amount_by_currency={tx_message.get("currency"): tx_message.get("amount")},
+                             sender_tx_fee=tx_message.get("sender_tx_fee"),
+                             counterparty_tx_fee=tx_message.get("counterparty_tx_fee"),
+                             quantities_by_good_pbk=tx_message.get("quantities_by_good_pbk"))
+            self.context.outbox.put_message(to=game.configuration.controller_pbk,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=TACMessage.protocol_id,
+                                            message=TACSerializer().encode(msg))
+        else:
+            logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
+
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+        pass

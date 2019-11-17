@@ -19,15 +19,18 @@
 # ------------------------------------------------------------------------------
 
 """This class contains the helpers for FIPA negotiation."""
+
+import copy
 from typing import Dict, List, Union, TYPE_CHECKING, cast
 
+from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
     ConstraintExpr
 
 if TYPE_CHECKING:
-    from packages.skills.tac_negotiation.dialogues import DialogueLabel
+    from packages.skills.tac_negotiation.dialogues import DialogueLabel, Dialogue
 else:
-    from tac_negotiation_skill.dialogues import DialogueLabel
+    from tac_negotiation_skill.dialogues import DialogueLabel, Dialogue
 
 Address = str
 TransactionId = str
@@ -140,3 +143,31 @@ def dialogue_label_from_transaction_id(agent_pbk: Address, transaction_id: Trans
         dialogue_opponent_pbk = buyer_pbk
     dialogue_label = DialogueLabel(dialogue_id, dialogue_opponent_pbk, dialogue_starter_pbk)
     return dialogue_label
+
+
+def generate_transaction_message(proposal_description: Description, dialogue: Dialogue, agent_public_key: str) -> TransactionMessage:
+    """
+    Generate the transaction message from the description and the dialogue.
+
+    :param proposal_description: the description of the proposal
+    :param dialogue: the dialogue
+    :param agent_public_key: the public key of the agent
+    :return: a transaction message
+    """
+    transaction_id = generate_transaction_id(agent_public_key, dialogue.dialogue_label.dialogue_opponent_pbk, dialogue.dialogue_label, dialogue.is_seller)
+    sender_tx_fee = proposal_description.values['seller_tx_fee'] if dialogue.is_seller else proposal_description.values['buyer_tx_fee']
+    counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if dialogue.is_seller else proposal_description.values['seller_tx_fee']
+    goods_component = copy.copy(proposal_description.values)
+    [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency']]
+    transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                         skill_id="tac_negotiation_skill",
+                                         transaction_id=transaction_id,
+                                         sender=agent_public_key,
+                                         counterparty=dialogue.dialogue_label.dialogue_opponent_pbk,
+                                         currency_pbk=proposal_description.values['currency'],
+                                         amount=proposal_description.values['price'],
+                                         is_sender_buyer=not dialogue.is_seller,
+                                         sender_tx_fee=sender_tx_fee,
+                                         counterparty_tx_fee=counterparty_tx_fee,
+                                         quantities_by_good_pbk=goods_component)
+    return transaction_msg

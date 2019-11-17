@@ -200,7 +200,7 @@ class Transactions(SharedClass):
         self._locked_txs_as_seller.pop(transaction_id, None)
         return transaction_msg
 
-    def ownership_state_after_locks(self, ownership_state: OwnershipState, is_seller: bool) -> OwnershipState:
+    def ownership_state_after_locks(self, is_seller: bool) -> OwnershipState:
         """
         Apply all the locks to the current ownership state of the agent.
 
@@ -211,14 +211,5 @@ class Transactions(SharedClass):
         :return: the agent state with the locks applied to current state
         """
         transaction_msgs = list(self._locked_txs_as_seller.values()) if is_seller else list(self._locked_txs_as_buyer.values())
-        ownershio_state_after_locks = ownership_state.apply(transaction_msgs)
-        return ownershio_state_after_locks
-
-    def reset(self) -> None:
-        """Reset the class."""
-        self._pending_proposals = defaultdict(lambda: {})
-        self._pending_initial_acceptances = defaultdict(lambda: {})
-        self._locked_txs = {}
-        self._locked_txs_as_buyer = {}
-        self._locked_txs_as_seller = {}
-        self._last_update_for_transactions = deque()
+        ownership_state_after_locks = self.context.agent_ownership_state.apply(transaction_msgs)
+        return ownership_state_after_locks
