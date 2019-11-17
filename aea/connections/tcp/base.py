@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Base classes for TCP communication."""
-import asyncio
 import logging
 import struct
 import threading

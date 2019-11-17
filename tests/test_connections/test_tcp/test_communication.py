@@ -21,11 +21,10 @@
 import asyncio
 import struct
 import unittest.mock
-from asyncio import CancelledError
 
-import aea
 import pytest
 
+import aea
 from aea.configurations.base import ConnectionConfig
 from aea.connections.tcp.tcp_client import TCPClientConnection
 from aea.connections.tcp.tcp_server import TCPServerConnection
