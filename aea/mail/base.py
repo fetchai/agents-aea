@@ -221,6 +221,10 @@ class Multiplexer:
         Initialize the connection multiplexer.
 
         :param connections: the connections.
+        :param default_connection_index: the index of the connection to use as default.
+                                       | this information is used for envelopes which
+                                       | don't specify any routing context.
+        :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
         """
         assert len(connections) > 0, "List of connections cannot be empty."
         assert 0 <= default_connection_index <= len(connections) - 1, "Default connection index out of range."
@@ -271,7 +275,7 @@ class Multiplexer:
             if self.connection_status.is_connected:
                 logger.debug("Multiplexer already connected.")
                 return
-            self._start()
+            self._start_loop_threaded()
             try:
                 asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
                 assert self.is_connected
@@ -310,7 +314,7 @@ class Multiplexer:
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
 
-    def _start(self):
+    def _start_loop_threaded(self):
         """Start the multiplexer."""
         if not self._loop.is_running() and not self._thread.is_alive():
             self._thread.start()
@@ -388,7 +392,7 @@ class Multiplexer:
             logger.debug("Connection {} has been disconnected successfully.".format(connection.connection_id))
 
     async def _send_loop(self):
-        """Process the outgoing messages."""
+        """Process the outgoing envelopes."""
         if not self.is_connected:
             logger.debug("Sending loop not started. The multiplexer is not connected.")
             return
@@ -422,10 +426,13 @@ class Multiplexer:
                 done, pending = await asyncio.wait(task_to_connection.keys(),
                                                    return_when=asyncio.FIRST_COMPLETED)
 
+                # process completed receiving tasks.
                 for task in done:
                     envelope = task.result()
                     if envelope is not None:
                         self.in_queue.put_nowait(envelope)
+
+                    # reinstantiate receiving task.
                     connection = task_to_connection.pop(task)
                     new_task = asyncio.ensure_future(connection.recv())
                     task_to_connection[new_task] = connection
@@ -483,8 +490,16 @@ class Multiplexer:
         except queue.Empty:
             raise Empty
 
-    def put(self, envelope: Envelope):
-        """Schedule an envelope for sending it."""
+    def put(self, envelope: Envelope) -> None:
+        """
+        Schedule an envelope for sending it.
+
+        Notice that the output queue is an asyncio.Queue which uses an event loop
+        running on a different thread than the one used in this function.
+
+        :param envelope: the envelope to be sent.
+        :return: None
+        """
         fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
         return fut.result()
 
@@ -591,7 +606,6 @@ class MailBox(object):
 
     def __init__(self, connections: List['Connection'], loop: Optional[AbstractEventLoop] = None):
         """Initialize the mailbox."""
-        self._connections = connections
         self._multiplexer = Multiplexer(connections, loop=loop)
         self.inbox = InBox(self._multiplexer)
         self.outbox = OutBox(self._multiplexer)
