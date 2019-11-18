@@ -17,21 +17,35 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Main entry point for CLI GUI."""
-import aea.cli_gui
+"""This package contains the implementation of the error tasks."""
 
-import argparse
+from aea.skills.base import Task
 
-parser = argparse.ArgumentParser(description='Launch the gui through python')
-parser.add_argument(
-    '-p',
-    '--port',
-    help='Port that the web server listens on',
-    type=int,
-    default=8080)
 
-args, unknown = parser.parse_known_args()
+class ErrorTask(Task):
+    """This class implements the error task."""
 
-# If we're running in stand alone mode, run the application
-if __name__ == '__main__':
-    aea.cli_gui.run(args.port)   # pragma: no cover
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass        # pragma: no cover
+
+    def execute(self) -> None:
+        """
+        Implement the task execution.
+
+        :param envelope: the envelope
+        :return: None
+        """
+        pass        # pragma: no cover
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        pass        # pragma: no cover

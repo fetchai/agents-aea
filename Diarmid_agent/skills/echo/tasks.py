@@ -17,21 +17,32 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Main entry point for CLI GUI."""
-import aea.cli_gui
+"""This module contains the tasks for the 'echo' skill."""
+import logging
+import time
 
-import argparse
+from aea.skills.base import Task
 
-parser = argparse.ArgumentParser(description='Launch the gui through python')
-parser.add_argument(
-    '-p',
-    '--port',
-    help='Port that the web server listens on',
-    type=int,
-    default=8080)
+logger = logging.getLogger("aea.echo_skill")
 
-args, unknown = parser.parse_known_args()
 
-# If we're running in stand alone mode, run the application
-if __name__ == '__main__':
-    aea.cli_gui.run(args.port)   # pragma: no cover
+class EchoTask(Task):
+    """Echo task."""
+
+    def __init__(self, **kwargs):
+        """Initialize the task."""
+        super().__init__(**kwargs)
+        logger.info("EchoTask.__init__: arguments: {}".format(kwargs))
+
+    def setup(self) -> None:
+        """Set up the task."""
+        logger.info("Echo Task: setup method called.")
+
+    def execute(self) -> None:
+        """Execute the task."""
+        logger.info("Echo Task: execute method called.")
+        time.sleep(1.0)
+
+    def teardown(self) -> None:
+        """Teardown the task."""
+        logger.info("Echo Task: teardown method called.")

@@ -17,21 +17,31 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Main entry point for CLI GUI."""
-import aea.cli_gui
+"""This package contains the error behaviours."""
 
-import argparse
+from aea.skills.base import Behaviour
 
-parser = argparse.ArgumentParser(description='Launch the gui through python')
-parser.add_argument(
-    '-p',
-    '--port',
-    help='Port that the web server listens on',
-    type=int,
-    default=8080)
 
-args, unknown = parser.parse_known_args()
+class ErrorBehaviour(Behaviour):
+    """This class implements the error behaviour."""
 
-# If we're running in stand alone mode, run the application
-if __name__ == '__main__':
-    aea.cli_gui.run(args.port)   # pragma: no cover
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
