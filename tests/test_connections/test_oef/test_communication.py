@@ -273,7 +273,6 @@ class TestOEF:
             cls.mailbox1.connect()
 
             cls.connection = cls.mailbox1._multiplexer.connections[0]
-            assert cls.connection.channel.mail_stats.search_count == 0
 
         def test_search_count_increases(self):
             """Test that the search count increases."""
@@ -290,8 +289,6 @@ class TestOEF:
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id")
             assert request_id and search_result.get("agents") == []
-
-            assert self.connection.channel.mail_stats.search_count == 1
 
         @classmethod
         def teardown_class(cls):
