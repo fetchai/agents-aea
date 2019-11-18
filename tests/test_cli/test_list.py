@@ -96,7 +96,7 @@ class TestListConnections:
         """Test that the command has printed the correct output."""
         compare_text = """------------------------------
 Name: local
-Description: local connection description [Fill in]
+Description: The local connection provides a stub for an OEF node.
 Version: 0.1.0
 ------------------------------
 
