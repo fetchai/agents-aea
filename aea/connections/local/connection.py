@@ -42,7 +42,11 @@ class LocalNode:
     """A light-weight local implementation of a OEF Node."""
 
     def __init__(self, loop: AbstractEventLoop = None):
-        """Initialize a local (i.e. non-networked) implementation of an OEF Node."""
+        """
+        Initialize a local (i.e. non-networked) implementation of an OEF Node.
+
+        :param loop: the event loop. If None, a new event loop is instantiated.
+        """
         self.agents = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self._lock = asyncio.Lock()

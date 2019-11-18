@@ -555,10 +555,9 @@ class OEFConnection(Connection):
             except (CancelledError, Exception) as e:  # pragma: no cover
                 self._core.stop()
                 self.connection_status.is_connected = False
-                self.is_connecting = False
                 raise e
 
-    async def _try_connect(self) -> None:
+    async def _try_connect(self     ) -> None:
         """
         Try connect to the channel.
 

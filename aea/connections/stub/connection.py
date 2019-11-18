@@ -46,7 +46,7 @@ class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
     def on_modified(self, event: FileModifiedEvent):
         modified_file_path = Path(event.src_path).absolute()
         if modified_file_path == self._file_to_observe:
-            self._connection.read_messages()
+            self._connection.read_envelopes()
 
 
 def _encode(e: Envelope, separator: bytes = SEPARATOR):
@@ -131,8 +131,8 @@ class StubConnection(Connection):
         self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
         self._observer.schedule(self._event_handler, directory)
 
-    def read_messages(self) -> None:
-        """Receive new messages, if any."""
+    def read_envelopes(self) -> None:
+        """Receive new envelopes, if any."""
         line = self.input_file.readline()
         logger.debug("read line: {!r}".format(line))
         while len(line) > 0:
@@ -184,7 +184,7 @@ class StubConnection(Connection):
             self.connection_status.is_connected = True
 
         # do a first processing of messages.
-        self.read_messages()
+        self.read_envelopes()
 
     async def disconnect(self) -> None:
         """

@@ -33,11 +33,11 @@ from oef.query import ConstraintExpr
 
 import aea
 from aea.configurations.base import ConnectionConfig
-from aea.connections.oef.connection import OEFMailBox, OEFConnection
+from aea.connections.oef.connection import OEFConnection
 from aea.connections.oef.connection import OEFObjectTranslator
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, MailBox
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa import fipa_pb2
@@ -63,7 +63,8 @@ class TestDefault:
     def setup_class(cls):
         """Set the test up."""
         cls.crypto1 = DefaultCrypto()
-        cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.mailbox1 = MailBox([cls.connection])
         cls.mailbox1.connect()
 
     def test_send_message(self):
@@ -96,7 +97,8 @@ class TestOEF:
         def setup_class(cls):
             """Set the test up."""
             cls.crypto1 = DefaultCrypto()
-            cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.mailbox1 = MailBox([cls.connection])
             cls.mailbox1.connect()
 
         def test_search_services_with_query_without_model(self):
@@ -149,7 +151,8 @@ class TestOEF:
         def setup_class(cls):
             """Set the test up."""
             cls.crypto1 = DefaultCrypto()
-            cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.mailbox1 = MailBox([cls.connection])
             cls.mailbox1.connect()
 
         def test_register_service(self):
@@ -191,7 +194,8 @@ class TestOEF:
             - Check that the registration worked.
             """
             cls.crypto1 = DefaultCrypto()
-            cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.mailbox1 = MailBox([cls.connection])
             cls.mailbox1.connect()
 
             cls.request_id = 1
@@ -261,7 +265,8 @@ class TestOEF:
         def setup_class(cls):
             """Set the tests up."""
             cls.crypto1 = DefaultCrypto()
-            cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.mailbox1 = MailBox([cls.connection])
             cls.mailbox1.connect()
 
             cls.connection = cls.mailbox1._multiplexer.connections[0]
@@ -304,8 +309,10 @@ class TestFIPA:
         """Set up the test class."""
         cls.crypto1 = DefaultCrypto()
         cls.crypto2 = DefaultCrypto()
-        cls.mailbox1 = OEFMailBox(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
-        cls.mailbox2 = OEFMailBox(cls.crypto2.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.connection1 = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.connection2 = OEFConnection(cls.crypto2.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.mailbox1 = MailBox([cls.connection1])
+        cls.mailbox2 = MailBox([cls.connection2])
         cls.mailbox1.connect()
         cls.mailbox2.connect()
 
@@ -528,7 +535,8 @@ class TestOefConnection:
     def test_connection(self):
         """Test that a mailbox can connect to the OEF."""
         crypto = DefaultCrypto()
-        mailbox = OEFMailBox(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        connection = OEFConnection(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        mailbox = MailBox([connection])
         mailbox.connect()
         mailbox.disconnect()
 

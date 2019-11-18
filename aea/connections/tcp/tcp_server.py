@@ -73,8 +73,13 @@ class TCPServerConnection(TCPConnection):
             self._read_tasks_to_public_key[read_task] = public_key
 
     async def receive(self, *args, **kwargs) -> Optional['Envelope']:
-        """Receive an envelope."""
+        """
+        Receive an envelope.
+
+        :return: the received envelope, or None if an error occurred.
+        """
         if len(self._read_tasks_to_public_key) == 0:
+            logger.warning("Tried to read from the TCP server. However, there is no open connection to read from.")
             return None
 
         try:

@@ -42,17 +42,20 @@ class MyScaffoldConnection(Connection):
         super().__init__(connection_id)
         self.public_key = public_key
 
-    @property
-    def is_established(self) -> bool:
-        """Return True if the connection has been established, False otherwise."""
-        raise NotImplementedError  # pragma: no cover
-
     async def connect(self) -> None:
-        """Set up the connection."""
+        """
+        Set up the connection.
+
+        In the implementation, remember to update 'connection_status' accordingly.
+        """
         raise NotImplementedError  # pragma: no cover
 
     async def disconnect(self) -> None:
-        """Tear down the connection."""
+        """
+        Tear down the connection.
+
+        In the implementation, remember to update 'connection_status' accordingly.
+        """
         raise NotImplementedError  # pragma: no cover
 
     async def send(self, envelope: 'Envelope') -> None:

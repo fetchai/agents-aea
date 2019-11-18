@@ -41,7 +41,11 @@ class Connection(ABC):
     """Abstract definition of a connection."""
 
     def __init__(self, connection_id: str):
-        """Initialize the connection."""
+        """
+        Initialize the connection.
+
+        :param connection_id: the connection identifier.
+        """
         self._connection_id = connection_id
 
         self._loop = None  # type: Optional[AbstractEventLoop]
@@ -53,8 +57,13 @@ class Connection(ABC):
         return self._loop
 
     @loop.setter
-    def loop(self, loop: AbstractEventLoop):
-        """Get the event loop."""
+    def loop(self, loop: AbstractEventLoop) -> None:
+        """
+        Set the event loop.
+
+        :param loop: the event loop.
+        :return: None
+        """
         assert self._loop is None or not self._loop.is_running(), "Cannot set the loop while it is running."
         self._loop = loop
 
@@ -88,9 +97,9 @@ class Connection(ABC):
     @abstractmethod
     async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """
-        Receive an envelope. Blocking.
+        Receive an envelope.
 
-        :return: the envelope received, or None.
+        :return: the received envelope, or None if an error occurred.
         """
 
     @classmethod

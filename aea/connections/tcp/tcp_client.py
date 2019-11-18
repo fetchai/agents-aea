@@ -65,7 +65,11 @@ class TCPClientConnection(TCPConnection):
         self._writer.close()
 
     async def receive(self, *args, **kwargs) -> Optional['Envelope']:
-        """Receive bytes."""
+        """
+        Receive an envelope.
+
+        :return: the received envelope, or None if an error occurred.
+        """
         try:
             assert self._reader is not None
             data = await self._recv(self._reader)
