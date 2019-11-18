@@ -26,6 +26,7 @@ import logging
 import os
 import subprocess
 import threading
+import time
 from typing import List, Dict
 
 import connexion
@@ -119,8 +120,8 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
     for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
         err += line + "\n"
 
-    # while pid.poll() is None:
-    #     time.sleep(0.5)
+    while pid.poll() is None:
+        time.sleep(0.5) # pragma: no cover
 
     if pid.poll() == 0:
         return output, 200  # 200 (Success)
