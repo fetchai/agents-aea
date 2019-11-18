@@ -52,6 +52,42 @@ def test_create_and_run_agent():
     )
     assert response_add.status_code == 201
 
+    # Get the running status before we have run it
+    response_status = app.get(
+        'api/agent/' + agent_id + "/run",
+        data=None,
+        content_type='application/json',
+    )
+    assert response_status.status_code == 200
+    data = json.loads(response_status.get_data(as_text=True))
+    assert "NOT_STARTED" in data["status"]
+
+    # run the agent with a non existent connection
+    response_run = app.post(
+        'api/agent/' + agent_id + "/run",
+        content_type='application/json',
+        data=json.dumps("non-existent-connection")
+    )
+    assert response_run.status_code == 400
+
+    # run the agent with default connection - should be something in the error output?
+    response_run = app.post(
+        'api/agent/' + agent_id + "/run",
+        content_type='application/json',
+        data=json.dumps("")
+    )
+    assert response_run.status_code == 201
+    time.sleep(2)
+
+    # Stop the agent running
+    response_stop = app.delete(
+        'api/agent/' + agent_id + "/run",
+        data=None,
+        content_type='application/json',
+    )
+    assert response_stop.status_code == 200
+    time.sleep(2)
+
     # run the agent with local connection (as no OEF node is running)
     response_run = app.post(
         'api/agent/' + agent_id + "/run",
@@ -61,6 +97,14 @@ def test_create_and_run_agent():
     assert response_run.status_code == 201
 
     time.sleep(2)
+
+    # Try running it again (this should fail)
+    response_run = app.post(
+        'api/agent/' + agent_id + "/run",
+        content_type='application/json',
+        data=json.dumps("local")
+    )
+    assert response_run.status_code == 400
 
     # Get the running status
     response_status = app.get(
@@ -145,6 +189,33 @@ def test_create_and_run_agent():
 
     assert "process terminate" in data["error"]
     assert "NOT_STARTED" in data["status"]
+
+    # Stop a none existent agent running
+    response_stop = app.delete(
+        'api/agent/' + agent_id + "_NOT" + "/run",
+        data=None,
+        content_type='application/json',
+    )
+    assert response_stop.status_code == 400
+    time.sleep(2)
+
+    genuine_func = aea.cli_gui._call_aea_async
+
+    def _dummy_call_aea_async(param_list, dir_arg):
+        assert param_list[0] == "aea"
+        if param_list[1] == "run":
+            return None
+        else:
+            return genuine_func(param_list, dir_arg)
+
+    # Run when process files (but other call - such as status should not fail)
+    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+        response_run = app.post(
+            'api/agent/' + agent_id + "/run",
+            content_type='application/json',
+            data=json.dumps("local")
+        )
+    assert response_run.status_code == 400
 
     # Destroy the temporary current working directory and put cwd back to what it was before
     temp_cwd.destroy()

@@ -18,8 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea gui` sub-commands."""
-from multiprocessing import Process
-import time
+from flask import Flask
+
+import unittest.mock
 
 import aea.cli_gui
 
@@ -64,9 +65,6 @@ def test_js():
 
 
 def test_run_app():
-    """Test that running the app in none test mode works."""
-    server = Process(target=aea.cli_gui.run)
-    server.start()
-    time.sleep(2)
-    server.terminate()
-    server.join()
+    """Test that running the app in non-test mode works."""
+    with unittest.mock.patch.object(Flask, 'run', return_value=None):
+        aea.cli_gui.run()

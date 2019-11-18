@@ -26,7 +26,6 @@ import logging
 import os
 import subprocess
 import threading
-import time
 from typing import List, Dict
 
 import connexion
@@ -120,8 +119,8 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
     for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
         err += line + "\n"
 
-    while pid.poll() is None:
-        time.sleep(0.5)
+    # while pid.poll() is None:
+    #     time.sleep(0.5)
 
     if pid.poll() == 0:
         return output, 200  # 200 (Success)
@@ -339,8 +338,8 @@ def get_agent_status(agent_id: str):
     tty_str = ""
     error_str = ""
 
+    # agent_id will not be in lists if we haven't run it yet
     if agent_id in app_context.agent_processes and app_context.agent_processes[agent_id] is not None:
-
         status_str = str(get_process_status(app_context.agent_processes[agent_id])).replace('ProcessState.', '')
 
     if agent_id in app_context.agent_tty:
@@ -386,8 +385,7 @@ def _stop_agent(agent_id: str):
 
 def get_process_status(process_id: subprocess.Popen) -> ProcessState:
     """Return the state of the execution."""
-    if process_id is None:
-        return ProcessState.NOT_STARTED
+    assert process_id is not None
 
     return_code = process_id.poll()
     if return_code is None:
@@ -453,8 +451,3 @@ def run_test():
     """Run the gui in the form where we can run tests against it."""
     app = create_app()
     return app.app.test_client()
-
-
-# If we're running in stand alone mode, run the application
-if __name__ == '__main__':
-    run()

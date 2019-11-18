@@ -19,6 +19,7 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
+import time
 
 import unittest.mock
 
@@ -84,6 +85,9 @@ def test_real_create():
     data = json.loads(response_create.get_data(as_text=True))
     assert data == agent_id
 
+    # Give it a bit of time so the polling funcionts get called
+    time.sleep(1)
+
     # Check that we can actually see this agent too
     response_agents = app.get(
         'api/agent',
@@ -95,6 +99,17 @@ def test_real_create():
     assert len(data) == 1
     assert data[0]['id'] == agent_id
     assert data[0]['description'] == "placeholder description"
+
+    # do same but this time find that this is not an agent directory.
+    with unittest.mock.patch("os.path.isdir", return_value=False):
+        response_agents = app.get(
+            'api/agent',
+            data=None,
+            content_type='application/json',
+        )
+    data = json.loads(response_agents.get_data(as_text=True))
+    assert response_agents.status_code == 200
+    assert len(data) == 0
 
     # Destroy the temporary current working directory and put cwd back to what it was before
     temp_cwd.destroy()
