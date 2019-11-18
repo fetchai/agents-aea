@@ -18,15 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """Base classes for TCP communication."""
-import asyncio
 import logging
-import queue
 import struct
 import threading
 from abc import ABC, abstractmethod
-from asyncio import CancelledError, StreamWriter, StreamReader, AbstractEventLoop, Future
-from concurrent.futures import Executor, ThreadPoolExecutor
-from threading import Thread
+from asyncio import CancelledError, StreamWriter, StreamReader
 from typing import Optional
 
 from aea.connections.base import Connection
@@ -41,55 +37,22 @@ class TCPConnection(Connection, ABC):
     def __init__(self,
                  public_key: str,
                  host: str,
-                 port: int,
-                 loop: Optional[AbstractEventLoop] = None,
-                 executor: Optional[Executor] = None):
+                 port: int):
         """Initialize the TCP connection."""
-        super().__init__()
+        super().__init__(type(self).__name__)
         self.public_key = public_key
 
         self.host = host
         self.port = port
-        self._loop = asyncio.new_event_loop() if loop is None else loop
-        self._executor = executor if executor is not None else ThreadPoolExecutor()
 
         self._lock = threading.Lock()
-        self._stopped = True
-        self._thread_loop = None  # type: Optional[Thread]
-        self._recv_task = None  # type: Optional[Future]
-        self._fetch_task = None  # type: Optional[Future]
-
-    def _run_task(self, coro):
-        return asyncio.run_coroutine_threadsafe(coro=coro, loop=self._loop)
-
-    @property
-    def _is_threaded(self) -> bool:
-        """Check if the loop is run by our thread or from another thread."""
-        return self._loop.is_running() and self._thread_loop is None
-
-    def _start_loop(self):
-        assert self._thread_loop is None
-
-        def loop_in_thread(loop):
-            asyncio.set_event_loop(loop)
-            loop.run_forever()
-            loop.close()
-
-        self._thread_loop = Thread(target=loop_in_thread, args=(self._loop, ))
-        self._thread_loop.start()
-
-    def _stop_loop(self):
-        assert self._thread_loop.is_alive()
-        self._loop.call_soon_threadsafe(self._loop.stop)
-        self._thread_loop.join(timeout=10)
-        self._thread_loop = None
 
     @abstractmethod
-    def setup(self):
+    async def setup(self):
         """Set the TCP connection up."""
 
     @abstractmethod
-    def teardown(self):
+    async def teardown(self):
         """Tear the TCP connection down."""
 
     @abstractmethod
@@ -101,7 +64,7 @@ class TCPConnection(Connection, ABC):
         :return: the stream writer to communicate with the recipient. None if it cannot be determined.
         """
 
-    def connect(self):
+    async def connect(self):
         """
         Set up the connection.
 
@@ -109,26 +72,18 @@ class TCPConnection(Connection, ABC):
         :raises ConnectionError: if a problem occurred during the connection.
         """
         with self._lock:
+            if self.connection_status.is_connected:
+                logger.warning("Connection already set up.")
+                return
+
             try:
-                if self.connection_status.is_connected:
-                    logger.warning("Connection already set up.")
-                    return
-
-                self._stopped = False
-                if not self._is_threaded:
-                    self._start_loop()
-
-                self.setup()
-
+                await self.setup()
                 self.connection_status.is_connected = True
             except Exception as e:
                 logger.error(str(e))
-                if not self._is_threaded:
-                    self._stop_loop()
                 self.connection_status.is_connected = False
-                self._stopped = True
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """
         Tear down the connection.
 
@@ -136,40 +91,26 @@ class TCPConnection(Connection, ABC):
         """
         with self._lock:
             if not self.connection_status.is_connected:
-                logger.warning("Connection is not set up.")
+                logger.warning("Connection already disconnected.")
                 return
 
+            await self.teardown()
             self.connection_status.is_connected = False
-            self.teardown()
-            if not self._is_threaded:
-                self._stop_loop()
-            self._stopped = True
 
     async def _recv(self, reader: StreamReader) -> Optional[bytes]:
         """Receive bytes."""
-        try:
-            data = await reader.read(len(struct.pack("I", 0)))
-            if not self.connection_status.is_connected:
-                return None
-            nbytes = struct.unpack("I", data)[0]
-            nbytes_read = 0
-            data = b""
-            while nbytes_read < nbytes:
-                data += (await reader.read(nbytes - nbytes_read))
-                nbytes_read = len(data)
-            return data
-        except CancelledError:
-            logger.debug("[{}] Read cancelled.".format(self.public_key))
+        data = await reader.read(len(struct.pack("I", 0)))
+        if not self.connection_status.is_connected:
             return None
-        except struct.error as e:
-            logger.debug("Struct error: {}".format(str(e)))
-            return None
-        except Exception as e:
-            logger.exception(e)
-            raise
+        nbytes = struct.unpack("I", data)[0]
+        nbytes_read = 0
+        data = b""
+        while nbytes_read < nbytes:
+            data += (await reader.read(nbytes - nbytes_read))
+            nbytes_read = len(data)
+        return data
 
-    async def _send(self, writer: StreamWriter, data: bytes) -> None:
-        """Send bytes."""
+    async def _send(self, writer, data):
         logger.debug("[{}] Send a message".format(self.public_key))
         nbytes = struct.pack("I", len(data))
         logger.debug("#bytes: {!r}".format(nbytes))
@@ -180,50 +121,16 @@ class TCPConnection(Connection, ABC):
         except CancelledError:
             return None
 
-    async def _recv_loop(self, reader) -> None:
-        """Process incoming messages."""
-        try:
-            logger.debug("[{}]: Waiting for receiving next message...".format(self.public_key))
-            data = await self._recv(reader)
-            if data is None:
-                return
-            logger.debug("[{}] Message received: {!r}".format(self.public_key, data))
-            envelope = Envelope.decode(data)  # TODO handle decoding error
-            logger.debug("[{}] Decoded envelope: {}".format(self.public_key, envelope))
-            self.in_queue.put_nowait(envelope)
-            await self._recv_loop(reader)
-        except CancelledError:
-            logger.debug("[{}] Receiving loop cancelled.".format(self.public_key))
-            return
-        except Exception as e:
-            logger.exception(e)
-            return
-
-    async def _send_loop(self):
-        """Process outgoing messages."""
-        try:
-            logger.debug("[{}]: Waiting for sending next message...".format(self.public_key))
-            envelope = await self._loop.run_in_executor(self._executor, self.out_queue.get, True)
-            if envelope is None:
-                logger.debug("[{}] Stopped sending loop.".format(self.public_key))
-                return
-            writer = self.select_writer_from_envelope(envelope)
-            await self._send(writer, envelope.encode())
-            await self._send_loop()
-        except CancelledError:
-            logger.debug("[{}] Sending loop cancelled.".format(self.public_key))
-            return
-        except queue.Empty:
-            await self._send_loop()
-        except Exception as e:
-            logger.exception(e)
-            return
-
-    def send(self, envelope: Envelope) -> None:
+    async def send(self, envelope: Envelope) -> None:
         """
         Send an envelope.
 
         :param envelope: the envelope to send.
         :return: None.
         """
-        self.out_queue.put_nowait(envelope)
+        writer = self.select_writer_from_envelope(envelope)
+        if writer is not None:
+            data = envelope.encode()
+            await self._send(writer, data)
+        else:
+            logger.error("[{}]: Cannot send envelope {}".format(self.public_key, envelope))

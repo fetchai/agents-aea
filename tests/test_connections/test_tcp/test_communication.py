@@ -18,6 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the TCP connection communication."""
+import asyncio
+import struct
+import unittest.mock
+
+import pytest
+
+import aea
+from aea.configurations.base import ConnectionConfig
 from aea.connections.tcp.tcp_client import TCPClientConnection
 from aea.connections.tcp.tcp_server import TCPServerConnection
 from aea.mail.base import MailBox, Envelope
@@ -37,17 +45,28 @@ class TestTCPCommunication:
         cls.server_pbk = "server_pbk"
         cls.client_pbk_1 = "client_pbk_1"
         cls.client_pbk_2 = "client_pbk_2"
+
         cls.server_conn = TCPServerConnection(cls.server_pbk, cls.host, cls.port)
         cls.client_conn_1 = TCPClientConnection(cls.client_pbk_1, cls.host, cls.port)
         cls.client_conn_2 = TCPClientConnection(cls.client_pbk_2, cls.host, cls.port)
 
-        cls.server_mailbox = MailBox(cls.server_conn)
-        cls.client_1_mailbox = MailBox(cls.client_conn_1)
-        cls.client_2_mailbox = MailBox(cls.client_conn_2)
+        cls.server_mailbox = MailBox([cls.server_conn])
+        cls.client_1_mailbox = MailBox([cls.client_conn_1])
+        cls.client_2_mailbox = MailBox([cls.client_conn_2])
+
+        assert not cls.server_conn.connection_status.is_connected
+        assert not cls.client_conn_1.connection_status.is_connected
+        assert not cls.client_conn_2.connection_status.is_connected
 
         cls.server_mailbox.connect()
         cls.client_1_mailbox.connect()
         cls.client_2_mailbox.connect()
+
+    def test_is_connected(self):
+        """Test that the connection status are connected."""
+        assert self.server_conn.connection_status.is_connected
+        assert self.client_conn_1.connection_status.is_connected
+        assert self.client_conn_2.connection_status.is_connected
 
     def test_communication_client_server(self):
         """Test that envelopes can be sent from a client to a server."""
@@ -82,3 +101,96 @@ class TestTCPCommunication:
         cls.server_mailbox.disconnect()
         cls.client_1_mailbox.disconnect()
         cls.client_2_mailbox.disconnect()
+
+
+class TestTCPClientConnection:
+    """Test TCP Client code."""
+
+    @pytest.mark.asyncio
+    async def test_receive_cancelled(self):
+        """Test that cancelling a receive task works correctly."""
+        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
+        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+
+        await tcp_server.connect()
+        await tcp_client.connect()
+
+        with unittest.mock.patch.object(aea.connections.tcp.tcp_client.logger, "debug") as mock_logger_debug:
+            task = asyncio.ensure_future(tcp_client.receive())
+            await asyncio.sleep(0.1)
+            task.cancel()
+            await asyncio.sleep(0.1)
+            mock_logger_debug.assert_called_with("[{}] Read cancelled.".format("public_key_client"))
+            assert task.result() is None
+
+        await tcp_client.disconnect()
+        await tcp_server.disconnect()
+
+    @pytest.mark.asyncio
+    async def test_receive_raises_struct_error(self):
+        """Test the case when a receive raises a struct error."""
+        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
+        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+
+        await tcp_server.connect()
+        await tcp_client.connect()
+
+        with unittest.mock.patch.object(aea.connections.tcp.tcp_client.logger, "debug") as mock_logger_debug:
+            with unittest.mock.patch.object(tcp_client, "_recv", side_effect=struct.error):
+                task = asyncio.ensure_future(tcp_client.receive())
+                await asyncio.sleep(0.1)
+                mock_logger_debug.assert_called_with("Struct error: ")
+                assert task.result() is None
+
+        await tcp_client.disconnect()
+        await tcp_server.disconnect()
+
+    @pytest.mark.asyncio
+    async def test_receive_raises_exception(self):
+        """Test the case when a receive raises a generic exception."""
+        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
+        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+
+        await tcp_server.connect()
+        await tcp_client.connect()
+
+        with pytest.raises(Exception, match="generic exception"):
+            with unittest.mock.patch.object(tcp_client, "_recv", side_effect=Exception("generic exception")):
+                task = asyncio.ensure_future(tcp_client.receive())
+                await asyncio.sleep(0.1)
+                assert task.result() is None
+
+        await tcp_client.disconnect()
+        await tcp_server.disconnect()
+
+    @pytest.mark.asyncio
+    async def test_from_config(self):
+        """Test the creation of the connection from a configuration."""
+        TCPClientConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=8081))
+
+
+class TestTCPServerConnection:
+    """Test TCP Server code."""
+
+    @pytest.mark.asyncio
+    async def test_receive_raises_exception(self):
+        """Test the case when a receive raises a generic exception."""
+        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
+        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+
+        await tcp_server.connect()
+        await tcp_client.connect()
+        await asyncio.sleep(0.1)
+        with unittest.mock.patch.object(aea.connections.tcp.tcp_server.logger, "error") as mock_logger_error:
+            with unittest.mock.patch("asyncio.wait", side_effect=Exception("generic exception")):
+                result = await tcp_server.receive()
+                assert result is None
+                mock_logger_error.assert_called_with("Error in the receiving loop: generic exception")
+
+        await tcp_client.disconnect()
+        await tcp_server.disconnect()
+
+    @pytest.mark.asyncio
+    async def test_from_config(self):
+        """Test the creation of the connection from a configuration."""
+        TCPServerConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=8081))

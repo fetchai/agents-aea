@@ -59,32 +59,30 @@ class DummyAgent(Agent):
 
 def test_run_agent():
     """Test that we can set up and then run the agent."""
-    agent_name = "dummyagent"
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({'default': private_key_pem_path})
-    agent = DummyAgent(agent_name, wallet)
-    mailbox = MailBox(OEFLocalConnection("mypbk", LocalNode()))
-    agent.mailbox = mailbox
-    assert agent.name == agent_name
-    assert isinstance(agent.wallet, Wallet)
-    assert agent.agent_state == AgentState.INITIATED,\
-        "Agent state must be 'initiated'"
+    with LocalNode() as node:
+        agent_name = "dummyagent"
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path})
+        agent = DummyAgent(agent_name, wallet)
+        mailbox = MailBox([OEFLocalConnection("mypbk", node)])
+        agent.mailbox = mailbox
+        assert agent.name == agent_name
+        assert isinstance(agent.wallet, Wallet)
+        assert agent.agent_state == AgentState.INITIATED, "Agent state must be 'initiated'"
 
-    agent.mailbox.connect()
-    assert agent.agent_state == AgentState.CONNECTED,\
-        "Agent state must be 'connected'"
+        agent.mailbox.connect()
+        assert agent.agent_state == AgentState.CONNECTED, "Agent state must be 'connected'"
 
-    assert isinstance(agent.inbox, InBox)
-    assert isinstance(agent.outbox, OutBox)
+        assert isinstance(agent.inbox, InBox)
+        assert isinstance(agent.outbox, OutBox)
 
-    agent_thread = Thread(target=agent.start)
-    agent_thread.start()
-    time.sleep(1)
+        agent_thread = Thread(target=agent.start)
+        agent_thread.start()
+        time.sleep(1.0)
 
-    try:
-        assert agent.agent_state == AgentState.RUNNING,\
-            "Agent state must be 'running'"
-    finally:
-        agent.stop()
-        agent.mailbox.disconnect()
-        agent_thread.join()
+        try:
+            assert agent.agent_state == AgentState.RUNNING, "Agent state must be 'running'"
+        finally:
+            agent.stop()
+            agent.mailbox.disconnect()
+            agent_thread.join()

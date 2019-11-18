@@ -25,6 +25,7 @@ import os
 import socket
 import sys
 import time
+from asyncio import CancelledError
 from threading import Timer
 from typing import Optional
 
@@ -84,26 +85,41 @@ def tcpping(ip, port) -> bool:
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
-    def __init__(self):
+    def __init__(self, connection_id: str = "dummy"):
         """Initialize."""
-        super().__init__()
+        super().__init__(connection_id=connection_id)
+        self.connection_status.is_connected = False
+        self._queue = None
+
+    async def connect(self, *args, **kwargs):
+        """Connect."""
+        self._queue = asyncio.Queue(loop=self.loop)
         self.connection_status.is_connected = True
 
-    def connect(self):
-        """Connect."""
-        pass
-
-    def disconnect(self):
+    async def disconnect(self, *args, **kwargs):
         """Disconnect."""
-        pass
+        self.connection_status.is_connected = False
 
-    def send(self, envelope: 'Envelope'):
+    async def send(self, envelope: 'Envelope'):
         """Send an envelope."""
-        self.out_queue.put(envelope)
+        assert self._queue is not None
+        self._queue.put_nowait(envelope)
 
-    def receive(self, envelope: 'Envelope'):
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """Receive an envelope."""
-        self.in_queue.put(envelope)
+        try:
+            assert self._queue is not None
+            return await self._queue.get()
+        except CancelledError:
+            return None
+        except Exception as e:
+            print(str(e))
+            return None
+
+    def put(self, envelope: Envelope):
+        """Put an envelope in the queue."""
+        assert self._queue is not None
+        self._queue.put_nowait(envelope)
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':

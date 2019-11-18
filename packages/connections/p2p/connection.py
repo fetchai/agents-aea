@@ -20,21 +20,20 @@
 
 """Peer to Peer connection and channel."""
 import logging
-import queue
+from asyncio import CancelledError
 from queue import Queue
-from threading import Thread
 from typing import Optional, cast, Dict, List, Any
 
-from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Channel, Connection
-from aea.mail.base import Envelope
-
 from fetch.p2p.api.http_calls import HTTPCalls
+
+from aea.configurations.base import ConnectionConfig
+from aea.connections.base import Connection
+from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 
 
-class PeerToPeerChannel(Channel):
+class PeerToPeerChannel:
     """A wrapper for an SDK or API."""
 
     def __init__(self, public_key: str, provider_addr: str, provider_port: int):
@@ -108,47 +107,16 @@ class PeerToPeerChannel(Channel):
 class PeerToPeerConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    def __init__(self, public_key: str, provider_addr: str, provider_port: int = 8000):
+    def __init__(self, public_key: str, provider_addr: str, provider_port: int = 8000, connection_id: str = "p2p"):
         """
         Initialize a connection to an SDK or API.
 
         :param public_key: the public key used in the protocols.
         """
-        super().__init__()
-        self.public_key = public_key
-
+        super().__init__(connection_id=connection_id)
         self.channel = PeerToPeerChannel(public_key, provider_addr, provider_port)
+        self.public_key = public_key
         self._connection = None  # type: Optional[Queue]
-        self.in_thread = None  # type: Optional[Thread]
-        self.out_thread = None  # type: Optional[Thread]
-
-    def _fetch(self) -> None:
-        """
-        Fetch the envelopes from the outqueue and send them.
-
-        :return: None
-        """
-        while self.connection_status.is_connected:
-            try:
-                envelope = self.out_queue.get(block=True, timeout=2.0)
-                self.send(envelope)
-            except queue.Empty:
-                pass
-
-    def _receive_loop(self) -> None:
-        """
-        Receive messages.
-
-        :return: None
-        """
-        assert self._connection is not None, "Call connect before calling _receive_loop."
-        while self.connection_status.is_connected:
-            try:
-                self.channel.receive()
-                envelope = self._connection.get(timeout=2.0)
-                self.in_queue.put_nowait(envelope)
-            except queue.Empty:
-                pass
 
     def connect(self) -> None:
         """
@@ -159,10 +127,6 @@ class PeerToPeerConnection(Connection):
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
             self._connection = self.channel.connect()
-            self.in_thread = Thread(target=self._receive_loop)
-            self.out_thread = Thread(target=self._fetch)
-            self.in_thread.start()
-            self.out_thread.start()
 
     def disconnect(self) -> None:
         """
@@ -170,18 +134,12 @@ class PeerToPeerConnection(Connection):
 
         :return: None
         """
-        assert self.in_thread is not None, "Call connect before disconnect."
-        assert self.out_thread is not None, "Call connect before disconnect."
         if self.connection_status.is_connected:
             self.connection_status.is_connected = False
-            self.in_thread.join()
-            self.out_thread.join()
-            self.in_thread = None
-            self.out_thread = None
             self.channel.disconnect()
             self.stop()
 
-    def send(self, envelope: Envelope) -> None:
+    async def send(self, envelope: 'Envelope') -> None:
         """
         Send an envelope.
 
@@ -191,6 +149,21 @@ class PeerToPeerConnection(Connection):
         if not self.connection_status.is_connected:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         self.channel.send(envelope)
+
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+        """
+        Receive an envelope.
+
+        :return: the envelope received, or None.
+        """
+        if not self.connection_status.is_connected:
+            raise ConnectionError("Connection not established yet. Please use 'connect()'.")
+        try:
+            assert self.loop is not None
+            envelope = await self.loop.run_in_executor(None, self.channel.in_queue.get(block=True))
+            return envelope
+        except CancelledError:
+            return None
 
     def stop(self) -> None:
         """

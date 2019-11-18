@@ -32,9 +32,9 @@ from aea.crypto.wallet import Wallet, FETCHAI
 from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.mail.base import OutBox  # , Envelope
+from aea.mail.base import OutBox, Multiplexer  # , Envelope
 from aea.protocols.default.message import DefaultMessage
-from tests.conftest import CUR_PATH
+from tests.conftest import CUR_PATH, DummyConnection
 
 MAX_REACTIONS = 10
 
@@ -256,7 +256,7 @@ class TestDecisionMaker:
     def setup_class(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
-        cls.outbox = OutBox(Queue())
+        cls.outbox = OutBox(Multiplexer([DummyConnection()]))
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet({FETCHAI: private_key_pem_path})
         cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG})

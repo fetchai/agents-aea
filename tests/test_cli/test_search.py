@@ -24,7 +24,7 @@ from unittest import mock
 from pathlib import Path
 
 import jsonschema
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
@@ -78,7 +78,7 @@ Version: 0.1.0
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"], standalone_mode=False)
 
         assert self.result.output == self._generated_expected_output()
 
@@ -93,7 +93,7 @@ Version: 0.1.0
         ]
         with mock.patch('aea.cli.search.request_api', return_value=resp):
             self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"]
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"], standalone_mode=False
             )
         expected_output = (
             'Searching for "some"...\n'
@@ -108,7 +108,7 @@ Version: 0.1.0
 
         with mock.patch('aea.cli.search.request_api', return_value=[]):
             self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"]
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"], standalone_mode=False
             )
         expected_output = (
             'Searching for "some"...\n'
@@ -173,7 +173,7 @@ Version: 0.1.0
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "connections"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "connections"], standalone_mode=False)
         assert self.result.output == self._generated_expected_output()
 
     def test_correct_output_registry_api(self):
@@ -187,7 +187,7 @@ Version: 0.1.0
         ]
         with mock.patch('aea.cli.search.request_api', return_value=resp):
             self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"]
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"], standalone_mode=False
             )
 
         expected_output = (
@@ -203,7 +203,7 @@ Version: 0.1.0
 
         with mock.patch('aea.cli.search.request_api', return_value=[]):
             self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"]
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"], standalone_mode=False
             )
         expected_output = (
             'Searching for "some"...\n'
@@ -298,7 +298,7 @@ Version: 0.1.0
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False)
         assert self.result.output == self._generated_expected_output()
 
     def test_correct_output_registry_api(self):
@@ -313,7 +313,7 @@ Version: 0.1.0
         ]
         with mock.patch('aea.cli.search.request_api', return_value=resp):
             self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"]
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"], standalone_mode=False
             )
             expected_output = (
                 'Searching for "some"...\n'
@@ -330,7 +330,7 @@ Version: 0.1.0
 
         with mock.patch('aea.cli.search.request_api', return_value=[]):
             self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"]
+                cli, [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"], standalone_mode=False
             )
         expected_output = (
             'Searching for "some"...\n'

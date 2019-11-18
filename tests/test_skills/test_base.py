@@ -40,7 +40,7 @@ def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    mailbox1 = MailBox(DummyConnection())
+    mailbox1 = MailBox([DummyConnection()])
     ledger_apis = LedgerApis({"fetchai": ('alpha.fetch-ai.com', 80)})
     my_aea = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
 
@@ -59,7 +59,7 @@ class TestSkillContext:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': private_key_pem_path})
         cls.ledger_apis = LedgerApis({"fetchai": ("alpha.fetch-ai.com", 80)})
-        cls.mailbox1 = MailBox(DummyConnection())
+        cls.mailbox1 = MailBox([DummyConnection()])
         cls.my_aea = AEA("Agent0", cls.mailbox1, cls.wallet, cls.ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
         cls.skill_context = SkillContext(cls.my_aea.context)
 
@@ -141,7 +141,7 @@ class TestSkillFromDir:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
-        cls.mailbox1 = MailBox(DummyConnection())
+        cls.mailbox1 = MailBox([DummyConnection()])
         cls.my_aea = AEA("agent_name", cls.mailbox1, cls.wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
         cls.agent_context = cls.my_aea.context
 

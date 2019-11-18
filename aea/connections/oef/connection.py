@@ -19,12 +19,14 @@
 # ------------------------------------------------------------------------------
 
 """Extension to the OEF Python SDK."""
+import asyncio
 import datetime
 import logging
 import pickle
-from queue import Empty, Queue
-from threading import Thread
+import threading
 import time
+from asyncio import AbstractEventLoop, CancelledError
+from threading import Thread
 from typing import List, Dict, Optional, cast
 
 import oef
@@ -42,8 +44,8 @@ from oef.query import (
 from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.base import Channel, Connection
-from aea.mail.base import MailBox, Envelope
+from aea.connections.base import Connection
+from aea.mail.base import Envelope
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
@@ -235,21 +237,22 @@ class MailStats(object):
         self._search_result_counts[search_id] = nb_search_results
 
 
-class OEFChannel(OEFAgent, Channel):
+class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore, in_queue: Queue):
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore):
         """
         Initialize.
 
         :param public_key: the public key of the agent.
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
-        :param in_queue: the in queue.
         """
         super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core,
                          logger=lambda *x: None, logger_debug=lambda *x: None)
-        self.in_queue = in_queue
+        self.in_queue = None  # type: Optional[asyncio.Queue]
+        self.loop = None  # type: Optional[AbstractEventLoop]
+        self.mail_stats = MailStats()
 
     def on_message(self, msg_id: int, dialogue_id: int, origin: str, content: bytes) -> None:
         """
@@ -263,8 +266,10 @@ class OEFChannel(OEFAgent, Channel):
         """
         # We are not using the 'origin' parameter because 'content' contains a serialized instance of 'Envelope',
         # hence it already contains the address of the sender.
+        assert self.in_queue is not None
+        assert self.loop is not None
         envelope = Envelope.decode(content)
-        self.in_queue.put(envelope)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def on_cfp(self, msg_id: int, dialogue_id: int, origin: str, target: int, query: CFP_TYPES) -> None:
         """
@@ -277,6 +282,8 @@ class OEFChannel(OEFAgent, Channel):
         :param query: the query.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         try:
             query = pickle.loads(query)
         except Exception:
@@ -288,7 +295,7 @@ class OEFChannel(OEFAgent, Channel):
                           query=query if query != b"" else None)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        self.in_queue.put(envelope)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def on_propose(self, msg_id: int, dialogue_id: int, origin: str, target: int, b_proposals: PROPOSE_TYPES) -> None:
         """
@@ -301,6 +308,8 @@ class OEFChannel(OEFAgent, Channel):
         :param b_proposals: the proposals.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         if type(b_proposals) == bytes:
             proposals = pickle.loads(b_proposals)  # type: List[Description]
         else:
@@ -313,7 +322,7 @@ class OEFChannel(OEFAgent, Channel):
                           proposal=proposals)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        self.in_queue.put(envelope)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def on_accept(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
         """
@@ -325,6 +334,8 @@ class OEFChannel(OEFAgent, Channel):
         :param target: the message target.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         performative = FIPAMessage.Performative.MATCH_ACCEPT if msg_id == 4 and target == 3 else FIPAMessage.Performative.ACCEPT
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
@@ -332,7 +343,7 @@ class OEFChannel(OEFAgent, Channel):
                           performative=performative)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        self.in_queue.put(envelope)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def on_decline(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
         """
@@ -344,13 +355,15 @@ class OEFChannel(OEFAgent, Channel):
         :param target: the message target.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         msg = FIPAMessage(message_id=msg_id,
                           dialogue_id=dialogue_id,
                           target=target,
                           performative=FIPAMessage.Performative.DECLINE)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        self.in_queue.put(envelope)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def on_search_result(self, search_id: int, agents: List[str]) -> None:
         """
@@ -360,10 +373,13 @@ class OEFChannel(OEFAgent, Channel):
         :param agents: the list of agents.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
+        self.mail_stats.search_end(search_id, len(agents))
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.in_queue.put(envelope)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def on_oef_error(self, answer_id: int, operation: oef.messages.OEFErrorOperation) -> None:
         """
@@ -373,6 +389,8 @@ class OEFChannel(OEFAgent, Channel):
         :param operation: the error operation.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         try:
             operation = OEFMessage.OEFErrorOperation(operation)
         except ValueError:
@@ -381,7 +399,7 @@ class OEFChannel(OEFAgent, Channel):
         msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.in_queue.put(envelope)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def on_dialogue_error(self, answer_id: int, dialogue_id: int, origin: str) -> None:
         """
@@ -392,13 +410,15 @@ class OEFChannel(OEFAgent, Channel):
         :param origin: the message sender.
         :return: None
         """
+        assert self.in_queue is not None
+        assert self.loop is not None
         msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR,
                          id=answer_id,
                          dialogue_id=dialogue_id,
                          origin=origin)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.in_queue.put(envelope)
+        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -482,92 +502,75 @@ class OEFChannel(OEFAgent, Channel):
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
             query = cast(Query, oef_message.get("query"))
             oef_query = OEFObjectTranslator.to_oef_query(query)
+            self.mail_stats.search_start(oef_msg_id)
             self.search_agents(oef_msg_id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             query = cast(Query, oef_message.get("query"))
             oef_query = OEFObjectTranslator.to_oef_query(query)
+            self.mail_stats.search_start(oef_msg_id)
             self.search_services(oef_msg_id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
-
-    def receive(self) -> None:
-        """
-        Receives an envelope.
-
-        :return: None.
-        """
-        pass
 
 
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000):
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef"):
         """
         Initialize.
 
         :param public_key: the public key of the agent.
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
+        :param connection_id: the identifier of the connection object.
         """
-        super().__init__()
-        core = AsyncioCore(logger=logger)
-        self._core = core  # type: AsyncioCore
-        self.channel = OEFChannel(public_key, oef_addr, oef_port, core=core, in_queue=self.in_queue)
+        super().__init__(connection_id=connection_id)
+        self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
+        self.in_queue = None  # type: Optional[asyncio.Queue]
+        self.channel = OEFChannel(public_key, oef_addr, oef_port, core=self._core)
 
-        self._stopped = True
-        self.out_thread = None  # type: Optional[Thread]
+        self._lock = threading.Lock()
         self._connection_check_thread = None  # type: Optional[Thread]
 
-    def _fetch(self) -> None:
-        """
-        Fetch the messages from the outqueue and send them.
-
-        :return: None
-        """
-        while self.connection_status.is_connected:
-            try:
-                msg = self.out_queue.get(block=True, timeout=1.0)
-                self.send(msg)
-            except Empty:
-                pass
-
-    def connect(self) -> None:
+    async def connect(self) -> None:
         """
         Connect to the channel.
 
         :return: None
         :raises Exception if the connection to the OEF fails.
         """
-        if self._connection_check_thread is not None:
-            self._connection_check_thread.join()
-            self._connection_check_thread = None
-        if self._stopped and not self.connection_status.is_connected:
-            self._stopped = False
-            self._core.run_threaded()
-            self._try_connect()
-            self._connection_check_thread = Thread(target=self._connection_check)
-            self._connection_check_thread.start()
+        with self._lock:
+            if self.connection_status.is_connected:
+                return
+            try:
+                self._core.run_threaded()
+                loop = asyncio.get_event_loop()
+                self.in_queue = asyncio.Queue()
+                await self._try_connect()
+                self.connection_status.is_connected = True
+                self.channel.loop = loop
+                self.channel.in_queue = self.in_queue
+                self._connection_check_thread = Thread(target=self._connection_check)
+                self._connection_check_thread.start()
+            except (CancelledError, Exception) as e:  # pragma: no cover
+                self._core.stop()
+                self.connection_status.is_connected = False
+                raise e
 
-    def _try_connect(self) -> None:
+    async def _try_connect(self) -> None:
         """
         Try connect to the channel.
 
         :return: None
         :raises Exception if the connection to the OEF fails.
         """
-        try:
-            while not self.connection_status.is_connected and not self._stopped:
-                if self.channel.connect():
-                    self.connection_status.is_connected = True
-                    self.out_thread = Thread(target=self._fetch)
-                    self.out_thread.start()
-                else:
-                    logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds ...")
-                    time.sleep(5.0)
-        except Exception as e:
-            self._core.stop()
-            raise e
+        while not self.connection_status.is_connected:
+            if not self.channel.connect():
+                logger.warning("Cannot connect to OEFChannel. Retrying in 5 seconds...")
+                await asyncio.sleep(5.0)
+            else:
+                break
 
     def _connection_check(self) -> None:
         """
@@ -577,39 +580,59 @@ class OEFConnection(Connection):
 
         :return: None
         """
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         while self.connection_status.is_connected:
-            assert self.out_thread is not None, "Call connect before _connection_check."
             time.sleep(2.0)
-            if not self.channel.get_state() == "connected":  # type: ignore
-                logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
+            if not self.channel.get_state() == "connected":  # pragma: no cover
                 self.connection_status.is_connected = False
-                self.out_thread.join()
-                self.out_thread = None
-                self._try_connect()
+                logger.warning("Lost connection to OEFChannel. Retrying to connect soon ...")
+                loop.run_until_complete(self._try_connect())
+                self.connection_status.is_connected = True
                 logger.warning("Successfully re-established connection to OEFChannel.")
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """
         Disconnect from the channel.
 
         :return: None
         """
-        assert self.out_thread is not None, "Call connect before disconnect."
-        assert self._connection_check_thread is not None, "Call connect before disconnect."
-        if not self._stopped and self.connection_status.is_connected:
+        with self._lock:
+            assert self._connection_check_thread is not None, "Call connect before disconnect."
+            assert self.in_queue is not None
             self.connection_status.is_connected = False
             self._connection_check_thread.join()
             self._connection_check_thread = None
-            self.out_thread.join()
-            self.out_thread = None
             self.channel.disconnect()
+            await self.in_queue.put(None)
             self._core.stop()
-            self._stopped = True
 
-    def send(self, envelope: Envelope):
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """
-        Send messages.
+        Receive an envelope. Blocking.
 
+        :return: the envelope received, or None.
+        """
+        try:
+            assert self.in_queue is not None
+            envelope = await self.in_queue.get()
+            if envelope is None:
+                logger.debug("Received None.")
+                return None
+            logger.debug("Received envelope: {}".format(envelope))
+            return envelope
+        except CancelledError:
+            logger.debug("Receive cancelled.")
+            return None
+        except Exception as e:
+            logger.exception(e)
+            return None
+
+    async def send(self, envelope: 'Envelope') -> None:
+        """
+        Send an envelope.
+
+        :param envelope: the envelope to send.
         :return: None
         """
         if self.connection_status.is_connected:
@@ -627,18 +650,3 @@ class OEFConnection(Connection):
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
         return OEFConnection(public_key, oef_addr, oef_port)
-
-
-class OEFMailBox(MailBox):
-    """The OEF mail box."""
-
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000):
-        """
-        Initialize.
-
-        :param public_key: the public key of the agent.
-        :param oef_addr: the OEF IP address.
-        :param oef_port: the OEF port.
-        """
-        connection = OEFConnection(public_key, oef_addr, oef_port)
-        super().__init__(connection)
