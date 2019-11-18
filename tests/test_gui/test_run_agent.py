@@ -29,7 +29,7 @@ from .test_base import create_app, TempCWD
 
 def test_create_and_run_agent():
     """Test for running and agent, reading TTY and errors."""
-    # Set up a temporary current working directory to make agents in
+    # Set up a temporary current working directory in which to make agents
     temp_cwd = TempCWD()
     app = create_app()
 
