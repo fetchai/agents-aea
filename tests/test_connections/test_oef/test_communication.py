@@ -482,9 +482,9 @@ class TestFIPA:
         envelope = Envelope(to="mailbox", sender="me", protocol_id="unknown", message=b'Hello')
         self.mailbox1.send(envelope)
 
-    def test_oef_mail_box(self):
-        """Test the mail stats."""
-        assert self.mailbox1.mail_stats.search_count == 0
+    # def test_oef_mail_box(self):
+    #     """Test the mail stats."""
+    #     assert self.mailbox1.mail_stats.search_count == 0
 
     def test_send_oef_message(self):
         """Test the send oef message."""

@@ -29,10 +29,22 @@ class TestStateUpdateMessage:
 
     def test_message_consistency(self):
         """Test for an error in consistency of a message."""
+        currency_endowment = {"FET": 100}
+        good_endowment = {"a_good": 2}
+        exchange_params = {"FET": 10.0}
+        utility_params = {"a_good": 20.0}
+        assert StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE, amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment,
+                                  exchange_params_by_currency=exchange_params, utility_params_by_good_pbk=utility_params)
+        currency_change = {"FET": - 10}
+        good_change = {"a_good": 1}
+        assert StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY, amount_by_currency=currency_change, quantities_by_good_pbk=good_change)
+
+    def test_message_inconsistency(self):
+        """Test for an error in consistency of a message."""
         with pytest.raises(AssertionError):
-            good_endowment = {"FET": 2}
-            currency_endowment = {"FET": 100.0}
-            utility_params = {"Unknown": 20.0}
-            exchange_params = {"FET": 10.0}
-            assert StateUpdateMessage(currency_endowment=currency_endowment, good_endowment=good_endowment,
-                                      utility_params=utility_params, exchange_params=exchange_params)
+            currency_endowment = {"FET": 100}
+            good_endowment = {"a_good": 2}
+            exchange_params = {"UNKNOWN": 10.0}
+            utility_params = {"a_good": 20.0}
+            assert StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE, amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment,
+                                      exchange_params_by_currency=exchange_params, utility_params_by_good_pbk=utility_params)

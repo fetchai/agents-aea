@@ -250,7 +250,6 @@ class OEFChannel(OEFAgent, Channel):
         super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core,
                          logger=lambda *x: None, logger_debug=lambda *x: None)
         self.in_queue = in_queue
-        self.mail_stats = MailStats()
 
     def on_message(self, msg_id: int, dialogue_id: int, origin: str, content: bytes) -> None:
         """
@@ -361,7 +360,6 @@ class OEFChannel(OEFAgent, Channel):
         :param agents: the list of agents.
         :return: None
         """
-        self.mail_stats.search_end(search_id, len(agents))
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
@@ -488,7 +486,6 @@ class OEFChannel(OEFAgent, Channel):
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             query = cast(Query, oef_message.get("query"))
             oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.mail_stats.search_start(oef_msg_id)
             self.search_services(oef_msg_id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
@@ -645,8 +642,3 @@ class OEFMailBox(MailBox):
         """
         connection = OEFConnection(public_key, oef_addr, oef_port)
         super().__init__(connection)
-
-    @property
-    def mail_stats(self) -> MailStats:
-        """Get the mail stats object."""
-        return self._connection.channel.mail_stats  # type: ignore
