@@ -34,10 +34,8 @@ from aea.helpers.preference_representations.base import logarithmic_utility, lin
 from aea.mail.base import OutBox  # , Envelope
 from aea.protocols.base import Message
 
-CurrencyEndowment = Dict[str, int]  # a map from identifier to quantity
-CurrencyHoldings = Dict[str, int]
-GoodEndowment = Dict[str, int]   # a map from identifier to quantity
-GoodHoldings = Dict[str, int]
+CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
+GoodHoldings = Dict[str, int]  # a map from identifier to quantity
 UtilityParams = Dict[str, float]   # a map from identifier to quantity
 ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
@@ -79,7 +77,7 @@ class OwnershipState:
         self._amount_by_currency = None  # type: CurrencyHoldings
         self._quantities_by_good_pbk = None  # type: GoodHoldings
 
-    def init(self, amount_by_currency: CurrencyEndowment, quantities_by_good_pbk: GoodEndowment, agent_name: str = ''):
+    def init(self, amount_by_currency: CurrencyHoldings, quantities_by_good_pbk: GoodHoldings, agent_name: str = ''):
         """
         Instantiate an ownership state object.
 
@@ -263,7 +261,7 @@ class Preferences:
         Compute the score given the good and currency holdings.
 
         :param quantities_by_good_pbk: the good holdings
-        :param currency_holdings: the currency holdings
+        :param amount_by_currency: the currency holdings
         :return: the score.
         """
         goods_score = self.logarithmic_utility(quantities_by_good_pbk)
