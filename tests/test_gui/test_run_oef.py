@@ -36,12 +36,13 @@ def test_create_and_run_oef():
         assert "launch.py" in param_list[1]
         return pid
 
-    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
-        response_start = app.post(
-            'api/oef',
-            data=None,
-            content_type='application/json',
-        )
+    with unittest.mock.patch("subprocess.call", return_value=None):
+        with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+            response_start = app.post(
+                'api/oef',
+                data=None,
+                content_type='application/json',
+            )
     assert response_start.status_code == 200
 
     # Wait for key message to appear
@@ -89,11 +90,12 @@ def test_create_and_run_oef():
     assert "FINISHED" in data["status"]
 
     # Stop the OEF Node
-    response_stop = app.delete(
-        'api/oef',
-        data=None,
-        content_type='application/json',
-    )
+    with unittest.mock.patch("subprocess.call", return_value=None):
+        response_stop = app.delete(
+            'api/oef',
+            data=None,
+            content_type='application/json',
+        )
     assert response_stop.status_code == 200
 
     # get the status
@@ -118,10 +120,11 @@ def test_create_and_run_oef_fail():
         assert "launch.py" in param_list[1]
         return None
 
-    with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
-        response_start = app.post(
-            'api/oef',
-            data=None,
-            content_type='application/json',
-        )
+    with unittest.mock.patch("subprocess.call", return_value=None):
+        with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
+            response_start = app.post(
+                'api/oef',
+                data=None,
+                content_type='application/json',
+            )
     assert response_start.status_code == 400
