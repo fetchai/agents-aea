@@ -5,30 +5,10 @@ There are two types of agents:
 * The tac controller which coordinates the game.
 * The participant agents which compete in the game.
 
-## Prerequisites
+### Dependencies
 
-Make sure you have the latest `aea` version.
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-``` bash
-aea --version
-```
-
-If not, update with the following.
-
-``` bash
-pip install aea[all] --force --no-cache-dir
-```
-
-## Demo preliminaries
-
-Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
-
-
-Download the packages and scripts directories.
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
-svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
-```
 
 ## Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
@@ -63,19 +43,28 @@ You must set the start time to a point in the future `start_time: Nov 10 2019  1
 aea run
 ```
 
-### Create the TAC participant AEA
+### Create the TAC participants AEA
 In a separate terminal, in the root directory, create the tac participant AEA.
 ``` bash
-aea create tac_participant
+aea create tac_participant_one
+aea create tac_participant_two
 ```
 
-### Add the tac participation skill
+### Add the tac participation skill to participant one
 ``` bash
-cd tac_participant
+cd tac_participant_one
 aea add skill tac_participation
+aea add skill tac_negotiation
 ```
 
-### Run the TAC participant AEA
+### Add the tac participation skill to participant two
+``` bash
+cd tac_participant_two
+aea add skill tac_participation
+aea add skill tac_negotiation
+```
+
+### Run both the TAC participant AEAs
 ``` bash
 aea run
 ```

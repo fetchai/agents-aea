@@ -13,6 +13,12 @@ handlers:
   - handler:
       class_name: FIPANegotiationHandler
       args: {}
+  - handler:
+      class_name: TransactionHandler
+      args: {}
+  - handler:
+      class_name: OEFSearchHandler
+      args: {}
 tasks:
   - task:
       class_name: TransactionCleanUpTask
@@ -33,6 +39,7 @@ shared_classes:
         search_for: both
   - shared_class:
       class_name: Dialogues
+      args: {}
   - shared_class:
       class_name: Transactions
       args:

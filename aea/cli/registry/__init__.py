@@ -17,9 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Main entry point for CLI GUI."""
-import aea.cli_gui
-
-# If we're running in stand alone mode, run the application
-if __name__ == '__main__':
-    aea.cli_gui.run()   # pragma: no cover
+"""This module contains tools for operating Registry with CLI."""

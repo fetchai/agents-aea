@@ -52,7 +52,19 @@ class TestListProtocols:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == "\n".join(["default", "fipa"]) + "\n"
+        compare_text = """------------------------------
+Name: default
+Description: The default protocol allows for any bytes message.
+Version: 0.1.0
+------------------------------
+------------------------------
+Name: fipa
+Description: fipa protocol description [Fill in]
+Version: 0.1.0
+------------------------------
+
+"""
+        assert self.result.output == compare_text
 
     @classmethod
     def teardown_class(cls):
@@ -82,7 +94,14 @@ class TestListConnections:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == "\n".join(["local"]) + "\n"
+        compare_text = """------------------------------
+Name: local
+Description: local connection description [Fill in]
+Version: 0.1.0
+------------------------------
+
+"""
+        assert self.result.output == compare_text
 
     @classmethod
     def teardown_class(cls):
@@ -112,7 +131,19 @@ class TestListSkills:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == "\n".join(["dummy", "error"]) + "\n"
+        compare_text = """------------------------------
+Name: dummy
+Description: a dummy_skill for testing purposes.
+Version: 0.1.0
+------------------------------
+------------------------------
+Name: error
+Description: The error skill implements basic error handling required by all AEAs.
+Version: 0.1.0
+------------------------------
+
+"""
+        assert self.result.output == compare_text
 
     @classmethod
     def teardown_class(cls):

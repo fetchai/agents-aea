@@ -16,10 +16,27 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Utils used for operating Registry with CLI."""
 
-"""Main entry point for CLI GUI."""
-import aea.cli_gui
 
-# If we're running in stand alone mode, run the application
-if __name__ == '__main__':
-    aea.cli_gui.run()   # pragma: no cover
+import click
+import requests
+
+from aea.cli.registry.settings import REGISTRY_API_URL
+
+
+def request_api(method, path, params=None):
+    """Request Registry API."""
+    resp = requests.request(
+        method=method,
+        url='{}{}'.format(REGISTRY_API_URL, path),
+        params=params
+    )
+    if resp.status_code == 200:
+        return resp.json()
+    elif resp.status_code == 403:
+        raise click.ClickException('You are not authenticated.')
+    else:
+        raise click.ClickException(
+            'Wrong server response. Status code: {}'.format(resp.status_code)
+        )

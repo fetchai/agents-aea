@@ -16,10 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Settings for operating Registry with CLI."""
 
-"""Main entry point for CLI GUI."""
-import aea.cli_gui
 
-# If we're running in stand alone mode, run the application
-if __name__ == '__main__':
-    aea.cli_gui.run()   # pragma: no cover
+REGISTRY_API_URL = 'http://localhost:8000'

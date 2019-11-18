@@ -140,5 +140,54 @@ def _load_env_file(env_file: str):
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
+def format_items(items):
+    """Format list of items (protocols/connections) to a string for CLI output."""
+    list_str = ''
+    for item in items:
+        list_str += (
+            '{line}\n'
+            'Name: {name}\n'
+            'Description: {description}\n'
+            'Version: {version}\n'
+            '{line}\n'.format(
+                name=item['name'],
+                description=item['description'],
+                version=item['version'],
+                line='-' * 30
+            ))
+    return list_str
+
+
+def format_skills(items):
+    """Format list of skills to a string for CLI output."""
+    list_str = ''
+    for item in items:
+        list_str += (
+            '{line}\n'
+            'Name: {name}\n'
+            'Description: {description}\n'
+            'Protocols: {protocols}\n'
+            'Version: {version}\n'
+            '{line}\n'.format(
+                name=item['name'],
+                description=item['description'],
+                version=item['version'],
+                protocols=''.join(
+                    name + ' | ' for name in item['protocol_names']
+                ),
+                line='-' * 30
+            ))
+    return list_str
+
+
+def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
+    """Return description of a protocol, skill or connection."""
+    config = loader.load(open(str(config_filepath)))
+    if config.name != name:
+        logger.error("Mismatch of config name and folder name. config.name = {}, name = {}".format(config.name, name))
+    assert config.name == name
+    return {"name": config.name, "description": config.description, "version": config.version}
+
+
 class AEAConfigException(Exception):
     """Exception about AEA configuration."""

@@ -20,41 +20,54 @@
 
 """The state update message module."""
 
-from typing import Dict, cast
+from enum import Enum
+from typing import cast, Dict, Optional, Union
 
 from aea.protocols.base import Message
 
 TransactionId = str
 Address = str
 
-CurrencyEndowment = Dict[str, float]  # a map from identifier to quantity
-GoodEndowment = Dict[str, int]   # a map from identifier to quantity
+Currencies = Dict[str, int]  # a map from identifier to quantity
+Goods = Dict[str, int]   # a map from identifier to quantity
 UtilityParams = Dict[str, float]   # a map from identifier to quantity
 ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
 
 class StateUpdateMessage(Message):
-    """The transaction message class."""
+    """The state update message class."""
 
     protocol_id = "internal"
 
-    def __init__(self, currency_endowment: CurrencyEndowment,
-                 good_endowment: GoodEndowment,
-                 utility_params: UtilityParams,
-                 exchange_params: ExchangeParams,
+    class Performative(Enum):
+        """State update performative."""
+
+        INITIALIZE = "initialize"
+        APPLY = "apply"
+
+    def __init__(self, performative: Union[str, Performative],
+                 amount_by_currency: Currencies,
+                 quantities_by_good_pbk: Goods,
+                 exchange_params_by_currency: Optional[ExchangeParams] = None,
+                 utility_params_by_good_pbk: Optional[UtilityParams] = None,
+                 tx_fee: Optional[int] = None,
                  **kwargs):
         """
         Instantiate transaction message.
 
-        :param currency_endowment: the currency endowment.
-        :param good_endowment: the good endowment.
-        :param utility_params: the utility params.
-        :param exchange_params: the exchange params.
+        :param performative: the performative
+        :param amount_by_currency: the amounts of currencies.
+        :param quantities_by_good_pbk: the quantities of goods.
+        :param exchange_params_by_currency: the exchange params.
+        :param utility_params_by_good_pbk: the utility params.
+        :param tx_fee: the tx fee.
         """
-        super().__init__(currency_endowment=currency_endowment,
-                         good_endowment=good_endowment,
-                         utility_params=utility_params,
-                         exchange_params=exchange_params,
+        super().__init__(performative=performative,
+                         amount_by_currency=amount_by_currency,
+                         quantities_by_good_pbk=quantities_by_good_pbk,
+                         exchange_params_by_currency=exchange_params_by_currency,
+                         utility_params_by_good_pbk=utility_params_by_good_pbk,
+                         tx_fee=tx_fee,
                          **kwargs)
         assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
 
@@ -65,20 +78,28 @@ class StateUpdateMessage(Message):
         :return: bool
         """
         try:
-            assert self.is_set("currency_endowment")
-            assert self.is_set("good_endowment")
-            assert self.is_set("utility_params")
-            assert self.is_set("exchange_params")
-            currency_endowment = self.get("currency_endowment")
-            currency_endowment = cast(CurrencyEndowment, currency_endowment)
-            exchange_params = self.get("exchange_params")
-            exchange_params = cast(ExchangeParams, exchange_params)
-            assert currency_endowment.keys() == exchange_params.keys()
-            good_endowment = self.get("good_endowment")
-            good_endowment = cast(GoodEndowment, good_endowment)
-            utility_params = self.get("utility_params")
-            utility_params = cast(UtilityParams, utility_params)
-            assert good_endowment.keys() == utility_params.keys()
+            assert self.is_set("performative")
+            performative = self.get("performative")
+            assert self.is_set("amount_by_currency")
+            amount_by_currency = self.get("amount_by_currency")
+            amount_by_currency = cast(Currencies, amount_by_currency)
+            assert self.is_set("quantities_by_good_pbk")
+            quantities_by_good_pbk = self.get("quantities_by_good_pbk")
+            quantities_by_good_pbk = cast(Goods, quantities_by_good_pbk)
+            if performative == self.Performative.INITIALIZE:
+                assert self.is_set("exchange_params_by_currency")
+                exchange_params_by_currency = self.get("exchange_params_by_currency")
+                exchange_params_by_currency = cast(ExchangeParams, exchange_params_by_currency)
+                assert amount_by_currency.keys() == exchange_params_by_currency.keys()
+                assert self.is_set("utility_params_by_good_pbk")
+                utility_params_by_good_pbk = self.get("utility_params_by_good_pbk")
+                utility_params_by_good_pbk = cast(UtilityParams, utility_params_by_good_pbk)
+                assert quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
+                assert self.is_set("tx_fee")
+            elif performative == self.Performative.APPLY:
+                assert self.get("exchange_params_by_currency") is None
+                assert self.get("utility_params_by_good_pbk") is None
+                assert self.get("tx_fee") is None
         except (AssertionError, KeyError):
             return False
         return True

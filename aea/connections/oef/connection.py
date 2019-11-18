@@ -506,7 +506,6 @@ class OEFChannel(OEFAgent):
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             query = cast(Query, oef_message.get("query"))
             oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.mail_stats.search_start(oef_msg_id)
             self.search_services(oef_msg_id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
