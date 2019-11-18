@@ -20,14 +20,13 @@
 
 """Extension to the OEF Python SDK."""
 import asyncio
-import datetime
 import logging
 import pickle
 import threading
 import time
 from asyncio import AbstractEventLoop, CancelledError
 from threading import Thread
-from typing import List, Dict, Optional, cast
+from typing import List, Optional, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -191,52 +190,6 @@ class OEFObjectTranslator:
             raise ValueError("Constraint type not recognized.")
 
 
-class MailStats(object):
-    """The MailStats class tracks statistics on messages processed by MailBox."""
-
-    def __init__(self) -> None:
-        """
-        Instantiate mail stats.
-
-        :return: None
-        """
-        self._search_count = 0
-        self._search_start_time = {}  # type: Dict[int, datetime.datetime]
-        self._search_timedelta = {}  # type: Dict[int, float]
-        self._search_result_counts = {}  # type: Dict[int, int]
-
-    @property
-    def search_count(self) -> int:
-        """Get the search count."""
-        return self._search_count
-
-    def search_start(self, search_id: int) -> None:
-        """
-        Add a search id and start time.
-
-        :param search_id: the search id
-
-        :return: None
-        """
-        assert search_id not in self._search_start_time
-        self._search_count += 1
-        self._search_start_time[search_id] = datetime.datetime.now()
-
-    def search_end(self, search_id: int, nb_search_results: int) -> None:
-        """
-        Add end time for a search id.
-
-        :param search_id: the search id
-        :param nb_search_results: the number of agents returned in the search result
-
-        :return: None
-        """
-        assert search_id in self._search_start_time
-        assert search_id not in self._search_timedelta
-        self._search_timedelta[search_id] = (datetime.datetime.now() - self._search_start_time[search_id]).total_seconds() * 1000
-        self._search_result_counts[search_id] = nb_search_results
-
-
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
@@ -252,7 +205,6 @@ class OEFChannel(OEFAgent):
                          logger=lambda *x: None, logger_debug=lambda *x: None)
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[AbstractEventLoop]
-        self.mail_stats = MailStats()
 
     def on_message(self, msg_id: int, dialogue_id: int, origin: str, content: bytes) -> None:
         """
@@ -375,7 +327,6 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        self.mail_stats.search_end(search_id, len(agents))
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
@@ -502,12 +453,10 @@ class OEFChannel(OEFAgent):
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
             query = cast(Query, oef_message.get("query"))
             oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.mail_stats.search_start(oef_msg_id)
             self.search_agents(oef_msg_id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
             query = cast(Query, oef_message.get("query"))
             oef_query = OEFObjectTranslator.to_oef_query(query)
-            self.mail_stats.search_start(oef_msg_id)
             self.search_services(oef_msg_id, oef_query)
         else:
             raise ValueError("OEF request not recognized.")
