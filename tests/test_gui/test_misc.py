@@ -66,5 +66,6 @@ def test_js():
 
 def test_run_app():
     """Test that running the app in non-test mode works."""
-    with unittest.mock.patch.object(Flask, 'run', return_value=None):
-        aea.cli_gui.run()
+    with unittest.mock.patch("subprocess.call", return_value=None):
+        with unittest.mock.patch.object(Flask, 'run', return_value=None):
+            aea.cli_gui.run()
