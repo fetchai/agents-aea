@@ -3,22 +3,15 @@ The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that u
 
 ## Demo instructions
 
-Follow the Preliminaries and Installation instructions <a href="../quickstart">here</a>.
+### Dependencies
 
-Install the gym library.
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+
+Install the `gym` library.
 
 ``` bash
 pip install gym
 ```
-
-Then, download the examples and packages directory.
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
-```
-
-
-
 
 ### Create the agent
 In the root directory, create the gym agent.
