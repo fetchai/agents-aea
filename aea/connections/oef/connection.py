@@ -45,7 +45,7 @@ from oef.schema import Description as OEFDescription, DataModel as OEFDataModel,
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import MailBox, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
@@ -649,18 +649,3 @@ class OEFConnection(Connection):
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
         return OEFConnection(public_key, oef_addr, oef_port)
-
-
-class OEFMailBox(MailBox):
-    """The OEF mail box."""
-
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, loop: Optional[AbstractEventLoop] = None):
-        """
-        Initialize.
-
-        :param public_key: the public key of the agent.
-        :param oef_addr: the OEF IP address.
-        :param oef_port: the OEF port.
-        """
-        connection = OEFConnection(public_key, oef_addr, oef_port)
-        super().__init__([connection], loop=loop)
