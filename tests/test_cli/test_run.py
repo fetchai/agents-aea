@@ -195,12 +195,12 @@ class TestRunFailsWhenExceptionOccursInSkill:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         os.chdir(Path(cls.t, cls.agent_name))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"], standalone_mode=False)
         assert result.exit_code == 0
 
         shutil.copytree(Path(CUR_PATH, "data", "exception_skill"), Path(cls.t, cls.agent_name, "skills", "exception"))
@@ -241,7 +241,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).unlink()
 
@@ -285,7 +285,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).write_text("")
@@ -331,7 +331,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         os.chdir(Path(cls.t, cls.agent_name))
@@ -375,10 +375,10 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "connection", cls.connection_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "connection", cls.connection_name], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, DEFAULT_CONNECTION_CONFIG_FILE).unlink()
 
@@ -421,10 +421,10 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").unlink()
 
@@ -467,10 +467,10 @@ class TestRunFailsWhenConnectionClassNotPresent:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").write_text("")
 
@@ -513,7 +513,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
@@ -558,7 +558,7 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 

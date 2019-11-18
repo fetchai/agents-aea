@@ -48,14 +48,14 @@ class TestSearchProtocols:
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"], standalone_mode=False)
         expected_output = "Available protocols:\n- " + "\n- ".join(["default", "fipa", "gym", "oef", "tac"]) + "\n"
         assert self.result.output == expected_output
 
     def test_correct_output_custom_registry(self):
         """Test that the command has printed the correct output when using a custom registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "protocols"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "protocols"], standalone_mode=False)
         expected_output = "Available protocols:\n- " + "\n- ".join(["default", "fipa", "gym", "oef", "tac"]) + "\n"
         assert self.result.output == expected_output
 
@@ -81,14 +81,14 @@ class TestSearchConnections:
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "connections"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "connections"], standalone_mode=False)
         expected_output = "Available connections:\n- " + "\n- ".join(["gym", "local", "oef", "stub"]) + "\n"
         assert self.result.output == expected_output
 
     def test_correct_output_custom_registry(self):
         """Test that the command has printed the correct output when using a custom registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "connections"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "connections"], standalone_mode=False)
         expected_output = "Available connections:\n- " + "\n- ".join(["gym", "local", "oef", "stub"]) + "\n"
         assert self.result.output == expected_output
 
@@ -114,7 +114,7 @@ class TestSearchSkills:
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False)
         expected_output = """Available skills:
 - carpark_client
 - carpark_detection
@@ -134,7 +134,7 @@ class TestSearchSkills:
     def test_correct_output_custom_registry(self):
         """Test that the command has printed the correct output when using a custom registry."""
         os.chdir(AEA_DIR)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "skills"])
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "--registry", DEFAULT_REGISTRY_PATH, "skills"], standalone_mode=False)
         expected_output = """Available skills:
 - carpark_client
 - carpark_detection

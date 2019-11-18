@@ -50,7 +50,7 @@ class TestRemoveSkill:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
@@ -59,9 +59,9 @@ class TestRemoveSkill:
         config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
         assert result.exit_code == 0
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_name], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -101,11 +101,11 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -144,7 +144,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
@@ -153,13 +153,13 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
         assert result.exit_code == 0
 
         cls.patch = unittest.mock.patch("shutil.rmtree", side_effect=BaseException("an exception"))
         cls.patch.__enter__()
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

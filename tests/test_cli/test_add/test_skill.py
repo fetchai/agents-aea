@@ -50,7 +50,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         # this also by default adds the oef connection and error skill
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
@@ -61,7 +61,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         # add the error skill again
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -100,10 +100,10 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -142,7 +142,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
@@ -156,7 +156,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
                                                side_effect=ValidationError("test error message"))
         cls.patch.__enter__()
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -195,7 +195,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
@@ -205,7 +205,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         Path("skills", cls.skill_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

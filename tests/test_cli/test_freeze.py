@@ -44,7 +44,7 @@ class TestFreeze:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""

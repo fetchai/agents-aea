@@ -44,7 +44,7 @@ class TestListProtocols:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -74,7 +74,7 @@ class TestListConnections:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -104,7 +104,7 @@ class TestListSkills:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""

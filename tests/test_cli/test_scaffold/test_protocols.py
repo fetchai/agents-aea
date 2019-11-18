@@ -58,11 +58,11 @@ class TestScaffoldProtocol:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # scaffold protocol
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
 
     def test_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0."""
@@ -111,12 +111,12 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # create a dummy 'myresource' folder
         Path(cls.t, cls.agent_name, "protocols", cls.resource_name).mkdir(exist_ok=False, parents=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -162,14 +162,14 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add protocol first time
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
         assert result.exit_code == 0
         # scaffold protocol with the same protocol name
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -215,7 +215,7 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         # change the dumping of yaml module to raise an exception.
@@ -223,7 +223,7 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -267,14 +267,14 @@ class TestScaffoldProtocolFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         cls.patch = unittest.mock.patch("shutil.copytree", side_effect=Exception("unknwon exception"))
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

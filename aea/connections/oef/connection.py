@@ -557,7 +557,7 @@ class OEFConnection(Connection):
                 self.connection_status.is_connected = False
                 raise e
 
-    async def _try_connect(self     ) -> None:
+    async def _try_connect(self) -> None:
         """
         Try connect to the channel.
 
