@@ -7,18 +7,11 @@ The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that u
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-Install the `gym` library.
-
-``` bash
-pip install gym
-```
-
 ### Create the agent
 In the root directory, create the gym agent.
 ``` bash
 aea create my_gym_agent
 ```
-
 
 ### Add the gym skill 
 ``` bash
@@ -46,6 +39,12 @@ nano connections/gym/connection.yaml
 env: gyms.env.BanditNArmedRandom
 ```
 
+### Install the skill dependencies
+
+To install the `gym` package, a dependency of the gym skill, from Pypi run
+``` bash
+aea install
+```
 
 
 ### Run the agent with the gym connection
