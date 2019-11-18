@@ -145,11 +145,12 @@ def freeze(ctx: Context):
 
 @cli.command()
 @pass_ctx
-def gui(ctx: Context):
+@click.option('-p', '--port', default=8080)
+def gui(ctx: Context, port):
     """Run the CLI GUI."""
     import aea.cli_gui  # pragma: no cover
     logger.info("Running the GUI.....(press Ctrl+C to exit)")   # pragma: no cover
-    aea.cli_gui.run()   # pragma: no cover
+    aea.cli_gui.run(port)   # pragma: no cover
 
 
 @cli.command()

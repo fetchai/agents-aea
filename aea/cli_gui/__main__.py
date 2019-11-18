@@ -20,6 +20,18 @@
 """Main entry point for CLI GUI."""
 import aea.cli_gui
 
+import argparse
+
+parser = argparse.ArgumentParser(description='Launch the gui through python')
+parser.add_argument(
+    '-p',
+    '--port',
+    help='Port that the web server listens on',
+    type=int,
+    default=8080)
+
+args, unknown = parser.parse_known_args()
+
 # If we're running in stand alone mode, run the application
 if __name__ == '__main__':
-    aea.cli_gui.run()   # pragma: no cover
+    aea.cli_gui.run(args.port)   # pragma: no cover
