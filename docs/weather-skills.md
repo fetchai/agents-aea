@@ -4,30 +4,10 @@ The AEA weather skills demonstrate an interaction between two AEAs.
 * The seller of weather data (the weather client).
 
 
-## Prerequisites
+### Dependencies
 
-Make sure you have the latest `aea` version.
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-``` bash
-aea --version
-```
-
-If not, update with the following.
-
-``` bash
-pip install aea[all] --force --no-cache-dir
-```
-
-## Demo preliminaries
-
-Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
-
-
-Download the packages and scripts directories.
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
-svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
-```
 
 ## Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
