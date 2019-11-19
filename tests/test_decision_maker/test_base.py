@@ -344,6 +344,13 @@ class TestDecisionMaker:
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
 
+        with mock.patch.object(self.decision_maker.ledger_apis, "token_balance", return_value=1000000):
+            with mock.patch.object(self.decision_maker.ledger_apis, "transfer", return_value="This is a test digest"):
+                with mock.patch("aea.decision_maker.base.GoalPursuitReadiness.Status") as mocked_status:
+                    mocked_status.READY.value = False
+                    self.decision_maker.handle(tx_message)
+                    assert not self.decision_maker.goal_pursuit_readiness.is_ready
+
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                         skill_id="default",
                                         transaction_id="transaction0",
