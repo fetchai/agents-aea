@@ -431,6 +431,12 @@ def create_app():
         return flask.send_from_directory(
             os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+    @app.route('/logo.png')
+    def logo():
+        """Return an logo to be displayed at top of webpage."""
+        return flask.send_from_directory(
+            os.path.join(app.root_path, 'static'), 'logo.png', mimetype='image/png')
+
     return app
 
 
@@ -438,7 +444,7 @@ def run():
     """Run the GUI."""
     _kill_running_oef_nodes()
     app = create_app()
-    app.run(host='127.0.0.1', port=8080, debug=False)
+    app.run(host='127.0.0.1', port=8080, debug=True)
 
     return app
 

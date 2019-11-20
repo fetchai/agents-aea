@@ -429,13 +429,8 @@ class Controller{
                     var test = $(this);
                     var text = test.text;
                     var val = test.value;
-                    $(this).css("background-color", "gray");
+                    $(this).css("background-color", "var(--neutral-light-grey)");
                 })
-
-
-
-
-
                 if (e.data.el["combined"] == "localAgents"){
                     self.refreshAgentData(id)
                 }
@@ -505,8 +500,6 @@ class Controller{
             self.view.setAgentError(data["error"])
             self.handleButtonStates()
         });
-
-
 
 
         $('#startOEFNode').click({el: element}, function(e) {
