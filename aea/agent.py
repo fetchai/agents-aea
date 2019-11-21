@@ -131,11 +131,11 @@ class Agent(ABC):
         :return the agent state.
         :raises ValueError: if the state does not satisfy any of the foreseen conditions.
         """
-        if self._multiplexer is not None and not self._multiplexer.connection_status.is_connected:
+        if self.multiplexer is not None and not self.multiplexer.connection_status.is_connected:
             return AgentState.INITIATED
-        elif self._multiplexer.connection_status.is_connected and self.liveness.is_stopped:
+        elif self.multiplexer.connection_status.is_connected and self.liveness.is_stopped:
             return AgentState.CONNECTED
-        elif self._multiplexer.connection_status.is_connected and not self.liveness.is_stopped:
+        elif self.multiplexer.connection_status.is_connected and not self.liveness.is_stopped:
             return AgentState.RUNNING
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover
@@ -146,8 +146,8 @@ class Agent(ABC):
 
         :return: None
         """
-        if not self.debug and not self._multiplexer.connection_status.is_connected:
-            self._multiplexer.connect()
+        if not self.debug and not self.multiplexer.connection_status.is_connected:
+            self.multiplexer.connect()
 
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
@@ -177,8 +177,8 @@ class Agent(ABC):
         """
         logger.debug("[{}]: Stopping message processing...".format(self.name))
         self.liveness._is_stopped = True
-        if self._multiplexer.connection_status.is_connected:
-            self._multiplexer.disconnect()
+        if self.multiplexer.connection_status.is_connected:
+            self.multiplexer.disconnect()
 
         logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.teardown()
