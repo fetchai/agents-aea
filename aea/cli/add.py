@@ -33,20 +33,34 @@ from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.cli.registry.utils import fetch
 
 
 @click.group()
+@click.option('--registry', is_flag=True, help="For adding from Registry.")
 @pass_ctx
-def add(ctx: Context):
+def add(ctx: Context, registry):
     """Add a resource to the agent."""
+    if registry:
+        ctx.set_config("is_registry", True)
     _try_to_load_agent_config(ctx)
 
 
 @add.command()
 @click.argument('connection_name', type=str, required=True)
+@click.option('--id', default=None,
+              help='Public ID of Connection from Registry you want to add.')
 @pass_context
-def connection(click_context, connection_name):
+def connection(click_context, connection_name, id):
     """Add a connection to the configuration file."""
+    if ctx.config.get("is_registry"):
+        if not id:
+            raise click.ClickException(
+                'Please provide a Public ID of connection you are looking for.'
+            )
+        fetch('connection', public_id=id)
+        raise NotImplementedError
+
     ctx = cast(Context, click_context.obj)
     agent_name = ctx.agent_config.agent_name
     logger.info("Adding connection '{}' to the agent '{}'...".format(connection_name, agent_name))
