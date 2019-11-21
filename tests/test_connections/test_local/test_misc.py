@@ -24,7 +24,7 @@ import unittest.mock
 import pytest
 
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.mail.base import Envelope, MailBox, AEAConnectionError
+from aea.mail.base import Envelope, AEAConnectionError, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
@@ -35,8 +35,8 @@ def test_connection():
     """Test that two mailbox can connect to the node."""
     node = LocalNode()
 
-    mailbox1 = MailBox([OEFLocalConnection("mailbox1", node)])
-    mailbox2 = MailBox([OEFLocalConnection("mailbox2", node)])
+    mailbox1 = Multiplexer([OEFLocalConnection("mailbox1", node)])
+    mailbox2 = Multiplexer([OEFLocalConnection("mailbox2", node)])
 
     mailbox1.connect()
     mailbox2.connect()
@@ -93,8 +93,8 @@ def test_communication():
     """Test that two mailbox can communicate through the node."""
     with LocalNode() as node:
 
-        mailbox1 = MailBox([OEFLocalConnection("mailbox1", node)])
-        mailbox2 = MailBox([OEFLocalConnection("mailbox2", node)])
+        mailbox1 = Multiplexer([OEFLocalConnection("mailbox1", node)])
+        mailbox2 = Multiplexer([OEFLocalConnection("mailbox2", node)])
 
         mailbox1.connect()
         mailbox2.connect()
@@ -102,45 +102,45 @@ def test_communication():
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg_bytes = DefaultSerializer().encode(msg)
         envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
-        mailbox1.send(envelope)
+        mailbox1.put(envelope)
 
         msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        mailbox1.send(envelope)
+        mailbox1.put(envelope)
 
         msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.PROPOSE, proposal=[])
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        mailbox1.send(envelope)
+        mailbox1.put(envelope)
 
         msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.ACCEPT)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        mailbox1.send(envelope)
+        mailbox1.put(envelope)
 
         msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.DECLINE)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        mailbox1.send(envelope)
+        mailbox1.put(envelope)
 
-        envelope = mailbox2.inbox.get(block=True, timeout=1.0)
+        envelope = mailbox2.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert envelope.protocol_id == "default"
         assert msg.get("content") == b"hello"
-        envelope = mailbox2.inbox.get(block=True, timeout=1.0)
+        envelope = mailbox2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
         assert envelope.protocol_id == "fipa"
         assert msg.get("performative") == FIPAMessage.Performative.CFP
-        envelope = mailbox2.inbox.get(block=True, timeout=1.0)
+        envelope = mailbox2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
         assert envelope.protocol_id == "fipa"
         assert msg.get("performative") == FIPAMessage.Performative.PROPOSE
-        envelope = mailbox2.inbox.get(block=True, timeout=1.0)
+        envelope = mailbox2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
         assert envelope.protocol_id == "fipa"
         assert msg.get("performative") == FIPAMessage.Performative.ACCEPT
-        envelope = mailbox2.inbox.get(block=True, timeout=1.0)
+        envelope = mailbox2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
         assert envelope.protocol_id == "fipa"
         assert msg.get("performative") == FIPAMessage.Performative.DECLINE

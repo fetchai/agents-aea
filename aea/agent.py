@@ -23,11 +23,13 @@
 import logging
 import time
 from abc import abstractmethod, ABC
+from asyncio import AbstractEventLoop
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
+from aea.connections.base import Connection
 from aea.crypto.wallet import Wallet
-from aea.mail.base import InBox, OutBox, MailBox
+from aea.mail.base import InBox, OutBox, Multiplexer
 
 logger = logging.getLogger(__name__)
 
@@ -57,39 +59,49 @@ class Agent(ABC):
     """This class implements a template agent."""
 
     def __init__(self, name: str,
+                 connections: List[Connection],
                  wallet: Wallet,
+                 loop: Optional[AbstractEventLoop] = None,
                  timeout: float = 1.0,
                  debug: bool = False) -> None:
         """
         Instantiate the agent.
 
         :param name: the name of the agent
+        :param connections: the list of connections of the agent.
         :param wallet: the crypto wallet of the agent.
+        :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
 
         :return: None
         """
         self._name = name
+        self._connections = connections
         self._wallet = wallet
+
+        self._multiplexer = Multiplexer(self._connections, loop=loop)
+        self._inbox = InBox(self._multiplexer)
+        self._outbox = OutBox(self._multiplexer)
         self._liveness = Liveness()
         self._timeout = timeout
 
         self.debug = debug
 
-        self.mailbox = None  # type: Optional[MailBox]
+    @property
+    def multiplexer(self) -> Multiplexer:
+        """Get the multiplexer."""
+        return self._multiplexer
 
     @property
     def inbox(self) -> InBox:
         """Get the inbox."""
-        assert self.mailbox is not None, "Cannot retrieve inbox. No mailbox specified."
-        return self.mailbox.inbox
+        return self._inbox
 
     @property
     def outbox(self) -> OutBox:
         """Get the outbox."""
-        assert self.mailbox is not None, "Cannot retrieve outbox. No mailbox specified."
-        return self.mailbox.outbox
+        return self._outbox
 
     @property
     def name(self) -> str:
@@ -119,11 +131,11 @@ class Agent(ABC):
         :return the agent state.
         :raises ValueError: if the state does not satisfy any of the foreseen conditions.
         """
-        if self.mailbox is None or not self.mailbox.is_connected:
+        if self._multiplexer is not None and not self._multiplexer.connection_status.is_connected:
             return AgentState.INITIATED
-        elif self.mailbox.is_connected and self.liveness.is_stopped:
+        elif self._multiplexer.connection_status.is_connected and self.liveness.is_stopped:
             return AgentState.CONNECTED
-        elif self.mailbox.is_connected and not self.liveness.is_stopped:
+        elif self._multiplexer.connection_status.is_connected and not self.liveness.is_stopped:
             return AgentState.RUNNING
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover
@@ -134,9 +146,8 @@ class Agent(ABC):
 
         :return: None
         """
-        assert self.mailbox is not None, "Cannot call start without mailbox instantiated."
-        if not self.debug and not self.mailbox.is_connected:
-            self.mailbox.connect()
+        if not self.debug and not self._multiplexer.connection_status.is_connected:
+            self._multiplexer.connect()
 
         logger.debug("[{}]: Calling setup method...".format(self.name))
         self.setup()
@@ -164,11 +175,10 @@ class Agent(ABC):
 
         :return: None
         """
-        assert self.mailbox is not None, "Cannot call stop without mailbox instantiated."
         logger.debug("[{}]: Stopping message processing...".format(self.name))
         self.liveness._is_stopped = True
-        if self.mailbox.is_connected:
-            self.mailbox.disconnect()
+        if self._multiplexer.connection_status.is_connected:
+            self._multiplexer.disconnect()
 
         logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.teardown()

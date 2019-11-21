@@ -25,7 +25,7 @@ import pytest
 
 import aea
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.mail.base import Envelope, MailBox, InBox, OutBox, Multiplexer
+from aea.mail.base import Envelope, InBox, OutBox, Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
 from .conftest import DummyConnection
@@ -146,7 +146,7 @@ def test_mailBox():
     """Tests if the mailbox is connected."""
     node = LocalNode()
     public_key_1 = "mailbox1"
-    mailbox1 = MailBox([OEFLocalConnection(public_key_1, node)])
+    mailbox1 = Multiplexer([OEFLocalConnection(public_key_1, node)])
     mailbox1.connect()
     assert mailbox1.is_connected, "Mailbox cannot connect to the specific Connection(OEFLocalConnection)"
     mailbox1.disconnect()
