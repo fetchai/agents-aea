@@ -20,12 +20,13 @@
 
 """Serialization for the TAC protocol."""
 
+import sys
 from typing import Any, Dict, List, cast, TYPE_CHECKING
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac import tac_pb2
     from packages.protocols.tac.message import TACMessage
 else:

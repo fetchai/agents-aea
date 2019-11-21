@@ -1,0 +1,12 @@
+name: gym
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+description: "The gym connection wraps an OpenAI gym."
+url: ""
+class_name: GymConnection
+supported_protocols: ["gym"]
+config:
+  env: 'gyms.env.BanditNArmedRandom'
+dependencies:
+  - gym

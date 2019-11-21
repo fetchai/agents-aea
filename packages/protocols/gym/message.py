@@ -59,12 +59,17 @@ class GymMessage(Message):
             if performative == GymMessage.Performative.ACT:
                 assert self.is_set("action")
                 assert self.is_set("step_id")
+                assert type(self.get("step_id")) == int
             elif performative == GymMessage.Performative.PERCEPT:
                 assert self.is_set("observation")
                 assert self.is_set("reward")
+                assert type(self.get("reward")) == float
                 assert self.is_set("done")
+                assert type(self.get("done")) == bool
                 assert self.is_set("info")
+                assert type(self.get("info")) == dict
                 assert self.is_set("step_id")
+                assert type(self.get("step_id")) == int
             elif performative == GymMessage.Performative.RESET or performative == GymMessage.Performative.CLOSE:
                 pass
             else:

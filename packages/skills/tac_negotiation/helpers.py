@@ -21,13 +21,14 @@
 """This class contains the helpers for FIPA negotiation."""
 
 import copy
+import sys
 from typing import Dict, List, Union, TYPE_CHECKING, cast
 
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
     ConstraintExpr
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.tac_negotiation.dialogues import DialogueLabel
 else:
     from tac_negotiation_skill.dialogues import DialogueLabel

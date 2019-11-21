@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a task."""
+
+import sys
 from typing import cast, TYPE_CHECKING
 
 from aea.skills.base import Task
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.tac_negotiation.transactions import Transactions
 else:
     from tac_negotiation_skill.transactions import Transactions
