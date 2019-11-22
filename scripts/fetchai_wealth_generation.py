@@ -28,8 +28,6 @@ from pathlib import Path
 from fetchai.ledger.api import LedgerApi        # type: ignore
 from fetchai.ledger.crypto import Entity, Address  # type: ignore
 
-logger = logging.getLogger(__name__)
-
 
 def generate_fetchai_wealth(arguments: argparse.Namespace) -> None:
     """
@@ -41,21 +39,22 @@ def generate_fetchai_wealth(arguments: argparse.Namespace) -> None:
     try:
         api = LedgerApi(arguments.addr, arguments.port)
     except Exception:
-        logger.debug("Couldn't connect! Please check your add and port.")
-        sys.exit("Couldn't connect! Please check your add and port.")
+        logging.info("Couldn't connect! Please check your add and port.")
+        sys.exit(1)
 
     try:
         if arguments.private_key is None or arguments.private_key == "":
             raise ValueError
     except ValueError:
-        logger.debug("Please provide a private key. --privte-key .... ")
-        sys.exit("-Please provide a private key. --private-key .... ")
+        logging.error("Please provide a private key. --private-key .... ")
+        sys.exit(1)
 
+    logging.info("Waiting for token wealth generation...")
     entity_to_generate_wealth = Entity.from_hex(Path(arguments.private_key).read_text())
     api.sync(api.tokens.wealth(entity_to_generate_wealth, arguments.amount))
     address = Address(entity_to_generate_wealth)
     balance = api.tokens.balance(address)
-    logger.info('The new balance of the address {} is : {} FET'.format(address, balance))
+    logging.info('The new balance of the address {} is : {} FET'.format(address, balance))
 
 
 def parse_arguments():
@@ -65,12 +64,18 @@ def parse_arguments():
     parser.add_argument("--port", type=int, default=8000, help="The port for the ledger api")
     parser.add_argument("--amount", type=int, default=10, help="The amount we want to generate to the address")
     parser.add_argument("--private-key", type=str, default=None, help="The path to the private key file.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Increase verbosity.")
     arguments = parser.parse_args()
-    logger.debug("Arguments: {}".format(pprint.pformat(arguments.__dict__)))
 
     return arguments
 
 
 if __name__ == "__main__":
     arguments = parse_arguments()
+    if arguments.verbose:
+        logging.basicConfig(format="[%(asctime)s][%(levelname)s] %(message)s", level=logging.DEBUG)
+    else:
+        logging.basicConfig(format="%(message)s", level=logging.INFO)
+
+    logging.debug("Arguments: {}".format(pprint.pformat(arguments.__dict__)))
     generate_fetchai_wealth(arguments)
