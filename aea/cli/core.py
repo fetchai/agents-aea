@@ -41,7 +41,7 @@ from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, PrivateKeyPathConfig
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
@@ -168,6 +168,20 @@ def generate_key(ctx: Context, type_):
         FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
     if type_ == EthereumCrypto.identifier or type_ == "all":
         EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
+
+@cli.command()
+@click.argument("type_", metavar="TYPE", type=click.Choice([
+    DefaultCrypto.identifier,
+    FetchAICrypto.identifier,
+    EthereumCrypto.identifier
+]), required=True)
+@click.argument("file", metavar="FILE", type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
+                required=True)
+@pass_ctx
+def add_key(ctx: Context, type_, file):
+    _try_to_load_agent_config(ctx)
+    ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
+    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
 cli.add_command(add)
