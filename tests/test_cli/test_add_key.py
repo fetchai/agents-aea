@@ -27,16 +27,14 @@ from unittest import mock
 import yaml
 
 import aea
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
-from aea.configurations.loader import ConfigLoader
-from ..common.click_testing import CliRunner
-
 from aea.cli import cli
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.default import DefaultCrypto, DEFAULT
-from aea.crypto.ethereum import EthereumCrypto, ETHEREUM
+from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FetchAICrypto, FETCHAI
 from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE
 from tests.conftest import CLI_LOG_OPTION
+from ..common.click_testing import CliRunner
 
 
 class TestAddKey:

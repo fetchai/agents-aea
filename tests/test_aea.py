@@ -161,13 +161,13 @@ async def test_handle():
         t = Thread(target=agent.start)
         try:
             t.start()
-            time.sleep(0.5)
+            time.sleep(1.0)
             dummy_skill = agent.resources.get_skill("dummy")
             dummy_handler = dummy_skill.handlers[0]
 
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
-            time.sleep(0.5)
+            time.sleep(1.0)
             assert len(dummy_handler.handled_messages) == 1
 
             #   DECODING ERROR
@@ -179,7 +179,7 @@ async def test_handle():
                 message=msg)
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
-            time.sleep(0.5)
+            time.sleep(1.0)
             assert len(dummy_handler.handled_messages) == 2
 
             #   UNSUPPORTED SKILL
@@ -196,7 +196,7 @@ async def test_handle():
                 message=msg)
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
-            time.sleep(0.5)
+            time.sleep(1.0)
             assert len(dummy_handler.handled_messages) == 3
 
         finally:
