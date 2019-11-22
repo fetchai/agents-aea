@@ -328,7 +328,6 @@ class Multiplexer:
         if self._send_loop_task is not None and not self._send_loop_task.done():
             # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing messages.
             asyncio.run_coroutine_threadsafe(self.out_queue.put(None), self._loop).result()
-            self._send_loop_task.result(2.0)
             self._send_loop_task.cancel()
 
         if self._loop.is_running():
@@ -420,7 +419,7 @@ class Multiplexer:
         logger.debug("Starting receving loop...")
         task_to_connection = {asyncio.ensure_future(conn.receive()): conn for conn in self.connections}
 
-        while self.connection_status.is_connected:
+        while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
                 logger.debug("Waiting for incoming messages...")
                 done, pending = await asyncio.wait(task_to_connection.keys(),
@@ -432,10 +431,11 @@ class Multiplexer:
                     if envelope is not None:
                         self.in_queue.put_nowait(envelope)
 
-                    # reinstantiate receiving task.
+                    # reinstantiate receiving task, but only if the connection is still up.
                     connection = task_to_connection.pop(task)
-                    new_task = asyncio.ensure_future(connection.receive())
-                    task_to_connection[new_task] = connection
+                    if connection.connection_status.is_connected:
+                        new_task = asyncio.ensure_future(connection.receive())
+                        task_to_connection[new_task] = connection
 
             except asyncio.CancelledError:
                 logger.debug("Receiving loop cancelled.")

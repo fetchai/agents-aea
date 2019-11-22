@@ -175,13 +175,13 @@ class Agent(ABC):
 
         :return: None
         """
-        logger.debug("[{}]: Stopping message processing...".format(self.name))
         self.liveness._is_stopped = True
-        if self.multiplexer.connection_status.is_connected:
-            self.multiplexer.disconnect()
-
         logger.debug("[{}]: Calling teardown method...".format(self.name))
         self.teardown()
+
+        logger.debug("[{}]: Stopping message processing...".format(self.name))
+        if self.multiplexer.connection_status.is_connected:
+            self.multiplexer.disconnect()
 
     @abstractmethod
     def setup(self) -> None:
