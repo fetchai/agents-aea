@@ -182,7 +182,10 @@ def generate_key(ctx: Context, type_):
 def add_key(ctx: Context, type_, file):
     """Add a private key to the wallet."""
     _try_to_load_agent_config(ctx)
-    ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
+    try:
+        ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
+    except ValueError as e:
+        logger.error(str(e))
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
