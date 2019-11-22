@@ -31,6 +31,7 @@ from aea.connections.tcp.tcp_server import TCPServerConnection
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+from tests.conftest import get_unused_tcp_port
 
 
 class TestTCPCommunication:
@@ -40,7 +41,7 @@ class TestTCPCommunication:
     def setup_class(cls):
         """Set up the test class."""
         cls.host = "127.0.0.1"
-        cls.port = 8082
+        cls.port = get_unused_tcp_port()
 
         cls.server_pbk = "server_pbk"
         cls.client_pbk_1 = "client_pbk_1"
@@ -109,8 +110,9 @@ class TestTCPClientConnection:
     @pytest.mark.asyncio
     async def test_receive_cancelled(self):
         """Test that cancelling a receive task works correctly."""
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+        port = get_unused_tcp_port()
+        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -129,8 +131,9 @@ class TestTCPClientConnection:
     @pytest.mark.asyncio
     async def test_receive_raises_struct_error(self):
         """Test the case when a receive raises a struct error."""
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+        port = get_unused_tcp_port()
+        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -148,8 +151,9 @@ class TestTCPClientConnection:
     @pytest.mark.asyncio
     async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+        port = get_unused_tcp_port()
+        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -166,7 +170,8 @@ class TestTCPClientConnection:
     @pytest.mark.asyncio
     async def test_from_config(self):
         """Test the creation of the connection from a configuration."""
-        TCPClientConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=8081))
+        port = get_unused_tcp_port()
+        TCPClientConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=port))
 
 
 class TestTCPServerConnection:
@@ -175,8 +180,9 @@ class TestTCPServerConnection:
     @pytest.mark.asyncio
     async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+        port = get_unused_tcp_port()
+        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -193,4 +199,5 @@ class TestTCPServerConnection:
     @pytest.mark.asyncio
     async def test_from_config(self):
         """Test the creation of the connection from a configuration."""
-        TCPServerConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=8081))
+        port = get_unused_tcp_port()
+        TCPServerConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=port))

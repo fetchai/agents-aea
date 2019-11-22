@@ -22,23 +22,27 @@ import asyncio
 from asyncio import CancelledError
 
 import aea
+import aea.connections.tcp.base
 import pytest
 import unittest.mock
 
 from aea.connections.tcp.tcp_client import TCPClientConnection
 from aea.connections.tcp.tcp_server import TCPServerConnection
 from aea.mail.base import Envelope
+from tests.conftest import get_unused_tcp_port
 
 
 @pytest.mark.asyncio
 async def test_connect_twice():
     """Test that connecting twice the tcp connection works correctly."""
-    tcp_connection = TCPServerConnection("public_key", "127.0.0.1", 8082)
+    port = get_unused_tcp_port()
+    tcp_connection = TCPServerConnection("public_key", "127.0.0.1", port)
 
     loop = asyncio.get_event_loop()
     tcp_connection.loop = loop
 
     await tcp_connection.connect()
+    await asyncio.sleep(0.1)
     with unittest.mock.patch.object(aea.connections.tcp.base.logger, "warning") as mock_logger_warning:
         await tcp_connection.connect()
         mock_logger_warning.assert_called_with("Connection already set up.")
@@ -49,7 +53,8 @@ async def test_connect_twice():
 @pytest.mark.asyncio
 async def test_connect_raises_exception():
     """Test the case that a connection attempt raises an exception."""
-    tcp_connection = TCPServerConnection("public_key", "127.0.0.1", 8082)
+    port = get_unused_tcp_port()
+    tcp_connection = TCPServerConnection("public_key", "127.0.0.1", port)
 
     loop = asyncio.get_event_loop()
     tcp_connection.loop = loop
@@ -63,7 +68,8 @@ async def test_connect_raises_exception():
 @pytest.mark.asyncio
 async def test_disconnect_when_already_disconnected():
     """Test that disconnecting a connection already disconnected works correctly."""
-    tcp_connection = TCPServerConnection("public_key", "127.0.0.1", 8082)
+    port = get_unused_tcp_port()
+    tcp_connection = TCPServerConnection("public_key", "127.0.0.1", port)
 
     with unittest.mock.patch.object(aea.connections.tcp.base.logger, "warning") as mock_logger_warning:
         await tcp_connection.disconnect()
@@ -74,7 +80,8 @@ async def test_disconnect_when_already_disconnected():
 async def test_send_to_unknown_destination():
     """Test that a message to an unknown destination logs an error."""
     public_key = "public_key"
-    tcp_connection = TCPServerConnection(public_key, "127.0.0.1", 8082)
+    port = get_unused_tcp_port()
+    tcp_connection = TCPServerConnection(public_key, "127.0.0.1", port)
     envelope = Envelope(to="non_existing_destination", sender="public_key", protocol_id="default", message=b"")
     with unittest.mock.patch.object(aea.connections.tcp.base.logger, "error") as mock_logger_error:
         await tcp_connection.send(envelope)
@@ -84,8 +91,9 @@ async def test_send_to_unknown_destination():
 @pytest.mark.asyncio
 async def test_send_cancelled():
     """Test that cancelling a send works correctly."""
-    tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", 8082)
-    tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", 8082)
+    port = get_unused_tcp_port()
+    tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
+    tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
 
     await tcp_server.connect()
     await tcp_client.connect()

@@ -21,7 +21,6 @@
 import asyncio
 import logging
 import os
-import threading
 from pathlib import Path
 from typing import Union, Optional
 
@@ -123,7 +122,6 @@ class StubConnection(Connection):
         self.output_file = open(output_file_path, "wb+", buffering=1)
 
         self.in_queue = None  # type: Optional[asyncio.Queue]
-        self._lock = threading.Lock()
 
         self._observer = Observer()
 
@@ -166,22 +164,21 @@ class StubConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
-        with self._lock:
-            if self.connection_status.is_connected:
-                return
+        if self.connection_status.is_connected:
+            return
 
-            try:
-                # initialize the queue here because the queue
-                # must be initialized with the right event loop
-                # which is known only at connection time.
-                self.in_queue = asyncio.Queue()
-                self._observer.start()
-            except Exception as e:      # pragma: no cover
-                raise e
-            finally:
-                self.connection_status.is_connected = False
+        try:
+            # initialize the queue here because the queue
+            # must be initialized with the right event loop
+            # which is known only at connection time.
+            self.in_queue = asyncio.Queue()
+            self._observer.start()
+        except Exception as e:      # pragma: no cover
+            raise e
+        finally:
+            self.connection_status.is_connected = False
 
-            self.connection_status.is_connected = True
+        self.connection_status.is_connected = True
 
         # do a first processing of messages.
         self.read_envelopes()
@@ -192,16 +189,15 @@ class StubConnection(Connection):
 
         In this type of connection there's no channel to disconnect.
         """
-        with self._lock:
-            if not self.connection_status.is_connected:
-                return
+        if not self.connection_status.is_connected:
+            return
 
-            assert self.in_queue is not None, "Input queue not initialized."
-            self._observer.stop()
-            self._observer.join()
-            self.in_queue.put_nowait(None)
+        assert self.in_queue is not None, "Input queue not initialized."
+        self._observer.stop()
+        self._observer.join()
+        self.in_queue.put_nowait(None)
 
-            self.connection_status.is_connected = False
+        self.connection_status.is_connected = False
 
     async def send(self, envelope: Envelope):
         """

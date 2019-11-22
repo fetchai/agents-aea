@@ -34,10 +34,10 @@ import pytest
 from docker.models.containers import Container
 from oef.agents import AsyncioCore, OEFAgent
 
+from aea import AEA_DIR
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
-from aea import AEA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -285,3 +285,13 @@ def network_node(oef_addr, oef_port, pytestconfig):
             logger.info("Stopping the OEF node...")
             c.stop()
             c.remove()
+
+
+def get_unused_tcp_port():
+    """Get an unused TCP port."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("", 0))
+    s.listen(1)
+    port = s.getsockname()[1]
+    s.close()
+    return port
