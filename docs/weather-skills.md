@@ -106,6 +106,7 @@ aea add skill weather_client_ledger
 Additionally, create the private key for the weather client AEA.
 ```bash
 aea generate-key fetchai
+aea add-key fetchai fet_private_key.txt
 ```
 
 ### Update the AEA configs
@@ -176,6 +177,7 @@ aea add skill weather_client_ledger
 Additionally, create the private key for the weather client AEA.
 ```bash
 aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
 ```
 
 ### Update the AEA configs
