@@ -52,7 +52,7 @@ class TestStubConnection:
         cls.multiplexer.connect()
 
     def test_reception(self):
-        """Test that the mailbox receives what has been enqueued in the input file."""
+        """Test that the connection receives what has been enqueued in the input file."""
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         expected_envelope = Envelope(to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
 

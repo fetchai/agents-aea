@@ -511,11 +511,11 @@ class TestFIPA:
 
     def test_send(self):
         """Test the send method."""
-        envelope = Envelope(to="mailbox", sender="me", protocol_id="tac", message=b'Hello')
+        envelope = Envelope(to="receiver", sender="me", protocol_id="tac", message=b'Hello')
         self.multiplexer1.put(envelope)
         self.multiplexer1.get(block=True, timeout=5.0)
 
-        envelope = Envelope(to="mailbox", sender="me", protocol_id="unknown", message=b'Hello')
+        envelope = Envelope(to="receiver", sender="me", protocol_id="unknown", message=b'Hello')
         self.multiplexer1.put(envelope)
 
     @classmethod
@@ -533,7 +533,7 @@ class TestOefConnection:
         """Start an oef node."""
 
     def test_connection(self):
-        """Test that a mailbox can connect to the OEF."""
+        """Test that an OEF connection can be established to the OEF."""
         crypto = DefaultCrypto()
         connection = OEFConnection(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
         multiplexer = Multiplexer([connection])
@@ -694,7 +694,7 @@ async def test_send_oef_message(network_node):
 
     msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
     msg_bytes = OEFSerializer().encode(msg)
-    envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to="recipient", sender="sender", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     await oef_connection.send(envelope)
     await oef_connection.disconnect()
 

@@ -142,11 +142,11 @@ def test_outbox_empty():
     assert outbox.empty(), "The outbox is not empty"
 
 
-def test_mailBox():
-    """Tests if the mailbox is connected."""
+def test_multiplexer():
+    """Tests if the multiplexer is connected."""
     node = LocalNode()
-    public_key_1 = "mailbox1"
-    mailbox1 = Multiplexer([OEFLocalConnection(public_key_1, node)])
-    mailbox1.connect()
-    assert mailbox1.is_connected, "Mailbox cannot connect to the specific Connection(OEFLocalConnection)"
-    mailbox1.disconnect()
+    public_key_1 = "public_key_1"
+    multiplexer = Multiplexer([OEFLocalConnection(public_key_1, node)])
+    multiplexer.connect()
+    assert multiplexer.is_connected, "Mailbox cannot connect to the specific Connection(OEFLocalConnection)"
+    multiplexer.disconnect()

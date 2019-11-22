@@ -98,6 +98,7 @@ class DummyConnection(Connection):
 
     async def disconnect(self, *args, **kwargs):
         """Disconnect."""
+        await self._queue.put(None)
         self.connection_status.is_connected = False
 
     async def send(self, envelope: 'Envelope'):
@@ -109,7 +110,11 @@ class DummyConnection(Connection):
         """Receive an envelope."""
         try:
             assert self._queue is not None
-            return await self._queue.get()
+            envelope = await self._queue.get()
+            if envelope is None:
+                logger.debug("Received none envelope.")
+                return None
+            return envelope
         except CancelledError:
             return None
         except Exception as e:

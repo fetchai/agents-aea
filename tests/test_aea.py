@@ -46,7 +46,7 @@ from .conftest import CUR_PATH
 def test_initialise_AEA():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
-    public_key_1 = "mailbox1"
+    public_key_1 = "public_key"
     connections1 = [OEFLocalConnection(public_key_1, node)]
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})

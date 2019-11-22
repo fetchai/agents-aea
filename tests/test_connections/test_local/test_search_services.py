@@ -41,10 +41,10 @@ class TestEmptySearch:
         cls.node = LocalNode()
         cls.node.start()
 
-        cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = Multiplexer([OEFLocalConnection(cls.public_key_1, cls.node)])
+        cls.public_key_1 = "public_key_1"
+        cls.multiplexer = Multiplexer([OEFLocalConnection(cls.public_key_1, cls.node)])
 
-        cls.mailbox1.connect()
+        cls.multiplexer.connect()
 
     def test_empty_search_result(self):
         """Test that at the beginning, the search request returns an empty search result."""
@@ -56,10 +56,10 @@ class TestEmptySearch:
         msg_bytes = OEFSerializer().encode(search_services_request)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id,
                             message=msg_bytes)
-        self.mailbox1.put(envelope)
+        self.multiplexer.put(envelope)
 
         # check the result
-        response_envelope = self.mailbox1.get(block=True, timeout=2.0)
+        response_envelope = self.multiplexer.get(block=True, timeout=2.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.to == self.public_key_1
         assert response_envelope.sender == DEFAULT_OEF
@@ -72,10 +72,10 @@ class TestEmptySearch:
         msg_bytes = OEFSerializer().encode(search_agents_request)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id,
                             message=msg_bytes)
-        self.mailbox1.put(envelope)
+        self.multiplexer.put(envelope)
 
         # check the result
-        response_envelope = self.mailbox1.get(block=True, timeout=5.0)
+        response_envelope = self.multiplexer.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         search_result = OEFSerializer().decode(response_envelope.message)
@@ -85,7 +85,7 @@ class TestEmptySearch:
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
-        cls.mailbox1.disconnect()
+        cls.multiplexer.disconnect()
         cls.node.stop()
 
 
@@ -98,10 +98,10 @@ class TestSimpleSearchResult:
         cls.node = LocalNode()
         cls.node.start()
 
-        cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = Multiplexer([OEFLocalConnection(cls.public_key_1, cls.node)])
+        cls.public_key_1 = "public_key"
+        cls.multiplexer = Multiplexer([OEFLocalConnection(cls.public_key_1, cls.node)])
 
-        cls.mailbox1.connect()
+        cls.multiplexer.connect()
 
         # register a service.
         request_id = 1
@@ -113,7 +113,7 @@ class TestSimpleSearchResult:
         msg_bytes = OEFSerializer().encode(register_service_request)
         envelope = Envelope(to=DEFAULT_OEF, sender=cls.public_key_1, protocol_id=OEFMessage.protocol_id,
                             message=msg_bytes)
-        cls.mailbox1.put(envelope)
+        cls.multiplexer.put(envelope)
 
     def test_not_empty_search_result(self):
         """Test that the search result contains one entry after a successful registration."""
@@ -125,10 +125,10 @@ class TestSimpleSearchResult:
         msg_bytes = OEFSerializer().encode(search_services_request)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id,
                             message=msg_bytes)
-        self.mailbox1.put(envelope)
+        self.multiplexer.put(envelope)
 
         # check the result
-        response_envelope = self.mailbox1.get(block=True, timeout=2.0)
+        response_envelope = self.multiplexer.get(block=True, timeout=2.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.to == self.public_key_1
         assert response_envelope.sender == DEFAULT_OEF
@@ -139,7 +139,7 @@ class TestSimpleSearchResult:
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
-        cls.mailbox1.disconnect()
+        cls.multiplexer.disconnect()
         cls.node.stop()
 
 
@@ -152,12 +152,12 @@ class TestUnregister:
         cls.node = LocalNode()
         cls.node.start()
 
-        cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = Multiplexer([OEFLocalConnection(cls.public_key_1, cls.node)])
-        cls.public_key_2 = "mailbox2"
-        cls.mailbox2 = Multiplexer([OEFLocalConnection(cls.public_key_2, cls.node)])
-        cls.mailbox1.connect()
-        cls.mailbox2.connect()
+        cls.public_key_1 = "public_key_1"
+        cls.multiplexer1 = Multiplexer([OEFLocalConnection(cls.public_key_1, cls.node)])
+        cls.public_key_2 = "public_key_2"
+        cls.multiplexer2 = Multiplexer([OEFLocalConnection(cls.public_key_2, cls.node)])
+        cls.multiplexer1.connect()
+        cls.multiplexer2.connect()
 
     def test_unregister_service_result(self):
         """Test that at the beginning, the search request returns an empty search result."""
@@ -167,10 +167,10 @@ class TestUnregister:
                          service_id="Test_service")
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        self.multiplexer1.put(envelope)
 
         # check the result
-        response_envelope = self.mailbox1.get(block=True, timeout=5.0)
+        response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OEFSerializer().decode(response_envelope.message)
@@ -180,15 +180,15 @@ class TestUnregister:
                          service_id="Test_Service")
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        self.multiplexer1.put(envelope)
 
         # Search for the register agent
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=Query([Constraint("foo", ConstraintType("==", 1))]))
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        self.multiplexer1.put(envelope)
         # check the result
-        response_envelope = self.mailbox1.get(block=True, timeout=5.0)
+        response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OEFSerializer().decode(response_envelope.message)
@@ -202,16 +202,16 @@ class TestUnregister:
                          service_id="Test_service")
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        self.multiplexer1.put(envelope)
 
         # the same query returns empty
         # Search for the register agent
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=Query([Constraint("foo", ConstraintType("==", 1))]))
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        self.multiplexer1.put(envelope)
         # check the result
-        response_envelope = self.mailbox1.get(block=True, timeout=5.0)
+        response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OEFSerializer().decode(response_envelope.message)
@@ -228,19 +228,19 @@ class TestUnregister:
         msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_AGENT, id=0, agent_description=agent_description,
                          agent_id="Test_agent")
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.multiplexer1.put(envelope)
 
         time.sleep(0.1)
 
         # Search for the register agent
         msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox2", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox2.put(envelope)
+        envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_2, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.multiplexer2.put(envelope)
 
         # check the result
-        response_envelope = self.mailbox2.get(block=True, timeout=5.0)
+        response_envelope = self.multiplexer2.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OEFSerializer().decode(response_envelope.message)
@@ -250,8 +250,8 @@ class TestUnregister:
         msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_AGENT, id=0, agent_description=agent_description,
                          agent_id="Test_agent")
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.multiplexer1.put(envelope)
 
         time.sleep(0.1)
 
@@ -259,11 +259,11 @@ class TestUnregister:
         msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_AGENT, id=0, agent_description=agent_description,
                          agent_id="Unknown_Agent")
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        self.multiplexer1.put(envelope)
 
         # check the result
-        response_envelope = self.mailbox1.get(block=True, timeout=5.0)
+        response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OEFSerializer().decode(response_envelope.message)
@@ -272,8 +272,8 @@ class TestUnregister:
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
-        cls.mailbox1.disconnect()
-        cls.mailbox2.disconnect()
+        cls.multiplexer1.disconnect()
+        cls.multiplexer2.disconnect()
         cls.node.stop()
 
 
@@ -286,26 +286,27 @@ class TestAgentMessage:
         cls.node = LocalNode()
         cls.node.start()
 
-        cls.public_key_1 = "mailbox1"
-        cls.mailbox1 = Multiplexer([OEFLocalConnection(cls.public_key_1, cls.node)])
+        cls.public_key_1 = "public_key_1"
+        cls.multiplexer1 = Multiplexer([OEFLocalConnection(cls.public_key_1, cls.node)])
 
     @pytest.mark.asyncio
     async def test_messages(self):
         """Test that at the beginning, the search request returns an empty search result."""
         msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
         msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=DEFAULT_OEF, sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         with pytest.raises(AEAConnectionError):
             await OEFLocalConnection(self.public_key_1, self.node).send(envelope)
 
-        self.mailbox1.connect()
+        self.multiplexer1.connect()
         msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
         msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to="mailbox3", sender="mailbox1", protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        self.mailbox1.put(envelope)
+        envelope = Envelope(to="this_public_key_does_not_exist",
+                            sender=self.public_key_1, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        self.multiplexer1.put(envelope)
 
         # check the result
-        response_envelope = self.mailbox1.get(block=True, timeout=5.0)
+        response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
         assert response_envelope.protocol_id == OEFMessage.protocol_id
         assert response_envelope.sender == DEFAULT_OEF
         result = OEFSerializer().decode(response_envelope.message)
@@ -314,7 +315,7 @@ class TestAgentMessage:
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
-        cls.mailbox1.disconnect()
+        cls.multiplexer1.disconnect()
         cls.node.stop()
 
 
@@ -326,7 +327,7 @@ class TestOEFConnectionFromJson:
         """Set up the test."""
         cls.node = LocalNode()
         cls.node.start()
-        cls.public_key_1 = "mailbox1"
+        cls.public_key_1 = "public_key_1"
 
     def test_from_config(self):
         """Test the configuration loading."""
