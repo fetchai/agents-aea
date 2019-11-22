@@ -45,7 +45,8 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, Privat
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE
+from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, \
+    _validate_private_key_path
 
 DEFAULT_CONNECTION = "oef"
 DEFAULT_SKILL = "error"
@@ -182,6 +183,7 @@ def generate_key(ctx: Context, type_):
 def add_key(ctx: Context, type_, file):
     """Add a private key to the wallet."""
     _try_to_load_agent_config(ctx)
+    _validate_private_key_path(file, type_)
     try:
         ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
     except ValueError as e:

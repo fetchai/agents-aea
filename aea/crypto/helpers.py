@@ -83,6 +83,25 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
         sys.exit(1)
 
 
+def _validate_private_key_path(private_key_path: str, ledger_id: str):
+    """
+    Validate a private key path.
+
+    :param private_key_path: the path to the private key.
+    :param ledger_id: one of 'fetchai', 'ethereum', 'default'
+    :return: None
+    :raises: ValueError if the private key is invalid.
+    """
+    if ledger_id == "default":
+        _try_validate_private_key_pem_path(private_key_path)
+    elif ledger_id == "fetchai":
+        _try_validate_fet_private_key_path(private_key_path)
+    elif ledger_id == "ethereum":
+        _try_validate_ethereum_private_key_path(private_key_path)
+    else:
+        raise ValueError("Ledger id {} is not valid.".format(repr(ledger_id)))  # pragma: no cover
+
+
 def _create_default_private_key() -> None:
     """
     Create a default private key.
