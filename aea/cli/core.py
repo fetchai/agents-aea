@@ -169,6 +169,7 @@ def generate_key(ctx: Context, type_):
     if type_ == EthereumCrypto.identifier or type_ == "all":
         EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
 
+
 @cli.command()
 @click.argument("type_", metavar="TYPE", type=click.Choice([
     DefaultCrypto.identifier,
@@ -179,6 +180,7 @@ def generate_key(ctx: Context, type_):
                 required=True)
 @pass_ctx
 def add_key(ctx: Context, type_, file):
+    """Add a private key to the wallet."""
     _try_to_load_agent_config(ctx)
     ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
