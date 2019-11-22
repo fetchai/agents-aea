@@ -37,7 +37,7 @@ from aea.connections.oef.connection import OEFConnection
 from aea.connections.oef.connection import OEFObjectTranslator
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
-from aea.mail.base import Envelope, MailBox
+from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa import fipa_pb2
@@ -64,23 +64,23 @@ class TestDefault:
         """Set the test up."""
         cls.crypto1 = DefaultCrypto()
         cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
-        cls.mailbox1 = MailBox([cls.connection])
-        cls.mailbox1.connect()
+        cls.multiplexer = Multiplexer([cls.connection])
+        cls.multiplexer.connect()
 
     def test_send_message(self):
         """Test that a default byte message can be sent correctly."""
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        self.mailbox1.outbox.put_message(to=self.crypto1.public_key, sender=self.crypto1.public_key,
-                                         protocol_id=DefaultMessage.protocol_id,
-                                         message=DefaultSerializer().encode(msg))
+        self.multiplexer.put(Envelope(to=self.crypto1.public_key, sender=self.crypto1.public_key,
+                                      protocol_id=DefaultMessage.protocol_id,
+                                      message=DefaultSerializer().encode(msg)))
 
-        recv_msg = self.mailbox1.inbox.get(block=True, timeout=3.0)
+        recv_msg = self.multiplexer.get(block=True, timeout=3.0)
         assert recv_msg is not None
 
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""
-        cls.mailbox1.disconnect()
+        cls.multiplexer.disconnect()
 
 
 class TestOEF:
@@ -98,8 +98,8 @@ class TestOEF:
             """Set the test up."""
             cls.crypto1 = DefaultCrypto()
             cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
-            cls.mailbox1 = MailBox([cls.connection])
-            cls.mailbox1.connect()
+            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer.connect()
 
         def test_search_services_with_query_without_model(self):
             """Test that a search services request can be sent correctly.
@@ -110,11 +110,11 @@ class TestOEF:
             search_query_empty_model = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
                                         query=search_query_empty_model)
-            self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
-                                             protocol_id=OEFMessage.protocol_id,
-                                             message=OEFSerializer().encode(search_request))
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+                                          protocol_id=OEFMessage.protocol_id,
+                                          message=OEFSerializer().encode(search_request)))
 
-            envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+            envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id")
@@ -129,11 +129,11 @@ class TestOEF:
             data_model = DataModel("foobar", [Attribute("foo", str, True)])
             search_query = Query([Constraint("foo", ConstraintType("==", "bar"))], model=data_model)
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id, query=search_query)
-            self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
-                                             protocol_id=OEFMessage.protocol_id,
-                                             message=OEFSerializer().encode(search_request))
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+                                          protocol_id=OEFMessage.protocol_id,
+                                          message=OEFSerializer().encode(search_request)))
 
-            envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+            envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id") == request_id
@@ -142,7 +142,7 @@ class TestOEF:
         @classmethod
         def teardown_class(cls):
             """Teardowm the test."""
-            cls.mailbox1.disconnect()
+            cls.multiplexer.disconnect()
 
     class TestRegisterService:
         """Tests related to service registration functionality."""
@@ -152,8 +152,8 @@ class TestOEF:
             """Set the test up."""
             cls.crypto1 = DefaultCrypto()
             cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
-            cls.mailbox1 = MailBox([cls.connection])
-            cls.mailbox1.connect()
+            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer.connect()
 
         def test_register_service(self):
             """Test that a register service request works correctly."""
@@ -161,16 +161,16 @@ class TestOEF:
             desc = Description({"bar": 1}, data_model=foo_datamodel)
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
-                                             protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+                                          protocol_id=OEFMessage.protocol_id, message=msg_bytes))
             time.sleep(0.5)
 
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=2,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel))
-            self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
-                                             protocol_id=OEFMessage.protocol_id,
-                                             message=OEFSerializer().encode(search_request))
-            envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+                                          protocol_id=OEFMessage.protocol_id,
+                                          message=OEFSerializer().encode(search_request)))
+            envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id") == 2
@@ -180,7 +180,7 @@ class TestOEF:
         @classmethod
         def teardown_class(cls):
             """Teardowm the test."""
-            cls.mailbox1.disconnect()
+            cls.multiplexer.disconnect()
 
     class TestUnregisterService:
         """Tests related to service unregistration functionality."""
@@ -196,8 +196,8 @@ class TestOEF:
             """
             cls.crypto1 = DefaultCrypto()
             cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
-            cls.mailbox1 = MailBox([cls.connection])
-            cls.mailbox1.connect()
+            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer.connect()
 
             cls.request_id = 1
             cls.foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
@@ -205,8 +205,8 @@ class TestOEF:
             msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=cls.request_id, service_description=cls.desc,
                              service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            cls.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=cls.crypto1.public_key,
-                                            protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            cls.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=cls.crypto1.public_key,
+                                         protocol_id=OEFMessage.protocol_id, message=msg_bytes))
 
             time.sleep(1.0)
 
@@ -214,10 +214,10 @@ class TestOEF:
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=cls.request_id,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))],
                                                     model=cls.foo_datamodel))
-            cls.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=cls.crypto1.public_key,
-                                            protocol_id=OEFMessage.protocol_id,
-                                            message=OEFSerializer().encode(search_request))
-            envelope = cls.mailbox1.inbox.get(block=True, timeout=5.0)
+            cls.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=cls.crypto1.public_key,
+                                         protocol_id=OEFMessage.protocol_id,
+                                         message=OEFSerializer().encode(search_request)))
+            envelope = cls.multiplexer.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id") == cls.request_id
@@ -237,8 +237,8 @@ class TestOEF:
             msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=self.request_id,
                              service_description=self.desc, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
-                                             protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+                                          protocol_id=OEFMessage.protocol_id, message=msg_bytes))
 
             time.sleep(1.0)
 
@@ -246,11 +246,11 @@ class TestOEF:
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=self.request_id,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))],
                                                     model=self.foo_datamodel))
-            self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
-                                             protocol_id=OEFMessage.protocol_id,
-                                             message=OEFSerializer().encode(search_request))
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+                                          protocol_id=OEFMessage.protocol_id,
+                                          message=OEFSerializer().encode(search_request)))
 
-            envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+            envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id") == self.request_id
@@ -259,7 +259,7 @@ class TestOEF:
         @classmethod
         def teardown_class(cls):
             """Teardown the test."""
-            cls.mailbox1.disconnect()
+            cls.multiplexer.disconnect()
 
     class TestMailStats:
         """This class contains tests for the mail stats component."""
@@ -269,10 +269,10 @@ class TestOEF:
             """Set the tests up."""
             cls.crypto1 = DefaultCrypto()
             cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
-            cls.mailbox1 = MailBox([cls.connection])
-            cls.mailbox1.connect()
+            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer.connect()
 
-            cls.connection = cls.mailbox1._multiplexer.connections[0]
+            cls.connection = cls.multiplexer.connections[0]
 
         def test_search_count_increases(self):
             """Test that the search count increases."""
@@ -280,11 +280,11 @@ class TestOEF:
             search_query_empty_model = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
             search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
                                         query=search_query_empty_model)
-            self.mailbox1.outbox.put_message(to=DEFAULT_OEF, sender=self.crypto1.public_key,
-                                             protocol_id=OEFMessage.protocol_id,
-                                             message=OEFSerializer().encode(search_request))
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+                                          protocol_id=OEFMessage.protocol_id,
+                                          message=OEFSerializer().encode(search_request)))
 
-            envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+            envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id")
@@ -293,7 +293,7 @@ class TestOEF:
         @classmethod
         def teardown_class(cls):
             """Tear the tests down."""
-            cls.mailbox1.disconnect()
+            cls.multiplexer.disconnect()
 
 
 class TestFIPA:
@@ -311,27 +311,27 @@ class TestFIPA:
         cls.crypto2 = DefaultCrypto()
         cls.connection1 = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
         cls.connection2 = OEFConnection(cls.crypto2.public_key, oef_addr="127.0.0.1", oef_port=10000)
-        cls.mailbox1 = MailBox([cls.connection1])
-        cls.mailbox2 = MailBox([cls.connection2])
-        cls.mailbox1.connect()
-        cls.mailbox2.connect()
+        cls.multiplexer1 = Multiplexer([cls.connection1])
+        cls.multiplexer2 = Multiplexer([cls.connection2])
+        cls.multiplexer1.connect()
+        cls.multiplexer2.connect()
 
     def test_cfp(self):
         """Test that a CFP can be sent correctly."""
         cfp_bytes = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP,
                                 query=Query([Constraint('something', ConstraintType('>', 1))]))
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id,
-                                         message=FIPASerializer().encode(cfp_bytes))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=5.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id,
+                                       message=FIPASerializer().encode(cfp_bytes)))
+        envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_bytes = FIPASerializer().decode(envelope.message)
         assert expected_cfp_bytes == cfp_bytes
 
         cfp_none = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP,
                                query=None)
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_none))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=5.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_none)))
+        envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_none = FIPASerializer().decode(envelope.message)
         assert expected_cfp_none == cfp_none
 
@@ -339,10 +339,10 @@ class TestFIPA:
         """Test that a Propose can be sent correctly."""
         propose_empty = FIPAMessage(message_id=0, dialogue_id=0, target=0,
                                     performative=FIPAMessage.Performative.PROPOSE, proposal=[])
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id,
-                                         message=FIPASerializer().encode(propose_empty))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id,
+                                       message=FIPASerializer().encode(propose_empty)))
+        envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_empty = FIPASerializer().decode(envelope.message)
         assert expected_propose_empty == propose_empty
 
@@ -351,19 +351,19 @@ class TestFIPA:
                                            target=0,
                                            performative=FIPAMessage.Performative.PROPOSE,
                                            proposal=[Description({"foo": "bar"}, DataModel("foobar", [Attribute("foo", str, True)]))])
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id,
-                                         message=FIPASerializer().encode(propose_descriptions))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id,
+                                       message=FIPASerializer().encode(propose_descriptions)))
+        envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_descriptions = FIPASerializer().decode(envelope.message)
         assert expected_propose_descriptions == propose_descriptions
 
     def test_accept(self):
         """Test that an Accept can be sent correctly."""
         accept = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(accept))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(accept)))
+        envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_accept = FIPASerializer().decode(envelope.message)
         assert expected_accept == accept
 
@@ -372,19 +372,19 @@ class TestFIPA:
         # NOTE since the OEF SDK doesn't support the match accept, we have to use a fixed message id!
         match_accept = FIPAMessage(message_id=4, dialogue_id=0, target=3,
                                    performative=FIPAMessage.Performative.MATCH_ACCEPT)
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id,
-                                         message=FIPASerializer().encode(match_accept))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id,
+                                       message=FIPASerializer().encode(match_accept)))
+        envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_match_accept = FIPASerializer().decode(envelope.message)
         assert expected_match_accept == match_accept
 
     def test_decline(self):
         """Test that a Decline can be sent correctly."""
         decline = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.DECLINE)
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key, sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(decline))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(decline)))
+        envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_decline = FIPASerializer().decode(envelope.message)
         assert expected_decline == decline
 
@@ -395,11 +395,11 @@ class TestFIPA:
                                              target=0,
                                              performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
                                              address='my_address')
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
-                                         sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id,
-                                         message=FIPASerializer().encode(match_accept_w_address))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
+                                       sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id,
+                                       message=FIPASerializer().encode(match_accept_w_address)))
+        envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_match_accept_w_address = FIPASerializer().decode(envelope.message)
         assert returned_match_accept_w_address == match_accept_w_address
 
@@ -410,11 +410,11 @@ class TestFIPA:
                                        target=0,
                                        performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
                                        address='my_address')
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
-                                         sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id,
-                                         message=FIPASerializer().encode(accept_w_address))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
+                                       sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id,
+                                       message=FIPASerializer().encode(accept_w_address)))
+        envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_accept_w_address = FIPASerializer().decode(envelope.message)
         assert returned_accept_w_address == accept_w_address
 
@@ -426,11 +426,11 @@ class TestFIPA:
                              target=0,
                              performative=FIPAMessage.Performative.INFORM,
                              json_data=payload)
-        self.mailbox1.outbox.put_message(to=self.crypto2.public_key,
-                                         sender=self.crypto1.public_key,
-                                         protocol_id=FIPAMessage.protocol_id,
-                                         message=FIPASerializer().encode(inform))
-        envelope = self.mailbox2.inbox.get(block=True, timeout=2.0)
+        self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
+                                       sender=self.crypto1.public_key,
+                                       protocol_id=FIPAMessage.protocol_id,
+                                       message=FIPASerializer().encode(inform)))
+        envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_inform = FIPASerializer().decode(envelope.message)
         assert returned_inform == inform
 
@@ -488,41 +488,41 @@ class TestFIPA:
 
     def test_on_oef_error(self):
         """Test the oef error."""
-        oef_connection = self.mailbox1._multiplexer.connections[0]
+        oef_connection = self.multiplexer1.connections[0]
         oef_channel = oef_connection.channel
 
         with pytest.raises(ValueError):
             oef_channel.on_propose(msg_id=0, dialogue_id=0, origin="me", target=1, b_proposals="hello")
 
         oef_channel.on_oef_error(answer_id=0, operation=OEFErrorOperation.SEARCH_AGENTS)
-        envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+        envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = OEFSerializer().decode(envelope.message)
         assert dec_msg.get("type") is OEFMessage.Type.OEF_ERROR, "It should be an error message"
 
     def test_on_dialogue_error(self):
         """Test the dialogue error."""
-        oef_connection = self.mailbox1._multiplexer.connections[0]
+        oef_connection = self.multiplexer1.connections[0]
         oef_channel = oef_connection.channel
 
         oef_channel.on_dialogue_error(answer_id=0, dialogue_id=0, origin="me")
-        envelope = self.mailbox1.inbox.get(block=True, timeout=5.0)
+        envelope = self.multiplexer1.get(block=True, timeout=5.0)
         dec_msg = OEFSerializer().decode(envelope.message)
         assert dec_msg.get("type") is OEFMessage.Type.DIALOGUE_ERROR, "It should be a dialogue error"
 
     def test_send(self):
         """Test the send method."""
-        envelope = Envelope(to="mailbox", sender="me", protocol_id="tac", message=b'Hello')
-        self.mailbox1.send(envelope)
-        self.mailbox1.inbox.get(block=True, timeout=5.0)
+        envelope = Envelope(to="receiver", sender="me", protocol_id="tac", message=b'Hello')
+        self.multiplexer1.put(envelope)
+        self.multiplexer1.get(block=True, timeout=5.0)
 
-        envelope = Envelope(to="mailbox", sender="me", protocol_id="unknown", message=b'Hello')
-        self.mailbox1.send(envelope)
+        envelope = Envelope(to="receiver", sender="me", protocol_id="unknown", message=b'Hello')
+        self.multiplexer1.put(envelope)
 
     @classmethod
     def teardown_class(cls):
         """Teardown the test."""
-        cls.mailbox1.disconnect()
-        cls.mailbox2.disconnect()
+        cls.multiplexer1.disconnect()
+        cls.multiplexer2.disconnect()
 
 
 class TestOefConnection:
@@ -533,12 +533,12 @@ class TestOefConnection:
         """Start an oef node."""
 
     def test_connection(self):
-        """Test that a mailbox can connect to the OEF."""
+        """Test that an OEF connection can be established to the OEF."""
         crypto = DefaultCrypto()
         connection = OEFConnection(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
-        mailbox = MailBox([connection])
-        mailbox.connect()
-        mailbox.disconnect()
+        multiplexer = Multiplexer([connection])
+        multiplexer.connect()
+        multiplexer.disconnect()
 
     # TODO connection error has been removed
     # @pytest.mark.asyncio
@@ -694,7 +694,7 @@ async def test_send_oef_message(network_node):
 
     msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
     msg_bytes = OEFSerializer().encode(msg)
-    envelope = Envelope(to="mailbox2", sender="mailbox1", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to="recipient", sender="sender", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     await oef_connection.send(envelope)
     await oef_connection.disconnect()
 

@@ -34,10 +34,10 @@ import pytest
 from docker.models.containers import Container
 from oef.agents import AsyncioCore, OEFAgent
 
+from aea import AEA_DIR
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
-from aea import AEA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +98,7 @@ class DummyConnection(Connection):
 
     async def disconnect(self, *args, **kwargs):
         """Disconnect."""
+        await self._queue.put(None)
         self.connection_status.is_connected = False
 
     async def send(self, envelope: 'Envelope'):
@@ -109,7 +110,11 @@ class DummyConnection(Connection):
         """Receive an envelope."""
         try:
             assert self._queue is not None
-            return await self._queue.get()
+            envelope = await self._queue.get()
+            if envelope is None:
+                logger.debug("Received none envelope.")
+                return None
+            return envelope
         except CancelledError:
             return None
         except Exception as e:
@@ -280,3 +285,13 @@ def network_node(oef_addr, oef_port, pytestconfig):
             logger.info("Stopping the OEF node...")
             c.stop()
             c.remove()
+
+
+def get_unused_tcp_port():
+    """Get an unused TCP port."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("", 0))
+    s.listen(1)
+    port = s.getsockname()[1]
+    s.close()
+    return port

@@ -20,7 +20,6 @@
 """Base classes for TCP communication."""
 import logging
 import struct
-import threading
 from abc import ABC, abstractmethod
 from asyncio import CancelledError, StreamWriter, StreamReader
 from typing import Optional
@@ -44,8 +43,6 @@ class TCPConnection(Connection, ABC):
 
         self.host = host
         self.port = port
-
-        self._lock = threading.Lock()
 
     @abstractmethod
     async def setup(self):
@@ -71,17 +68,16 @@ class TCPConnection(Connection, ABC):
         :return: A queue or None.
         :raises ConnectionError: if a problem occurred during the connection.
         """
-        with self._lock:
-            if self.connection_status.is_connected:
-                logger.warning("Connection already set up.")
-                return
+        if self.connection_status.is_connected:
+            logger.warning("Connection already set up.")
+            return
 
-            try:
-                await self.setup()
-                self.connection_status.is_connected = True
-            except Exception as e:
-                logger.error(str(e))
-                self.connection_status.is_connected = False
+        try:
+            await self.setup()
+            self.connection_status.is_connected = True
+        except Exception as e:
+            logger.error(str(e))
+            self.connection_status.is_connected = False
 
     async def disconnect(self) -> None:
         """
@@ -89,13 +85,12 @@ class TCPConnection(Connection, ABC):
 
         :return: None.
         """
-        with self._lock:
-            if not self.connection_status.is_connected:
-                logger.warning("Connection already disconnected.")
-                return
+        if not self.connection_status.is_connected:
+            logger.warning("Connection already disconnected.")
+            return
 
-            await self.teardown()
-            self.connection_status.is_connected = False
+        await self.teardown()
+        self.connection_status.is_connected = False
 
     async def _recv(self, reader: StreamReader) -> Optional[bytes]:
         """Receive bytes."""

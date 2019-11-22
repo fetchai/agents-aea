@@ -31,7 +31,6 @@ from aea.connections.base import ConnectionStatus
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
-from aea.mail.base import MailBox
 from aea.skills.base import SkillContext, Skill
 from tests.conftest import CUR_PATH, DummyConnection
 
@@ -40,9 +39,9 @@ def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    mailbox1 = MailBox([DummyConnection()])
+    connections = [DummyConnection()]
     ledger_apis = LedgerApis({"fetchai": ('alpha.fetch-ai.com', 80)})
-    my_aea = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+    my_aea = AEA("Agent0", connections, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
 
     assert set(my_aea.context.ledger_apis.apis.keys()) == {"fetchai"}
     fetchai_ledger_api_obj = my_aea.context.ledger_apis.apis["fetchai"]
@@ -59,8 +58,8 @@ class TestSkillContext:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': private_key_pem_path})
         cls.ledger_apis = LedgerApis({"fetchai": ("alpha.fetch-ai.com", 80)})
-        cls.mailbox1 = MailBox([DummyConnection()])
-        cls.my_aea = AEA("Agent0", cls.mailbox1, cls.wallet, cls.ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+        cls.connections = [DummyConnection()]
+        cls.my_aea = AEA("Agent0", cls.connections, cls.wallet, cls.ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
         cls.skill_context = SkillContext(cls.my_aea.context)
 
     def test_agent_name(self):
@@ -141,8 +140,8 @@ class TestSkillFromDir:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
-        cls.mailbox1 = MailBox([DummyConnection()])
-        cls.my_aea = AEA("agent_name", cls.mailbox1, cls.wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+        cls.connections = [DummyConnection()]
+        cls.my_aea = AEA("agent_name", cls.connections, cls.wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
         cls.agent_context = cls.my_aea.context
 
     def test_missing_handler(self):

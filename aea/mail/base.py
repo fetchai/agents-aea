@@ -599,35 +599,3 @@ class OutBox(object):
         """
         envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
         self._multiplexer.put(envelope)
-
-
-class MailBox(object):
-    """Abstract definition of a mailbox."""
-
-    def __init__(self, connections: List['Connection'], loop: Optional[AbstractEventLoop] = None):
-        """Initialize the mailbox."""
-        self._multiplexer = Multiplexer(connections, loop=loop)
-        self.inbox = InBox(self._multiplexer)
-        self.outbox = OutBox(self._multiplexer)
-
-    @property
-    def connection_status(self) -> ConnectionStatus:
-        """Get the connection status."""
-        return self._multiplexer.connection_status
-
-    @property
-    def is_connected(self) -> bool:
-        """Check whether the multiplexer is connected."""
-        return self._multiplexer.is_connected
-
-    def connect(self) -> None:
-        """Connect."""
-        self._multiplexer.connect()
-
-    def disconnect(self) -> None:
-        """Disconnect."""
-        self._multiplexer.disconnect()
-
-    def send(self, out: Envelope) -> None:
-        """Send an envelope."""
-        self.outbox.put(out)
