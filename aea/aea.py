@@ -20,6 +20,7 @@
 """This module contains the implementation of an Autonomous Economic Agent."""
 import logging
 from asyncio import AbstractEventLoop
+from concurrent.futures import Executor
 from typing import Optional, cast, List
 
 from aea.agent import Agent
@@ -31,6 +32,7 @@ from aea.decision_maker.base import DecisionMaker
 from aea.mail.base import Envelope
 from aea.registries.base import Filter, Resources
 from aea.skills.error.handlers import ErrorHandler
+from aea.skills.tasks import TaskManager
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +48,8 @@ class AEA(Agent):
                  loop: Optional[AbstractEventLoop] = None,
                  timeout: float = 0.0,
                  debug: bool = False,
-                 max_reactions: int = 20) -> None:
+                 max_reactions: int = 20,
+                 executor: Optional[Executor] = None) -> None:
         """
         Instantiate the agent.
 
@@ -59,12 +62,14 @@ class AEA(Agent):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
+        :param executor: executor for asynchronous execution of tasks.
 
         :return: None
         """
         super().__init__(name=name, wallet=wallet, connections=connections, loop=loop, timeout=timeout, debug=debug)
 
         self.max_reactions = max_reactions
+        self._task_manager = TaskManager(executor)
         self._decision_maker = DecisionMaker(self.name,
                                              self.max_reactions,
                                              self.outbox,
@@ -182,8 +187,9 @@ class AEA(Agent):
 
         :return None
         """
-        for task in self.filter.get_active_tasks():
-            task.execute()
+        # TODO: task should be submitted by the behaviours and handlers
+        # for task in self.filter.get_active_tasks():
+        #     task.execute()
         self.decision_maker.execute()
         self.filter.handle_internal_messages()
 
