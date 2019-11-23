@@ -24,7 +24,7 @@ import logging
 from asyncio import Queue, AbstractEventLoop
 from collections import defaultdict
 from threading import Thread
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast, Set
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
@@ -53,7 +53,7 @@ class LocalNode:
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
+        self._in_queue = None  # type: Optional[asyncio.Queue]
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
         self._receiving_loop_task = None  # type: Optional[asyncio.Task]
@@ -75,6 +75,7 @@ class LocalNode:
         """
         logger.debug("Starting threaded asyncio loop...")
         asyncio.set_event_loop(self._loop)
+        self._in_queue = asyncio.Queue()
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
 
@@ -322,14 +323,17 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    def __init__(self, public_key: str, local_node: LocalNode, connection_id: str = "local"):
+    supported_protocols = {"default", "oef", "fipa", "tac"}
+
+    def __init__(self, public_key: str, local_node: LocalNode, connection_id: str = "local",
+                 supported_protocols: Optional[Set[str]] = None):
         """
         Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
 
         :param public_key: the public key used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
         """
-        super().__init__(connection_id)
+        super().__init__(connection_id=connection_id, supported_protocols=supported_protocols)
         self._public_key = public_key
         self._local_node = local_node
 
@@ -344,7 +348,7 @@ class OEFLocalConnection(Connection):
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
         if not self.connection_status.is_connected:
-            self._reader = Queue(loop=self._loop)
+            self._reader = Queue()
             self._writer = await self._local_node.connect(self._public_key, self._reader)
             self.connection_status.is_connected = True
 
@@ -391,4 +395,5 @@ class OEFLocalConnection(Connection):
         :return: the connection object
         """
         local_node = LocalNode()
-        return OEFLocalConnection(public_key, local_node)
+        return OEFLocalConnection(public_key, local_node,
+                                  supported_protocols=connection_configuration.supported_protocols)

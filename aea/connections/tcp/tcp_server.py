@@ -40,14 +40,16 @@ class TCPServerConnection(TCPConnection):
     def __init__(self,
                  public_key: str,
                  host: str,
-                 port: int):
+                 port: int,
+                 *args,
+                 **kwargs):
         """
         Initialize a TCP channel.
 
         :param public_key: public key.
         :param host: the socket bind address.
         """
-        super().__init__(public_key, host, port)
+        super().__init__(public_key, host, port, *args, **kwargs)
 
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
@@ -139,4 +141,5 @@ class TCPServerConnection(TCPConnection):
         """
         address = cast(str, connection_configuration.config.get("address"))
         port = cast(int, connection_configuration.config.get("port"))
-        return TCPServerConnection(public_key, address, port)
+        return TCPServerConnection(public_key, address, port,
+                                   supported_protocols=connection_configuration.supported_protocols)

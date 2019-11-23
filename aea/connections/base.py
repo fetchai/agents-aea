@@ -19,14 +19,18 @@
 # ------------------------------------------------------------------------------
 
 """The base connection package."""
+import logging
 from abc import abstractmethod, ABC
 from asyncio import AbstractEventLoop
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Set
 
 from aea.configurations.base import ConnectionConfig
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope  # pragma: no cover
+
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionStatus(object):
@@ -40,16 +44,29 @@ class ConnectionStatus(object):
 class Connection(ABC):
     """Abstract definition of a connection."""
 
-    def __init__(self, connection_id: str):
+    def __init__(self, connection_id: Optional[str] = None, supported_protocols: Optional[Set[str]] = None):
         """
         Initialize the connection.
 
         :param connection_id: the connection identifier.
+        :param supported_protocols: the set of protocol ids supported by the connection.
         """
-        self._connection_id = connection_id
+        self._connection_id = connection_id if connection_id is not None else type(self).__name__
+        self._supported_protocols = self._get_supported_protocols(supported_protocols)
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
+
+        if len(self.supported_protocols) == 0:
+            logger.warning("No supported protocol for connection '{}'".format(connection_id))
+
+    def _get_supported_protocols(self, supported_protocols: Optional[Set[str]] = None) -> Set[str]:
+        if supported_protocols is not None:
+            return supported_protocols
+        elif hasattr(type(self), "supported_protocols") and isinstance(getattr(type(self), "supported_protocols"), set):
+            return getattr(type(self), "supported_protocols")
+        else:
+            return set()
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
@@ -71,6 +88,11 @@ class Connection(ABC):
     def connection_id(self) -> str:
         """Get the id of the connection."""
         return self._connection_id
+
+    @property
+    def supported_protocols(self) -> Set[str]:
+        """Get the supported protocols."""
+        return self._supported_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:

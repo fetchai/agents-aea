@@ -151,11 +151,11 @@ def test_communication():
 @pytest.mark.asyncio
 async def test_connecting_to_node_with_same_key():
     """Test that connecting twice with the same key works correctly."""
-    node = LocalNode()
-    public_key = "my_public_key"
-    my_queue = asyncio.Queue()
+    with LocalNode() as node:
+        public_key = "my_public_key"
+        my_queue = asyncio.Queue()
 
-    ret = await node.connect(public_key, my_queue)
-    assert ret is not None and isinstance(ret, asyncio.Queue)
-    ret = await node.connect(public_key, my_queue)
-    assert ret is None
+        ret = await node.connect(public_key, my_queue)
+        assert ret is not None and isinstance(ret, asyncio.Queue)
+        ret = await node.connect(public_key, my_queue)
+        assert ret is None

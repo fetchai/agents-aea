@@ -166,7 +166,7 @@ async def test_handle():
             dummy_handler = dummy_skill.handlers[0]
 
             expected_envelope = envelope
-            agent.outbox.put(expected_envelope)
+            agent._multiplexer.in_queue.put(expected_envelope)
             time.sleep(1.0)
             assert len(dummy_handler.handled_messages) == 1
 
