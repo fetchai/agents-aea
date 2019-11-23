@@ -85,7 +85,7 @@ def tcpping(ip, port) -> bool:
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
-    restricted_to_protocols = set()
+    restricted_to_protocols = set()  # type: Set[str]
 
     def __init__(self, connection_id: str = "dummy", restricted_to_protocols: Optional[Set[str]] = None):
         """Initialize."""

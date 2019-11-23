@@ -137,7 +137,7 @@ class GymChannel:
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    supported_protocols = {"gym"}
+    restricted_to_protocols = {"gym"}
 
     def __init__(self, public_key: str, gym_env: gym.Env, connection_id: str = "gym", **kwargs):
         """
@@ -220,4 +220,6 @@ class GymConnection(Connection):
         """
         gym_env_package = cast(str, connection_configuration.config.get('env'))
         gym_env = locate(gym_env_package)
-        return GymConnection(public_key, gym_env())
+        return GymConnection(public_key, gym_env(),
+                             connection_id=connection_configuration.name,
+                             restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

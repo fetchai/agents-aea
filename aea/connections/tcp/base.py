@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
 
-    restricted_to_protocols = set()
+    restricted_to_protocols = set()  # type: Set[str]
 
     def __init__(self,
                  public_key: str,

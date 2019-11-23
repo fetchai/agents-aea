@@ -108,5 +108,5 @@ class TCPClientConnection(TCPConnection):
         address = cast(str, connection_configuration.config.get("address"))
         port = cast(int, connection_configuration.config.get("port"))
         return TCPClientConnection(public_key, address, port,
-                                   connection_id=connection_configuration.config.get("name"),
+                                   connection_id=cast(str, connection_configuration.config.get("name")),
                                    restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

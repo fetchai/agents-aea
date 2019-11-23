@@ -464,7 +464,7 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    restricted_to_protocols = set()
+    restricted_to_protocols = set()  # type: Set[str]
 
     def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef",
                  restricted_to_protocols: Optional[Set[str]] = None):
@@ -599,5 +599,5 @@ class OEFConnection(Connection):
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
         return OEFConnection(public_key, oef_addr, oef_port,
-                             connection_id=connection_configuration.config.get("name"),
+                             connection_id=cast(str, connection_configuration.config.get("name")),
                              restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

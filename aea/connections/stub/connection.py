@@ -22,7 +22,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Union, Optional, Set
+from typing import Union, Optional, Set, cast
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
@@ -103,7 +103,7 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    restricted_to_protocols = set()
+    restricted_to_protocols = set()  # type: Set[str]
 
     def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
                  connection_id: str = "stub", restricted_to_protocols: Optional[Set[str]] = None):
@@ -226,5 +226,5 @@ class StubConnection(Connection):
         input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
         output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
         return StubConnection(input_file, output_file,
-                              connection_id=connection_configuration.config.get("name"),
+                              connection_id=cast(str, connection_configuration.config.get("name")),
                               restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
