@@ -289,10 +289,8 @@ def test_multiple_connection():
         connection_1_id = "local_1"
         connection_2_id = "local_2"
 
-        connection_1 = OEFLocalConnection(public_key_1, node, connection_id=connection_1_id,
-                                          supported_protocols=["default"])
-        connection_2 = OEFLocalConnection(public_key_2, node, connection_id=connection_2_id,
-                                          supported_protocols=["default"])
+        connection_1 = OEFLocalConnection(public_key_1, node, connection_id=connection_1_id)
+        connection_2 = OEFLocalConnection(public_key_2, node, connection_id=connection_2_id)
         multiplexer = Multiplexer([connection_1, connection_2])
 
         assert not connection_1.connection_status.is_connected
@@ -328,7 +326,8 @@ def test_send_message_no_supported_protocol():
     with LocalNode() as node:
         public_key_1 = "public_key_1"
         connection_1_id = "local_1"
-        connection_1 = OEFLocalConnection(public_key_1, node, connection_id=connection_1_id)
+        connection_1 = OEFLocalConnection(public_key_1, node, connection_id=connection_1_id,
+                                          restricted_to_protocols={"my_private_protocol"})
         multiplexer = Multiplexer([connection_1])
 
         multiplexer.connect()
@@ -340,7 +339,7 @@ def test_send_message_no_supported_protocol():
                                 message=b"some bytes")
             multiplexer.put(envelope)
             time.sleep(0.5)
-            mock_logger_warning.assert_called_with("Connection {} does not support protocol {}. Cannot send the message."
+            mock_logger_warning.assert_called_with("Connection {} cannot handle protocol {}. Cannot send the message."
                                                    .format(connection_1_id, protocol_id))
 
         multiplexer.disconnect()

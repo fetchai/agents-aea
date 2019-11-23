@@ -188,4 +188,4 @@ class PeerToPeerConnection(Connection):
         addr = cast(str, connection_configuration.config.get("addr"))
         port = cast(int, connection_configuration.config.get("port"))
         return PeerToPeerConnection(public_key, addr, port,
-                                    supported_protocols=set(connection_configuration.supported_protocols))
+                                    supported_protocols=set(connection_configuration.restricted_to_protocols))

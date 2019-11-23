@@ -44,27 +44,24 @@ class ConnectionStatus(object):
 class Connection(ABC):
     """Abstract definition of a connection."""
 
-    def __init__(self, connection_id: Optional[str] = None, supported_protocols: Optional[Set[str]] = None):
+    def __init__(self, connection_id: str, restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize the connection.
 
         :param connection_id: the connection identifier.
-        :param supported_protocols: the set of protocol ids supported by the connection.
+        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         """
-        self._connection_id = connection_id if connection_id is not None else type(self).__name__
-        self._supported_protocols = self._get_supported_protocols(supported_protocols)
+        self._connection_id = connection_id
+        self._restricted_to_protocols = self._get_restricted_to_protocols(restricted_to_protocols)
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
 
-        if len(self.supported_protocols) == 0:
-            logger.warning("No supported protocol for connection '{}'".format(connection_id))
-
-    def _get_supported_protocols(self, supported_protocols: Optional[Set[str]] = None) -> Set[str]:
-        if supported_protocols is not None:
-            return supported_protocols
-        elif hasattr(type(self), "supported_protocols") and isinstance(getattr(type(self), "supported_protocols"), set):
-            return getattr(type(self), "supported_protocols")
+    def _get_restricted_to_protocols(self, restricted_to_protocols: Optional[Set[str]] = None) -> Set[str]:
+        if restricted_to_protocols is not None:
+            return restricted_to_protocols
+        elif hasattr(type(self), "restricted_to_protocols") and isinstance(getattr(type(self), "restricted_to_protocols"), set):
+            return getattr(type(self), "restricted_to_protocols")
         else:
             return set()
 
@@ -90,9 +87,9 @@ class Connection(ABC):
         return self._connection_id
 
     @property
-    def supported_protocols(self) -> Set[str]:
-        """Get the supported protocols."""
-        return self._supported_protocols
+    def restricted_to_protocols(self) -> Set[str]:
+        """Get the restricted to protocols.."""
+        return self._restricted_to_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:

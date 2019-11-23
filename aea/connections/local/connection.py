@@ -53,7 +53,7 @@ class LocalNode:
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = None  # type: Optional[asyncio.Queue]
+        self._in_queue = asyncio.Queue(loop=self._loop)  # type: Optional[asyncio.Queue]
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
         self._receiving_loop_task = None  # type: Optional[asyncio.Task]
@@ -75,13 +75,8 @@ class LocalNode:
         """
         logger.debug("Starting threaded asyncio loop...")
         asyncio.set_event_loop(self._loop)
-        self._in_queue = asyncio.Queue()
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
-
-    def is_running(self) -> bool:
-        """Check that the node is running."""
-        return self._loop.is_running()
 
     async def connect(self, public_key: str, writer: asyncio.Queue) -> Optional[asyncio.Queue]:
         """
@@ -91,9 +86,6 @@ class LocalNode:
         :param writer: the queue where the client is listening.
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        if not self.is_running():
-            raise ConnectionError("The event loop is not running. Please call 'start'")
-
         if public_key in self._out_queues.keys():
             return None
 
@@ -333,17 +325,15 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    supported_protocols = {"default", "oef", "fipa", "tac"}
-
     def __init__(self, public_key: str, local_node: LocalNode, connection_id: str = "local",
-                 supported_protocols: Optional[Set[str]] = None):
+                 restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
 
         :param public_key: the public key used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
         """
-        super().__init__(connection_id=connection_id, supported_protocols=supported_protocols)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self._public_key = public_key
         self._local_node = local_node
 
@@ -406,4 +396,5 @@ class OEFLocalConnection(Connection):
         """
         local_node = LocalNode()
         return OEFLocalConnection(public_key, local_node,
-                                  supported_protocols=set(connection_configuration.supported_protocols))
+                                  connection_id=connection_configuration.config.get("name"),
+                                  restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

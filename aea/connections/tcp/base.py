@@ -33,14 +33,14 @@ logger = logging.getLogger(__name__)
 class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
 
-    supported_protocols = {"oef", "tac", "default", "fipa", "gym"}
+    restricted_to_protocols = set()
 
     def __init__(self,
                  public_key: str,
                  host: str,
                  port: int,
-                 connection_id: Optional[str] = None,
-                 supported_protocols: Optional[Set[str]] = None):
+                 connection_id: str,
+                 restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize the TCP connection.
 
@@ -48,9 +48,9 @@ class TCPConnection(Connection, ABC):
         :param host: the host to connect to.
         :param port: the port to connect to.
         :param connection_id: the identifier of the connection object.
-        :param supported_protocols: the supported protocols for this connection.
+        :param restricted_to_protocols: the only supported protocols for this connection.
         """
-        super().__init__(connection_id=connection_id, supported_protocols=supported_protocols)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self.public_key = public_key
 
         self.host = host

@@ -444,13 +444,13 @@ class TestFIPA:
                 destination="publicKey",
                 target=1,
                 query=None)
-            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
-                    as mock_performative_enum:
+            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
-                assert FIPASerializer().encode(msg), "Raises Value Error"
+                FIPASerializer().encode(msg), "Raises Value Error"
         with pytest.raises(ValueError):
             msg.set("query", "Hello")
-            assert FIPASerializer().encode(msg), "Query type is Supported!"
+            # query type is not supported
+            FIPASerializer().encode(msg)
         with pytest.raises(ValueError):
             cfp_msg = FIPAMessage(message_id=0,
                                   dialogue_id=0,
@@ -465,16 +465,16 @@ class TestFIPA:
             performative = fipa_pb2.FIPAMessage.CFP()
             fipa_msg.cfp.CopyFrom(performative)
             fipa_bytes = fipa_msg.SerializeToString()
-            assert FIPASerializer().decode(fipa_bytes), \
-                "The encoded message is a valid FIPA message."
+
+            # The encoded message is not a valid FIPA message.
+            FIPASerializer().decode(fipa_bytes)
         with pytest.raises(ValueError):
             cfp_msg = FIPAMessage(message_id=0,
                                   dialogue_id=0,
                                   target=0,
                                   performative=FIPAMessage.Performative.CFP,
                                   query=b"hello")
-            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") \
-                    as mock_performative_enum:
+            with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 fipa_msg = fipa_pb2.FIPAMessage()
                 fipa_msg.message_id = cfp_msg.get("message_id")
@@ -483,8 +483,9 @@ class TestFIPA:
                 performative = fipa_pb2.FIPAMessage.CFP()
                 fipa_msg.cfp.CopyFrom(performative)
                 fipa_bytes = fipa_msg.SerializeToString()
-                assert FIPASerializer().decode(fipa_bytes), \
-                    "The encoded message is a FIPA message"
+
+                # The encoded message is not a FIPA message
+                FIPASerializer().decode(fipa_bytes)
 
     def test_on_oef_error(self):
         """Test the oef error."""
@@ -678,14 +679,15 @@ async def test_send_oef_message(network_node):
     """Test the send oef message."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
+    public_key = wallet.public_keys['default']
+    oef_connection = OEFConnection(public_key=public_key, oef_addr="127.0.0.1", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
 
     msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
     msg_bytes = OEFSerializer().encode(msg)
-    envelope = Envelope(to=DEFAULT_OEF, sender="me", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     with pytest.raises(ValueError):
         await oef_connection.send(envelope)
 
@@ -694,7 +696,7 @@ async def test_send_oef_message(network_node):
 
     msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
     msg_bytes = OEFSerializer().encode(msg)
-    envelope = Envelope(to="recipient", sender="sender", protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to="recipient", sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     await oef_connection.send(envelope)
     await oef_connection.disconnect()
 

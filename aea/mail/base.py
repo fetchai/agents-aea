@@ -474,8 +474,8 @@ class Multiplexer:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
 
-        if envelope.protocol_id not in connection.supported_protocols:
-            logger.warning("Connection {} does not support protocol {}. Cannot send the message."
+        if len(connection.restricted_to_protocols) > 0 and envelope.protocol_id not in connection.restricted_to_protocols:
+            logger.warning("Connection {} cannot handle protocol {}. Cannot send the message."
                            .format(connection.connection_id, envelope.protocol_id))
             return
 
