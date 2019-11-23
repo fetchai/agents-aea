@@ -53,7 +53,7 @@ class LocalNode:
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop)
 
-        self._in_queue = asyncio.Queue(loop=self._loop)  # type: Optional[asyncio.Queue]
+        self._in_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
         self._receiving_loop_task = None  # type: Optional[asyncio.Task]
@@ -99,8 +99,6 @@ class LocalNode:
         """Start the node."""
         if not self._loop.is_running() and not self._thread.is_alive():
             self._thread.start()
-        else:
-            self._in_queue = asyncio.Queue()
         self._receiving_loop_task = asyncio.run_coroutine_threadsafe(self.receiving_loop(), loop=self._loop)
         logger.debug("Local node has been started.")
 
