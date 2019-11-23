@@ -22,7 +22,7 @@
 import logging
 from asyncio import CancelledError
 from queue import Queue
-from typing import Optional, cast, Dict, List, Any
+from typing import Optional, cast, Dict, List, Any, Set
 
 from fetch.p2p.api.http_calls import HTTPCalls
 
@@ -107,13 +107,16 @@ class PeerToPeerChannel:
 class PeerToPeerConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    def __init__(self, public_key: str, provider_addr: str, provider_port: int = 8000, connection_id: str = "p2p"):
+    restricted_to_protocols = set()  # type: Set[str]
+
+    def __init__(self, public_key: str, provider_addr: str, provider_port: int = 8000, connection_id: str = "p2p",
+                 restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize a connection to an SDK or API.
 
         :param public_key: the public key used in the protocols.
         """
-        super().__init__(connection_id=connection_id)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self.channel = PeerToPeerChannel(public_key, provider_addr, provider_port)
         self.public_key = public_key
         self._connection = None  # type: Optional[Queue]
@@ -184,4 +187,5 @@ class PeerToPeerConnection(Connection):
         """
         addr = cast(str, connection_configuration.config.get("addr"))
         port = cast(int, connection_configuration.config.get("port"))
-        return PeerToPeerConnection(public_key, addr, port)
+        return PeerToPeerConnection(public_key, addr, port,
+                                    restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

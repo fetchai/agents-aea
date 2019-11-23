@@ -256,7 +256,8 @@ class TestDecisionMaker:
     def setup_class(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
-        cls.outbox = OutBox(Multiplexer([DummyConnection()]))
+        cls.multiplexer = Multiplexer([DummyConnection()])
+        cls.outbox = OutBox(cls.multiplexer)
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet({FETCHAI: private_key_pem_path})
         cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG})
@@ -265,6 +266,7 @@ class TestDecisionMaker:
         cls.preferences = Preferences()
         cls.decision_maker = DecisionMaker(agent_name=cls.agent_name, max_reactions=MAX_REACTIONS, outbox=cls.outbox,
                                            wallet=cls.wallet, ledger_apis=cls.ledger_apis)
+        cls.multiplexer.connect()
 
     def test_properties(self):
         """Test the properties of the decision maker."""
@@ -388,3 +390,4 @@ class TestDecisionMaker:
     def teardown_class(cls):
         """Tear the tests down."""
         cls._unpatch_logger()
+        cls.multiplexer.disconnect()

@@ -239,7 +239,7 @@ class Multiplexer:
         self._thread = Thread(target=self._run_loop)
 
         self._in_queue = queue.Queue()  # type: queue.Queue
-        self._out_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
+        self._out_queue = None  # type: Optional[asyncio.Queue]
 
         self._recv_loop_task = None  # type: Optional[Future]
         self._send_loop_task = None  # type: Optional[Future]
@@ -252,6 +252,7 @@ class Multiplexer:
     @property
     def out_queue(self) -> asyncio.Queue:
         """Get the out queue."""
+        assert self._out_queue is not None, "Accessing out queue before loop is started."
         return self._out_queue
 
     @property
@@ -311,6 +312,7 @@ class Multiplexer:
         """
         logger.debug("Starting threaded asyncio loop...")
         asyncio.set_event_loop(self._loop)
+        self._out_queue = asyncio.Queue()
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
 
@@ -471,6 +473,11 @@ class Multiplexer:
         if connection is None:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
+
+        if len(connection.restricted_to_protocols) > 0 and envelope.protocol_id not in connection.restricted_to_protocols:
+            logger.warning("Connection {} cannot handle protocol {}. Cannot send the message."
+                           .format(connection.connection_id, envelope.protocol_id))
+            return
 
         try:
             await connection.send(envelope)

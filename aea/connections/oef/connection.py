@@ -25,7 +25,7 @@ import pickle
 import time
 from asyncio import AbstractEventLoop, CancelledError
 from threading import Thread
-from typing import List, Optional, cast
+from typing import List, Optional, cast, Set
 
 import oef
 from oef.agents import OEFAgent
@@ -464,7 +464,10 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef"):
+    restricted_to_protocols = set()  # type: Set[str]
+
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef",
+                 restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize.
 
@@ -472,8 +475,9 @@ class OEFConnection(Connection):
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
         :param connection_id: the identifier of the connection object.
+        :param restricted_to_protocols: the only supported protocols for this connection.
         """
-        super().__init__(connection_id=connection_id)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.channel = OEFChannel(public_key, oef_addr, oef_port, core=self._core)
@@ -594,4 +598,6 @@ class OEFConnection(Connection):
         """
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
-        return OEFConnection(public_key, oef_addr, oef_port)
+        return OEFConnection(public_key, oef_addr, oef_port,
+                             connection_id=cast(str, connection_configuration.config.get("name")),
+                             restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

@@ -24,7 +24,7 @@ import logging
 from asyncio import Queue, AbstractEventLoop
 from collections import defaultdict
 from threading import Thread
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast, Set
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
@@ -89,6 +89,7 @@ class LocalNode:
         if public_key in self._out_queues.keys():
             return None
 
+        assert self._in_queue is not None
         q = self._in_queue  # type: asyncio.Queue
         self._out_queues[public_key] = writer
 
@@ -322,14 +323,15 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    def __init__(self, public_key: str, local_node: LocalNode, connection_id: str = "local"):
+    def __init__(self, public_key: str, local_node: LocalNode, connection_id: str = "local",
+                 restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
 
         :param public_key: the public key used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
         """
-        super().__init__(connection_id)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self._public_key = public_key
         self._local_node = local_node
 
@@ -344,7 +346,7 @@ class OEFLocalConnection(Connection):
     async def connect(self) -> None:
         """Connect to the local OEF Node."""
         if not self.connection_status.is_connected:
-            self._reader = Queue(loop=self._loop)
+            self._reader = Queue()
             self._writer = await self._local_node.connect(self._public_key, self._reader)
             self.connection_status.is_connected = True
 
@@ -391,4 +393,6 @@ class OEFLocalConnection(Connection):
         :return: the connection object
         """
         local_node = LocalNode()
-        return OEFLocalConnection(public_key, local_node)
+        return OEFLocalConnection(public_key, local_node,
+                                  connection_id=connection_configuration.config.get("name"),
+                                  restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

@@ -27,7 +27,7 @@ import sys
 import time
 from asyncio import CancelledError
 from threading import Timer
-from typing import Optional
+from typing import Optional, Set
 
 import docker as docker
 import pytest
@@ -85,9 +85,11 @@ def tcpping(ip, port) -> bool:
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
-    def __init__(self, connection_id: str = "dummy"):
+    restricted_to_protocols = set()  # type: Set[str]
+
+    def __init__(self, connection_id: str = "dummy", restricted_to_protocols: Optional[Set[str]] = None):
         """Initialize."""
-        super().__init__(connection_id=connection_id)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self.connection_status.is_connected = False
         self._queue = None
 

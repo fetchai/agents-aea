@@ -72,7 +72,7 @@ def connection(click_context, connection_name):
     # try to load the connection configuration file
     try:
         connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
-        logger.info("Connection '{}' supports the following protocols: {}".format(connection_name, connection_configuration.supported_protocols))
+        logger.info("Connection '{}' supports the following protocols: {}".format(connection_name, connection_configuration.restricted_to_protocols))
     except ValidationError as e:
         logger.error("Connection configuration file not valid: {}".format(str(e)))
         sys.exit(1)

@@ -5,6 +5,6 @@ license: Apache 2.0
 url: ""
 description: "The scaffold connection provides a scaffold for a connection to be implemented by the developer."
 class_name: MyScaffoldConnection
-supported_protocols: []
+restricted_to_protocols: []
 config:
   foo: bar
