@@ -33,16 +33,16 @@ from aea.protocols.fipa.serialization import FIPASerializer
 
 def test_connection():
     """Test that two OEF local connection can connect to a local node."""
-    node = LocalNode()
+    with LocalNode() as node:
 
-    multiplexer1 = Multiplexer([OEFLocalConnection("multiplexer1", node)])
-    multiplexer2 = Multiplexer([OEFLocalConnection("multiplexer2", node)])
+        multiplexer1 = Multiplexer([OEFLocalConnection("multiplexer1", node)])
+        multiplexer2 = Multiplexer([OEFLocalConnection("multiplexer2", node)])
 
-    multiplexer1.connect()
-    multiplexer2.connect()
+        multiplexer1.connect()
+        multiplexer2.connect()
 
-    multiplexer1.disconnect()
-    multiplexer2.disconnect()
+        multiplexer1.disconnect()
+        multiplexer2.disconnect()
 
 
 @pytest.mark.asyncio

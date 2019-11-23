@@ -165,38 +165,38 @@ def test_multiplexer_disconnect_all_raises_error():
 
 def test_multiplexer_disconnect_one_raises_error_many_connections():
     """Test the case when the multiplexer raises an exception while attempting the disconnection of one connection."""
-    node = LocalNode()
-    tmpdir = Path(tempfile.mktemp())
-    d = tmpdir / "test_stub"
-    d.mkdir(parents=True)
-    input_file_path = d / "input_file.csv"
-    output_file_path = d / "input_file.csv"
+    with LocalNode() as node:
+        tmpdir = Path(tempfile.mktemp())
+        d = tmpdir / "test_stub"
+        d.mkdir(parents=True)
+        input_file_path = d / "input_file.csv"
+        output_file_path = d / "input_file.csv"
 
-    connection_1 = OEFLocalConnection("my_pbk", node)
-    connection_2 = StubConnection(input_file_path, output_file_path)
-    connection_3 = DummyConnection()
-    multiplexer = Multiplexer([connection_1, connection_2, connection_3])
+        connection_1 = OEFLocalConnection("my_pbk", node)
+        connection_2 = StubConnection(input_file_path, output_file_path)
+        connection_3 = DummyConnection()
+        multiplexer = Multiplexer([connection_1, connection_2, connection_3])
 
-    assert not connection_1.connection_status.is_connected
-    assert not connection_2.connection_status.is_connected
-    assert not connection_3.connection_status.is_connected
+        assert not connection_1.connection_status.is_connected
+        assert not connection_2.connection_status.is_connected
+        assert not connection_3.connection_status.is_connected
 
-    multiplexer.connect()
+        multiplexer.connect()
 
-    assert connection_1.connection_status.is_connected
-    assert connection_2.connection_status.is_connected
-    assert connection_3.connection_status.is_connected
+        assert connection_1.connection_status.is_connected
+        assert connection_2.connection_status.is_connected
+        assert connection_3.connection_status.is_connected
 
-    with unittest.mock.patch.object(connection_3, "disconnect", side_effect=Exception):
-        # with pytest.raises(AEAConnectionError, match="Failed to disconnect the multiplexer."):
-        multiplexer.disconnect()
+        with unittest.mock.patch.object(connection_3, "disconnect", side_effect=Exception):
+            # with pytest.raises(AEAConnectionError, match="Failed to disconnect the multiplexer."):
+            multiplexer.disconnect()
 
-    # TODO is this what we want?
-    assert not connection_1.connection_status.is_connected
-    assert not connection_2.connection_status.is_connected
-    assert connection_3.connection_status.is_connected
+        # TODO is this what we want?
+        assert not connection_1.connection_status.is_connected
+        assert not connection_2.connection_status.is_connected
+        assert connection_3.connection_status.is_connected
 
-    shutil.rmtree(tmpdir)
+        shutil.rmtree(tmpdir)
 
 
 @pytest.mark.asyncio
