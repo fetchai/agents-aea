@@ -22,7 +22,7 @@ import logging
 import struct
 from abc import ABC, abstractmethod
 from asyncio import CancelledError, StreamWriter, StreamReader
-from typing import Optional, List
+from typing import Optional, Set
 
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
@@ -40,7 +40,7 @@ class TCPConnection(Connection, ABC):
                  host: str,
                  port: int,
                  connection_id: Optional[str] = None,
-                 supported_protocols: Optional[List[str]] = None):
+                 supported_protocols: Optional[Set[str]] = None):
         """
         Initialize the TCP connection.
 

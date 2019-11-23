@@ -79,6 +79,10 @@ class LocalNode:
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
 
+    def is_running(self) -> bool:
+        """Check that the node is running."""
+        return self._loop.is_running()
+
     async def connect(self, public_key: str, writer: asyncio.Queue) -> Optional[asyncio.Queue]:
         """
         Connect a public key to the node.
@@ -87,9 +91,13 @@ class LocalNode:
         :param writer: the queue where the client is listening.
         :return: an asynchronous queue, that constitutes the communication channel.
         """
+        if not self.is_running():
+            raise ConnectionError("The event loop is not running. Please call 'start'")
+
         if public_key in self._out_queues.keys():
             return None
 
+        assert self._in_queue is not None
         q = self._in_queue  # type: asyncio.Queue
         self._out_queues[public_key] = writer
 
@@ -99,6 +107,8 @@ class LocalNode:
         """Start the node."""
         if not self._loop.is_running() and not self._thread.is_alive():
             self._thread.start()
+        else:
+            self._in_queue = asyncio.Queue()
         self._receiving_loop_task = asyncio.run_coroutine_threadsafe(self.receiving_loop(), loop=self._loop)
         logger.debug("Local node has been started.")
 
@@ -396,4 +406,4 @@ class OEFLocalConnection(Connection):
         """
         local_node = LocalNode()
         return OEFLocalConnection(public_key, local_node,
-                                  supported_protocols=connection_configuration.supported_protocols)
+                                  supported_protocols=set(connection_configuration.supported_protocols))

@@ -22,7 +22,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Union, Optional, List
+from typing import Union, Optional, Set
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
@@ -106,7 +106,7 @@ class StubConnection(Connection):
     supported_protocols = {"oef", "tac", "default", "fipa", "gym"}
 
     def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
-                 connection_id: str = "stub", supported_protocols: Optional[List[str]] = None):
+                 connection_id: str = "stub", supported_protocols: Optional[Set[str]] = None):
         """
         Initialize a stub connection.
 
@@ -226,4 +226,4 @@ class StubConnection(Connection):
         input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
         output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
         return StubConnection(input_file, output_file,
-                              supported_protocols=connection_configuration.supported_protocols)
+                              supported_protocols=set(connection_configuration.supported_protocols))

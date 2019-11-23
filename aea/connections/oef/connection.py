@@ -25,7 +25,7 @@ import pickle
 import time
 from asyncio import AbstractEventLoop, CancelledError
 from threading import Thread
-from typing import List, Optional, cast
+from typing import List, Optional, cast, Set
 
 import oef
 from oef.agents import OEFAgent
@@ -467,7 +467,7 @@ class OEFConnection(Connection):
     supported_protocols = {"default", "oef", "fipa", "tac"}
 
     def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef",
-                 supported_protocols: Optional[List[str]] = None):
+                 supported_protocols: Optional[Set[str]] = None):
         """
         Initialize.
 
@@ -599,4 +599,4 @@ class OEFConnection(Connection):
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
         return OEFConnection(public_key, oef_addr, oef_port,
-                             supported_protocols=connection_configuration.supported_protocols)
+                             supported_protocols=set(connection_configuration.supported_protocols))
