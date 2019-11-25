@@ -52,6 +52,18 @@ def test_icon():
     assert result.status_code == 200
 
 
+def test_logo():
+    """Test that the home-page exits."""
+    app = create_app()
+
+    # sends HTTP GET request to the application
+    # on the specified path
+    result = app.get('/logo.png')
+
+    # assert the status code of the response
+    assert result.status_code == 200
+
+
 def test_js():
     """Test that the home-page exits."""
     app = create_app()
