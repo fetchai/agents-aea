@@ -96,14 +96,14 @@ def _extract(source, target):
         File path of fetched object.
 
     """
-    if (source_path.endswith("tar.gz")):
-        tar = tarfile.open(source_path, "r:gz")
-        tar.extractall(path=target_path)
+    if (source.endswith("tar.gz")):
+        tar = tarfile.open(source, "r:gz")
+        tar.extractall(path=target)
         tar.close()
     else:
-        raise Exception('Unknown file type: {}'.format(source_path))
+        raise Exception('Unknown file type: {}'.format(source))
 
-    os.remove(source_path)
+    os.remove(source)
 
     folder_name = os.path.basename(source).replace('.tar.gz', '')
     extracted_folder = os.path.join(target, folder_name)
