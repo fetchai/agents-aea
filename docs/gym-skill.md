@@ -16,7 +16,7 @@ aea create my_gym_agent
 ### Add the gym skill 
 ``` bash
 cd my_gym_agent
-aea add skill gym 
+aea add skill gym
 ```
 
 

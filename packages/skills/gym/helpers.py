@@ -44,7 +44,7 @@ Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
 
 DEFAULT_GYM = 'gym'
-NB_STEPS = 4000
+NB_STEPS = 500
 
 
 class ProxyEnv(gym.Env):

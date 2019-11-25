@@ -35,7 +35,7 @@ from tests.conftest import CLI_LOG_OPTION
 
 
 class TestGymSkill:
-    """Test that echo skill works."""
+    """Test that gym skill works."""
 
     @classmethod
     def setup_class(cls):
@@ -90,11 +90,11 @@ class TestGymSkill:
 
         # check the gym run ends
 
-        time.sleep(15.0)
+        time.sleep(30.0)
         process.send_signal(signal.SIGINT)
         process.wait(timeout=20)
 
-        # assert process.returncode == 0
+        assert process.returncode == 0
 
         poll = process.poll()
         if poll is None:

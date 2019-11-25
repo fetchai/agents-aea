@@ -79,11 +79,11 @@ class TestEchoSkill:
 
         # add sending and receiving envelope from input/output files
 
-        time.sleep(5.0)
+        time.sleep(10.0)
         process.send_signal(signal.SIGINT)
         process.wait(timeout=20)
 
-        # assert process.returncode == 0
+        assert process.returncode == 0
 
         poll = process.poll()
         if poll is None:
