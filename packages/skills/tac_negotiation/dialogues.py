@@ -39,6 +39,7 @@ from aea.protocols.oef.models import Query
 from aea.skills.base import SharedClass
 
 DEMAND_DATAMODEL_NAME = 'demand'
+# TODO: temporary fix to a circular import issue
 
 Action = Any
 logger = logging.getLogger("aea.tac_negotiation_skill")
