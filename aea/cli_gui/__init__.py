@@ -121,7 +121,7 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
         err += line + "\n"
 
     while pid.poll() is None:
-        time.sleep(0.5)  # pragma: no cover
+        time.sleep(0.1)  # pragma: no cover
 
     if pid.poll() == 0:
         return output, 200  # 200 (Success)
