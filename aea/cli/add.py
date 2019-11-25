@@ -33,7 +33,7 @@ from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE
-from aea.cli.registry.utils import fetch
+from aea.cli.registry.utils import fetch as registry_fetch, split_public_id
 
 
 @click.group()
@@ -46,31 +46,7 @@ def add(ctx: Context, registry):
     _try_to_load_agent_config(ctx)
 
 
-@add.command()
-@click.argument('connection_name', type=str, required=True)
-@click.option('--id', default=None,
-              help='Public ID of Connection from Registry you want to add.')
-@pass_context
-def connection(click_context, connection_name, id):
-    """Add a connection to the configuration file."""
-    if ctx.config.get("is_registry"):
-        if not id:
-            raise click.ClickException(
-                'Please provide a Public ID of connection you are looking for.'
-            )
-        fetch('connection', public_id=id)
-        raise NotImplementedError
-
-    ctx = cast(Context, click_context.obj)
-    agent_name = ctx.agent_config.agent_name
-    logger.info("Adding connection '{}' to the agent '{}'...".format(connection_name, agent_name))
-
-    # check if we already have a connection with the same name
-    logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
-    if connection_name in ctx.agent_config.connections:
-        logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
-        sys.exit(1)
-
+def _find_connection_locally(ctx, connection_name):
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
     # first check in aea dir
     registry_path = ctx.agent_config.registry_path
@@ -101,6 +77,40 @@ def connection(click_context, connection_name, id):
         logger.error(str(e))
         sys.exit(1)
 
+
+@add.command()
+@click.argument('connection_name', type=str, required=False)
+@click.option('--id', default=None,
+              help='Public ID of Connection from Registry you want to add.')
+@pass_context
+def connection(click_context, connection_name, id):
+    """Add a connection to the configuration file."""
+    ctx = cast(Context, click_context.obj)
+
+    agent_name = ctx.agent_config.agent_name
+
+    if not connection_name and id:
+        connection_name = split_public_id(id)[1]
+
+    logger.info("Adding connection '{}' to the agent '{}'...".format(connection_name, agent_name))
+
+    # check if we already have a connection with the same name
+    logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
+    if connection_name in ctx.agent_config.connections:
+        logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
+        sys.exit(1)
+
+    # find and add connection
+    if ctx.config.get("is_registry"):
+        # fetch from Registry
+        if not id:
+            raise click.ClickException(
+                'Please provide a Public ID of connection you are looking for.'
+            )
+        connection_dir = registry_fetch('connection', public_id=id, cwd=ctx.cwd)
+    else:
+        _find_connection_locally(ctx, connection_name)
+
     # make the 'connections' folder a Python package.
     connections_init_module = os.path.join(ctx.cwd, "connections", "__init__.py")
     logger.debug("Creating {}".format(connections_init_module))
@@ -112,21 +122,7 @@ def connection(click_context, connection_name, id):
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
-@add.command()
-@click.argument('protocol_name', type=str, required=True)
-@pass_context
-def protocol(click_context, protocol_name):
-    """Add a protocol to the agent."""
-    ctx = cast(Context, click_context.obj)
-    agent_name = cast(str, ctx.agent_config.agent_name)
-    logger.info("Adding protocol '{}' to the agent '{}'...".format(protocol_name, agent_name))
-
-    # check if we already have a protocol with the same name
-    logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
-    if protocol_name in ctx.agent_config.protocols:
-        logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
-        sys.exit(1)
-
+def _find_protocol_locally(ctx, protocol_name):
     # check that the provided path points to a proper protocol directory -> look for protocol.yaml file.
     # first check in aea dir
     registry_path = ctx.agent_config.registry_path
@@ -156,6 +152,40 @@ def protocol(click_context, protocol_name):
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
+
+
+
+@add.command()
+@click.argument('protocol_name', type=str, required=False)
+@click.option('--id', default=None,
+              help='Public ID of Protocol from Registry you want to add.')
+@pass_context
+def protocol(click_context, protocol_name, id):
+    """Add a protocol to the agent."""
+    ctx = cast(Context, click_context.obj)
+    agent_name = cast(str, ctx.agent_config.agent_name)
+
+    if not protocol_name and id:
+        protocol_name = split_public_id(id)[1]
+
+    logger.info("Adding protocol '{}' to the agent '{}'...".format(protocol_name, agent_name))
+
+    # check if we already have a protocol with the same name
+    logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
+    if protocol_name in ctx.agent_config.protocols:
+        logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
+        sys.exit(1)
+
+    # find and add connection
+    if ctx.config.get("is_registry"):
+        # fetch from Registry
+        if not id:
+            raise click.ClickException(
+                'Please provide a Public ID of protocol you are looking for.'
+            )
+        registry_fetch('protocol', public_id=id, cwd=ctx.cwd)
+    else:
+        _find_protocol_locally(ctx, protocol_name)
 
     # make the 'protocols' folder a Python package.
     logger.debug("Creating {}".format(os.path.join(agent_name, "protocols", "__init__.py")))
