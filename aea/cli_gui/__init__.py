@@ -119,7 +119,7 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
         err += line + "\n"
 
     while pid.poll() is None:
-        time.sleep(0.5)
+        time.sleep(0.1)
 
     if pid.poll() == 0:
         return output, 200  # 200 (Success)
@@ -444,7 +444,7 @@ def run():
     """Run the GUI."""
     _kill_running_oef_nodes()
     app = create_app()
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=False)
 
     return app
 

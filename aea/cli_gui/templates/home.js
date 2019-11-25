@@ -425,12 +425,13 @@ class Controller{
                 self.clearTable(tableBody);
 
                 // make this row (and the cells in this row) grey
-                $(this).children().each(function(i) {
-                    var test = $(this);
-                    var text = test.text;
-                    var val = test.value;
-                    $(this).css("background-color", "var(--neutral-light-grey)");
-                })
+//                $(this).children().each(function(i) {
+//                    var test = $(this);
+//                    var text = test.text;
+//                    var val = test.value;
+//                    $(this).css("background-color", "var(--neutral-light-grey)");
+//                })
+                $(this).addClass("aea_selected")
                 if (e.data.el["combined"] == "localAgents"){
                     self.refreshAgentData(id)
                 }
@@ -569,9 +570,7 @@ class Controller{
 
     clearTable (tableBody) {
        tableBody.children().each(function(i) {
-            $(this).children().each(function(i) {
-                $(this).css("background-color", "white");
-            })
+            $(this).removeClass("aea_selected")
         });
     }
 

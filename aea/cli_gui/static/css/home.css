@@ -50,9 +50,11 @@ q:before, q:after {
 	content: none;
 }
 
-table {
+table{
 	border-collapse: collapse;
 	border-spacing: 0;
+    table-layout: fixed;
+
 }
 
 
@@ -128,6 +130,15 @@ body {
     margin-right: 40px;
 }
 
+/* Account for the border spacing on tables */
+.addLeftMarginBordered{
+    margin-left: 30px;
+}
+
+.addRightMarginBordered{
+    margin-right: 30px;
+}
+
 .banner {
     background-color: var(--primary-colour);
     width: 100%;
@@ -197,7 +208,7 @@ input:focus {
 button{
     height: 18px;
     vertical-align: middle;
-    background-color: var(--primary-colour);
+    background-color: var(--neutral-cyan);
     border-width: 0px;
     outline: none;
     color: white;
@@ -205,8 +216,15 @@ button{
 }
 
 button:hover {
-  background-color: var(--neutral-cyan);
+  background-color: var(--primary-colour);
   color: white;
+}
+
+button:disabled,
+button[disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
 }
 
 
@@ -217,11 +235,8 @@ th{
 
 
 /* main area */
-.content {
-    width: 100%;
-    height: 100px;
+.mainContent {
     color: black;
-
 }
 
 .simpleBox{
@@ -244,27 +259,62 @@ th{
     background-color: white;
 }
 
+.idWidth{
+    width: 25%
+}
 
-.spaceAllRound{
-  margin-top: 20px;
-  margin-bottom: 20px;
-  margin-right: 20px;
-  margin-left: 20px;
+.descriptionWidth{
+    width: 75%
 }
 
 .halfSpaceAllRound{
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.spaceAllRound{
   margin-top: 10px;
   margin-bottom: 10px;
   margin-right: 10px;
   margin-left: 10px;
+}
+
+.spaceAllRoundNoTop{
+  margin-top: 0px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.spaceBottom{
+  margin-top: 0px;
+  margin-bottom: 20px;
+  margin-right: 00px;
+  margin-left: 0px;
+}
+
+.bigSpaceBottom{
+  margin-top: 0px;
+  margin-bottom: 30px;
+  margin-right: 00px;
+  margin-left: 0px;
+}
+
+.halfSpaceBottom{
+  margin-top: 0px;
+  margin-bottom: 10px;
+  margin-right: 00px;
+  margin-left: 0px;
 }
 
 
 .tableSpaceAllRound{
-  margin-top: 10px;
-  margin-bottom: 10px;
-  margin-right: 10px;
-  margin-left: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 
@@ -273,30 +323,50 @@ th{
 }
 
 
+.mainTable{
+	border-collapse: separate;
+	border-spacing: 10px;
+}
+
 .mainTableSide {
     width: 50%;
     vertical-align: top;
+
 }
 
 .contentTitle {
-    height: 50px;
+    height: 40px;
     margin-right: 40px;
-    margin-top: 20px;
-
+    margin-top: 10px;
     font-size: 18px;
     text-align: center;
+    vertical-align: middle;
 
+}
+
+.sectionTitle {
+    font-weight: bold;
+    padding: 0px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-top: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    vertical-align: middle;
 }
 
 
 /*aea tables*/
 
-
+.aea table{
+    table-layout: fixed;
+}
 
 .aea caption {
     font-weight: bold;
     padding: 0px;
-    margin-top: 4px;
+    margin-top: 8px;
     margin-bottom: 4px;
 
 }
@@ -308,9 +378,74 @@ th{
     outline: none;
     background-color: var(--neutral-mid-grey);
 }
+/*
+tr {
+    border: none;
+    outline: none;
+}
 
+
+.aea_selected{
+    border: 1px;
+    border-style: solid;
+    border-color: var(--secondary-blue);
+}
+*/
+
+tr {
+    padding: 2px;
+    border: none;
+    outline: none;
+}
+
+
+.aea_selected{
+    padding: 2px;
+    outline: 2px;
+    outline-style: solid;
+    outline-color: var(--secondary-blue);
+}
 .aea td {
     padding: 2px;
     border: none;
     outline: none;
+}
+
+.code {
+    display:block;
+    overflow: scroll;
+    height:150px;
+    margin-left: 10px;
+    margin-right: 10px;
+    background-color: black;
+    color: white;
+    font-family: "Courier New", Courier, monospace;
+    padding: 8px;
+
+}
+
+.codeError {
+    display:block;
+    overflow: scroll;
+    height:150px;
+    margin-left: 10px;
+    margin-right: 10px;
+    background-color: black;
+    color: red;
+    font-family: "Courier New", Courier, monospace;
+    padding: 8px;
+}
+
+.error{
+    position: fixed; /* Sit on top of the page content */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 10%; /* A bit of the page */
+    bottom: 0;
+    visibility: hidden;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    background-color: #fbbd;
+    text-align: center;
+    font-weight: bold;
+
 }

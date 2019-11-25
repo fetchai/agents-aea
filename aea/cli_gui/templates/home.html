@@ -25,218 +25,148 @@
         </table>
     </div>
 
-    <div class="content">
-
-        <table class="innerMargin center-me">
+    <div class="mainContent">
+        <div class="error"><br></div>
+        <table class="innerMargin center-me mainTable">
             <tr>
                 <td class="mainTableSide">
                     <div class="contentTitle">Local</div>
-                    <div class = "addLeftMargin">
-                        <div class="simpleOutlinedBox  fullWidth">
-                            <div class="halfSpaceAllRound simpleBox">
-                                <div class="halfSpaceAllRound simpleOutlinedBox">
-                                    <div class="simpleBox">
-                                        <div class="localAgents">
-
-                                            <table class="aea fullWidth  whiteFill">
-                                                <caption>Local Agents </caption>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Agent id</th>
-                                                        <th>Description</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="localAgentsregisteredTable">
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
+                    <div class = "addLeftMarginBordered">
+                        <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
                             <div class="simpleBox spaceAllRound">
                                 <label for="localAgentsCreateId">Create Agent id&nbsp;&nbsp;
                                     <input id="localAgentsCreateId" type="text"/>&nbsp;&nbsp;
                                     <button id="localAgentsCreate">Create Agent</button>
                                 </label>
                             </div>
+
+                            <div class="spaceAllRound simpleOutlinedBox">
+                                <div class="simpleBox">
+                                    <div class="localAgents">
+
+                                        <table class="aea fullWidth  whiteFill">
+                                            <caption>Local Agents </caption>
+                                            <thead>
+                                                <tr>
+                                                    <th class="idWidth">Agent id</th>
+                                                    <th class="descriptionWidth">Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="localAgentsregisteredTable">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="spaceAllRound">Selected Agent: <span id="localAgentsSelectionId">NONE</span> </div>
+                            </div>
+
                         </div>
+
+                        <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
+                            {% for i in range(0, len) %}
+                                {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
+                                    <div class="simpleBox bigSpaceBottom">
+                                        <div class="spaceAllRound simpleOutlinedBox">
+                                            <div class="{{htmlElements[i][2]}}">
+                                                <table class="aea fullWidth  whiteFill">
+                                                    <caption><span class="localItemHeading">Local</span>'s {{htmlElements[i][1]}}s</caption>
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="idWidth">{{htmlElements[i][1]}} id</th>
+                                                            <th class="descriptionWidth">Description</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="{{htmlElements[i][2]}}registeredTable"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="simpleBox">
+                                            <div class="spaceAllRound">Selected {{htmlElements[i][1]}}: <span id="{{htmlElements[i][2]}}SelectionId">NONE</span></div>
+                                            <button id="{{htmlElements[i][2]}}Remove"  class="spaceAllRoundNoTop">Remove {{htmlElements[i][1]}}</button>
+                                            <div class="spaceAllRoundNoTop">
+                                                <label for="{{htmlElements[i][2]}}ScaffoldId" >Scaffold {{htmlElements[i][1]}} id
+                                                    <input id="{{htmlElements[i][2]}}ScaffoldId" type="text" />
+                                                </label>
+                                                <button id="{{htmlElements[i][2]}}Scaffold">Scaffold new {{htmlElements[i][1]}}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            <button id="localAgentsDelete"  class="spaceAllRoundNoTop">Delete "<span class="localItemHeading">NONE</span>" Agent</button>
+                        </div>
+                        <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
+
+                            <div class="spaceAllRound sectionTitle">Running "<span class="localItemHeading">NONE</span>" Agent</div>
+                            <div class="spaceAllRound">
+                                <button id="startAgent">Start Agent</button>
+                                <label for="runConnectionId">with connection id:
+                                    <input id="runConnectionId" type="text" />
+                                </label>
+                            </div>
+                            <button id="stopAgent" class="spaceAllRound">Stop Agent</button>
+                            <div id="agentStatus" class="spaceAllRound">Agent Status: NONE</div>
+                            <div class="code spaceAllRound" id="agentTTY"></div>
+                            <div class="codeError spaceAllRound" id="agentError"></div>
+                        </div>
+
                     </div>
                 </td>
                 <td class="mainTableSide">
                     <div class="contentTitle">Registry</div>
-                    <div class = "addRightMargin">
-                        <div class="simpleOutlinedBox  fullWidth">
-                            <div class="simpleBox spaceAllRound">
-                                <label for="localAgentsCreateId">Create Agent id&nbsp;&nbsp;
-                                    <input id="localAgentsCreateId" type="text"/>&nbsp;&nbsp;
-                                    <button id="localAgentsCreate">Create Agent</button>
-                                </label>
-                            </div>
-                            Testing
-                        </div>
-                    </div>
+                    <div class = "addRightMarginBordered">
+                        <div class="simpleOutlinedBox  fullWidth halfSpaceBottom">
+                            {% for i in range(0, len) %}
+                                {% if htmlElements[i][0] == "registered"%}
+                                    <div class="simpleBox spaceBottom">
+                                        <div class="spaceAllRound simpleOutlinedBox">
 
-                </td>
-            </tr>
-        </table>
-    </div>
-    <br>
-    <br>
-    <br>
-
-
-
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-                    <br>                    <br>
-                    <br>
-                    <br>                    <br>
-                    <br>
-                    <br>                    <br>
-                    <br>
-                    <br>
-
-    <div class="error"><br></div>
-    <div class="container">
-        <table>
-            <tr>
-                <td class="mainTable center-me">
-                    <h2 class="banner">Local Agents</h2>
-
-                    <div class="section editor">
-                        <br>
-                        <br>
-                        <div class="localAgents">
-                            <table>
-                                <caption>Local Agents</caption>
-                                <thead>
-                                    <tr>
-                                        <th>Agent id</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="localAgentsregisteredTable">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                     <div>
-                        <h2 align="center">Selected Agent: <span id="localAgentsSelectionId">NONE</span> </h2>
-                    </div>
-                    {% for i in range(0, len) %}
-                        {% if htmlElements[i][0] == "local" and htmlElements[i][1] != "agent" %}
-
-                            <div class="section editor">
-                                <div class="section ">
-                                    <div class="{{htmlElements[i][2]}}">
-                                        <table>
-                                            <caption><span class="localItemHeading">Local</span>'s {{htmlElements[i][1]}}s</caption>
-                                            <thead>
-                                                <tr>
-                                                    <th>{{htmlElements[i][1]}} id</th>
-                                                    <th>Description</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="{{htmlElements[i][2]}}registeredTable">
-                                            </tbody>
-                                        </table>
+                                            <div class="{{htmlElements[i][2]}}">
+                                                <table class="aea fullWidth  whiteFill">
+                                                    <caption>Registered {{htmlElements[i][1]}}s</caption>
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="idWidth">{{htmlElements[i][1]}} id</th>
+                                                            <th class="descriptionWidth">Description</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="{{htmlElements[i][2]}}registeredTable">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="spaceAllRound">Selected {{htmlElements[i][1]}}: <span id="{{htmlElements[i][2]}}SelectionId">NONE</span></div>
+                                        </div>
+                                        <button id="{{htmlElements[i][2]}}Add"  class="spaceAllRoundNoTop"><< Add {{htmlElements[i][1]}}</button>
                                     </div>
-                                    <div>
-                                        <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
-                                    </div>
-                                    <button id="{{htmlElements[i][2]}}Remove">Remove {{htmlElements[i][1]}}</button>
-                                    <br>
-                                    <label for="{{htmlElements[i][2]}}ScaffoldId">Scaffold {{htmlElements[i][1]}} id
-                                        <input id="{{htmlElements[i][2]}}ScaffoldId" type="text" />
-                                    </label>
-                                    <button id="{{htmlElements[i][2]}}Scaffold">Scaffold new {{htmlElements[i][1]}}</button>
-                                    <br>
-                                    <br>
-                                </div>
-                            </div>
-
-                        {% endif %}
-                    {% endfor %}
-                    <div class="section editor">
-                        <div class="section ">
-                            <button id="localAgentsDelete">Delete "<span class="localItemHeading">NONE</span>" Agent</button>
+                                {% endif %}
+                            {% endfor %}
                         </div>
+                        <div class="simpleOutlinedBox fullWidth halfSpaceBottom">
+                            <div class="spaceAllRound sectionTitle">OEF Node</div>
+
+                            <button id="startOEFNode" class="spaceAllRound">Start OEF Node</button>
+                            <button id="stopOEFNode" class="spaceAllRound">Stop OEF Node</button>
+                            <div id="oefStatus" class="spaceAllRound">OEF Node Status: NONE</div>
+                            <div class="code spaceAllRound" id="oefTTY"></div>
+                            <div class="codeError spaceAllRound" id="oefError"></div>
+                        </div>
+
                     </div>
 
-
-                    <div class="section editor">
-                        <h2>Running "<span class="localItemHeading">NONE</span>" Agent</h2>
-
-                        <button id="startAgent">Start Agent</button>
-                        <label for="runConnectionId">with connection id:
-                            <input id="runConnectionId" type="text" />
-                        </label>
-                        <br>
-                        <button id="stopAgent">Stop Agent</button>
-                        <h3 id="agentStatus">Agent Status: NONE</h3>
-                        <div class="code" id="agentTTY"></div>
-                        <br>
-                        <div class="codeError" id="agentError"></div>
-                    </div>
-
-                    <br>
-                    <br>
-                    <br>
-                </td>
-                <td class="mainTable">
-                    <h2 class="banner">The Registry</h2>
-
-                    {% for i in range(0, len) %}
-                        {% if htmlElements[i][0] == "registered"%}
-                            <div class="section editor">
-                                <div class="{{htmlElements[i][2]}}">
-                                    <table>
-                                        <caption>Registered {{htmlElements[i][1]}}s</caption>
-                                        <thead>
-                                            <tr>
-                                                <th>{{htmlElements[i][1]}} id</th>
-                                                <th>Description</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="{{htmlElements[i][2]}}registeredTable">
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div>
-                                <h3>Selected {{htmlElements[i][1]}}: <div id="{{htmlElements[i][2]}}SelectionId" style="display: inline">NONE</div></h3>
-                                </div>
-                                <button id="{{htmlElements[i][2]}}Add"><< Add {{htmlElements[i][1]}}</button>
-                            </div>
-                            <br>
-                        {% endif %}
-                    {% endfor %}
-
-                    <div class="section editor">
-                        <h2>OEF Node</h2>
-
-                        <button id="startOEFNode">Start OEF Node</button>
-                        <button id="stopOEFNode">Stop OEF Node</button>
-                        <h3 id="oefStatus">OEF Node Status: NONE</h3>
-                        <div class="code" id="oefTTY">
-                        </div>
-                        <br>
-                        <div class="codeError" id="oefError">
-                        </div>
-                    </div>
-                    <br>
-                    <br>
-                    <br>
 
                 </td>
             </tr>
         </table>
 
     </div>
+
+
+
 
 
 </body>
