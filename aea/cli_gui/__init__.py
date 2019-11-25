@@ -449,11 +449,7 @@ def run(port: int):
     _kill_running_oef_nodes()
 
     app = create_app()
-<<<<<<< HEAD
-    app.run(host='127.0.0.1', port=8080, debug=False)
-=======
     app.run(host='127.0.0.1', port=port, debug=False)
->>>>>>> develop
 
     return app
 
