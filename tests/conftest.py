@@ -27,17 +27,17 @@ import sys
 import time
 from asyncio import CancelledError
 from threading import Timer
-from typing import Optional
+from typing import Optional, Set
 
 import docker as docker
 import pytest
 from docker.models.containers import Container
 from oef.agents import AsyncioCore, OEFAgent
 
+from aea import AEA_DIR
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Envelope
-from aea import AEA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -85,9 +85,11 @@ def tcpping(ip, port) -> bool:
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
-    def __init__(self, connection_id: str = "dummy"):
+    restricted_to_protocols = set()  # type: Set[str]
+
+    def __init__(self, connection_id: str = "dummy", restricted_to_protocols: Optional[Set[str]] = None):
         """Initialize."""
-        super().__init__(connection_id=connection_id)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self.connection_status.is_connected = False
         self._queue = None
 
@@ -98,6 +100,7 @@ class DummyConnection(Connection):
 
     async def disconnect(self, *args, **kwargs):
         """Disconnect."""
+        await self._queue.put(None)
         self.connection_status.is_connected = False
 
     async def send(self, envelope: 'Envelope'):
@@ -109,7 +112,11 @@ class DummyConnection(Connection):
         """Receive an envelope."""
         try:
             assert self._queue is not None
-            return await self._queue.get()
+            envelope = await self._queue.get()
+            if envelope is None:
+                logger.debug("Received none envelope.")
+                return None
+            return envelope
         except CancelledError:
             return None
         except Exception as e:
@@ -280,3 +287,13 @@ def network_node(oef_addr, oef_port, pytestconfig):
             logger.info("Stopping the OEF node...")
             c.stop()
             c.remove()
+
+
+def get_unused_tcp_port():
+    """Get an unused TCP port."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("", 0))
+    s.listen(1)
+    port = s.getsockname()[1]
+    s.close()
+    return port

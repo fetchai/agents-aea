@@ -138,7 +138,9 @@ class GymChannel:
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    def __init__(self, public_key: str, gym_env: gym.Env, connection_id: str = "gym"):
+    restricted_to_protocols = {"gym"}
+
+    def __init__(self, public_key: str, gym_env: gym.Env, connection_id: str = "gym", **kwargs):
         """
         Initialize a connection to a local gym environment.
 
@@ -146,7 +148,7 @@ class GymConnection(Connection):
         :param gym_env: the gym environment.
         :param connection_id: the connection id.
         """
-        super().__init__(connection_id=connection_id)
+        super().__init__(connection_id=connection_id, **kwargs)
         self.public_key = public_key
         self.channel = GymChannel(public_key, gym_env)
 
@@ -219,4 +221,6 @@ class GymConnection(Connection):
         """
         gym_env_package = cast(str, connection_configuration.config.get('env'))
         gym_env = locate(gym_env_package)
-        return GymConnection(public_key, gym_env())
+        return GymConnection(public_key, gym_env(),
+                             connection_id=connection_configuration.name,
+                             restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

@@ -19,14 +19,16 @@
 
 """This module contains the implementation of an Autonomous Economic Agent."""
 import logging
-from typing import Optional, cast
+from asyncio import AbstractEventLoop
+from typing import Optional, cast, List
 
 from aea.agent import Agent
+from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
-from aea.mail.base import Envelope, MailBox
+from aea.mail.base import Envelope
 from aea.registries.base import Filter, Resources
 from aea.skills.error.handlers import ErrorHandler
 
@@ -37,10 +39,11 @@ class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
     def __init__(self, name: str,
-                 mailbox: MailBox,
+                 connections: List[Connection],
                  wallet: Wallet,
                  ledger_apis: LedgerApis,
                  resources: Resources,
+                 loop: Optional[AbstractEventLoop] = None,
                  timeout: float = 0.0,
                  debug: bool = False,
                  max_reactions: int = 20) -> None:
@@ -48,7 +51,8 @@ class AEA(Agent):
         Instantiate the agent.
 
         :param name: the name of the agent
-        :param mailbox: the mailbox of the agent.
+        :param connections: the list of connections of the agent.
+        :param loop: the event loop to run the connections.
         :param wallet: the wallet of the agent.
         :param ledger_apis: the ledger apis of the agent.
         :param resources: the resources of the agent.
@@ -58,11 +62,9 @@ class AEA(Agent):
 
         :return: None
         """
-        super().__init__(name=name, wallet=wallet, timeout=timeout, debug=debug)
+        super().__init__(name=name, wallet=wallet, connections=connections, loop=loop, timeout=timeout, debug=debug)
 
         self.max_reactions = max_reactions
-
-        self.mailbox = mailbox
         self._decision_maker = DecisionMaker(self.name,
                                              self.max_reactions,
                                              self.outbox,
@@ -72,7 +74,7 @@ class AEA(Agent):
                                      self.wallet.public_keys,
                                      self.wallet.addresses,
                                      ledger_apis,
-                                     self.mailbox.connection_status,
+                                     self.multiplexer.connection_status,
                                      self.outbox,
                                      self.decision_maker.message_in_queue,
                                      self.decision_maker.ownership_state,

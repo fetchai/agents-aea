@@ -30,7 +30,7 @@ import pytest
 import aea
 from aea.configurations.base import ConnectionConfig
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import MailBox, Envelope
+from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
@@ -48,11 +48,11 @@ class TestStubConnection:
         cls.output_file_path = d / "input_file.csv"
 
         cls.connection = StubConnection(cls.input_file_path, cls.output_file_path)
-        cls.mailbox = MailBox([cls.connection])
-        cls.mailbox.connect()
+        cls.multiplexer = Multiplexer([cls.connection])
+        cls.multiplexer.connect()
 
     def test_reception(self):
-        """Test that the mailbox receives what has been enqueued in the input file."""
+        """Test that the connection receives what has been enqueued in the input file."""
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         expected_envelope = Envelope(to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
 
@@ -62,7 +62,7 @@ class TestStubConnection:
             f.write(encoded_envelope + b"\n")
             f.flush()
 
-        actual_envelope = self.mailbox.inbox.get(block=True, timeout=2.0)
+        actual_envelope = self.multiplexer.get(block=True, timeout=2.0)
         assert expected_envelope == actual_envelope
 
     def test_reception_fails(self):
@@ -82,7 +82,8 @@ class TestStubConnection:
         encoded_envelope = "{},{},{},{}".format("any", "any", DefaultMessage.protocol_id, DefaultSerializer().encode(msg).decode("utf-8"))
         encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
         self.connection._process_line(encoded_envelope)
-        assert self.mailbox.inbox.empty(), "The inbox must be empty due to bad encoded message"
+
+        assert self.connection.in_queue.empty(), "The inbox must be empty due to bad encoded message"
 
     def test_connection_from_config(self):
         """Test loading a connection from config file."""
@@ -94,7 +95,7 @@ class TestStubConnection:
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         expected_envelope = Envelope(to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
 
-        self.mailbox.outbox.put(expected_envelope)
+        self.multiplexer.put(expected_envelope)
         time.sleep(0.1)
 
         with open(self.output_file_path, "rb+") as f:
@@ -114,7 +115,7 @@ class TestStubConnection:
     def teardown_class(cls):
         """Tear down the test."""
         shutil.rmtree(cls.tmpdir, ignore_errors=True)
-        cls.mailbox.disconnect()
+        cls.multiplexer.disconnect()
 
 
 def test_connection_from_config():

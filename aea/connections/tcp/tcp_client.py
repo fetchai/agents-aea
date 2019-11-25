@@ -40,15 +40,18 @@ class TCPClientConnection(TCPConnection):
     def __init__(self,
                  public_key: str,
                  host: str,
-                 port: int):
+                 port: int,
+                 connection_id: str = "tcp_client",
+                 **kwargs):
         """
         Initialize a TCP channel.
 
         :param public_key: public key.
         :param host: the socket bind address.
         :param port: the socket bind port.
+        :param connection_id: the identifier for the connection object.
         """
-        super().__init__(public_key, host, port)
+        super().__init__(public_key, host, port, connection_id, **kwargs)
 
         self._reader, self._writer = (None, None)  # type: Optional[StreamReader], Optional[StreamWriter]
 
@@ -104,4 +107,6 @@ class TCPClientConnection(TCPConnection):
         """
         address = cast(str, connection_configuration.config.get("address"))
         port = cast(int, connection_configuration.config.get("port"))
-        return TCPClientConnection(public_key, address, port)
+        return TCPClientConnection(public_key, address, port,
+                                   connection_id=cast(str, connection_configuration.config.get("name")),
+                                   restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

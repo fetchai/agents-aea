@@ -21,7 +21,7 @@
 """Scaffold connection and channel."""
 
 import logging
-from typing import Optional
+from typing import Optional, Set
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
@@ -33,13 +33,16 @@ logger = logging.getLogger(__name__)
 class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
+    restricted_to_protocols = set()  # type: Set[str]
+
     def __init__(self, connection_id: str, public_key: str, *args, **kwargs):
         """
         Initialize a connection to an SDK or API.
 
+        :param connection_id: the identifier of the connection object.
         :param public_key: the public key used in the protocols.
         """
-        super().__init__(connection_id)
+        super().__init__(connection_id, *args, **kwargs)
         self.public_key = public_key
 
     async def connect(self) -> None:

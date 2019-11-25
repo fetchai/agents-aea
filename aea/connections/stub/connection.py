@@ -21,9 +21,8 @@
 import asyncio
 import logging
 import os
-import threading
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union, Optional, Set, cast
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
@@ -104,15 +103,19 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
+    restricted_to_protocols = set()  # type: Set[str]
+
     def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
-                 connection_id: str = "stub"):
+                 connection_id: str = "stub", restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize a stub connection.
 
         :param input_file_path: the input file for the incoming messages.
         :param output_file_path: the output file for the outgoing messages.
+        :param connection_id: the identifier of the connection object.
+        :param restricted_to_protocols: the only supported protocols for this connection.
         """
-        super().__init__(connection_id=connection_id)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
 
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -123,7 +126,6 @@ class StubConnection(Connection):
         self.output_file = open(output_file_path, "wb+", buffering=1)
 
         self.in_queue = None  # type: Optional[asyncio.Queue]
-        self._lock = threading.Lock()
 
         self._observer = Observer()
 
@@ -166,22 +168,21 @@ class StubConnection(Connection):
 
     async def connect(self) -> None:
         """Set up the connection."""
-        with self._lock:
-            if self.connection_status.is_connected:
-                return
+        if self.connection_status.is_connected:
+            return
 
-            try:
-                # initialize the queue here because the queue
-                # must be initialized with the right event loop
-                # which is known only at connection time.
-                self.in_queue = asyncio.Queue()
-                self._observer.start()
-            except Exception as e:      # pragma: no cover
-                raise e
-            finally:
-                self.connection_status.is_connected = False
+        try:
+            # initialize the queue here because the queue
+            # must be initialized with the right event loop
+            # which is known only at connection time.
+            self.in_queue = asyncio.Queue()
+            self._observer.start()
+        except Exception as e:      # pragma: no cover
+            raise e
+        finally:
+            self.connection_status.is_connected = False
 
-            self.connection_status.is_connected = True
+        self.connection_status.is_connected = True
 
         # do a first processing of messages.
         self.read_envelopes()
@@ -192,16 +193,15 @@ class StubConnection(Connection):
 
         In this type of connection there's no channel to disconnect.
         """
-        with self._lock:
-            if not self.connection_status.is_connected:
-                return
+        if not self.connection_status.is_connected:
+            return
 
-            assert self.in_queue is not None, "Input queue not initialized."
-            self._observer.stop()
-            self._observer.join()
-            self.in_queue.put_nowait(None)
+        assert self.in_queue is not None, "Input queue not initialized."
+        self._observer.stop()
+        self._observer.join()
+        self.in_queue.put_nowait(None)
 
-            self.connection_status.is_connected = False
+        self.connection_status.is_connected = False
 
     async def send(self, envelope: Envelope):
         """
@@ -225,4 +225,6 @@ class StubConnection(Connection):
         """
         input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
         output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
-        return StubConnection(input_file, output_file)
+        return StubConnection(input_file, output_file,
+                              connection_id=cast(str, connection_configuration.config.get("name")),
+                              restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

@@ -25,7 +25,7 @@ from threading import Thread
 from aea.agent import Agent, AgentState
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
-from aea.mail.base import MailBox, InBox, OutBox
+from aea.mail.base import InBox, OutBox
 from .conftest import CUR_PATH
 
 
@@ -63,14 +63,12 @@ def test_run_agent():
         agent_name = "dummyagent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
-        agent = DummyAgent(agent_name, wallet)
-        mailbox = MailBox([OEFLocalConnection("mypbk", node)])
-        agent.mailbox = mailbox
+        agent = DummyAgent(agent_name, [OEFLocalConnection("mypbk", node)], wallet)
         assert agent.name == agent_name
         assert isinstance(agent.wallet, Wallet)
         assert agent.agent_state == AgentState.INITIATED, "Agent state must be 'initiated'"
 
-        agent.mailbox.connect()
+        agent.multiplexer.connect()
         assert agent.agent_state == AgentState.CONNECTED, "Agent state must be 'connected'"
 
         assert isinstance(agent.inbox, InBox)
@@ -84,5 +82,5 @@ def test_run_agent():
             assert agent.agent_state == AgentState.RUNNING, "Agent state must be 'running'"
         finally:
             agent.stop()
-            agent.mailbox.disconnect()
+            agent.multiplexer.disconnect()
             agent_thread.join()

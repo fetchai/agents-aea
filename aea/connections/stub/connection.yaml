@@ -5,12 +5,7 @@ license: Apache 2.0
 url: ""
 description: "The stub connection implements a connection stub which reads/writes messages from/to file."
 class_name: StubConnection
-supported_protocols:
-  - oef
-  - tac
-  - default
-  - fipa
-  - gym
+restricted_to_protocols: []
 config:
   input_file: "./input_file"
   output_file: "./output_file"

@@ -32,7 +32,7 @@ from aea.configurations.base import ProtocolConfig
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.mail.base import MailBox, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -46,12 +46,12 @@ from .conftest import CUR_PATH
 def test_initialise_AEA():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
-    public_key_1 = "mailbox1"
-    mailbox1 = MailBox([OEFLocalConnection(public_key_1, node)])
+    public_key_1 = "public_key"
+    connections1 = [OEFLocalConnection(public_key_1, node)]
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
     ledger_apis = LedgerApis({})
-    my_AEA = AEA("Agent0", mailbox1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
+    my_AEA = AEA("Agent0", connections1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
     assert not my_AEA.context.connection_status.is_connected, "AEA should not be connected."
     my_AEA.setup()
@@ -70,11 +70,11 @@ def test_act():
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
         public_key = wallet.public_keys['default']
-        mailbox = MailBox([OEFLocalConnection(public_key, node)])
+        connections = [OEFLocalConnection(public_key, node)]
 
         agent = AEA(
             agent_name,
-            mailbox,
+            connections,
             wallet,
             ledger_apis,
             resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
@@ -99,7 +99,7 @@ def test_react():
         ledger_apis = LedgerApis({})
         public_key = wallet.public_keys['default']
         connection = OEFLocalConnection(public_key, node)
-        mailbox = MailBox([connection])
+        connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         message_bytes = DefaultSerializer().encode(msg)
@@ -112,7 +112,7 @@ def test_react():
 
         agent = AEA(
             agent_name,
-            mailbox,
+            connections,
             wallet,
             ledger_apis,
             resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
@@ -120,7 +120,7 @@ def test_react():
         try:
             t.start()
             time.sleep(0.1)
-            agent.mailbox.outbox.put(envelope)
+            agent.outbox.put(envelope)
             time.sleep(0.5)
             handler = agent.resources.handler_registry.fetch_by_skill('default', "dummy")
             assert msg in handler.handled_messages, "The message is not inside the handled_messages."
@@ -141,7 +141,7 @@ async def test_handle():
         ledger_apis = LedgerApis({})
         public_key = wallet.public_keys['default']
         connection = OEFLocalConnection(public_key, node)
-        mailbox = MailBox([connection])
+        connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         message_bytes = DefaultSerializer().encode(msg)
@@ -154,20 +154,20 @@ async def test_handle():
 
         agent = AEA(
             agent_name,
-            mailbox,
+            connections,
             wallet,
             ledger_apis,
             resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
         t = Thread(target=agent.start)
         try:
             t.start()
-            time.sleep(0.5)
+            time.sleep(1.0)
             dummy_skill = agent.resources.get_skill("dummy")
             dummy_handler = dummy_skill.handlers[0]
 
             expected_envelope = envelope
-            mailbox.outbox.put(expected_envelope)
-            time.sleep(0.5)
+            agent.outbox.put(expected_envelope)
+            time.sleep(1.0)
             assert len(dummy_handler.handled_messages) == 1
 
             #   DECODING ERROR
@@ -178,8 +178,8 @@ async def test_handle():
                 protocol_id='default',
                 message=msg)
             expected_envelope = envelope
-            mailbox.outbox.put(expected_envelope)
-            time.sleep(0.5)
+            agent.outbox.put(expected_envelope)
+            time.sleep(1.0)
             assert len(dummy_handler.handled_messages) == 2
 
             #   UNSUPPORTED SKILL
@@ -195,8 +195,8 @@ async def test_handle():
                 protocol_id="fipa",
                 message=msg)
             expected_envelope = envelope
-            mailbox.outbox.put(expected_envelope)
-            time.sleep(0.5)
+            agent.outbox.put(expected_envelope)
+            time.sleep(1.0)
             assert len(dummy_handler.handled_messages) == 3
 
         finally:
@@ -217,10 +217,10 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.wallet = Wallet({'default': cls.private_key_pem_path})
         cls.ledger_apis = LedgerApis({})
         cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
-        cls.mailbox = MailBox([cls.connection])
+        cls.connections = [cls.connection]
 
         cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
-        cls.aea = AEA(cls.agent_name, cls.mailbox, cls.wallet, cls.ledger_apis, cls.resources)
+        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, cls.resources)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         envelope = Envelope(to=cls.agent_name, sender=cls.agent_name, protocol_id="default", message=DefaultSerializer().encode(cls.expected_message))
@@ -229,7 +229,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.t.start()
 
         time.sleep(0.5)
-        cls.aea.mailbox.outbox.put(envelope)
+        cls.aea.outbox.put(envelope)
         time.sleep(0.5)
 
     def test_initialize_aea_programmatically(self):
@@ -268,11 +268,11 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.wallet = Wallet({'default': cls.private_key_pem_path})
         cls.ledger_apis = LedgerApis({})
         cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
-        cls.mailbox = MailBox([cls.connection])
+        cls.connections = [cls.connection]
 
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
         cls.resources = Resources(cls.temp)
-        cls.aea = AEA(cls.agent_name, cls.mailbox, cls.wallet, cls.ledger_apis, resources=cls.resources)
+        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, resources=cls.resources)
 
         cls.default_protocol_configuration = ProtocolConfig.from_json(
             yaml.safe_load(open(Path(AEA_DIR, "protocols", "default", "protocol.yaml"))))

@@ -106,12 +106,13 @@ aea add skill weather_client_ledger
 Additionally, create the private key for the weather client AEA.
 ```bash
 aea generate-key fetchai
+aea add-key fetchai fet_private_key.txt
 ```
 
 ### Update the AEA configs
 
-Both in `weather_station/aea-config.yaml` and
-`weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
+Both in `my_weather_station/aea-config.yaml` and
+`my_weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
 
 ``` yaml
 ledger_apis:
@@ -126,7 +127,7 @@ ledger_apis:
 Create some wealth for your weather client on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
 cd ..
-python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
+python scripts/fetchai_wealth_generation.py --private-key my_weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
 cd my_weather_client
 ```
 
@@ -176,12 +177,13 @@ aea add skill weather_client_ledger
 Additionally, create the private key for the weather client AEA.
 ```bash
 aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
 ```
 
 ### Update the AEA configs
 
-Both in `weather_station/aea-config.yaml` and
-`weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
+Both in `my_weather_station/aea-config.yaml` and
+`my_weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
 
 ``` yaml
 ledger_apis:
@@ -218,7 +220,7 @@ ledgers: ['ethereum']
 
 Create some wealth for your weather client on the Ethereum Ropsten test net.
 
-Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `weather_client/eth_private_key.txt`.
+Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_weather_client/eth_private_key.txt`.
 
 ### Run the AEAs
 

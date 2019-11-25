@@ -22,11 +22,10 @@
 import asyncio
 import logging
 import pickle
-import threading
 import time
 from asyncio import AbstractEventLoop, CancelledError
 from threading import Thread
-from typing import List, Optional, cast
+from typing import List, Optional, cast, Set
 
 import oef
 from oef.agents import OEFAgent
@@ -465,7 +464,10 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef"):
+    restricted_to_protocols = set()  # type: Set[str]
+
+    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef",
+                 restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize.
 
@@ -473,13 +475,13 @@ class OEFConnection(Connection):
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
         :param connection_id: the identifier of the connection object.
+        :param restricted_to_protocols: the only supported protocols for this connection.
         """
-        super().__init__(connection_id=connection_id)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.channel = OEFChannel(public_key, oef_addr, oef_port, core=self._core)
 
-        self._lock = threading.Lock()
         self._connection_check_thread = None  # type: Optional[Thread]
 
     async def connect(self) -> None:
@@ -489,23 +491,22 @@ class OEFConnection(Connection):
         :return: None
         :raises Exception if the connection to the OEF fails.
         """
-        with self._lock:
-            if self.connection_status.is_connected:
-                return
-            try:
-                self._core.run_threaded()
-                loop = asyncio.get_event_loop()
-                self.in_queue = asyncio.Queue()
-                await self._try_connect()
-                self.connection_status.is_connected = True
-                self.channel.loop = loop
-                self.channel.in_queue = self.in_queue
-                self._connection_check_thread = Thread(target=self._connection_check)
-                self._connection_check_thread.start()
-            except (CancelledError, Exception) as e:  # pragma: no cover
-                self._core.stop()
-                self.connection_status.is_connected = False
-                raise e
+        if self.connection_status.is_connected:
+            return
+        try:
+            self._core.run_threaded()
+            loop = asyncio.get_event_loop()
+            self.in_queue = asyncio.Queue()
+            await self._try_connect()
+            self.connection_status.is_connected = True
+            self.channel.loop = loop
+            self.channel.in_queue = self.in_queue
+            self._connection_check_thread = Thread(target=self._connection_check)
+            self._connection_check_thread.start()
+        except (CancelledError, Exception) as e:  # pragma: no cover
+            self._core.stop()
+            self.connection_status.is_connected = False
+            raise e
 
     async def _try_connect(self) -> None:
         """
@@ -546,15 +547,14 @@ class OEFConnection(Connection):
 
         :return: None
         """
-        with self._lock:
-            assert self._connection_check_thread is not None, "Call connect before disconnect."
-            assert self.in_queue is not None
-            self.connection_status.is_connected = False
-            self._connection_check_thread.join()
-            self._connection_check_thread = None
-            self.channel.disconnect()
-            await self.in_queue.put(None)
-            self._core.stop()
+        assert self._connection_check_thread is not None, "Call connect before disconnect."
+        assert self.in_queue is not None
+        self.connection_status.is_connected = False
+        self._connection_check_thread.join()
+        self._connection_check_thread = None
+        self.channel.disconnect()
+        await self.in_queue.put(None)
+        self._core.stop()
 
     async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """
@@ -598,4 +598,6 @@ class OEFConnection(Connection):
         """
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
-        return OEFConnection(public_key, oef_addr, oef_port)
+        return OEFConnection(public_key, oef_addr, oef_port,
+                             connection_id=cast(str, connection_configuration.config.get("name")),
+                             restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

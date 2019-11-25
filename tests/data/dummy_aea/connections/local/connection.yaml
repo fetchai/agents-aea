@@ -5,9 +5,5 @@ license: Apache 2.0
 url: ""
 description: "The local connection provides a stub for an OEF node."
 class_name: OEFLocalConnection
-supported_protocols:
-  - default
-  - oef
-  - fipa
-  - tac
+restricted_to_protocols: []
 config: {}

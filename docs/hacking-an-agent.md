@@ -23,7 +23,7 @@ from aea.aea import AEA
 from aea.connections.stub.connection import StubConnection
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-from aea.mail.base import MailBox, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
@@ -43,10 +43,9 @@ Create a wallet object with a private key.
 wallet = Wallet({'default': 'my_key.txt'})
 ```
 
-Create a `Connection` and a `MailBox`.
+Create a `Connection`.
 ``` python
 stub_connection = StubConnection(input_file_path='input.txt', output_file_path='output.txt')
-mailbox = MailBox(stub_connection)
 ```
 
 For ledger APIs, we simply feed the agent an empty dictionary (meaning we do not require any). 
@@ -61,7 +60,7 @@ resources = Resources('')
 
 Now we have everything we need for initialisation.
 ``` python
-my_agent = AEA("my_agent", mailbox, wallet, ledger_apis, resources)
+my_agent = AEA("my_agent", stub_connection, wallet, ledger_apis, resources)
 ```
 
 ## Add skills and protocols
