@@ -222,6 +222,31 @@ paths:
             items:
               type: string
 
+  /{item_type}/{search_term}:
+    get:
+      operationId: aea.cli_gui.search_registered_items
+      tags:
+        - agents
+      summary: Return list of all registered items (protocols, connections, skills)
+      parameters:
+        - name: item_type
+          in: path
+          description: type of item to remove
+          type: string
+          required: True
+        - name: search_term
+          in: path
+          description: type of item to remove
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read item list operation
+          schema:
+            type: array
+            items:
+              type: string
+
   /oef:
     post:
       operationId: aea.cli_gui.start_oef_node
