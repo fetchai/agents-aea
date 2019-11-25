@@ -33,15 +33,17 @@ from aea.aea import AEA
 from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
     AEAConfigException, _load_env_file
 from aea.cli.install import install
-from aea.connections.base import Connection
-from aea.configurations.loader import ConfigLoader
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig
+from aea.configurations.loader import ConfigLoader
+from aea.connections.base import Connection
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_default_private_key, _create_fetchai_private_key, _create_ethereum_private_key, DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, _try_validate_private_key_pem_path, _try_validate_fet_private_key_path, _try_validate_ethereum_private_key_path
-from aea.crypto.ledger_apis import LedgerApis, _try_to_instantiate_fetchai_ledger_api, _try_to_instantiate_ethereum_ledger_api, SUPPORTED_LEDGER_APIS
+from aea.crypto.helpers import _create_default_private_key, _create_fetchai_private_key, _create_ethereum_private_key, \
+    DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, _try_validate_private_key_pem_path, \
+    _try_validate_fet_private_key_path, _try_validate_ethereum_private_key_path
+from aea.crypto.ledger_apis import LedgerApis, _try_to_instantiate_fetchai_ledger_api, \
+    _try_to_instantiate_ethereum_ledger_api, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet, DEFAULT, SUPPORTED_CRYPTOS
-from aea.mail.base import MailBox
 from aea.registries.base import Resources
 
 
@@ -209,8 +211,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
         else:
             click_context.invoke(install)
 
-    mailbox = MailBox(connection)
-    agent = AEA(agent_name, mailbox, wallet, ledger_apis, resources=Resources(str(Path("."))))
+    agent = AEA(agent_name, [connection], wallet, ledger_apis, resources=Resources(str(Path("."))))
     try:
         agent.start()
     except KeyboardInterrupt:

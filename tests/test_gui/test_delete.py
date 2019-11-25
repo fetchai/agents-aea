@@ -26,45 +26,45 @@ import unittest.mock
 from .test_base import create_app
 
 
-def test_create_agent():
+def test_delete_agent():
     """Test creating an agent."""
     app = create_app()
     agent_name = "test_agent_id"
 
     def _dummy_call_aea(param_list, dir):
         assert param_list[0] == "aea"
-        assert param_list[1] == "create"
+        assert param_list[1] == "delete"
         assert param_list[2] == agent_name
         return 0
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
-        response_create = app.post(
-            'api/agent',
-            content_type='application/json',
-            data=json.dumps(agent_name))
-    assert response_create.status_code == 201
-    data = json.loads(response_create.get_data(as_text=True))
-    assert data == agent_name
+        response_delete = app.delete(
+            'api/agent/' + agent_name,
+            data=None,
+            content_type='application/json')
+    assert response_delete.status_code == 200
+    data = json.loads(response_delete.get_data(as_text=True))
+    assert data == "Agent {} deleted".format(agent_name)
 
 
-def test_create_agent_fail():
+def test_delete_agent_fail():
     """Test creating an agent and failing."""
     app = create_app()
     agent_name = "test_agent_id"
 
     def _dummy_call_aea(param_list, dir):
         assert param_list[0] == "aea"
-        assert param_list[1] == "create"
+        assert param_list[1] == "delete"
         assert param_list[2] == agent_name
         return 1
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
-        response_create = app.post(
-            'api/agent',
-            content_type='application/json',
-            data=json.dumps(agent_name))
-    assert response_create.status_code == 400
-    data = json.loads(response_create.get_data(as_text=True))
-    assert data['detail'] == 'Failed to create Agent {} - a folder of this name may exist already'.format(agent_name)
+        response_delete = app.delete(
+            'api/agent/' + agent_name,
+            data=None,
+            content_type='application/json')
+    assert response_delete.status_code == 400
+    data = json.loads(response_delete.get_data(as_text=True))
+    assert data['detail'] == 'Failed to delete Agent {} - it may not exist'.format(agent_name)

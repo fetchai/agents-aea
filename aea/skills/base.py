@@ -34,7 +34,7 @@ from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, 
 from aea.configurations.loader import ConfigLoader
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
-from aea.decision_maker.base import OwnershipState, Preferences
+from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
 
@@ -110,9 +110,9 @@ class SkillContext:
         return self._agent_context.preferences
 
     @property
-    def agent_is_ready_to_pursuit_goals(self) -> bool:
+    def agent_goal_pursuit_readiness(self) -> GoalPursuitReadiness:
         """Get the goal pursuit readiness."""
-        return self._agent_context.is_ready_to_pursuit_goals
+        return self._agent_context.goal_pursuit_readiness
 
     @property
     def ledger_apis(self) -> LedgerApis:

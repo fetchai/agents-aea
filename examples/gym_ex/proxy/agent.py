@@ -51,7 +51,7 @@ class ProxyAgent(Agent):
         super().__init__(name, wallet, timeout=0)
         self.proxy_env_queue = proxy_env_queue
         crypto_object = self.wallet.crypto_objects.get(DEFAULT)
-        self.mailbox = MailBox(GymConnection(crypto_object.public_key, gym_env))
+        self.mailbox = MailBox([GymConnection(crypto_object.public_key, gym_env)])
 
     def setup(self) -> None:
         """

@@ -10,6 +10,7 @@ Command  | Description
 `freeze`  | Get all the dependencies needed for the aea project and its components.
 `gui`  | Run the GUI.
 `generate-key default/fetchai/ethereum/all`  | Generate private keys.
+`add-key default/fetchai/ethereum file`  | add a private key from a file.
 `install [-r <requirements_file>]` | Install the dependencies.
 `list protocols/connections/skills` |   List the installed resources.
 `remove connection/protocol/skill [name]` | Remove connection, protocol, or skill, called `[name]`, from agent.

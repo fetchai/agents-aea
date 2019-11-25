@@ -19,18 +19,13 @@
 
 """This test module contains the tests for the Scaffold connection.py."""
 
-from aea.connections.scaffold.connection import MyScaffoldChannel, MyScaffoldConnection
+from aea.connections.scaffold.connection import MyScaffoldConnection
 
 
 class TestScaffold:
     """Test the aea/connections/scaffold/connection.py."""
 
-    def test_scaffold_channel(self):
-        """Test the initialisation of the scaffold_channel."""
-        m_channel = MyScaffoldChannel(public_key="pk")
-        assert m_channel.public_key == "pk"
-
     def test_scaffold_connection(self):
         """Test the initialisation of the scaffold_connection."""
-        m_connection = MyScaffoldConnection(public_key="pk")
+        m_connection = MyScaffoldConnection("my_scaffold_connection", public_key="pk")
         assert m_connection.public_key == "pk"

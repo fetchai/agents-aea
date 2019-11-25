@@ -1,10 +1,9 @@
-A `Connection` is attached to a `MailBox` within the AEA framework.
+A `Connection` is attached to an `AEA` within the AEA framework.
 
-The `connection.py` module in the `connections` directory contains two classes. A `Connection` object has a reference to a `Channel`. 
+The `connection.py` module in the `connections` directory contains a `Connection` class, 
+which is a wrapper for an SDK or API
 
-* `Channel`: a wrapper for an SDK or API.
-* `Connection`: a proxy to the functionality of an SDK or API.
-
+An `AEA` can interact with multiple connections at the same time.
 
 ## Configuration
 
@@ -25,39 +24,10 @@ config:
 ```
 
 
-The developer is left to implement the methods of both `Connection` and `Channel` classes dependent on the protocol type. 
+The developer is left to implement the methods of the `Connection` dependent on the protocol type. 
 
 <!--We'll demonstrate implementations from the `oef` connection as an example.-->
 
-
-## `Channel`
-
-
-### `send(self, envelope: Envelope) `
-<!--
-``` python
-def send(self, envelope: Envelope) -> None:
-    if envelope.protocol_id == "default":
-      	self.send_default_message(envelope)
-   	elif envelope.protocol_id == "fipa":
-       	self.send_fipa_message(envelope)
-   	elif envelope.protocol_id == "oef":
-       	self.send_oef_message(envelope)
-   	elif envelope.protocol_id == "tac":
-      	self.send_default_message(envelope)
-   	else:
-    	logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
-        raise ValueError("Cannot send message.")
-```
--->
-### `connect(self) -> Optional[Queue]`
-<!--
-`Channel.connect() not implemented in oef`
--->
-### `disconnect(self)`
-<!--
-`Channel.disconnect() not implemented in oef`
--->
 
 ## `Connection`
 

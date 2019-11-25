@@ -21,11 +21,16 @@
 import base64
 import shutil
 import tempfile
+import time
+import unittest.mock
 from pathlib import Path
 
+import pytest
+
+import aea
 from aea.configurations.base import ConnectionConfig
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import MailBox, Envelope
+from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
@@ -43,11 +48,11 @@ class TestStubConnection:
         cls.output_file_path = d / "input_file.csv"
 
         cls.connection = StubConnection(cls.input_file_path, cls.output_file_path)
-        cls.mailbox = MailBox(cls.connection)
-        cls.mailbox.connect()
+        cls.multiplexer = Multiplexer([cls.connection])
+        cls.multiplexer.connect()
 
     def test_reception(self):
-        """Test that the mailbox receives what has been enqueued in the input file."""
+        """Test that the connection receives what has been enqueued in the input file."""
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         expected_envelope = Envelope(to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
 
@@ -57,8 +62,18 @@ class TestStubConnection:
             f.write(encoded_envelope + b"\n")
             f.flush()
 
-        actual_envelope = self.mailbox.inbox.get(timeout=2.0)
+        actual_envelope = self.multiplexer.get(block=True, timeout=2.0)
         assert expected_envelope == actual_envelope
+
+    def test_reception_fails(self):
+        """Test the case when an error occurs during the processing of a line."""
+        patch = unittest.mock.patch.object(aea.connections.stub.connection.logger, 'error')
+        mocked_logger_error = patch.__enter__()
+        with unittest.mock.patch('aea.connections.stub.connection._decode', side_effect=Exception("an error.")):
+            self.connection._process_line(b"")
+            mocked_logger_error.assert_called_with("Error when processing a line. Message: an error.")
+
+        patch.__exit__()
 
     def test_connection_is_established(self):
         """Test the stub connection is established and then bad formatted messages."""
@@ -67,7 +82,8 @@ class TestStubConnection:
         encoded_envelope = "{},{},{},{}".format("any", "any", DefaultMessage.protocol_id, DefaultSerializer().encode(msg).decode("utf-8"))
         encoded_envelope = base64.b64encode(encoded_envelope.encode("utf-8"))
         self.connection._process_line(encoded_envelope)
-        assert self.mailbox.inbox.empty(), "The inbox must be empty due to bad encoded message"
+
+        assert self.connection.in_queue.empty(), "The inbox must be empty due to bad encoded message"
 
     def test_connection_from_config(self):
         """Test loading a connection from config file."""
@@ -79,7 +95,8 @@ class TestStubConnection:
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         expected_envelope = Envelope(to="any", sender="any", protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(msg))
 
-        self.mailbox.outbox.put(expected_envelope)
+        self.multiplexer.put(expected_envelope)
+        time.sleep(0.1)
 
         with open(self.output_file_path, "rb+") as f:
             lines = f.readlines()
@@ -98,4 +115,67 @@ class TestStubConnection:
     def teardown_class(cls):
         """Tear down the test."""
         shutil.rmtree(cls.tmpdir, ignore_errors=True)
-        cls.mailbox.disconnect()
+        cls.multiplexer.disconnect()
+
+
+def test_connection_from_config():
+    """Test loading a connection from config file."""
+    tmpdir = Path(tempfile.mktemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+    stub_con = StubConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig(
+        input_file=input_file_path,
+        output_file=output_file_path
+    ))
+    assert not stub_con.connection_status.is_connected
+    shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+@pytest.mark.asyncio
+async def test_disconnection_when_already_disconnected():
+    """Test the case when disconnecting a connection already disconnected."""
+    tmpdir = Path(tempfile.mktemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+    stub_con = StubConnection(input_file_path, output_file_path)
+
+    assert not stub_con.connection_status.is_connected
+    await stub_con.disconnect()
+    assert not stub_con.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_connection_when_already_connected():
+    """Test the case when connecting a connection already connected."""
+    tmpdir = Path(tempfile.mktemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+    stub_con = StubConnection(input_file_path, output_file_path)
+
+    assert not stub_con.connection_status.is_connected
+    await stub_con.connect()
+    assert stub_con.connection_status.is_connected
+    await stub_con.connect()
+    assert stub_con.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_receiving_returns_none_when_error_occurs():
+    """Test that when we try to receive an envelope and an error occurs we return None."""
+    tmpdir = Path(tempfile.mktemp())
+    d = tmpdir / "test_stub"
+    d.mkdir(parents=True)
+    input_file_path = d / "input_file.csv"
+    output_file_path = d / "input_file.csv"
+    stub_con = StubConnection(input_file_path, output_file_path)
+
+    await stub_con.connect()
+    with unittest.mock.patch.object(stub_con.in_queue, "get", side_effect=Exception):
+        ret = await stub_con.receive()
+        assert ret is None

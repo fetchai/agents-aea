@@ -169,7 +169,7 @@ class ConnectionConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  class_name: str = "",
-                 supported_protocols: Optional[List[str]] = None,
+                 restricted_to_protocols: Optional[Set[str]] = None,
                  dependencies: Optional[List[str]] = None,
                  description: str = "",
                  **config):
@@ -180,7 +180,7 @@ class ConnectionConfig(Configuration):
         self.license = license
         self.url = url
         self.class_name = class_name
-        self.supported_protocols = supported_protocols if supported_protocols is not None else []
+        self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
         self.dependencies = dependencies if dependencies is not None else []
         self.description = description
         self.config = config
@@ -195,7 +195,7 @@ class ConnectionConfig(Configuration):
             "license": self.license,
             "url": self.url,
             "class_name": self.class_name,
-            "supported_protocols": self.supported_protocols,
+            "restricted_to_protocols": self.restricted_to_protocols,
             "dependencies": self.dependencies,
             "description": self.description,
             "config": self.config
@@ -204,7 +204,8 @@ class ConnectionConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        supported_protocols = cast(List[str], obj.get("supported_protocols", []))
+        restricted_to_protocols = obj.get("restricted_to_protocols")
+        restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
         dependencies = cast(List[str], obj.get("dependencies", []))
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
@@ -213,7 +214,7 @@ class ConnectionConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
-            supported_protocols=supported_protocols,
+            restricted_to_protocols=cast(Set[str], restricted_to_protocols),
             dependencies=dependencies,
             description=cast(str, obj.get("description")),
             **cast(dict, obj.get("config"))

@@ -3,7 +3,7 @@ authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
 url: ""
+description: "The local connection provides a stub for an OEF node."
 class_name: OEFLocalConnection
-supported_protocols: ["oef"]
+restricted_to_protocols: []
 config: {}
-description: "local connection description [Fill in]"
