@@ -29,6 +29,7 @@ time, mark, audio, video {
 	font-size: 100%;
 	font: inherit;
 	vertical-align: baseline;
+	cursor: auto;
 }
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure,
@@ -90,6 +91,8 @@ $overlay: rgba(0, 0, 0, 0.5);
     --neutral-dark-grey: #0d0d0d;
     --neutral-dark-cyan: #33383e;
     --neutral-cyan: #467083;
+    --neutral-light-cyan: #a2b7c1;
+    --secondary-orange: #f6923b;
 
 
 }
@@ -205,6 +208,11 @@ input:focus {
 }
 
 
+ .interactive{
+    cursor: pointer;
+ }
+
+
 button{
     height: 18px;
     vertical-align: middle;
@@ -213,18 +221,25 @@ button{
     outline: none;
     color: white;
     display: inline-block;
+    cursor: pointer;
 }
 
 button:hover {
-  background-color: var(--primary-colour);
-  color: white;
+    background-color: var(--primary-colour);
+    color: white;
+    cursor: pointer;
 }
 
 button:disabled,
 button[disabled]{
-  border: 1px solid #999999;
-  background-color: #cccccc;
-  color: #666666;
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+    cursor: auto;
+}
+
+button:active {
+  background-color: var(--neutral-light-cyan);
 }
 
 
@@ -396,6 +411,7 @@ tr {
     padding: 2px;
     border: none;
     outline: none;
+
 }
 
 

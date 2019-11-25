@@ -327,7 +327,7 @@ class View{
         // did we get a people array?
         if (tableName) {
             for (let i=0, l=data.length; i < l; i++) {
-                rows += `<tr><td class="id">${data[i].id}</td><td class="description">${data[i].description}</td></tr>`;
+                rows += `<tr><td class="id interactive">${data[i].id}</td><td class="description interactive">${data[i].description}</td></tr>`;
             }
             $('.' + tableName + ' table > tbody').append(rows);
         }
