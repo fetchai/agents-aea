@@ -179,9 +179,6 @@ def remove_local_item(agent_id: str, item_type: str, item_id: str):
 
 
 def get_local_items(agent_id: str, item_type: str):
-    if item_type == "connection":
-        a = "hello"
-
     """Return a list of protocols, skills or connections supported by a local agent."""
     if agent_id == "NONE":
         return [], 200  # 200 (Success)
