@@ -20,8 +20,8 @@
 """Implementation of the TCP client."""
 import asyncio
 import logging
-from asyncio import AbstractEventLoop, Task, StreamWriter, StreamReader
-from concurrent.futures import CancelledError, Executor
+import struct
+from asyncio import StreamWriter, StreamReader, CancelledError
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
@@ -41,40 +41,57 @@ class TCPClientConnection(TCPConnection):
                  public_key: str,
                  host: str,
                  port: int,
-                 loop: Optional[AbstractEventLoop] = None,
-                 executor: Optional[Executor] = None):
+                 connection_id: str = "tcp_client",
+                 **kwargs):
         """
         Initialize a TCP channel.
 
         :param public_key: public key.
         :param host: the socket bind address.
-        :param loop: the asyncio loop.
+        :param port: the socket bind port.
+        :param connection_id: the identifier for the connection object.
         """
-        super().__init__(public_key, host, port, loop=loop, executor=executor)
+        super().__init__(public_key, host, port, connection_id, **kwargs)
 
         self._reader, self._writer = (None, None)  # type: Optional[StreamReader], Optional[StreamWriter]
-        self._read_task = None  # type: Optional[Task]
 
-    def setup(self):
+    async def setup(self):
         """Set the connection up."""
-        future = self._run_task(asyncio.open_connection(self.host, self.port, loop=self._loop))
-        self._reader, self._writer = future.result()
+        self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
         public_key_bytes = self.public_key.encode("utf-8")
-        future = self._run_task(self._send(self._writer, public_key_bytes))
-        future.result(timeout=3.0)
-        self._read_task = self._run_task(self._recv_loop(self._reader))
-        self._fetch_task = self._run_task(self._send_loop())
+        await self._send(self._writer, public_key_bytes)
 
-    def teardown(self):
+    async def teardown(self):
         """Tear the connection down."""
-        try:
-            self.out_queue.put_nowait(None)
-            self._fetch_task.result()
+        if self._reader:
             self._reader.feed_eof()
-            self._read_task.cancel()
-        except CancelledError:
-            pass
         self._writer.close()
+
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+        """
+        Receive an envelope.
+
+        :return: the received envelope, or None if an error occurred.
+        """
+        try:
+            assert self._reader is not None
+            data = await self._recv(self._reader)
+            if data is None:
+                logger.debug("[{}] No data received.".format(self.public_key))
+                return None
+            logger.debug("[{}] Message received: {!r}".format(self.public_key, data))
+            envelope = Envelope.decode(data)  # TODO handle decoding error
+            logger.debug("[{}] Decoded envelope: {}".format(self.public_key, envelope))
+            return envelope
+        except CancelledError:
+            logger.debug("[{}] Read cancelled.".format(self.public_key))
+            return None
+        except struct.error as e:
+            logger.debug("Struct error: {}".format(str(e)))
+            return None
+        except Exception as e:
+            logger.exception(e)
+            raise
 
     def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:
         """Select the destination, given the envelope."""
@@ -90,4 +107,6 @@ class TCPClientConnection(TCPConnection):
         """
         address = cast(str, connection_configuration.config.get("address"))
         port = cast(int, connection_configuration.config.get("port"))
-        return TCPClientConnection(public_key, address, port)
+        return TCPClientConnection(public_key, address, port,
+                                   connection_id=cast(str, connection_configuration.config.get("name")),
+                                   restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

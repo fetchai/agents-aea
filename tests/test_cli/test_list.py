@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 
 import jsonschema
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
@@ -44,7 +44,7 @@ class TestListProtocols:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -86,7 +86,7 @@ class TestListConnections:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -96,7 +96,7 @@ class TestListConnections:
         """Test that the command has printed the correct output."""
         compare_text = """------------------------------
 Name: local
-Description: local connection description [Fill in]
+Description: The local connection provides a stub for an OEF node.
 Version: 0.1.0
 ------------------------------
 
@@ -123,7 +123,7 @@ class TestListSkills:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""

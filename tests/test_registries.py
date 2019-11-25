@@ -33,7 +33,6 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.mail.base import MailBox
 from aea.protocols.base import Protocol
 from aea.registries.base import ProtocolRegistry, Resources
 from .conftest import CUR_PATH, DummyConnection
@@ -134,12 +133,12 @@ class TestResources:
         yaml.safe_dump(agent_config, open(agent_config_path, "w"))
         Path(cls.agent_folder, "skills", cls.fake_skill_id).mkdir()
 
-        mailbox = MailBox(DummyConnection())
+        connections = [DummyConnection()]
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
         cls.resources = Resources(os.path.join(cls.agent_folder))
-        cls.aea = AEA(cls.agent_name, mailbox, wallet, ledger_apis, resources=cls.resources)
+        cls.aea = AEA(cls.agent_name, connections, wallet, ledger_apis, resources=cls.resources)
         cls.resources.load(cls.aea.context)
 
         cls.expected_skills = {"dummy", "error"}
@@ -295,11 +294,11 @@ class TestFilter:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        mailbox = MailBox(DummyConnection())
+        connections = [DummyConnection()]
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
-        cls.aea = AEA(cls.agent_name, mailbox, wallet, ledger_apis, resources=Resources(cls.agent_folder))
+        cls.aea = AEA(cls.agent_name, connections, wallet, ledger_apis, resources=Resources(cls.agent_folder))
 
     def test_handle_internal_messages(self):
         """Test that the internal messages are handled."""

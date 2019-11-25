@@ -25,25 +25,27 @@ from enum import Enum
 import pprint
 from typing import cast, Dict, List, Optional, TYPE_CHECKING
 
+from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING:
     from packages.protocols.tac.message import TACMessage
     from packages.skills.tac_control.helpers import generate_good_pbk_to_name, determine_scaling_factor, \
-        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings, \
-        logarithmic_utility
+        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings
     from packages.skills.tac_control.parameters import Parameters
 else:
     from tac_protocol.message import TACMessage
     from tac_control_skill.helpers import generate_good_pbk_to_name, determine_scaling_factor, \
-        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings, \
-        logarithmic_utility
+        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings
     from tac_control_skill.parameters import Parameters
 
 Address = str
 TransactionId = str
 Endowment = List[int]  # an element e_j is the endowment of good j.
 UtilityParams = List[float]  # an element u_j is the utility value of good j.
+
+DEFAULT_CURRENCY = 'FET'
+DEFAULT_CURRENCY_EXCHANGE_RATE = 1.0
 
 
 class Phase(Enum):
@@ -240,7 +242,7 @@ class Initialization:
 class GoodState:
     """Represent the state of a good during the game."""
 
-    def __init__(self, price: float) -> None:
+    def __init__(self, price: float = 0.0) -> None:
         """
         Instantiate an agent state object.
 
@@ -258,7 +260,7 @@ class GoodState:
         :return: None
         :raises: AssertionError: if some constraint is not satisfied.
         """
-        assert self.price >= 0, "The price must be non-negative."
+        assert self.price >= 0.0, "The price must be non-negative."
 
 
 class Transaction:
@@ -268,38 +270,30 @@ class Transaction:
                  transaction_id: TransactionId,
                  sender: Address,
                  counterparty: Address,
-                 is_sender_buyer: bool,
-                 currency_pbk: str,
-                 amount: int,
+                 amount_by_currency: Dict[str, int],
                  sender_tx_fee: int,
                  counterparty_tx_fee: int,
-                 quantities_by_good_pbk: Dict[str, int],
-                 ledger_id: str) -> None:
+                 quantities_by_good_pbk: Dict[str, int]) -> None:
         """
         Instantiate transaction request.
 
         :param transaction_id: the id of the transaction.
         :param sender: the sender of the transaction.
         :param counterparty: the counterparty of the transaction.
-        :param is_sender_buyer: whether the transaction is sent by a buyer.
-        :param currency_pbk: the currencry used.
-        :param amount: the amount of money involved.
+        :param amount_by_currency: the currency used.
         :param sender_tx_fee: the transaction fee covered by the sender.
         :param counterparty_tx_fee: the transaction fee covered by the counterparty.
         :param quantities_by_good_pbk: a map from good pbk to the quantity of that good involved in the transaction.
-        :param ledger_id: the ledger used for transacting.
         :return: None
         """
         self.transaction_id = transaction_id
         self.sender = sender
         self.counterparty = counterparty
-        self.is_sender_buyer = is_sender_buyer
-        self.currency_pbk = currency_pbk
-        self.amount = amount
+        self.is_sender_buyer = any(value <= 0 for value in amount_by_currency.values())
+        self.amount_by_currency = amount_by_currency
         self.sender_tx_fee = sender_tx_fee
         self.counterparty_tx_fee = counterparty_tx_fee
         self.quantities_by_good_pbk = quantities_by_good_pbk
-        self.ledger_id = ledger_id
         self._check_consistency()
 
     @property
@@ -326,6 +320,18 @@ class Transaction:
         result = self.counterparty_tx_fee if self.is_sender_buyer else self.sender_tx_fee
         return result
 
+    @property
+    def amount(self) -> int:
+        """Get the amount."""
+        assert len(self.amount_by_currency) == 1
+        return list(self.amount_by_currency.values())[0]
+
+    @property
+    def currency(self) -> str:
+        """Get the currency."""
+        assert len(self.amount_by_currency) == 1
+        return list(self.amount_by_currency.keys())[0]
+
     def _check_consistency(self) -> None:
         """
         Check the consistency of the transaction parameters.
@@ -334,11 +340,10 @@ class Transaction:
         :raises AssertionError if some constraint is not satisfied.
         """
         assert self.sender != self.counterparty
-        assert self.amount >= 0
+        assert len(self.amount_by_currency.keys()) == 1  # For now we restrict to one currency per transaction.
         assert self.sender_tx_fee >= 0
         assert self.counterparty_tx_fee >= 0
         assert len(self.quantities_by_good_pbk.keys()) == len(set(self.quantities_by_good_pbk.keys()))
-        assert all(quantity >= 0 for quantity in self.quantities_by_good_pbk.values())
 
     @classmethod
     def from_message(cls, message: TACMessage, sender: Address) -> 'Transaction':
@@ -352,13 +357,10 @@ class Transaction:
         return Transaction(cast(str, message.get("transaction_id")),
                            sender,
                            cast(str, message.get("counterparty")),
-                           cast(bool, message.get("is_sender_buyer")),
-                           cast(str, message.get("currency_pbk")),
-                           cast(int, message.get("amount")),
+                           cast(Dict[str, int], message.get("amount_by_currency")),
                            cast(int, message.get("sender_tx_fee")),
                            cast(int, message.get("counterparty_tx_fee")),
-                           cast(Dict[str, int], message.get("quantities_by_good_pbk")),
-                           cast(str, message.get("ledger_id")))
+                           cast(Dict[str, int], message.get("quantities_by_good_pbk")))
 
     def matches(self, other: 'Transaction') -> bool:
         """
@@ -377,12 +379,10 @@ class Transaction:
             and self.sender == other.counterparty \
             and self.counterparty == other.sender \
             and self.is_sender_buyer != other.is_sender_buyer \
-            and self.currency_pbk == other.currency_pbk \
-            and self.amount == other.amount \
+            and self.amount_by_currency == {x: y * -1 for x, y in other.amount_by_currency.items()} \
             and self.sender_tx_fee == other.counterparty_tx_fee \
             and self.counterparty_tx_fee == other.sender_tx_fee \
-            and self.quantities_by_good_pbk == other.quantities_by_good_pbk \
-            and self.ledger_id == other.ledger_id
+            and self.quantities_by_good_pbk == {x: y * -1 for x, y in other.quantities_by_good_pbk.items()}
 
     def __eq__(self, other):
         """Compare to another object."""
@@ -391,44 +391,53 @@ class Transaction:
             and self.sender == other.sender \
             and self.counterparty == other.counterparty \
             and self.is_sender_buyer == other.is_sender_buyer \
-            and self.currency_pbk == other.currency_pbk \
-            and self.amount == other.amount \
+            and self.amount_by_currency == other.amount_by_currency \
             and self.sender_tx_fee == other.sender_tx_fee \
             and self.counterparty_tx_fee == other.counterparty_tx_fee \
-            and self.quantities_by_good_pbk == other.quantities_by_good_pbk \
-            and self.ledger_id == other.ledger_id
+            and self.quantities_by_good_pbk == other.quantities_by_good_pbk
 
 
 class AgentState:
     """Represent the state of an agent during the game."""
 
-    def __init__(self, money: int, endowment: Endowment, utility_params: UtilityParams):
+    def __init__(self, amount_by_currency: Dict[str, int],
+                 exchange_params_by_currency: Dict[str, float],
+                 quantities_by_good_pbk: Dict[str, int],
+                 utility_params_by_good_pbk: Dict[str, float]):
         """
         Instantiate an agent state object.
 
-        :param money: the money of the agent in this state.
-        :param endowment: the endowment for every good.
-        :param utility_params: the utility params for every good.
+        :param amount_by_currency: the amount for each currency
+        :param exchange_params_by_currency: the exchange parameters of the different currencies
+        :param quantities_by_good_pbk: the quantities for each good.
+        :param utility_params_by_good_pbk: the utility params for every good.
         """
-        assert len(endowment) == len(utility_params)
-        self._balance = money
-        self._utility_params = copy.copy(utility_params)
-        self._good_holdings = copy.copy(endowment)
+        assert len(amount_by_currency.keys()) == len(exchange_params_by_currency.keys())
+        assert len(quantities_by_good_pbk.keys()) == len(utility_params_by_good_pbk.keys())
+        self._balance_by_currency = copy.copy(amount_by_currency)
+        self._exchange_params_by_currency = copy.copy(exchange_params_by_currency)
+        self._quantities_by_good_pbk = quantities_by_good_pbk
+        self._utility_params_by_good_pbk = copy.copy(utility_params_by_good_pbk)
 
     @property
-    def balance(self) -> int:
-        """Get the money balance."""
-        return self._balance
+    def balance_by_currency(self) -> Dict[str, int]:
+        """Get the balance for each currency."""
+        return copy.copy(self._balance_by_currency)
 
     @property
-    def good_holdings(self) -> Endowment:
+    def exchange_params_by_currency(self) -> Dict[str, float]:
+        """Get the exchange parameters for each currency."""
+        return copy.copy(self._exchange_params_by_currency)
+
+    @property
+    def quantities_by_good_pbk(self) -> Dict[str, int]:
         """Get holding of each good."""
-        return copy.copy(self._good_holdings)
+        return copy.copy(self._quantities_by_good_pbk)
 
     @property
-    def utility_params(self) -> UtilityParams:
+    def utility_params_by_good_pbk(self) -> Dict[str, float]:
         """Get utility parameter for each good."""
-        return copy.copy(self._utility_params)
+        return copy.copy(self._utility_params_by_good_pbk)
 
     def get_score(self) -> float:
         """
@@ -438,8 +447,8 @@ class AgentState:
         with positive quantity plus the money left.
         :return: the score.
         """
-        goods_score = logarithmic_utility(self.utility_params, self.good_holdings)
-        money_score = float(self.balance)
+        goods_score = logarithmic_utility(self.utility_params_by_good_pbk, self.quantities_by_good_pbk)
+        money_score = linear_utility(self.exchange_params_by_currency, self.balance_by_currency)
         score = goods_score + money_score
         return score
 
@@ -465,12 +474,12 @@ class AgentState:
         """
         if tx.is_sender_buyer:
             # check if we have the money as the buyer.
-            result = self.balance >= tx.amount + tx.buyer_tx_fee
+            result = self.balance_by_currency[tx.currency] >= tx.amount + tx.buyer_tx_fee
         else:
             # check if we have the diff and the goods as the seller.
-            result = self.balance + tx.amount >= tx.seller_tx_fee
-            for good_id, quantity in enumerate(tx.quantities_by_good_pbk.values()):
-                result = result and (self.good_holdings[good_id] >= quantity)
+            result = self.balance_by_currency[tx.currency] + tx.amount >= tx.seller_tx_fee
+            for good_pbk, quantity in tx.quantities_by_good_pbk.items():
+                result = result and (self.quantities_by_good_pbk[good_pbk] >= quantity)
         return result
 
     def apply(self, transactions: List[Transaction]) -> 'AgentState':
@@ -493,35 +502,44 @@ class AgentState:
         :param tx: the transaction.
         :return: None
         """
+        new_balance_by_currency = self.balance_by_currency
         if tx.is_sender_buyer:
             total = tx.amount + tx.buyer_tx_fee
-            self._balance -= total
+            new_balance_by_currency[tx.currency] -= total
         else:
             diff = tx.amount - tx.seller_tx_fee
-            self._balance += diff
+            new_balance_by_currency[tx.currency] += diff
+        self._balance_by_currency = new_balance_by_currency
 
-        for good_id, quantity in enumerate(tx.quantities_by_good_pbk.values()):
+        new_quantities_by_good_pbk = self.quantities_by_good_pbk
+        for good_pbk, quantity in tx.quantities_by_good_pbk.items():
             quantity_delta = quantity if tx.is_sender_buyer else -quantity
-            self._good_holdings[good_id] += quantity_delta
+            new_quantities_by_good_pbk[good_pbk] += quantity_delta
+        self._quantities_by_good_pbk = new_quantities_by_good_pbk
 
     def __copy__(self):
         """Copy the object."""
-        return AgentState(self.balance, self.current_holdings, self.utility_params)
+        return AgentState(self.balance_by_currency,
+                          self.exchange_params_by_currency,
+                          self.quantities_by_good_pbk,
+                          self.utility_params_by_good_pbk)
 
     def __str__(self):
         """From object to string."""
         return "AgentState{}".format(pprint.pformat({
-            "money": self.balance,
-            "utility_params": self.utility_params,
-            "current_holdings": self.good_holdings
+            "balance_by_currency": self.balance_by_currency,
+            "exchange_params_by_currency": self.exchange_params_by_currency,
+            "quantities_by_good_pbk": self.quantities_by_good_pbk,
+            "utility_params_by_good_pbk": self.utility_params_by_good_pbk
         }))
 
     def __eq__(self, other) -> bool:
         """Compare equality of two instances of the class."""
         return isinstance(other, AgentState) and \
-            self.balance == other.balance and \
-            self.utility_params == other.utility_params and \
-            self.good_holdings == other.good_holdings
+            self.balance_by_currency == other.balance_by_currency and \
+            self.exchange_params_by_currency == other.exchange_params_by_currency and \
+            self.quantities_by_good_pbk == other.quantities_by_good_pbk and \
+            self.utility_params_by_good_pbk == other.utility_params_by_good_pbk
 
 
 class Transactions:
@@ -703,18 +721,20 @@ class Game(SharedClass):
         self._initial_agent_states = dict(
             (agent_pbk,
                 AgentState(
-                    self.initialization.initial_money_amounts[i],
-                    self.initialization.endowments[i],
-                    self.initialization.utility_params[i]
+                    {DEFAULT_CURRENCY: self.initialization.initial_money_amounts[i]},
+                    {DEFAULT_CURRENCY: DEFAULT_CURRENCY_EXCHANGE_RATE},
+                    {good_pbk: endowment for good_pbk, endowment in zip(list(good_pbk_to_name.keys()), self.initialization.endowments[i])},
+                    {good_pbk: utility_param for good_pbk, utility_param in zip(list(good_pbk_to_name.keys()), self.initialization.utility_params[i])}
                 ))
             for agent_pbk, i in zip(self.configuration.agent_pbks, range(self.configuration.nb_agents)))
 
         self._current_agent_states = dict(
             (agent_pbk,
                 AgentState(
-                    self.initialization.initial_money_amounts[i],
-                    self.initialization.endowments[i],
-                    self.initialization.utility_params[i]
+                    {DEFAULT_CURRENCY: self.initialization.initial_money_amounts[i]},
+                    {DEFAULT_CURRENCY: DEFAULT_CURRENCY_EXCHANGE_RATE},
+                    {good_pbk: endowment for good_pbk, endowment in zip(list(good_pbk_to_name.keys()), self.initialization.endowments[i])},
+                    {good_pbk: utility_param for good_pbk, utility_param in zip(list(good_pbk_to_name.keys()), self.initialization.utility_params[i])}
                 ))
             for agent_pbk, i in zip(self.configuration.agent_pbks, range(self.configuration.nb_agents)))
 
@@ -751,13 +771,13 @@ class Game(SharedClass):
 
         :return: the holdings matrix.
         """
-        result = list(map(lambda state: state.good_holdings, self.current_agent_states.values()))
+        result = list(map(lambda state: list(state.quantities_by_good_pbk.values()), self.current_agent_states.values()))
         return result
 
     @property
     def agent_balances(self) -> Dict[str, int]:
         """Get the current agent balances."""
-        result = {agent_pbk: agent_state.balance for agent_pbk, agent_state in self.current_agent_states.items()}
+        result = {agent_pbk: agent_state.balance_by_currency[DEFAULT_CURRENCY] for agent_pbk, agent_state in self.current_agent_states.items()}
         return result
 
     @property
@@ -771,7 +791,7 @@ class Game(SharedClass):
         """Get holdings summary (a string representing the holdings for every agent)."""
         result = ""
         for agent_pbk, agent_state in self.current_agent_states.items():
-            result = result + self.configuration.agent_pbk_to_name[agent_pbk] + " " + str(agent_state.good_holdings) + "\n"
+            result = result + self.configuration.agent_pbk_to_name[agent_pbk] + " " + str(agent_state.quantities_by_good_pbk) + "\n"
         return result
 
     @property
@@ -798,18 +818,11 @@ class Game(SharedClass):
         :return: True if the transaction is valid, False otherwise.
         :raises: AssertionError: if the data in the transaction are not allowed (e.g. negative amount).
         """
-        # check if the buyer has enough balance to pay the transaction.
-        share_of_tx_fee = round(self.configuration.tx_fee / 2.0, 2)
-        if self.current_agent_states[tx.buyer_pbk].balance < tx.amount + share_of_tx_fee:
-            return False
-
-        # check if we have enough instances of goods, for every good involved in the transaction.
-        seller_holdings = self.current_agent_states[tx.seller_pbk].good_holdings
-        for good_id, bought_quantity in enumerate(tx.quantities_by_good_pbk.values()):
-            if seller_holdings[good_id] < bought_quantity:
-                return False
-
-        return True
+        buyer_state = self.current_agent_states[tx.buyer_pbk]
+        seller_state = self.current_agent_states[tx.seller_pbk]
+        result = buyer_state.check_transaction_is_consistent(tx) and \
+            seller_state.check_transaction_is_consistent(tx)
+        return result
 
     def settle_transaction(self, tx: Transaction) -> None:
         """
@@ -821,21 +834,12 @@ class Game(SharedClass):
         """
         # assert self.is_transaction_valid(tx)
         # self._transactions.append(tx)
+        assert self._current_agent_states is not None, "Call create before calling current_agent_states."
         buyer_state = self.current_agent_states[tx.buyer_pbk]
         seller_state = self.current_agent_states[tx.seller_pbk]
 
-        nb_instances_traded = sum(tx.quantities_by_good_pbk.values())
+        buyer_state.update(tx)
+        seller_state.update(tx)
 
-        # update holdings and prices
-        for good_id, (good_pbk, quantity) in enumerate(tx.quantities_by_good_pbk.items()):
-            buyer_state._good_holdings[good_id] += quantity
-            seller_state._good_holdings[good_id] -= quantity
-            if quantity > 0:
-                # for now the price is simply the amount proportional to the share in the bundle
-                price = tx.amount / nb_instances_traded
-                good_state = self.current_good_states[good_pbk]
-                good_state.price = price
-
-        # update balances and charge share of fee to buyer and seller
-        buyer_state._balance -= tx.amount + tx.buyer_tx_fee
-        seller_state._balance += tx.amount - tx.seller_tx_fee
+        self._current_agent_states.update({tx.buyer_pbk: buyer_state})
+        self._current_agent_states.update({tx.seller_pbk: seller_state})

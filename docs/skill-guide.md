@@ -4,9 +4,11 @@ The <a href="../scaffolding/">scaffolding tool</a> allows you to create the fold
 	Before developing your first skill, please read the <a href="../skill/">skill guide</a>.
 
 
-## Step 1: Setup
+### Dependencies
 
-Make sure you have followed the <a href="../quickstart/" target=_blank>preliminaries and installation</a> instructions from the quick start. 
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+
+## Step 1: Setup
 
 We will first create an agent and add a scaffold skill, which we call `my_search`.
 

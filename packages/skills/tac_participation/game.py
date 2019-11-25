@@ -45,14 +45,12 @@ class Phase(Enum):
     POST_GAME = 'post_game'
 
 
-class GameConfiguration:
+class Configuration:
     """Class containing the game configuration of a TAC instance."""
 
     def __init__(self,
                  version_id: str,
-                 nb_agents: int,
-                 nb_goods: int,
-                 tx_fee: float,
+                 tx_fee: int,
                  agent_pbk_to_name: Dict[Address, str],
                  good_pbk_to_name: Dict[Address, str],
                  controller_pbk: Address):
@@ -60,16 +58,14 @@ class GameConfiguration:
         Instantiate a game configuration.
 
         :param version_id: the version of the game.
-        :param nb_agents: the number of agents.
-        :param nb_goods: the number of goods.
         :param tx_fee: the fee for a transaction.
         :param agent_pbk_to_name: a dictionary mapping agent public keys to agent names (as strings).
         :param good_pbk_to_name: a dictionary mapping good public keys to good names (as strings).
         :param controller_pbk: the public key of the controller
         """
         self._version_id = version_id
-        self._nb_agents = nb_agents
-        self._nb_goods = nb_goods
+        self._nb_agents = len(agent_pbk_to_name)
+        self._nb_goods = len(good_pbk_to_name)
         self._tx_fee = tx_fee
         self._agent_pbk_to_name = agent_pbk_to_name
         self._good_pbk_to_name = good_pbk_to_name
@@ -93,7 +89,7 @@ class GameConfiguration:
         return self._nb_goods
 
     @property
-    def tx_fee(self) -> float:
+    def tx_fee(self) -> int:
         """Transaction fee for the TAC instance."""
         return self._tx_fee
 
@@ -127,6 +123,11 @@ class GameConfiguration:
         """List of good names."""
         return list(self._good_pbk_to_name.values())
 
+    @property
+    def controller_pbk(self) -> str:
+        """Get the controller pbk."""
+        return self._controller_pbk
+
     def _check_consistency(self):
         """
         Check the consistency of the game configuration.
@@ -153,7 +154,7 @@ class Game(SharedClass):
         self._expected_controller_pbk = kwargs.pop('expected_controller_pbk', None)  # type: Optional[str]
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
-        self._game_configuration = None  # type: Optional[GameConfiguration]
+        self._configuration = None  # type: Optional[Configuration]
 
     @property
     def expected_version_id(self) -> str:
@@ -172,10 +173,10 @@ class Game(SharedClass):
         return self._expected_controller_pbk
 
     @property
-    def game_configuration(self) -> GameConfiguration:
+    def configuration(self) -> Configuration:
         """Get the game configuration."""
-        assert self._game_configuration is not None, "Game configuration not assigned!"
-        return self._game_configuration
+        assert self._configuration is not None, "Game configuration not assigned!"
+        return self._configuration
 
     def init(self, tac_message: TACMessage, controller_pbk: Address) -> None:
         """
@@ -189,13 +190,11 @@ class Game(SharedClass):
         assert tac_message.get("type") == TACMessage.Type.GAME_DATA, "Wrong TACMessage for initialization of TAC game."
         assert controller_pbk == self.expected_controller_pbk, "TACMessage from unexpected controller."
         assert tac_message.get("version_id") == self.expected_version_id, "TACMessage for unexpected game."
-        self._game_configuration = GameConfiguration(cast(str, tac_message.get("version_id")),
-                                                     cast(int, tac_message.get("nb_agents")),
-                                                     cast(int, tac_message.get("nb_goods")),
-                                                     cast(float, tac_message.get("tx_fee")),
-                                                     cast(Dict[str, str], tac_message.get("agent_pbk_to_name")),
-                                                     cast(Dict[str, str], tac_message.get("good_pbk_to_name")),
-                                                     controller_pbk)
+        self._configuration = Configuration(cast(str, tac_message.get("version_id")),
+                                            cast(int, tac_message.get("tx_fee")),
+                                            cast(Dict[str, str], tac_message.get("agent_pbk_to_name")),
+                                            cast(Dict[str, str], tac_message.get("good_pbk_to_name")),
+                                            controller_pbk)
 
     def update_expected_controller_pbk(self, controller_pbk: Address):
         """

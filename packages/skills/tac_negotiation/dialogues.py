@@ -144,10 +144,11 @@ class DialogueStats(object):
 
         :return: None
         """
-        if is_self_initiated:
-            self._self_initiated[end_state] += 1
-        else:
-            self._other_initiated[end_state] += 1
+        pass
+        # if is_self_initiated:
+        #     self._self_initiated[end_state.value] += 1
+        # else:
+        #     self._other_initiated[end_state.value] += 1
 
 
 class Dialogues(SharedClass):
@@ -320,13 +321,3 @@ class Dialogues(SharedClass):
             self._dialogues_as_buyer.update({dialogue_label: dialogue})
         self.dialogues.update({dialogue_label: dialogue})
         return dialogue
-
-    def reset(self) -> None:
-        """
-        Reset the dialogues.
-
-        :return: None
-        """
-        self._dialogues_as_seller = {}
-        self._dialogues_as_buyer = {}
-        self._dialogue_stats = DialogueStats()

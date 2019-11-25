@@ -10,7 +10,6 @@
     "license",
     "url",
     "class_name",
-    "supported_protocols",
     "config"
   ],
   "properties": {
@@ -32,7 +31,7 @@
     "class_name": {
       "type": "string"
     },
-    "supported_protocols": {
+    "restricted_to_protocols": {
       "type": "array",
       "uniqueItems": true,
       "items": {
