@@ -81,6 +81,7 @@ class TestEchoSkill:
 
         time.sleep(10.0)
         process.send_signal(signal.SIGINT)
+        time.sleep(2.0)
         process.wait(timeout=20)
 
         assert process.returncode == 0

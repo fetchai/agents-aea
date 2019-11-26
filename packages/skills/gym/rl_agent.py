@@ -20,10 +20,11 @@
 """This contains the rl agent class."""
 
 import logging
-import numpy as np
 import random
 import sys
 from typing import Any, Dict, TYPE_CHECKING
+
+import numpy as np
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.gym.helpers import RLAgent, ProxyEnv

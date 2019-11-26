@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the gym skill."""
-import json
 import os
 import shutil
 import signal
@@ -30,12 +29,10 @@ from pathlib import Path
 
 import yaml
 
-from aea.configurations.base import SkillConfig
-from ...common.click_testing import CliRunner
-
 from aea.cli import cli
-
+from aea.configurations.base import SkillConfig
 from tests.conftest import CLI_LOG_OPTION
+from ...common.click_testing import CliRunner
 
 
 class TestGymSkill:
