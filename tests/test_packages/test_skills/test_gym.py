@@ -31,7 +31,7 @@ import yaml
 
 from aea.cli import cli
 from aea.configurations.base import SkillConfig
-from tests.conftest import CLI_LOG_OPTION
+from ...conftest import CLI_LOG_OPTION, ROOT_DIR
 from ...common.click_testing import CliRunner
 
 
@@ -50,7 +50,7 @@ class TestGymSkill:
     def test_gym(self, pytestconfig):
         """Run the gym skill sequence."""
         # add packages folder
-        packages_src = os.path.join(self.cwd, 'packages')
+        packages_src = os.path.join(ROOT_DIR, 'packages')
         packages_dst = os.path.join(os.getcwd(), 'packages')
         shutil.copytree(packages_src, packages_dst)
 

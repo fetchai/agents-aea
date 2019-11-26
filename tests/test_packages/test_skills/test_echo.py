@@ -35,7 +35,7 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from tests.conftest import CLI_LOG_OPTION
+from ...conftest import CLI_LOG_OPTION, ROOT_DIR
 from ...common.click_testing import CliRunner
 
 
@@ -54,8 +54,8 @@ class TestEchoSkill:
     def test_echo(self, pytestconfig):
         """Run the echo skill sequence."""
         # add packages folder
-        packages_src = os.path.join(self.cwd, 'packages')
-        packages_dst = os.path.join(os.getcwd(), 'packages')
+        packages_src = os.path.join(ROOT_DIR, 'packages')
+        packages_dst = os.path.join(self.t, 'packages')
         shutil.copytree(packages_src, packages_dst)
 
         # create agent
@@ -73,7 +73,8 @@ class TestEchoSkill:
         # disable logging
         aea_config_path = Path(self.t, self.agent_name, DEFAULT_AEA_CONFIG_FILE)
         aea_config = AgentConfig.from_json(yaml.safe_load(open(aea_config_path)))
-        aea_config.logging_config = {"disable_existing_loggers": False, "version": 1}
+        aea_config.logging_config = {"disable_existing_loggers": False, "version": 1,
+                                     "loggers": {"aea.echo_skill": {"level": "CRITICAL"}}}
         yaml.safe_dump(aea_config.json, open(aea_config_path, "w"))
 
         # run the agent
