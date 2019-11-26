@@ -28,6 +28,9 @@ import tempfile
 import time
 from pathlib import Path
 
+import yaml
+
+from aea.configurations.base import SkillConfig, DEFAULT_AEA_CONFIG_FILE, AgentConfig
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -68,6 +71,12 @@ class TestEchoSkill:
         assert result.exit_code == 0
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "stub"], standalone_mode=False)
         assert result.exit_code == 0
+
+        # disable logging
+        aea_config_path = Path(self.t, self.agent_name, DEFAULT_AEA_CONFIG_FILE)
+        aea_config = AgentConfig.from_json(yaml.safe_load(open(aea_config_path)))
+        aea_config.logging_config = {"disable_existing_loggers": False, "version": 1}
+        yaml.safe_dump(aea_config.json, open(aea_config_path, "w"))
 
         # run the agent
         process = subprocess.Popen([
