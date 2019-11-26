@@ -20,19 +20,22 @@
 """This test module contains the integration test for the gym skill."""
 import os
 import shutil
-import signal
-import subprocess
-import sys
 import tempfile
 import time
 from pathlib import Path
+from threading import Thread
 
 import yaml
 
+from aea.aea import AEA
 from aea.cli import cli
-from aea.configurations.base import SkillConfig
-from ...conftest import CLI_LOG_OPTION, ROOT_DIR
+from aea.configurations.base import SkillConfig, ConnectionConfig
+from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet
+from aea.registries.base import Resources
+from packages.connections.gym.connection import GymConnection
 from ...common.click_testing import CliRunner
+from ...conftest import CLI_LOG_OPTION, ROOT_DIR, CUR_PATH
 
 
 class TestGymSkill:
@@ -84,29 +87,23 @@ class TestGymSkill:
         skill_config.tasks.read("GymTask").args["nb_steps"] = 100
         yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
 
-        process = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            "--connection",
-            "gym"
-        ],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy())
+        # start the AEA programmatically
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path})
+        ledger_apis = LedgerApis({})
+        json_connection_configuration = yaml.safe_load(open(Path(self.t, self.agent_name, "connections", "gym", "connection.yaml")))
+        connection = GymConnection.from_config(wallet.public_keys['default'],
+                                                ConnectionConfig.from_json(json_connection_configuration))
+        gym_agent = AEA(self.agent_name, [connection], wallet, ledger_apis, resources=Resources(str(Path(self.t, self.agent_name))))
+        t = Thread(target=gym_agent.start)
+        t.start()
 
         # check the gym run ends
 
-        time.sleep(5.0)
-        process.send_signal(signal.SIGINT)
-        process.wait(timeout=20)
+        time.sleep(10.0)
 
-        assert process.returncode == 0
-
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
+        gym_agent.stop()
+        t.join()
 
         os.chdir(self.t)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False)

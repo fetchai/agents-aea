@@ -18,25 +18,27 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the echo skill."""
-
 import os
 import shutil
-import signal
-import subprocess
-import sys
 import tempfile
 import time
 from pathlib import Path
+from threading import Thread
 
 import yaml
 
+from aea.aea import AEA
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, ConnectionConfig
+from aea.connections.stub.connection import StubConnection
+from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from ...conftest import CLI_LOG_OPTION, ROOT_DIR
+from aea.registries.base import Resources
 from ...common.click_testing import CliRunner
+from ...conftest import CLI_LOG_OPTION, ROOT_DIR, CUR_PATH
 
 
 class TestEchoSkill:
@@ -77,19 +79,18 @@ class TestEchoSkill:
                                      "loggers": {"aea.echo_skill": {"level": "CRITICAL"}}}
         yaml.safe_dump(aea_config.json, open(aea_config_path, "w"))
 
-        # run the agent
-        process = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            "--connection",
-            "stub"
-        ],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy())
+        # start the AEA programmatically
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({'default': private_key_pem_path})
+        ledger_apis = LedgerApis({})
+        json_connection_configuration = yaml.safe_load(open(Path(self.t, self.agent_name, "connections", "stub", "connection.yaml")))
+        connection = StubConnection.from_config(wallet.public_keys['default'],
+                                                ConnectionConfig.from_json(json_connection_configuration))
+        echo_agent = AEA(self.agent_name, [connection], wallet, ledger_apis, resources=Resources(str(Path(self.t, self.agent_name))))
+        t = Thread(target=echo_agent.start)
+        t.start()
 
-        time.sleep(1.0)
+        time.sleep(2.0)
         # add sending and receiving envelope from input/output files
         message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         expected_envelope = Envelope(to=self.agent_name, sender="sender", protocol_id="default",
@@ -102,7 +103,7 @@ class TestEchoSkill:
             f.write(encoded_envelope + b"\n")
             f.flush()
 
-        time.sleep(1.0)
+        time.sleep(2.0)
         with open(Path(self.t, self.agent_name, "output_file"), "rb+") as f:
             lines = f.readlines()
 
@@ -119,17 +120,8 @@ class TestEchoSkill:
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         assert expected_envelope.message == actual_envelope.message
 
-        time.sleep(0.5)
-        process.send_signal(signal.SIGINT)
-        time.sleep(0.5)
-        process.wait(timeout=20)
-
-        assert process.returncode == 0
-
-        poll = process.poll()
-        if poll is None:
-            process.terminate()
-            process.wait(2)
+        echo_agent.stop()
+        t.join()
 
         os.chdir(self.t)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False)
