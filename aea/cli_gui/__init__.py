@@ -443,12 +443,6 @@ def create_app():
         return flask.send_from_directory(
             os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-    @app.route('/logo.png')
-    def logo():
-        """Return an logo to be displayed at top of webpage."""
-        return flask.send_from_directory(
-            os.path.join(app.root_path, 'static'), 'logo.png', mimetype='image/png')
-
     return app
 
 
