@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the gym skill."""
-
+import json
 import os
 import shutil
 import signal
@@ -26,7 +26,11 @@ import subprocess
 import sys
 import tempfile
 import time
+from pathlib import Path
 
+import yaml
+
+from aea.configurations.base import SkillConfig
 from ...common.click_testing import CliRunner
 
 from aea.cli import cli
@@ -77,6 +81,12 @@ class TestGymSkill:
         file_dst = os.path.join(self.t, self.agent_name, 'connections', 'gym', 'connection.yaml')
         shutil.copyfile(file_src, file_dst)
 
+        # change number of training steps
+        skill_config_path = Path(self.t, self.agent_name, "skills", "gym", "skill.yaml")
+        skill_config = SkillConfig.from_json(yaml.safe_load(open(skill_config_path)))
+        skill_config.tasks.read("GymTask").args["nb_steps"] = 100
+        yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
+
         process = subprocess.Popen([
             sys.executable,
             '-m',
@@ -90,9 +100,9 @@ class TestGymSkill:
 
         # check the gym run ends
 
-        time.sleep(20.0)
+        time.sleep(5.0)
         process.send_signal(signal.SIGINT)
-        process.wait(timeout=20)
+        process.wait(timeout=5)
 
         assert process.returncode == 0
 

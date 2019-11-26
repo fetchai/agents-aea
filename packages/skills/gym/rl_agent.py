@@ -31,7 +31,7 @@ else:
     from gym_skill.helpers import RLAgent, ProxyEnv
 
 
-NB_STEPS = 500
+DEFAULT_NB_STEPS = 4000
 NB_GOODS = 10
 
 logger = logging.getLogger("aea.gym_skill")
