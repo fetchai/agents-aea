@@ -20,7 +20,6 @@
 """This test module contains the integration test for the echo skill."""
 
 import os
-import pytest
 import shutil
 import signal
 import subprocess
@@ -38,10 +37,6 @@ from tests.conftest import CLI_LOG_OPTION
 class TestEchoSkill:
     """Test that echo skill works."""
 
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
-
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
@@ -53,8 +48,6 @@ class TestEchoSkill:
 
     def test_echo(self, pytestconfig):
         """Run the echo skill sequence."""
-        if pytestconfig.getoption("ci"):
-            pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
         packages_src = os.path.join(self.cwd, 'packages')
         packages_dst = os.path.join(os.getcwd(), 'packages')

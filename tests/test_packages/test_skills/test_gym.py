@@ -19,103 +19,96 @@
 
 """This test module contains the integration test for the gym skill."""
 
-# import os
-# import pytest
-# import shutil
-# import signal
-# import subprocess
-# import sys
-# import tempfile
-# import time
+import os
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
 
-# from ...common.click_testing import CliRunner
+from ...common.click_testing import CliRunner
 
-# from aea.cli import cli
+from aea.cli import cli
 
-# from tests.conftest import CLI_LOG_OPTION
+from tests.conftest import CLI_LOG_OPTION
 
 
-# class TestGymSkill:
-#     """Test that gym skill works."""
+class TestGymSkill:
+    """Test that gym skill works."""
 
-#     @pytest.fixture(autouse=True)
-#     def _start_oef_node(self, network_node):
-#         """Start an oef node."""
+    @classmethod
+    def setup_class(cls):
+        """Set up the test class."""
+        cls.runner = CliRunner()
+        cls.agent_name = "my_gym_agent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
 
-#     @classmethod
-#     def setup_class(cls):
-#         """Set up the test class."""
-#         cls.runner = CliRunner()
-#         cls.agent_name = "my_gym_agent"
-#         cls.cwd = os.getcwd()
-#         cls.t = tempfile.mkdtemp()
-#         os.chdir(cls.t)
+    def test_gym(self, pytestconfig):
+        """Run the gym skill sequence."""
+        # add packages folder
+        packages_src = os.path.join(self.cwd, 'packages')
+        packages_dst = os.path.join(os.getcwd(), 'packages')
+        shutil.copytree(packages_src, packages_dst)
 
-#     def test_gym(self, pytestconfig):
-#         """Run the gym skill sequence."""
-#         if pytestconfig.getoption("ci"):
-#             pytest.skip("Skipping the test since it doesn't work in CI.")
-#         # add packages folder
-#         packages_src = os.path.join(self.cwd, 'packages')
-#         packages_dst = os.path.join(os.getcwd(), 'packages')
-#         shutil.copytree(packages_src, packages_dst)
+        # create agent
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+        agent_dir_path = os.path.join(self.t, self.agent_name)
+        os.chdir(agent_dir_path)
 
-#         # create agent
-#         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False)
-#         assert result.exit_code == 0
-#         agent_dir_path = os.path.join(self.t, self.agent_name)
-#         os.chdir(agent_dir_path)
+        # add packages and install dependencies
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "gym"], standalone_mode=False)
+        assert result.exit_code == 0
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "gym"], standalone_mode=False)
+        assert result.exit_code == 0
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        assert result.exit_code == 0
 
-#         # add packages and install dependencies
-#         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "gym"], standalone_mode=False)
-#         assert result.exit_code == 0
-#         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "gym"], standalone_mode=False)
-#         assert result.exit_code == 0
-#         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
-#         assert result.exit_code == 0
+        # add gyms folder from examples
+        gyms_src = os.path.join(self.cwd, 'examples', 'gym_ex', 'gyms')
+        gyms_dst = os.path.join(self.t, self.agent_name, 'gyms')
+        shutil.copytree(gyms_src, gyms_dst)
 
-#         # add gyms folder from examples
-#         gyms_src = os.path.join(self.cwd, 'examples', 'gym_ex', 'gyms')
-#         gyms_dst = os.path.join(self.t, self.agent_name, 'gyms')
-#         shutil.copytree(gyms_src, gyms_dst)
+        # change config file of gym connection
+        file_src = os.path.join(self.cwd, 'tests', 'test_packages', 'test_skills', 'data', 'connection.yaml')
+        file_dst = os.path.join(self.t, self.agent_name, 'connections', 'gym', 'connection.yaml')
+        shutil.copyfile(file_src, file_dst)
 
-#         # change config file of gym connection
-#         file_src = os.path.join(self.cwd, 'tests', 'test_packages', 'test_skills', 'data', 'connection.yaml')
-#         file_dst = os.path.join(self.t, self.agent_name, 'connections', 'gym', 'connection.yaml')
-#         shutil.copyfile(file_src, file_dst)
+        process = subprocess.Popen([
+            sys.executable,
+            '-m',
+            'aea.cli',
+            "run",
+            "--connection",
+            "gym"
+        ],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy())
 
-#         process = subprocess.Popen([
-#             sys.executable,
-#             '-m',
-#             'aea.cli',
-#             "run",
-#             "--connection",
-#             "gym"
-#         ],
-#             stdout=subprocess.PIPE,
-#             env=os.environ.copy())
+        # check the gym run ends
 
-#         # check the gym run ends
+        time.sleep(30.0)
+        process.send_signal(signal.SIGINT)
+        process.wait(timeout=40)
 
-#         time.sleep(30.0)
-#         process.send_signal(signal.SIGINT)
-#         process.wait(timeout=40)
+        assert process.returncode == 0
 
-#         assert process.returncode == 0
+        poll = process.poll()
+        if poll is None:
+            process.terminate()
+            process.wait(2)
 
-#         poll = process.poll()
-#         if poll is None:
-#             process.terminate()
-#             process.wait(2)
+        os.chdir(self.t)
+        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False)
 
-#         os.chdir(self.t)
-#         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False)
-
-#     @classmethod
-#     def teardown_class(cls):
-#         """Teardowm the test."""
-#         os.chdir(cls.cwd)
-#         try:
-#             shutil.rmtree(cls.t)
-#         except (OSError, IOError):
-#             pass
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
