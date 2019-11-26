@@ -30,15 +30,13 @@ from pathlib import Path
 
 import yaml
 
-from aea.configurations.base import SkillConfig, DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.cli import cli
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from ...common.click_testing import CliRunner
-
-from aea.cli import cli
-
 from tests.conftest import CLI_LOG_OPTION
+from ...common.click_testing import CliRunner
 
 
 class TestEchoSkill:
