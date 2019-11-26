@@ -23,6 +23,7 @@ from unittest import mock
 import pytest
 
 from aea.mail.base import Envelope
+from aea.protocols.fipa.dialogues import FIPADialogues, FIPADialogue
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.models import Description, Query, Constraint, ConstraintType
@@ -282,3 +283,12 @@ def test_fipa_decoding_unknown_performative():
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(FIPAMessage.Performative, "__eq__", return_value=False):
             FIPASerializer().decode(encoded_msg)
+
+
+def test_dialogues():
+    """Test the dialogues model."""
+    dialogues = FIPADialogues()
+    result = dialogues.create_self_initiated(dialogue_opponent_pbk="opponent", dialogue_starter_pbk="starter", is_seller=True)
+    assert isinstance(result, FIPADialogue)
+    result = dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_id=0, is_seller=False)
+    assert isinstance(result, FIPADialogue)

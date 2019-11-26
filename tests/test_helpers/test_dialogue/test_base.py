@@ -79,10 +79,3 @@ class TestDialogueBase:
         assert isinstance(self.dialogues.dialogues, Dict)
         id = self.dialogues._next_dialogue_id()
         assert id > 0
-        result = self.dialogues.create_self_initiated(dialogue_opponent_pbk="opponent", dialogue_starter_pbk="starter")
-        assert isinstance(result, Dialogue)
-        result = self.dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_id=0)
-        assert isinstance(result, Dialogue)
-
-        result = self.dialogues._create(self.dialogue_label)
-        assert isinstance(result, Dialogue)
