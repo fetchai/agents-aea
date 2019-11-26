@@ -37,7 +37,7 @@ def test_home_page_exits():
 
     # assert the status code of the response
     assert result.status_code == 200
-    assert "Fetch.AI AEA CLI REST API" in str(result.data)
+    assert "AEA CLI REST API" in str(result.data)
 
 
 def test_icon():
