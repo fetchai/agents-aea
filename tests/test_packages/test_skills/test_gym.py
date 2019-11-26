@@ -99,7 +99,7 @@ class TestGymSkill:
 
         time.sleep(5.0)
         process.send_signal(signal.SIGINT)
-        process.wait(timeout=5)
+        process.wait(timeout=20)
 
         assert process.returncode == 0
 

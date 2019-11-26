@@ -119,8 +119,10 @@ class TestEchoSkill:
         assert expected_envelope.protocol_id == actual_envelope.protocol_id
         assert expected_envelope.message == actual_envelope.message
 
+        time.sleep(0.5)
         process.send_signal(signal.SIGINT)
-        process.wait(timeout=5)
+        time.sleep(0.5)
+        process.wait(timeout=20)
 
         assert process.returncode == 0
 
