@@ -26,7 +26,11 @@ import subprocess
 import sys
 import tempfile
 import time
+from pathlib import Path
 
+from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from ...common.click_testing import CliRunner
 
 from aea.cli import cli
@@ -77,12 +81,38 @@ class TestEchoSkill:
             stdout=subprocess.PIPE,
             env=os.environ.copy())
 
+        time.sleep(1.0)
         # add sending and receiving envelope from input/output files
+        message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        expected_envelope = Envelope(to=self.agent_name, sender="sender", protocol_id="default",
+                                     message=DefaultSerializer().encode(message))
+        encoded_envelope = "{},{},{},{}".format(expected_envelope.to, expected_envelope.sender,
+                                                expected_envelope.protocol_id,
+                                                expected_envelope.message.decode("utf-8"))
+        encoded_envelope = encoded_envelope.encode("utf-8")
+        with open(Path(self.t, self.agent_name, "input_file"), "ab+") as f:
+            f.write(encoded_envelope + b"\n")
+            f.flush()
 
-        time.sleep(10.0)
+        time.sleep(1.0)
+        with open(Path(self.t, self.agent_name, "output_file"), "rb+") as f:
+            lines = f.readlines()
+
+        assert len(lines) == 1
+        line = lines[0]
+        to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
+        to = to.decode("utf-8")
+        sender = sender.decode("utf-8")
+        protocol_id = protocol_id.decode("utf-8")
+
+        actual_envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+        assert expected_envelope.to == actual_envelope.sender
+        assert expected_envelope.sender == actual_envelope.to
+        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        assert expected_envelope.message == actual_envelope.message
+
         process.send_signal(signal.SIGINT)
-        time.sleep(2.0)
-        process.wait(timeout=20)
+        process.wait(timeout=5)
 
         assert process.returncode == 0
 
