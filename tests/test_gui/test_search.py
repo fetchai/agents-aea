@@ -40,6 +40,7 @@ Version: 0.1.0
 
 dummy_error = """dummy error"""
 
+
 def _test_search_items_with_query(item_type: str, query: str):
     """Test searching of generic items in registry."""
     app = create_app()
