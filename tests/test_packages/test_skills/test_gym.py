@@ -93,7 +93,7 @@ class TestGymSkill:
         ledger_apis = LedgerApis({})
         json_connection_configuration = yaml.safe_load(open(Path(self.t, self.agent_name, "connections", "gym", "connection.yaml")))
         connection = GymConnection.from_config(wallet.public_keys['default'],
-                                                ConnectionConfig.from_json(json_connection_configuration))
+                                               ConnectionConfig.from_json(json_connection_configuration))
         gym_agent = AEA(self.agent_name, [connection], wallet, ledger_apis, resources=Resources(str(Path(self.t, self.agent_name))))
         t = Thread(target=gym_agent.start)
         t.start()
