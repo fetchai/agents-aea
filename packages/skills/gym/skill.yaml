@@ -14,7 +14,7 @@ tasks:
   - task:
       class_name: GymTask
       args:
-        foo: bar
+        nb_steps: 4000
 shared_classes: []
 protocols: ["gym"]
 dependencies:
