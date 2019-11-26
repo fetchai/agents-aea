@@ -90,9 +90,9 @@ class TestGymSkill:
 
         # check the gym run ends
 
-        time.sleep(30.0)
+        time.sleep(20.0)
         process.send_signal(signal.SIGINT)
-        process.wait(timeout=40)
+        process.wait(timeout=20)
 
         assert process.returncode == 0
 
