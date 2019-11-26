@@ -20,6 +20,7 @@
 """This test module contains the integration test for the gym skill."""
 
 # import os
+# import pytest
 # import shutil
 # import signal
 # import subprocess
@@ -37,6 +38,10 @@
 # class TestGymSkill:
 #     """Test that gym skill works."""
 
+#     @pytest.fixture(autouse=True)
+#     def _start_oef_node(self, network_node):
+#         """Start an oef node."""
+
 #     @classmethod
 #     def setup_class(cls):
 #         """Set up the test class."""
@@ -46,8 +51,10 @@
 #         cls.t = tempfile.mkdtemp()
 #         os.chdir(cls.t)
 
-#     def test_gym(self):
+#     def test_gym(self, pytestconfig):
 #         """Run the gym skill sequence."""
+#         if pytestconfig.getoption("ci"):
+#             pytest.skip("Skipping the test since it doesn't work in CI.")
 #         # add packages folder
 #         packages_src = os.path.join(self.cwd, 'packages')
 #         packages_dst = os.path.join(os.getcwd(), 'packages')
