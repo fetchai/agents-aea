@@ -523,8 +523,6 @@ class Controller{
         });
 
 
-
-
         $('#startOEFNode').click({el: element}, function(e) {
             e.preventDefault();
 
