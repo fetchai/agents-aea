@@ -37,7 +37,7 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Query, Description
 from aea.decision_maker.messages.transaction import TransactionMessage
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.tac_negotiation.dialogues import Dialogues
     from packages.skills.tac_negotiation.helpers import generate_transaction_message, DEMAND_DATAMODEL_NAME
     from packages.skills.tac_negotiation.search import Search

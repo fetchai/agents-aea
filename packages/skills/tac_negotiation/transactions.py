@@ -23,7 +23,6 @@
 import datetime
 import logging
 from collections import defaultdict, deque
-import sys
 from typing import Dict, Tuple, Deque, cast
 
 from aea.decision_maker.base import OwnershipState
