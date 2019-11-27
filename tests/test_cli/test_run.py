@@ -125,6 +125,7 @@ def test_run_unknown_private_key(pytestconfig):
     with open("aea-config.yaml", 'w') as f:
         f.write(whole_file)
 
+    # Private key needs to exist otherwise doesn't get to code path we are interested in testing
     with open("fet_private_key.txt", 'w') as f:
         f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
 
@@ -236,9 +237,6 @@ def test_run_default_private_key_config(pytestconfig):
     with open("aea-config.yaml", 'w') as f:
         f.write(whole_file)
 
-    with open("fet_private_key.txt", 'w') as f:
-        f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
-
     error_msg = ""
     try:
         cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
@@ -292,9 +290,6 @@ def test_run_fet_private_key_config(pytestconfig):
     with open("aea-config.yaml", 'w') as f:
         f.write(whole_file)
 
-    with open("fet_private_key.txt", 'w') as f:
-        f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
-
     error_msg = ""
     try:
         cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
@@ -347,9 +342,6 @@ def test_run_ethereum_private_key_config(pytestconfig):
 
     with open("aea-config.yaml", 'w') as f:
         f.write(whole_file)
-
-    with open("fet_private_key.txt", 'w') as f:
-        f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
 
     error_msg = ""
     try:
@@ -409,12 +401,6 @@ def test_run_ledger_apis(pytestconfig):
 
     with open("aea-config.yaml", 'w') as f:
         f.write(whole_file)
-
-    with open("fet_private_key.txt", 'w') as f:
-        f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
-
-    with open("eth_private_key.txt", 'w') as f:
-        f.write("0xa77f04041064441a5d944614ed82484a0852a29fdc1e8bbc88d80728f2d3f509")
 
     process = subprocess.Popen([
         sys.executable,
@@ -486,12 +472,6 @@ def test_run_fet_ledger_apis(pytestconfig):
 
     with open("aea-config.yaml", 'w') as f:
         f.write(whole_file)
-
-    with open("fet_private_key.txt", 'w') as f:
-        f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
-
-    with open("eth_private_key.txt", 'w') as f:
-        f.write("0xa77f04041064441a5d944614ed82484a0852a29fdc1e8bbc88d80728f2d3f509")
 
     process = subprocess.Popen([
         sys.executable,
