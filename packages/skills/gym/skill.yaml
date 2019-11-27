@@ -4,10 +4,7 @@ version: 0.1.0
 license: Apache 2.0
 description: "The gym skill wraps an RL agent."
 url: ""
-behaviours:
-  - behaviour:
-      class_name: GymBehaviour
-      args: {}
+behaviours: []
 handlers:
   - handler:
       class_name: GymHandler
@@ -17,7 +14,7 @@ tasks:
   - task:
       class_name: GymTask
       args:
-        foo: bar
+        nb_steps: 4000
 shared_classes: []
 protocols: ["gym"]
 dependencies:

@@ -22,6 +22,9 @@ mkdocs-material = "*"
 pymdown-extensions = "*"
 pygments = "*"
 pytest-asyncio = "*"
+gym = "*"
+numpy = "*"
+scikit-image = "*"
 
 [packages]
 cryptography = "*"

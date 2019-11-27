@@ -28,7 +28,7 @@ This module contains the classes required for dialogue management.
 
 from enum import Enum
 import logging
-from typing import Any, Dict, cast, TYPE_CHECKING
+from typing import Any, Dict, cast
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.dialogue.base import Dialogue as BaseDialogue
@@ -38,10 +38,8 @@ from aea.protocols.fipa.message import FIPAMessage, VALID_PREVIOUS_PERFORMATIVES
 from aea.protocols.oef.models import Query
 from aea.skills.base import SharedClass
 
-if TYPE_CHECKING:
-    from packages.skills.tac_negotiation.helpers import DEMAND_DATAMODEL_NAME
-else:
-    from tac_negotiation_skill.helpers import DEMAND_DATAMODEL_NAME
+DEMAND_DATAMODEL_NAME = 'demand'
+# TODO: temporary fix to a circular import issue
 
 Action = Any
 logger = logging.getLogger("aea.tac_negotiation_skill")

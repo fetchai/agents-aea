@@ -239,7 +239,7 @@ class Multiplexer:
         self._thread = Thread(target=self._run_loop)
 
         self._in_queue = queue.Queue()  # type: queue.Queue
-        self._out_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
+        self._out_queue = None  # type: Optional[asyncio.Queue]
 
         self._recv_loop_task = None  # type: Optional[Future]
         self._send_loop_task = None  # type: Optional[Future]
@@ -252,6 +252,7 @@ class Multiplexer:
     @property
     def out_queue(self) -> asyncio.Queue:
         """Get the out queue."""
+        assert self._out_queue is not None, "Accessing out queue before loop is started."
         return self._out_queue
 
     @property
@@ -311,6 +312,7 @@ class Multiplexer:
         """
         logger.debug("Starting threaded asyncio loop...")
         asyncio.set_event_loop(self._loop)
+        self._out_queue = asyncio.Queue()
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
 
@@ -328,7 +330,6 @@ class Multiplexer:
         if self._send_loop_task is not None and not self._send_loop_task.done():
             # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing messages.
             asyncio.run_coroutine_threadsafe(self.out_queue.put(None), self._loop).result()
-            self._send_loop_task.result(2.0)
             self._send_loop_task.cancel()
 
         if self._loop.is_running():
@@ -420,7 +421,7 @@ class Multiplexer:
         logger.debug("Starting receving loop...")
         task_to_connection = {asyncio.ensure_future(conn.receive()): conn for conn in self.connections}
 
-        while self.connection_status.is_connected:
+        while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
                 logger.debug("Waiting for incoming messages...")
                 done, pending = await asyncio.wait(task_to_connection.keys(),
@@ -432,10 +433,11 @@ class Multiplexer:
                     if envelope is not None:
                         self.in_queue.put_nowait(envelope)
 
-                    # reinstantiate receiving task.
+                    # reinstantiate receiving task, but only if the connection is still up.
                     connection = task_to_connection.pop(task)
-                    new_task = asyncio.ensure_future(connection.receive())
-                    task_to_connection[new_task] = connection
+                    if connection.connection_status.is_connected:
+                        new_task = asyncio.ensure_future(connection.receive())
+                        task_to_connection[new_task] = connection
 
             except asyncio.CancelledError:
                 logger.debug("Receiving loop cancelled.")
@@ -471,6 +473,11 @@ class Multiplexer:
         if connection is None:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
+
+        if len(connection.restricted_to_protocols) > 0 and envelope.protocol_id not in connection.restricted_to_protocols:
+            logger.warning("Connection {} cannot handle protocol {}. Cannot send the message."
+                           .format(connection.connection_id, envelope.protocol_id))
+            return
 
         try:
             await connection.send(envelope)
@@ -599,35 +606,3 @@ class OutBox(object):
         """
         envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
         self._multiplexer.put(envelope)
-
-
-class MailBox(object):
-    """Abstract definition of a mailbox."""
-
-    def __init__(self, connections: List['Connection'], loop: Optional[AbstractEventLoop] = None):
-        """Initialize the mailbox."""
-        self._multiplexer = Multiplexer(connections, loop=loop)
-        self.inbox = InBox(self._multiplexer)
-        self.outbox = OutBox(self._multiplexer)
-
-    @property
-    def connection_status(self) -> ConnectionStatus:
-        """Get the connection status."""
-        return self._multiplexer.connection_status
-
-    @property
-    def is_connected(self) -> bool:
-        """Check whether the multiplexer is connected."""
-        return self._multiplexer.is_connected
-
-    def connect(self) -> None:
-        """Connect."""
-        self._multiplexer.connect()
-
-    def disconnect(self) -> None:
-        """Disconnect."""
-        self._multiplexer.disconnect()
-
-    def send(self, out: Envelope) -> None:
-        """Send an envelope."""
-        self.outbox.put(out)

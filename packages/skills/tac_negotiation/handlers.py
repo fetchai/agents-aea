@@ -21,6 +21,7 @@
 
 import logging
 import pprint
+import sys
 from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
@@ -35,7 +36,7 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Query, Description
 from aea.decision_maker.messages.transaction import TransactionMessage
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.tac_negotiation.dialogues import Dialogue, Dialogues
     from packages.skills.tac_negotiation.helpers import generate_transaction_message
     from packages.skills.tac_negotiation.search import Search

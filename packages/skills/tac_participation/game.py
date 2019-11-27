@@ -20,12 +20,13 @@
 """This package contains a class representing the game."""
 from enum import Enum
 import logging
+import sys
 from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.protocols.oef.models import Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac.message import TACMessage
 else:
     from tac_protocol.message import TACMessage

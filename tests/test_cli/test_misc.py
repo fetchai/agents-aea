@@ -54,6 +54,7 @@ Options:
 
 Commands:
   add           Add a resource to the agent.
+  add-key       Add a private key to the wallet.
   create        Create an agent.
   delete        Delete an agent.
   freeze        Get the dependencies.

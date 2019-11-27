@@ -26,7 +26,7 @@ from aea.aea import AEA
 from aea.connections.local.connection import LocalNode
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
-from aea.mail.base import MailBox, Envelope
+from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
@@ -54,8 +54,8 @@ class TestSkillError:
         cls.public_key = cls.wallet.public_keys['default']
 
         cls.connection = DummyConnection()
-        cls.mailbox1 = MailBox([cls.connection])
-        cls.my_aea = AEA(cls.agent_name, cls.mailbox1, cls.wallet, cls.ledger_apis, timeout=2.0,
+        cls.connections = [cls.connection]
+        cls.my_aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, timeout=2.0,
                          resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))))
         cls.t = Thread(target=cls.my_aea.start)
         cls.t.start()
@@ -81,7 +81,7 @@ class TestSkillError:
 
         self.my_error_handler.send_unsupported_protocol(envelope)
 
-        envelope = self.mailbox1.inbox.get(block=True, timeout=1.0)
+        envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL.value
@@ -95,7 +95,7 @@ class TestSkillError:
 
         self.my_error_handler.send_decoding_error(envelope)
 
-        envelope = self.mailbox1.inbox.get(block=True, timeout=1.0)
+        envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.DECODING_ERROR.value
@@ -109,7 +109,7 @@ class TestSkillError:
 
         self.my_error_handler.send_invalid_message(envelope)
 
-        envelope = self.mailbox1.inbox.get(block=True, timeout=1.0)
+        envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.INVALID_MESSAGE.value
@@ -123,7 +123,7 @@ class TestSkillError:
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)
 
-        envelope = self.mailbox1.inbox.get(block=True, timeout=1.0)
+        envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
         assert msg.get("type") == DefaultMessage.Type.ERROR
         assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value

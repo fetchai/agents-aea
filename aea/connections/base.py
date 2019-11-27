@@ -19,14 +19,18 @@
 # ------------------------------------------------------------------------------
 
 """The base connection package."""
+import logging
 from abc import abstractmethod, ABC
 from asyncio import AbstractEventLoop
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Set
 
 from aea.configurations.base import ConnectionConfig
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope  # pragma: no cover
+
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionStatus(object):
@@ -40,16 +44,26 @@ class ConnectionStatus(object):
 class Connection(ABC):
     """Abstract definition of a connection."""
 
-    def __init__(self, connection_id: str):
+    def __init__(self, connection_id: str, restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize the connection.
 
         :param connection_id: the connection identifier.
+        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         """
         self._connection_id = connection_id
+        self._restricted_to_protocols = self._get_restricted_to_protocols(restricted_to_protocols)
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
+
+    def _get_restricted_to_protocols(self, restricted_to_protocols: Optional[Set[str]] = None) -> Set[str]:
+        if restricted_to_protocols is not None:
+            return restricted_to_protocols
+        elif hasattr(type(self), "restricted_to_protocols") and isinstance(getattr(type(self), "restricted_to_protocols"), set):
+            return getattr(type(self), "restricted_to_protocols")
+        else:
+            return set()
 
     @property
     def loop(self) -> Optional[AbstractEventLoop]:
@@ -71,6 +85,11 @@ class Connection(ABC):
     def connection_id(self) -> str:
         """Get the id of the connection."""
         return self._connection_id
+
+    @property
+    def restricted_to_protocols(self) -> Set[str]:
+        """Get the restricted to protocols.."""
+        return self._restricted_to_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:

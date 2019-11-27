@@ -4,7 +4,7 @@ version: 0.1.0
 license: Apache 2.0
 url: ""
 class_name: DummyConnection
-supported_protocols:
+restricted_to_protocols:
   - "default"
 config: {}
 dependencies:
