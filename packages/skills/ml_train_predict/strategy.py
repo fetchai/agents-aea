@@ -19,11 +19,7 @@
 
 """This module contains the strategy class."""
 
-import time
-import sys
-from typing import Any, Dict, List, Tuple
-
-from aea.protocols.oef.models import Description, Query
+from aea.protocols.oef.models import Attribute, DataModel, Description
 from aea.skills.base import SharedClass
 
 DEFAULT_PRICE_PER_PREDICTION = 2
@@ -70,21 +66,20 @@ class Strategy(SharedClass):
 
         :return: a description of the offered services
         """
-        dm = DataModel("ml_datamodel", Attribute("ml_data", str, True)) 
+        dm = DataModel("ml_datamodel", [Attribute("ml_data", str, True)])
         desc = Description({'ml_data': 'Fashion MNIST'}, data_model=dm)
         return desc
 
-    def generate_proposal_and_data(self, query: Query) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
-        """
-        Generate a proposal matching the query.
+    # def generate_proposal_and_data(self, query: Query) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
+    #     """
+    #     Generate a proposal matching the query.
 
-        :param query: the query
-        :return: a tuple of proposal and the weather data
-        """
-        if query.data_model == 'ml_data'
-        proposal = Description({"rows": rows,
-                                "price": total_price,
-                                "seller_tx_fee": self._seller_tx_fee,
-                                "currency_pbk": self._currency_pbk,
-                                "ledger_id": self._ledger_id})
-        return (proposal, weather_data)
+    #     :param query: the query
+    #     :return: a tuple of proposal and the weather data
+    #     """
+    #     proposal = Description({"rows": rows,
+    #                             "price": total_price,
+    #                             "seller_tx_fee": self._seller_tx_fee,
+    #                             "currency_pbk": self._currency_pbk,
+    #                             "ledger_id": self._ledger_id})
+    #     return (proposal, weather_data)

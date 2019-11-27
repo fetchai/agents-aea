@@ -31,19 +31,30 @@ class TaskManager:
     """A Task manager."""
 
     def __init__(self, executor: Optional[Executor] = None):
+        """
+        Initialize the task manager.
+
+        :param executor: the executor
+        """
         self._executor = executor if executor is not None else ThreadPoolExecutor()
 
-        self.task_queue = Queue()
-        self.futures = deque([])
+        self.task_queue = Queue()  # type: Queue
+        self.futures = deque([])  # type: deque
 
         self.stopped = True
         self.thread = Thread(target=self.dispatch)
         self.lock = threading.Lock()
 
-    def enqueue_task(self, task: Task):
+    def enqueue_task(self, task: Task) -> None:
+        """
+        Enqueue a task with the executor.
+
+        :param task: the task instance to be enqueued
+        """
         self.task_queue.put(task)
 
-    def dispatch(self):
+    def dispatch(self) -> None:
+        """Dispatch a task."""
         while not self.stopped:
             next_task = self.task_queue.get(block=True)  # type: Optional[Task]
             if next_task is None:
@@ -52,12 +63,14 @@ class TaskManager:
             future = self._executor.submit(next_task.execute)
             self.futures.append(future)
 
-    def start(self):
+    def start(self) -> None:
+        """Start the task manager."""
         with self.lock:
             self.stopped = False
             self.thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
+        """Stop the task manager."""
         with self.lock:
             self.stopped = True
             self.task_queue.put(None)

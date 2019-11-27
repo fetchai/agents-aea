@@ -22,13 +22,17 @@
 # we follow https://www.tensorflow.org/tutorials/keras/classification
 
 # TensorFlow and tf.keras
-import tensorflow as tf
+# import tensorflow as tf
 from tensorflow import keras
 
 # Helper libraries
-import numpy as np
-import matplotlib.pyplot as plt
+# import numpy as np
+# import matplotlib.pyplot as plt
 
+# we download some part of the fashion data (or we give it to the selling agent?)
+fashion_mnist = keras.datasets.fashion_mnist
+
+(train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
 
 # this should be specified at setup
 model = keras.Sequential([
@@ -45,7 +49,8 @@ model.compile(optimizer='adam',
 # this should happen in a `task` once the agent has enough training data
 model.fit(train_images, train_labels, epochs=10)
 
-test_loss, test_acc = model.evaluate(test_images,  test_labels, verbose=2)
+test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
 
-# 
-predictions = model.predict(test_images)
+# this is sold, sample images come from the purchaser of a prediction
+sample_images = ''
+predictions = model.predict(sample_images)
