@@ -20,6 +20,7 @@
 """This package contains a scaffold of a handler."""
 
 import logging
+import sys
 from typing import Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
@@ -31,7 +32,7 @@ from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.models import Description, Query
 from aea.skills.base import Handler
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.carpark_detection.dialogues import Dialogue, Dialogues
     from packages.skills.carpark_detection.strategy import Strategy
 else:
@@ -67,10 +68,10 @@ class FIPAHandler(Handler):
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
         if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
-            dialogue = dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key)
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key))
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg, sender):
-            dialogue = dialogues.create_opponent_initiated(fipa_msg, sender)
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(sender, dialogue_id, is_seller=True))
             dialogue.incoming_extend(fipa_msg)
         else:
             self._handle_unidentified_dialogue(fipa_msg, sender)

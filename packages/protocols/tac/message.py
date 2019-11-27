@@ -40,7 +40,7 @@ class TACMessage(Message):
         CANCELLED = "cancelled"
         GAME_DATA = "game_data"
         TRANSACTION_CONFIRMATION = "transaction_confirmation"
-        STATE_UPDATE = "state_update"
+        # STATE_UPDATE = "state_update"
         TAC_ERROR = "tac_error"
 
         def __str__(self):
@@ -91,62 +91,91 @@ class TACMessage(Message):
             tac_type = TACMessage.Type(self.get("type"))
             if tac_type == TACMessage.Type.REGISTER:
                 assert self.is_set("agent_name")
+                assert len(self.body) == 2
             elif tac_type == TACMessage.Type.UNREGISTER:
-                pass
+                assert len(self.body) == 1
             elif tac_type == TACMessage.Type.TRANSACTION:
                 assert self.is_set("transaction_id")
+                assert type(self.get("transaction_id")) == str
                 assert self.is_set("counterparty")
+                assert type(self.get("counterparty")) == str
                 assert self.is_set("amount_by_currency")
-                amount_by_currency = cast(Dict[str, int], self.get("amount_by_currency"))
+                amount_by_currency = cast(Dict, self.get("amount_by_currency"))
+                for key, value in amount_by_currency.items():
+                    assert type(key) == str and type(value) == int
                 assert len(amount_by_currency.keys()) == len(set(amount_by_currency.keys()))
                 assert self.is_set("sender_tx_fee")
-                sender_tx_fee = cast(int, self.get("sender_tx_fee"))
-                assert sender_tx_fee >= 0
+                sender_tx_fee = self.get("sender_tx_fee")
+                assert type(sender_tx_fee) == int
+                assert cast(int, sender_tx_fee) >= 0
                 assert self.is_set("counterparty_tx_fee")
-                counterparty_tx_fee = cast(int, self.get("counterparty_tx_fee"))
-                assert counterparty_tx_fee >= 0
+                counterparty_tx_fee = self.get("counterparty_tx_fee")
+                assert type(counterparty_tx_fee) == int
+                assert cast(int, counterparty_tx_fee) >= 0
                 assert self.is_set("quantities_by_good_pbk")
-                quantities_by_good_pbk = cast(Dict[str, int], self.get("quantities_by_good_pbk"))
+                quantities_by_good_pbk = cast(Dict, self.get("quantities_by_good_pbk"))
+                for key, value in quantities_by_good_pbk.items():
+                    assert type(key) == str and type(value) == int
                 assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
+                assert len(self.body) == 7
             elif tac_type == TACMessage.Type.GET_STATE_UPDATE:
-                pass
+                assert len(self.body) == 1
             elif tac_type == TACMessage.Type.CANCELLED:
-                pass
+                assert len(self.body) == 1
             elif tac_type == TACMessage.Type.GAME_DATA:
                 assert self.is_set("amount_by_currency")
-                for key, value in cast(Dict, self.get("amount_by_currency")).items():
+                amount_by_currency = cast(Dict, self.get("amount_by_currency"))
+                for key, value in amount_by_currency.items():
                     assert type(key) == str and type(value) == int
                 assert self.is_set("exchange_params_by_currency")
-                for key, value in cast(Dict, self.get("exchange_params_by_currency")).items():
+                exchange_params_by_currency = cast(Dict, self.get("exchange_params_by_currency"))
+                for key, value in exchange_params_by_currency.items():
                     assert type(key) == str and type(value) == float
+                assert amount_by_currency.keys() == exchange_params_by_currency.keys()
                 assert self.is_set("quantities_by_good_pbk")
-                for key, value in cast(Dict, self.get("quantities_by_good_pbk")).items():
+                quantities_by_good_pbk = cast(Dict, self.get("quantities_by_good_pbk"))
+                for key, value in quantities_by_good_pbk.items():
                     assert type(key) == str and type(value) == int
                 assert self.is_set("utility_params_by_good_pbk")
-                for key, value in cast(Dict, self.get("utility_params_by_good_pbk")).items():
+                utility_params_by_good_pbk = cast(Dict, self.get("utility_params_by_good_pbk"))
+                for key, value in utility_params_by_good_pbk.items():
                     assert type(key) == str and type(value) == float
+                assert quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
                 assert self.is_set("tx_fee")
+                assert type(self.get("tx_fee")) == int
                 assert self.is_set("agent_pbk_to_name")
+                assert type(self.get("agent_pbk_to_name")) == dict
                 assert self.is_set("good_pbk_to_name")
+                assert type(self.get("good_pbk_to_name")) == dict
                 assert self.is_set("version_id")
+                assert type(self.get("version_id")) == str
+                assert len(self.body) == 9
             elif tac_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
                 assert self.is_set("transaction_id")
+                assert type(self.get("transaction_id")) == str
                 assert self.is_set("amount_by_currency")
-                amount_by_currency = cast(Dict[str, int], self.get("amount_by_currency"))
+                amount_by_currency = cast(Dict, self.get("amount_by_currency"))
+                for key, value in amount_by_currency.items():
+                    assert type(key) == str and type(value) == int
                 assert len(amount_by_currency.keys()) == len(set(amount_by_currency.keys()))
                 assert self.is_set("quantities_by_good_pbk")
-                quantities_by_good_pbk = cast(Dict[str, int], self.get("quantities_by_good_pbk"))
+                quantities_by_good_pbk = cast(Dict, self.get("quantities_by_good_pbk"))
+                for key, value in quantities_by_good_pbk.items():
+                    assert type(key) == str and type(value) == int
                 assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
-            elif tac_type == TACMessage.Type.STATE_UPDATE:
-                assert self.is_set("game_data")
-                assert self.is_set("transactions")
+                assert len(self.body) == 4
+            # elif tac_type == TACMessage.Type.STATE_UPDATE:
+            #     assert self.is_set("game_data")
+            #     assert self.is_set("transactions")
+            #     assert len(self.body) == 3
             elif tac_type == TACMessage.Type.TAC_ERROR:
                 assert self.is_set("error_code")
                 error_code = self.get("error_code")
                 assert error_code in set(self.ErrorCode)
+                assert len(self.body) == 2
             else:
                 raise ValueError("Type not recognized.")
-        except (AssertionError, ValueError):
+        except (AssertionError, ValueError):  # pragma: no cover
             return False
 
         return True

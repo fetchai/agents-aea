@@ -23,12 +23,13 @@ from collections import defaultdict
 import copy
 from enum import Enum
 import pprint
+import sys
 from typing import cast, Dict, List, Optional, TYPE_CHECKING
 
 from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
 from aea.skills.base import SharedClass
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac.message import TACMessage
     from packages.skills.tac_control.helpers import generate_good_pbk_to_name, determine_scaling_factor, \
         generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings

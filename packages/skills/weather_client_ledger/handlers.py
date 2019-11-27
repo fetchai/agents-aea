@@ -20,6 +20,7 @@
 """This package contains a scaffold of a handler."""
 import logging
 import pprint
+import sys
 from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
@@ -34,7 +35,7 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 from aea.decision_maker.messages.transaction import TransactionMessage
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_client_ledger.dialogues import Dialogue, Dialogues
     from packages.skills.weather_client_ledger.strategy import Strategy
 else:
@@ -74,7 +75,7 @@ class FIPAHandler(Handler):
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
         if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
-            dialogue = dialogues.get_dialogue(dialogue_id, sender, self.context.agent_public_key)
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key))
             dialogue.incoming_extend(fipa_msg)
         else:
             self._handle_unidentified_dialogue(fipa_msg, sender)
@@ -291,7 +292,7 @@ class OEFHandler(Handler):
             # pick first agent found
             opponent_pbk = agents[0]
             dialogues = cast(Dialogues, self.context.dialogues)
-            dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key)
+            dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key, is_seller=False)
             query = strategy.get_service_query()
             logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
             cfp_msg = FIPAMessage(message_id=FIPAMessage.STARTING_MESSAGE_ID,

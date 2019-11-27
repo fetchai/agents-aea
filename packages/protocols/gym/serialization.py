@@ -18,20 +18,21 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Serialization for the FIPA protocol."""
+"""Serialization for the Gym protocol."""
 import base64
 import copy
 import json
 import pickle
+import sys
 from typing import Any, TYPE_CHECKING
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.gym.message import GymMessage
 else:
-    from gym_protocol.message import GymMessage
+    from gym_protocol.message import GymMessage  # pragma: no cover
 
 
 class GymSerializer(Serializer):
@@ -79,7 +80,7 @@ class GymSerializer(Serializer):
         json_msg = json.loads(obj.decode("utf-8"))
         performative = GymMessage.Performative(json_msg["performative"])
         new_body = copy.copy(json_msg)
-        new_body["type"] = performative
+        new_body["performative"] = performative
 
         if performative == GymMessage.Performative.ACT:
             action_bytes = base64.b64decode(json_msg["action"])

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,24 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This module contains the classes required for dialogue management.
-
-- Dialogues: The dialogues class keeps track of all dialogues.
-"""
-
-from aea.protocols.fipa.dialogues import FIPADialogues
-from aea.skills.base import SharedClass
-
-
-class Dialogues(SharedClass, FIPADialogues):
-    """The dialogues class keeps track of all dialogues."""
-
-    def __init__(self, **kwargs) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
-        SharedClass.__init__(self, **kwargs)
-        FIPADialogues.__init__(self)
+"""The tests module contains the tests of the packages/connections dir."""

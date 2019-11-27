@@ -20,13 +20,14 @@
 """This package contains the handlers."""
 
 import logging
+import sys
 from typing import cast, TYPE_CHECKING
 
 from aea.protocols.base import Message
 from aea.protocols.oef.message import OEFMessage
 from aea.skills.base import Handler
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac.message import TACMessage
     from packages.protocols.tac.serialization import TACSerializer
     from packages.skills.tac_control.game import Game, Phase, Transaction

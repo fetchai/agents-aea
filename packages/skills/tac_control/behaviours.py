@@ -21,6 +21,7 @@
 
 import datetime
 import logging
+import sys
 from typing import cast, Optional, TYPE_CHECKING
 
 from aea.protocols.oef.message import OEFMessage
@@ -28,7 +29,7 @@ from aea.protocols.oef.models import Description, DataModel, Attribute
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac.message import TACMessage
     from packages.protocols.tac.serialization import TACSerializer
     from packages.skills.tac_control.game import Game, Phase

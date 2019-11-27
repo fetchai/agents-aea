@@ -21,6 +21,7 @@
 
 import datetime
 import logging
+import sys
 from typing import cast, Optional, TYPE_CHECKING
 
 from aea.skills.base import Behaviour
@@ -28,7 +29,7 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_station.strategy import Strategy
 else:
     from weather_station_skill.strategy import Strategy
