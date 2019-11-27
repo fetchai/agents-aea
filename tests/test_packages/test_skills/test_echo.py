@@ -22,6 +22,7 @@
 import yaml
 import os
 from pathlib import Path
+import pytest
 import shutil
 import signal
 import subprocess
@@ -54,6 +55,8 @@ class TestEchoSkill:
 
     def test_echo(self, pytestconfig):
         """Run the echo skill sequence."""
+        if pytestconfig.getoption("ci"):
+            pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
         packages_src = os.path.join(self.cwd, 'packages')
         packages_dst = os.path.join(os.getcwd(), 'packages')
