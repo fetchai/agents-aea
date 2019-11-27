@@ -151,7 +151,6 @@ def _find_protocol_locally(ctx, protocol_name):
         sys.exit(1)
 
 
-
 @add.command()
 @click.argument(
     'protocol_name', type=str, required=True
@@ -164,8 +163,8 @@ def protocol(click_context, protocol_name):
 
     is_registry = ctx.config.get("is_registry")
     if is_registry:
-        public_id = str(connection_name)
-        connection_name = split_public_id(connection_name)[1]
+        public_id = str(protocol_name)
+        protocol_name = split_public_id(protocol_name)[1]
 
     logger.info("Adding protocol '{}' to the agent '{}'...".format(protocol_name, agent_name))
 
