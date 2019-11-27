@@ -61,6 +61,10 @@ def _download_file(url, cwd):
     if response.status_code == 200:
         with open(filepath, 'wb') as f:
             f.write(response.raw.read())
+    else:
+        raise click.ClickException(
+            'Wrong response from server when downloading package.'
+        )
     return filepath
 
 
@@ -82,28 +86,30 @@ def _extract(source, target):
 
 def fetch_package(obj_type, public_id, cwd):
     """Fetch connection/protocol/skill from Registry."""
-    click.echo('Fetching {public_id} {obj_type} from Registry...'.format(
+    click.echo('Fetching {obj_type} {public_id} from Registry...'.format(
         public_id=public_id,
         obj_type=obj_type
     ))
     owner, name, version = split_public_id(public_id)
-    obj_type += 's'
-    api_path = '/{}/{}/{}/{}'.format(obj_type, owner, name, version)
+    plural_obj_type = obj_type + 's'  # used for API and folder paths
+
+    api_path = '/{}/{}/{}/{}'.format(plural_obj_type, owner, name, version)
     resp = request_api('GET', api_path)
     file_url = resp['file']
 
-    click.echo('Downloading {public_id} {obj_type}...'.format(
+    click.echo('Downloading {obj_type} {public_id}...'.format(
         public_id=public_id,
         obj_type=obj_type
     ))
     filepath = _download_file(file_url, cwd)
-    target_folder = os.path.join(cwd, obj_type)
+    target_folder = os.path.join(cwd, plural_obj_type)
 
-    click.echo('Extracting {public_id} {obj_type}...'.format(
+    click.echo('Extracting {obj_type} {public_id}...'.format(
         public_id=public_id,
         obj_type=obj_type
     ))
-    _extract(
-        source=filepath,
-        target=target_folder
-    )
+    _extract(filepath, target_folder)
+    click.echo('Successfully fetched {obj_type}: {public_id}.'.format(
+        public_id=public_id,
+        obj_type=obj_type
+    ))

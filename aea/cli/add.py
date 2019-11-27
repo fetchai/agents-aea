@@ -174,7 +174,7 @@ def protocol(click_context, protocol_name):
         logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
         sys.exit(1)
 
-    # find and add connection
+    # find and add protocol
     if is_registry:
         # fetch from Registry
         fetch_package('protocol', public_id=public_id, cwd=ctx.cwd)
@@ -191,21 +191,7 @@ def protocol(click_context, protocol_name):
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
-@add.command()
-@click.argument('skill_name', type=str, required=True)
-@pass_context
-def skill(click_context, skill_name):
-    """Add a skill to the agent."""
-    ctx = cast(Context, click_context.obj)
-    agent_name = ctx.agent_config.agent_name
-    logger.info("Adding skill '{}' to the agent '{}'...".format(skill_name, agent_name))
-
-    # check if we already have a skill with the same name
-    logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
-    if skill_name in ctx.agent_config.skills:
-        logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
-        sys.exit(1)
-
+def _find_skill_locally(ctx, skill_name, click_context):
     # check that the provided path points to a proper skill directory -> look for skill.yaml file.
     # first check in aea dir
     registry_path = ctx.agent_config.registry_path
@@ -235,16 +221,45 @@ def skill(click_context, skill_name):
         logger.error(str(e))
         sys.exit(1)
 
-    # make the 'skills' folder a Python package.
-    skills_init_module = os.path.join(ctx.cwd, "skills", "__init__.py")
-    logger.debug("Creating {}".format(skills_init_module))
-    Path(skills_init_module).touch(exist_ok=True)
-
     # check for not supported protocol, and add it.
     for protocol_name in skill_configuration.protocols:
         if protocol_name not in ctx.agent_config.protocols:
             logger.debug("Adding protocol '{}' to the agent...".format(protocol_name))
             click_context.invoke(protocol, protocol_name=protocol_name)
+
+
+@add.command()
+@click.argument('skill_name', type=str, required=True)
+@pass_context
+def skill(click_context, skill_name):
+    """Add a skill to the agent."""
+    ctx = cast(Context, click_context.obj)
+    agent_name = ctx.agent_config.agent_name
+
+    is_registry = ctx.config.get("is_registry")
+    if is_registry:
+        public_id = str(skill_name)
+        skill_name = split_public_id(skill_name)[1]
+
+    logger.info("Adding skill '{}' to the agent '{}'...".format(skill_name, agent_name))
+
+    # check if we already have a skill with the same name
+    logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
+    if skill_name in ctx.agent_config.skills:
+        logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
+        sys.exit(1)
+
+    # find and add protocol
+    if is_registry:
+        # fetch from Registry
+        fetch_package('skill', public_id=public_id, cwd=ctx.cwd)
+    else:
+        _find_skill_locally(ctx, skill_name, click_context)
+
+    # make the 'skills' folder a Python package.
+    skills_init_module = os.path.join(ctx.cwd, "skills", "__init__.py")
+    logger.debug("Creating {}".format(skills_init_module))
+    Path(skills_init_module).touch(exist_ok=True)
 
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
