@@ -64,6 +64,7 @@ You will see the gym training logs.
 When you're done, you can go up a level and delete the agent.
 
 ``` bash
+cd ..
 aea delete my_gym_agent
 ```
 

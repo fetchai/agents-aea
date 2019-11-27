@@ -29,7 +29,7 @@ import gym
 from aea.agent import Agent
 from aea.crypto.wallet import Wallet, DEFAULT
 from aea.helpers.base import locate
-from aea.mail.base import Envelope, MailBox
+from aea.mail.base import Envelope
 
 sys.modules["gym_connection"] = locate("packages.connections.gym")
 from gym_connection.connection import GymConnection  # noqa: E402
@@ -48,10 +48,8 @@ class ProxyAgent(Agent):
         :return: None
         """
         wallet = Wallet({DEFAULT: None})
-        super().__init__(name, wallet, timeout=0)
+        super().__init__(name, [GymConnection(wallet.public_keys.get(DEFAULT), gym_env)], wallet, timeout=0)
         self.proxy_env_queue = proxy_env_queue
-        crypto_object = self.wallet.crypto_objects.get(DEFAULT)
-        self.mailbox = MailBox([GymConnection(crypto_object.public_key, gym_env)])
 
     def setup(self) -> None:
         """

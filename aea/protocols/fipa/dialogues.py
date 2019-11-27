@@ -133,9 +133,9 @@ class FIPADialogueStats(object):
         :return: None
         """
         if is_self_initiated:
-            self._self_initiated[end_state.value] += 1
+            self._self_initiated[end_state] += 1
         else:
-            self._other_initiated[end_state.value] += 1
+            self._other_initiated[end_state] += 1
 
 
 class FIPADialogues(Dialogues):
