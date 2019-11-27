@@ -21,6 +21,7 @@
 
 import logging
 import pprint
+import sys
 from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId

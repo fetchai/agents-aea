@@ -17,26 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the behaviours for the 'gym' skill."""
-
-from aea.skills.base import Behaviour
-
-
-class GymBehaviour(Behaviour):
-    """Gym behaviour."""
-
-    def __init__(self, **kwargs):
-        """Initialize the behaviour."""
-        pass
-
-    def setup(self) -> None:
-        """Implement the behaviour setup."""
-        pass
-
-    def act(self) -> None:
-        """Act according to the behaviour."""
-        pass
-
-    def teardown(self) -> None:
-        """Teardown the behaviour."""
-        pass
+"""The tests module contains the tests of the packages dir."""

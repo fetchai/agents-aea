@@ -121,7 +121,7 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
         err += line + "\n"
 
     while pid.poll() is None:
-        time.sleep(0.5)  # pragma: no cover
+        time.sleep(0.1)  # pragma: no cover
 
     if pid.poll() == 0:
         return output, 200  # 200 (Success)
@@ -134,6 +134,14 @@ def get_registered_items(item_type: str):
     # need to place ourselves one directory down so the searcher can find the packages
     pid = _call_aea_async(["aea", "search", item_type + "s"], os.path.join(app_context.module_dir, "aea"))
     return _sync_extract_items_from_tty(pid)
+
+
+def search_registered_items(item_type: str, search_term: str):
+    """Create a new AEA project."""
+    # need to place ourselves one directory down so the searcher can find the packages
+    pid = _call_aea_async(["aea", "search", item_type + "s", "--query", search_term], os.path.join(app_context.module_dir, "aea"))
+    ret = _sync_extract_items_from_tty(pid)
+    return ret[0], item_type, search_term, ret[1]
 
 
 def create_agent(agent_id: str):

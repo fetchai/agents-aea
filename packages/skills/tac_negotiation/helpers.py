@@ -21,6 +21,7 @@
 """This class contains the helpers for FIPA negotiation."""
 
 import copy
+import sys
 from typing import Dict, List, Union, cast
 
 from aea.decision_maker.messages.transaction import TransactionMessage

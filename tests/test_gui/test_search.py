@@ -41,6 +41,31 @@ Version: 0.1.0
 dummy_error = """dummy error"""
 
 
+def _test_search_items_with_query(item_type: str, query: str):
+    """Test searching of generic items in registry."""
+    app = create_app()
+
+    pid = DummyPID(0, dummy_output, "")
+
+    # Test for actual agent
+    with unittest.mock.patch("aea.cli_gui._call_aea_async", return_value=pid):
+        response_list = app.get(
+            'api/' + item_type + "/" + query,
+            data=None,
+            content_type='application/json',
+        )
+    assert response_list.status_code == 200
+    data = json.loads(response_list.get_data(as_text=True))
+    assert len(data[0]) == 2
+    assert data[0][0]['id'] == 'default'
+    assert data[0][0]['description'] == 'The default item allows for any byte logic.'
+    assert data[0][1]['id'] == 'oef'
+    assert data[0][1]['description'] == 'The oef item implements the OEF specific logic.'
+    assert data[0][1]['description'] == 'The oef item implements the OEF specific logic.'
+    assert data[1] == item_type
+    assert data[2] == 'test'
+
+
 def _test_search_items(item_type: str):
     """Test searching of generic items in registry."""
     app = create_app()
@@ -85,18 +110,21 @@ def test_search_protocols():
     """Test for listing protocols supported by an agent."""
     _test_search_items('protocol')
     _test_search_items_fail('protocol')
+    _test_search_items_with_query('protocol', 'test')
 
 
-def test_seartch_connections():
+def test_search_connections():
     """Test for listing connections supported by an agent."""
     _test_search_items('connection')
     _test_search_items_fail('connection')
+    _test_search_items_with_query('connection', 'test')
 
 
 def test_list_skills():
     """Test for listing connections supported by an agent."""
     _test_search_items('skill')
     _test_search_items_fail('skill')
+    _test_search_items_with_query('skill', 'test')
 
 
 def test_real_search():

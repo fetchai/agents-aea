@@ -20,6 +20,7 @@
 """This package contains a scaffold of a handler."""
 import logging
 import pprint
+import sys
 from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
@@ -34,7 +35,7 @@ from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 from aea.decision_maker.messages.transaction import TransactionMessage
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_client_ledger.dialogues import Dialogue, Dialogues
     from packages.skills.weather_client_ledger.strategy import Strategy
 else:

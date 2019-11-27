@@ -20,18 +20,19 @@
 """This module contains the tasks for the 'gym' skill."""
 import logging
 from queue import Queue
+import sys
 from threading import Thread
 from typing import TYPE_CHECKING
 
 
 from aea.skills.base import Task
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.gym.helpers import ProxyEnv
-    from packages.skills.gym.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
+    from packages.skills.gym.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
 else:
     from gym_skill.helpers import ProxyEnv
-    from gym_skill.rl_agent import MyRLAgent, NB_STEPS, NB_GOODS
+    from gym_skill.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
 
 logger = logging.getLogger("aea.gym_skill")
 
@@ -39,13 +40,14 @@ logger = logging.getLogger("aea.gym_skill")
 class GymTask(Task):
     """Gym task."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, nb_steps: int = DEFAULT_NB_STEPS, **kwargs):
         """Initialize the task."""
         logger.info("GymTask.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
         self._rl_agent = MyRLAgent(NB_GOODS)
         self._proxy_env = ProxyEnv(self.context)
-        self._rl_agent_training_thread = Thread(target=self._rl_agent.fit, args=[self._proxy_env, NB_STEPS])
+        self.nb_steps = nb_steps
+        self._rl_agent_training_thread = Thread(target=self._rl_agent.fit, args=[self._proxy_env, self.nb_steps])
         self.is_rl_agent_training = False
 
     @property
