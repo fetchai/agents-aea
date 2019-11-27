@@ -24,10 +24,12 @@ import os
 import requests
 import tarfile
 
+from typing import List, Dict
+
 from aea.cli.registry.settings import REGISTRY_API_URL
 
 
-def request_api(method, path, params=None):
+def request_api(method: str, path: str, params=None) -> Dict:
     """Request Registry API."""
     resp = requests.request(
         method=method,
@@ -46,14 +48,27 @@ def request_api(method, path, params=None):
         )
 
 
-def split_public_id(public_id):
-    """Split public ID to ownwer, name, version."""
+def split_public_id(public_id: str) -> List[str]:
+    """
+    Split public ID to ownwer, name, version.
+
+    :param public_id: public ID of item from Registry.
+
+    :return: list of str [owner, name, version]
+    """
     public_id = public_id.replace(':', '/')
     return public_id.split('/')
 
 
-def _download_file(url, cwd):
-    """Download file from URL and save it in CWD (current working directory)."""
+def _download_file(url: str, cwd: str) -> str:
+    """
+    Download file from URL and save it in CWD (current working directory).
+
+    :param url: str url of the file to download.
+    :param cwd: str path to current working directory.
+
+    :return: str path to downloaded file
+    """
     local_filename = url.split('/')[-1]
     filepath = os.path.join(cwd, local_filename)
     # NOTE the stream=True parameter below
@@ -68,8 +83,15 @@ def _download_file(url, cwd):
     return filepath
 
 
-def _extract(source, target):
-    """Extract tarball and remove source file."""
+def _extract(source: str, target: str) -> None:
+    """
+    Extract tarball and remove source file.
+
+    :param source: str path to a source tarball file.
+    :param target: str path to target directory.
+
+    :return: None
+    """
     if (source.endswith("tar.gz")):
         tar = tarfile.open(source, "r:gz")
         tar.extractall(path=target)
@@ -79,13 +101,18 @@ def _extract(source, target):
 
     os.remove(source)
 
-    folder_name = os.path.basename(source).replace('.tar.gz', '')
-    extracted_folder = os.path.join(target, folder_name)
-    return extracted_folder
 
+def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
+    """
+    Fetch connection/protocol/skill from Registry.
 
-def fetch_package(obj_type, public_id, cwd):
-    """Fetch connection/protocol/skill from Registry."""
+    :param obj_type: str type of object you want to fetch:
+        'connection', 'protocol', 'skill'
+    :param public_id: str public ID of object.
+    :param cwd: str path to current working directory.
+
+    :return: None
+    """
     click.echo('Fetching {obj_type} {public_id} from Registry...'.format(
         public_id=public_id,
         obj_type=obj_type
