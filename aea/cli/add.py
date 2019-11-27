@@ -33,7 +33,7 @@ from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE
-from aea.cli.registry.utils import fetch as registry_fetch, split_public_id
+from aea.cli.registry.utils import fetch_package, split_public_id
 
 
 @click.group()
@@ -79,18 +79,19 @@ def _find_connection_locally(ctx, connection_name):
 
 
 @add.command()
-@click.argument('connection_name', type=str, required=False)
-@click.option('--id', default=None,
-              help='Public ID of Connection from Registry you want to add.')
+@click.argument(
+    'connection_name', type=str, required=True
+)
 @pass_context
-def connection(click_context, connection_name, id):
+def connection(click_context, connection_name):
     """Add a connection to the configuration file."""
     ctx = cast(Context, click_context.obj)
-
     agent_name = ctx.agent_config.agent_name
 
-    if not connection_name and id:
-        connection_name = split_public_id(id)[1]
+    is_registry = ctx.config.get("is_registry")
+    if is_registry:
+        public_id = str(connection_name)
+        connection_name = split_public_id(connection_name)[1]
 
     logger.info("Adding connection '{}' to the agent '{}'...".format(connection_name, agent_name))
 
@@ -101,13 +102,9 @@ def connection(click_context, connection_name, id):
         sys.exit(1)
 
     # find and add connection
-    if ctx.config.get("is_registry"):
+    if is_registry:
         # fetch from Registry
-        if not id:
-            raise click.ClickException(
-                'Please provide a Public ID of connection you are looking for.'
-            )
-        connection_dir = registry_fetch('connection', public_id=id, cwd=ctx.cwd)
+        fetch_package('connection', public_id=public_id, cwd=ctx.cwd)
     else:
         _find_connection_locally(ctx, connection_name)
 
@@ -156,17 +153,19 @@ def _find_protocol_locally(ctx, protocol_name):
 
 
 @add.command()
-@click.argument('protocol_name', type=str, required=False)
-@click.option('--id', default=None,
-              help='Public ID of Protocol from Registry you want to add.')
+@click.argument(
+    'protocol_name', type=str, required=True
+)
 @pass_context
-def protocol(click_context, protocol_name, id):
+def protocol(click_context, protocol_name):
     """Add a protocol to the agent."""
     ctx = cast(Context, click_context.obj)
     agent_name = cast(str, ctx.agent_config.agent_name)
 
-    if not protocol_name and id:
-        protocol_name = split_public_id(id)[1]
+    is_registry = ctx.config.get("is_registry")
+    if is_registry:
+        public_id = str(connection_name)
+        connection_name = split_public_id(connection_name)[1]
 
     logger.info("Adding protocol '{}' to the agent '{}'...".format(protocol_name, agent_name))
 
@@ -177,13 +176,9 @@ def protocol(click_context, protocol_name, id):
         sys.exit(1)
 
     # find and add connection
-    if ctx.config.get("is_registry"):
+    if is_registry:
         # fetch from Registry
-        if not id:
-            raise click.ClickException(
-                'Please provide a Public ID of protocol you are looking for.'
-            )
-        registry_fetch('protocol', public_id=id, cwd=ctx.cwd)
+        fetch_package('protocol', public_id=public_id, cwd=ctx.cwd)
     else:
         _find_protocol_locally(ctx, protocol_name)
 

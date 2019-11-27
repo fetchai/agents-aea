@@ -53,49 +53,19 @@ def split_public_id(public_id):
 
 
 def _download_file(url, cwd):
-    """Download file from URL and save it in CWD (current working directory).
-
-    Parameters
-    ----------
-    url : str
-        URL of file that should be downloaded.
-    cwd : str
-        Path to current working directory where file will be saved.
-
-    Returns
-    -------
-    str
-        Path to downloaded file.
-
-    """
+    """Download file from URL and save it in CWD (current working directory)."""
     local_filename = url.split('/')[-1]
     filepath = os.path.join(cwd, local_filename)
     # NOTE the stream=True parameter below
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
         with open(filepath, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                if chunk: # filter out keep-alive new chunks
-                    f.write(chunk)
+            f.write(response.raw.read())
     return filepath
 
 
 def _extract(source, target):
-    """Extract tarball and remove source file.
-
-    Parameters
-    ----------
-    source : str
-        Path to file to extract.
-    target : str
-        Path to target folder.
-
-    Returns
-    -------
-    str
-        File path of fetched object.
-
-    """
+    """Extract tarball and remove source file."""
     if (source.endswith("tar.gz")):
         tar = tarfile.open(source, "r:gz")
         tar.extractall(path=target)
@@ -110,22 +80,8 @@ def _extract(source, target):
     return extracted_folder
 
 
-def fetch(obj_type, public_id, cwd):
-    """Fetch connection/protocol/skill from Registry.
-
-    Parameters
-    ----------
-    obj_type : str
-        Type of object you want to fetch: 'connection', 'protocol', 'skill'.
-    public_id : str
-        Public ID of object.
-
-    Returns
-    -------
-    str
-        Folder path of fetched object.
-
-    """
+def fetch_package(obj_type, public_id, cwd):
+    """Fetch connection/protocol/skill from Registry."""
     click.echo('Fetching {public_id} {obj_type} from Registry...'.format(
         public_id=public_id,
         obj_type=obj_type
