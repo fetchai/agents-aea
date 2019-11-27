@@ -30,6 +30,7 @@ from aea.skills.base import Handler
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+from aea.protocols.fipa.dialogues import FIPADialogue as Dialogue
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
@@ -37,14 +38,14 @@ from aea.protocols.oef.models import Query, Description
 from aea.decision_maker.messages.transaction import TransactionMessage
 
 if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.tac_negotiation.dialogues import Dialogue, Dialogues
-    from packages.skills.tac_negotiation.helpers import generate_transaction_message
+    from packages.skills.tac_negotiation.dialogues import Dialogues
+    from packages.skills.tac_negotiation.helpers import generate_transaction_message, DEMAND_DATAMODEL_NAME
     from packages.skills.tac_negotiation.search import Search
     from packages.skills.tac_negotiation.strategy import Strategy
     from packages.skills.tac_negotiation.transactions import Transactions
 else:
-    from tac_negotiation_skill.dialogues import Dialogue, Dialogues
-    from tac_negotiation_skill.helpers import generate_transaction_message
+    from tac_negotiation_skill.dialogues import Dialogues
+    from tac_negotiation_skill.helpers import generate_transaction_message, DEMAND_DATAMODEL_NAME
     from tac_negotiation_skill.search import Search
     from tac_negotiation_skill.strategy import Strategy
     from tac_negotiation_skill.transactions import Transactions
@@ -78,10 +79,13 @@ class FIPANegotiationHandler(Handler):
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
         dialogues = cast(Dialogues, self.context.dialogues)
         if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
-            dialogue = dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key)
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key))
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg, sender):
-            dialogue = dialogues.create_opponent_initiated(fipa_msg, sender)
+            query = cast(Query, fipa_msg.get("query"))
+            assert query.model is not None, "Query has no data model."
+            is_seller = query.model.name == DEMAND_DATAMODEL_NAME
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(sender, cast(int, fipa_msg.get('dialogue_id')), is_seller))
             dialogue.incoming_extend(fipa_msg)
         else:
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))

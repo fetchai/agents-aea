@@ -23,17 +23,12 @@
 import datetime
 import logging
 from collections import defaultdict, deque
-import sys
-from typing import Dict, Tuple, Deque, cast, TYPE_CHECKING
+from typing import Dict, Tuple, Deque, cast
 
 from aea.decision_maker.base import OwnershipState
 from aea.decision_maker.messages.transaction import TransactionMessage, TransactionId
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.skills.base import SharedClass
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.tac_negotiation.dialogues import DialogueLabel
-else:
-    from tac_negotiation_skill.dialogues import DialogueLabel
 
 logger = logging.getLogger("aea.tac_negotiation_skill")
 
