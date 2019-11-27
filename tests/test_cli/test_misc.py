@@ -67,3 +67,5 @@ Commands:
   scaffold      Scaffold a resource for the agent.
   search        Search for components in the registry.
 """
+
+
