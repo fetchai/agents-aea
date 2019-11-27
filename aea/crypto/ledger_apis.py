@@ -71,7 +71,7 @@ class LedgerApis(object):
                 apis[identifier] = api
                 configs[identifier] = config
             else:
-                raise ValueError("Unsupported identifier in private key paths.")
+                raise ValueError("Unsupported identifier in ledger apis.")
 
         self._apis = apis
         self._configs = configs
