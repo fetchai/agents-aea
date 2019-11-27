@@ -59,18 +59,25 @@ class GymMessage(Message):
             if performative == GymMessage.Performative.ACT:
                 assert self.is_set("action")
                 assert self.is_set("step_id")
+                assert type(self.get("step_id")) == int
+                assert len(self.body) == 3
             elif performative == GymMessage.Performative.PERCEPT:
                 assert self.is_set("observation")
                 assert self.is_set("reward")
+                assert type(self.get("reward")) == float
                 assert self.is_set("done")
+                assert type(self.get("done")) == bool
                 assert self.is_set("info")
+                assert type(self.get("info")) == dict
                 assert self.is_set("step_id")
+                assert type(self.get("step_id")) == int
+                assert len(self.body) == 6
             elif performative == GymMessage.Performative.RESET or performative == GymMessage.Performative.CLOSE:
-                pass
+                assert len(self.body) == 1
             else:
                 raise ValueError("Performative not recognized.")
 
-        except (AssertionError, ValueError, KeyError):
+        except (AssertionError, ValueError, KeyError):  # pragma: no cover
             return False
 
         return True
