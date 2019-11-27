@@ -122,8 +122,8 @@ class StubConnection(Connection):
         if not input_file_path.exists():
             input_file_path.touch()
 
-        self.input_file = open(input_file_path, "rb+", buffering=1)
-        self.output_file = open(output_file_path, "wb+", buffering=1)
+        self.input_file = open(input_file_path, "rb+")
+        self.output_file = open(output_file_path, "wb+")
 
         self.in_queue = None  # type: Optional[asyncio.Queue]
 

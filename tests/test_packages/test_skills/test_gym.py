@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the gym skill."""
-import json
+
 import os
 import shutil
 import signal

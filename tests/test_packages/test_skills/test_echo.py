@@ -19,7 +19,9 @@
 
 """This test module contains the integration test for the echo skill."""
 
+import yaml
 import os
+from pathlib import Path
 import shutil
 import signal
 import subprocess
@@ -30,6 +32,10 @@ import time
 from ...common.click_testing import CliRunner
 
 from aea.cli import cli
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 
 from tests.conftest import CLI_LOG_OPTION
 
@@ -59,6 +65,13 @@ class TestEchoSkill:
         agent_dir_path = os.path.join(self.t, self.agent_name)
         os.chdir(agent_dir_path)
 
+        # disable logging
+        aea_config_path = Path(self.t, self.agent_name, DEFAULT_AEA_CONFIG_FILE)
+        aea_config = AgentConfig.from_json(yaml.safe_load(open(aea_config_path)))
+        aea_config.logging_config = {"disable_existing_loggers": False, "version": 1,
+                                     "loggers": {"aea.echo_skill": {"level": "CRITICAL"}}}
+        yaml.safe_dump(aea_config.json, open(aea_config_path, "w"))
+
         # add skills
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "echo"], standalone_mode=False)
         assert result.exit_code == 0
@@ -78,8 +91,37 @@ class TestEchoSkill:
             env=os.environ.copy())
 
         # add sending and receiving envelope from input/output files
+        time.sleep(2.0)
+        message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        expected_envelope = Envelope(to=self.agent_name, sender="sender", protocol_id="default",
+                                     message=DefaultSerializer().encode(message))
+        encoded_envelope = "{},{},{},{}".format(expected_envelope.to,
+                                                expected_envelope.sender,
+                                                expected_envelope.protocol_id,
+                                                expected_envelope.message.decode("utf-8"))
+        encoded_envelope = encoded_envelope.encode("utf-8")
+        with open(Path(self.t, self.agent_name, "input_file"), "ab+") as f:
+            f.write(encoded_envelope + b"\n")
+            f.flush()
 
-        time.sleep(10.0)
+        time.sleep(2.0)
+        with open(Path(self.t, self.agent_name, "output_file"), "rb+") as f:
+            lines = f.readlines()
+
+        assert len(lines) == 1
+        line = lines[0]
+        to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
+        to = to.decode("utf-8")
+        sender = sender.decode("utf-8")
+        protocol_id = protocol_id.decode("utf-8")
+
+        actual_envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+        assert expected_envelope.to == actual_envelope.sender
+        assert expected_envelope.sender == actual_envelope.to
+        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        assert expected_envelope.message == actual_envelope.message
+
+        time.sleep(2.0)
         process.send_signal(signal.SIGINT)
         process.wait(timeout=20)
 
