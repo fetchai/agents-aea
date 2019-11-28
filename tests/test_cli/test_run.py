@@ -62,7 +62,7 @@ def test_run(pytestconfig):
         '-m',
         'aea.cli',
         "run",
-        "--connection",
+        "--connections",
         "local"
     ],
         stdout=subprocess.PIPE,
@@ -71,6 +71,62 @@ def test_run(pytestconfig):
     time.sleep(10.0)
     process.send_signal(signal.SIGINT)
     process.wait(timeout=20)
+
+    assert process.returncode == 0
+
+    os.chdir(cwd)
+
+    poll = process.poll()
+    if poll is None:
+        process.terminate()
+        process.wait(2)
+
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+@pytest.mark.parametrize(argnames=["connection_names"], argvalues=[
+    ["local,stub"],
+    ["'local, stub'"],
+    ["local,,stub,"],
+])
+def test_run_multiple_connections(pytestconfig, connection_names):
+    """Test that the command 'aea run' works as expected when specifying multiple connections."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "stub"])
+    assert result.exit_code == 0
+
+    process = subprocess.Popen([
+        sys.executable,
+        '-m',
+        'aea.cli',
+        "run",
+        "--connections",
+        connection_names,
+    ],
+        stdout=subprocess.PIPE,
+        env=os.environ.copy())
+
+    time.sleep(5.0)
+    process.send_signal(signal.SIGINT)
+    process.wait(timeout=5)
 
     assert process.returncode == 0
 
@@ -131,7 +187,7 @@ def test_run_unknown_private_key(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
     except Exception as e:
         error_msg = str(e)
 
@@ -186,7 +242,7 @@ def test_run_unknown_ledger(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
     except Exception as e:
         error_msg = str(e)
 
@@ -239,7 +295,7 @@ def test_run_default_private_key_config(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
     except SystemExit as e:
         error_msg = str(e)
 
@@ -292,7 +348,7 @@ def test_run_fet_private_key_config(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
     except SystemExit as e:
         error_msg = str(e)
 
@@ -345,7 +401,7 @@ def test_run_ethereum_private_key_config(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
     except SystemExit as e:
         error_msg = str(e)
 
@@ -407,7 +463,7 @@ def test_run_ledger_apis(pytestconfig):
         '-m',
         'aea.cli',
         "run",
-        "--connection",
+        "--connections",
         "local"
     ],
         stdout=subprocess.PIPE,
@@ -478,7 +534,7 @@ def test_run_fet_ledger_apis(pytestconfig):
         '-m',
         'aea.cli',
         "run",
-        "--connection",
+        "--connections",
         "local"
     ],
         stdout=subprocess.PIPE,
@@ -526,7 +582,7 @@ def test_run_with_install_deps(pytestconfig):
         'aea.cli',
         "run",
         "--install-deps",
-        "--connection",
+        "--connections",
         "local"
     ],
         stdout=subprocess.PIPE,
@@ -577,7 +633,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
         'aea.cli',
         "run",
         "--install-deps",
-        "--connection",
+        "--connections",
         "local"
     ],
         stdout=subprocess.PIPE,
@@ -627,7 +683,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         yaml.safe_dump(config, open(config_path, "w"))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -735,7 +791,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
 
 class TestRunFailsWhenConnectionNotDeclared:
-    """Test that the command 'aea run --connection' fails when the connection is not declared."""
+    """Test that the command 'aea run --connections' fails when the connection is not declared."""
 
     @classmethod
     def setup_class(cls):
@@ -754,7 +810,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         os.chdir(Path(cls.t, cls.agent_name))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -779,7 +835,7 @@ class TestRunFailsWhenConnectionNotDeclared:
 
 
 class TestRunFailsWhenConnectionConfigFileNotFound:
-    """Test that the command 'aea run --connection' fails when the connection config file is not found."""
+    """Test that the command 'aea run --connections' fails when the connection config file is not found."""
 
     @classmethod
     def setup_class(cls):
@@ -800,7 +856,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, DEFAULT_CONNECTION_CONFIG_FILE).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -825,7 +881,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
 
 
 class TestRunFailsWhenConnectionNotComplete:
-    """Test that the command 'aea run --connection' fails when the connection.py module is missing."""
+    """Test that the command 'aea run --connections' fails when the connection.py module is missing."""
 
     @classmethod
     def setup_class(cls):
@@ -846,7 +902,7 @@ class TestRunFailsWhenConnectionNotComplete:
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -871,7 +927,7 @@ class TestRunFailsWhenConnectionNotComplete:
 
 
 class TestRunFailsWhenConnectionClassNotPresent:
-    """Test that the command 'aea run --connection' fails when the connection class is missing in connection.py."""
+    """Test that the command 'aea run --connections' fails when the connection class is missing in connection.py."""
 
     @classmethod
     def setup_class(cls):
@@ -892,7 +948,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").write_text("")
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -937,7 +993,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         Path(cls.t, cls.agent_name, "protocols", "default", "protocol.yaml").unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -982,7 +1038,7 @@ class TestRunFailsWhenProtocolNotComplete:
         Path(cls.t, cls.agent_name, "protocols", "default", "__init__.py").unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 

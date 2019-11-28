@@ -599,5 +599,5 @@ class OEFConnection(Connection):
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
         return OEFConnection(public_key, oef_addr, oef_port,
-                             connection_id=cast(str, connection_configuration.config.get("name")),
+                             connection_id=connection_configuration.name,
                              restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
