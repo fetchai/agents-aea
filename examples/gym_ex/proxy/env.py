@@ -116,7 +116,8 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        self._connect()
+        if not self._agent.multiplexer.is_connected:
+            self._connect()
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
         gym_bytes = GymSerializer().encode(gym_msg)
         envelope = Envelope(to=DEFAULT_GYM, sender=self._agent_public_key, protocol_id=GymMessage.protocol_id,
