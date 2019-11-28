@@ -26,6 +26,7 @@ import numpy as np
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
 
+
 class MLTradeMessage(Message):
     """The ML trade message class."""
 
