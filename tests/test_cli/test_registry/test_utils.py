@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry utils."""
-import builtins
 import os
 
 from unittest import TestCase, mock
