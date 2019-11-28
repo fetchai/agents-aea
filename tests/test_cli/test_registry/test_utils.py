@@ -177,7 +177,7 @@ class ExtractTestCase(TestCase):
         os_remove_mock.assert_called_once_with(source)
 
     def test_extract_wrong_file_type(self):
-        """Test for _extract method positive result."""
+        """Test for _extract method wrong file type."""
         source = 'file.wrong'
         target = 'target-folder'
         with self.assertRaises(Exception):
