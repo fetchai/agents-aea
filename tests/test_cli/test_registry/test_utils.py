@@ -23,7 +23,7 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli.registry.utils import (
-    fetch_package, request_api, split_public_id, _download_file
+    fetch_package, request_api, split_public_id, _download_file, _extract
 )
 from aea.cli.registry.settings import REGISTRY_API_URL
 
@@ -155,3 +155,30 @@ class DownloadFileTestCase(TestCase):
 
         with self.assertRaises(ClickException):
             _download_file('url', 'cwd')
+
+
+class ExtractTestCase(TestCase):
+    """Test case for _extract method."""
+
+    @mock.patch('aea.cli.registry.utils.os.remove')
+    @mock.patch('aea.cli.registry.utils.tarfile.open')
+    def test_extract_positive(self, tarfile_open_mock, os_remove_mock):
+        """Test for _extract method positive result."""
+        source = 'file.tar.gz'
+        target = 'target-folder'
+
+        tar_mock = mock.Mock()
+        tar_mock.extractall = lambda path: None
+        tar_mock.close = lambda: None
+        tarfile_open_mock.return_value = tar_mock
+
+        _extract(source, target)
+        tarfile_open_mock.assert_called_once_with(source, 'r:gz')
+        os_remove_mock.assert_called_once_with(source)
+
+    def test_extract_wrong_file_type(self):
+        """Test for _extract method positive result."""
+        source = 'file.wrong'
+        target = 'target-folder'
+        with self.assertRaises(Exception):
+            _extract(source, target)
