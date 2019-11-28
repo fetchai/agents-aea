@@ -172,6 +172,9 @@ class RLAgent:
         :return: None
         """
         action_counter = 0
+        # for the BanditEnv example, the episode will always be 1.
+        # In general that's not the case, but for completeness
+        # we implemented a training loop that supports learning across many episodes.
         episode_counter = 0
         nb_steps_digits = len(str(nb_steps))
 
