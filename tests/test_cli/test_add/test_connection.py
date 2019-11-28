@@ -58,6 +58,28 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         # add connection again
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
 
+    @unittest.mock.patch(
+        'aea.cli.add.split_public_id',
+        return_value=['owner', 'name', 'version']
+    )
+    @unittest.mock.patch('aea.cli.add.fetch_package')
+    def test_add_connection_from_registry_positive(
+        self, fetch_package_mock, split_public_id_mock
+    ):
+        """Test add from registry positive result."""
+        public_id = "owner/name:version"
+        obj_type = 'connection'
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--registry", obj_type, public_id],
+            standalone_mode=False
+        )
+        assert result.exit_code == 0
+        split_public_id_mock.assert_called_once_with(public_id)
+        fetch_package_mock.assert_called_once_with(
+            obj_type, public_id=public_id, cwd='.'
+        )
+
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
         assert self.result.exit_code == 1
