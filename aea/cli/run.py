@@ -24,14 +24,14 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import cast
+from typing import cast, List
 
 import click
 from click import pass_context
 
 from aea.aea import AEA
 from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
-    AEAConfigException, _load_env_file
+    AEAConfigException, _load_env_file, ConnectionsOption
 from aea.cli.install import install
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig
 from aea.configurations.loader import ConfigLoader
@@ -175,14 +175,14 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
 
 
 @click.command()
-@click.option('--connection', 'connection_name', metavar="CONN_NAME", type=str, required=False, default=None,
-              help="The connection name. Must be declared in the agent's configuration file.")
+@click.option('--connections', "connection_names", cls=ConnectionsOption, required=False, default=None,
+              help="The connection names to use for running the agent. Must be declared in the agent's configuration file.")
 @click.option('--env', 'env_file', type=click.Path(), required=False, default=".env",
               help="Specify an environment file (default: .env)")
 @click.option('--install-deps', 'install_deps', is_flag=True, required=False, default=False,
               help="Install all the dependencies before running the agent.")
 @pass_context
-def run(click_context, connection_name: str, env_file: str, install_deps: bool):
+def run(click_context, connection_names: List[str], env_file: str, install_deps: bool):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     _try_to_load_agent_config(ctx)
@@ -197,10 +197,13 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
     wallet = Wallet(private_key_paths)
     ledger_apis = LedgerApis(ledger_api_configs)
 
-    connection_name = ctx.agent_config.default_connection if connection_name is None else connection_name
+    connection_names = [ctx.agent_config.default_connection] if connection_names is None else connection_names
+    connections = []
     _try_to_load_protocols(ctx)
     try:
-        connection = _setup_connection(connection_name, wallet.public_keys[FETCHAI], ctx)
+        for connection_name in connection_names:
+            connection = _setup_connection(connection_name, wallet.public_keys[FETCHAI], ctx)
+            connections.append(connection)
     except AEAConfigException as e:
         logger.error(str(e))
         sys.exit(1)
@@ -211,7 +214,7 @@ def run(click_context, connection_name: str, env_file: str, install_deps: bool):
         else:
             click_context.invoke(install)
 
-    agent = AEA(agent_name, [connection], wallet, ledger_apis, resources=Resources(str(Path("."))))
+    agent = AEA(agent_name, connections, wallet, ledger_apis, resources=Resources(str(Path("."))))
     try:
         agent.start()
     except KeyboardInterrupt:

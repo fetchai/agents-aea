@@ -87,7 +87,7 @@ class TestEchoSkill:
             '-m',
             'aea.cli',
             "run",
-            "--connection",
+            "--connections",
             "stub"
         ],
             stdout=subprocess.PIPE,

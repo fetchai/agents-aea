@@ -394,5 +394,5 @@ class OEFLocalConnection(Connection):
         """
         local_node = LocalNode()
         return OEFLocalConnection(public_key, local_node,
-                                  connection_id=cast(str, connection_configuration.config.get("name")),
+                                  connection_id=connection_configuration.name,
                                   restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
