@@ -21,6 +21,7 @@
 """This module contains the default message definition."""
 from enum import Enum
 from typing import Dict, Optional, cast
+from collections import defaultdict
 
 from aea.protocols.base import Message
 
@@ -144,9 +145,9 @@ class TACMessage(Message):
                 assert self.is_set("tx_fee")
                 assert type(self.get("tx_fee")) == int
                 assert self.is_set("agent_pbk_to_name")
-                assert type(self.get("agent_pbk_to_name")) == dict
+                assert type(self.get("agent_pbk_to_name")) in [dict, defaultdict]
                 assert self.is_set("good_pbk_to_name")
-                assert type(self.get("good_pbk_to_name")) == dict
+                assert type(self.get("good_pbk_to_name")) in [dict, defaultdict]
                 assert self.is_set("version_id")
                 assert type(self.get("version_id")) == str
                 assert len(self.body) == 9

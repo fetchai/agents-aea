@@ -34,7 +34,7 @@ aea add skill tac_control
 ```
 
 ### Update the game parameters
-You can change the game parameters in `skill.yaml` under `Parameters`.
+You can change the game parameters in `tac_controller/skills/tac_control/skill.yaml` under `Parameters`.
 
 You must set the start time to a point in the future `start_time: Nov 10 2019  10:40AM`.
 
@@ -68,3 +68,6 @@ aea add skill tac_negotiation
 ``` bash
 aea run
 ```
+
+!!!	Note
+	Currently, the agents cannot settle their trades. Updates coming soon!

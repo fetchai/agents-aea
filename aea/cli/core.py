@@ -186,8 +186,8 @@ def add_key(ctx: Context, type_, file):
     _validate_private_key_path(file, type_)
     try:
         ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
-    except ValueError as e:
-        logger.error(str(e))
+    except ValueError as e:     # pragma: no cover
+        logger.error(str(e))    # pragma: no cover
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
