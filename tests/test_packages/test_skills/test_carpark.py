@@ -48,8 +48,8 @@ def _read_error(pid: subprocess.Popen):
         print("stderr: " + line.replace("\n", ""))
 
 
-class TestWeatherSkillsFetchaiLedger:
-    """Test that weather skills work."""
+class TestCarPark:
+    """Test that carpark skills work."""
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
@@ -59,13 +59,13 @@ class TestWeatherSkillsFetchaiLedger:
     def setup_class(cls):
         """Set up the test class."""
         cls.runner = CliRunner()
-        cls.agent_name_one = "my_weather_station"
-        cls.agent_name_two = "my_weather_client"
+        cls.agent_name_one = "my_carpark_aea"
+        cls.agent_name_two = "my_carpark_client_aea"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_weather(self, pytestconfig):
+    def test_carpark(self, pytestconfig):
         """Run the weather skills sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
@@ -89,8 +89,33 @@ class TestWeatherSkillsFetchaiLedger:
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "weather_station_ledger"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "carpark_detection"], standalone_mode=False)
         assert result.exit_code == 0
+
+
+        # Load the agent yaml file and manually insert the things we need
+        yaml_path = os.path.join("skills", "carpark_detection", "skill.yaml")
+        file = open(yaml_path, mode='r')
+
+        # read all lines at once
+        whole_file = file.read()
+
+        # add in the ledger address
+        find_text = "ledger_apis: []"
+        replace_text = """ledger_apis:
+            - ledger_api:
+                addr: alpha.fetch-ai.com
+                ledger: fetchai
+                port: 80"""
+
+        whole_file = whole_file.replace("db_is_rel_to_cwd: true", "# db_is_rel_to_cwd: true")
+        whole_file = whole_file.replace("db_rel_dir: ../temp_files", "# db_rel_dir: ../temp_files")
+
+        # close the file
+        file.close()
+
+        with open(yaml_path, 'w') as f:
+            f.write(whole_file)
 
         process_one = subprocess.Popen([
             sys.executable,
@@ -108,7 +133,7 @@ class TestWeatherSkillsFetchaiLedger:
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
         os.chdir(agent_two_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "weather_client_ledger"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "carpark_client"], standalone_mode=False)
         assert result.exit_code == 0
 
         # Load the agent yaml file and manually insert the things we need
@@ -139,7 +164,7 @@ class TestWeatherSkillsFetchaiLedger:
 
         # Add some funds to the weather station
         os.chdir(os.path.join(scripts_dst, "../"))
-        result = subprocess.call(["python", "./scripts/fetchai_wealth_generation.py", "--private-key", os.path.join("./", self.agent_name_two, "fet_private_key.txt"), "--amount", "10000000", "--addr", "alpha.fetch-ai.com", "--port", "80"])
+        result = subprocess.call(["python", "./scripts/fetchai_wealth_generation.py", "--private-key", os.path.join("./", self.agent_name_two, "fet_private_key.txt"), "--amount", "1000000000", "--addr", "alpha.fetch-ai.com", "--port", "80"])
         assert result == 0
 
         os.chdir(agent_two_dir_path)
