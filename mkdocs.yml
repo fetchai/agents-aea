@@ -3,7 +3,7 @@ site_url: https://docs.fetch.ai/
 site_description: Everything you need to know about Fetch.AI. 
 #repo_url: https://github.com/fetchai/docs // commented out to remove edit option
 #repo_name: 'GitHub'
-site_author: katharine.murphy@fetch.ai
+site_author: diarmid.campbell@fetch.ai
 
 
 theme:
@@ -55,8 +55,8 @@ nav:
       - "Integrate with third parties": 'integration.md'
 
 
-
-
+plugins:
+    - markdownmermaid
 
 markdown_extensions:
   - pymdownx.superfences
@@ -64,3 +64,6 @@ markdown_extensions:
 
 extra_css:
     - css/my-styles.css
+
+extra_javascript:
+    - https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js

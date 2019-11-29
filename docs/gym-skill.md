@@ -68,5 +68,25 @@ cd ..
 aea delete my_gym_agent
 ```
 
+### Communication
+This diagram shows the communication between the agent and the gym environment 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent
+        participant Environment
+    
+        activate Agent
+        activate Environment
+        Agent->>Environment: reset
+        loop learn
+            Agent->>Environment: act
+            Environment->>Agent: percept
+        end
+        Agent->>Environment: close
+        
+        deactivate Agent
+        deactivate Environment
+</div>
 
 <br/>
