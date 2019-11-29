@@ -68,6 +68,28 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         s = "A protocol with name '{}' already exists. Aborting...".format(self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
+    @unittest.mock.patch(
+        'aea.cli.add.split_public_id',
+        return_value=['owner', 'name', 'version']
+    )
+    @unittest.mock.patch('aea.cli.add.fetch_package')
+    def test_add_protocol_from_registry_positive(
+        self, fetch_package_mock, split_public_id_mock
+    ):
+        """Test add from registry positive result."""
+        public_id = "owner/name:version"
+        obj_type = 'protocol'
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--registry", obj_type, public_id],
+            standalone_mode=False
+        )
+        assert result.exit_code == 0
+        split_public_id_mock.assert_called_once_with(public_id)
+        fetch_package_mock.assert_called_once_with(
+            obj_type, public_id=public_id, cwd='.'
+        )
+
     @classmethod
     def teardown_class(cls):
         """Teardowm the test."""

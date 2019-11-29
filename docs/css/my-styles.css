@@ -25,3 +25,9 @@ code {
 .md-icon {
 	./assets/images/favicon.ico
 }
+
+/* Needed so that Mermaid UML diagrams don't end up being massively tall */
+svg{
+    height: auto;
+
+}

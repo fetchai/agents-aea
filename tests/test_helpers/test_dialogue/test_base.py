@@ -30,18 +30,19 @@ class TestDialogueBase:
     @classmethod
     def setup(cls):
         """Initialise the class."""
-        cls.dialogue_label = DialogueLabel(dialogue_id=1, dialogue_opponent_pbk="opponent",
+        cls.dialogue_label = DialogueLabel(dialogue_reference=(str(0), ''), dialogue_opponent_pbk="opponent",
                                            dialogue_starter_pbk="starter")
         cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
         cls.dialogues = Dialogues()
 
     def test_dialogue_label(self):
         """Test the dialogue_label."""
-        assert self.dialogue_label.dialogue_id == 1
+        assert self.dialogue_label.dialogue_starter_reference == str(0)
+        assert self.dialogue_label.dialogue_responder_reference == ''
         assert self.dialogue_label.dialogue_opponent_pbk == "opponent"
         assert self.dialogue_label.dialogue_starter_pbk == "starter"
 
-        dialogue_label2 = DialogueLabel(dialogue_id=1, dialogue_opponent_pbk="opponent",
+        dialogue_label2 = DialogueLabel(dialogue_reference=(str(0), ''), dialogue_opponent_pbk="opponent",
                                         dialogue_starter_pbk="starter")
 
         assert dialogue_label2 == self.dialogue_label
@@ -53,7 +54,9 @@ class TestDialogueBase:
         assert hash(self.dialogue_label) == hash(self.dialogue.dialogue_label)
 
         assert self.dialogue_label.json == dict(
-            dialogue_id=str(1), dialogue_opponent_pbk="opponent",
+            dialogue_starter_reference=str(0),
+            dialogue_responder_reference='',
+            dialogue_opponent_pbk="opponent",
             dialogue_starter_pbk="starter"
         )
         assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
@@ -77,5 +80,5 @@ class TestDialogueBase:
     def test_dialogues(self):
         """Test the dialogues."""
         assert isinstance(self.dialogues.dialogues, Dict)
-        id = self.dialogues._next_dialogue_id()
+        id = self.dialogues._next_dialogue_nonce()
         assert id > 0

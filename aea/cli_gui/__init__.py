@@ -303,7 +303,7 @@ def start_agent(agent_id: str, connection_id: str):
             if element["id"] == connection_id:
                 has_named_connection = True
         if has_named_connection:
-            agent_process = _call_aea_async(["aea", "run", "--connection", connection_id], agent_dir)
+            agent_process = _call_aea_async(["aea", "run", "--connections", connection_id], agent_dir)
         else:
             return {"detail": "Trying to run agent {} with non-existent connection: {}".format(agent_id, connection_id)}, 400  # 400 Bad request
     else:

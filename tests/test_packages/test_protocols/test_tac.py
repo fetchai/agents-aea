@@ -18,6 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the messages module."""
+from unittest import mock
+
+import pytest
 
 from packages.protocols.tac.message import TACMessage
 from packages.protocols.tac.serialization import TACSerializer
@@ -53,6 +56,12 @@ def test_tac_message_instantiation():
     assert TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
                       error_code=TACMessage.ErrorCode.GENERIC_ERROR)
     assert str(TACMessage.Type.REGISTER) == 'register'
+
+    msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name='some_name')
+    with mock.patch('packages.protocols.tac.message.TACMessage.Type') as mocked_type:
+        mocked_type.REGISTER.value = "unknown"
+        assert not msg.check_consistency(), \
+            "Expect the consistency to return False"
 
 
 def test_tac_serialization():
@@ -116,6 +125,11 @@ def test_tac_serialization():
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
+
+    with pytest.raises(ValueError, match="Type not recognized."):
+        with mock.patch('packages.protocols.tac.message.TACMessage.Type') as mocked_type:
+            mocked_type.TRANSACTION_CONFIRMATION.value = "unknown"
+            TACSerializer().encode(msg)
 
     msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
                      error_code=TACMessage.ErrorCode.GENERIC_ERROR)

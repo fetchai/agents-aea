@@ -41,16 +41,17 @@ message FIPAMessage{
     }
 
     int32 message_id = 1;
-    int32 dialogue_id = 2;
-    int32 target = 3;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
     oneof performative{
-        CFP cfp = 4;
-        Propose propose = 5;
-        Accept accept = 6;
-        MatchAccept match_accept = 7;
-        Decline decline = 8;
-        Inform inform = 9;
-        AcceptWAddress accept_w_address = 10;
-        MatchAcceptWAddress match_accept_w_address = 11;
+        CFP cfp = 5;
+        Propose propose = 6;
+        Accept accept = 7;
+        MatchAccept match_accept = 8;
+        Decline decline = 9;
+        Inform inform = 10;
+        AcceptWAddress accept_w_address = 11;
+        MatchAcceptWAddress match_accept_w_address = 12;
     }
 }

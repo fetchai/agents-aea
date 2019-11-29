@@ -292,14 +292,14 @@ class TestAgentMessage:
     @pytest.mark.asyncio
     async def test_messages(self):
         """Test that at the beginning, the search request returns an empty search result."""
-        msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
+        msg = FIPAMessage((str(0), ''), 0, 0, FIPAMessage.Performative.CFP, query=None)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=DEFAULT_OEF, sender=self.public_key_1, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         with pytest.raises(AEAConnectionError):
             await OEFLocalConnection(self.public_key_1, self.node).send(envelope)
 
         self.multiplexer1.connect()
-        msg = FIPAMessage(0, 0, 0, FIPAMessage.Performative.CFP, query=None)
+        msg = FIPAMessage((str(0), str(1)), 0, 0, FIPAMessage.Performative.CFP, query=None)
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to="this_public_key_does_not_exist",
                             sender=self.public_key_1, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)

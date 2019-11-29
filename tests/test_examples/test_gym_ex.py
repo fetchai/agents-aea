@@ -20,11 +20,15 @@
 """The tests module contains the tests of the gym example."""
 
 import os
-import pytest
 import signal
 import subprocess
 import sys
 import time
+from pathlib import Path
+
+import pytest
+
+from ..conftest import CUR_PATH
 
 
 def test_gym_ex(pytestconfig):
@@ -35,15 +39,16 @@ def test_gym_ex(pytestconfig):
     # run the example
     process = subprocess.Popen([
         sys.executable,
-        '-m',
-        'examples/gym_ex/train.py'
+        str(Path(CUR_PATH, '..', 'examples/gym_ex/train.py').resolve()),
+        "--nb-steps",
+        "100"
     ],
         stdout=subprocess.PIPE,
         env=os.environ.copy())
 
-    time.sleep(30.0)
+    time.sleep(3.0)
     process.send_signal(signal.SIGINT)
-    process.wait(timeout=20)
+    process.wait(timeout=10)
 
     assert process.returncode == 0
 

@@ -22,7 +22,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Union, Optional, Set, cast
+from typing import Union, Optional, Set
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
@@ -226,5 +226,5 @@ class StubConnection(Connection):
         input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
         output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
         return StubConnection(input_file, output_file,
-                              connection_id=cast(str, connection_configuration.config.get("name")),
+                              connection_id=connection_configuration.name,
                               restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
