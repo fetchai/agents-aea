@@ -67,7 +67,6 @@ aea run
 
 <center>![Weather client logs](assets/weather-client-logs.png)</center>
 
-
 ### Delete the AEAs
 
 When you're done, go up a level and delete the AEAs.
@@ -78,6 +77,34 @@ aea delete my_weather_station
 aea delete my_weather_client
 ```
 
+## Communication
+This diagram shows the communication between the various entities as data is successfully sold by the car park agent to the client. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Search
+        participant Client_AEA
+        participant Weather_AEA
+    
+        activate Client_AEA
+        activate Search
+        activate Weather_AEA
+        
+        Weather_AEA->>Search: register_service
+        Client_AEA->>Search: search
+        Search->>Client_AEA: list_of_agents
+        Client_AEA->>Weather_AEA: call_for_proposal
+        Weather_AEA->>Client_AEA: propose
+        Client_AEA->>Weather_AEA: accept
+        Weather_AEA->>Client_AEA: match_accept
+        Client_AEA->>Weather_AEA: Inform funds transfered 
+        Weather_AEA->>Client_AEA: send_data
+        
+        deactivate Client_AEA
+        deactivate Search
+        deactivate Weather_AEA
+    
+</div>
 
 ## Demo 2: Fetch.ai ledger payment
 
@@ -240,7 +267,35 @@ aea delete my_weather_station
 aea delete my_weather_client
 ```
 
+## Communication
+This diagram shows the communication between the various entities as data is successfully sold by the weather station agent to the client. 
 
-<br/>
-
-
+<div class="mermaid">
+    sequenceDiagram
+        participant Search
+        participant Client_AEA
+        participant Weather_AEA
+        participant Blockchain
+    
+        activate Client_AEA
+        activate Search
+        activate Weather_AEA
+        activate Blockchain
+        
+        Weather_AEA->>Search: register_service
+        Client_AEA->>Search: search
+        Search-->>Client_AEA: list_of_agents
+        Client_AEA->>Weather_AEA: call_for_proposal
+        Weather_AEA->>Client_AEA: propose
+        Client_AEA->>Weather_AEA: accept
+        Weather_AEA->>Client_AEA: match_accept
+        Client_AEA->>Blockchain: transfer_funds
+        Blockchain->>Weather_AEA: transfer_complete
+        Weather_AEA->>Client_AEA: send_data
+        
+        deactivate Client_AEA
+        deactivate Search
+        deactivate Weather_AEA
+        deactivate Blockchain
+       
+</div>

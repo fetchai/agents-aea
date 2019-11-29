@@ -67,5 +67,24 @@ When you're done, you can go up a level and delete the agent.
 aea delete my_gym_agent
 ```
 
+This diagram shows the communication between the two agents and the controller. In this case, we have a Seller_Agent which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the Searching_Agent which is set up to search for sellers. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent
+        participant Environment
+    
+        activate Agent
+        activate Environment
+        Agent->>Environment: reset
+        loop learn
+            Agent->>Environment: act
+            Environment->>Agent: percept
+        end
+        Agent->>Environment: close
+        
+        deactivate Agent
+        deactivate Environment
+</div>
 
 <br/>
