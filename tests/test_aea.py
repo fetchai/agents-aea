@@ -186,7 +186,7 @@ async def test_handle():
             msg = FIPASerializer().encode(
                 FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
                             message_id=0,
-                            dialogue_id=0,
+                            dialogue_reference=(str(0), ''),
                             destination=public_key,
                             target=1))
             envelope = Envelope(

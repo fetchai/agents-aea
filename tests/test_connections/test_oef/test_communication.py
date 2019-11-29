@@ -24,7 +24,7 @@ import os
 import sys
 import time
 import unittest
-from typing import cast
+from typing import Dict, cast
 from unittest import mock
 
 import pytest
@@ -318,7 +318,7 @@ class TestFIPA:
 
     def test_cfp(self):
         """Test that a CFP can be sent correctly."""
-        cfp_bytes = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP,
+        cfp_bytes = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.CFP,
                                 query=Query([Constraint('something', ConstraintType('>', 1))]))
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
@@ -327,7 +327,7 @@ class TestFIPA:
         expected_cfp_bytes = FIPASerializer().decode(envelope.message)
         assert expected_cfp_bytes == cfp_bytes
 
-        cfp_none = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.CFP,
+        cfp_none = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.CFP,
                                query=None)
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_none)))
@@ -337,7 +337,7 @@ class TestFIPA:
 
     def test_propose(self):
         """Test that a Propose can be sent correctly."""
-        propose_empty = FIPAMessage(message_id=0, dialogue_id=0, target=0,
+        propose_empty = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0,
                                     performative=FIPAMessage.Performative.PROPOSE, proposal=[])
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
@@ -347,7 +347,7 @@ class TestFIPA:
         assert expected_propose_empty == propose_empty
 
         propose_descriptions = FIPAMessage(message_id=0,
-                                           dialogue_id=0,
+                                           dialogue_reference=(str(0), ''),
                                            target=0,
                                            performative=FIPAMessage.Performative.PROPOSE,
                                            proposal=[Description({"foo": "bar"}, DataModel("foobar", [Attribute("foo", str, True)]))])
@@ -360,7 +360,7 @@ class TestFIPA:
 
     def test_accept(self):
         """Test that an Accept can be sent correctly."""
-        accept = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.ACCEPT)
+        accept = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.ACCEPT)
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(accept)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
@@ -370,7 +370,7 @@ class TestFIPA:
     def test_match_accept(self):
         """Test that a match accept can be sent correctly."""
         # NOTE since the OEF SDK doesn't support the match accept, we have to use a fixed message id!
-        match_accept = FIPAMessage(message_id=4, dialogue_id=0, target=3,
+        match_accept = FIPAMessage(message_id=4, dialogue_reference=(str(0), ''), target=3,
                                    performative=FIPAMessage.Performative.MATCH_ACCEPT)
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
@@ -381,7 +381,7 @@ class TestFIPA:
 
     def test_decline(self):
         """Test that a Decline can be sent correctly."""
-        decline = FIPAMessage(message_id=0, dialogue_id=0, target=0, performative=FIPAMessage.Performative.DECLINE)
+        decline = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.DECLINE)
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(decline)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
@@ -391,7 +391,7 @@ class TestFIPA:
     def test_match_accept_w_address(self):
         """Test that a match accept with address can be sent correctly."""
         match_accept_w_address = FIPAMessage(message_id=0,
-                                             dialogue_id=0,
+                                             dialogue_reference=(str(0), ''),
                                              target=0,
                                              performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
                                              address='my_address')
@@ -406,7 +406,7 @@ class TestFIPA:
     def test_accept_w_address(self):
         """Test that an accept with address can be sent correctly."""
         accept_w_address = FIPAMessage(message_id=0,
-                                       dialogue_id=0,
+                                       dialogue_reference=(str(0), ''),
                                        target=0,
                                        performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
                                        address='my_address')
@@ -422,7 +422,7 @@ class TestFIPA:
         """Test that an inform can be sent correctly."""
         payload = {'foo': 'bar'}
         inform = FIPAMessage(message_id=0,
-                             dialogue_id=0,
+                             dialogue_reference=(str(0), ''),
                              target=0,
                              performative=FIPAMessage.Performative.INFORM,
                              json_data=payload)
@@ -440,8 +440,7 @@ class TestFIPA:
             msg = FIPAMessage(
                 performative=FIPAMessage.Performative.CFP,
                 message_id=0,
-                dialogue_id=0,
-                destination="publicKey",
+                dialogue_reference=(str(0), ''),
                 target=1,
                 query=None)
             with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
@@ -453,14 +452,16 @@ class TestFIPA:
             FIPASerializer().encode(msg)
         with pytest.raises(ValueError):
             cfp_msg = FIPAMessage(message_id=0,
-                                  dialogue_id=0,
+                                  dialogue_reference=(str(0), ''),
                                   target=0,
                                   performative=FIPAMessage.Performative.CFP,
                                   query=b"hello")
             cfp_msg.set("query", "hello")
             fipa_msg = fipa_pb2.FIPAMessage()
             fipa_msg.message_id = cfp_msg.get("message_id")
-            fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
+            dialogue_reference = cast(Dict[str, str], cfp_msg.get("dialogue_reference"))
+            fipa_msg.dialogue_starter_reference = dialogue_reference[0]
+            fipa_msg.dialogue_responder_reference = dialogue_reference[1]
             fipa_msg.target = cfp_msg.get("target")
             performative = fipa_pb2.FIPAMessage.CFP()
             fipa_msg.cfp.CopyFrom(performative)
@@ -470,7 +471,7 @@ class TestFIPA:
             FIPASerializer().decode(fipa_bytes)
         with pytest.raises(ValueError):
             cfp_msg = FIPAMessage(message_id=0,
-                                  dialogue_id=0,
+                                  dialogue_reference=(str(0), ''),
                                   target=0,
                                   performative=FIPAMessage.Performative.CFP,
                                   query=b"hello")
@@ -478,7 +479,9 @@ class TestFIPA:
                 mock_performative_enum.CFP.value = "unknown"
                 fipa_msg = fipa_pb2.FIPAMessage()
                 fipa_msg.message_id = cfp_msg.get("message_id")
-                fipa_msg.dialogue_id = cfp_msg.get("dialogue_id")
+                dialogue_reference = cast(Dict[str, str], cfp_msg.get("dialogue_reference"))
+                fipa_msg.dialogue_starter_reference = dialogue_reference[0]
+                fipa_msg.dialogue_responder_reference = dialogue_reference[1]
                 fipa_msg.target = cfp_msg.get("target")
                 performative = fipa_pb2.FIPAMessage.CFP()
                 fipa_msg.cfp.CopyFrom(performative)
@@ -491,9 +494,6 @@ class TestFIPA:
         """Test the oef error."""
         oef_connection = self.multiplexer1.connections[0]
         oef_channel = oef_connection.channel
-
-        with pytest.raises(ValueError):
-            oef_channel.on_propose(msg_id=0, dialogue_id=0, origin="me", target=1, b_proposals="hello")
 
         oef_channel.on_oef_error(answer_id=0, operation=OEFErrorOperation.SEARCH_AGENTS)
         envelope = self.multiplexer1.get(block=True, timeout=5.0)

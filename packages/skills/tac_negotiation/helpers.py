@@ -119,7 +119,7 @@ def generate_transaction_id(agent_pbk: Address, opponent_pbk: Address, dialogue_
     # the format is {buyer_pbk}_{seller_pbk}_{dialogue_id}_{dialogue_starter_pbk}
     assert opponent_pbk == dialogue_label.dialogue_opponent_pbk
     buyer_pbk, seller_pbk = (opponent_pbk, agent_pbk) if agent_is_seller else (agent_pbk, opponent_pbk)
-    transaction_id = "{}_{}_{}_{}".format(buyer_pbk, seller_pbk, dialogue_label.dialogue_id, dialogue_label.dialogue_starter_pbk)
+    transaction_id = "{}_{}_{}_{}_{}".format(buyer_pbk, seller_pbk, dialogue_label.dialogue_starter_reference, dialogue_label.dialogue_responder_reference, dialogue_label.dialogue_starter_pbk)
     return transaction_id
 
 
@@ -131,13 +131,12 @@ def dialogue_label_from_transaction_id(agent_pbk: Address, transaction_id: Trans
     :param transaction_id: the transaction id
     :return: a dialogue label
     """
-    buyer_pbk, seller_pbk, dialogue_id_str, dialogue_starter_pbk = transaction_id.split('_')
-    dialogue_id = int(dialogue_id_str)
+    buyer_pbk, seller_pbk, dialogue_starter_reference, dialogue_responder_reference, dialogue_starter_pbk = transaction_id.split('_')
     if agent_pbk == buyer_pbk:
         dialogue_opponent_pbk = seller_pbk
     else:
         dialogue_opponent_pbk = buyer_pbk
-    dialogue_label = DialogueLabel(dialogue_id, dialogue_opponent_pbk, dialogue_starter_pbk)
+    dialogue_label = DialogueLabel((dialogue_starter_reference, dialogue_responder_reference), dialogue_opponent_pbk, dialogue_starter_pbk)
     return dialogue_label
 
 

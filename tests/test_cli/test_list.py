@@ -59,7 +59,7 @@ Version: 0.1.0
 ------------------------------
 ------------------------------
 Name: fipa
-Description: fipa protocol description [Fill in]
+Description: The fipa protocol implements the FIPA ACL.
 Version: 0.1.0
 ------------------------------
 
