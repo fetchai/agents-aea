@@ -674,31 +674,31 @@ class DummyConstrainExpr(ConstraintExpr):
         pass
 
 
-# @pytest.mark.asyncio
-# async def test_send_oef_message(network_node):
-#     """Test the send oef message."""
-#     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-#     wallet = Wallet({'default': private_key_pem_path})
-#     public_key = wallet.public_keys['default']
-#     oef_connection = OEFConnection(public_key=public_key, oef_addr="127.0.0.1", oef_port=10000)
-#     oef_connection.loop = asyncio.get_event_loop()
-#     await oef_connection.connect()
-#
-#     msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
-#                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
-#     msg_bytes = OEFSerializer().encode(msg)
-#     envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-#     with pytest.raises(ValueError):
-#         await oef_connection.send(envelope)
-#
-#     data_model = DataModel("foobar", attributes=[])
-#     query = Query(constraints=[], model=data_model)
-#
-#     msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
-#     msg_bytes = OEFSerializer().encode(msg)
-#     envelope = Envelope(to="recipient", sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
-#     await oef_connection.send(envelope)
-#     await oef_connection.disconnect()
+@pytest.mark.asyncio
+async def test_send_oef_message(network_node):
+    """Test the send oef message."""
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({'default': private_key_pem_path})
+    public_key = wallet.public_keys['default']
+    oef_connection = OEFConnection(public_key=public_key, oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection.loop = asyncio.get_event_loop()
+    await oef_connection.connect()
+
+    msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
+                     operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
+    msg_bytes = OEFSerializer().encode(msg)
+    envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    with pytest.raises(ValueError):
+        await oef_connection.send(envelope)
+
+    data_model = DataModel("foobar", attributes=[])
+    query = Query(constraints=[], model=data_model)
+
+    msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
+    msg_bytes = OEFSerializer().encode(msg)
+    envelope = Envelope(to="recipient", sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    await oef_connection.send(envelope)
+    await oef_connection.disconnect()
 
 
 @pytest.mark.asyncio
