@@ -23,9 +23,9 @@ import base64
 import json
 import pickle
 import sys
-from typing import Any, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-from aea.protocols.base import Message, JSONSerializer
+from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 from aea.protocols.oef.models import Query
 
@@ -35,7 +35,7 @@ else:
     from ml_trade_protocol.message import MLTradeMessage
 
 
-class MLTradeSerializer(JSONSerializer):
+class MLTradeSerializer(Serializer):
     """Serialization for the ML Trade protocol."""
 
     def encode(self, msg: Message) -> bytes:
@@ -50,7 +50,9 @@ class MLTradeSerializer(JSONSerializer):
             query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
             body["query"] = query_bytes
         elif msg_type == MLTradeMessage.Performative.TERMS:
-            raise NotImplementedError
+            terms = msg.body["terms"]
+            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")
+            body["terms"] = terms_bytes
         elif msg_type == MLTradeMessage.Performative.ACCEPT:
             raise NotImplementedError
         else:
@@ -71,7 +73,9 @@ class MLTradeSerializer(JSONSerializer):
             query = pickle.loads(query_bytes)
             body["query"] = query
         elif msg_type == MLTradeMessage.Performative.TERMS:
-            raise NotImplementedError
+            terms_bytes = base64.b64decode(json_body["terms"])
+            terms = pickle.loads(terms_bytes)
+            body["terms"] = terms
         elif msg_type == MLTradeMessage.Performative.ACCEPT:
             raise NotImplementedError
         else:

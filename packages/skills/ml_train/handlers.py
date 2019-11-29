@@ -25,6 +25,8 @@ from typing import cast, TYPE_CHECKING, Optional, List
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
+from aea.protocols.default.message import DefaultMessage
+from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.skills.base import Handler
 
@@ -45,7 +47,7 @@ logger = logging.getLogger("aea.ml_train_skill")
 class TrainHandler(Handler):
     """Gym handler."""
 
-    SUPPORTED_PROTOCOL = "ml_train"
+    SUPPORTED_PROTOCOL = "default"
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -64,7 +66,9 @@ class TrainHandler(Handler):
         :param sender: the sender
         :return: None
         """
-        ml_msg = cast(MLTradeMessage, message)
+        default_message = cast(DefaultMessage, message)
+        ml_msg = MLTradeSerializer().decode(default_message.get("content"))
+        ml_msg = cast(MLTradeMessage, ml_msg)
         ml_msg_performative = MLTradeMessage.Performative(ml_msg.get("performative"))
         if ml_msg_performative == MLTradeMessage.Performative.TERMS:
             self._handle_terms(ml_msg, sender)
@@ -72,22 +76,22 @@ class TrainHandler(Handler):
     def _handle_terms(self, msg: MLTradeMessage, sender: str):
         """Handle the terms of the request."""
         logger.debug("Received terms message from {}: {}".format(sender, msg.body))
-        tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                    skill_id="weather_client_ledger",
-                                    transaction_id="transaction0",
-                                    sender=self.context.agent_public_keys[ledger_id],
-                                    counterparty=address,
-                                    is_sender_buyer=True,
-                                    currency_pbk=proposal.values['currency_pbk'],
-                                    amount=proposal.values['price'],
-                                    sender_tx_fee=strategy.max_buyer_tx_fee,
-                                    counterparty_tx_fee=proposal.values['seller_tx_fee'],
-                                    quantities_by_good_pbk={},
-                                    dialogue_label=dialogue.dialogue_label.json,
-                                    ledger_id=ledger_id)
-        self.context.decision_maker_message_queue.put_nowait(tx_msg)
-        logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
-            self.context.agent_name))
+        # tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+        #                             skill_id="weather_client_ledger",
+        #                             transaction_id="transaction0",
+        #                             sender=self.context.agent_public_keys[ledger_id],
+        #                             counterparty=address,
+        #                             is_sender_buyer=True,
+        #                             currency_pbk=proposal.values['currency_pbk'],
+        #                             amount=proposal.values['price'],
+        #                             sender_tx_fee=strategy.max_buyer_tx_fee,
+        #                             counterparty_tx_fee=proposal.values['seller_tx_fee'],
+        #                             quantities_by_good_pbk={},
+        #                             dialogue_label=dialogue.dialogue_label.json,
+        #                             ledger_id=ledger_id)
+        # self.context.decision_maker_message_queue.put_nowait(tx_msg)
+        # logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
+        #     self.context.agent_name))
 
     def teardown(self) -> None:
         """
@@ -147,12 +151,13 @@ class OEFHandler(Handler):
             opponent_pbk = agents[0]
             query = strategy.get_service_query()
             logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
-            cft_msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT,
-                                     query=query)
+            cft_msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
+            ml_msg_bytes = MLTradeSerializer().encode(cft_msg)
+            default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=ml_msg_bytes)
             self.context.outbox.put_message(to=opponent_pbk,
                                             sender=self.context.agent_public_key,
-                                            protocol_id=MLTradeMessage.protocol_id,
-                                            message=MLTradeSerializer().encode(cft_msg))
+                                            protocol_id=DefaultMessage.protocol_id,
+                                            message=DefaultSerializer().encode(default_msg))
         else:
             logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))
 

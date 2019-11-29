@@ -73,7 +73,7 @@ class Strategy(SharedClass):
         desc = Description({'dataset_id': 'fmnist'}, data_model=dm)
         return desc
 
-    def _sample(self, n: int):
+    def sample_data(self, n: int):
         """Sample N rows from data."""
         idx = np.arange(self.train_x.shape[0])
         mask = np.zeros_like(idx, dtype=bool)
@@ -85,17 +85,17 @@ class Strategy(SharedClass):
         y_sample = self.train_y[mask]
         return x_sample, y_sample
 
-    def generate_proposal_and_data(self, query: Query) -> Tuple[Description, Tuple[np.ndarray, np.ndarray]]:
+    def generate_terms(self, query: Query) -> Description:
         """
         Generate a proposal matching the query.
 
         :param query: the query
         :return: a tuple of proposal and the weather data
         """
-        batch = self._sample(self.batch_size)
+
         proposal = Description({"rows": self.batch_size,
                                 "price": self.price_per_data_batch,
                                 "seller_tx_fee": self.seller_tx_fee,
                                 "currency_pbk": self.currency_pbk,
                                 "ledger_id": self.ledger_id})
-        return proposal, batch
+        return proposal
