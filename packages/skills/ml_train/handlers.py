@@ -20,14 +20,16 @@
 """This module contains the handler for the 'gym' skill."""
 import logging
 import sys
-from typing import cast, TYPE_CHECKING, Optional, List
+from typing import cast, TYPE_CHECKING, Optional, List, Dict
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
@@ -47,7 +49,7 @@ logger = logging.getLogger("aea.ml_train_skill")
 class TrainHandler(Handler):
     """Gym handler."""
 
-    SUPPORTED_PROTOCOL = "default"
+    SUPPORTED_PROTOCOL = "ml_trade"
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -66,32 +68,40 @@ class TrainHandler(Handler):
         :param sender: the sender
         :return: None
         """
-        default_message = cast(DefaultMessage, message)
-        ml_msg = MLTradeSerializer().decode(default_message.get("content"))
-        ml_msg = cast(MLTradeMessage, ml_msg)
+        ml_msg = cast(MLTradeMessage, message)
         ml_msg_performative = MLTradeMessage.Performative(ml_msg.get("performative"))
         if ml_msg_performative == MLTradeMessage.Performative.TERMS:
             self._handle_terms(ml_msg, sender)
 
     def _handle_terms(self, msg: MLTradeMessage, sender: str):
         """Handle the terms of the request."""
-        logger.debug("Received terms message from {}: {}".format(sender, msg.body))
-        # tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-        #                             skill_id="weather_client_ledger",
-        #                             transaction_id="transaction0",
-        #                             sender=self.context.agent_public_keys[ledger_id],
-        #                             counterparty=address,
-        #                             is_sender_buyer=True,
-        #                             currency_pbk=proposal.values['currency_pbk'],
-        #                             amount=proposal.values['price'],
-        #                             sender_tx_fee=strategy.max_buyer_tx_fee,
-        #                             counterparty_tx_fee=proposal.values['seller_tx_fee'],
-        #                             quantities_by_good_pbk={},
-        #                             dialogue_label=dialogue.dialogue_label.json,
-        #                             ledger_id=ledger_id)
-        # self.context.decision_maker_message_queue.put_nowait(tx_msg)
-        # logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
-        #     self.context.agent_name))
+        terms = cast(Description, msg.body.get("terms"))
+        logger.debug("Received terms message from {}: terms={}".format(sender, terms.values))
+
+        ledger_id = terms.values["ledger_id"]
+        amount = terms.values["price"]
+        address = terms.values["address"]
+
+        tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                    skill_id=self.context._skill.config.name,
+                                    transaction_id="transaction0",
+                                    sender=self.context.agent_public_keys[ledger_id],
+                                    counterparty=address,
+                                    is_sender_buyer=True,
+                                    currency_pbk=terms.values['currency_pbk'],
+                                    amount=amount,
+                                    sender_tx_fee=self.context.strategy.max_tx_fee,
+                                    counterparty_tx_fee=terms.values["seller_tx_fee"],
+                                    # TODO the following parameter should be removed and refactored properly.
+                                    quantities_by_good_pbk={},
+                                    ledger_id=ledger_id,
+                                    # this is used to retrieve the opponent address later
+                                    dialogue_label=DialogueLabel(('',''), sender, self.context.agent_public_key).json,
+                                    # this is used to send the terms later - because the seller is stateless and must know
+                                    # what terms have been accepted
+                                    terms=terms)
+        self.context.decision_maker_message_queue.put_nowait(tx_msg)
+        logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
 
     def teardown(self) -> None:
         """
@@ -146,18 +156,16 @@ class OEFHandler(Handler):
             logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
             strategy = cast(Strategy, self.context.strategy)
             # stopping search
-            # strategy.is_searching = False
+            strategy.is_searching = False
             # pick first agent found
             opponent_pbk = agents[0]
             query = strategy.get_service_query()
             logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
             cft_msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
-            ml_msg_bytes = MLTradeSerializer().encode(cft_msg)
-            default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=ml_msg_bytes)
             self.context.outbox.put_message(to=opponent_pbk,
                                             sender=self.context.agent_public_key,
-                                            protocol_id=DefaultMessage.protocol_id,
-                                            message=DefaultSerializer().encode(default_msg))
+                                            protocol_id=MLTradeMessage.protocol_id,
+                                            message=MLTradeSerializer().encode(cft_msg))
         else:
             logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))
 
@@ -179,7 +187,26 @@ class MyTransactionHandler(Handler):
         :param sender: the sender
         :return: None
         """
-        pass
+        tx_msg_response = cast(TransactionMessage, message)
+        if tx_msg_response is not None and TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
+            logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
+            transaction_digest = tx_msg_response.body["transaction_digest"]
+            terms = tx_msg_response.body["terms"]
+            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], tx_msg_response.body["dialogue_label"]))
+            counterparty_pbk = dialogue_label.dialogue_opponent_pbk
+            ml_accept = MLTradeMessage(
+                performative=MLTradeMessage.Performative.ACCEPT,
+                tx_digest=transaction_digest,
+                terms=terms
+            )
+            self.context.outbox.put_message(to=counterparty_pbk,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=MLTradeMessage.protocol_id,
+                                            message=MLTradeSerializer().encode(ml_accept))
+            logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."
+                        .format(self.context.agent_name, counterparty_pbk[-5:], transaction_digest, terms))
+        else:
+            logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 
     def teardown(self) -> None:
         """

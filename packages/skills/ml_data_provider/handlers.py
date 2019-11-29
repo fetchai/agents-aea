@@ -42,7 +42,7 @@ logger = logging.getLogger("aea.ml_data_provider")
 class MLTradeHandler(Handler):
     """Gym handler."""
 
-    SUPPORTED_PROTOCOL = "default"
+    SUPPORTED_PROTOCOL = "ml_trade"
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -61,12 +61,12 @@ class MLTradeHandler(Handler):
         :param sender: the sender
         :return: None
         """
-        default_message = cast(DefaultMessage, message)
-        ml_msg = MLTradeSerializer().decode(default_message.get("content"))
-        ml_msg = cast(MLTradeMessage, ml_msg)
+        ml_msg = cast(MLTradeMessage, message)
         ml_msg_performative = MLTradeMessage.Performative(ml_msg.get("performative"))
         if ml_msg_performative == MLTradeMessage.Performative.CFT:
             self._handle_cft(ml_msg, sender)
+        elif ml_msg_performative == MLTradeMessage.Performative.ACCEPT:
+            self._handle_accept(ml_msg, sender)
 
     def _handle_cft(self, ml_msg, sender):
         """Handle call for terms."""
@@ -79,12 +79,25 @@ class MLTradeHandler(Handler):
                                                                          sender[-5:],
                                                                          proposal.values))
         proposal_msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=proposal)
-        ml_msg_bytes = MLTradeSerializer().encode(proposal_msg)
-        default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=ml_msg_bytes)
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
-                                        protocol_id=DefaultMessage.protocol_id,
-                                        message=DefaultSerializer().encode(default_msg))
+                                        protocol_id=MLTradeMessage.protocol_id,
+                                        message=MLTradeSerializer().encode(proposal_msg))
+
+    def _handle_accept(self, ml_msg, sender):
+        """Handle accept."""
+        logger.debug("Got an Accept from {}: {}".format(sender, ml_msg))
+        terms = ml_msg.get("terms")
+        strategy = cast(Strategy, self.context.strategy)
+
+        # logger.info("[{}]: sending sender={} a Terms message: {}".format(self.context.agent_name,
+        #                                                                  sender[-5:],
+        #                                                                  proposal.values))
+        # proposal_msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=proposal)
+        # self.context.outbox.put_message(to=sender,
+        #                                 sender=self.context.agent_public_key,
+        #                                 protocol_id=MLTradeMessage.protocol_id,
+        #                                 message=MLTradeSerializer().encode(proposal_msg))
 
     def teardown(self) -> None:
         """
@@ -92,5 +105,5 @@ class MLTradeHandler(Handler):
 
         :return: None
         """
-        logger.info("MLTrade gandler: teardown method called.")
+        logger.info("MLTrade handler: teardown method called.")
 

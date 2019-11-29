@@ -38,6 +38,7 @@ class MLTradeMessage(Message):
         CFT = 'cft'
         TERMS = 'terms'
         ACCEPT = 'accept'
+        DATA = 'data'
 
         def __str__(self):
             """Get string representation."""
@@ -71,10 +72,15 @@ class MLTradeMessage(Message):
                 assert self.is_set("terms")
                 terms = self.get("terms")
                 assert isinstance(terms, Description)
+                assert self.is_set("tx_digest")
+                tx_digest = self.get("tx_digest")
+                assert isinstance(tx_digest, str)
+                assert len(self.body) == 3
+            elif performative == MLTradeMessage.Performative.DATA:
                 assert self.is_set("data")
                 data = self.get("data")
                 assert type(data) == np.ndarray
-                assert len(self.body) == 3
+                assert len(self.body) == 2
             else:
                 raise ValueError("Performative not recognized.")
 

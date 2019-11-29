@@ -92,10 +92,11 @@ class Strategy(SharedClass):
         :param query: the query
         :return: a tuple of proposal and the weather data
         """
-
+        address = self.context.agent_addresses[self.ledger_id]
         proposal = Description({"rows": self.batch_size,
                                 "price": self.price_per_data_batch,
                                 "seller_tx_fee": self.seller_tx_fee,
                                 "currency_pbk": self.currency_pbk,
-                                "ledger_id": self.ledger_id})
+                                "ledger_id": self.ledger_id,
+                                "address": address})
         return proposal

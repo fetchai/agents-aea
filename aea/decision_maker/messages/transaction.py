@@ -177,7 +177,9 @@ class TransactionMessage(Message):
                                     quantities_by_good_pbk=cast(Dict[str, int], other.get("quantities_by_good_pbk")),
                                     transaction_digest=transaction_digest,
                                     dialogue_label=cast(Dict, other.get("dialogue_label")),
-                                    ledger_id=other.get("ledger_id"))
+                                    ledger_id=other.get("ledger_id"),
+                                    # TODO there should be a container for generic data
+                                    terms=other.get("terms"))
         return tx_msg
 
     def __eq__(self, other: object) -> bool:

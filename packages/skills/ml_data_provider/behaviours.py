@@ -42,8 +42,6 @@ SERVICE_ID = ''
 
 
 # TODO this could be implemented a TickerBehaviour. see JADE Behaviour hierarchy.
-
-
 class ServiceRegistrationBehaviour(Behaviour):
     """This class implements a behaviour."""
 

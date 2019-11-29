@@ -164,8 +164,9 @@ class AEA(Agent):
 
         try:
             msg = protocol.serializer.decode(envelope.message)
-        except Exception:
+        except Exception as e:
             error_handler.send_decoding_error(envelope)
+            logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
         if not protocol.check(msg):                         # pragma: no cover

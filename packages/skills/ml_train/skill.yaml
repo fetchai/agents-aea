@@ -15,6 +15,9 @@ handlers:
   - handler:
       class_name: TrainHandler
       args: {}
+  - handler:
+      class_name: MyTransactionHandler
+      args: {}
 tasks: []
 shared_classes:
   - shared_class:
