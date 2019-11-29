@@ -32,11 +32,11 @@ from aea.protocols.oef.models import Description
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.ml_train_predict.strategy import Strategy
+    from packages.skills.ml_train.strategy import Strategy
 else:
-    from ml_train_predict_skill.strategy import Strategy
+    from ml_train_skill.strategy import Strategy
 
-logger = logging.getLogger("aea.ml_train_predict_skill")
+logger = logging.getLogger("aea.ml_train_skill")
 
 SERVICE_ID = ''
 

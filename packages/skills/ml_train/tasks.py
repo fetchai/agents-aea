@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tasks for the 'ml_train_predict' skill."""
+"""This module contains the tasks for the 'ml_train' skill."""
 import logging
 import sys
 from typing import TYPE_CHECKING

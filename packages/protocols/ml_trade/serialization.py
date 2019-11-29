@@ -19,19 +19,62 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the TAC protocol."""
-
+import base64
+import json
+import pickle
 import sys
 from typing import Any, Dict, TYPE_CHECKING
 
 from aea.protocols.base import Message, JSONSerializer
 from aea.protocols.base import Serializer
+from aea.protocols.oef.models import Query
 
 if TYPE_CHECKING or "pytest" in sys.modules:
-    pass
+    from packages.protocols.ml_trade.message import MLTradeMessage
 else:
-    pass
+    from ml_trade_protocol.message import MLTradeMessage
 
 
 class MLTradeSerializer(JSONSerializer):
     """Serialization for the ML Trade protocol."""
-    pass
+
+    def encode(self, msg: Message) -> bytes:
+        """Encode a 'ml_trade' message into bytes."""
+        body = {}  # Dict[str, Any]
+
+        msg_type = MLTradeMessage.Performative(msg.get("performative"))
+        body["performative"] = str(msg_type.value)
+
+        if msg_type == MLTradeMessage.Performative.CFT:
+            query = msg.body["query"]  # type: Query
+            query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
+            body["query"] = query_bytes
+        elif msg_type == MLTradeMessage.Performative.TERMS:
+            raise NotImplementedError
+        elif msg_type == MLTradeMessage.Performative.ACCEPT:
+            raise NotImplementedError
+        else:
+            raise ValueError("Type not recognized.")
+
+        bytes_msg = json.dumps(body).encode("utf-8")
+        return bytes_msg
+
+    def decode(self, obj: bytes) -> Message:
+        """Decode bytes into a 'ml_trade' message."""
+        json_body = json.loads(obj.decode("utf-8"))
+        body = {}
+
+        msg_type = MLTradeMessage.Performative(json_body["performative"])
+        body["performative"] = msg_type
+        if msg_type == MLTradeMessage.Performative.CFT:
+            query_bytes = base64.b64decode(json_body["query"])
+            query = pickle.loads(query_bytes)
+            body["query"] = query
+        elif msg_type == MLTradeMessage.Performative.TERMS:
+            raise NotImplementedError
+        elif msg_type == MLTradeMessage.Performative.ACCEPT:
+            raise NotImplementedError
+        else:
+            raise ValueError("Type not recognized.")
+
+        return MLTradeMessage(performative=msg_type, body=body)

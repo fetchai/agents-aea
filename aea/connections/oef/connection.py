@@ -383,7 +383,7 @@ class OEFChannel(OEFAgent):
             self.send_fipa_message(envelope)
         elif envelope.protocol_id == "oef":
             self.send_oef_message(envelope)
-        elif envelope.protocol_id == "tac":
+        elif envelope.protocol_id in {"tac", "ml_trade"}:
             self.send_default_message(envelope)
         else:
             logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))

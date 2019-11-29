@@ -30,13 +30,16 @@ from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.ml_trade.message import MLTradeMessage
-    # from packages.skills.ml_train_predict.tasks import MLTask
+    from packages.protocols.ml_trade.serialization import MLTradeSerializer
+    from packages.skills.ml_train.strategy import Strategy
+    # from packages.skills.ml_train.tasks import MLTask
 else:
     from ml_trade_protocol.message import MLTradeMessage
-    # from gym_protocol.message import GymMessage
+    from ml_trade_protocol.serialization import MLTradeSerializer
+    from ml_train_skill.strategy import Strategy
     # from gym_skill.tasks import GymTask
 
-logger = logging.getLogger("aea.gym_skill")
+logger = logging.getLogger("aea.ml_train_skill")
 
 
 class TrainHandler(Handler):
@@ -135,30 +138,23 @@ class OEFHandler(Handler):
         :param agents: the agents returned by the search
         :return: None
         """
-        print(agents)
-        # if len(agents) > 0:
-        #     logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
-        #     strategy = cast(Strategy, self.context.strategy)
-        #     # stopping search
-        #     strategy.is_searching = False
-        #     # pick first agent found
-        #     opponent_pbk = agents[0]
-        #     dialogues = cast(Dialogues, self.context.dialogues)
-        #     dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key, is_seller=False)
-        #     query = strategy.get_service_query()
-        #     logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
-        #     cfp_msg = FIPAMessage(message_id=FIPAMessage.STARTING_MESSAGE_ID,
-        #                           dialogue_id=dialogue.dialogue_label.dialogue_id,
-        #                           performative=FIPAMessage.Performative.CFP,
-        #                           target=FIPAMessage.STARTING_TARGET,
-        #                           query=query)
-        #     dialogue.outgoing_extend(cfp_msg)
-        #     self.context.outbox.put_message(to=opponent_pbk,
-        #                                     sender=self.context.agent_public_key,
-        #                                     protocol_id=FIPAMessage.protocol_id,
-        #                                     message=FIPASerializer().encode(cfp_msg))
-        # else:
-        #     logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))
+        if len(agents) > 0:
+            logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
+            strategy = cast(Strategy, self.context.strategy)
+            # stopping search
+            # strategy.is_searching = False
+            # pick first agent found
+            opponent_pbk = agents[0]
+            query = strategy.get_service_query()
+            logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
+            cft_msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT,
+                                     query=query)
+            self.context.outbox.put_message(to=opponent_pbk,
+                                            sender=self.context.agent_public_key,
+                                            protocol_id=MLTradeMessage.protocol_id,
+                                            message=MLTradeSerializer().encode(cft_msg))
+        else:
+            logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))
 
 
 class MyTransactionHandler(Handler):
