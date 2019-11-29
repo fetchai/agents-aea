@@ -17,7 +17,6 @@ shared_classes:
   - shared_class:
       class_name: Strategy
       args:
-        price_per_prediction: 20
         price_per_data_batch: 10
         batch_size: 32
         seller_tx_fee: 0

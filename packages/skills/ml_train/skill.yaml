@@ -6,11 +6,11 @@ description: "The ml train and predict skill implements a simple skill which buy
 url: ""
 behaviours:
   - behaviour:
-      class_name: OEFBehaviour
+      class_name: MySearchBehaviour
       args: {}
 handlers:
   - handler:
-      class_name: PredictHandler
+      class_name: OEFHandler
       args: {}
   - handler:
       class_name: TrainHandler
@@ -20,12 +20,13 @@ shared_classes:
   - shared_class:
       class_name: Strategy
       args:
-        price_per_prediction: 20
-        price_per_data_batch: 10
-        seller_tx_fee: 0
-        buyer_tx_fee: 0
+        dataset_id: 'fmnist'
+        search_interval: 10
+        max_row_price: 0
+        max_tx_fee: 0
         currency_pbk: 'FET'
         ledger_id: 'fetchai'
 protocols: ['oef']
 dependencies:
   - tensorflow
+  - numpy

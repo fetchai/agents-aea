@@ -27,6 +27,7 @@ from aea.protocols.oef.models import Attribute, DataModel, Description, Query
 from aea.skills.base import SharedClass
 
 DEFAULT_PRICE_PER_DATA_BATCH = 1
+DEFAULT_DATASET_ID = None
 DEFAULT_BATCH_SIZE = 32
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_BUYER_TX_FEE = 0
@@ -41,6 +42,7 @@ class Strategy(SharedClass):
         """Initialize the strategy of the agent."""
         self.price_per_data_batch = kwargs.pop('price_per_data_batch', DEFAULT_PRICE_PER_DATA_BATCH)
         self.batch_size = kwargs.pop('batch_size', DEFAULT_BATCH_SIZE)
+        self.batch_size = kwargs.pop('dataset_id', DEFAULT_BATCH_SIZE)
         self.seller_tx_fee = kwargs.pop('seller_tx_fee', DEFAULT_SELLER_TX_FEE)
         self.buyer_tx_fee = kwargs.pop('buyer_tx_fee', DEFAULT_BUYER_TX_FEE)
         self.currency_pbk = kwargs.pop('currency_pbk', DEFAULT_CURRENCY_PBK)
@@ -67,8 +69,8 @@ class Strategy(SharedClass):
 
         :return: a description of the offered services
         """
-        dm = DataModel("ml_datamodel", [Attribute("ml_data", str, True)])
-        desc = Description({'ml_data': 'Fashion MNIST'}, data_model=dm)
+        dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
+        desc = Description({'dataset_id': 'fmnist'}, data_model=dm)
         return desc
 
     def _sample(self, n: int):
