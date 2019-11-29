@@ -24,7 +24,7 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from click.testing import CliRunner
+from ...common.click_testing import CliRunner
 from jsonschema import ValidationError
 
 import aea
@@ -49,12 +49,12 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
         assert result.exit_code == 0
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -67,6 +67,28 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         """
         s = "A protocol with name '{}' already exists. Aborting...".format(self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
+
+    @unittest.mock.patch(
+        'aea.cli.add.split_public_id',
+        return_value=['owner', 'name', 'version']
+    )
+    @unittest.mock.patch('aea.cli.add.fetch_package')
+    def test_add_protocol_from_registry_positive(
+        self, fetch_package_mock, split_public_id_mock
+    ):
+        """Test add from registry positive result."""
+        public_id = "owner/name:version"
+        obj_type = 'protocol'
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--registry", obj_type, public_id],
+            standalone_mode=False
+        )
+        assert result.exit_code == 0
+        split_public_id_mock.assert_called_once_with(public_id)
+        fetch_package_mock.assert_called_once_with(
+            obj_type, public_id=public_id, cwd='.'
+        )
 
     @classmethod
     def teardown_class(cls):
@@ -93,10 +115,10 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -135,7 +157,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         # change the serialization of the ProtocolConfig class so to make the parsing to fail.
@@ -144,7 +166,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -183,12 +205,12 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         os.chdir(cls.agent_name)
         Path("protocols", cls.protocol_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

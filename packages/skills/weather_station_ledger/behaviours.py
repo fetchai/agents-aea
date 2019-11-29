@@ -19,16 +19,19 @@
 
 """This package contains a scaffold of a behaviour."""
 
+import datetime
 import logging
-from typing import cast, TYPE_CHECKING
+import sys
+from typing import cast, Optional, TYPE_CHECKING
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.base import Behaviour
 from aea.protocols.oef.message import OEFMessage
+from aea.protocols.oef.models import Description
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_station_ledger.strategy import Strategy
 else:
     from weather_station_ledger_skill.strategy import Strategy
@@ -43,8 +46,10 @@ class ServiceRegistrationBehaviour(Behaviour):
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
+        self._services_interval = kwargs.pop('services_interval', 30)  # type: int
         super().__init__(**kwargs)
-        self._registered = False
+        self._last_update_time = datetime.datetime.now()  # type: datetime.datetime
+        self._registered_service_description = None  # type: Optional[Description]
 
     def setup(self) -> None:
         """
@@ -66,20 +71,7 @@ class ServiceRegistrationBehaviour(Behaviour):
             else:
                 logger.warning("[{}]: you have no starting balance on ethereum ledger!".format(self.context.agent_name))
 
-        if not self._registered:
-            strategy = cast(Strategy, self.context.strategy)
-            desc = strategy.get_service_description()
-            oef_msg_id = strategy.get_next_oef_msg_id()
-            msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
-                             id=oef_msg_id,
-                             service_description=desc,
-                             service_id=SERVICE_ID)
-            self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
-                                            protocol_id=OEFMessage.protocol_id,
-                                            message=OEFSerializer().encode(msg))
-            logger.info("[{}]: registering weather station services on OEF.".format(self.context.agent_name))
-            self._registered = True
+        self._register_service()
 
     def act(self) -> None:
         """
@@ -87,7 +79,9 @@ class ServiceRegistrationBehaviour(Behaviour):
 
         :return: None
         """
-        pass
+        if self._is_time_to_update_services():
+            self._unregister_service()
+            self._register_service()
 
     def teardown(self) -> None:
         """
@@ -103,17 +97,56 @@ class ServiceRegistrationBehaviour(Behaviour):
             balance = self.context.ledger_apis.token_balance(ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM)))
             logger.info("[{}]: ending balance on ethereum ledger={}.".format(self.context.agent_name, balance))
 
-        if self._registered:
-            strategy = cast(Strategy, self.context.strategy)
-            desc = strategy.get_service_description()
-            oef_msg_id = strategy.get_next_oef_msg_id()
-            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE,
-                             id=oef_msg_id,
-                             service_description=desc,
-                             service_id=SERVICE_ID)
-            self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
-                                            protocol_id=OEFMessage.protocol_id,
-                                            message=OEFSerializer().encode(msg))
-            logger.info("[{}]: unregistering weather station services from OEF.".format(self.context.agent_name))
-            self._registered = False
+        self._unregister_service()
+
+    def _register_service(self) -> None:
+        """
+        Register to the OEF Service Directory.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        desc = strategy.get_service_description()
+        self._registered_service_description = desc
+        oef_msg_id = strategy.get_next_oef_msg_id()
+        msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
+                         id=oef_msg_id,
+                         service_description=desc,
+                         service_id=SERVICE_ID)
+        self.context.outbox.put_message(to=DEFAULT_OEF,
+                                        sender=self.context.agent_public_key,
+                                        protocol_id=OEFMessage.protocol_id,
+                                        message=OEFSerializer().encode(msg))
+        logger.info("[{}]: updating weather station services on OEF.".format(self.context.agent_name))
+
+    def _unregister_service(self) -> None:
+        """
+        Unregister service from OEF Service Directory.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        oef_msg_id = strategy.get_next_oef_msg_id()
+        msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE,
+                         id=oef_msg_id,
+                         service_description=self._registered_service_description,
+                         service_id=SERVICE_ID)
+        self.context.outbox.put_message(to=DEFAULT_OEF,
+                                        sender=self.context.agent_public_key,
+                                        protocol_id=OEFMessage.protocol_id,
+                                        message=OEFSerializer().encode(msg))
+        logger.info("[{}]: unregistering weather station services from OEF.".format(self.context.agent_name))
+        self._registered_service_description = None
+
+    def _is_time_to_update_services(self) -> bool:
+        """
+        Check if the agent should update the service directory.
+
+        :return: bool indicating the action
+        """
+        now = datetime.datetime.now()
+        diff = now - self._last_update_time
+        result = diff.total_seconds() > self._services_interval
+        if result:
+            self._last_update_time = now
+        return result

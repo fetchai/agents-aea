@@ -27,7 +27,7 @@ This module contains the classes required for dialogue management.
 """
 
 from abc import abstractmethod
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 from aea.protocols.base import Message
 
@@ -35,24 +35,34 @@ from aea.protocols.base import Message
 class DialogueLabel:
     """The dialogue label class acts as an identifier for dialogues."""
 
-    def __init__(self, dialogue_id: int, dialogue_opponent_pbk: str, dialogue_starter_pbk: str) -> None:
+    def __init__(self, dialogue_reference: Tuple[str, str], dialogue_opponent_pbk: str, dialogue_starter_pbk: str) -> None:
         """
         Initialize a dialogue label.
 
-        :param dialogue_id: the id of the dialogue.
+        :param dialogue_reference: the reference of the dialogue.
         :param dialogue_opponent_pbk: the pbk of the agent with which the dialogue is kept.
         :param dialogue_starter_pbk: the pbk of the agent which started the dialogue.
 
         :return: None
         """
-        self._dialogue_id = dialogue_id
+        self._dialogue_reference = dialogue_reference
         self._dialogue_opponent_pbk = dialogue_opponent_pbk
         self._dialogue_starter_pbk = dialogue_starter_pbk
 
     @property
-    def dialogue_id(self) -> int:
-        """Get the dialogue id."""
-        return self._dialogue_id
+    def dialogue_reference(self) -> Tuple[str, str]:
+        """Get the dialogue reference."""
+        return self._dialogue_reference
+
+    @property
+    def dialogue_starter_reference(self) -> str:
+        """Get the dialogue starter reference."""
+        return self._dialogue_reference[0]
+
+    @property
+    def dialogue_responder_reference(self) -> str:
+        """Get the dialogue responder reference."""
+        return self._dialogue_reference[1]
 
     @property
     def dialogue_opponent_pbk(self) -> str:
@@ -67,19 +77,20 @@ class DialogueLabel:
     def __eq__(self, other) -> bool:
         """Check for equality between two DialogueLabel objects."""
         if type(other) == DialogueLabel:
-            return self._dialogue_id == other.dialogue_id and self._dialogue_starter_pbk == other.dialogue_starter_pbk and self._dialogue_opponent_pbk == other.dialogue_opponent_pbk
+            return self.dialogue_reference == other.dialogue_reference and self._dialogue_starter_pbk == other.dialogue_starter_pbk and self._dialogue_opponent_pbk == other.dialogue_opponent_pbk
         else:
             return False
 
     def __hash__(self) -> int:
         """Turn object into hash."""
-        return hash((self.dialogue_id, self.dialogue_opponent_pbk, self.dialogue_starter_pbk))
+        return hash((self.dialogue_reference, self.dialogue_opponent_pbk, self.dialogue_starter_pbk))
 
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         return {
-            "dialogue_id": str(self.dialogue_id),
+            "dialogue_starter_reference": self.dialogue_starter_reference,
+            "dialogue_responder_reference": self.dialogue_responder_reference,
             "dialogue_opponent_pbk": self.dialogue_opponent_pbk,
             "dialogue_starter_pbk": self.dialogue_starter_pbk
         }
@@ -88,11 +99,15 @@ class DialogueLabel:
     def from_json(cls, obj: Dict[str, str]) -> 'DialogueLabel':
         """Get dialogue label from json."""
         dialogue_label = DialogueLabel(
-            int(cast(str, obj.get('dialogue_id'))),
+            (cast(str, obj.get('dialogue_starter_reference')), cast(str, obj.get('dialogue_responder_reference'))),
             cast(str, obj.get('dialogue_opponent_pbk')),
             cast(str, obj.get('dialogue_starter_pbk'))
         )
         return dialogue_label
+
+    def __str__(self):
+        """Get the string representation."""
+        return "{}_{}_{}_{}".format(self.dialogue_starter_reference, self.dialogue_responder_reference, self.dialogue_opponent_pbk, self.dialogue_starter_pbk)
 
 
 class Dialogue:
@@ -160,7 +175,7 @@ class Dialogues:
         :return: None
         """
         self._dialogues = {}  # type: Dict[DialogueLabel, Dialogue]
-        self._dialogue_id = 0
+        self._dialogue_nonce = 0
 
     @property
     def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
@@ -202,51 +217,11 @@ class Dialogues:
         :return: the dialogue
         """
 
-    def _next_dialogue_id(self) -> int:
+    def _next_dialogue_nonce(self) -> int:
         """
-        Increment the id and returns it.
+        Increment the nonce and returns it.
 
-        :return: the next id
+        :return: the next nonce
         """
-        self._dialogue_id += 1
-        return self._dialogue_id
-
-    def create_self_initiated(self, dialogue_opponent_pbk: str, dialogue_starter_pbk: str) -> Dialogue:
-        """
-        Create a self initiated dialogue.
-
-        :param dialogue_opponent_pbk: the pbk of the agent with which the dialogue is kept.
-        :param dialogue_starter_pbk: the pbk of the agent which started the dialogue
-
-        :return: the created dialogue.
-        """
-        dialogue_label = DialogueLabel(self._next_dialogue_id(), dialogue_opponent_pbk, dialogue_starter_pbk)
-        result = self._create(dialogue_label)
-        return result
-
-    def create_opponent_initiated(self, dialogue_opponent_pbk: str, dialogue_id: int) -> Dialogue:
-        """
-        Save an opponent initiated dialogue.
-
-        :param dialogue_opponent_pbk: the pbk of the agent with which the dialogue is kept.
-        :param dialogue_id: the id of the dialogue
-
-        :return: the created dialogue
-        """
-        dialogue_starter_pbk = dialogue_opponent_pbk
-        dialogue_label = DialogueLabel(dialogue_id, dialogue_opponent_pbk, dialogue_starter_pbk)
-        result = self._create(dialogue_label)
-        return result
-
-    def _create(self, dialogue_label: DialogueLabel) -> Dialogue:
-        """
-        Create a dialogue.
-
-        :param dialogue_label: the dialogue label
-
-        :return: the created dialogue
-        """
-        assert dialogue_label not in self.dialogues
-        dialogue = Dialogue(dialogue_label)
-        self.dialogues.update({dialogue_label: dialogue})
-        return dialogue
+        self._dialogue_nonce += 1
+        return self._dialogue_nonce

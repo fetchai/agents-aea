@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 
 import jsonschema
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
@@ -44,7 +44,7 @@ class TestListProtocols:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -52,7 +52,19 @@ class TestListProtocols:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == "\n".join(["default", "fipa"]) + "\n"
+        compare_text = """------------------------------
+Name: default
+Description: The default protocol allows for any bytes message.
+Version: 0.1.0
+------------------------------
+------------------------------
+Name: fipa
+Description: The fipa protocol implements the FIPA ACL.
+Version: 0.1.0
+------------------------------
+
+"""
+        assert self.result.output == compare_text
 
     @classmethod
     def teardown_class(cls):
@@ -74,7 +86,7 @@ class TestListConnections:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -82,7 +94,14 @@ class TestListConnections:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == "\n".join(["local"]) + "\n"
+        compare_text = """------------------------------
+Name: local
+Description: The local connection provides a stub for an OEF node.
+Version: 0.1.0
+------------------------------
+
+"""
+        assert self.result.output == compare_text
 
     @classmethod
     def teardown_class(cls):
@@ -104,7 +123,7 @@ class TestListSkills:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"])
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -112,7 +131,19 @@ class TestListSkills:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == "\n".join(["dummy", "error"]) + "\n"
+        compare_text = """------------------------------
+Name: dummy
+Description: a dummy_skill for testing purposes.
+Version: 0.1.0
+------------------------------
+------------------------------
+Name: error
+Description: The error skill implements basic error handling required by all AEAs.
+Version: 0.1.0
+------------------------------
+
+"""
+        assert self.result.output == compare_text
 
     @classmethod
     def teardown_class(cls):

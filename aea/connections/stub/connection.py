@@ -18,12 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the stub connection."""
+import asyncio
 import logging
 import os
 from pathlib import Path
-from queue import Empty
-from threading import Thread
-from typing import Union
+from typing import Union, Optional, Set
 
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
@@ -46,7 +45,7 @@ class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
     def on_modified(self, event: FileModifiedEvent):
         modified_file_path = Path(event.src_path).absolute()
         if modified_file_path == self._file_to_observe:
-            self._connection.receive()
+            self._connection.read_envelopes()
 
 
 def _encode(e: Envelope, separator: bytes = SEPARATOR):
@@ -104,32 +103,38 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path]):
+    restricted_to_protocols = set()  # type: Set[str]
+
+    def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
+                 connection_id: str = "stub", restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize a stub connection.
 
         :param input_file_path: the input file for the incoming messages.
         :param output_file_path: the output file for the outgoing messages.
+        :param connection_id: the identifier of the connection object.
+        :param restricted_to_protocols: the only supported protocols for this connection.
         """
-        super().__init__()
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
 
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
         if not input_file_path.exists():
             input_file_path.touch()
 
-        self.input_file = open(input_file_path, "rb+", buffering=1)
-        self.output_file = open(output_file_path, "wb+", buffering=1)
+        self.input_file = open(input_file_path, "rb+")
+        self.output_file = open(output_file_path, "wb+")
+
+        self.in_queue = None  # type: Optional[asyncio.Queue]
 
         self._observer = Observer()
-        self._fetch_thread = Thread(target=self._fetch)
 
-        dir = os.path.dirname(input_file_path.absolute())
+        directory = os.path.dirname(input_file_path.absolute())
         self._event_handler = _ConnectionFileSystemEventHandler(self, input_file_path)
-        self._observer.schedule(self._event_handler, dir)
+        self._observer.schedule(self._event_handler, directory)
 
-    def receive(self) -> None:
-        """Receive new messages, if any."""
+    def read_envelopes(self) -> None:
+        """Receive new envelopes, if any."""
         line = self.input_file.readline()
         logger.debug("read line: {!r}".format(line))
         while len(line) > 0:
@@ -143,56 +148,62 @@ class StubConnection(Connection):
         """
         try:
             envelope = _decode(line, separator=SEPARATOR)
-            self.in_queue.put(envelope)
+            assert self.in_queue is not None, "Input queue not initialized."
+            assert self._loop is not None, "Loop not initialized."
+            asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self._loop)
         except ValueError:
             logger.error("Bad formatted line: {}".format(line))
+        except Exception as e:
+            logger.error("Error when processing a line. Message: {}".format(str(e)))
 
-    def connect(self) -> None:
-        """
-        Connect to the channel.
+    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+        """Receive an envelope."""
+        try:
+            assert self.in_queue is not None
+            envelope = await self.in_queue.get()
+            return envelope
+        except Exception as e:
+            logger.exception(e)
+            return None
 
-        In this type of connection there's no channel to connect.
-        """
-        if not self.connection_status.is_connected:
-            self.connection_status.is_connected = True
-            try:
-                self._observer.start()
-                self._fetch_thread.start()
-            except Exception as e:      # pragma: no cover
-                self.connection_status.is_connected = False
-                raise e
+    async def connect(self) -> None:
+        """Set up the connection."""
+        if self.connection_status.is_connected:
+            return
 
-            self.receive()
+        try:
+            # initialize the queue here because the queue
+            # must be initialized with the right event loop
+            # which is known only at connection time.
+            self.in_queue = asyncio.Queue()
+            self._observer.start()
+        except Exception as e:      # pragma: no cover
+            raise e
+        finally:
+            self.connection_status.is_connected = False
 
-    def disconnect(self) -> None:
+        self.connection_status.is_connected = True
+
+        # do a first processing of messages.
+        self.read_envelopes()
+
+    async def disconnect(self) -> None:
         """
         Disconnect from the channel.
 
         In this type of connection there's no channel to disconnect.
         """
-        if self.connection_status.is_connected:
-            self.connection_status.is_connected = False
-            self._fetch_thread.join()
-            try:
-                self._observer.stop()
-            except Exception as e:      # pragma: no cover
-                self.connection_status.is_connected = True
-                raise e
+        if not self.connection_status.is_connected:
+            return
 
-    def _fetch(self) -> None:
-        """
-        Fetch the messages from the outqueue and send them.
+        assert self.in_queue is not None, "Input queue not initialized."
+        self._observer.stop()
+        self._observer.join()
+        self.in_queue.put_nowait(None)
 
-        :return: None
-        """
-        while self.connection_status.is_connected:
-            try:
-                msg = self.out_queue.get(block=True, timeout=1.0)
-                self.send(msg)
-            except Empty:
-                pass
+        self.connection_status.is_connected = False
 
-    def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope):
         """
         Send messages.
 
@@ -214,4 +225,6 @@ class StubConnection(Connection):
         """
         input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
         output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
-        return StubConnection(input_file, output_file)
+        return StubConnection(input_file, output_file,
+                              connection_id=connection_configuration.name,
+                              restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

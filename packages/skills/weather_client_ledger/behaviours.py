@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a behaviour."""
 import logging
+import sys
 from typing import cast, TYPE_CHECKING
 
 from aea.crypto.ethereum import ETHEREUM
@@ -27,7 +28,7 @@ from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from aea.skills.base import Behaviour
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_client_ledger.strategy import Strategy
 else:
     from weather_client_ledger_skill.strategy import Strategy

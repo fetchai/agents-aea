@@ -25,7 +25,7 @@ import logging.config
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, cast
+from typing import Dict, List, cast, Optional
 
 import click
 import jsonschema  # type: ignore
@@ -140,5 +140,77 @@ def _load_env_file(env_file: str):
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
 
+def format_items(items):
+    """Format list of items (protocols/connections) to a string for CLI output."""
+    list_str = ''
+    for item in items:
+        list_str += (
+            '{line}\n'
+            'Name: {name}\n'
+            'Description: {description}\n'
+            'Version: {version}\n'
+            '{line}\n'.format(
+                name=item['name'],
+                description=item['description'],
+                version=item['version'],
+                line='-' * 30
+            ))
+    return list_str
+
+
+def format_skills(items):
+    """Format list of skills to a string for CLI output."""
+    list_str = ''
+    for item in items:
+        list_str += (
+            '{line}\n'
+            'Name: {name}\n'
+            'Description: {description}\n'
+            'Protocols: {protocols}\n'
+            'Version: {version}\n'
+            '{line}\n'.format(
+                name=item['name'],
+                description=item['description'],
+                version=item['version'],
+                protocols=''.join(
+                    name + ' | ' for name in item['protocol_names']
+                ),
+                line='-' * 30
+            ))
+    return list_str
+
+
+def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
+    """Return description of a protocol, skill or connection."""
+    config = loader.load(open(str(config_filepath)))
+    assert config.name == name
+    return {"name": config.name, "description": config.description, "version": config.version}
+
+
 class AEAConfigException(Exception):
     """Exception about AEA configuration."""
+
+
+class ConnectionsOption(click.Option):
+    """Click option for the --connections option in 'aea run'."""
+
+    def type_cast_value(self, ctx, value) -> Optional[List[str]]:
+        """
+        Parse the list of string passed through command line.
+
+        E.g. from 'stub,local' to ['stub', 'local'].
+
+        :param ctx: the click context
+        :param value: the list of connection names, as a string.
+        :return:
+        """
+        if value is None:
+            return None
+        try:
+            def arg_strip(s):
+                return s.strip(" '\"")
+
+            connection_names = set(arg_strip(s) for s in value.split(",") if arg_strip(s) != "")
+            return list(connection_names)
+        except Exception:
+            raise click.BadParameter(value)

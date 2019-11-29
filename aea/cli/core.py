@@ -41,11 +41,12 @@ from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, PrivateKeyPathConfig
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE
+from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, \
+    _validate_private_key_path
 
 DEFAULT_CONNECTION = "oef"
 DEFAULT_SKILL = "error"
@@ -67,27 +68,28 @@ def create(click_context, agent_name):
     """Create an agent."""
     ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
-    logger.info("Creating agent's directory in '{}'".format(path))
+    logger.info("Initializing AEA project '{}'".format(agent_name))
+    logger.info("Creating project directory '/{}'".format(agent_name))
 
     # create the agent's directory
     try:
         path.mkdir(exist_ok=False)
 
         # create a config file inside it
+        logger.info("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
         agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", registry_path=DEFAULT_REGISTRY_PATH, description="")
         agent_config.default_connection = DEFAULT_CONNECTION
         ctx.agent_loader.dump(agent_config, config_file)
-        logger.info("Created config file {}".format(DEFAULT_AEA_CONFIG_FILE))
 
         # next commands must be done from the agent's directory -> overwrite ctx.cwd
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
 
-        logger.info("Adding default connection '{}' to the agent...".format(DEFAULT_CONNECTION))
+        logger.info("Default connections:")
         click_context.invoke(connection, connection_name=DEFAULT_CONNECTION)
 
-        logger.info("Adding default skill '{}' to the agent...".format(DEFAULT_SKILL))
+        logger.info("Default skills:")
         click_context.invoke(skill, skill_name=DEFAULT_SKILL)
 
     except OSError:
@@ -123,7 +125,7 @@ def delete(ctx: Context, agent_name):
     finally:
         os.chdir(cwd)
 
-    logger.info("Deleting agent's directory in '{}'...".format(path))
+    logger.info("Deleting agent project directory '/{}'...".format(path))
 
     # delete the agent's directory
     try:
@@ -144,11 +146,12 @@ def freeze(ctx: Context):
 
 @cli.command()
 @pass_ctx
-def gui(ctx: Context):
+@click.option('-p', '--port', default=8080)
+def gui(ctx: Context, port):
     """Run the CLI GUI."""
     import aea.cli_gui  # pragma: no cover
     logger.info("Running the GUI.....(press Ctrl+C to exit)")   # pragma: no cover
-    aea.cli_gui.run()   # pragma: no cover
+    aea.cli_gui.run(port)   # pragma: no cover
 
 
 @cli.command()
@@ -166,6 +169,26 @@ def generate_key(ctx: Context, type_):
         FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
     if type_ == EthereumCrypto.identifier or type_ == "all":
         EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
+
+
+@cli.command()
+@click.argument("type_", metavar="TYPE", type=click.Choice([
+    DefaultCrypto.identifier,
+    FetchAICrypto.identifier,
+    EthereumCrypto.identifier
+]), required=True)
+@click.argument("file", metavar="FILE", type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
+                required=True)
+@pass_ctx
+def add_key(ctx: Context, type_, file):
+    """Add a private key to the wallet."""
+    _try_to_load_agent_config(ctx)
+    _validate_private_key_path(file, type_)
+    try:
+        ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
+    except ValueError as e:     # pragma: no cover
+        logger.error(str(e))    # pragma: no cover
+    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
 cli.add_command(add)

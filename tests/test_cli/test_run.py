@@ -30,10 +30,11 @@ from pathlib import Path
 
 import pytest
 import yaml
-from click.testing import CliRunner
+from ..common.click_testing import CliRunner
 
 import aea.cli.common
 from aea.cli import cli
+
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE
 from tests.conftest import CLI_LOG_OPTION, CUR_PATH
 
@@ -61,7 +62,479 @@ def test_run(pytestconfig):
         '-m',
         'aea.cli',
         "run",
-        "--connection",
+        "--connections",
+        "local"
+    ],
+        stdout=subprocess.PIPE,
+        env=os.environ.copy())
+
+    time.sleep(10.0)
+    process.send_signal(signal.SIGINT)
+    process.wait(timeout=20)
+
+    assert process.returncode == 0
+
+    os.chdir(cwd)
+
+    poll = process.poll()
+    if poll is None:
+        process.terminate()
+        process.wait(2)
+
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+@pytest.mark.parametrize(argnames=["connection_names"], argvalues=[
+    ["local,stub"],
+    ["'local, stub'"],
+    ["local,,stub,"],
+])
+def test_run_multiple_connections(pytestconfig, connection_names):
+    """Test that the command 'aea run' works as expected when specifying multiple connections."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "stub"])
+    assert result.exit_code == 0
+
+    process = subprocess.Popen([
+        sys.executable,
+        '-m',
+        'aea.cli',
+        "run",
+        "--connections",
+        connection_names,
+    ],
+        stdout=subprocess.PIPE,
+        env=os.environ.copy())
+
+    time.sleep(5.0)
+    process.send_signal(signal.SIGINT)
+    process.wait(timeout=5)
+
+    assert process.returncode == 0
+
+    os.chdir(cwd)
+
+    poll = process.poll()
+    if poll is None:
+        process.terminate()
+        process.wait(2)
+
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+def test_run_unknown_private_key(pytestconfig):
+    """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    # Load the agent yaml file and manually insert the things we need
+    file = open("aea-config.yaml", mode='r')
+
+    # read all lines at once
+    whole_file = file.read()
+
+    find_text = "private_key_paths: []"
+    replace_text = """private_key_paths:
+- private_key_path:
+    ledger: fetchai-not
+    path: fet_private_key.txt"""
+
+    whole_file = whole_file.replace(find_text, replace_text)
+
+    # close the file
+    file.close()
+
+    with open("aea-config.yaml", 'w') as f:
+        f.write(whole_file)
+
+    # Private key needs to exist otherwise doesn't get to code path we are interested in testing
+    with open("fet_private_key.txt", 'w') as f:
+        f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
+
+    error_msg = ""
+    try:
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+    except Exception as e:
+        error_msg = str(e)
+
+    assert error_msg == "Unsupported identifier in private key paths."
+
+    os.chdir(cwd)
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+def test_run_unknown_ledger(pytestconfig):
+    """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    # Load the agent yaml file and manually insert the things we need
+    file = open("aea-config.yaml", mode='r')
+
+    # read all lines at once
+    whole_file = file.read()
+
+    # add in the ledger address
+    find_text = "ledger_apis: []"
+    replace_text = """ledger_apis:
+        - ledger_api:
+            addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+            ledger: ethereum-not
+            port: 3"""
+
+    whole_file = whole_file.replace(find_text, replace_text)
+
+    # close the file
+    file.close()
+
+    with open("aea-config.yaml", 'w') as f:
+        f.write(whole_file)
+
+    error_msg = ""
+    try:
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+    except Exception as e:
+        error_msg = str(e)
+
+    assert error_msg == "Unsupported identifier in ledger apis."
+
+    os.chdir(cwd)
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+def test_run_default_private_key_config(pytestconfig):
+    """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    # Load the agent yaml file and manually insert the things we need
+    file = open("aea-config.yaml", mode='r')
+
+    # read all lines at once
+    whole_file = file.read()
+
+    find_text = "private_key_paths: []"
+    replace_text = """private_key_paths:
+- private_key_path:
+    ledger: default
+    path: default_private_key_not.txt"""
+
+    whole_file = whole_file.replace(find_text, replace_text)
+
+    # close the file
+    file.close()
+
+    with open("aea-config.yaml", 'w') as f:
+        f.write(whole_file)
+
+    error_msg = ""
+    try:
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+    except SystemExit as e:
+        error_msg = str(e)
+
+    assert error_msg == "1"
+
+    os.chdir(cwd)
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+def test_run_fet_private_key_config(pytestconfig):
+    """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    # Load the agent yaml file and manually insert the things we need
+    file = open("aea-config.yaml", mode='r')
+
+    # read all lines at once
+    whole_file = file.read()
+
+    find_text = "private_key_paths: []"
+    replace_text = """private_key_paths:
+- private_key_path:
+    ledger: fetchai
+    path: default_private_key_not.txt"""
+
+    whole_file = whole_file.replace(find_text, replace_text)
+
+    # close the file
+    file.close()
+
+    with open("aea-config.yaml", 'w') as f:
+        f.write(whole_file)
+
+    error_msg = ""
+    try:
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+    except SystemExit as e:
+        error_msg = str(e)
+
+    assert error_msg == "1"
+
+    os.chdir(cwd)
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+def test_run_ethereum_private_key_config(pytestconfig):
+    """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    # Load the agent yaml file and manually insert the things we need
+    file = open("aea-config.yaml", mode='r')
+
+    # read all lines at once
+    whole_file = file.read()
+
+    find_text = "private_key_paths: []"
+    replace_text = """private_key_paths:
+- private_key_path:
+    ledger: ethereum
+    path: default_private_key_not.txt"""
+
+    whole_file = whole_file.replace(find_text, replace_text)
+
+    # close the file
+    file.close()
+
+    with open("aea-config.yaml", 'w') as f:
+        f.write(whole_file)
+
+    error_msg = ""
+    try:
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+    except SystemExit as e:
+        error_msg = str(e)
+
+    assert error_msg == "1"
+
+    os.chdir(cwd)
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+def test_run_ledger_apis(pytestconfig):
+    """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    # Load the agent yaml file and manually insert the things we need
+    file = open("aea-config.yaml", mode='r')
+
+    # read all lines at once
+    whole_file = file.read()
+
+    # add in the ledger address
+    find_text = "ledger_apis: []"
+    replace_text = """ledger_apis:
+        - ledger_api:
+            addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+            ledger: ethereum
+            port: 3
+        - ledger_api:
+            addr: alpha.fetch-ai.com
+            ledger: fetchai
+            port: 80"""
+
+    whole_file = whole_file.replace(find_text, replace_text)
+
+    # close the file
+    file.close()
+
+    with open("aea-config.yaml", 'w') as f:
+        f.write(whole_file)
+
+    process = subprocess.Popen([
+        sys.executable,
+        '-m',
+        'aea.cli',
+        "run",
+        "--connections",
+        "local"
+    ],
+        stdout=subprocess.PIPE,
+        env=os.environ.copy())
+
+    time.sleep(10.0)
+    process.send_signal(signal.SIGINT)
+    process.wait(timeout=20)
+
+    assert process.returncode == 0
+
+    os.chdir(cwd)
+
+    poll = process.poll()
+    if poll is None:
+        process.terminate()
+        process.wait(2)
+
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+def test_run_fet_ledger_apis(pytestconfig):
+    """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    assert result.exit_code == 0
+
+    # Load the agent yaml file and manually insert the things we need
+    file = open("aea-config.yaml", mode='r')
+
+    # read all lines at once
+    whole_file = file.read()
+
+    # add in the ledger address
+
+    find_text = "ledger_apis: []"
+    replace_text = """ledger_apis:
+    - ledger_api:
+        addr: alpha.fetch-ai.com
+        ledger: fetchai
+        port: 80"""
+
+    whole_file = whole_file.replace(find_text, replace_text)
+
+    # close the file
+    file.close()
+
+    with open("aea-config.yaml", 'w') as f:
+        f.write(whole_file)
+
+    process = subprocess.Popen([
+        sys.executable,
+        '-m',
+        'aea.cli',
+        "run",
+        "--connections",
         "local"
     ],
         stdout=subprocess.PIPE,
@@ -109,7 +582,7 @@ def test_run_with_install_deps(pytestconfig):
         'aea.cli',
         "run",
         "--install-deps",
-        "--connection",
+        "--connections",
         "local"
     ],
         stdout=subprocess.PIPE,
@@ -160,7 +633,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
         'aea.cli',
         "run",
         "--install-deps",
-        "--connection",
+        "--connections",
         "local"
     ],
         stdout=subprocess.PIPE,
@@ -195,12 +668,12 @@ class TestRunFailsWhenExceptionOccursInSkill:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         os.chdir(Path(cls.t, cls.agent_name))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"], standalone_mode=False)
         assert result.exit_code == 0
 
         shutil.copytree(Path(CUR_PATH, "data", "exception_skill"), Path(cls.t, cls.agent_name, "skills", "exception"))
@@ -210,7 +683,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         yaml.safe_dump(config, open(config_path, "w"))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", "local"])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -241,7 +714,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).unlink()
 
@@ -285,7 +758,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).write_text("")
@@ -318,7 +791,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
 
 class TestRunFailsWhenConnectionNotDeclared:
-    """Test that the command 'aea run --connection' fails when the connection is not declared."""
+    """Test that the command 'aea run --connections' fails when the connection is not declared."""
 
     @classmethod
     def setup_class(cls):
@@ -331,13 +804,13 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
 
         os.chdir(Path(cls.t, cls.agent_name))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -362,7 +835,7 @@ class TestRunFailsWhenConnectionNotDeclared:
 
 
 class TestRunFailsWhenConnectionConfigFileNotFound:
-    """Test that the command 'aea run --connection' fails when the connection config file is not found."""
+    """Test that the command 'aea run --connections' fails when the connection config file is not found."""
 
     @classmethod
     def setup_class(cls):
@@ -375,15 +848,15 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "connection", cls.connection_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "connection", cls.connection_name], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, DEFAULT_CONNECTION_CONFIG_FILE).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -408,7 +881,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
 
 
 class TestRunFailsWhenConnectionNotComplete:
-    """Test that the command 'aea run --connection' fails when the connection.py module is missing."""
+    """Test that the command 'aea run --connections' fails when the connection.py module is missing."""
 
     @classmethod
     def setup_class(cls):
@@ -421,15 +894,15 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -454,7 +927,7 @@ class TestRunFailsWhenConnectionNotComplete:
 
 
 class TestRunFailsWhenConnectionClassNotPresent:
-    """Test that the command 'aea run --connection' fails when the connection class is missing in connection.py."""
+    """Test that the command 'aea run --connections' fails when the connection class is missing in connection.py."""
 
     @classmethod
     def setup_class(cls):
@@ -467,15 +940,15 @@ class TestRunFailsWhenConnectionClassNotPresent:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").write_text("")
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -513,14 +986,14 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
         Path(cls.t, cls.agent_name, "protocols", "default", "protocol.yaml").unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -558,14 +1031,14 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name])
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
         Path(cls.t, cls.agent_name, "protocols", "default", "__init__.py").unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connection", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
         except SystemExit as e:
             cls.exit_code = e.code
 

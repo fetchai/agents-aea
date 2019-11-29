@@ -110,3 +110,18 @@ Release History
 - Updates oef connection to re-establish dropped connections
 - Updates the car park agent
 - Multiple additional minor fixes and changes
+
+0.1.14 (2019-11-29)
+-------------------
+
+- Removes dependency on OEF SDK's FIPA API
+- Replaces dialogue id with dialogue references
+- Improves CLI logging and list/search command output
+- Introduces multiplexer and removes mailbox
+- Adds much improved tac skills
+- Adds support for CLI integration with registry
+- Increases test coverage to 99%
+- Introduces integration tests for skills and examples
+- Adds support to run multiple connections from CLI
+- Updates the docs and adds uml diagrams
+- Multiple additional minor fixes and changes

@@ -19,8 +19,14 @@ pytest-cov = "*"
 mypy = "*"
 mkdocs = "*"
 mkdocs-material = "*"
+bs4 = "*"
 pymdown-extensions = "*"
 pygments = "*"
+pytest-asyncio = "*"
+gym = "*"
+numpy = "*"
+scikit-image = "*"
+mkdocs-mermaid-plugin = {editable = true,git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
 
 [packages]
 cryptography = "*"

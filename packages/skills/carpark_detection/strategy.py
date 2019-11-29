@@ -21,13 +21,14 @@
 
 import logging
 import os
+import sys
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING, cast
 import time
 
 from aea.protocols.oef.models import Description, Query
 from aea.skills.base import SharedClass
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.carpark_detection.detection_database import DetectionDatabase
     from packages.skills.carpark_detection.carpark_detection_data_model import CarParkDataModel
 

@@ -44,6 +44,23 @@ class Model{
         })
     }
 
+    searchItems(itemType, searchTerm){
+        var ajax_options = {
+            type: 'GET',
+            url: 'api/' + itemType + "/" + searchTerm,
+            accepts: 'application/json',
+            dataType: 'json'
+        };
+        var self = this;
+        $.ajax(ajax_options)
+        .done(function(data) {
+            self.$event_pump.trigger('model_searchReadSuccess', [data]);
+        })
+        .fail(function(xhr, textStatus, errorThrown) {
+            self.$event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+        })
+    }
+
     readOEFStatus() {
         var ajax_options = {
             type: 'GET',
@@ -191,9 +208,7 @@ class Model{
             type: 'POST',
             url: 'api/oef',
             accepts: 'application/json',
-            contentType: 'application/json',
-            dataType: 'json',
-            data: JSON.stringify("Test dummy")
+            contentType: 'plain/text'
         };
         var self = this;
         $.ajax(ajax_options)
@@ -286,6 +301,10 @@ class View{
         $('#agentError').html(error);
         $('#agentError').scrollTop($('#agentError')[0].scrollHeight);
     }
+    setSearchType(itemType){
+        $('#searchItemTypeTable').html(itemType);
+        $('#searchItemTypeSelected').html(itemType);
+    }
 
     setCreateId(tag, id) {
         $('#'+tag+'CreateId').val(id);
@@ -308,7 +327,7 @@ class View{
         // did we get a people array?
         if (tableName) {
             for (let i=0, l=data.length; i < l; i++) {
-                rows += `<tr><td class="id">${data[i].id}</td><td class="description">${data[i].description}</td></tr>`;
+                rows += `<tr><td class="id interactive">${data[i].id}</td><td class="description interactive">${data[i].description}</td></tr>`;
             }
             $('.' + tableName + ' table > tbody').append(rows);
         }
@@ -426,18 +445,7 @@ class Controller{
                 var tableBody = $(e.target).closest("."+ e.data.el["combined"] +"registeredTable");
                 self.clearTable(tableBody);
 
-                // make this row (and the cells in this row) grey
-                $(this).children().each(function(i) {
-                    var test = $(this);
-                    var text = test.text;
-                    var val = test.value;
-                    $(this).css("background-color", "gray");
-                })
-
-
-
-
-
+                $(this).addClass("aea_selected")
                 if (e.data.el["combined"] == "localAgents"){
                     self.refreshAgentData(id)
                 }
@@ -473,7 +481,7 @@ class Controller{
             this.$event_pump.on('model_'+ combineName + 'DeleteSuccess', {el: element}, function(e, data) {
                 self.model.readData(e.data.el);
 
-                self.refreshAgentData(data)
+                self.refreshAgentData("NONE")
                 self.handleButtonStates()
 
             });
@@ -508,7 +516,11 @@ class Controller{
             self.handleButtonStates()
         });
 
-
+        this.$event_pump.on('model_searchReadSuccess', function(e, data) {
+            self.view.setSearchType(data[1])
+            self.view.build_table(data[0], 'searchItemsTable');
+            self.handleButtonStates()
+        });
 
 
         $('#startOEFNode').click({el: element}, function(e) {
@@ -549,6 +561,64 @@ class Controller{
 
             e.preventDefault();
         });
+        $('#searchInputButton').click({el: element}, function(e) {
+            e.preventDefault();
+            var searchTerm = $('#searchInput').val()
+            if (self.validateId(searchTerm)){
+                var itemType = $("input[name='itemType']:checked").attr('id')
+                self.model.searchItems(itemType, searchTerm)
+            }
+            else{
+                alert('Error: Attempting to stop search for: ' + searchTerm);
+            }
+
+            e.preventDefault();
+        });
+
+        $('.searchItemsTable table > tbody ').on('click', 'tr', {el: element}, function(e) {
+
+            var $target = $(e.target),
+                id,
+                description;
+
+            id = $target
+                .parent()
+                .find('td.id')
+                .text();
+
+
+            self.view.setSelectedId("searchItemsTable", id);
+
+            // Select the appropriate row
+            var tableBody = $(e.target).closest(".searchItemsTableRegisteredTable");
+            self.clearTable(tableBody);
+
+            $(this).addClass("aea_selected")
+
+            self.handleButtonStates()
+        });
+
+
+        $('#searchItemsAdd').click({el: element}, function(e) {
+            var agentId = $('#localAgentsSelectionId').html();
+            var itemId = $('#searchItemsTableSelectionId').html();
+            // It doesn't matter too much what the combined name is as long as it exists
+            var itemType = {"type": $("#searchItemTypeSelected").html(), "combined": "localSkills"}
+
+            e.preventDefault();
+
+            if (self.validateId(agentId) && self.validateId(itemId) ) {
+                self.model.addItem(itemType, agentId, itemId)
+                self.view.setSelectedId("searchItemsTable", "NONE")
+                var tableBody = $(e.target).closest(".searchItemsTableRegisteredTable");
+                self.clearTable(tableBody);
+            } else {
+                alert('Error: Problem with one of the selected ids (either agent or ' + itemType);
+            }
+            e.preventDefault();
+        });
+
+
 
         this.$event_pump.on('model_error', {el: element}, function(e, xhr, textStatus, errorThrown) {
             var error_msg = textStatus + ': ' + errorThrown + ' - ' + xhr.responseJSON.detail;
@@ -565,6 +635,9 @@ class Controller{
         $('#localAgentsSelectionId').on('input', function(e){
             self.handleButtonStates()
         });
+        $('#searchInput').on('input', function(e){
+            self.handleButtonStates()
+        });
 
         for (var j = 0; j < elements.length; j++) {
             $('#'+ elements[j]["combined"] + 'ScaffoldId').on('input', function(e){
@@ -578,9 +651,7 @@ class Controller{
 
     clearTable (tableBody) {
        tableBody.children().each(function(i) {
-            $(this).children().each(function(i) {
-                $(this).css("background-color", "white");
-            })
+            $(this).removeClass("aea_selected")
         });
     }
 
@@ -621,6 +692,20 @@ class Controller{
                 }
             }
         }
+        // Search buttons
+        var searchTerm = $('#searchInput').val();
+        $('#searchInputButton').prop('disabled', !this.validateId(searchTerm));
+        var searchItem = $('#searchItemsTableSelectionId').html();
+        var isDisabled =  !this.validateId(searchItem) || !this.validateId(agentSelectionId);
+        $('#searchItemsAdd').prop('disabled', isDisabled);
+        if (isDisabled){
+            $('#searchItemsAdd').html("<< Add " + $("#searchItemTypeSelected").html())
+        }
+        else{
+            $('#searchItemsAdd').html("<< Add " + searchItem + " "  + $("#searchItemTypeSelected").html() + " to " + agentSelectionId + " agent")
+//            $('#searchItemsAdd').html("<< Add " + itemSelectionId + " " + elements[j]["type"] + " to " + agentSelectionId + " agent")
+        }
+
         if (agentSelectionId != "NONE"){
             $('.localItemHeading').html(agentSelectionId);
         }

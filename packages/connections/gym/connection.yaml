@@ -5,7 +5,7 @@ license: Apache 2.0
 description: "The gym connection wraps an OpenAI gym."
 url: ""
 class_name: GymConnection
-supported_protocols: ["gym"]
+restricted_to_protocols: ["gym"]
 config:
   env: '' # put here the dotted path to your Gym Environment class.
 dependencies:

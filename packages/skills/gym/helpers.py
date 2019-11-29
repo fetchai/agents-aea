@@ -22,13 +22,14 @@
 from abc import ABC, abstractmethod
 import gym
 from queue import Queue
+import sys
 from typing import Any, Tuple, cast, TYPE_CHECKING
 
 from aea.mail.base import Envelope
 from aea.skills.base import SkillContext
 from aea.protocols.base import Message
 
-if TYPE_CHECKING:
+if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.gym.message import GymMessage
     from packages.protocols.gym.serialization import GymSerializer
 else:
@@ -43,7 +44,7 @@ Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
 
 DEFAULT_GYM = 'gym'
-NB_STEPS = 4000
+NB_STEPS = 500
 
 
 class ProxyEnv(gym.Env):
