@@ -25,7 +25,7 @@ import logging.config
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, cast
+from typing import Dict, List, cast, Optional
 
 import click
 import jsonschema  # type: ignore
@@ -189,3 +189,28 @@ def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
 
 class AEAConfigException(Exception):
     """Exception about AEA configuration."""
+
+
+class ConnectionsOption(click.Option):
+    """Click option for the --connections option in 'aea run'."""
+
+    def type_cast_value(self, ctx, value) -> Optional[List[str]]:
+        """
+        Parse the list of string passed through command line.
+
+        E.g. from 'stub,local' to ['stub', 'local'].
+
+        :param ctx: the click context
+        :param value: the list of connection names, as a string.
+        :return:
+        """
+        if value is None:
+            return None
+        try:
+            def arg_strip(s):
+                return s.strip(" '\"")
+
+            connection_names = set(arg_strip(s) for s in value.split(",") if arg_strip(s) != "")
+            return list(connection_names)
+        except Exception:
+            raise click.BadParameter(value)

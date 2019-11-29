@@ -95,7 +95,7 @@ class TestGymSkill:
             '-m',
             'aea.cli',
             "run",
-            "--connection",
+            "--connections",
             "gym"
         ],
             stdout=subprocess.PIPE,

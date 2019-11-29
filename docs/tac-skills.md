@@ -34,7 +34,7 @@ aea add skill tac_control
 ```
 
 ### Update the game parameters
-You can change the game parameters in `skill.yaml` under `Parameters`.
+You can change the game parameters in `tac_controller/skills/tac_control/skill.yaml` under `Parameters`.
 
 You must set the start time to a point in the future `start_time: Nov 10 2019  10:40AM`.
 
@@ -69,7 +69,10 @@ aea add skill tac_negotiation
 aea run
 ```
 
-## Registration communication
+!!!	Note
+	Currently, the agents cannot settle their trades. Updates coming soon!
+	
+### Registration communication
 This diagram shows the communication between the various entities during the registration phase. 
 
 <div class="mermaid">
@@ -100,7 +103,7 @@ This diagram shows the communication between the various entities during the reg
         deactivate Controller
 </div>
 
-## Transaction communication
+### Transaction communication
 This diagram shows the communication between the two agents and the controller. In this case, we have a Seller_Agent which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the Searching_Agent which is set up to search for sellers. 
 
 <div class="mermaid">
@@ -132,3 +135,4 @@ This diagram shows the communication between the two agents and the controller. 
 In the above case, the proposal received contains a set of good which the seller wishes to sell and a cost of them. The Searching Agent needs to determine if this is a good deal for them and if so, it accepts.
 
 There is an equivilent diagram for agents set up to search for buyers and their interaction with agents which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
+

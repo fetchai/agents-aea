@@ -67,6 +67,8 @@ aea run
 
 <center>![Weather client logs](assets/weather-client-logs.png)</center>
 
+To stop an agent use `CTRL + C`.
+
 ### Delete the AEAs
 
 When you're done, go up a level and delete the AEAs.
@@ -115,7 +117,7 @@ A demo to run the same scenario but with a true ledger transaction on Fetch.ai `
 Create the AEA that will provide weather measurements.
 
 ``` bash
-aea create my_weather_station 
+aea create my_weather_station
 cd my_weather_station
 aea add skill weather_station_ledger
 ```
@@ -125,8 +127,8 @@ aea add skill weather_station_ledger
 In another terminal, create the AEA that will query the weather station.
 
 ``` bash
-aea create my_weather_client 
-cd my_weather_client 
+aea create my_weather_client
+cd my_weather_client
 aea add skill weather_client_ledger
 ```
 
@@ -186,7 +188,7 @@ A demo to run the same scenario but with a true ledger transaction on the Ethere
 Create the AEA that will provide weather measurements.
 
 ``` bash
-aea create my_weather_station 
+aea create my_weather_station
 cd my_weather_station
 aea add skill weather_station_ledger
 ```
@@ -196,8 +198,8 @@ aea add skill weather_station_ledger
 In another terminal, create the AEA that will query the weather station.
 
 ``` bash
-aea create my_weather_client 
-cd my_weather_client 
+aea create my_weather_client
+cd my_weather_client
 aea add skill weather_client_ledger
 ```
 
@@ -267,7 +269,7 @@ aea delete my_weather_station
 aea delete my_weather_client
 ```
 
-## Communication
+### Communication
 This diagram shows the communication between the various entities as data is successfully sold by the weather station agent to the client. 
 
 <div class="mermaid">

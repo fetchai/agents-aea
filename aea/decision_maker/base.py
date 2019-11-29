@@ -410,9 +410,10 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        if not self.goal_pursuit_readiness.is_ready:
-            logger.warning("[{}]: Preferences and ownership state not initialized. Refusing to process transaction!".format(self._agent_name))
-            return
+        # if not self.goal_pursuit_readiness.is_ready:
+        #     logger.warning("[{}]: Preferences and ownership state not initialized. Refusing to process transaction!".format(self._agent_name))
+        #     return
+        # TODO: reintroduce above check
 
         # check if the transaction is acceptable and process it accordingly
         if self._is_acceptable_tx(tx_message):

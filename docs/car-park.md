@@ -21,6 +21,7 @@ cd car_data_buyer
 aea add skill carpark_client
 aea install
 aea generate-key fetchai
+aea add-key fetchai fet_private_key.txt
 ```
 
 Add the ledger info to both aea configs:
@@ -38,13 +39,13 @@ cd ..
 python scripts/fetchai_wealth_generation.py --private-key car_data_buyer/fet_private_key.txt --amount 10000000000 --addr alpha.fetch-ai.com --port 80
 ```
 
-Then, in the carpark detection agent comment out database related settings:
+Then, in the carpark detection skill settings (`car_detector/skills/carpark_detection/skill.yaml`) of the detection agent comment out database related settings:
 ```
 # db_is_rel_to_cwd: true
 # db_rel_dir: ../temp_files
 ```
 
-Then, in the client agent do:
+Then, in the carpark client skill settings (`car_data_buyer/skills/carpark_client/skill.yaml`) of the client agent do:
 ```
 max_detection_age: 36000000
 ```
@@ -56,6 +57,14 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Finally, run both agents with `aea run`.
 
+You can see that the agents find each other, negotiate and eventually trade.
+
+When you're finished, delete your agents:
+```
+cd ..
+aea delete car_detector
+aea delete car_data_buyer
+```
 ## Communication
 This diagram shows the communication between the various entities as data is successfully sold by the car park agent to the client. 
 
@@ -86,10 +95,7 @@ This diagram shows the communication between the various entities as data is suc
         deactivate Search
         deactivate Car_Park_AEA
         deactivate Blockchain
-        
-    
 </div>
-
 
 <br />
 

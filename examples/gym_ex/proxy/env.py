@@ -21,6 +21,7 @@
 """This contains the proxy gym environment."""
 
 import sys
+import time
 
 from aea.helpers.base import locate
 
@@ -106,6 +107,7 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
+        # TODO: adapt this line to the new APIs. We no longer have a mailbox.
         self._agent.mailbox._connection.channel.gym_env.render(mode)
 
     def reset(self) -> None:
@@ -114,7 +116,8 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        self._connect()
+        if not self._agent.multiplexer.is_connected:
+            self._connect()
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
         gym_bytes = GymSerializer().encode(gym_msg)
         envelope = Envelope(to=DEFAULT_GYM, sender=self._agent_public_key, protocol_id=GymMessage.protocol_id,
@@ -140,7 +143,10 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
+        assert not self._agent_thread.is_alive(), "Agent already running."
         self._agent_thread.start()
+        while not self._agent.multiplexer.is_connected:
+            time.sleep(0.1)
 
     def _disconnect(self):
         """

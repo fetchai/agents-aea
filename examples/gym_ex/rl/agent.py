@@ -172,13 +172,22 @@ class RLAgent:
         :return: None
         """
         action_counter = 0
+        # for the BanditEnv example, the episode will always be 1.
+        # In general that's not the case, but for completeness
+        # we implemented a training loop that supports learning across many episodes.
+        episode_counter = 0
+        nb_steps_digits = len(str(nb_steps))
 
-        env.reset()
         while action_counter < nb_steps:
-            action = self._pick_an_action()
-            action_counter += 1
-            obs, reward, done, info = env.step(action)
-            self._update_model(obs, reward, done, info, action)
-            if action_counter % 10 == 0:
-                print("Action: step_id='{}' action='{}' reward='{}'".format(action_counter, action, reward))
+            env.reset()
+            done = False
+            episode_counter += 1
+            while not done and action_counter < nb_steps:
+                action = self._pick_an_action()
+                action_counter += 1
+                obs, reward, done, info = env.step(action)
+                self._update_model(obs, reward, done, info, action)
+                if action_counter % 10 == 0:
+                    print(("Step {:" + str(nb_steps_digits) + "}/{}, episode={}, action={:7}, reward={}")
+                          .format(action_counter, nb_steps, episode_counter, str(action), reward))
         env.close()
