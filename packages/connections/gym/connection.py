@@ -199,7 +199,7 @@ class GymConnection(Connection):
             if envelope is None:
                 return None
             return envelope
-        except CancelledError:
+        except CancelledError:  # pragma: no cover
             return None
 
     def stop(self) -> None:
