@@ -21,6 +21,8 @@
 import asyncio
 import inspect
 import logging
+
+import gym
 import os
 import socket
 import sys
@@ -50,6 +52,8 @@ AGENT_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "aea-config_
 SKILL_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "skill-config_schema.json")
 CONNECTION_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "connection-config_schema.json")
 PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "protocol-config_schema.json")
+
+DUMMY_ENV = gym.GoalEnv
 
 
 def pytest_addoption(parser):
