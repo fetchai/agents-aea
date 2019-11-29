@@ -45,11 +45,6 @@ Then, in the carpark detection skill settings (`car_detector/skills/carpark_dete
 # db_rel_dir: ../temp_files
 ```
 
-Then, in the carpark client skill settings (`car_data_buyer/skills/carpark_client/skill.yaml`) of the client agent do:
-```
-max_detection_age: 36000000
-```
-
 Then, launch an OEF node instance:
 ```
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
