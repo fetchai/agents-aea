@@ -33,7 +33,7 @@ def test_fipa_cfp_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
     query = Query([Constraint('something', ConstraintType('>', 1))])
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=0,
                       performative=FIPAMessage.Performative.CFP,
                       query=query)
@@ -61,7 +61,7 @@ def test_fipa_cfp_serialization_bytes():
     """Test that the serialization - deserialization for the 'fipa' protocol works."""
     query = b'Hello'
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=0,
                       performative=FIPAMessage.Performative.CFP,
                       query=query)
@@ -91,7 +91,7 @@ def test_fipa_propose_serialization():
         Description({"foo2": 1, "bar2": 2}),
     ]
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=0,
                       performative=FIPAMessage.Performative.PROPOSE,
                       proposal=proposal)
@@ -118,7 +118,7 @@ def test_fipa_propose_serialization():
 def test_fipa_accept_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=0,
                       performative=FIPAMessage.Performative.ACCEPT)
     msg_bytes = FIPASerializer().encode(msg)
@@ -140,7 +140,7 @@ def test_fipa_accept_serialization():
 def test_performative_match_accept():
     """Test the serialization - deserialization of the match_accept performative."""
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.MATCH_ACCEPT)
 
@@ -163,8 +163,7 @@ def test_performative_not_recognized():
     msg = FIPAMessage(
         performative=FIPAMessage.Performative.ACCEPT,
         message_id=0,
-        dialogue_id=0,
-        destination="publicKey",
+        dialogue_reference=(str(0), ''),
         target=1)
 
     with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
@@ -177,7 +176,7 @@ def test_performative_not_recognized():
 def test_performative_accept_with_address():
     """Test the serialization - deserialization of the accept_with_address performative."""
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
                       address="dummy_address")
@@ -199,7 +198,7 @@ def test_performative_accept_with_address():
 def test_performative_match_accept_with_address():
     """Test the serialization - deserialization of the match_accept_with_address performative."""
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
                       address="dummy_address")
@@ -221,7 +220,7 @@ def test_performative_match_accept_with_address():
 def test_performative_inform():
     """Test the serialization-deserialization of the inform performative."""
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.INFORM,
                       json_data={"foo": "bar"})
@@ -263,7 +262,7 @@ def test_performative_string_value():
 def test_fipa_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.ACCEPT)
 
@@ -275,7 +274,7 @@ def test_fipa_encoding_unknown_performative():
 def test_fipa_decoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during decoding."""
     msg = FIPAMessage(message_id=0,
-                      dialogue_id=0,
+                      dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.ACCEPT)
 
@@ -290,5 +289,5 @@ def test_dialogues():
     dialogues = FIPADialogues()
     result = dialogues.create_self_initiated(dialogue_opponent_pbk="opponent", dialogue_starter_pbk="starter", is_seller=True)
     assert isinstance(result, FIPADialogue)
-    result = dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_id=0, is_seller=False)
+    result = dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_reference=(str(0), ''), is_seller=False)
     assert isinstance(result, FIPADialogue)

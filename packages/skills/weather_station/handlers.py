@@ -21,7 +21,7 @@
 
 import logging
 import sys
-from typing import Optional, cast, TYPE_CHECKING
+from typing import Optional, Tuple, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
@@ -63,7 +63,7 @@ class FIPAHandler(Handler):
         fipa_msg = cast(FIPAMessage, message)
         msg_performative = FIPAMessage.Performative(fipa_msg.get('performative'))
         message_id = cast(int, fipa_msg.get('message_id'))
-        dialogue_id = cast(int, fipa_msg.get('dialogue_id'))
+        dialogue_reference = cast(Tuple[str, str], fipa_msg.get('dialogue_reference'))
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
@@ -71,7 +71,7 @@ class FIPAHandler(Handler):
             dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key))
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg, sender):
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(sender, dialogue_id, is_seller=True))
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(sender, dialogue_reference, is_seller=True))
             dialogue.incoming_extend(fipa_msg)
         else:
             self._handle_unidentified_dialogue(fipa_msg, sender)
@@ -79,13 +79,13 @@ class FIPAHandler(Handler):
 
         # handle message
         if msg_performative == FIPAMessage.Performative.CFP:
-            self._handle_cfp(fipa_msg, sender, message_id, dialogue_id, dialogue)
+            self._handle_cfp(fipa_msg, sender, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, sender, message_id, dialogue_id, dialogue)
+            self._handle_decline(fipa_msg, sender, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.ACCEPT:
-            self._handle_accept(fipa_msg, sender, message_id, dialogue_id, dialogue)
+            self._handle_accept(fipa_msg, sender, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, sender, message_id, dialogue_id, dialogue)
+            self._handle_inform(fipa_msg, sender, message_id, dialogue)
 
     def teardown(self) -> None:
         """
@@ -115,7 +115,7 @@ class FIPAHandler(Handler):
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(default_msg))
 
-    def _handle_cfp(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
+    def _handle_cfp(self, msg: FIPAMessage, sender: str, message_id: int, dialogue: Dialogue) -> None:
         """
         Handle the CFP.
 
@@ -124,7 +124,6 @@ class FIPAHandler(Handler):
         :param msg: the message
         :param sender: the sender
         :param message_id: the message id
-        :param dialogue_id: the dialogue id
         :param dialogue: the dialogue object
         :return: None
         """
@@ -143,7 +142,7 @@ class FIPAHandler(Handler):
                                                                                     sender[-5:],
                                                                                     proposal.values))
             proposal_msg = FIPAMessage(message_id=new_message_id,
-                                       dialogue_id=dialogue_id,
+                                       dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=new_target,
                                        performative=FIPAMessage.Performative.PROPOSE,
                                        proposal=[proposal])
@@ -156,7 +155,7 @@ class FIPAHandler(Handler):
             logger.info("[{}]: declined the CFP from sender={}".format(self.context.agent_name,
                                                                        sender[-5:]))
             decline_msg = FIPAMessage(message_id=new_message_id,
-                                      dialogue_id=dialogue_id,
+                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                       target=new_target,
                                       performative=FIPAMessage.Performative.DECLINE)
             dialogue.outgoing_extend(decline_msg)
@@ -165,7 +164,7 @@ class FIPAHandler(Handler):
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(decline_msg))
 
-    def _handle_decline(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int, dialogue: Dialogue) -> None:
+    def _handle_decline(self, msg: FIPAMessage, sender: str, message_id: int, dialogue: Dialogue) -> None:
         """
         Handle the DECLINE.
 
@@ -174,7 +173,6 @@ class FIPAHandler(Handler):
         :param msg: the message
         :param sender: the sender
         :param message_id: the message id
-        :param dialogue_id: the dialogue id
         :param dialogue: the dialogue object
         :return: None
         """
@@ -183,7 +181,7 @@ class FIPAHandler(Handler):
         # dialogues = cast(Dialogues, self.context.dialogues)
         # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE)
 
-    def _handle_accept(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int,
+    def _handle_accept(self, msg: FIPAMessage, sender: str, message_id: int,
                        dialogue: Dialogue) -> None:
         """
         Handle the ACCEPT.
@@ -193,7 +191,6 @@ class FIPAHandler(Handler):
         :param msg: the message
         :param sender: the sender
         :param message_id: the message id
-        :param dialogue_id: the dialogue id
         :param dialogue: the dialogue object
         :return: None
         """
@@ -206,7 +203,7 @@ class FIPAHandler(Handler):
         # proposal = cast(Description, dialogue.proposal)
         # identifier = cast(str, proposal.values.get("ledger_id"))
         match_accept_msg = FIPAMessage(message_id=new_message_id,
-                                       dialogue_id=dialogue_id,
+                                       dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=new_target,
                                        performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
                                        address="no_address")
@@ -216,7 +213,7 @@ class FIPAHandler(Handler):
                                         protocol_id=FIPAMessage.protocol_id,
                                         message=FIPASerializer().encode(match_accept_msg))
 
-    def _handle_inform(self, msg: FIPAMessage, sender: str, message_id: int, dialogue_id: int,
+    def _handle_inform(self, msg: FIPAMessage, sender: str, message_id: int,
                        dialogue: Dialogue) -> None:
         """
         Handle the INFORM.
@@ -227,7 +224,6 @@ class FIPAHandler(Handler):
         :param msg: the message
         :param sender: the sender
         :param message_id: the message id
-        :param dialogue_id: the dialogue id
         :param dialogue: the dialogue object
         :return: None
         """
@@ -239,7 +235,7 @@ class FIPAHandler(Handler):
         json_data = cast(dict, msg.get("json_data"))
         if "Done" in json_data:
             inform_msg = FIPAMessage(message_id=new_message_id,
-                                     dialogue_id=dialogue_id,
+                                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                      target=new_target,
                                      performative=FIPAMessage.Performative.INFORM,
                                      json_data=dialogue.weather_data)

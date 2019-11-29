@@ -21,7 +21,7 @@
 """Serialization for the FIPA protocol."""
 import json
 import pickle
-from typing import cast
+from typing import Tuple, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
@@ -37,7 +37,9 @@ class FIPASerializer(Serializer):
         """Encode a FIPA message into bytes."""
         fipa_msg = fipa_pb2.FIPAMessage()
         fipa_msg.message_id = msg.get("message_id")
-        fipa_msg.dialogue_id = msg.get("dialogue_id")
+        dialogue_reference = cast(Tuple[str, str], msg.get("dialogue_reference"))
+        fipa_msg.dialogue_starter_reference = dialogue_reference[0]
+        fipa_msg.dialogue_responder_reference = dialogue_reference[1]
         fipa_msg.target = msg.get("target")
 
         performative_id = FIPAMessage.Performative(msg.get("performative"))
@@ -99,7 +101,7 @@ class FIPASerializer(Serializer):
         fipa_pb = fipa_pb2.FIPAMessage()
         fipa_pb.ParseFromString(obj)
         message_id = fipa_pb.message_id
-        dialogue_id = fipa_pb.dialogue_id
+        dialogue_reference = (fipa_pb.dialogue_starter_reference, fipa_pb.dialogue_responder_reference)
         target = fipa_pb.target
 
         performative = fipa_pb.WhichOneof("performative")
@@ -140,5 +142,5 @@ class FIPASerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}.".format(performative))
 
-        return FIPAMessage(message_id=message_id, dialogue_id=dialogue_id, target=target,
+        return FIPAMessage(message_id=message_id, dialogue_reference=dialogue_reference, target=target,
                            performative=performative, **performative_content)
