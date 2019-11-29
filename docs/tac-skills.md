@@ -90,11 +90,11 @@ This diagram shows the communication between the various entities during the reg
         Agent_1->>Search: search
         Search-->>Agent_1: controller
         Agent_1->>Controller: register
-        Controller->>Agent_1: game_data
         activate Agent_2
         Agent_2->>Search: search
-        Search->>Agent_2: controller
+        Search-->>Agent_2: controller
         Agent_2->>Controller: register
+        Controller->>Agent_1: game_data
         Controller->>Agent_2: game_data
         
         deactivate Agent_1

@@ -107,6 +107,7 @@ This diagram shows the communication between the various entities as data is suc
         deactivate Weather_AEA
     
 </div>
+Note that the client informs the weather station that funds have been transfereed, but in this example no funds actually get transfered.
 
 ## Demo 2: Fetch.ai ledger payment
 
@@ -292,7 +293,7 @@ This diagram shows the communication between the various entities as data is suc
         Client_AEA->>Weather_AEA: accept
         Weather_AEA->>Client_AEA: match_accept
         Client_AEA->>Blockchain: transfer_funds
-        Blockchain->>Weather_AEA: transfer_complete
+        Client_AEA->>Weather_AEA: send_transaction_hash
         Weather_AEA->>Client_AEA: send_data
         
         deactivate Client_AEA

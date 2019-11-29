@@ -88,7 +88,7 @@ This diagram shows the communication between the various entities as data is suc
         Client_AEA->>Car_Park_AEA: accept
         Car_Park_AEA->>Client_AEA: match_accept
         Client_AEA->>Blockchain: transfer_funds
-        Blockchain->>Car_Park_AEA: transfer_complete
+        Client_AEA->>Car_Park_AEA: send_transaction_hash
         Car_Park_AEA->>Client_AEA: send_data
         
         deactivate Client_AEA
