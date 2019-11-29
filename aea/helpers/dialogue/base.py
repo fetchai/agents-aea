@@ -83,7 +83,7 @@ class DialogueLabel:
 
     def __hash__(self) -> int:
         """Turn object into hash."""
-        return hash((self._dialogue_reference, self.dialogue_opponent_pbk, self.dialogue_starter_pbk))
+        return hash((self.dialogue_reference, self.dialogue_opponent_pbk, self.dialogue_starter_pbk))
 
     @property
     def json(self) -> Dict:
