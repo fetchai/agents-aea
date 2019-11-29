@@ -187,7 +187,6 @@ async def test_handle():
                 FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
                             message_id=0,
                             dialogue_reference=(str(0), ''),
-                            destination=public_key,
                             target=1))
             envelope = Envelope(
                 to=public_key,

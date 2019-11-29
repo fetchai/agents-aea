@@ -77,7 +77,7 @@ class DialogueLabel:
     def __eq__(self, other) -> bool:
         """Check for equality between two DialogueLabel objects."""
         if type(other) == DialogueLabel:
-            return self._dialogue_reference == (other.dialogue_starter_reference, other.dialogue_responder_reference) and self._dialogue_starter_pbk == other.dialogue_starter_pbk and self._dialogue_opponent_pbk == other.dialogue_opponent_pbk
+            return self.dialogue_reference == other.dialogue_reference and self._dialogue_starter_pbk == other.dialogue_starter_pbk and self._dialogue_opponent_pbk == other.dialogue_opponent_pbk
         else:
             return False
 

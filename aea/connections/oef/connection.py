@@ -276,7 +276,7 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        logger.warning('Dropping incompatible on_decline: msg_id={}, dialogue_id={}, origin={}, target={}'.format(msg_id, dialogue_id, origin, target))
+        logger.warning('Dropping incompatible on_accept: msg_id={}, dialogue_id={}, origin={}, target={}'.format(msg_id, dialogue_id, origin, target))
 
     def on_decline(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
         """
