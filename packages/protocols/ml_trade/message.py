@@ -33,7 +33,7 @@ class MLTradeMessage(Message):
     protocol_id = "ml_trade"
 
     class Performative(Enum):
-        """Gym performatives."""
+        """ML trade performatives."""
 
         CFT = 'cft'
         TERMS = 'terms'
