@@ -13,6 +13,7 @@ In the root directory, create the gym agent.
 aea create my_gym_agent
 ```
 
+
 ### Add the gym skill 
 ``` bash
 cd my_gym_agent

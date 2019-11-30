@@ -1,8 +1,9 @@
 The <a href="../scaffolding/">scaffolding tool</a> allows you to create the folder structure required for a skill.
 
-!!!	Note
-	Before developing your first skill, please read the <a href="../skill/">skill guide</a>.
-
+<div class="admonition note">
+   <p class="admonition-title">Note</p> 
+   <p>Before developing your first skill, please read the <a href="../skill/">skill guide</a>.</p>      
+ </div>
 
 ### Dependencies
 
@@ -12,7 +13,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 We will first create an agent and add a scaffold skill, which we call `my_search`.
 
-``` bash
+```bash
 aea create my_agent && cd my_agent
 aea scaffold skill my_search
 ```
@@ -26,7 +27,7 @@ A `Behaviour` class contains the business logic specific to initial actions init
 
 In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the OEF.
 
-``` python
+```python
 import logging
 import time
 
@@ -95,7 +96,7 @@ So far, we have tasked the agent with sending search requests to the OEF. Howeve
 Let us now implement a handler to deal with the incoming search responses.
 
 
-``` python
+```python
 import logging
 
 from aea.protocols.oef.message import OEFMessage
@@ -206,12 +207,12 @@ We place this code in `my_agent/skills/my_search/tasks.py`.
 
 Based on our skill components above, we create the following config file.
 
-``` yaml
+```yaml
 name: my_search
 authors: Fetch.ai Limited
 version: 0.1.0
 license: Apache 2.0
-url: ""
+url: ''
 description: 'A simple search skill utilising the OEF.'
 behaviours:
   - behaviour:
@@ -236,6 +237,7 @@ We place this code in `my_agent/skills/my_search/skill.yaml`.
 ## Step 6: Add the oef protocol
 
 Our agent does not have the oef protocol yet so let's add it.
+
 ```bash
 aea add protocol oef
 ```
@@ -249,6 +251,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 
 We can then launch our agent.
+
 ```bash
 aea run
 ```
@@ -259,6 +262,5 @@ Stop the agent with `CTRL + C`.
 ## Now it's your turn
 
 We hope this step by step introduction has helped you develop your own skill. We are excited to see what you will build.
-
 
 <br />
