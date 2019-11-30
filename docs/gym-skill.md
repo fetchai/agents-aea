@@ -51,7 +51,7 @@ aea install
 ### Run the agent with the gym connection
 
 ``` bash
-aea run --connection gym
+aea run --connections gym
 ```
 
 You will see the gym training logs.

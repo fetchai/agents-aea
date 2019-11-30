@@ -112,7 +112,7 @@ aea add connection local
 ### Run the agent with the default connection
 
 ```bash
-aea run --connection local
+aea run --connections local
 ```
 
 <!--
