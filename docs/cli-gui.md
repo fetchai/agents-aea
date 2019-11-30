@@ -54,4 +54,5 @@ This is how your whole page should look if you followed the instructions correct
 
 <center>![whole screen running](assets/cli_gui05_full_running_agent.png)</center>
 
+
 <br />

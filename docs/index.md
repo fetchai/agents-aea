@@ -1,4 +1,4 @@
-## Software to work for you
+## Autonomous Economic Agent Framework
 
 The AEA framework provides the tools for creating autonomous economic agents. Autonomous Economic Agents (AEAs) work continuously for your benefit without you having to do anything more than write them and start them up.
 
@@ -6,12 +6,11 @@ AEAs act independently of constant input and autonomously develop new capabiliti
 
 It is a Python-based development suite which equips you with an efficient and easy to understand set of tools for building autonomous economic agents.
 
-The framework is super modular, easily extensible, and highly composable. 
+The framework is super modular, easily extensible, and highly composable.
 
 The AEA framework attempts to make agent development as straightforward as web development using popular web frameworks.
 
 AEAs achieve their goals with the help of the Fetch.ai OEF - a search and discovery platform for agents - and the Fetch.ai blockchain. Third party systems, such as Ethereum, may also allow AEA integration.
-
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

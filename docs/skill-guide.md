@@ -1,9 +1,9 @@
 The <a href="../scaffolding/">scaffolding tool</a> allows you to create the folder structure required for a skill.
 
 <div class="admonition note">
-   <p class="admonition-title">Note</p> 
-   <p>Before developing your first skill, please read the <a href="../skill/">skill guide</a>.</p>      
- </div>
+  <p class="admonition-title">Note</p>
+  <p>Before developing your first skill, please read the <a href="../skill/">skill guide</a>.</p>
+</div>
 
 ### Dependencies
 

@@ -19,7 +19,6 @@
 | `scaffold connection/protocol/skill [name]` | Scaffold a new connection, protocol, or skill called `[name]`.               |		
 | `-v DEBUG run`                              | Run with debugging.                                                          |
 
-
 <!-- 
 Command  | Description
 ---------| -----------------------------------------------------------------
@@ -44,9 +43,9 @@ Command  | Description
 
  -->
 
-<div class="admonition tip">		
-   <p class="admonition-title">Tip</p>		
-   <p>You can also disable a resource without deleting it by removing the entry from the configuration but leaving the package in the skills namespace.</p>		
- </div>
+<div class="admonition tip">
+  <p class="admonition-title">Tip</p>
+  <p>You can also disable a resource without deleting it by removing the entry from the configuration but leaving the package in the skills namespace.</p>
+</div>
 
 <br />

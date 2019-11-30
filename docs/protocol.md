@@ -2,7 +2,6 @@ A `Protocol` manages message representation, encoding, and serialisation. It als
 
 An agent can have one or more protocols. The AEA framework supplies three: `oef`, `fipa`, and a `default` protocol.
 
-
 ## Custom protocol
 
 For a custom protocol, the developer must code methods from two classes.
@@ -33,8 +32,8 @@ Outside of these, the developer is free to implement the agent protocols in any 
 ### `rules.py`
 
 <div class="admonition note">
-   <p class="admonition-title">Note</p>
-   <p>Coming soon.</p>      
+  <p class="admonition-title">Note</p>
+  <p>Coming soon.</p>
 </div>
 
 
@@ -44,8 +43,8 @@ Outside of these, the developer is free to implement the agent protocols in any 
 The `oef` helps agents to search for and find other agents and (for now) talk to them via different protocols.
 
 <div class="admonition note">
-   <p class="admonition-title">Note</p>
-   <p>In future, the framework will support peer to peer communications.</p>        
+  <p class="admonition-title">Note</p>
+  <p>In future, the framework will support peer to peer communications.</p>
 </div>
 
 The `oef` protocol definition includes an `OEFMessage` class which gets a `protocol_id` of `oef`.
@@ -68,6 +67,7 @@ class Type(Enum):
     	"""Get string representation."""
         return self.value
 ```
+
 It also provides error codes.
 
 ```python
@@ -83,6 +83,7 @@ class OEFErrorOperation(Enum):
 
     OTHER = 10000
 ```
+
 A `models.py` module is provided by the `oef` protocol which includes classes and methods commonly required by OEF agents. These includes a class for serialising json and classes for implementing the OEF query language such as `Attribute`, `Query`, etc. 
 
 
@@ -152,7 +153,6 @@ message FIPAMessage{
     }
 }
 ```
-
 
 ## `default` protocol
 

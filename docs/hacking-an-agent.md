@@ -2,8 +2,10 @@
 
 These instructions detail the Python code you need for running an AEA outside the `cli` tool.
 
-!!! Note
-    You have already coded up your agent. See the <a href="../aea/skill-guide/" target=_blank>build your own skill guide</a> for a reminder.
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>You have already coded up your agent. See the <a href="../aea/skill-guide/" target=_blank>build your own skill guide</a> for a reminder.</p>
+</div>
 
 
 ## Imports
