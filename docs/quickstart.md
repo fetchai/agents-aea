@@ -23,12 +23,23 @@ Once installed, create a new environment and open it.
 touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
+### Installing docker
 
 At some point, you will need [Docker](https://www.docker.com/) installed on your machine 
 (e.g. to run an OEF Node).
  
 If you don't have it, please check the official documentation [here](https://docs.docker.com/install/) 
 and follow the instructions for your platform.
+
+
+### Download the scripts and packages directories
+``` bash
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
+svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+You can install the `svn` command with (`brew install subversion` or `sudo apt-get install subversion`).
+
 
 ## Installation
 
@@ -59,7 +70,7 @@ pip install aea[cli]
 
 ### Known issues
 
-If the installation steps fail, it might be a depenceny issue. 
+If the installation steps fail, it might a dependency issue. 
 
 The following hints can help:
 
@@ -74,13 +85,6 @@ sudo apt-get install python3.7-dev
 ## Echo skill demo
 
 The echo skill is a simple demo that introduces you to the main business logic components of an AEA.
-
-
-### Download the scripts and packages directories.
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
-```
 
 ### Create a new agent
 
