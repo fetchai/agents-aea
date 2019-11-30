@@ -1,4 +1,4 @@
-!!!Warning
+!!! Warning
 Work in progress.
 
 # Car Park Agent Application
@@ -49,6 +49,7 @@ Select Preferences then Raspberry Pi Configuration.
 <br/>
 
 Enable the Camera, SSH, and VNC options.
+
 <center>
 <img src="../assets/config_dlg.png" />
 </center>
@@ -71,7 +72,7 @@ Set up your Pi to physically view the car park. We'll leave that to you.
 sudo raspi-config
 ```
 
-Select the `1920X1080` resolution option - number 31. 
+Select the `1920X1080` resolution option - number 31.
 
 Then update the configuration file as follows. Open it.
 
@@ -130,7 +131,7 @@ python setup.py develop
 <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>We recommend that using `develop` as this creates a link to the code and so any changes you make will take immediate effect when you run the code.</p>
-</div> 
+</div>
 
 ### Run it
 
@@ -147,6 +148,7 @@ Ensure the startup script runs whenever we the Raspberry Pi turns on.
 ```bash
 crontab -e
 ```
+
 Pick an editor which will open a text file. Scroll to the bottom and add the following line.
 
 ```bash
@@ -164,6 +166,7 @@ ifconfig
 ```
 
 Returns something like:
+
 ```bash
 ...
 wlan0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
@@ -172,7 +175,6 @@ wlan0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 ```
 
 The `inet` value is the Raspberry Pi's ip address.  
-
 
 <!--
 ### Get the code
