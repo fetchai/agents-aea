@@ -5,9 +5,11 @@ The <a href="../scaffolding/">scaffolding tool</a> allows you to create the fold
   <p>Before developing your first skill, please read the <a href="../skill/">skill guide</a>.</p>
 </div>
 
-## Step 1: Setup
+### Dependencies
 
-Make sure you have followed the <a href="../quickstart/" target=_blank>preliminaries and installation</a> instructions from the quick start.
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+
+## Step 1: Setup
 
 We will first create an agent and add a scaffold skill, which we call `my_search`.
 
@@ -207,17 +209,17 @@ license: Apache 2.0
 url: ''
 description: 'A simple search skill utilising the OEF.'
 behaviours:
-    - behaviour:
-          class_name: MySearchBehaviour
-          args: {}
+  - behaviour:
+      class_name: MySearchBehaviour
+      args: {}
 handlers:
-    - handler:
-          class_name: MySearchHandler
-          args: {}
+  - handler:
+      class_name: MySearchHandler
+      args: {}
 tasks:
-    - task:
-          class_name: MySearchTask
-          args: {}
+  - task:
+      class_name: MySearchTask
+      args: {}
 shared_classes: []
 protocols: ['oef']
 dependencies: []

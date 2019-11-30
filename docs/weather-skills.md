@@ -4,30 +4,9 @@ The AEA weather skills demonstrate an interaction between two AEAs.
 * The seller of weather data (the weather client).
 
 
-## Prerequisites
+### Dependencies
 
-Make sure you have the latest `aea` version.
-
-``` bash
-aea --version
-```
-
-If not, update with the following.
-
-``` bash
-pip install aea[all] --force --no-cache-dir
-```
-
-## Demo preliminaries
-
-Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
-
-
-Download the packages and scripts directories.
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
-svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
-```
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 
 ## Launch an OEF node
@@ -88,6 +67,7 @@ aea run
 
 <center>![Weather client logs](assets/weather-client-logs.png)</center>
 
+To stop an agent use `CTRL + C`.
 
 ### Delete the AEAs
 
@@ -99,6 +79,35 @@ aea delete my_weather_station
 aea delete my_weather_client
 ```
 
+## Communication
+This diagram shows the communication between the various entities as data is successfully sold by the car park agent to the client. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Search
+        participant Client_AEA
+        participant Weather_AEA
+    
+        activate Client_AEA
+        activate Search
+        activate Weather_AEA
+        
+        Weather_AEA->>Search: register_service
+        Client_AEA->>Search: search
+        Search->>Client_AEA: list_of_agents
+        Client_AEA->>Weather_AEA: call_for_proposal
+        Weather_AEA->>Client_AEA: propose
+        Client_AEA->>Weather_AEA: accept
+        Weather_AEA->>Client_AEA: match_accept
+        Client_AEA->>Weather_AEA: Inform funds transfered 
+        Weather_AEA->>Client_AEA: send_data
+        
+        deactivate Client_AEA
+        deactivate Search
+        deactivate Weather_AEA
+    
+</div>
+Note that the client informs the weather station that funds have been transfereed, but in this example no funds actually get transfered.
 
 ## Demo 2: Fetch.ai ledger payment
 
@@ -109,7 +118,7 @@ A demo to run the same scenario but with a true ledger transaction on Fetch.ai `
 Create the AEA that will provide weather measurements.
 
 ``` bash
-aea create my_weather_station 
+aea create my_weather_station
 cd my_weather_station
 aea add skill weather_station_ledger
 ```
@@ -119,20 +128,21 @@ aea add skill weather_station_ledger
 In another terminal, create the AEA that will query the weather station.
 
 ``` bash
-aea create my_weather_client 
-cd my_weather_client 
+aea create my_weather_client
+cd my_weather_client
 aea add skill weather_client_ledger
 ```
 
 Additionally, create the private key for the weather client AEA.
 ```bash
 aea generate-key fetchai
+aea add-key fetchai fet_private_key.txt
 ```
 
 ### Update the AEA configs
 
-Both in `weather_station/aea-config.yaml` and
-`weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
+Both in `my_weather_station/aea-config.yaml` and
+`my_weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
 
 ``` yaml
 ledger_apis:
@@ -147,7 +157,7 @@ ledger_apis:
 Create some wealth for your weather client on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
 cd ..
-python scripts/fetchai_wealth_generation.py --private-key weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
+python scripts/fetchai_wealth_generation.py --private-key my_weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
 cd my_weather_client
 ```
 
@@ -179,7 +189,7 @@ A demo to run the same scenario but with a true ledger transaction on the Ethere
 Create the AEA that will provide weather measurements.
 
 ``` bash
-aea create my_weather_station 
+aea create my_weather_station
 cd my_weather_station
 aea add skill weather_station_ledger
 ```
@@ -189,20 +199,21 @@ aea add skill weather_station_ledger
 In another terminal, create the AEA that will query the weather station.
 
 ``` bash
-aea create my_weather_client 
-cd my_weather_client 
+aea create my_weather_client
+cd my_weather_client
 aea add skill weather_client_ledger
 ```
 
 Additionally, create the private key for the weather client AEA.
 ```bash
 aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
 ```
 
 ### Update the AEA configs
 
-Both in `weather_station/aea-config.yaml` and
-`weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
+Both in `my_weather_station/aea-config.yaml` and
+`my_weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
 
 ``` yaml
 ledger_apis:
@@ -231,7 +242,7 @@ currency_pbk: 'ETH'
 ledger_id: 'ethereum'
 ```
 Amend `ledgers` to the following.
-``` bash
+``` basgh
 ledgers: ['ethereum']
 ```
 
@@ -239,7 +250,7 @@ ledgers: ['ethereum']
 
 Create some wealth for your weather client on the Ethereum Ropsten test net.
 
-Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `weather_client/eth_private_key.txt`.
+Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_weather_client/eth_private_key.txt`.
 
 ### Run the AEAs
 
@@ -259,7 +270,35 @@ aea delete my_weather_station
 aea delete my_weather_client
 ```
 
+### Communication
+This diagram shows the communication between the various entities as data is successfully sold by the weather station agent to the client. 
 
-<br/>
-
-
+<div class="mermaid">
+    sequenceDiagram
+        participant Search
+        participant Client_AEA
+        participant Weather_AEA
+        participant Blockchain
+    
+        activate Client_AEA
+        activate Search
+        activate Weather_AEA
+        activate Blockchain
+        
+        Weather_AEA->>Search: register_service
+        Client_AEA->>Search: search
+        Search-->>Client_AEA: list_of_agents
+        Client_AEA->>Weather_AEA: call_for_proposal
+        Weather_AEA->>Client_AEA: propose
+        Client_AEA->>Weather_AEA: accept
+        Weather_AEA->>Client_AEA: match_accept
+        Client_AEA->>Blockchain: transfer_funds
+        Client_AEA->>Weather_AEA: send_transaction_hash
+        Weather_AEA->>Client_AEA: send_data
+        
+        deactivate Client_AEA
+        deactivate Search
+        deactivate Weather_AEA
+        deactivate Blockchain
+       
+</div>

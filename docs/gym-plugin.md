@@ -11,23 +11,11 @@ However, the example decouples the RL agent from the `gym.Env` allowing them to 
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-### Packages
-
-Install the following packages.
+Install the `gym` and `numpy` library.
 
 ``` bash
 pip install numpy gym
 ```
-
-### Files
-
-If you haven't done so already, download the `examples` and `packages` directories.
-
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
-```
-
 
 ### Run the example
 

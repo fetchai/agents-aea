@@ -3,22 +3,9 @@ The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that u
 
 ## Demo instructions
 
-Follow the Preliminaries and Installation instructions <a href="../quickstart">here</a>.
+### Dependencies
 
-Install the gym library.
-
-``` bash
-pip install gym
-```
-
-Then, download the examples and packages directory.
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
-```
-
-
-
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 ### Create the agent
 In the root directory, create the gym agent.
@@ -30,7 +17,7 @@ aea create my_gym_agent
 ### Add the gym skill 
 ``` bash
 cd my_gym_agent
-aea add skill gym 
+aea add skill gym
 ```
 
 
@@ -53,6 +40,12 @@ nano connections/gym/connection.yaml
 env: gyms.env.BanditNArmedRandom
 ```
 
+### Install the skill dependencies
+
+To install the `gym` package, a dependency of the gym skill, from Pypi run
+``` bash
+aea install
+```
 
 
 ### Run the agent with the gym connection
@@ -72,8 +65,29 @@ You will see the gym training logs.
 When you're done, you can go up a level and delete the agent.
 
 ``` bash
+cd ..
 aea delete my_gym_agent
 ```
 
+### Communication
+This diagram shows the communication between the agent and the gym environment 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent
+        participant Environment
+    
+        activate Agent
+        activate Environment
+        Agent->>Environment: reset
+        loop learn
+            Agent->>Environment: act
+            Environment->>Agent: percept
+        end
+        Agent->>Environment: close
+        
+        deactivate Agent
+        deactivate Environment
+</div>
 
 <br/>

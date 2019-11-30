@@ -16,32 +16,32 @@ version: 0.1.0
 license: Apache 2.0
 url: ''
 behaviours:
-    - behaviour:
-          class_name: GoodsRegisterAndSearchBehaviour
-          args:
-              services_interval: 5
+  - behaviour:
+      class_name: GoodsRegisterAndSearchBehaviour
+      args:
+        services_interval: 5
 handlers:
-    - handler:
-          class_name: FIPANegotiationHandler
-          args: {}
+  - handler:
+      class_name: FIPANegotiationHandler
+      args: {}
 tasks:
-    - task:
-          class_name: TransactionCleanUpTask
-          args: {}
+  - task:
+      class_name: TransactionCleanUpTask
+      args: {}
 shared_classes:
-    - shared_class:
-          class_name: Search
-          args: {}
-    - shared_class:
-          class_name: Strategy
-          args: {}
-    - shared_class:
-          class_name: Dialogues
-          args: {}
-    - shared_class:
-          class_name: Transactions
-          args:
-              pending_transaction_timeout: 30
+  - shared_class:
+      class_name: Search
+      args: {}
+  - shared_class:
+      class_name: Strategy
+      args: {}
+  - shared_class:
+      class_name: Dialogues
+      args: {}
+  - shared_class:
+      class_name: Transactions
+      args:
+        pending_transaction_timeout: 30
 protocols: ['oef', 'fipa']
 ```
 
@@ -77,7 +77,7 @@ This class deals with representing potential transactions between agents.
 
 ## Demo instructions
 
-!!! Warn
+!!! Warning
 FIPA negotiation skill is not fully developed.
 
 Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.

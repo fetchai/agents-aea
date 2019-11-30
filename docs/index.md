@@ -1,4 +1,4 @@
-## Agent Framework
+## Autonomous Economic Agent Framework
 
 The AEA framework provides the tools for creating autonomous economic agents. Autonomous Economic Agents (AEAs) work continuously for your benefit without you having to do anything more than write them and start them up.
 
