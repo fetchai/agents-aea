@@ -5,12 +5,12 @@ Work in progress.
 
 The Fetch.ai car park agent application is made up of three components:
 
-- A Raspberry Pi hardware device with camera module viewing a car park.
-- A car park agent GUI running on the Raspberry Pi that collects data on free spaces and serves it up for purchase on the Fetch.ai network.
-- A remote client agent GUI that connects to the Raspberry Pi and buys data.
+-   A Raspberry Pi hardware device with camera module viewing a car park.
+-   A car park agent GUI running on the Raspberry Pi that collects data on free spaces and serves it up for purchase on the Fetch.ai network.
+-   A remote client agent GUI that connects to the Raspberry Pi and buys data.
 
-| Hardware                                            |               Car Park Agent GUI               |                 Client Agent GUI                 |		
-| --------------------------------------------------- | :--------------------------------------------: | :----------------------------------------------: |		
+| Hardware                                            |               Car Park Agent GUI               |                 Client Agent GUI                 |
+| --------------------------------------------------- | :--------------------------------------------: | :----------------------------------------------: |
 | <img src="../assets/device_small.jpg" height="150"> | <img src="../assets/pi_live.jpg" height="150"> | <img src="../assets/client_04.jpg" height="150"> |
 
 ## Raspberry Pi hardware set up
