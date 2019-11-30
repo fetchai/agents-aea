@@ -77,10 +77,18 @@ class MLTradeMessage(Message):
                 assert isinstance(tx_digest, str)
                 assert len(self.body) == 3
             elif performative == MLTradeMessage.Performative.DATA:
+                assert self.is_set("terms")
+                terms = self.get("terms")
+                assert isinstance(terms, Description)
                 assert self.is_set("data")
+                # expect data = (X, y)
                 data = self.get("data")
-                assert type(data) == np.ndarray
-                assert len(self.body) == 2
+                assert isinstance(data, tuple)
+                assert len(data) == 2
+                assert isinstance(data[0], np.ndarray)
+                assert isinstance(data[1], np.ndarray)
+                assert data[0].shape[0] == data[1].shape[0]
+                assert len(self.body) == 3
             else:
                 raise ValueError("Performative not recognized.")
 

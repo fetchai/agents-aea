@@ -60,6 +60,15 @@ class MLTradeSerializer(Serializer):
             body["terms"] = terms_bytes
             # encoding tx_digest
             body["tx_digest"] = msg.body["tx_digest"]
+        elif msg_type == MLTradeMessage.Performative.DATA:
+            # encoding terms
+            terms = msg.body["terms"]
+            terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")
+            body["terms"] = terms_bytes
+            # encoding data
+            data = msg.body["data"]
+            data_bytes = base64.b64encode(pickle.dumps(data)).decode("utf-8")
+            body["data"] = data_bytes
         else:
             raise ValueError("Type not recognized.")
 
@@ -85,8 +94,16 @@ class MLTradeSerializer(Serializer):
             terms_bytes = base64.b64decode(json_body["terms"])
             terms = pickle.loads(terms_bytes)
             body["terms"] = terms
-
             body["tx_digest"] = json_body["tx_digest"]
+        elif msg_type == MLTradeMessage.Performative.DATA:
+            # encoding terms
+            terms_bytes = base64.b64decode(json_body["terms"])
+            terms = pickle.loads(terms_bytes)
+            body["terms"] = terms
+            # encoding data
+            data_bytes = base64.b64decode(json_body["data"])
+            data = pickle.loads(data_bytes)
+            body["data"] = data
         else:
             raise ValueError("Type not recognized.")
 

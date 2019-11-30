@@ -75,9 +75,8 @@ class MLTradeHandler(Handler):
         # TODO we assume the query matches what we have
         strategy = cast(Strategy, self.context.strategy)
         proposal = strategy.generate_terms(query)
-        logger.info("[{}]: sending sender={} a Terms message: {}".format(self.context.agent_name,
-                                                                         sender[-5:],
-                                                                         proposal.values))
+        logger.info("[{}]: sending to the public_key={} a Terms message: {}"
+                    .format(self.context.agent_name, sender[-5:], proposal.values))
         proposal_msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=proposal)
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
@@ -86,18 +85,20 @@ class MLTradeHandler(Handler):
 
     def _handle_accept(self, ml_msg, sender):
         """Handle accept."""
-        logger.debug("Got an Accept from {}: {}".format(sender, ml_msg))
         terms = ml_msg.get("terms")
+        logger.debug("Got an Accept from {}: {}".format(sender, terms.values))
         strategy = cast(Strategy, self.context.strategy)
 
-        # logger.info("[{}]: sending sender={} a Terms message: {}".format(self.context.agent_name,
-        #                                                                  sender[-5:],
-        #                                                                  proposal.values))
-        # proposal_msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=proposal)
-        # self.context.outbox.put_message(to=sender,
-        #                                 sender=self.context.agent_public_key,
-        #                                 protocol_id=MLTradeMessage.protocol_id,
-        #                                 message=MLTradeSerializer().encode(proposal_msg))
+        batch_size = terms.values["batch_size"]
+        data = strategy.sample_data(batch_size)
+        logger.info("[{}]: sending to public_key={} a Data message: shape={}"
+                    .format(self.context.agent_name, sender[-5:], data[0].shape))
+        data_msg = MLTradeMessage(performative=MLTradeMessage.Performative.DATA, terms=terms, data=data)
+
+        self.context.outbox.put_message(to=sender,
+                                        sender=self.context.agent_public_key,
+                                        protocol_id=MLTradeMessage.protocol_id,
+                                        message=MLTradeSerializer().encode(data_msg))
 
     def teardown(self) -> None:
         """

@@ -118,7 +118,7 @@ class ServiceRegistrationBehaviour(Behaviour):
                                         sender=self.context.agent_public_key,
                                         protocol_id=OEFMessage.protocol_id,
                                         message=OEFSerializer().encode(msg))
-        logger.info("[{}]: updating weather station services on OEF.".format(self.context.agent_name))
+        logger.info("[{}]: updating ml data provider service on OEF.".format(self.context.agent_name))
 
     def _unregister_service(self) -> None:
         """
@@ -136,7 +136,7 @@ class ServiceRegistrationBehaviour(Behaviour):
                                         sender=self.context.agent_public_key,
                                         protocol_id=OEFMessage.protocol_id,
                                         message=OEFSerializer().encode(msg))
-        logger.info("[{}]: unregistering weather station services from OEF.".format(self.context.agent_name))
+        logger.info("[{}]: unregistering ml data provider service from OEF.".format(self.context.agent_name))
         self._registered_service_description = None
 
     def _is_time_to_update_services(self) -> bool:

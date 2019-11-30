@@ -22,12 +22,12 @@ import logging
 import sys
 from typing import cast, TYPE_CHECKING, Optional, List, Dict
 
+import numpy as np
+
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
@@ -72,6 +72,8 @@ class TrainHandler(Handler):
         ml_msg_performative = MLTradeMessage.Performative(ml_msg.get("performative"))
         if ml_msg_performative == MLTradeMessage.Performative.TERMS:
             self._handle_terms(ml_msg, sender)
+        elif ml_msg_performative == MLTradeMessage.Performative.DATA:
+            self._handle_data(ml_msg, sender)
 
     def _handle_terms(self, msg: MLTradeMessage, sender: str):
         """Handle the terms of the request."""
@@ -102,6 +104,12 @@ class TrainHandler(Handler):
                                     terms=terms)
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
+
+    def _handle_data(self, msg: MLTradeMessage, sender: str):
+        """Handle the data."""
+        terms = cast(Description, msg.body.get("terms"))
+        data = cast(np.ndarray, msg.body.get("data"))
+        logger.debug("Received data message from {}: data shape={}, terms={}".format(sender, data[0].shape, terms.values))
 
     def teardown(self) -> None:
         """
@@ -156,7 +164,7 @@ class OEFHandler(Handler):
             logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
             strategy = cast(Strategy, self.context.strategy)
             # stopping search
-            strategy.is_searching = False
+            # strategy.is_searching = False
             # pick first agent found
             opponent_pbk = agents[0]
             query = strategy.get_service_query()
@@ -204,7 +212,7 @@ class MyTransactionHandler(Handler):
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."
-                        .format(self.context.agent_name, counterparty_pbk[-5:], transaction_digest, terms))
+                        .format(self.context.agent_name, counterparty_pbk[-5:], transaction_digest, terms.values))
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 
