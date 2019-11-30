@@ -1,9 +1,9 @@
 pre {
-  background-color: #f8f8f7;
+    background-color: #f8f8f7;
 }
 
 code {
-  background-color: #0083fb;
+    background-color: #0083fb;
 }
 
 /* this doesn't work now
@@ -14,20 +14,18 @@ code {
 */
 
 /* Katharine's css additions */
-.md-header, .md-tabs, .md-footer-meta, .md-footer-nav, .md-footer-nav__inner {
-	background-color:  #172b6e; 
+.md-header,
+.md-tabs,
+.md-footer-meta,
+.md-footer-nav,
+.md-footer-nav__inner {
+    background-color: #172b6e;
 }
 
 .md-nav__title {
-	color:  #172b6e;
+    color: #172b6e;
 }
 
 .md-icon {
-	./assets/images/favicon.ico
-}
-
-/* Needed so that Mermaid UML diagrams don't end up being massively tall */
-svg{
-    height: auto;
-
+    ./assets/images/favicon.ico;
 }

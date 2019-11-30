@@ -1,6 +1,7 @@
-### InBox and OutBox
+### MailBox
 
-The `InBox` and `OutBox` are, respectively, queues for incoming and outgoing `Envelopes`.
+A `MailBox` contains `InBox` and `OutBox` queues containing `Envelopes`.
+
 
 ### Envelope
 
@@ -34,7 +35,7 @@ A number of protocols come packaged up with the AEA framework.
 
 Connections wrap an external SDK or API and manage messaging. As such, they allow the agent to connect to an external service with an exposed Python SDK/API.
 
-The module `connections/base.py` contains the abstract class which define a `Connection`. A `Connection` acts as a bridge to the SDK or API to be wrapped, and is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service.
+The module `connections/base.py` contains two abstract classes which define a `Channel` and a `Connection`. A `Connection` contains one `Channel`, which acts as a bridge to the SDK or API to be wrapped. The `Channel` is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service.
 
 The framework provides a number of default connections.
 

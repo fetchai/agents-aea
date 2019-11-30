@@ -1,5 +1,7 @@
-!!!	Note
-	Work in progress.
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>Work in progress.</p>
+</div>
 
 The AEA FIPA skill demonstrates how FIPA negotiation strategies may be embedded into an Autonomous Economic Agent.
 
@@ -7,39 +9,39 @@ The AEA FIPA skill demonstrates how FIPA negotiation strategies may be embedded 
 
 The FIPA skill `skill.yaml` configuration file looks like this.
 
-``` yaml
+```yaml
 name: 'fipa_negotiation'
 authors: Fetch.ai Limited
 version: 0.1.0
 license: Apache 2.0
-url: ""
+url: ''
 behaviours:
-  - behaviour:
-      class_name: GoodsRegisterAndSearchBehaviour
-      args:
-        services_interval: 5
+    - behaviour:
+          class_name: GoodsRegisterAndSearchBehaviour
+          args:
+              services_interval: 5
 handlers:
-  - handler:
-      class_name: FIPANegotiationHandler
-      args: {}
+    - handler:
+          class_name: FIPANegotiationHandler
+          args: {}
 tasks:
-  - task:
-      class_name: TransactionCleanUpTask
-      args: {}
+    - task:
+          class_name: TransactionCleanUpTask
+          args: {}
 shared_classes:
-  - shared_class:
-      class_name: Search
-      args: {}
-  - shared_class:
-      class_name: Strategy
-      args: {}
-  - shared_class:
-      class_name: Dialogues
-      args: {}
-  - shared_class:
-      class_name: Transactions
-      args: 
-        pending_transaction_timeout: 30
+    - shared_class:
+          class_name: Search
+          args: {}
+    - shared_class:
+          class_name: Strategy
+          args: {}
+    - shared_class:
+          class_name: Dialogues
+          args: {}
+    - shared_class:
+          class_name: Transactions
+          args:
+              pending_transaction_timeout: 30
 protocols: ['oef', 'fipa']
 ```
 
@@ -73,42 +75,43 @@ It also provides methods for defining what goods agents are looking for and what
 
 This class deals with representing potential transactions between agents.
 
-
 ## Demo instructions
 
-!!!	Warn
-	FIPA negotiation skill is not fully developed.
-
+!!! Warn
+FIPA negotiation skill is not fully developed.
 
 Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
 
-
 Then, download the examples and packages directory.
-``` bash
+
+```bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
 ### Create the agent
+
 In the root directory, create the FIPA agent.
-``` bash
+
+```bash
 aea create my_fipa_agent
 ```
 
+### Add the FIPA skill
 
-### Add the FIPA skill 
-``` bash
+```bash
 cd my_fipa_agent
 aea add skill fipa_negotiation
 ```
 
 ### Add the local connection
-``` bash
+
+```bash
 aea add connection local
 ```
 
 ### Run the agent with the default connection
 
-``` bash
+```bash
 aea run --connection local
 ```
 
@@ -122,10 +125,9 @@ You will see the FIPA logs.
 
 When you're done, go up a level and delete the agent.
 
-``` bash
+```bash
 cd ..
 aea delete my_fipa_agent
 ```
-
 
 <br/>
