@@ -1,6 +1,5 @@
 # CLI commands
 
-
 | Command                                     | Description                                                                  |		
 | ------------------------------------------- | ---------------------------------------------------------------------------- |		
 | `add connection/protocol/skill [name]`      | Add connection, protocol, or skill, called `[name]`, to the agent.           |	
@@ -19,7 +18,7 @@
 | `scaffold connection/protocol/skill [name]` | Scaffold a new connection, protocol, or skill called `[name]`.               |		
 | `-v DEBUG run`                              | Run with debugging.                                                          |
 
-<!-- 
+<!--
 Command  | Description
 ---------| -----------------------------------------------------------------
 `add connection/protocol/skill [name]`  | Add connection, protocol, or skill, called `[name]`, to the agent.
@@ -40,7 +39,6 @@ Command  | Description
 `search protocols/connections/skills` | Search for components in the registry.
 `scaffold connection/protocol/skill [name]`  | Scaffold a new connection, protocol, or skill called `[name]`.
 `-v DEBUG run` | Run with debugging.
-
  -->
 
 <div class="admonition tip">

@@ -36,8 +36,6 @@ Outside of these, the developer is free to implement the agent protocols in any 
   <p>Coming soon.</p>
 </div>
 
-
-
 ## `oef` protocol
 
 The `oef` helps agents to search for and find other agents and (for now) talk to them via different protocols.
@@ -85,9 +83,6 @@ class OEFErrorOperation(Enum):
 ```
 
 A `models.py` module is provided by the `oef` protocol which includes classes and methods commonly required by OEF agents. These includes a class for serialising json and classes for implementing the OEF query language such as `Attribute`, `Query`, etc. 
-
-
-
 
 ## `fipa` protocol
 

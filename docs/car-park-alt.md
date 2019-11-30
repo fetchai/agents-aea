@@ -1,22 +1,17 @@
-!!!	Warning
+!!!Warning
 Work in progress.
-
-
 
 # Car Park Agent Application
 
 The Fetch.ai car park agent application is made up of three components:
 
-* A Raspberry Pi hardware device with camera module viewing a car park.
-* A car park agent GUI running on the Raspberry Pi that collects data on free spaces and serves it up for purchase on the Fetch.ai network.
-* A remote client agent GUI that connects to the Raspberry Pi and buys data.
-
+- A Raspberry Pi hardware device with camera module viewing a car park.
+- A car park agent GUI running on the Raspberry Pi that collects data on free spaces and serves it up for purchase on the Fetch.ai network.
+- A remote client agent GUI that connects to the Raspberry Pi and buys data.
 
 | Hardware                                            |               Car Park Agent GUI               |                 Client Agent GUI                 |		
 | --------------------------------------------------- | :--------------------------------------------: | :----------------------------------------------: |		
 | <img src="../assets/device_small.jpg" height="150"> | <img src="../assets/pi_live.jpg" height="150"> | <img src="../assets/client_04.jpg" height="150"> |
-
-
 
 ## Raspberry Pi hardware set up
 
@@ -58,7 +53,6 @@ Enable the Camera, SSH, and VNC options.
 <img src="../assets/config_dlg.png" />
 </center>
 
-
 ### Set up camera module
 
 Follow the manufacturer's instructions to set up the Raspberry Pi Camera module: <a href="https://projects.raspberrypi.org/en/projects/getting-started-with-picamera" target=_blank>https://projects.raspberrypi.org/en/projects/getting-started-with-picamera</a>.
@@ -76,6 +70,7 @@ Set up your Pi to physically view the car park. We'll leave that to you.
 ```bash
 sudo raspi-config
 ```
+
 Select the `1920X1080` resolution option - number 31. 
 
 Then update the configuration file as follows. Open it.
@@ -83,6 +78,7 @@ Then update the configuration file as follows. Open it.
 ```bash
 sudo nano /boot/config.txt
 ```
+
 And make sure the following three lines are commented out.
 
 ```bash
@@ -110,6 +106,7 @@ This is required for the machine learning algorithms.
 ```bash
 ./car_detection/weights/download_weights.sh
 ```
+
 Install the required libraries.
 
 ```bash
@@ -135,7 +132,6 @@ python setup.py develop
   <p>We recommend that using `develop` as this creates a link to the code and so any changes you make will take immediate effect when you run the code.</p>
 </div> 
 
-
 ### Run it
 
 ```bash
@@ -146,7 +142,7 @@ You should now see the agent running.
 
 ### Ensure agent start on boot (RPi4 only)
 
-Ensure the startup script runs whenever we the Raspberry Pi turns on. 
+Ensure the startup script runs whenever we the Raspberry Pi turns on.
 
 ```bash
 crontab -e
@@ -158,7 +154,6 @@ Pick an editor which will open a text file. Scroll to the bottom and add the fol
 ```
 
 Save and reboot. The agent should now start automatically on reboot.
-
 
 ### Get the Pi's ip address
 
@@ -175,6 +170,7 @@ wlan0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 	inet 192.168.11.9  netmask 255.255.255.0  broadcast 192.168.11.255
 ...
 ```
+
 The `inet` value is the Raspberry Pi's ip address.  
 
 

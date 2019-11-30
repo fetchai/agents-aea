@@ -77,7 +77,7 @@ This class deals with representing potential transactions between agents.
 
 ## Demo instructions
 
-!!!Warn
+!!!Warning
 FIPA negotiation skill is not fully developed.
 
 Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
@@ -125,7 +125,7 @@ You will see the FIPA logs.
 
 When you're done, go up a level and delete the agent.
 
-``` bash
+```bash
 cd ..
 aea delete my_fipa_agent
 ```
