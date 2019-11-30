@@ -227,7 +227,6 @@ dependencies: []
 
 We place this code in `my_agent/skills/my_search/skill.yaml`.
 
-
 ## Step 6: Add the oef protocol
 
 Our agent does not have the oef protocol yet so let's add it.

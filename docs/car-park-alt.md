@@ -174,7 +174,7 @@ wlan0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
 ...
 ```
 
-The `inet` value is the Raspberry Pi's ip address.  
+The `inet` value is the Raspberry Pi's ip address.
 
 <!--
 ### Get the code
