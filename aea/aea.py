@@ -196,8 +196,8 @@ class AEA(Agent):
         :return None
         """
         # TODO: task should be submitted by the behaviours and handlers
-        # for task in self.filter.get_active_tasks():
-        #     task.execute()
+        for task in self.filter.get_active_tasks():
+            task.execute()
         self.decision_maker.execute()
         self.filter.handle_internal_messages()
 
