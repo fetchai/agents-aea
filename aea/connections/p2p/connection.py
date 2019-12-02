@@ -167,7 +167,8 @@ class PeerToPeerConnection(Connection):
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         try:
             assert self.loop is not None
-            envelope = await self.loop.run_in_executor(None, self.channel.in_queue.get(block=True))
+            envelope = await self.loop.run_until_complete(self.channel.in_queue.get(block=True))
+
             return envelope
         except CancelledError:
             return None

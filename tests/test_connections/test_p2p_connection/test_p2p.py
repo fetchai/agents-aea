@@ -19,13 +19,16 @@
 # ------------------------------------------------------------------------------
 
 """Peer to Peer connection and channel."""
+import asyncio
+import time
+
 from aea.connections.p2p.connection import PeerToPeerConnection
 from unittest import mock
 import logging
 from fetchai.ledger.crypto import entity
 import pytest
 
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Multiplexer
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +47,9 @@ class TestP2p:
                                                   provider_addr=cls.address,
                                                   provider_port=cls.port)
 
+        cls.agent_multiplexer = Multiplexer([cls.p2p_connection])
+        cls.agent_multiplexer.connect()
+
     def test_initialization(self):
         """Test the initialisation of the class."""
         assert self.p2p_connection.public_key == self.ent.public_key_hex
@@ -53,7 +59,7 @@ class TestP2p:
         with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.register") as mocked_register:
             mocked_register.return_value = {"status": "OK"}
             self.p2p_connection.connect()
-            assert self.p2p_connection.connection_status.is_connected is True
+            assert self.p2p_connection.connection_status.is_connected
 
     def test_disconnect(self):
         """Test the disconnect from the p2p connection."""
@@ -78,20 +84,20 @@ class TestP2p:
             # TODO: Consider returning the response from the server in order to be able to assert that the message send!
             assert self.p2p_connection._connection.empty() is True
 
-    # @pytest.mark.asyncio
-    # async def test_receive(self):
-    #     """Test the receive functionality of the p2p connection."""
-    #
-    #     s_msg = {"FROM": {"NODE_ADDRESS": "node_address",
-    #                       "SENDER_ADDRESS": "sender_address"},
-    #              "TO": {"NODE_ADDRESS": "node_address",
-    #                     "RECEIVER_ADDRESS": "receiver_address"},
-    #              "PROTOCOL": "protocol",
-    #              "CONTEXT": "context",
-    #              "PAYLOAD": "payload"}
-    #     messages = [s_msg]
-    #     with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.get_messages") as mocked_get_messages:
-    #         mocked_get_messages.return_value = messages
-    #         env = await self.p2p_connection.receive()
-    #         logger.info(env)
-    #         assert env.get("PROTOCOL") == "protocol"
+    @pytest.mark.asyncio
+    async def test_receive(self):
+        """Test the receive functionality of the p2p connection."""
+
+        s_msg = {"FROM": {"NODE_ADDRESS": "node_address",
+                          "SENDER_ADDRESS": "sender_address"},
+                 "TO": {"NODE_ADDRESS": "node_address",
+                        "RECEIVER_ADDRESS": "receiver_address"},
+                 "PROTOCOL": "protocol",
+                 "CONTEXT": "context",
+                 "PAYLOAD": "payload"}
+        messages = [s_msg]
+
+        with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.get_messages") as mocked_get_messages:
+            mocked_get_messages.return_value = messages
+            messages = asyncio.ensure_future(self.p2p_connection.channel.receive())
+            assert messages is not None
