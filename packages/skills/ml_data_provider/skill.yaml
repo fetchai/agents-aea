@@ -24,7 +24,7 @@ shared_classes:
         dataset_id: 'fmnist'
         currency_pbk: 'FET'
         ledger_id: 'fetchai'
-protocols: ['oef']
+protocols: ['oef', 'ml_trade']
 dependencies:
   - tensorflow
   - numpy

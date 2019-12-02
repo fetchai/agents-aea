@@ -86,8 +86,7 @@ class TCPServerConnection(TCPConnection):
 
         try:
             logger.debug("Waiting for incoming messages...")
-            done, pending = await asyncio.wait(self._read_tasks_to_public_key.keys(),
-                                               return_when=asyncio.FIRST_COMPLETED)
+            done, pending = await asyncio.wait(self._read_tasks_to_public_key.keys(), return_when=asyncio.FIRST_COMPLETED)  # type: ignore
 
             # take the first
             task = next(iter(done))
