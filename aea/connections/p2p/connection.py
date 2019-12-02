@@ -76,6 +76,7 @@ class PeerToPeerChannel:
     def try_register(self) -> bool:
         """Try to register to the provider."""
         try:
+            assert self._httpCall is not None
             logger.info(self.public_key)
             query = self._httpCall.register(sender_address=self.public_key, mailbox=True)
             return query['status'] == "OK"
@@ -90,6 +91,7 @@ class PeerToPeerChannel:
         :param envelope: the envelope
         :return: None
         """
+        assert self._httpCall is not None
         self._httpCall.send_message(sender_address=envelope.sender,
                                     receiver_address=envelope.to,
                                     protocol=envelope.protocol_id,
@@ -98,6 +100,9 @@ class PeerToPeerChannel:
 
     def receiving_loop(self) -> None:
         """Receive the messages from the provider."""
+        assert self._httpCall is not None
+        assert self.in_queue is not None
+        assert self.loop is not None
         while not self.stopped:
             messages = self._httpCall.get_messages(sender_address=self.public_key)  # type: List[Dict[str, Any]]
             for message in messages:
@@ -116,6 +121,7 @@ class PeerToPeerChannel:
 
         :return: None
         """
+        assert self._httpCall is not None
         with self.lock:
             if not self.stopped:
                 self._httpCall.unregister(self.public_key)
@@ -182,10 +188,11 @@ class PeerToPeerConnection(Connection):
         """
         if not self.connection_status.is_connected:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
+        assert self.channel.in_queue is not None
         try:
             envelope = await self.channel.in_queue.get()
             if envelope is None:
-                return
+                return None
 
             return envelope
         except CancelledError:
