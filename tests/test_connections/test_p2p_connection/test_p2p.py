@@ -20,19 +20,21 @@
 
 """Peer to Peer connection and channel."""
 import asyncio
-import time
+import logging
+from unittest import mock
+from unittest.mock import MagicMock
+
+import fetch.p2p.api.http_calls
+import pytest
+from fetchai.ledger.crypto import entity
 
 from aea.connections.p2p.connection import PeerToPeerConnection
-from unittest import mock
-import logging
-from fetchai.ledger.crypto import entity
-import pytest
-
-from aea.mail.base import Envelope, Multiplexer
+from aea.mail.base import Envelope
 
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.asyncio
 class TestP2p:
     """Contains the test for the p2p connection."""
 
@@ -47,57 +49,64 @@ class TestP2p:
                                                   provider_addr=cls.address,
                                                   provider_port=cls.port)
 
-        cls.agent_multiplexer = Multiplexer([cls.p2p_connection])
-        cls.agent_multiplexer.connect()
-
-    def test_initialization(self):
+    async def test_initialization(self):
         """Test the initialisation of the class."""
         assert self.p2p_connection.public_key == self.ent.public_key_hex
 
-    def test_connect(self):
-        """Test the connection to the search service."""
-        with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.register") as mocked_register:
-            mocked_register.return_value = {"status": "OK"}
-            self.p2p_connection.connect()
-            assert self.p2p_connection.connection_status.is_connected
+    async def test_connection(self):
+        """Test the connection and disconnection from the p2p connection."""
+        with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=[]):
+            with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "register", return_value={'status': 'OK'}):
+                await self.p2p_connection.connect()
 
-    def test_disconnect(self):
-        """Test the disconnect from the p2p connection."""
-        with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.register") as mocked_register:
-            mocked_register.return_value = {"status": "OK"}
-            self.p2p_connection.connect()
-        with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.unregister")as mocked_unregister:
-            mocked_unregister.return_value = {'status': 'OK'}
-            self.p2p_connection.disconnect()
-            assert self.p2p_connection.connection_status.is_connected is False
-
-    @pytest.mark.asyncio
     async def test_send(self):
         """Test the send functionality of the p2p connection."""
-        with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.register") as mocked_register:
-            mocked_register.return_value = {"status": "OK"}
-            self.p2p_connection.connect()
         envelope = Envelope(to="receiver", sender="sender", protocol_id="protocol", message=b"Hello")
-        with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.send_message") as mocked_send_message:
-            mocked_send_message.return_value = {'status': 'OK'}
-            await self.p2p_connection.send(envelope=envelope)
-            # TODO: Consider returning the response from the server in order to be able to assert that the message send!
-            assert self.p2p_connection._connection.empty() is True
+        with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=[]):
+            with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "send_message", return_value={'status': 'OK'}):
+                await self.p2p_connection.send(envelope=envelope)
+                # TODO: Consider returning the response from the server in order to be able to assert that the message send!
+                # assert self.p2p_connection._connection.empty() is True
 
-    @pytest.mark.asyncio
-    async def test_receive(self):
-        """Test the receive functionality of the p2p connection."""
+    async def test_disconnect(self):
+        """Test the connection and disconnection from the p2p connection."""
+        with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "unregister", return_value={'status': 'OK'}):
+            await self.p2p_connection.disconnect()
+            assert self.p2p_connection.connection_status.is_connected is False
 
-        s_msg = {"FROM": {"NODE_ADDRESS": "node_address",
-                          "SENDER_ADDRESS": "sender_address"},
-                 "TO": {"NODE_ADDRESS": "node_address",
-                        "RECEIVER_ADDRESS": "receiver_address"},
-                 "PROTOCOL": "protocol",
-                 "CONTEXT": "context",
-                 "PAYLOAD": "payload"}
-        messages = [s_msg]
 
-        with mock.patch("fetch.p2p.api.http_calls.HTTPCalls.get_messages") as mocked_get_messages:
-            mocked_get_messages.return_value = messages
-            messages = asyncio.ensure_future(self.p2p_connection.channel.receive())
-            assert messages is not None
+@pytest.mark.asyncio
+async def test_p2p_receive():
+    """Test receive from p2p connection."""
+    address = "127.0.0.1"
+    port = 8000
+    m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
+    ent = entity.Entity.from_hex(m_fet_key)
+    p2p_connection = PeerToPeerConnection(public_key=ent.public_key_hex, provider_addr=address, provider_port=port)
+    p2p_connection.loop = asyncio.get_running_loop()
+
+    fake_get_messages_empty = MagicMock(return_value=[])
+
+    s_msg = {"FROM": {"NODE_ADDRESS": "node_address",
+                      "SENDER_ADDRESS": "sender_address"},
+             "TO": {"NODE_ADDRESS": "node_address",
+                    "RECEIVER_ADDRESS": "receiver_address"},
+             "PROTOCOL": "protocol",
+             "CONTEXT": "context",
+             "PAYLOAD": "payload"}
+    messages = [s_msg]
+
+    with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=[]):
+        with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "register", return_value={'status': 'OK'}):
+            await p2p_connection.connect()
+            p2p_connection.channel._httpCall.get_messages = fake_get_messages_empty
+
+    with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=messages) as mock_receive:
+        p2p_connection.channel._httpCall.get_messages = mock_receive
+        await asyncio.sleep(1.0)
+        envelope = await p2p_connection.receive()
+        assert envelope is not None
+
+    p2p_connection.channel._httpCall.get_messages = fake_get_messages_empty
+    with mock.patch.object(fetch.p2p.api.http_calls.HTTPCalls, "unregister", return_value={'status': 'OK'}):
+        await p2p_connection.disconnect()

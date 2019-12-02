@@ -23,15 +23,17 @@
 # TODO: reintroduce p2p and add api
 import asyncio
 import logging
+import threading
+import time
 from asyncio import CancelledError
-from queue import Queue
+from threading import Thread
 from typing import Optional, cast, Dict, List, Any, Set
 
 from fetch.p2p.api.http_calls import HTTPCalls
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, AEAConnectionError
 
 logger = logging.getLogger(__name__)
 
@@ -48,20 +50,28 @@ class PeerToPeerChannel:
         self.public_key = public_key
         self.provider_addr = provider_addr
         self.provider_port = provider_port
-        self.in_queue = Queue()  # type: Queue
-        self._httpCall = None  # type: HTTPCalls
+        self.in_queue = None  # type: Optional[asyncio.Queue]
+        self.loop = None  # type: Optional[asyncio.AbstractEventLoop]
+        self._httpCall = None  # type: Optional[HTTPCalls]
+
+        self.thread = Thread(target=self.receiving_loop)
+        self.lock = threading.Lock()
+        self.stopped = True
         logger.info("Initialised the peer to peer channel")
 
-    def connect(self) -> Optional[Queue]:
+    def connect(self):
         """
         Connect.
 
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        self._httpCall = HTTPCalls(server_address=self.provider_addr, port=self.provider_port)
-        logger.info("Connected")
-        self.try_register()
-        return self.in_queue
+        with self.lock:
+            if self.stopped:
+                self._httpCall = HTTPCalls(server_address=self.provider_addr, port=self.provider_port)
+                self.stopped = False
+                self.thread.start()
+                logger.debug("P2P Channel is connected.")
+                self.try_register()
 
     def try_register(self) -> bool:
         """Try to register to the provider."""
@@ -71,7 +81,7 @@ class PeerToPeerChannel:
             return query['status'] == "OK"
         except Exception:
             logger.warning("Could not register to the provider.")
-            return False
+            raise AEAConnectionError()
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -86,16 +96,19 @@ class PeerToPeerChannel:
                                     context=b"None",
                                     payload=envelope.message)
 
-    def receive(self) -> None:
+    def receiving_loop(self) -> None:
         """Receive the messages from the provider."""
-        messages = self._httpCall.get_messages(sender_address=self.public_key)  # type: List[Dict[str, Any]]
-        for message in messages:
-            logger.info(message)
-            envelope = Envelope(to=message['TO']['RECEIVER_ADDRESS'],
-                                sender=message['FROM']['SENDER_ADDRESS'],
-                                protocol_id=message['PROTOCOL'],
-                                message=message['PAYLOAD'])
-            self.in_queue.put(envelope)
+        while not self.stopped:
+            messages = self._httpCall.get_messages(sender_address=self.public_key)  # type: List[Dict[str, Any]]
+            for message in messages:
+                logger.debug("Received message: {}".format(message))
+                envelope = Envelope(to=message['TO']['RECEIVER_ADDRESS'],
+                                    sender=message['FROM']['SENDER_ADDRESS'],
+                                    protocol_id=message['PROTOCOL'],
+                                    message=message['PAYLOAD'])
+                asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+            time.sleep(0.5)
+        logger.debug("Receiving loop stopped.")
 
     def disconnect(self) -> None:
         """
@@ -103,8 +116,12 @@ class PeerToPeerChannel:
 
         :return: None
         """
-        self._httpCall.unregister(self.public_key)
-        # self._httpCall.disconnect()
+        with self.lock:
+            if not self.stopped:
+                self._httpCall.unregister(self.public_key)
+                # self._httpCall.disconnect()
+                self.stopped = True
+                self.thread.join()
 
 
 class PeerToPeerConnection(Connection):
@@ -122,10 +139,8 @@ class PeerToPeerConnection(Connection):
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self.channel = PeerToPeerChannel(public_key, provider_addr, provider_port)
         self.public_key = public_key
-        self._connection = None  # type: Optional[Queue]
-        self.loop = asyncio.get_event_loop()
 
-    def connect(self) -> None:
+    async def connect(self) -> None:
         """
         Connect to the gym.
 
@@ -133,9 +148,11 @@ class PeerToPeerConnection(Connection):
         """
         if not self.connection_status.is_connected:
             self.connection_status.is_connected = True
-            self._connection = self.channel.connect()
+            self.channel.in_queue = asyncio.Queue()
+            self.channel.loop = self.loop
+            self.channel.connect()
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """
         Disconnect from P2P.
 
@@ -166,8 +183,9 @@ class PeerToPeerConnection(Connection):
         if not self.connection_status.is_connected:
             raise ConnectionError("Connection not established yet. Please use 'connect()'.")
         try:
-            assert self.loop is not None
-            envelope = await self.loop.run_until_complete(self.channel.in_queue.get(block=True))
+            envelope = await self.channel.in_queue.get()
+            if envelope is None:
+                return
 
             return envelope
         except CancelledError:
@@ -179,7 +197,7 @@ class PeerToPeerConnection(Connection):
 
         :return: None
         """
-        self._connection = None
+        self.channel.disconnect()
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
