@@ -83,7 +83,7 @@ async def test_p2p_receive():
     m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
     ent = entity.Entity.from_hex(m_fet_key)
     p2p_connection = PeerToPeerConnection(public_key=ent.public_key_hex, provider_addr=address, provider_port=port)
-    p2p_connection.loop = asyncio.get_running_loop()
+    p2p_connection.loop = asyncio.get_event_loop()
 
     fake_get_messages_empty = MagicMock(return_value=[])
 

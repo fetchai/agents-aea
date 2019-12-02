@@ -128,7 +128,6 @@ setup(
         *all_extras.get("crypto", []),
         *all_extras.get("cli", []),
         *all_extras.get("oef_connection", []),
-        "fetch-p2p-api==0.0.1"
     ],
     tests_require=["tox"],
     extras_require=all_extras,

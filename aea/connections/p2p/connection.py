@@ -20,7 +20,6 @@
 
 """Peer to Peer connection and channel."""
 
-# TODO: reintroduce p2p and add api
 import asyncio
 import logging
 import threading
