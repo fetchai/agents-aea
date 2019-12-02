@@ -20,7 +20,7 @@
 """This module contains the strategy class."""
 import datetime
 
-from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType
+from aea.protocols.oef.models import Attribute, DataModel, Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
 
 DEFAULT_DATASET_ID = 'UK'

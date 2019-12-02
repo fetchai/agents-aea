@@ -20,7 +20,7 @@
 """This module contains the handler for the 'gym' skill."""
 import logging
 import sys
-from typing import cast, TYPE_CHECKING, Optional, List, Dict
+from typing import cast, TYPE_CHECKING, Optional, List, Dict, Tuple
 
 import numpy as np
 
@@ -81,10 +81,10 @@ class TrainHandler(Handler):
         terms = cast(Description, msg.body.get("terms"))
         logger.debug("Received terms message from {}: terms={}".format(sender, terms.values))
 
-        ledger_id = terms.values["ledger_id"]
-        amount = terms.values["price"]
-        address = terms.values["address"]
-
+        # ledger_id = terms.values["ledger_id"]
+        # amount = terms.values["price"]
+        # address = terms.values["address"]
+        #
         # tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
         #                             skill_id=self.context._skill.config.name,
         #                             transaction_id="transaction0",
@@ -119,7 +119,7 @@ class TrainHandler(Handler):
     def _handle_data(self, msg: MLTradeMessage, sender: str):
         """Handle the data."""
         terms = cast(Description, msg.body.get("terms"))
-        data = cast(tuple, msg.body.get("data"))
+        data = cast(Tuple[np.ndarray, np.ndarray], msg.body.get("data"))
         logger.debug("Received data message from {}: data shape={}, terms={}".format(sender, data[0].shape, terms.values))
         training_task = MLTrainTask(data, skill_context=self.context)
         self.context.task_queue.put(training_task)
@@ -131,7 +131,6 @@ class TrainHandler(Handler):
         :return: None
         """
         logger.info("Train handler: teardown method called.")
-
 
 
 class OEFHandler(Handler):

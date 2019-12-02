@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-import json
 import threading
 from pathlib import Path
 
@@ -53,6 +52,7 @@ class Model(SharedClass):
 
     @property
     def tf_model(self) -> keras.Model:
+        """Get the TensorFlow model."""
         with self._lock:
             return self._model
 

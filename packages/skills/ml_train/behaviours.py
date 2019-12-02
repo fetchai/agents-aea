@@ -19,17 +19,15 @@
 
 """This package contains a the behaviours."""
 
-import datetime
 import logging
 import sys
-from typing import cast, Optional, TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
-from aea.skills.base import Behaviour
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.skills.base import Behaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.ml_train.strategy import Strategy

@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-from typing import Tuple
 
 import numpy as np
 from tensorflow import keras

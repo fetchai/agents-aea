@@ -70,7 +70,6 @@ class TaskManager:
             future = self._executor.submit(next_task.execute)
             self.futures.append(future)
 
-
     def start(self) -> None:
         """Start the task manager."""
         with self.lock:

@@ -23,8 +23,6 @@ import sys
 from typing import cast, TYPE_CHECKING
 
 from aea.protocols.base import Message
-from aea.protocols.default.message import DefaultMessage
-from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
@@ -107,4 +105,3 @@ class MLTradeHandler(Handler):
         :return: None
         """
         logger.info("MLTrade handler: teardown method called.")
-
