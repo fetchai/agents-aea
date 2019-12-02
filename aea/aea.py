@@ -84,7 +84,8 @@ class AEA(Agent):
                                      self.decision_maker.message_in_queue,
                                      self.decision_maker.ownership_state,
                                      self.decision_maker.preferences,
-                                     self.decision_maker.goal_pursuit_readiness)
+                                     self.decision_maker.goal_pursuit_readiness,
+                                     self._task_manager.task_queue)
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
@@ -113,6 +114,11 @@ class AEA(Agent):
         """Get filter."""
         return self._filter
 
+    @property
+    def task_manager(self) -> TaskManager:
+        """Get the task manager."""
+        return self._task_manager
+
     def setup(self) -> None:
         """
         Set up the agent.
@@ -121,6 +127,7 @@ class AEA(Agent):
         """
         self.resources.load(self.context)
         self.resources.setup()
+        self.task_manager.start()
 
     def act(self) -> None:
         """
@@ -200,5 +207,6 @@ class AEA(Agent):
 
         :return: None
         """
+        self.task_manager.stop()
         if self._resources is not None:
             self._resources.teardown()

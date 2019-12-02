@@ -37,5 +37,25 @@ class Model(SharedClass):
         self._model_config_path = kwargs.pop("model_config_path", DEFAULT_MODEL_CONFIG_PATH)
         super().__init__(**kwargs)
 
-        self._model = keras.Model.from_config(json.load(open(self._model_config_path)))
+        # TODO this at the momment does not work - need to compile the model according to the network configuration
+        #      A better alternative is to save/load in HDF5 format, but that might require some system level dependencies
+        #      https://keras.io/getting-started/faq/#how-can-i-install-hdf5-or-h5py-to-save-my-models-in-keras
+        # self._model = keras.Model.from_config(json.load(open(self._model_config_path)))
+        self._model = keras.Sequential([
+            keras.layers.Flatten(input_shape=(28, 28)),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dense(10, activation='softmax')
+        ])
+        self._model.compile(optimizer='adam',
+                            loss='sparse_categorical_crossentropy',
+                            metrics=['accuracy'])
         self._lock = threading.Lock()
+
+    @property
+    def tf_model(self) -> keras.Model:
+        with self._lock:
+            return self._model
+
+    def save(self):
+        """Save the model weights."""
+        self._model.

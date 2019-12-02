@@ -36,12 +36,13 @@ if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.ml_trade.message import MLTradeMessage
     from packages.protocols.ml_trade.serialization import MLTradeSerializer
     from packages.skills.ml_train.strategy import Strategy
+    from packages.skills.ml_train.tasks import MLTrainTask
     # from packages.skills.ml_train.tasks import MLTask
 else:
     from ml_trade_protocol.message import MLTradeMessage
     from ml_trade_protocol.serialization import MLTradeSerializer
     from ml_train_skill.strategy import Strategy
-    # from gym_skill.tasks import GymTask
+    from ml_train_skill.tasks import MLTrainTask
 
 logger = logging.getLogger("aea.ml_train_skill")
 
@@ -84,32 +85,44 @@ class TrainHandler(Handler):
         amount = terms.values["price"]
         address = terms.values["address"]
 
-        tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                    skill_id=self.context._skill.config.name,
-                                    transaction_id="transaction0",
-                                    sender=self.context.agent_public_keys[ledger_id],
-                                    counterparty=address,
-                                    is_sender_buyer=True,
-                                    currency_pbk=terms.values['currency_pbk'],
-                                    amount=amount,
-                                    sender_tx_fee=self.context.strategy.max_tx_fee,
-                                    counterparty_tx_fee=terms.values["seller_tx_fee"],
-                                    # TODO the following parameter should be removed and refactored properly.
-                                    quantities_by_good_pbk={},
-                                    ledger_id=ledger_id,
-                                    # this is used to retrieve the opponent address later
-                                    dialogue_label=DialogueLabel(('',''), sender, self.context.agent_public_key).json,
-                                    # this is used to send the terms later - because the seller is stateless and must know
-                                    # what terms have been accepted
-                                    terms=terms)
-        self.context.decision_maker_message_queue.put_nowait(tx_msg)
-        logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
+        # tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+        #                             skill_id=self.context._skill.config.name,
+        #                             transaction_id="transaction0",
+        #                             sender=self.context.agent_public_keys[ledger_id],
+        #                             counterparty=address,
+        #                             is_sender_buyer=True,
+        #                             currency_pbk=terms.values['currency_pbk'],
+        #                             amount=amount,
+        #                             sender_tx_fee=self.context.strategy.max_tx_fee,
+        #                             counterparty_tx_fee=terms.values["seller_tx_fee"],
+        #                             # TODO the following parameter should be removed and refactored properly.
+        #                             quantities_by_good_pbk={},
+        #                             ledger_id=ledger_id,
+        #                             # this is used to retrieve the opponent address later
+        #                             dialogue_label=DialogueLabel(('',''), sender, self.context.agent_public_key).json,
+        #                             # this is used to send the terms later - because the seller is stateless and must know
+        #                             # what terms have been accepted
+        #                             terms=terms)
+        # self.context.decision_maker_message_queue.put_nowait(tx_msg)
+        # logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
+
+        ml_accept = MLTradeMessage(
+            performative=MLTradeMessage.Performative.ACCEPT,
+            tx_digest="blablabla",
+            terms=terms
+        )
+        self.context.outbox.put_message(to=sender,
+                                        sender=self.context.agent_public_key,
+                                        protocol_id=MLTradeMessage.protocol_id,
+                                        message=MLTradeSerializer().encode(ml_accept))
 
     def _handle_data(self, msg: MLTradeMessage, sender: str):
         """Handle the data."""
         terms = cast(Description, msg.body.get("terms"))
-        data = cast(np.ndarray, msg.body.get("data"))
+        data = cast(tuple, msg.body.get("data"))
         logger.debug("Received data message from {}: data shape={}, terms={}".format(sender, data[0].shape, terms.values))
+        training_task = MLTrainTask(data, skill_context=self.context)
+        self.context.task_queue.put(training_task)
 
     def teardown(self) -> None:
         """
@@ -118,6 +131,7 @@ class TrainHandler(Handler):
         :return: None
         """
         logger.info("Train handler: teardown method called.")
+
 
 
 class OEFHandler(Handler):

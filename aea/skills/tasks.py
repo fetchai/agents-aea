@@ -17,6 +17,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the classes for tasks."""
+import logging
 import threading
 from collections import deque
 from concurrent.futures import Executor, ThreadPoolExecutor
@@ -25,6 +26,8 @@ from threading import Thread
 from typing import Optional
 
 from aea.skills.base import Task
+
+logger = logging.getLogger(__name__)
 
 
 class TaskManager:
@@ -56,6 +59,10 @@ class TaskManager:
     def dispatch(self) -> None:
         """Dispatch a task."""
         while not self.stopped:
+            for future in self.futures:
+                if future.done():
+                    future.result()
+
             next_task = self.task_queue.get(block=True)  # type: Optional[Task]
             if next_task is None:
                 return
@@ -63,15 +70,18 @@ class TaskManager:
             future = self._executor.submit(next_task.execute)
             self.futures.append(future)
 
+
     def start(self) -> None:
         """Start the task manager."""
         with self.lock:
+            logger.debug("Start the task manager.")
             self.stopped = False
             self.thread.start()
 
     def stop(self) -> None:
         """Stop the task manager."""
         with self.lock:
+            logger.debug("Start the task manager.")
             self.stopped = True
             self.task_queue.put(None)
             self.thread.join()
