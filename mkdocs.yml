@@ -51,7 +51,7 @@ nav:
          - "CLI tool": 'cli-how-to.md'
          - "Commands": 'cli-commands.md'
          - "GUI": 'cli-gui.md'
-      - "Code an agent directly": 'hacking-an-agent.md'
+      - "Build an AEA using code API": 'hacking-an-agent.md'
       - "Integrate with third parties": 'integration.md'
 
 
