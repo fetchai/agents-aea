@@ -1,8 +1,9 @@
 The <a href="../scaffolding/">scaffolding tool</a> allows you to create the folder structure required for a skill.
 
-!!!	Note
-	Before developing your first skill, please read the <a href="../skill/">skill guide</a>.
-
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>Before developing your first skill, please read the <a href="../skill/">skill guide</a>.</p>
+</div>
 
 ### Dependencies
 
@@ -12,13 +13,12 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 We will first create an agent and add a scaffold skill, which we call `my_search`.
 
-``` bash
+```bash
 aea create my_agent && cd my_agent
 aea scaffold skill my_search
 ```
 
 In the following steps, we replace each one of the scaffolded `Behaviour`, `Handler` and `Task` in `my_agent/skills/my_search` with our implementation. We will build a simple skill which lets the agent send a search query to the [OEF](https://docs.fetch.ai/oef/) and process the resulting response.
-
 
 ## Step 2: Develop a Behaviour
 
@@ -26,7 +26,7 @@ A `Behaviour` class contains the business logic specific to initial actions init
 
 In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the OEF.
 
-``` python
+```python
 import logging
 import time
 
@@ -87,15 +87,13 @@ Searches are proactive and, as such, well placed in a `Behaviour`.
 
 We place this code in `my_agent/skills/my_search/behaviours.py`.
 
-
 ## Step 3: Develop a Handler
 
 So far, we have tasked the agent with sending search requests to the OEF. However, we have no way of handling the responses sent to the agent by the OEF at the moment. The agent would simply respond to the OEF via the default `error` skill which sends all unrecognised envelopes back to the sender.
 
 Let us now implement a handler to deal with the incoming search responses.
 
-
-``` python
+```python
 import logging
 
 from aea.protocols.oef.message import OEFMessage
@@ -149,11 +147,9 @@ Note, how the handler simply reacts to incoming events (i.e. messages). It could
 
 We place this code in `my_agent/skills/my_search/handlers.py`.
 
-
 ## Step 4: Develop a Task
 
 We have implemented a behaviour and a handler. We conclude by implementing a task. Here we can implement background logic. We will implement a trivial check on the difference between the amount of search requests sent and responses received.
-
 
 ```python
 import logging
@@ -200,17 +196,16 @@ Note, how we have access to other objects in the skill via `self.context`.
 
 We place this code in `my_agent/skills/my_search/tasks.py`.
 
-
 ## Step 5: Create the config file
 
 Based on our skill components above, we create the following config file.
 
-``` yaml
+```yaml
 name: my_search
 authors: Fetch.ai Limited
 version: 0.1.0
 license: Apache 2.0
-url: ""
+url: ''
 description: 'A simple search skill utilising the OEF.'
 behaviours:
   - behaviour:
@@ -225,16 +220,16 @@ tasks:
       class_name: MySearchTask
       args: {}
 shared_classes: []
-protocols: ["oef"]
+protocols: ['oef']
 dependencies: []
 ```
 
 We place this code in `my_agent/skills/my_search/skill.yaml`.
 
-
 ## Step 6: Add the oef protocol
 
 Our agent does not have the oef protocol yet so let's add it.
+
 ```bash
 aea add protocol oef
 ```
@@ -248,16 +243,15 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
 
 We can then launch our agent.
+
 ```bash
 aea run
 ```
 
 Stop the agent with `CTRL + C`.
 
-
 ## Now it's your turn
 
 We hope this step by step introduction has helped you develop your own skill. We are excited to see what you will build.
-
 
 <br />

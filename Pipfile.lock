@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "370e1f1629a521a6c5863b2f8d4aaf436cbc914dc511b9fc0c474cd48857c07d"
+            "sha256": "7669ae15154b83d5eb07fb9f09e9a8237e770d5a0a5d5af333de44fae47565c0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -241,6 +241,13 @@
                 "sha256:f9ee3178db30a1bcff80c73915bde18b80219e944587512cea0101eaf71f35fc"
             ],
             "version": "==1.8.1"
+        },
+        "fetch-p2p-api": {
+            "hashes": [
+                "sha256:330bb327016dece905187a8b261b68db12d3689c4d0f0aa299abbc81aedf79d5",
+                "sha256:4a36bdc7adf7ba4d96f231e473b5b5ee97a037f66afc48cb6b7b990e8d0e77fa"
+            ],
+            "version": "==0.0.1"
         },
         "fetchai-ledger-api": {
             "hashes": [
