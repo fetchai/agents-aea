@@ -29,12 +29,22 @@ from typing import List, Dict
 from aea.cli.registry.settings import REGISTRY_API_URL
 
 
-def request_api(method: str, path: str, params=None) -> Dict:
-    """Request Registry API."""
+def request_api(method: str, path: str, params=None, data=None) -> Dict:
+    """
+    Request Registry API.
+
+    :param method: str request method ('GET, 'POST', 'PUT', etc.).
+    :param path: str URL path.
+    :param params: dict GET params.
+    :param data: dict POST data.
+
+    :return: dict response from Registry API
+    """
     resp = requests.request(
         method=method,
         url='{}{}'.format(REGISTRY_API_URL, path),
-        params=params
+        params=params,
+        json=data
     )
     if resp.status_code == 200:
         return resp.json()
@@ -140,3 +150,19 @@ def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
         public_id=public_id,
         obj_type=obj_type
     ))
+
+
+def registry_login(username, password):
+    """
+    Login into Registry account.
+
+    :param username: str username.
+    :param password: str password.
+
+    :return: str token
+    """
+    resp = request_api(
+        'POST', '/rest-auth/login/',
+        data={'username': username, 'password': password}
+    )
+    return resp['key']
