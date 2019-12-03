@@ -3,14 +3,14 @@
 | Command                                     | Description                                                                  |		
 | ------------------------------------------- | ---------------------------------------------------------------------------- |		
 | `add connection/protocol/skill [name]`      | Add connection, protocol, or skill, called `[name]`, to the agent.           |	
-| `add-key default/fetchai/ethereum file`     | Add a private key from a file.	
+| `add-key default/fetchai/ethereum file`     | Add a private key from a file.	                                             |
 | `create NAME`                               | Create a new aea project called `[name]`.                                    |		
 | `delete NAME`                               | Delete an aea project. See below for disabling a resource.                   |		
 | `fetch NAME`                                | Fetch an aea project called `[name]`.                                        |		
 | `freeze`                                    | Get all the dependencies needed for the aea project and its components.      |		
 | `gui`                                       | Run the GUI.                                                                 |		
 | `generate-key default/fetchai/ethereum/all` | Generate private keys.                                                       |		
-| `install [-r <requirements_file>]`          | Install the dependencies.                                                    |		
+| `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |		
 | `list protocols/connections/skills`         | List the installed resources.                                                |		
 | `remove connection/protocol/skill [name]`   | Remove connection, protocol, or skill, called `[name]`, from agent.          |		
 | `run {using [connection, ...]}`             | Run the agent on the Fetch.ai network with default or specified connections. |		
