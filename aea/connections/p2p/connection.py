@@ -166,7 +166,6 @@ class PeerToPeerConnection(Connection):
         if self.connection_status.is_connected:
             self.connection_status.is_connected = False
             self.channel.disconnect()
-            self.stop()
 
     async def send(self, envelope: 'Envelope') -> None:
         """
@@ -196,14 +195,6 @@ class PeerToPeerConnection(Connection):
             return envelope
         except CancelledError:
             return None
-
-    def stop(self) -> None:
-        """
-        Tear down the connection.
-
-        :return: None
-        """
-        self.channel.disconnect()
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':

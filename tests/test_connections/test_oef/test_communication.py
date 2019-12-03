@@ -511,7 +511,7 @@ class TestFIPA:
 
     def test_send(self):
         """Test the send method."""
-        envelope = Envelope(to="receiver", sender="me", protocol_id="tac", message=b'Hello')
+        envelope = Envelope(to=DEFAULT_OEF, sender="me", protocol_id="tac", message=b'Hello')
         self.multiplexer1.put(envelope)
         received_envelope = self.multiplexer1.get(block=True, timeout=5.0)
         assert received_envelope is not None

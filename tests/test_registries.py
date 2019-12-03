@@ -319,6 +319,7 @@ class TestFilter:
 
         internal_handler = self.aea.resources.handler_registry.fetch_by_skill("internal", "dummy")
         assert len(internal_handler.handled_internal_messages) == 1
+        self.aea.teardown()
 
     @classmethod
     def teardown_class(cls):
