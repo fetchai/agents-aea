@@ -30,7 +30,7 @@ parser.add_argument(
     type=int,
     default=8080)
 parser.add_argument(
-    '-h',
+    '-H',
     '--host',
     help='host that the web server serves from',
     type=str,
