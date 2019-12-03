@@ -48,6 +48,7 @@ class TestP2p:
         cls.p2p_connection = PeerToPeerConnection(public_key=cls.ent.public_key_hex,
                                                   provider_addr=cls.address,
                                                   provider_port=cls.port)
+        cls.p2p_connection.loop = asyncio.get_event_loop()
 
     async def test_initialization(self):
         """Test the initialisation of the class."""
