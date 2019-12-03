@@ -3,7 +3,7 @@
 These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface. 
 
   
-This guide assumes you have already followed the [quick start](quickstart.md) guide and so have the framework installed and the packages and scripts directory downloaded into the directory you are working in.
+This guide assumes you have already followed the Preliminaries and Installation section in the [quick start](quickstart.md) guide and so have the framework installed and the packages and scripts directory downloaded into the directory you are working in.
 
 
 ## Create private key
@@ -103,7 +103,7 @@ time.sleep(4)
 ```
 
 ## Send and receive an envelope
-We use the input and output text files to send an envelope to our agent and recieve a response (from the echo skill)
+We use the input and output text files to send an envelope to our agent and receive a response (from the echo skill)
 ``` python
 # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
 message_text = 'my_agent,other_agent,default,{"type": "bytes", "content": "aGVsbG8="}'
@@ -128,7 +128,7 @@ t.join()
 ```
 
 ## Running the agent
-If you now run this pythong script file, you should see this output:
+If you now run this python script file, you should see this output:
 
     No protocol found.
     No skill found.
