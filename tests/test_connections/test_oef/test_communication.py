@@ -73,7 +73,6 @@ class TestDefault:
         self.multiplexer.put(Envelope(to=self.crypto1.public_key, sender=self.crypto1.public_key,
                                       protocol_id=DefaultMessage.protocol_id,
                                       message=DefaultSerializer().encode(msg)))
-
         recv_msg = self.multiplexer.get(block=True, timeout=3.0)
         assert recv_msg is not None
 
@@ -514,10 +513,8 @@ class TestFIPA:
         """Test the send method."""
         envelope = Envelope(to="receiver", sender="me", protocol_id="tac", message=b'Hello')
         self.multiplexer1.put(envelope)
-        self.multiplexer1.get(block=True, timeout=5.0)
-
-        envelope = Envelope(to="receiver", sender="me", protocol_id="unknown", message=b'Hello')
-        self.multiplexer1.put(envelope)
+        received_envelope = self.multiplexer1.get(block=True, timeout=5.0)
+        assert received_envelope is not None
 
     @classmethod
     def teardown_class(cls):
@@ -696,7 +693,7 @@ async def test_send_oef_message(network_node):
 
     msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
     msg_bytes = OEFSerializer().encode(msg)
-    envelope = Envelope(to="recipient", sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     await oef_connection.send(envelope)
     await oef_connection.disconnect()
 
