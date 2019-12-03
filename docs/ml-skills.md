@@ -34,6 +34,7 @@ aea add skill ml_data_provider
 ```
 
 ### Install the dependencies
+The ml data provider uses `tensorflow` and `numpy`.
 ``` bash
 aea install
 ```
@@ -53,6 +54,12 @@ aea create ml_model_trainer
 ``` bash
 cd ml_model_trainer
 aea add skill ml_train
+```
+
+### Install the dependencies
+The ml data provider uses `tensorflow` and `numpy`.
+``` bash
+aea install
 ```
 
 ### Run the model trainer AEA
@@ -75,26 +82,30 @@ This diagram shows the communication between the two agents.
     sequenceDiagram
         participant ml_model_trainer
         participant ml_data_provider
-        participant OEF
+        participant Search
         participant Ledger
     
         activate ml_model_trainer
         activate ml_data_provider
-        activate OEF
+        activate Search
         activate Ledger
         
-        ml_model_trainer->>OEF: search
-        OEF-->>ml_model_trainer: list_of_agents
+        ml_data_provider->>Search: register_service
+        ml_model_trainer->>Search: search
+        Search-->>ml_model_trainer: list_of_agents
         ml_model_trainer->>ml_data_provider: call_for_terms
         ml_data_provider->>ml_model_trainer: terms
         ml_model_trainer->>Ledger: request_transaction
         ml_model_trainer->>ml_data_provider: accept (incl transaction_hash)
         ml_data_provider->>Ledger: check_transaction_status
         ml_data_provider->>ml_model_trainer: data
+        loop train
+            ml_model_trainer->>ml_model_trainer: tran_model
+        end
         
         deactivate ml_model_trainer
         deactivate ml_data_provider
-        deactivate OEF
+        deactivate Search
         deactivate Ledger
 
 </div>  

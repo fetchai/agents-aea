@@ -108,31 +108,37 @@ This diagram shows the communication between the two agents and the controller. 
 
 <div class="mermaid">
     sequenceDiagram
-        participant Searching_Agent
+        participant Buyer_Agent
         participant Seller_Agent
+        participant Search
         participant Controller
     
-        activate Searching_Agent
+        activate Buyer_Agent
         activate Seller_Agent
+        activate Search
         activate Controller
         
-        Searching_Agent->>Controller: search
-        Controller-->>Searching_Agent: list_of_agents
-        Searching_Agent->>Seller_Agent: call_for_proposal
-        Seller_Agent->>Searching_Agent: proposal
-        Searching_Agent->>Seller_Agent: accept
-        Searching_Agent->>Controller: request_transaction
-        Seller_Agent->>Searching_Agent: match_accept
+        Seller_Agent->>Search: register_service
+        Buyer_Agent->>Search: search
+        Search-->>Buyer_Agent: list_of_agents
+        Buyer_Agent->>Seller_Agent: call_for_proposal
+        Seller_Agent->>Buyer_Agent: proposal
+        Buyer_Agent->>Seller_Agent: accept
+        Buyer_Agent->>Controller: request_transaction
+        Seller_Agent->>Buyer_Agent: match_accept
         Seller_Agent->>Controller: request_transaction
         Controller->>Controller: transfer_funds
+        Controller->>Seller_Agent: confirm_transaction
+        Controller->>Buyer_Agent: confirm_transaction
         
-        deactivate Searching_Agent
+        deactivate Buyer_Agent
         deactivate Seller_Agent
+        deactivate Search
         deactivate Controller
 
 </div>
 
-In the above case, the proposal received contains a set of good which the seller wishes to sell and a cost of them. The Searching Agent needs to determine if this is a good deal for them and if so, it accepts.
+In the above case, the proposal received contains a set of good which the seller wishes to sell and a cost of them. The buyer agent needs to determine if this is a good deal for them and if so, it accepts.
 
-There is an equivilent diagram for agents set up to search for buyers and their interaction with agents which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
+There is an equivalent diagram for seller agents set up to search for buyers and their interaction with agents which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
 

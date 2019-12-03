@@ -32,8 +32,8 @@ nav:
       - "Weather skills": 'weather-skills.md'
       - "TAC skills": 'tac-skills.md'
       - "TAC external app": 'tac.md'
-      # - "FIPA skill": 'fipa-skill.md'
       - "Car park agent": 'car-park.md'
+      - "ML skills": 'ml-skills.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
       - "Architectural diagram": 'diagram.md'
