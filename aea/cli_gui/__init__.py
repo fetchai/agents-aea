@@ -446,7 +446,7 @@ def create_app():
     return app
 
 
-def run(port: int, host: str="127.0.0.1"):
+def run(port: int, host: str):
     """Run the GUI."""
     _kill_running_oef_nodes()
 
