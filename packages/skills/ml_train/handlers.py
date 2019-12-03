@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'gym' skill."""
+"""This module contains the handler for the 'ml_train' skill."""
 import logging
 import sys
 from typing import cast, TYPE_CHECKING, Optional, List, Dict, Tuple
@@ -48,7 +48,7 @@ logger = logging.getLogger("aea.ml_train_skill")
 
 
 class TrainHandler(Handler):
-    """Gym handler."""
+    """Train handler."""
 
     SUPPORTED_PROTOCOL = "ml_trade"
 
@@ -59,7 +59,7 @@ class TrainHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        logger.info("Train handler: setup method called.")
+        logger.debug("Train handler: setup method called.")
 
     def handle(self, message: Message, sender: str) -> None:
         """
@@ -130,7 +130,7 @@ class TrainHandler(Handler):
 
         :return: None
         """
-        logger.info("Train handler: teardown method called.")
+        logger.debug("Train handler: teardown method called.")
 
 
 class OEFHandler(Handler):

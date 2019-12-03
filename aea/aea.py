@@ -85,7 +85,7 @@ class AEA(Agent):
                                      self.decision_maker.ownership_state,
                                      self.decision_maker.preferences,
                                      self.decision_maker.goal_pursuit_readiness,
-                                     self._task_manager.task_queue)
+                                     self.task_manager.task_queue)
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 

@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the handler for the 'gym' skill."""
+"""This module contains the handler for the 'ml_data_provider' skill."""
 import logging
 import sys
 from typing import cast, TYPE_CHECKING
@@ -38,7 +38,7 @@ logger = logging.getLogger("aea.ml_data_provider")
 
 
 class MLTradeHandler(Handler):
-    """Gym handler."""
+    """ML trade handler."""
 
     SUPPORTED_PROTOCOL = "ml_trade"
 
@@ -49,7 +49,7 @@ class MLTradeHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        logger.info("MLTrade handler: setup method called.")
+        logger.debug("MLTrade handler: setup method called.")
 
     def handle(self, message: Message, sender: str) -> None:
         """
@@ -104,4 +104,4 @@ class MLTradeHandler(Handler):
 
         :return: None
         """
-        logger.info("MLTrade handler: teardown method called.")
+        logger.debug("MLTrade handler: teardown method called.")
