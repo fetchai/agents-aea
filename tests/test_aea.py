@@ -60,6 +60,7 @@ def test_initialise_AEA():
     my_AEA.resources = Resources(str(Path(CUR_PATH, "aea")))
     assert my_AEA.resources is not None,\
         "Resources must not be None after set"
+    my_AEA.stop()
 
 
 def test_act():
