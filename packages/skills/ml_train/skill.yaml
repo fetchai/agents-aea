@@ -24,7 +24,7 @@ shared_classes:
       class_name: Strategy
       args:
         dataset_id: 'fmnist'
-        search_interval: 1
+        search_interval: 30
         max_row_price: 0
         max_tx_fee: 0
         currency_pbk: 'FET'
