@@ -29,9 +29,15 @@ parser.add_argument(
     help='Port that the web server listens on',
     type=int,
     default=8080)
+parser.add_argument(
+    '-h',
+    '--host',
+    help='host that the web server serves from',
+    type=str,
+    default="127.0.0.1")
 
 args, unknown = parser.parse_known_args()
 
 # If we're running in stand alone mode, run the application
 if __name__ == '__main__':
-    aea.cli_gui.run(args.port)   # pragma: no cover
+    aea.cli_gui.run(args.port, args.host)   # pragma: no cover
