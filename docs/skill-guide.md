@@ -174,7 +174,6 @@ class MySearchTask(Task):
         """
         Implement the task execution.
 
-        :param envelope: the envelope
         :return: None
         """
         my_search_behaviour = self.context.behaviours[0]

@@ -165,5 +165,7 @@ def generate_transaction_message(proposal_description: Description, dialogue_lab
                                          is_sender_buyer=not is_seller,
                                          sender_tx_fee=sender_tx_fee,
                                          counterparty_tx_fee=counterparty_tx_fee,
+                                         ledger_id='fetchai',
+                                         info={'dialogue_label': dialogue_label.json},
                                          quantities_by_good_pbk=goods_component)
     return transaction_msg

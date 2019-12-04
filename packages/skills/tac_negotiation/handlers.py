@@ -22,7 +22,7 @@
 import logging
 import pprint
 import sys
-from typing import Dict, List, Optional, Tuple, cast, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.dialogue.base import DialogueLabel
@@ -308,7 +308,8 @@ class TransactionHandler(Handler):
         tx_message = cast(TransactionMessage, message)
         if TransactionMessage.Performative(tx_message.get("performative")) == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction confirmed by decision maker, sending match accept.".format(self.context.agent_name))
-            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], tx_message.get("dialogue_label")))
+            info = cast(Dict[str, Any], tx_message.get("info"))
+            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
             tac_message = dialogue.last_incoming_message

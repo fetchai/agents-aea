@@ -25,6 +25,7 @@ pygments = "*"
 pytest-asyncio = "*"
 gym = "*"
 numpy = "*"
+tensorflow = "*"
 scikit-image = "*"
 mkdocs-mermaid-plugin = {editable = true,git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
 

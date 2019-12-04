@@ -313,12 +313,14 @@ class TestFilter:
                                amount=2,
                                sender_tx_fee=0,
                                counterparty_tx_fee=0,
+                               ledger_id="fetchai",
                                quantities_by_good_pbk={"Unknown": 10})
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()
 
         internal_handler = self.aea.resources.handler_registry.fetch_by_skill("internal", "dummy")
         assert len(internal_handler.handled_internal_messages) == 1
+        self.aea.teardown()
 
     @classmethod
     def teardown_class(cls):

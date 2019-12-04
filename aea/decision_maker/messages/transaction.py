@@ -21,8 +21,9 @@
 """The transaction message module."""
 
 from enum import Enum
-from typing import Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Union, cast
 
+from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
 from aea.protocols.base import Message
 
 TransactionId = str
@@ -51,10 +52,10 @@ class TransactionMessage(Message):
                  amount: int,
                  sender_tx_fee: int,
                  counterparty_tx_fee: int,
-                 quantities_by_good_pbk: Dict[str, int],
+                 ledger_id: str,
+                 info: Optional[Dict[str, Any]] = None,
+                 quantities_by_good_pbk: Optional[Dict[str, int]] = None,
                  transaction_digest: Optional[str] = None,
-                 dialogue_label: Optional[Dict[str, str]] = None,
-                 ledger_id: Optional[str] = None,
                  **kwargs):
         """
         Instantiate transaction message.
@@ -69,9 +70,10 @@ class TransactionMessage(Message):
         :param sender_tx_fee: the part of the tx fee paid by the sender
         :param counterparty_tx_fee: the part of the tx fee paid by the counterparty
         :param amount: the amount of money involved.
+        :param ledger_id: the ledger id
+        :param info: a dictionary for arbitrary information
         :param quantities_by_good_pbk: a map from good pbk to the quantity of that good involved in the transaction.
         :param transaction_digest: the transaction digest
-        :param dialog_label: the dialog label
         """
         super().__init__(performative=performative,
                          skill_id=skill_id,
@@ -83,10 +85,10 @@ class TransactionMessage(Message):
                          sender_tx_fee=sender_tx_fee,
                          counterparty_tx_fee=counterparty_tx_fee,
                          amount=amount,
+                         ledger_id=ledger_id,
+                         info=info,
                          quantities_by_good_pbk=quantities_by_good_pbk,
                          transaction_digest=transaction_digest,
-                         dialogue_label=dialogue_label,
-                         ledger_id=ledger_id,
                          **kwargs)
         assert self.check_consistency(), "Transaction message initialization inconsistent."
 
@@ -119,14 +121,31 @@ class TransactionMessage(Message):
             counterparty_tx_fee = self.get("counterparty_tx_fee")
             counterparty_tx_fee = cast(int, counterparty_tx_fee)
             assert counterparty_tx_fee >= 0
+            assert self.is_set("ledger_id")
+            ledger_id = self.get("ledger_id")
+            assert type(ledger_id) == str and ledger_id in SUPPORTED_LEDGER_APIS
+            assert self.is_set("info")
+            info = self.get("info")
+            if info is not None:
+                assert type(info) == dict
+                info = cast(Dict, info)
+                for key, value in info.items():
+                    assert type(key) == str
             assert self.is_set("quantities_by_good_pbk")
             quantities_by_good_pbk = self.get("quantities_by_good_pbk")
-            quantities_by_good_pbk = cast(Dict[str, int], quantities_by_good_pbk)
-            assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
-            assert all(quantity >= 0 for quantity in quantities_by_good_pbk.values())
+            if quantities_by_good_pbk is not None:
+                assert type(quantities_by_good_pbk) == dict
+                for key, value in quantities_by_good_pbk.items():
+                    assert type(key) == str and type(value) == int
+                quantities_by_good_pbk = cast(Dict[str, int], quantities_by_good_pbk)
+                assert len(quantities_by_good_pbk.keys()) == len(set(quantities_by_good_pbk.keys()))
+                assert all(quantity >= 0 for quantity in quantities_by_good_pbk.values())
             assert self.is_set("transaction_digest")
-            assert self.is_set("dialogue_label")
-            assert self.is_set("ledger_id")
+            transaction_digest = self.get("transaction_digest")
+            if transaction_digest is not None:
+                assert type(transaction_digest) == str
+            assert len(self.body) == 14
+
         except (AssertionError, KeyError):
             return False
         return True
@@ -149,10 +168,10 @@ class TransactionMessage(Message):
             and self.get("amount") == other.get("amount") \
             and self.get("sender_tx_fee") == other.get("counterparty_tx_fee") \
             and self.get("counterparty_tx_fee") == other.get("sender_tx_fee") \
+            and self.get("ledger_id") == other.get("ledger_id") \
+            and self.get("info") == other.get("info") \
             and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk") \
-            and self.get("transaction_digest") == other.get("transaction_digest") \
-            and self.get("dialogue_label") == other.get("dialogue_label") \
-            and self.get("ledger_id") == other.get("ledger_id")
+            and self.get("transaction_digest") == other.get("transaction_digest")
 
     @classmethod
     def respond_with(cls, other: 'TransactionMessage', performative: Performative, transaction_digest: Optional[str] = None) -> 'TransactionMessage':
@@ -174,10 +193,10 @@ class TransactionMessage(Message):
                                     sender_tx_fee=cast(int, other.get("sender_tx_fee")),
                                     counterparty_tx_fee=cast(int, other.get("counterparty_tx_fee")),
                                     amount=cast(int, other.get("amount")),
+                                    ledger_id=cast(str, other.get("ledger_id")),
+                                    info=cast(Dict[str, Any], other.get("info")),
                                     quantities_by_good_pbk=cast(Dict[str, int], other.get("quantities_by_good_pbk")),
-                                    transaction_digest=transaction_digest,
-                                    dialogue_label=cast(Dict, other.get("dialogue_label")),
-                                    ledger_id=other.get("ledger_id"))
+                                    transaction_digest=transaction_digest)
         return tx_msg
 
     def __eq__(self, other: object) -> bool:
@@ -198,7 +217,7 @@ class TransactionMessage(Message):
             and self.get("amount") == other.get("amount") \
             and self.get("sender_tx_fee") == other.get("sender_tx_fee") \
             and self.get("counterparty_tx_fee") == other.get("counterparty_tx_fee") \
+            and self.get("ledger_id") == other.get("ledger_id") \
+            and self.get("info") == other.get("info") \
             and self.get("quantities_by_good_pbk") == other.get("quantities_by_good_pbk") \
-            and self.get("transaction_digest") == other.get("transaction_digest") \
-            and self.get("dialogue_label") == other.get("dialogue_label")\
-            and self.get("ledger_id") == other.get("ledger_id")
+            and self.get("transaction_digest") == other.get("transaction_digest")

@@ -63,6 +63,11 @@ Description: The gym protocol implements the messages an agent needs to engage w
 Version: 0.1.0
 ------------------------------
 ------------------------------
+Name: ml_trade
+Description: The ml trade protocol implements the messages an agent needs to engage in trading data for training and prediction.
+Version: 0.1.0
+------------------------------
+------------------------------
 Name: oef
 Description: The oef protocol implements the OEF specific messages.
 Version: 0.1.0
@@ -255,6 +260,16 @@ Version: 0.1.0
 ------------------------------
 Name: gym
 Description: The gym skill wraps an RL agent.
+Version: 0.1.0
+------------------------------
+------------------------------
+Name: ml_data_provider
+Description: The ml data provider skill implements a provider for Machine Learning datasets in order to monetize data.
+Version: 0.1.0
+------------------------------
+------------------------------
+Name: ml_train
+Description: The ml train and predict skill implements a simple skill which buys training data, trains a model and sells predictions.
 Version: 0.1.0
 ------------------------------
 ------------------------------

@@ -1,0 +1,30 @@
+name: 'ml_data_provider'
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+description: "The ml data provider skill implements a provider for Machine Learning datasets in order to monetize data."
+url: ""
+behaviours:
+  - behaviour:
+      class_name: ServiceRegistrationBehaviour
+      args: {}
+handlers:
+  - handler:
+      class_name: MLTradeHandler
+      args: {}
+tasks: []
+shared_classes:
+  - shared_class:
+      class_name: Strategy
+      args:
+        price_per_data_batch: 100
+        batch_size: 2
+        seller_tx_fee: 0
+        buyer_tx_fee: 10
+        dataset_id: 'fmnist'
+        currency_pbk: 'FET'
+        ledger_id: 'fetchai'
+protocols: ['oef', 'ml_trade']
+dependencies:
+  - tensorflow
+  - numpy
