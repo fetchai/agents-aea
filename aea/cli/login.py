@@ -20,16 +20,15 @@
 """Implementation of the 'aea login' subcommand."""
 import click
 
-from aea.cli.common import Context, pass_ctx
-from aea.cli.registry.utils import registry_login
+from aea.cli.registry.utils import registry_login, write_cli_config
 
 
 @click.command(name='login', help='Login to Registry account')
 @click.argument('username', type=str, required=True)
 @click.argument('password', type=str, required=True)
-@pass_ctx
-def login(ctx: Context, username, password):
+def login(username, password):
     """Login to Registry account."""
+    click.echo('Signing in as {}...'.format(username))
     token = registry_login(username, password)
-    ctx.set_config("token", token)
-    click.echo('Successfully signed in: {}'.format(username))
+    write_cli_config({'auth_token': token})
+    click.echo('Successfully signed in: {}.'.format(username))
