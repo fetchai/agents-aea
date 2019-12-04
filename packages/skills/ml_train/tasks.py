@@ -47,9 +47,6 @@ class MLTrainTask(Task):
         # TODO not sure it's relevant - MLTrainTask already trains over a single batch.
         self.batch_size = kwargs.pop("batch_size", 32)
 
-        # TODO this could be a property at abstraction level, and not of only this concrete class.
-        self.completed = False
-
     def setup(self) -> None:
         """Set up the task."""
         logger.info("ML Train task: setup method called.")

@@ -327,6 +327,7 @@ class Task(ABC):
         """
         self._context = kwargs.pop('skill_context')  # type: SkillContext
         self._config = kwargs
+        self.completed = False
 
     @property
     def context(self) -> SkillContext:

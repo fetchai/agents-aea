@@ -65,8 +65,9 @@ class TestMLSkills:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_weather(self, pytestconfig):
-        """Run the weather skills sequence."""
+    @pytest.mark.skipif(sys.version_info == (3, 8), reason="cannot run on 3.8 as tensorflow not installable")
+    def test_ml_skills(self, pytestconfig):
+        """Run the ml skills sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
@@ -171,9 +172,6 @@ class TestMLSkills:
 
         process_one.wait(timeout=60)
         process_two.wait(timeout=60)
-
-        # text1, err1 = process_one.communicate()
-        # text2, err2 = process_two.communicate()
 
         assert process_one.returncode == 0
         assert process_two.returncode == 0

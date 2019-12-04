@@ -126,10 +126,11 @@ class TransactionMessage(Message):
             assert type(ledger_id) == str and ledger_id in SUPPORTED_LEDGER_APIS
             assert self.is_set("info")
             info = self.get("info")
-            assert type(info) == dict
-            info = cast(Dict, info)
-            for key, value in info.items():
-                assert type(key) == str
+            if info is not None:
+                assert type(info) == dict
+                info = cast(Dict, info)
+                for key, value in info.items():
+                    assert type(key) == str
             assert self.is_set("quantities_by_good_pbk")
             quantities_by_good_pbk = self.get("quantities_by_good_pbk")
             if quantities_by_good_pbk is not None:
