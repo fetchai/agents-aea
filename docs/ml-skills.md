@@ -18,7 +18,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for all the following demos.
 
-## Demo:
+## Demo 1 - no ledger:
 
 
 ### Create the data provider AEA
@@ -66,6 +66,51 @@ aea install
 ``` bash
 aea run
 ```
+
+After some time, you should see the AEAs transact and the model trainer train its model.
+
+
+## Demo 2 - ledger:
+
+
+We will now run the same demo but with a real ledger transaction on test net.
+
+### Update the AEA configs
+
+Both in `ml_model_trainer/aea-config.yaml` and
+`ml_data_provider/aea-config.yaml`, replace `ledger_apis: []` with the following.
+
+``` yaml
+ledger_apis:
+  - ledger_api:
+      ledger: fetchai
+      addr: alpha.fetch-ai.com
+      port: 80
+```
+
+### Fund the ml model trainer AEA
+
+Create some wealth for your ml model trainer on the Fetch.ai `testnet`. (It takes a while).
+``` bash
+cd ..
+python scripts/fetchai_wealth_generation.py --private-key ml_model_trainer/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
+cd ml_model_trainer
+```
+
+### Update the ml model trainer AEA skills config
+
+We tell the ml model trainer skill to use the ledger, by updating the following field in `ml_model_trainer/skills/ml_train/skill.yaml`:
+``` bash
+is_ledger_tx: True
+```
+
+### Run both AEAs
+
+From their respective repos, run both AEAs
+``` bash
+aea run
+```
+
 
 ### Clean up
 ``` bash

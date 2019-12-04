@@ -20,7 +20,7 @@
 """This module contains the handler for the 'ml_train' skill."""
 import logging
 import sys
-from typing import cast, TYPE_CHECKING, Optional, List, Tuple
+from typing import cast, TYPE_CHECKING, Any, Dict, Optional, List, Tuple
 
 import numpy as np
 
@@ -101,7 +101,7 @@ class TrainHandler(Handler):
         if strategy.is_ledger_tx:
             # propose the transaction to the decision maker for settlement on the ledger
             tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id='ml_train_skill',
+                                        skill_id='ml_train',
                                         transaction_id=strategy.get_next_transition_id(),
                                         sender=self.context.agent_public_keys[terms.values["ledger_id"]],
                                         counterparty=terms.values["address"],
@@ -111,7 +111,7 @@ class TrainHandler(Handler):
                                         sender_tx_fee=terms.values["buyer_tx_fee"],
                                         counterparty_tx_fee=terms.values["seller_tx_fee"],
                                         ledger_id=terms.values["ledger_id"],
-                                        info={'terms': terms})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
+                                        info={'terms': terms, 'counterparty_pbk': sender})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
         else:
@@ -229,17 +229,18 @@ class MyTransactionHandler(Handler):
         if TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
             transaction_digest = cast(str, tx_msg_response.get("transaction_digest"))
-            terms = cast(Description, tx_msg_response.get("terms"))
-            counterparty = cast(str, tx_msg_response.get('counterparty'))
+            info = cast(Dict[str, Any], tx_msg_response.get("info"))
+            terms = cast(Description, info.get("terms"))
+            counterparty_pbk = cast(str, info.get("counterparty_pbk"))
             ml_accept = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT,
                                        tx_digest=transaction_digest,
                                        terms=terms)
-            self.context.outbox.put_message(to=counterparty,
+            self.context.outbox.put_message(to=counterparty_pbk,
                                             sender=self.context.agent_public_key,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."
-                        .format(self.context.agent_name, counterparty[-5:], transaction_digest, terms.values))
+                        .format(self.context.agent_name, counterparty_pbk[-5:], transaction_digest, terms.values))
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 

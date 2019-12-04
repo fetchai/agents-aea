@@ -39,7 +39,6 @@ class MLTrainTask(Task):
 
     def __init__(self, train_data: Tuple[np.ndarray, np.ndarray], *args, **kwargs):
         """Initialize the task."""
-        logger.info("MLTrainTask.__init__: arguments: {}".format(kwargs))
         super().__init__(*args, **kwargs)
         self.train_x, self.train_y = train_data
 
