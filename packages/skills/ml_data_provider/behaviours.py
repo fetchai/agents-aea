@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a the behaviours."""
+"""This package contains the behaviours."""
 
 import datetime
 import logging

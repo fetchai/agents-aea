@@ -25,10 +25,11 @@ shared_classes:
       args:
         dataset_id: 'fmnist'
         search_interval: 30
-        max_row_price: 0
-        max_tx_fee: 0
+        max_unit_price: 20
+        max_buyer_tx_fee: 20
         currency_pbk: 'FET'
         ledger_id: 'fetchai'
+        is_ledger_tx: False
   - shared_class:
       class_name: Model
       args:

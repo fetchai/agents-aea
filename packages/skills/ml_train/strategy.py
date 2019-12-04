@@ -19,8 +19,9 @@
 
 """This module contains the strategy class."""
 import datetime
+from typing import cast
 
-from aea.protocols.oef.models import Attribute, DataModel, Query, Constraint, ConstraintType
+from aea.protocols.oef.models import Attribute, DataModel, Query, Constraint, ConstraintType, Description
 from aea.skills.base import SharedClass
 
 DEFAULT_DATASET_ID = 'UK'
@@ -36,27 +37,37 @@ class Strategy(SharedClass):
 
     def __init__(self, **kwargs) -> None:
         """Initialize the strategy of the agent."""
-        self.dataset_id = kwargs.pop('dataset_id', DEFAULT_DATASET_ID)
+        self._dataset_id = kwargs.pop('dataset_id', DEFAULT_DATASET_ID)
         self._search_interval = kwargs.pop('search_interval', DEFAULT_SEARCH_INTERVAL)
-        self.max_row_price = kwargs.pop('max_row_price', DEFAULT_MAX_ROW_PRICE)
-        self.max_tx_fee = kwargs.pop('max_tx_fee', DEFAULT_MAX_TX_FEE)
-        self.currency_pbk = kwargs.pop('currency_pbk', DEFAULT_CURRENCY_PBK)
-        self.ledger_id = kwargs.pop('ledger_id', DEFAULT_LEDGER_ID)
+        self._max_unit_price = kwargs.pop('max_unit_price', DEFAULT_MAX_ROW_PRICE)
+        self._max_buyer_tx_fee = kwargs.pop('max_buyer_tx_fee', DEFAULT_MAX_TX_FEE)
+        self._currency_pbk = kwargs.pop('currency_pbk', DEFAULT_CURRENCY_PBK)
+        self._ledger_id = kwargs.pop('ledger_id', DEFAULT_LEDGER_ID)
+        self.is_ledger_tx = kwargs.pop('is_ledger_tx', False)
         super().__init__(**kwargs)
-        self._oef_msg_id = 0
-
         self._search_id = 0
         self.is_searching = True
         self._last_search_time = datetime.datetime.now()
+        self._tx_id = 0
 
-    def get_next_oef_msg_id(self) -> int:
+    def get_next_search_id(self) -> int:
         """
-        Get the next oef msg id.
+        Get the next search id and set the search time.
 
-        :return: the next oef msg id
+        :return: the next search id
         """
-        self._oef_msg_id += 1
-        return self._oef_msg_id
+        self._search_id += 1
+        self._last_search_time = datetime.datetime.now()
+        return self._search_id
+
+    def get_next_transition_id(self) -> str:
+        """
+        Get the next transaction id.
+
+        :return: The next transaction id
+        """
+        self._tx_id += 1
+        return "transaction_{}".format(self._tx_id)
 
     def get_service_query(self) -> Query:
         """
@@ -65,7 +76,7 @@ class Strategy(SharedClass):
         :return: the query
         """
         dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
-        query = Query([Constraint("dataset_id", ConstraintType("==", self.dataset_id))], model=dm)
+        query = Query([Constraint("dataset_id", ConstraintType("==", self._dataset_id))], model=dm)
         return query
 
     def is_time_to_search(self) -> bool:
@@ -81,12 +92,33 @@ class Strategy(SharedClass):
         result = diff.total_seconds() > self._search_interval
         return result
 
-    def get_next_search_id(self) -> int:
+    def is_acceptable_terms(self, terms: Description) -> bool:
         """
-        Get the next search id and set the search time.
+        Check whether the terms are acceptable.
 
-        :return: the next search id
+        :params terms: the terms
+        :return: boolean
         """
-        self._search_id += 1
-        self._last_search_time = datetime.datetime.now()
-        return self._search_id
+        result = (terms.values['price'] - terms.values['seller_tx_fee'] > 0) and \
+            (terms.values['price'] <= self._max_unit_price * terms.values['batch_size']) and \
+            (terms.values['buyer_tx_fee'] <= self._max_buyer_tx_fee) and \
+            (terms.values['currency_pbk'] == self._currency_pbk) and \
+            (terms.values['ledger_id'] == self._ledger_id)
+        return result
+
+    def is_affordable_terms(self, terms: Description) -> bool:
+        """
+        Check whether the terms are affordable.
+
+        :params terms: the terms
+        :return: whether it is affordable
+        """
+        if self.is_ledger_tx:
+            payable = terms.values['price'] - terms.values['seller_tx_fee'] + terms.values['buyer_tx_fee']
+            ledger_id = terms.values['ledger_id']
+            address = cast(str, self.context.agent_addresses.get(ledger_id))
+            balance = self.context.ledger_apis.token_balance(ledger_id, address)
+            result = balance >= payable
+        else:
+            result = True
+        return result

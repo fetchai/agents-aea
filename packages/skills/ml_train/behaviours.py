@@ -39,6 +39,7 @@ logger = logging.getLogger("aea.ml_train_skill")
 SERVICE_ID = ''
 
 
+# TODO this could be implemented a TickerBehaviour.
 class MySearchBehaviour(Behaviour):
     """This behaviour searches for data to buy."""
 
@@ -47,14 +48,17 @@ class MySearchBehaviour(Behaviour):
         super().__init__(**kwargs)
 
     def setup(self) -> None:
-        """Implement the setup for the behaviour."""
+        """
+        Implement the setup for the behaviour.
+
+        :return: None
+        """
         if self.context.ledger_apis.has_fetchai:
             fet_balance = self.context.ledger_apis.token_balance(FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI)))
             if fet_balance > 0:
                 logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, fet_balance))
             else:
                 logger.warning("[{}]: you have no starting balance on fetchai ledger!".format(self.context.agent_name))
-                # TODO: deregister skill from filter
 
         if self.context.ledger_apis.has_ethereum:
             eth_balance = self.context.ledger_apis.token_balance(ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM)))
@@ -62,7 +66,6 @@ class MySearchBehaviour(Behaviour):
                 logger.info("[{}]: starting balance on ethereum ledger={}.".format(self.context.agent_name, eth_balance))
             else:
                 logger.warning("[{}]: you have no starting balance on ethereum ledger!".format(self.context.agent_name))
-                # TODO: deregister skill from filter
 
     def act(self) -> None:
         """

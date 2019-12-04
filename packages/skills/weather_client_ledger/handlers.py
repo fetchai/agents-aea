@@ -21,7 +21,7 @@
 import logging
 import pprint
 import sys
-from typing import Dict, List, Optional, cast, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.dialogue.base import DialogueLabel
@@ -209,9 +209,8 @@ class FIPAHandler(Handler):
                                     amount=proposal.values['price'],
                                     sender_tx_fee=strategy.max_buyer_tx_fee,
                                     counterparty_tx_fee=proposal.values['seller_tx_fee'],
-                                    quantities_by_good_pbk={},
-                                    dialogue_label=dialogue.dialogue_label.json,
-                                    ledger_id=ledger_id)
+                                    ledger_id=ledger_id,
+                                    info={'dialogue_label': dialogue.dialogue_label.json})
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
             self.context.agent_name))
@@ -326,7 +325,8 @@ class MyTransactionHandler(Handler):
                 TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
             json_data = {'transaction_digest': tx_msg_response.get("transaction_digest")}
-            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], tx_msg_response.get("dialogue_label")))
+            info = cast(Dict[str, Any], tx_msg_response.get("info"))
+            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
             fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)

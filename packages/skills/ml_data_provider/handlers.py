@@ -23,6 +23,7 @@ import sys
 from typing import cast, TYPE_CHECKING
 
 from aea.protocols.base import Message
+from aea.protocols.oef.models import Description, Query
 from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
@@ -44,7 +45,6 @@ class MLTradeHandler(Handler):
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
-        logger.info("MLTradeHandler.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
 
     def setup(self) -> None:
@@ -66,33 +66,46 @@ class MLTradeHandler(Handler):
         elif ml_msg_performative == MLTradeMessage.Performative.ACCEPT:
             self._handle_accept(ml_msg, sender)
 
-    def _handle_cft(self, ml_msg, sender):
-        """Handle call for terms."""
-        logger.debug("Got a Call for Terms from {}: {}".format(sender, ml_msg))
-        query = ml_msg.get("query")
-        # TODO we assume the query matches what we have
+    def _handle_cft(self, ml_trade_msg: MLTradeMessage, sender: str) -> None:
+        """
+        Handle call for terms.
+
+        :param ml_trade_msg: the ml trade message
+        :param sender: the sender
+        :return: None
+        """
+        query = cast(Query, ml_trade_msg.get("query"))
+        logger.info("Got a Call for Terms from {}: query={}".format(sender[-5:], query))
         strategy = cast(Strategy, self.context.strategy)
-        proposal = strategy.generate_terms(query)
+        if not strategy.is_matching_supply(query):
+            return
+        terms = strategy.generate_terms()
         logger.info("[{}]: sending to the public_key={} a Terms message: {}"
-                    .format(self.context.agent_name, sender[-5:], proposal.values))
-        proposal_msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=proposal)
+                    .format(self.context.agent_name, sender[-5:], terms.values))
+        terms_msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=terms)
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
                                         protocol_id=MLTradeMessage.protocol_id,
-                                        message=MLTradeSerializer().encode(proposal_msg))
+                                        message=MLTradeSerializer().encode(terms_msg))
 
-    def _handle_accept(self, ml_msg, sender):
-        """Handle accept."""
-        terms = ml_msg.get("terms")
-        logger.debug("Got an Accept from {}: {}".format(sender, terms.values))
+    def _handle_accept(self, ml_trade_msg: MLTradeMessage, sender: str) -> None:
+        """
+        Handle accept.
+
+        :param ml_trade_msg: the ml trade message
+        :param sender: the sender
+        :return: None
+        """
+        terms = cast(Description, ml_trade_msg.get("terms"))
+        logger.info("Got an Accept from {}: {}".format(sender[-5:], terms.values))
         strategy = cast(Strategy, self.context.strategy)
-
+        if not strategy.is_valid_terms(terms):
+            return
         batch_size = terms.values["batch_size"]
         data = strategy.sample_data(batch_size)
         logger.info("[{}]: sending to public_key={} a Data message: shape={}"
                     .format(self.context.agent_name, sender[-5:], data[0].shape))
         data_msg = MLTradeMessage(performative=MLTradeMessage.Performative.DATA, terms=terms, data=data)
-
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
                                         protocol_id=MLTradeMessage.protocol_id,

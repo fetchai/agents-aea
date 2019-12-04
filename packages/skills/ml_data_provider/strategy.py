@@ -84,18 +84,37 @@ class Strategy(SharedClass):
         y_sample = self.train_y[mask]
         return x_sample, y_sample
 
-    def generate_terms(self, query: Query) -> Description:
+    def is_matching_supply(self, query: Query) -> bool:
         """
-        Generate a proposal matching the query.
+        Check if the query matches the supply.
 
         :param query: the query
+        :return: bool indiciating whether matches or not
+        """
+        service_desc = self.get_service_description()
+        return query.check(service_desc)
+
+    def generate_terms(self) -> Description:
+        """
+        Generate a proposal.
+
         :return: a tuple of proposal and the weather data
         """
         address = self.context.agent_addresses[self.ledger_id]
         proposal = Description({"batch_size": self.batch_size,
                                 "price": self.price_per_data_batch,
                                 "seller_tx_fee": self.seller_tx_fee,
+                                "buyer_tx_fee": self.buyer_tx_fee,
                                 "currency_pbk": self.currency_pbk,
                                 "ledger_id": self.ledger_id,
                                 "address": address})
         return proposal
+
+    def is_valid_terms(self, terms: Description) -> bool:
+        """
+        Check the terms are valid.
+
+        :param terms: the terms
+        :return: boolean
+        """
+        return terms == self.generate_terms()

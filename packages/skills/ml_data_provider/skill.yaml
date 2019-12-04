@@ -17,10 +17,10 @@ shared_classes:
   - shared_class:
       class_name: Strategy
       args:
-        price_per_data_batch: 10
+        price_per_data_batch: 100
         batch_size: 2
         seller_tx_fee: 0
-        buyer_tx_fee: 0
+        buyer_tx_fee: 10
         dataset_id: 'fmnist'
         currency_pbk: 'FET'
         ledger_id: 'fetchai'
