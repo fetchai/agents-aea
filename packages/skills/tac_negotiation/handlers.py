@@ -278,10 +278,10 @@ class FIPANegotiationHandler(Handler):
         logger.debug("[{}]: on_match_accept: msg_id={}, dialogue_id={}, origin={}, target={}"
                      .format(self.context.agent_name, match_accept.get("message_id"), match_accept.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, match_accept.get("target")))
         transactions = cast(Transactions, self.context.transactions)
-        transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.get("target")))
-        # update skill id to route back to tac participation skill
-        transaction_msg.set('skill_id', 'tac_participation_skill')
-        self.context.decision_maker_message_queue.put(transaction_msg)
+        transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.get("target")))
+        # # update skill id to route back to tac participation skill
+        # transaction_msg.set('skill_id', 'tac_participation_skill')
+        # self.context.decision_maker_message_queue.put(transaction_msg)
 
 
 class TransactionHandler(Handler):
@@ -307,17 +307,18 @@ class TransactionHandler(Handler):
         """
         tx_message = cast(TransactionMessage, message)
         if TransactionMessage.Performative(tx_message.get("performative")) == TransactionMessage.Performative.ACCEPT:
-            logger.info("[{}]: transaction confirmed by decision maker, sending match accept.".format(self.context.agent_name))
+            logger.info("[{}]: transaction confirmed by decision maker".format(self.context.agent_name))
             info = cast(Dict[str, Any], tx_message.get("info"))
             dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
             tac_message = dialogue.last_incoming_message
             if tac_message is not None and tac_message.get("performative") == FIPAMessage.Performative.ACCEPT:
+                logger.info("[{}]: sending match accept to {}.".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:]))
                 fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
                                        message_id=cast(int, tac_message.get("message_id")) + 1,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                                       target=tac_message.get("message_id"),
+                                       target=cast(int, tac_message.get("message_id")),
                                        address=tx_message.get("transaction_digest"))
                 dialogue.outgoing_extend(fipa_msg)
                 self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_pbk,
@@ -325,7 +326,7 @@ class TransactionHandler(Handler):
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(fipa_msg))
             else:
-                logger.info("[{}]: last message should be of performative accept.".format(self.context.agent_name))
+                logger.warning("[{}]: last message should be of performative accept.".format(self.context.agent_name))
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 

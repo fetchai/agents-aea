@@ -200,7 +200,7 @@ class FIPAHandler(Handler):
         proposal = cast(Description, dialogue.proposal)
         ledger_id = cast(str, proposal.values.get("ledger_id"))
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                    skill_id="weather_client_ledger",
+                                    skill_ids=["weather_client_ledger"],
                                     transaction_id="transaction0",
                                     sender=self.context.agent_public_keys[ledger_id],
                                     counterparty=address,
