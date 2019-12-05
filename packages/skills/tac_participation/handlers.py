@@ -258,8 +258,8 @@ class TACHandler(Handler):
         error_code = TACMessage.ErrorCode(tac_message.get("error_code"))
         logger.error("[{}]: Received error from the controller. error_msg={}".format(self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)))
         if error_code == TACMessage.ErrorCode.TRANSACTION_NOT_VALID:
-            start_idx_of_tx_id = len("Error in checking transaction: ")
-            transaction_id = cast(str, tac_message.get("error_msg"))[start_idx_of_tx_id:]
+            info = cast(Dict, tac_message.get("info"))
+            transaction_id = info.get("transaction_id")
             logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id))
 
     def _on_start(self, tac_message: TACMessage, controller_pbk: Address) -> None:
@@ -376,10 +376,10 @@ class TransactionHandler(Handler):
         if TransactionMessage.Performative(tx_message.get("performative")) == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction confirmed by decision maker, sending to controller.".format(self.context.agent_name))
             game = cast(Game, self.context.game)
-            msg = TACMessage(type=TACMessage.Type.TRANSACTION,
+            msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION,
                              transaction_id=tx_message.get("transaction_digest"),
                              counterparty=tx_message.get("counterparty"),
-                             amount_by_currency={tx_message.get("currency"): tx_message.get("amount")},
+                             amount_by_currency={tx_message.get("currency_pbk"): tx_message.get("amount")},
                              sender_tx_fee=tx_message.get("sender_tx_fee"),
                              counterparty_tx_fee=tx_message.get("counterparty_tx_fee"),
                              quantities_by_good_pbk=tx_message.get("quantities_by_good_pbk"))

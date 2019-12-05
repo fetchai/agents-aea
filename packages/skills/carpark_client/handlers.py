@@ -198,7 +198,7 @@ class FIPAHandler(Handler):
         address = cast(str, msg.get("address"))
         proposal = cast(Description, dialogue.proposal)
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                    skill_id="carpark_client",
+                                    skill_ids=["carpark_client"],
                                     transaction_id="transaction0",
                                     sender=self.context.agent_public_keys['fetchai'],
                                     counterparty=address,

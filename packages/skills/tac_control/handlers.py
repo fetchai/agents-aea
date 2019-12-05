@@ -186,14 +186,18 @@ class TACHandler(Handler):
 
         # send the transaction confirmation.
         sender_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
-                                    transaction_id=transaction.transaction_id)
+                                    transaction_id=transaction.transaction_id,
+                                    amount_by_currency=transaction.amount_by_currency,
+                                    quantities_by_good_pbk=transaction.quantities_by_good_pbk)
         counterparty_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
-                                          transaction_id=transaction.transaction_id)
+                                          transaction_id=transaction.transaction_id,
+                                          amount_by_currency=transaction.amount_by_currency,
+                                          quantities_by_good_pbk=transaction.quantities_by_good_pbk)
         self.context.outbox.put_message(to=sender,
-                                        sender=self.context.public_key,
+                                        sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,
                                         message=TACSerializer().encode(sender_tac_msg))
-        self.context.outbox.put_message(to=cast(str, message.get("counterparty")),
+        self.context.outbox.put_message(to=transaction.counterparty,
                                         sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,
                                         message=TACSerializer().encode(counterparty_tac_msg))
@@ -206,7 +210,7 @@ class TACHandler(Handler):
         """Handle an invalid transaction."""
         tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
                              error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID,
-                             details={"transaction_id": message.get("transaction_id")})
+                             info={"transaction_id": message.get("transaction_id")})
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,

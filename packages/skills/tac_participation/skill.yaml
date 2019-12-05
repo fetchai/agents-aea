@@ -15,6 +15,9 @@ handlers:
   - handler:
       class_name: TACHandler
       args: {}
+  - handler:
+      class_name: TransactionHandler
+      args: {}
 tasks: []
 shared_classes:
   - shared_class:

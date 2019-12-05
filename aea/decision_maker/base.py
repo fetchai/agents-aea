@@ -410,10 +410,8 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        # if not self.goal_pursuit_readiness.is_ready:
-        #     logger.warning("[{}]: Preferences and ownership state not initialized. Refusing to process transaction!".format(self._agent_name))
-        #     return
-        # TODO: reintroduce above check
+        if not self.goal_pursuit_readiness.is_ready:
+            logger.debug("[{}]: Preferences and ownership state not initialized!".format(self._agent_name))
 
         # check if the transaction is acceptable and process it accordingly
         if self._is_acceptable_tx(tx_message):
@@ -437,23 +435,46 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        if tx_message.get("ledger_id") is not None:
+        is_utility_enhancing = self._is_utility_enhancing(tx_message)
+        is_affordable = self._is_affordable(tx_message)
+        return is_utility_enhancing and is_affordable
+
+    def _is_utility_enhancing(self, tx_message: TransactionMessage) -> bool:
+        """
+        Check if the tx is utility enhancing.
+
+        :param tx_message: the transaction message
+        :return: whether the transaction is utility enhancing or not
+        """
+        if self.preferences.is_initialized and self.ownership_state.is_initialized:
+            is_utility_enhancing = self.preferences.get_score_diff_from_transaction(self.ownership_state, tx_message) >= 0.0
+        else:
+            logger.warning("[{}]: Cannot verify whether transaction improves utility. Assuming it does!".format(self._agent_name))
+            is_utility_enhancing = True
+        return is_utility_enhancing
+
+    def _is_affordable(self, tx_message: TransactionMessage) -> bool:
+        """
+        Check if the tx is affordable.
+
+        :param tx_message: the transaction message
+        :return: whether the transaction is affordable or not
+        """
+        if tx_message.get("ledger_id") == 'off_chain':
+            logger.warning("[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(self._agent_name))
+            is_affordable = True
+        else:
             amount = cast(int, tx_message.get("amount"))
             counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
             sender_tx_fee = cast(int, tx_message.get("sender_tx_fee"))
             # adjust payment amount to reflect transaction fee split
-            amount -= counterparty_tx_fee
-            tx_fee = counterparty_tx_fee + sender_tx_fee
-            payable = amount + tx_fee
-            is_correct_format = isinstance(payable, int)
+            transfer_amount = amount - counterparty_tx_fee
+            max_tx_fee = sender_tx_fee + counterparty_tx_fee
+            payable = transfer_amount + max_tx_fee
             crypto_object = self._wallet.crypto_objects.get(tx_message.get("ledger_id"))
             balance = self.ledger_apis.token_balance(crypto_object.identifier, cast(str, crypto_object.address))
             is_affordable = payable <= balance
-            # TODO check against preferences and other constraints
-            is_acceptable = is_correct_format and is_affordable
-        else:
-            is_acceptable = self.preferences.get_score_diff_from_transaction(self.ownership_state, tx_message) >= 0.0
-        return is_acceptable
+        return is_affordable
 
     def _settle_tx(self, tx_message: TransactionMessage) -> Optional[str]:
         """
@@ -462,8 +483,11 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: the transaction digest
         """
-        logger.info("[{}]: Settling transaction!".format(self._agent_name))
-        if tx_message.get("ledger_id") is not None:
+        if tx_message.get("ledger_id") == 'off_chain':
+            logger.info("[{}]: Cannot settle transaction, settlememt happens off chain!".format(self._agent_name))
+            tx_digest = cast(Optional[str], tx_message.get("transaction_id"))
+        else:
+            logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
             amount = cast(int, tx_message.get("amount"))
             counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
             sender_tx_fee = cast(int, tx_message.get("sender_tx_fee"))
@@ -473,8 +497,6 @@ class DecisionMaker:
             tx_fee = counterparty_tx_fee + sender_tx_fee
             crypto_object = self._wallet.crypto_objects.get(tx_message.get("ledger_id"))
             tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object, counterparty_address, amount, tx_fee)
-        else:
-            tx_digest = cast(str, tx_message.get("transaction_id"))
         return tx_digest
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
@@ -486,6 +508,7 @@ class DecisionMaker:
         """
         performative = state_update_message.get("performative")
         if performative == StateUpdateMessage.Performative.INITIALIZE:
+            logger.info("[{}]: Applying state initialization!".format(self._agent_name))
             amount_by_currency = cast(Dict[str, int], state_update_message.get("amount_by_currency"))
             quantities_by_good_pbk = cast(Dict[str, int], state_update_message.get("quantities_by_good_pbk"))
             self.ownership_state.init(amount_by_currency=amount_by_currency, quantities_by_good_pbk=quantities_by_good_pbk, agent_name=self._agent_name)
@@ -495,6 +518,7 @@ class DecisionMaker:
             self.preferences.init(exchange_params_by_currency=exchange_params_by_currency, utility_params_by_good_pbk=utility_params_by_good_pbk, tx_fee=tx_fee, agent_name=self._agent_name)
             self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
         elif performative == StateUpdateMessage.Performative.APPLY:
+            logger.info("[{}]: Applying state update!".format(self._agent_name))
             amount_by_currency = cast(Dict[str, int], state_update_message.get("amount_by_currency"))
             quantities_by_good_pbk = cast(Dict[str, int], state_update_message.get("quantities_by_good_pbk"))
             new_ownership_state = self.ownership_state.apply_state_update(amount_deltas_by_currency=amount_by_currency, quantity_deltas_by_good_pbk=quantities_by_good_pbk)
