@@ -116,7 +116,7 @@ class RegistrySearchTestCase(TestCase):
     """Test case for search --registry CLI command."""
 
     def setUp(self):
-        """Setup test case."""
+        """Set it up."""
         self.runner = CliRunner()
 
     def test_search_connections_positive(

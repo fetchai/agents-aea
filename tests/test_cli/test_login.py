@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for CLI login command."""
 from unittest import TestCase, mock
 
@@ -32,7 +31,7 @@ class LoginTestCase(TestCase):
     """Test case for CLI login command."""
 
     def setUp(self):
-        """Setup test case."""
+        """Set it up."""
         self.runner = CliRunner()
 
     def test_login_positive(self, write_cli_config_mock, registry_login_mock):
