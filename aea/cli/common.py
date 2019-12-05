@@ -152,7 +152,8 @@ def format_items(items):
             'Version: {version}\n'
             '{line}\n'.format(
                 name=item['name'],
-                public_id=item['public_id'],
+                # TODO: switch to unsafe get public_id when every obj has it
+                public_id=item.get('public_id'),
                 description=item['description'],
                 version=item['version'],
                 line='-' * 30
@@ -173,7 +174,8 @@ def format_skills(items):
             'Version: {version}\n'
             '{line}\n'.format(
                 name=item['name'],
-                public_id=item['public_id'],
+                # TODO: switch to unsafe get public_id when every obj has it
+                public_id=item.get('public_id'),
                 description=item['description'],
                 version=item['version'],
                 protocols=''.join(
