@@ -138,7 +138,11 @@ class StubConnection(Connection):
         line = self.input_file.readline()
         logger.debug("read line: {!r}".format(line))
         while len(line) > 0:
-            self._process_line(line[:-1])
+            # If the line is the last line of the file, then it doesn't have a \n on the end
+            if line[-1:] == b"\n":
+                self._process_line(line[:-1])
+            else:
+                self._process_line(line)
             line = self.input_file.readline()
 
     def _process_line(self, line) -> None:

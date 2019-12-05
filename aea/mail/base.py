@@ -508,7 +508,7 @@ class Multiplexer:
         :return: None
         """
         fut = asyncio.run_coroutine_threadsafe(self.out_queue.put(envelope), self._loop)
-        return fut.result()
+        fut.result()
 
 
 class InBox(object):

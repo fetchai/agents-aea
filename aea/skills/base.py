@@ -120,6 +120,13 @@ class SkillContext:
         return self._agent_context.ledger_apis
 
     @property
+    def task_queue(self) -> Queue:
+        """Get the task queue."""
+        # TODO this is potentially dangerous - it exposes the task queue to other skills
+        #      such that other skills can modify it.
+        return self._agent_context.task_queue
+
+    @property
     def handlers(self) -> Optional[List['Handler']]:
         """Get handlers of the skill."""
         assert self._skill is not None, "Skill not initialized."
@@ -320,6 +327,7 @@ class Task(ABC):
         """
         self._context = kwargs.pop('skill_context')  # type: SkillContext
         self._config = kwargs
+        self.completed = False
 
     @property
     def context(self) -> SkillContext:

@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Optional, Union
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
@@ -30,6 +30,9 @@ class FIPAMessage(Message):
     """The FIPA message class."""
 
     protocol_id = "fipa"
+
+    STARTING_MESSAGE_ID = 1
+    STARTING_TARGET = 0
 
     class Performative(Enum):
         """FIPA performatives."""
@@ -47,8 +50,8 @@ class FIPAMessage(Message):
             """Get string representation."""
             return self.value
 
-    def __init__(self, message_id: Optional[int] = None,
-                 dialogue_id: Optional[int] = None,
+    def __init__(self, dialogue_reference: Tuple[str, str] = None,
+                 message_id: Optional[int] = None,
                  target: Optional[int] = None,
                  performative: Optional[Union[str, Performative]] = None,
                  **kwargs):
@@ -56,12 +59,12 @@ class FIPAMessage(Message):
         Initialize.
 
         :param message_id: the message id.
-        :param dialogue_id: the dialogue id.
+        :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
         """
         super().__init__(message_id=message_id,
-                         dialogue_id=dialogue_id,
+                         dialogue_reference=dialogue_reference,
                          target=target,
                          performative=FIPAMessage.Performative(performative),
                          **kwargs)
@@ -70,26 +73,39 @@ class FIPAMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
+            assert self.is_set("dialogue_reference")
+            dialogue_reference = self.get("dialogue_reference")
+            assert type(dialogue_reference) == tuple
+            dialogue_reference = cast(Tuple, dialogue_reference)
+            assert type(dialogue_reference[0]) == str and type(dialogue_reference[0]) == str
             assert self.is_set("message_id")
-            assert self.is_set("dialogue_id")
+            assert type(self.get("message_id")) == int
             assert self.is_set("target")
+            assert type(self.get("target")) == int
             performative = FIPAMessage.Performative(self.get("performative"))
             if performative == FIPAMessage.Performative.CFP:
+                assert self.is_set("query")
                 query = self.get("query")
                 assert isinstance(query, Query) or isinstance(query, bytes) or query is None
+                assert len(self.body) == 5
             elif performative == FIPAMessage.Performative.PROPOSE:
+                assert self.is_set("proposal")
                 proposal = self.get("proposal")
                 assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
+                assert len(self.body) == 5
             elif performative == FIPAMessage.Performative.ACCEPT \
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
                     or performative == FIPAMessage.Performative.DECLINE:
-                pass  # pragma: no cover
+                assert len(self.body) == 4
             elif performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS\
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
                 assert self.is_set("address")
+                assert len(self.body) == 5
             elif performative == FIPAMessage.Performative.INFORM:
-                data = self.get("data")
-                assert isinstance(data, bytes)
+                assert self.is_set("json_data")
+                json_data = self.get("json_data")
+                assert isinstance(json_data, dict)
+                assert len(self.body) == 5
             else:
                 raise ValueError("Performative not recognized.")
 
@@ -97,3 +113,15 @@ class FIPAMessage(Message):
             return False
 
         return True
+
+
+VALID_PREVIOUS_PERFORMATIVES = {
+    FIPAMessage.Performative.CFP: [None],
+    FIPAMessage.Performative.PROPOSE: [FIPAMessage.Performative.CFP],
+    FIPAMessage.Performative.ACCEPT: [FIPAMessage.Performative.PROPOSE],
+    FIPAMessage.Performative.ACCEPT_W_ADDRESS: [FIPAMessage.Performative.PROPOSE],
+    FIPAMessage.Performative.MATCH_ACCEPT: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS],
+    FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS],
+    FIPAMessage.Performative.INFORM: [FIPAMessage.Performative.MATCH_ACCEPT, FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS, FIPAMessage.Performative.INFORM],
+    FIPAMessage.Performative.DECLINE: [FIPAMessage.Performative.CFP, FIPAMessage.Performative.PROPOSE, FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS]
+}  # type: Dict[FIPAMessage.Performative, List[Union[None, FIPAMessage.Performative]]]

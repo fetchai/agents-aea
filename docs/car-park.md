@@ -5,6 +5,7 @@ The Fetch.ai car park agent demo is documented in its own repo [here](https://gi
 
 ## To test the AEA functionality (without the detection)
 
+
 First, create the carpark detection agent:
 ```
 aea create car_detector
@@ -44,11 +45,6 @@ Then, in the carpark detection skill settings (`car_detector/skills/carpark_dete
 # db_rel_dir: ../temp_files
 ```
 
-Then, in the carpark client skill settings (`car_data_buyer/skills/carpark_client/skill.yaml`) of the client agent do:
-```
-max_detection_age: 36000000
-```
-
 Then, launch an OEF node instance:
 ```
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -64,4 +60,39 @@ cd ..
 aea delete car_detector
 aea delete car_data_buyer
 ```
+## Communication
+This diagram shows the communication between the various entities as data is successfully sold by the car park agent to the client. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Search
+        participant Client_AEA
+        participant Car_Park_AEA
+        participant Blockchain
+    
+        activate Client_AEA
+        activate Search
+        activate Car_Park_AEA
+        activate Blockchain
+        
+        Car_Park_AEA->>Search: register_service
+        Client_AEA->>Search: search
+        Search-->>Client_AEA: list_of_agents
+        Client_AEA->>Car_Park_AEA: call_for_proposal
+        Car_Park_AEA->>Client_AEA: propose
+        Client_AEA->>Car_Park_AEA: accept
+        Car_Park_AEA->>Client_AEA: match_accept
+        Client_AEA->>Blockchain: transfer_funds
+        Client_AEA->>Car_Park_AEA: send_transaction_hash
+        Car_Park_AEA->>Client_AEA: send_data
+        
+        deactivate Client_AEA
+        deactivate Search
+        deactivate Car_Park_AEA
+        deactivate Blockchain
+</div>
+
 <br />
+
+
+

@@ -215,8 +215,8 @@ class OEFChannel(OEFAgent):
         :param content: the bytes content.
         :return: None
         """
-        # We are not using the 'origin' parameter because 'content' contains a serialized instance of 'Envelope',
-        # hence it already contains the address of the sender.
+        # We are not using the 'msg_id', 'dialogue_id' and 'origin' parameters because 'content' contains a
+        # serialized instance of 'Envelope', hence it already contains this information.
         assert self.in_queue is not None
         assert self.loop is not None
         envelope = Envelope.decode(content)
@@ -235,12 +235,13 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
+        logger.warning('Accepting on_cfp from deprecated API: msg_id={}, dialogue_id={}, origin={}, target={}. Continuing dialogue via envelopes!'.format(msg_id, dialogue_id, origin, target))
         try:
             query = pickle.loads(query)
         except Exception:
             pass
         msg = FIPAMessage(message_id=msg_id,
-                          dialogue_id=dialogue_id,
+                          dialogue_reference=(str(dialogue_id), ''),
                           target=target,
                           performative=FIPAMessage.Performative.CFP,
                           query=query if query != b"" else None)
@@ -261,19 +262,7 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        if type(b_proposals) == bytes:
-            proposals = pickle.loads(b_proposals)  # type: List[Description]
-        else:
-            raise ValueError("No support for non-bytes proposals.")
-
-        msg = FIPAMessage(message_id=msg_id,
-                          dialogue_id=dialogue_id,
-                          target=target,
-                          performative=FIPAMessage.Performative.PROPOSE,
-                          proposal=proposals)
-        msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+        logger.warning('Dropping incompatible on_propose: msg_id={}, dialogue_id={}, origin={}, target={}'.format(msg_id, dialogue_id, origin, target))
 
     def on_accept(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
         """
@@ -287,14 +276,7 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        performative = FIPAMessage.Performative.MATCH_ACCEPT if msg_id == 4 and target == 3 else FIPAMessage.Performative.ACCEPT
-        msg = FIPAMessage(message_id=msg_id,
-                          dialogue_id=dialogue_id,
-                          target=target,
-                          performative=performative)
-        msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+        logger.warning('Dropping incompatible on_accept: msg_id={}, dialogue_id={}, origin={}, target={}'.format(msg_id, dialogue_id, origin, target))
 
     def on_decline(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
         """
@@ -308,13 +290,7 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = FIPAMessage(message_id=msg_id,
-                          dialogue_id=dialogue_id,
-                          target=target,
-                          performative=FIPAMessage.Performative.DECLINE)
-        msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+        logger.warning('Dropping incompatible on_decline: msg_id={}, dialogue_id={}, origin={}, target={}'.format(msg_id, dialogue_id, origin, target))
 
     def on_search_result(self, search_id: int, agents: List[str]) -> None:
         """
@@ -377,57 +353,17 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        if envelope.protocol_id == "default":
-            self.send_default_message(envelope)
-        elif envelope.protocol_id == "fipa":
-            self.send_fipa_message(envelope)
+        if envelope.protocol_id == "gym":
+            logger.error("This envelope cannot be sent with the oef connection: protocol_id={}".format(envelope.protocol_id))
+            raise ValueError("Cannot send message.")
         elif envelope.protocol_id == "oef":
             self.send_oef_message(envelope)
-        elif envelope.protocol_id == "tac":
-            self.send_default_message(envelope)
         else:
-            logger.error("This envelope cannot be sent: protocol_id={}".format(envelope.protocol_id))
-            raise ValueError("Cannot send message.")
+            self.send_default_message(envelope)
 
     def send_default_message(self, envelope: Envelope):
         """Send a 'default' message."""
         self.send_message(STUB_MESSSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode())
-
-    def send_fipa_message(self, envelope: Envelope) -> None:
-        """
-        Send fipa message handler.
-
-        :param envelope: the message.
-        :return: None
-        """
-        fipa_message = FIPASerializer().decode(envelope.message)
-        id = fipa_message.get("message_id")
-        dialogue_id = fipa_message.get("dialogue_id")
-        destination = envelope.to
-        target = fipa_message.get("target")
-        performative = FIPAMessage.Performative(fipa_message.get("performative"))
-        if performative == FIPAMessage.Performative.CFP:
-            query = fipa_message.get("query")
-            query = b"" if query is None else query
-            if type(query) == Query:
-                query = pickle.dumps(query)
-            self.send_cfp(id, dialogue_id, destination, target, query)
-        elif performative == FIPAMessage.Performative.PROPOSE:
-            proposal = cast(List[Description], fipa_message.get("proposal"))
-            proposal_b = pickle.dumps(proposal)  # type: bytes
-            self.send_propose(id, dialogue_id, destination, target, proposal_b)
-        elif performative == FIPAMessage.Performative.ACCEPT:
-            self.send_accept(id, dialogue_id, destination, target)
-        elif performative == FIPAMessage.Performative.MATCH_ACCEPT:
-            self.send_accept(id, dialogue_id, destination, target)
-        elif performative == FIPAMessage.Performative.DECLINE:
-            self.send_decline(id, dialogue_id, destination, target)
-        elif performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS or \
-                performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS or \
-                performative == FIPAMessage.Performative.INFORM:
-            self.send_default_message(envelope)
-        else:
-            raise ValueError("OEF FIPA message not recognized.")  # pragma: no cover
 
     def send_oef_message(self, envelope: Envelope) -> None:
         """
@@ -549,6 +485,7 @@ class OEFConnection(Connection):
         """
         assert self._connection_check_thread is not None, "Call connect before disconnect."
         assert self.in_queue is not None
+        # import pdb; pdb.set_trace()
         self.connection_status.is_connected = False
         self._connection_check_thread.join()
         self._connection_check_thread = None

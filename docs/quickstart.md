@@ -70,7 +70,7 @@ pip install aea[cli]
 
 ### Known issues
 
-If the installation steps fail, it might a dependency issue. 
+If the installation steps fail, it might be a dependency issue. 
 
 The following hints can help:
 
@@ -133,7 +133,7 @@ recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
 Run the agent with the `stub` connection.
 
 ``` bash
-aea run --connection stub
+aea run --connections stub
 ```
 
 You will see the echo task running in the terminal window.

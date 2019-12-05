@@ -60,6 +60,7 @@ def test_initialise_AEA():
     my_AEA.resources = Resources(str(Path(CUR_PATH, "aea")))
     assert my_AEA.resources is not None,\
         "Resources must not be None after set"
+    my_AEA.stop()
 
 
 def test_act():
@@ -186,8 +187,7 @@ async def test_handle():
             msg = FIPASerializer().encode(
                 FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
                             message_id=0,
-                            dialogue_id=0,
-                            destination=public_key,
+                            dialogue_reference=(str(0), ''),
                             target=1))
             envelope = Envelope(
                 to=public_key,

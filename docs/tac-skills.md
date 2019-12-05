@@ -71,3 +71,74 @@ aea run
 
 !!!	Note
 	Currently, the agents cannot settle their trades. Updates coming soon!
+	
+### Registration communication
+This diagram shows the communication between the various entities during the registration phase. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent_2
+        participant Agent_1
+        participant Search
+        participant Controller
+    
+        activate Search
+        activate Controller
+        
+        Controller->>Search: register_service
+        activate Agent_1
+        Agent_1->>Search: search
+        Search-->>Agent_1: controller
+        Agent_1->>Controller: register
+        activate Agent_2
+        Agent_2->>Search: search
+        Search-->>Agent_2: controller
+        Agent_2->>Controller: register
+        Controller->>Agent_1: game_data
+        Controller->>Agent_2: game_data
+        
+        deactivate Agent_1
+        deactivate Agent_2
+        deactivate Search
+        deactivate Controller
+</div>
+
+### Transaction communication
+This diagram shows the communication between the two agents and the controller. In this case, we have a Seller_Agent which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the Searching_Agent which is set up to search for sellers. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Buyer_Agent
+        participant Seller_Agent
+        participant Search
+        participant Controller
+    
+        activate Buyer_Agent
+        activate Seller_Agent
+        activate Search
+        activate Controller
+        
+        Seller_Agent->>Search: register_service
+        Buyer_Agent->>Search: search
+        Search-->>Buyer_Agent: list_of_agents
+        Buyer_Agent->>Seller_Agent: call_for_proposal
+        Seller_Agent->>Buyer_Agent: proposal
+        Buyer_Agent->>Seller_Agent: accept
+        Buyer_Agent->>Controller: request_transaction
+        Seller_Agent->>Buyer_Agent: match_accept
+        Seller_Agent->>Controller: request_transaction
+        Controller->>Controller: transfer_funds
+        Controller->>Seller_Agent: confirm_transaction
+        Controller->>Buyer_Agent: confirm_transaction
+        
+        deactivate Buyer_Agent
+        deactivate Seller_Agent
+        deactivate Search
+        deactivate Controller
+
+</div>
+
+In the above case, the proposal received contains a set of good which the seller wishes to sell and a cost of them. The buyer agent needs to determine if this is a good deal for them and if so, it accepts.
+
+There is an equivalent diagram for seller agents set up to search for buyers and their interaction with agents which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
+

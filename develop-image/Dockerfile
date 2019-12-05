@@ -52,8 +52,7 @@ RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get update
 RUN apt-get install -y      \
     python3.8               \
-    python3.8-dev           \
-    python3.8-distutils
+    python3.8-dev           
 RUN python3.8 -m pip install Cython
 RUN python3.8 -m pip install git+https://github.com/pytoolz/cytoolz.git#egg=cytoolz==0.10.1.dev0
 

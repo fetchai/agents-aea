@@ -22,7 +22,7 @@
 import logging
 import pprint
 import sys
-from typing import Dict, List, Optional, cast, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Tuple, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.dialogue.base import DialogueLabel
@@ -85,7 +85,7 @@ class FIPANegotiationHandler(Handler):
             query = cast(Query, fipa_msg.get("query"))
             assert query.model is not None, "Query has no data model."
             is_seller = query.model.name == DEMAND_DATAMODEL_NAME
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(sender, cast(int, fipa_msg.get('dialogue_id')), is_seller))
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(sender, cast(Tuple[str, str], fipa_msg.get('dialogue_reference')), is_seller))
             dialogue.incoming_extend(fipa_msg)
         else:
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
@@ -142,7 +142,7 @@ class FIPANegotiationHandler(Handler):
                                                                   })))
             fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.DECLINE,
                                    message_id=new_msg_id,
-                                   dialogue_id=cfp.get("dialogue_id"),
+                                   dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                    target=cfp.get("message_id"))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
@@ -160,7 +160,7 @@ class FIPANegotiationHandler(Handler):
                                                                  })))
             fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.PROPOSE,
                                    message_id=new_msg_id,
-                                   dialogue_id=cfp.get("dialogue_id"),
+                                   dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                    target=cfp.get("message_id"),
                                    proposal=[proposal_description])
         dialogue.outgoing_extend(fipa_msg)
@@ -193,13 +193,13 @@ class FIPANegotiationHandler(Handler):
                 transactions.add_pending_initial_acceptance(dialogue.dialogue_label, new_msg_id, transaction_msg)
                 fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,
                                        message_id=new_msg_id,
-                                       dialogue_id=propose.get("dialogue_id"),
+                                       dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=propose.get("message_id"))
             else:
                 logger.info("[{}]: Declining propose (as {})".format(self.context.agent_name, dialogue.role))
                 fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.DECLINE,
                                        message_id=new_msg_id,
-                                       dialogue_id=propose.get("dialogue_id"),
+                                       dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=propose.get("message_id"))
                 dialogues = cast(Dialogues, self.context.dialogues)
                 dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
@@ -257,7 +257,7 @@ class FIPANegotiationHandler(Handler):
             logger.debug("[{}]: decline the Accept (as {}).".format(self.context.agent_name, dialogue.role))
             fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.DECLINE,
                                    message_id=new_msg_id,
-                                   dialogue_id=accept.get("dialogue_id"),
+                                   dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                    target=accept.get("message_id"), )
             dialogue.outgoing_extend(fipa_msg)
             dialogues = cast(Dialogues, self.context.dialogues)
@@ -308,14 +308,15 @@ class TransactionHandler(Handler):
         tx_message = cast(TransactionMessage, message)
         if TransactionMessage.Performative(tx_message.get("performative")) == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction confirmed by decision maker, sending match accept.".format(self.context.agent_name))
-            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], tx_message.get("dialogue_label")))
+            info = cast(Dict[str, Any], tx_message.get("info"))
+            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
             tac_message = dialogue.last_incoming_message
             if tac_message is not None and tac_message.get("performative") == FIPAMessage.Performative.ACCEPT:
                 fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
                                        message_id=cast(int, tac_message.get("message_id")) + 1,
-                                       dialogue_id=tac_message.get("dialogue_id"),
+                                       dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=tac_message.get("message_id"),
                                        address=tx_message.get("transaction_digest"))
                 dialogue.outgoing_extend(fipa_msg)
@@ -400,7 +401,7 @@ class OEFSearchHandler(Handler):
                 dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key, not is_searching_for_sellers)
                 logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
                 fipa_msg = FIPAMessage(message_id=FIPAMessage.STARTING_MESSAGE_ID,
-                                       dialogue_id=dialogue.dialogue_label.dialogue_id,
+                                       dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        performative=FIPAMessage.Performative.CFP,
                                        target=FIPAMessage.STARTING_TARGET,
                                        query=query)

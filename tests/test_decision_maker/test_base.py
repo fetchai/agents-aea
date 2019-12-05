@@ -363,6 +363,7 @@ class TestDecisionMaker:
                                         amount=2,
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
+                                        ledger_id="fetchai",
                                         quantities_by_good_pbk={"good_pbk": 10})
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()

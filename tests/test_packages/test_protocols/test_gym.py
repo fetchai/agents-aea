@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the messages module."""
+from unittest import mock
 
 from packages.protocols.gym.message import GymMessage
 from packages.protocols.gym.serialization import GymSerializer
@@ -30,6 +31,12 @@ def test_gym_message_instantiation():
     assert GymMessage(performative=GymMessage.Performative.RESET)
     assert GymMessage(performative=GymMessage.Performative.CLOSE)
     assert str(GymMessage.Performative.CLOSE) == 'close'
+
+    msg = GymMessage(performative=GymMessage.Performative.ACT, action='any_action', step_id=1)
+    with mock.patch('packages.protocols.gym.message.GymMessage.Performative') as mocked_type:
+        mocked_type.ACT.value = "unknown"
+        assert not msg.check_consistency(), \
+            "Expect the consistency to return False"
 
 
 def test_gym_serialization():
