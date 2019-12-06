@@ -29,6 +29,7 @@ from jsonschema import Draft4Validator
 
 from aea.cli import cli
 from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
+from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 
 class TestListProtocols:
@@ -46,7 +47,7 @@ class TestListProtocols:
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
 
-        with mock.patch('aea.cli.list.format_items', return_value='Correct items'):
+        with mock.patch('aea.cli.list.format_items', return_value=FORMAT_ITEMS_SAMPLE_OUTPUT):
             cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
@@ -55,7 +56,7 @@ class TestListProtocols:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = "Correct items\n"
+        compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         assert self.result.output == compare_text
 
     @classmethod
@@ -79,7 +80,7 @@ class TestListConnections:
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
 
-        with mock.patch('aea.cli.list.format_items', return_value='Correct items'):
+        with mock.patch('aea.cli.list.format_items', return_value=FORMAT_ITEMS_SAMPLE_OUTPUT):
             cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
@@ -88,7 +89,7 @@ class TestListConnections:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = "Correct items\n"
+        compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         assert self.result.output == compare_text
 
     @classmethod
@@ -112,7 +113,7 @@ class TestListSkills:
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
 
-        with mock.patch('aea.cli.list.format_items', return_value='Correct items'):
+        with mock.patch('aea.cli.list.format_items', return_value=FORMAT_ITEMS_SAMPLE_OUTPUT):
             cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
@@ -121,7 +122,7 @@ class TestListSkills:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = "Correct items\n"
+        compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         assert self.result.output == compare_text
 
     @classmethod

@@ -30,6 +30,7 @@ from jsonschema import Draft4Validator
 from aea import AEA_DIR
 from aea.cli import cli
 from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 
 class TestSearchProtocols:
@@ -45,12 +46,12 @@ class TestSearchProtocols:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    @mock.patch('aea.cli.search.format_items', return_value='Correct items')
+    @mock.patch('aea.cli.search.format_items', return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"], standalone_mode=False)
-        assert self.result.output == "Available protocols:\nCorrect items\n"
+        assert self.result.output == "Available protocols:\n{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
 
     @classmethod
     def teardown_class(cls):
@@ -71,12 +72,17 @@ class TestSearchConnections:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    @mock.patch('aea.cli.search.format_items', return_value='Correct items')
+    @mock.patch(
+        'aea.cli.search.format_items',
+        return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+    )
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "connections"], standalone_mode=False)
-        assert self.result.output == "Available connections:\nCorrect items\n"
+        assert self.result.output == "Available connections:\n{}\n".format(
+            FORMAT_ITEMS_SAMPLE_OUTPUT
+        )
 
     @classmethod
     def teardown_class(cls):
@@ -97,12 +103,15 @@ class TestSearchSkills:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    @mock.patch('aea.cli.search.format_items', return_value='Correct items')
+    @mock.patch(
+        'aea.cli.search.format_items',
+        return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+    )
     def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False)
-        assert self.result.output == "Available skills:\nCorrect items\n"
+        assert self.result.output == "Available skills:\n{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
 
     @classmethod
     def teardown_class(cls):
@@ -110,8 +119,14 @@ class TestSearchSkills:
         os.chdir(cls.cwd)
 
 
-@mock.patch('aea.cli.search.request_api', return_value=['correct', 'results'])
-@mock.patch('aea.cli.search.format_items', return_value='Correct items')
+@mock.patch(
+    'aea.cli.search.request_api',
+    return_value=['correct', 'results']
+)
+@mock.patch(
+    'aea.cli.search.format_items',
+    return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+)
 class RegistrySearchTestCase(TestCase):
     """Test case for search --registry CLI command."""
 
@@ -137,7 +152,7 @@ class RegistrySearchTestCase(TestCase):
         expected_output = (
             'Searching for "some"...\n'
             'Connections found:\n\n'
-            'Correct items\n'
+            '{}\n'.format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
@@ -163,7 +178,7 @@ class RegistrySearchTestCase(TestCase):
         expected_output = (
             'Searching for "some"...\n'
             'Protocols found:\n\n'
-            'Correct items\n'
+            '{}\n'.format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
@@ -171,7 +186,10 @@ class RegistrySearchTestCase(TestCase):
         )
         format_items_mock.assert_called_once_with(['correct', 'results'])
 
-    @mock.patch('aea.cli.search.format_skills', return_value='Correct items')
+    @mock.patch(
+        'aea.cli.search.format_skills',
+        return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+    )
     def test_search_skills_positive(
         self, format_skills_mock, format_items_mock, request_api_mock
     ):
@@ -190,7 +208,7 @@ class RegistrySearchTestCase(TestCase):
         expected_output = (
             'Searching for "some"...\n'
             'Skills found:\n\n'
-            'Correct items\n'
+            '{}\n'.format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
