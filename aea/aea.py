@@ -137,6 +137,7 @@ class AEA(Agent):
         """
         for behaviour in self.filter.get_active_behaviours():
             behaviour.act()
+            behaviour.step()
 
     def react(self) -> None:
         """
