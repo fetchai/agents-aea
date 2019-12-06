@@ -171,3 +171,5 @@ class TACBehaviour(Behaviour):
                                             sender=self.context.agent_public_key,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))
+        logger.info("[{}]: Finished competition:\n{}".format(self.context.agent_name, game.holdings_summary))
+        logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))

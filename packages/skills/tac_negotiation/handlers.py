@@ -133,11 +133,11 @@ class FIPANegotiationHandler(Handler):
         proposal_description = strategy.get_proposal_for_query(query, dialogue.is_seller)
 
         if proposal_description is None:
-            logger.debug("[{}]: sending to {} a Decline{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk,
+            logger.debug("[{}]: sending to {} a Decline{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                   pprint.pformat({
                                                                       "msg_id": new_msg_id,
                                                                       "dialogue_id": cfp.get("dialogue_id"),
-                                                                      "origin": dialogue.dialogue_label.dialogue_opponent_pbk,
+                                                                      "origin": dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                       "target": cfp.get("target")
                                                                   })))
             fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.DECLINE,
@@ -150,11 +150,11 @@ class FIPANegotiationHandler(Handler):
             transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
             transactions = cast(Transactions, self.context.transactions)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
-            logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk,
+            logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                  pprint.pformat({
                                                                      "msg_id": new_msg_id,
                                                                      "dialogue_id": cfp.get("dialogue_id"),
-                                                                     "origin": dialogue.dialogue_label.dialogue_opponent_pbk,
+                                                                     "origin": dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                      "target": cfp.get("message_id"),
                                                                      "propose": proposal_description.values
                                                                  })))

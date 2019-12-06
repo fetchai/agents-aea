@@ -180,7 +180,7 @@ class TACHandler(Handler):
         :return: None
         """
         game = cast(Game, self.context.game)
-        logger.debug("[{}]: Handling valid transaction: {}".format(self.context.agent_name, transaction.transaction_id))
+        logger.info("[{}]: Handling valid transaction: {}".format(self.context.agent_name, transaction.transaction_id[-10:]))
         game.transactions.add_confirmed(transaction)
         game.settle_transaction(transaction)
 
@@ -203,11 +203,13 @@ class TACHandler(Handler):
                                         message=TACSerializer().encode(counterparty_tac_msg))
 
         # log messages
-        logger.debug("[{}]: Transaction '{}' settled successfully.".format(self.context.agent_name, transaction.transaction_id))
-        logger.debug("[{}]: Current state:\n{}".format(self.context.agent_name, game.holdings_summary))
+        logger.info("[{}]: Transaction '{}' settled successfully.".format(self.context.agent_name, transaction.transaction_id[-10:]))
+        logger.info("[{}]: Current state:\n{}".format(self.context.agent_name, game.holdings_summary))
 
     def _handle_invalid_transaction(self, message: TACMessage, sender: Address) -> None:
         """Handle an invalid transaction."""
+        tx_id = cast(str, message.get("transaction_id"))[-10:] if (message.get("transaction_id") is not None) else 'NO_TX_ID'
+        logger.info("[{}]: Handling invalid transaction: {}".format(self.context.agent_name, tx_id))
         tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
                              error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID,
                              info={"transaction_id": message.get("transaction_id")})
