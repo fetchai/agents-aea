@@ -599,8 +599,7 @@ class Filter(object):
         :return: the list of behaviours currently active
         """
         behaviours = self.resources.behaviour_registry.fetch_all()
-        # TODO: add filtering, remove inactive behaviours
-        return behaviours
+        return [b for b in behaviours if not b.done()]
 
     def handle_internal_messages(self) -> None:
         """
