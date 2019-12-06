@@ -304,8 +304,8 @@ class TestFilter:
         """Test that the internal messages are handled."""
         self.aea.setup()
         t = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                               skill_id="dummy",
                                transaction_id="transaction0",
+                               skill_ids=["internal", "dummy"],
                                sender="pk1",
                                counterparty="pk2",
                                is_sender_buyer=True,
