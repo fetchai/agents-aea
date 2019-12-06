@@ -189,7 +189,6 @@ def format_skills(items):
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
     """Return description of a protocol, skill or connection."""
     config = loader.load(open(str(config_filepath)))
-    assert config.name == name
     return {"name": config.name, "description": config.description, "version": config.version}
 
 
