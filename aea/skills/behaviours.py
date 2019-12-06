@@ -24,7 +24,7 @@ class CyclicBehaviour(Behaviour):
     """This behaviour is executed until the agent is stopped."""
 
     def __init__(self, **kwargs):
-        """Initialize the """
+        """Initialize the cyclic behaviour."""
         super().__init__(**kwargs)
         self._number_of_executions = 0
 
