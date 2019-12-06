@@ -23,18 +23,29 @@ import click
 import os
 import requests
 import tarfile
+import yaml
 
 from typing import List, Dict
 
-from aea.cli.registry.settings import REGISTRY_API_URL
+from aea.cli.registry.settings import REGISTRY_API_URL, CLI_CONFIG_PATH
 
 
-def request_api(method: str, path: str, params=None) -> Dict:
-    """Request Registry API."""
+def request_api(method: str, path: str, params=None, data=None) -> Dict:
+    """
+    Request Registry API.
+
+    :param method: str request method ('GET, 'POST', 'PUT', etc.).
+    :param path: str URL path.
+    :param params: dict GET params.
+    :param data: dict POST data.
+
+    :return: dict response from Registry API
+    """
     resp = requests.request(
         method=method,
         url='{}{}'.format(REGISTRY_API_URL, path),
-        params=params
+        params=params,
+        json=data
     )
     if resp.status_code == 200:
         return resp.json()
@@ -140,3 +151,60 @@ def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
         public_id=public_id,
         obj_type=obj_type
     ))
+
+
+def registry_login(username: str, password: str) -> str:
+    """
+    Login into Registry account.
+
+    :param username: str username.
+    :param password: str password.
+
+    :return: str token
+    """
+    resp = request_api(
+        'POST', '/rest-auth/login/',
+        data={'username': username, 'password': password}
+    )
+    return resp['key']
+
+
+def _init_config_folder() -> None:
+    """
+    Create config folder if not exists.
+
+    :return: None
+    """
+    conf_dir = os.path.dirname(CLI_CONFIG_PATH)
+    if not os.path.exists(conf_dir):
+        os.makedirs(conf_dir)
+
+
+def write_cli_config(dict_conf: Dict) -> None:
+    """
+    Write CLI config into yaml file.
+
+    :param dict_conf: dict config to write.
+
+    :return: None
+    """
+    _init_config_folder()
+    with open(CLI_CONFIG_PATH, 'w') as f:
+        yaml.dump(dict_conf, f, default_flow_style=False)
+
+
+def read_cli_config() -> Dict:
+    """
+    Read CLI config from yaml file.
+
+    :return: dict CLI config.
+    """
+    with open(CLI_CONFIG_PATH, 'r') as f:
+        try:
+            return yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise click.ClickException(
+                'Loading CLI config from {} failed: {}'.format(
+                    CLI_CONFIG_PATH, e
+                )
+            )

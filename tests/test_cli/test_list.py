@@ -21,6 +21,7 @@
 import json
 import os
 from pathlib import Path
+from unittest import mock
 
 import jsonschema
 from ..common.click_testing import CliRunner
@@ -28,6 +29,7 @@ from jsonschema import Draft4Validator
 
 from aea.cli import cli
 from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
+from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 
 class TestListProtocols:
@@ -44,7 +46,9 @@ class TestListProtocols:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False)
+
+        with mock.patch('aea.cli.list.format_items', return_value=FORMAT_ITEMS_SAMPLE_OUTPUT):
+            cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -52,18 +56,7 @@ class TestListProtocols:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = """------------------------------
-Name: default
-Description: The default protocol allows for any bytes message.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: fipa
-Description: The fipa protocol implements the FIPA ACL.
-Version: 0.1.0
-------------------------------
-
-"""
+        compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         assert self.result.output == compare_text
 
     @classmethod
@@ -86,7 +79,9 @@ class TestListConnections:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False)
+
+        with mock.patch('aea.cli.list.format_items', return_value=FORMAT_ITEMS_SAMPLE_OUTPUT):
+            cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "connections"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -94,13 +89,7 @@ class TestListConnections:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = """------------------------------
-Name: local
-Description: The local connection provides a stub for an OEF node.
-Version: 0.1.0
-------------------------------
-
-"""
+        compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         assert self.result.output == compare_text
 
     @classmethod
@@ -123,7 +112,9 @@ class TestListSkills:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False)
+
+        with mock.patch('aea.cli.list.format_items', return_value=FORMAT_ITEMS_SAMPLE_OUTPUT):
+            cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -131,18 +122,7 @@ class TestListSkills:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        compare_text = """------------------------------
-Name: dummy
-Description: a dummy_skill for testing purposes.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: error
-Description: The error skill implements basic error handling required by all AEAs.
-Version: 0.1.0
-------------------------------
-
-"""
+        compare_text = "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         assert self.result.output == compare_text
 
     @classmethod

@@ -16,13 +16,19 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Settings for operating Registry with CLI."""
-import os
+
+"""Implementation of the 'aea login' subcommand."""
+import click
+
+from aea.cli.registry.utils import registry_login, write_cli_config
 
 
-REGISTRY_API_URL = 'http://localhost:8000'
-CLI_CONFIG_PATH = os.path.join(
-    os.path.expanduser('~'),
-    '.aea',
-    'cli_config.yaml'
-)
+@click.command(name='login', help='Login to Registry account')
+@click.argument('username', type=str, required=True)
+@click.argument('password', type=str, required=True)
+def login(username, password):
+    """Login to Registry account."""
+    click.echo('Signing in as {}...'.format(username))
+    token = registry_login(username, password)
+    write_cli_config({'auth_token': token})
+    click.echo('Successfully signed in: {}.'.format(username))

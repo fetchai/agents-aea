@@ -16,13 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Settings for operating Registry with CLI."""
-import os
+"""Constants used for CLI testing."""
 
-
-REGISTRY_API_URL = 'http://localhost:8000'
-CLI_CONFIG_PATH = os.path.join(
-    os.path.expanduser('~'),
-    '.aea',
-    'cli_config.yaml'
-)
+FORMAT_ITEMS_SAMPLE_OUTPUT = 'Correct items'
