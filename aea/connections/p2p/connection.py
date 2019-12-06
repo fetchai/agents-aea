@@ -110,7 +110,7 @@ class PeerToPeerChannel:
                                     sender=message['FROM']['SENDER_ADDRESS'],
                                     protocol_id=message['PROTOCOL'],
                                     message=message['PAYLOAD'])
-                asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
+                self.loop.call_soon_threadsafe(self.in_queue.put_nowait, envelope)
             time.sleep(0.5)
         logger.debug("Receiving loop stopped.")
 
