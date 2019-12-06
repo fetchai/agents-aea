@@ -259,8 +259,8 @@ class TACHandler(Handler):
         logger.error("[{}]: Received error from the controller. error_msg={}".format(self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)))
         if error_code == TACMessage.ErrorCode.TRANSACTION_NOT_VALID:
             info = cast(Dict, tac_message.get("info"))
-            transaction_id = info.get("transaction_id")
-            logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id))
+            transaction_id = cast(str, info.get("transaction_id")) if (info.get("transaction_id") is not None) else 'NO_TX_ID'
+            logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id[-10:]))
 
     def _on_start(self, tac_message: TACMessage, controller_pbk: Address) -> None:
         """
@@ -300,7 +300,7 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.get("transaction_id")))
+        logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, cast(str, message.get("transaction_id"))[-10:]))
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY,
                                               amount_by_currency=cast(Dict[str, int], message.get("amount_by_currency")),
                                               quantities_by_good_pbk=cast(Dict[str, int], message.get("quantities_by_good_pbk")))

@@ -205,7 +205,7 @@ class Game(SharedClass):
 
         :return: None
         """
-        logger.warning("TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.")
+        logger.warning("[{}]: TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.".format(self.context.agent_name))
         self._expected_controller_pbk = controller_pbk
 
     def update_game_phase(self, phase: Phase) -> None:
