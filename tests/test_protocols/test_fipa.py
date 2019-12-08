@@ -295,5 +295,5 @@ def test_dialogues():
     assert dialogues.dialogue_stats is not None
     dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.SUCCESSFUL, is_self_initiated=True)
     dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.DECLINED_CFP, is_self_initiated=False)
-    assert type(dialogues.dialogue_stats.self_initiated) == {FIPADialogue.EndState.SUCCESSFUL: 1}
-    assert type(dialogues.dialogue_stats.other_initiated) == {FIPADialogue.EndState.DECLINED_CFP: 1}
+    assert dialogues.dialogue_stats.self_initiated == {FIPADialogue.EndState.SUCCESSFUL: 1, FIPADialogue.EndState.DECLINED_PROPOSE: 0, FIPADialogue.EndState.DECLINED_ACCEPT: 0, FIPADialogue.EndState.DECLINED_CFP: 0}
+    assert dialogues.dialogue_stats.other_initiated == {FIPADialogue.EndState.SUCCESSFUL: 0, FIPADialogue.EndState.DECLINED_PROPOSE: 0, FIPADialogue.EndState.DECLINED_ACCEPT: 0, FIPADialogue.EndState.DECLINED_CFP: 1}
