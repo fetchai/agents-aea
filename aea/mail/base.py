@@ -481,8 +481,8 @@ class Multiplexer:
 
         try:
             await connection.send(envelope)
-        except Exception as e:
-            raise e
+        except Exception as e:  # pragma: no cover
+            raise e  # pragma: no cover
 
     def get(self, block: bool = False, timeout: Optional[float] = None) -> Optional[Envelope]:
         """

@@ -142,7 +142,7 @@ class StubConnection(Connection):
             if line[-1:] == b"\n":
                 self._process_line(line[:-1])
             else:
-                self._process_line(line)
+                self._process_line(line)  # pragma: no cover
             line = self.input_file.readline()
 
     def _process_line(self, line) -> None:

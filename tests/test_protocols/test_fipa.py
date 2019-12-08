@@ -291,3 +291,9 @@ def test_dialogues():
     assert isinstance(result, FIPADialogue)
     result = dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_reference=(str(0), ''), is_seller=False)
     assert isinstance(result, FIPADialogue)
+    assert result.role == FIPADialogue.AgentRole.BUYER
+    assert dialogues.dialogue_stats is not None
+    dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.SUCCESSFUL, is_self_initiated=True)
+    dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.DECLINED_CFP, is_self_initiated=False)
+    assert type(dialogues.dialogue_stats.self_initiated) == {FIPADialogue.EndState.SUCCESSFUL: 1}
+    assert type(dialogues.dialogue_stats.other_initiated) == {FIPADialogue.EndState.DECLINED_CFP: 1}

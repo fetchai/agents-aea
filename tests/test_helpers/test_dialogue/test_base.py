@@ -41,6 +41,10 @@ class TestDialogueBase:
         assert self.dialogue_label.dialogue_responder_reference == ''
         assert self.dialogue_label.dialogue_opponent_pbk == "opponent"
         assert self.dialogue_label.dialogue_starter_pbk == "starter"
+        assert str(self.dialogue_label) == "{}_{}_{}_{}".format(self.dialogue_label.dialogue_starter_reference,
+                                                                self.dialogue_label.dialogue_responder_reference,
+                                                                self.dialogue_label.dialogue_opponent_pbk,
+                                                                self.dialogue_label.dialogue_starter_pbk)
 
         dialogue_label2 = DialogueLabel(dialogue_reference=(str(0), ''), dialogue_opponent_pbk="opponent",
                                         dialogue_starter_pbk="starter")
