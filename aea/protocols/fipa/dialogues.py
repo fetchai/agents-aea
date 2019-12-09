@@ -182,7 +182,7 @@ class FIPADialogues(Dialogues):
         """Get the dialogue statistics."""
         return self._dialogue_stats
 
-    def is_permitted_for_new_dialogue(self, fipa_msg: Message, sender: Address) -> bool:
+    def is_permitted_for_new_dialogue(self, fipa_msg: Message) -> bool:
         """
         Check whether a fipa message is permitted for a new dialogue.
 
@@ -191,7 +191,6 @@ class FIPADialogues(Dialogues):
         - have the correct msg id and message target.
 
         :param message: the fipa message
-        :param sender: the sender
 
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
@@ -205,7 +204,7 @@ class FIPADialogues(Dialogues):
             this_performative == FIPAMessage.Performative.CFP
         return result
 
-    def is_belonging_to_registered_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> bool:
+    def is_belonging_to_registered_dialogue(self, fipa_msg: Message, agent_pbk: Address) -> bool:
         """
         Check whether an agent message is part of a registered dialogue.
 
@@ -218,9 +217,9 @@ class FIPADialogues(Dialogues):
         fipa_msg = cast(FIPAMessage, fipa_msg)
         dialogue_reference = cast(Tuple[str, str], fipa_msg.get("dialogue_reference"))
         alt_dialogue_reference = (dialogue_reference[0], '')
-        self_initiated_dialogue_label = DialogueLabel(dialogue_reference, sender, agent_pbk)
-        alt_self_initiated_dialogue_label = DialogueLabel(alt_dialogue_reference, sender, agent_pbk)
-        other_initiated_dialogue_label = DialogueLabel(dialogue_reference, sender, sender)
+        self_initiated_dialogue_label = DialogueLabel(dialogue_reference, fipa_msg.counterparty, agent_pbk)
+        alt_self_initiated_dialogue_label = DialogueLabel(alt_dialogue_reference, fipa_msg.counterparty, agent_pbk)
+        other_initiated_dialogue_label = DialogueLabel(dialogue_reference, fipa_msg.counterparty, fipa_msg.counterparty)
         result = False
         if other_initiated_dialogue_label in self.dialogues:
             other_initiated_dialogue = cast(FIPADialogue, self.dialogues[other_initiated_dialogue_label])
@@ -238,7 +237,7 @@ class FIPADialogues(Dialogues):
                 self._add(self_initiated_dialogue)
         return result
 
-    def get_dialogue(self, fipa_msg: Message, sender: Address, agent_pbk: Address) -> Dialogue:
+    def get_dialogue(self, fipa_msg: Message, agent_pbk: Address) -> Dialogue:
         """
         Retrieve dialogue.
 
@@ -250,8 +249,8 @@ class FIPADialogues(Dialogues):
         """
         fipa_msg = cast(FIPAMessage, fipa_msg)
         dialogue_reference = cast(Tuple[str, str], fipa_msg.get("dialogue_reference"))
-        self_initiated_dialogue_label = DialogueLabel(dialogue_reference, sender, agent_pbk)
-        other_initiated_dialogue_label = DialogueLabel(dialogue_reference, sender, sender)
+        self_initiated_dialogue_label = DialogueLabel(dialogue_reference, fipa_msg.counterparty, agent_pbk)
+        other_initiated_dialogue_label = DialogueLabel(dialogue_reference, fipa_msg.counterparty, fipa_msg.counterparty)
         if other_initiated_dialogue_label in self.dialogues:
             other_initiated_dialogue = cast(FIPADialogue, self.dialogues[other_initiated_dialogue_label])
             if other_initiated_dialogue.is_valid_next_message(fipa_msg):
