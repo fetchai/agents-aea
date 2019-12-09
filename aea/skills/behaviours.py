@@ -19,7 +19,7 @@
 """This module contains the classes for specific behaviours."""
 import datetime
 from abc import ABC
-from typing import Optional
+from typing import Optional, List, Dict
 
 from aea.skills.base import Behaviour
 
@@ -42,11 +42,14 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
-        self.act()
-        self._number_of_executions += 1
+        if self.done():
+            self.act()
+            self._number_of_executions += 1
 
     def done(self) -> bool:
-        """Return True if the behaviour is terminated, False otherwise."""
+        """Return True if the behaviour is terminated, False otherwise.
+
+        The user should implement it properly to determine the stopping condition."""
         return False
 
 
@@ -103,7 +106,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
-        if self.is_time_to_act():
+        if not self.done() and self.is_time_to_act():
             self._last_act_time = datetime.datetime.now()
             self.act()
 
@@ -115,3 +118,124 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         """
         now = datetime.datetime.now()
         return now > self._start_at and (now - self._last_act_time).total_seconds() > self.tick_interval
+
+
+class SequenceBehaviour(CompositeBehaviour, ABC):
+    """This behaviour executes sub-behaviour serially."""
+
+    def __init__(self, behaviour_sequence: List[Behaviour], **kwargs):
+        """
+        Initialize the sequence behaviour.
+
+        :param behaviour_sequence: the sequence of behaviour.
+        :param kwargs:
+        """
+        super().__init__(**kwargs)
+
+        self._behaviour_sequence = behaviour_sequence
+        assert len(self._behaviour_sequence) > 0, "at least one behaviour."
+        self._index = 0
+
+    @property
+    def current_behaviour(self) -> Optional[Behaviour]:
+        """Get the current behaviour."""
+        return None if self._index >= len(self._behaviour_sequence) else self._behaviour_sequence[self._index]
+
+    def _increase_index_if_possible(self):
+        if self._index < len(self._behaviour_sequence):
+            self._index += 1
+
+    def act(self) -> None:
+        """Implement the behaviour."""
+        while not self.done() and self.current_behaviour.done():
+            self._increase_index_if_possible()
+
+        if not self.done() and not self.current_behaviour.done():
+            self.current_behaviour.act_wrapper()
+
+    def done(self) -> bool:
+        """Return True if the behaviour is terminated, False otherwise."""
+        return self._index >= len(self._behaviour_sequence)
+
+
+class State(SimpleBehaviour, ABC):
+    """A state of a FSMBehaviour is a OneShotBehaviour"""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.next_state = None
+
+    def set_next_state(self, state_name: str):
+        """
+        Set the state to transition to when this state is finished.
+        state_name must be a valid state and the transition must be registered.
+        If set_next_state is not called then current state is a final state.
+
+        :param: state_name: the name of the state to transition to
+        """
+        self.next_state = state_name
+
+
+class FMSBehaviour(CompositeBehaviour):
+    """This class implements a finite-state machine behaviour."""
+
+    def __init__(self, **kwargs):
+        """Initialize the finite-state machine behaviour."""
+        super().__init__(**kwargs)
+
+        self.name2state = {}  # type: Dict[str, State]
+        self._initial_state = None  # type: Optional[str]
+        self.current = None  # type: Optional[str]
+
+        self.transitions = {}  # type: Dict[str, Dict[str, str]]
+
+    @property
+    def is_started(self) -> bool:
+        """Check if the behaviour is started."""
+        return self._initial_state is not None
+
+    def register_state(self, name: str, state: State, initial: bool = False) -> None:
+        """
+        Register a state.
+
+        :param name: the name of the state.
+        :param state: the behaviour in that state.
+        :return: None
+        """
+        self.name2state[name] = state
+        if initial:
+            self._initial_state = name
+
+    @property
+    def initial_state(self) -> Optional[str]:
+        """Get the initial state name."""
+        return self._initial_state
+
+    @initial_state.setter
+    def initial_state(self, value: str):
+        """Set the initial state."""
+        if value not in self.name2state:
+            raise ValueError("Name is not registered as state.")
+        self._initial_state = value
+
+    def get_state(self, name) -> State:
+        """Get a state from its name."""
+        return self.name2state[name]
+
+    def reset(self):
+        """Reset the behaviour to its initial conditions."""
+        self.current = None
+
+    def act(self):
+        """Implement the behaviour."""
+        if self.current is None:
+            if self.initial_state is None:
+                return
+            else:
+                self.current = self.initial_state
+
+        current_state = self.get_state(self.current)
+        current_state.act_wrapper()
+
+        if current_state.done():
+            self.current = current_state.next_state
