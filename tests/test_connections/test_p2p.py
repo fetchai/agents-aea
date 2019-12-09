@@ -112,4 +112,3 @@ async def test_p2p_receive():
         p2p_connection.channel._httpCall.get_messages = fake_get_messages_empty
         await p2p_connection.disconnect()
         assert p2p_connection.connection_status.is_connected is False
-

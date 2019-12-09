@@ -143,7 +143,7 @@ class TACSerializer(Serializer):
         #         transactions.append(tx)
         #     tac_msg.txs.extend(transactions)
         #     tac_container.state_update.CopyFrom(tac_msg)
-        elif tac_type == TACMessage.Type.TAC_ERROR:  # pragma: no cover
+        elif tac_type == TACMessage.Type.TAC_ERROR:
             tac_msg = tac_pb2.TACController.Error()  # type: ignore
             tac_msg.error_code = TACMessage.ErrorCode(msg.get("error_code")).value
             if msg.is_set("info"):
@@ -225,16 +225,13 @@ class TACSerializer(Serializer):
         #         )
         #         transactions.append(tx_json)
         #     new_body["transactions"] = transactions
-        elif tac_type == "error":   # pragma: no cover
+        elif tac_type == "error":
             new_body["type"] = TACMessage.Type.TAC_ERROR
             new_body["error_code"] = TACMessage.ErrorCode(tac_container.error.error_code)
-            if tac_container.error.error_msg:
-                new_body["error_msg"] = tac_container.error.error_msg
-            if tac_container.error.details:
-                new_body["details"] = dict(tac_container.error.details)
-        else:  # pragma: no cover
             if tac_container.error.info:
                 new_body["info"] = _from_pairs_to_dict(tac_container.error.info)
+        else:  # pragma: no cover
+            raise ValueError("Type not recognized.")
 
         tac_type = TACMessage.Type(new_body["type"])
         new_body["type"] = tac_type
