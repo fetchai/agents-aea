@@ -50,19 +50,74 @@ class URI:
     """URI following RFC3986."""
 
     def __init__(self, uri_raw: str):
-        """Initialize the URI."""
+        """
+        Initialize the URI.
+
+        :param uri_raw: the raw form uri
+        :raises ValueError: if uri_raw is not RFC3986 compliant
+        """
         self.uri_raw = uri_raw
         parsed = urlparse(uri_raw)
-        self.scheme = parsed.scheme
-        self.netloc = parsed.netloc
-        self.path = parsed.path
-        self.params = parsed.params
-        self.query = parsed.query
-        self.fragment = parsed.fragment
-        self.username = parsed.username
-        self.password = parsed.password
-        self.host = parsed.hostname
-        self.port = parsed.port
+        self._scheme = parsed.scheme
+        self._netloc = parsed.netloc
+        self._path = parsed.path
+        self._params = parsed.params
+        self._query = parsed.query
+        self._fragment = parsed.fragment
+        self._username = parsed.username
+        self._password = parsed.password
+        self._host = parsed.hostname
+        self._port = parsed.port
+
+    @property
+    def scheme(self) -> str:
+        """Get the scheme."""
+        return self._scheme
+
+    @property
+    def netloc(self) -> str:
+        """Get the netloc."""
+        return self._netloc
+
+    @property
+    def path(self) -> str:
+        """Get the path."""
+        return self._path
+
+    @property
+    def params(self) -> str:
+        """Get the params."""
+        return self._params
+
+    @property
+    def query(self) -> str:
+        """Get the query."""
+        return self._query
+
+    @property
+    def fragment(self) -> str:
+        """Get the fragment."""
+        return self._fragment
+
+    @property
+    def username(self) -> Optional[str]:
+        """Get the username."""
+        return self._username
+
+    @property
+    def password(self) -> Optional[str]:
+        """Get the password."""
+        return self._password
+
+    @property
+    def host(self) -> Optional[str]:
+        """Get the host."""
+        return self._host
+
+    @property
+    def port(self) -> Optional[int]:
+        """Get the port."""
+        return self._port
 
     def __str__(self):
         """Get string representation."""
