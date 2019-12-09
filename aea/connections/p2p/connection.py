@@ -80,8 +80,8 @@ class PeerToPeerChannel:
             query = self._httpCall.register(sender_address=self.public_key, mailbox=True)
             return query['status'] == "OK"
         except Exception:  # pragma: no cover
-            logger.warning("Could not register to the provider.")  # pragma: no cover
-            raise AEAConnectionError()  # pragma: no cover
+            logger.warning("Could not register to the provider.")
+            raise AEAConnectionError()
 
     def send(self, envelope: Envelope) -> None:
         """
@@ -194,7 +194,7 @@ class PeerToPeerConnection(Connection):
 
             return envelope
         except CancelledError:  # pragma: no cover
-            return None  # pragma: no cover
+            return None
 
     @classmethod
     def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':

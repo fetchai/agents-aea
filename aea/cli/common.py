@@ -219,4 +219,4 @@ class ConnectionsOption(click.Option):
             connection_names = set(arg_strip(s) for s in value.split(",") if arg_strip(s) != "")
             return list(connection_names)
         except Exception:  # pragma: no cover
-            raise click.BadParameter(value)  # pragma: no cover
+            raise click.BadParameter(value)
