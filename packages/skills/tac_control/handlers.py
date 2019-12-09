@@ -180,33 +180,39 @@ class TACHandler(Handler):
         :return: None
         """
         game = cast(Game, self.context.game)
-        logger.debug("[{}]: Handling valid transaction: {}".format(self.context.agent_name, transaction.transaction_id))
+        logger.info("[{}]: Handling valid transaction: {}".format(self.context.agent_name, transaction.transaction_id[-10:]))
         game.transactions.add_confirmed(transaction)
         game.settle_transaction(transaction)
 
         # send the transaction confirmation.
         sender_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
-                                    transaction_id=transaction.transaction_id)
+                                    transaction_id=transaction.transaction_id,
+                                    amount_by_currency=transaction.amount_by_currency,
+                                    quantities_by_good_pbk=transaction.quantities_by_good_pbk)
         counterparty_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
-                                          transaction_id=transaction.transaction_id)
+                                          transaction_id=transaction.transaction_id,
+                                          amount_by_currency=transaction.amount_by_currency,
+                                          quantities_by_good_pbk=transaction.quantities_by_good_pbk)
         self.context.outbox.put_message(to=sender,
-                                        sender=self.context.public_key,
+                                        sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,
                                         message=TACSerializer().encode(sender_tac_msg))
-        self.context.outbox.put_message(to=cast(str, message.get("counterparty")),
+        self.context.outbox.put_message(to=transaction.counterparty,
                                         sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,
                                         message=TACSerializer().encode(counterparty_tac_msg))
 
         # log messages
-        logger.debug("[{}]: Transaction '{}' settled successfully.".format(self.context.agent_name, transaction.transaction_id))
-        logger.debug("[{}]: Current state:\n{}".format(self.context.agent_name, game.holdings_summary))
+        logger.info("[{}]: Transaction '{}' settled successfully.".format(self.context.agent_name, transaction.transaction_id[-10:]))
+        logger.info("[{}]: Current state:\n{}".format(self.context.agent_name, game.holdings_summary))
 
     def _handle_invalid_transaction(self, message: TACMessage, sender: Address) -> None:
         """Handle an invalid transaction."""
+        tx_id = cast(str, message.get("transaction_id"))[-10:] if (message.get("transaction_id") is not None) else 'NO_TX_ID'
+        logger.info("[{}]: Handling invalid transaction: {}".format(self.context.agent_name, tx_id))
         tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
                              error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID,
-                             details={"transaction_id": message.get("transaction_id")})
+                             info={"transaction_id": message.get("transaction_id")})
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,

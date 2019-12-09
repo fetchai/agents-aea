@@ -146,11 +146,8 @@ class TACSerializer(Serializer):
         elif tac_type == TACMessage.Type.TAC_ERROR:  # pragma: no cover
             tac_msg = tac_pb2.TACController.Error()  # type: ignore
             tac_msg.error_code = TACMessage.ErrorCode(msg.get("error_code")).value
-            if msg.is_set("error_msg"):
-                tac_msg.error_msg = msg.get("error_msg")
-            if msg.is_set("details"):
-                tac_msg.details.update(msg.get("details"))
-
+            if msg.is_set("info"):
+                tac_msg.info.extend(_from_dict_to_pairs(msg.get("info")))
             tac_container.error.CopyFrom(tac_msg)
         else:  # pragma: no cover
             raise ValueError("Type not recognized: {}.".format(tac_type))
@@ -236,7 +233,8 @@ class TACSerializer(Serializer):
             if tac_container.error.details:
                 new_body["details"] = dict(tac_container.error.details)
         else:  # pragma: no cover
-            raise ValueError("Type not recognized.")
+            if tac_container.error.info:
+                new_body["info"] = _from_pairs_to_dict(tac_container.error.info)
 
         tac_type = TACMessage.Type(new_body["type"])
         new_body["type"] = tac_type

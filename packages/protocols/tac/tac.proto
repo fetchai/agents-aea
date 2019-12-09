@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package fetch.oef.pb;
 
-import "google/protobuf/struct.proto";
-
 message StrIntPair {
     string first = 1;
     int32 second = 2;
@@ -65,8 +63,7 @@ message TACController {
         }
 
         ErrorCode error_code = 1;
-        string error_msg = 2;
-        google.protobuf.Struct details = 3;
+        repeated StrStrPair info = 2;
     }
 
 }

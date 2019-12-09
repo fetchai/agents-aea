@@ -82,7 +82,7 @@ class Transactions(SharedClass):
 
             # extract dialogue label and message id
             transaction_id = next_item
-            logger.debug("Removing transaction: {}".format(transaction_id))
+            logger.debug("[{}]: Removing transaction from pending list: {}".format(self.context.agent_name, transaction_id))
 
             # remove (safely) the associated pending proposal (if present)
             self._locked_txs.pop(transaction_id, None)

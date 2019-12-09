@@ -21,13 +21,15 @@
 """The transaction message module."""
 
 from enum import Enum
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
 from aea.protocols.base import Message
 
 TransactionId = str
 Address = str
+OFF_CHAIN = 'off_chain'
+SUPPORTED_LEDGER_IDS = SUPPORTED_LEDGER_APIS + [OFF_CHAIN]
 
 
 class TransactionMessage(Message):
@@ -43,7 +45,7 @@ class TransactionMessage(Message):
         REJECT = "reject"
 
     def __init__(self, performative: Union[str, Performative],
-                 skill_id: str,
+                 skill_ids: List[str],
                  transaction_id: TransactionId,
                  sender: Address,
                  counterparty: Address,
@@ -61,7 +63,7 @@ class TransactionMessage(Message):
         Instantiate transaction message.
 
         :param performative: the performative
-        :param skill_id: the skill sending the transaction message
+        :param skill_ids: the skills to receive the transaction message response
         :param transaction_id: the id of the transaction.
         :param sender: the sender of the transaction.
         :param counterparty: the counterparty of the transaction.
@@ -76,7 +78,7 @@ class TransactionMessage(Message):
         :param transaction_digest: the transaction digest
         """
         super().__init__(performative=performative,
-                         skill_id=skill_id,
+                         skill_ids=skill_ids,
                          transaction_id=transaction_id,
                          sender=sender,
                          counterparty=counterparty,
@@ -100,7 +102,9 @@ class TransactionMessage(Message):
         """
         try:
             assert self.is_set("performative")
-            assert self.is_set("skill_id")
+            assert self.is_set("skill_ids")
+            skill_ids = self.get("skill_ids")
+            assert type(skill_ids) == list
             assert self.is_set("transaction_id")
             assert self.is_set("sender")
             assert self.is_set("counterparty")
@@ -123,7 +127,7 @@ class TransactionMessage(Message):
             assert counterparty_tx_fee >= 0
             assert self.is_set("ledger_id")
             ledger_id = self.get("ledger_id")
-            assert type(ledger_id) == str and ledger_id in SUPPORTED_LEDGER_APIS
+            assert type(ledger_id) == str and ledger_id in SUPPORTED_LEDGER_IDS
             assert self.is_set("info")
             info = self.get("info")
             if info is not None:
@@ -159,7 +163,7 @@ class TransactionMessage(Message):
         """
         return isinstance(other, TransactionMessage) \
             and self.get("performative") == other.get("performative") \
-            and self.get("skill_id") == other.get("skill_id") \
+            and self.get("skill_ids") == other.get("skill_ids") \
             and self.get("transaction_id") == other.get("transaction_id") \
             and self.get("sender") == other.get("counterparty") \
             and self.get("counterparty") == other.get("sender") \
@@ -184,7 +188,7 @@ class TransactionMessage(Message):
         :return: a transaction message object
         """
         tx_msg = TransactionMessage(performative=performative,
-                                    skill_id=cast(str, other.get("skill_id")),
+                                    skill_ids=cast(List[str], other.get("skill_ids")),
                                     transaction_id=cast(str, other.get("transaction_id")),
                                     sender=cast(Address, other.get("sender")),
                                     counterparty=cast(Address, other.get("counterparty")),
@@ -208,7 +212,7 @@ class TransactionMessage(Message):
         """
         return isinstance(other, TransactionMessage) \
             and self.get("performative") == other.get("performative") \
-            and self.get("skill_id") == other.get("skill_id") \
+            and self.get("skill_ids") == other.get("skill_ids") \
             and self.get("transaction_id") == other.get("transaction_id") \
             and self.get("sender") == other.get("sender") \
             and self.get("counterparty") == other.get("counterparty") \

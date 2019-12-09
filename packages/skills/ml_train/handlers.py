@@ -101,7 +101,7 @@ class TrainHandler(Handler):
         if strategy.is_ledger_tx:
             # propose the transaction to the decision maker for settlement on the ledger
             tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id='ml_train',
+                                        skill_ids=['ml_train'],
                                         transaction_id=strategy.get_next_transition_id(),
                                         sender=self.context.agent_public_keys[terms.values["ledger_id"]],
                                         counterparty=terms.values["address"],
