@@ -45,17 +45,59 @@ class Empty(Exception):
     """Exception for when the inbox is empty."""
 
 
+class URI:
+    """URI following RFC3986."""
+
+    def __init__(self, scheme: str,
+                 path: str,
+                 authority: Optional[str] = None,
+                 host: Optional[str] = None,
+                 port: Optional[int] = None,
+                 query: Optional[dict] = None,
+                 fragment: Optional[str] = None):
+        """Initialize the URI."""
+        self.scheme = scheme
+        self.path = path
+        self.authority = authority
+        self.host = host
+        self.port = port
+        self.query = query,
+        self.fragment = fragment
+
+    def __str__(self):
+        """Get string representation."""
+        raise NotImplementedError
+
+    def __eq__(self, other):
+        """Compare with another object."""
+        return isinstance(other, URI) \
+            and self.scheme == other.scheme \
+            and self.path == other.path \
+            and self.authority == other.authority \
+            and self.host == other.host \
+            and self.port == other.port \
+            and self.query == other.query \
+            and self.fragment == other.fragment
+
+
 class EnvelopeContext:
     """Extra information for the handling of an envelope."""
 
-    def __init__(self, connection_id: Optional[str] = None):
+    def __init__(self, connection_id: Optional[str] = None, uri: Optional[URI] = None):
         """Initialize the envelope context."""
         self.connection_id = connection_id
+        self.uri = uri  # must follow: https://tools.ietf.org/html/rfc3986.html
+
+    @property
+    def uri_str(self):
+        """Get uri in string format."""
+        return str(self._uri)
 
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, EnvelopeContext) \
-            and self.connection_id == other.connection_id
+            and self.connection_id == other.connection_id \
+            and self.uri == other.uri
 
 
 class EnvelopeSerializer(ABC):
