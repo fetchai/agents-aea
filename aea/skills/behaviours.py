@@ -114,4 +114,4 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         :return: True if it is time to act, false otherwise.
         """
         now = datetime.datetime.now()
-        return now > self._start_at and (now - self._last_act_time).total_seconds() > self._period
+        return now > self._start_at and (now - self._last_act_time).total_seconds() > self.tick_interval

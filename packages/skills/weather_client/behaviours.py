@@ -42,7 +42,7 @@ class MySearchBehaviour(TickerBehaviour):
     def __init__(self, **kwargs):
         """Initialize the search behaviour."""
         search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
-        super().__init__(tick_interval=search_interval)
+        super().__init__(tick_interval=search_interval, **kwargs)
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
