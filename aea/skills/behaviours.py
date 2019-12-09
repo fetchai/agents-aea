@@ -114,4 +114,4 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         :return: whether it is time to search
         """
         now = datetime.datetime.now()
-        return now < self._start_at and (now - self._last_act_time).total_seconds() > self._period
+        return now > self._start_at and (now - self._last_act_time).total_seconds() > self._period
