@@ -28,6 +28,7 @@ import fetch.p2p.api.http_calls
 import pytest
 from fetchai.ledger.crypto import entity
 
+from aea.configurations.base import ConnectionConfig
 from aea.connections.p2p.connection import PeerToPeerConnection
 from aea.mail.base import Envelope
 
@@ -112,3 +113,9 @@ async def test_p2p_receive():
         p2p_connection.channel._httpCall.get_messages = fake_get_messages_empty
         await p2p_connection.disconnect()
         assert p2p_connection.connection_status.is_connected is False
+
+
+def test_p2p_from_config():
+    """Test the Connection from config File."""
+    con = PeerToPeerConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
+    assert not con.connection_status.is_connected, "We are connected..."

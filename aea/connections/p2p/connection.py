@@ -79,7 +79,7 @@ class PeerToPeerChannel:
             logger.info(self.public_key)
             query = self._httpCall.register(sender_address=self.public_key, mailbox=True)
             return query['status'] == "OK"
-        except Exception:
+        except Exception:  # pragma: no cover
             logger.warning("Could not register to the provider.")
             raise AEAConnectionError()
 
@@ -175,7 +175,7 @@ class PeerToPeerConnection(Connection):
         :return: None
         """
         if not self.connection_status.is_connected:
-            raise ConnectionError("Connection not established yet. Please use 'connect()'.")
+            raise ConnectionError("Connection not established yet. Please use 'connect()'.")  # pragma: no cover
         self.channel.send(envelope)
 
     async def receive(self, *args, **kwargs) -> Optional['Envelope']:
@@ -185,15 +185,15 @@ class PeerToPeerConnection(Connection):
         :return: the envelope received, or None.
         """
         if not self.connection_status.is_connected:
-            raise ConnectionError("Connection not established yet. Please use 'connect()'.")
+            raise ConnectionError("Connection not established yet. Please use 'connect()'.")  # pragma: no cover
         assert self.channel.in_queue is not None
         try:
             envelope = await self.channel.in_queue.get()
             if envelope is None:
-                return None
+                return None  # pragma: no cover
 
             return envelope
-        except CancelledError:
+        except CancelledError:  # pragma: no cover
             return None
 
     @classmethod
