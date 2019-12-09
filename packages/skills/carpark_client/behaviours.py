@@ -58,7 +58,7 @@ class MySearchBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_searching and strategy.is_time_to_search():
+        if strategy.is_searching:
             strategy.on_submit_search()
             self._search_id += 1
             query = strategy.get_service_query()

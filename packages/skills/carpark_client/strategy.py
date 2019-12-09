@@ -19,7 +19,6 @@
 
 """This module contains the strategy class."""
 
-import datetime
 import time
 from typing import cast
 
@@ -50,6 +49,8 @@ class Strategy(SharedClass):
         self._max_detection_age = kwargs.pop('max_detection_age') if 'max_detection_age' in kwargs.keys() else DEFAULT_MAX_DETECTION_AGE
         super().__init__(**kwargs)
 
+        self.is_searching = True
+
     def get_service_query(self) -> Query:
         """
         Get the service query of the agent.
@@ -65,24 +66,11 @@ class Strategy(SharedClass):
 
     def on_search_success(self):
         """Call when search returns succesfully."""
-        self.last_search_time = datetime.datetime.now()
         self.is_searching = True
 
     def on_search_failed(self):
         """Call when search returns with no matches."""
-        self.last_search_time = datetime.datetime.now() - datetime.timedelta(seconds=self._search_interval - self._no_find_search_interval)
         self.is_searching = True
-
-    def is_time_to_search(self) -> bool:
-        """
-        Check whether it is time to search.
-
-        :return: whether it is time to search
-        """
-        now = datetime.datetime.now()
-        diff = now - self.last_search_time
-        result = diff.total_seconds() > self._search_interval
-        return result
 
     def is_acceptable_proposal(self, proposal: Description) -> bool:
         """

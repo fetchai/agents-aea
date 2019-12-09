@@ -22,13 +22,11 @@ import logging
 import sys
 from typing import cast, TYPE_CHECKING
 
-from aea.skills.behaviours import TickerBehaviour
-
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from aea.skills.base import Behaviour
+from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_client_ledger.strategy import Strategy
@@ -46,7 +44,7 @@ class MySearchBehaviour(TickerBehaviour):
     def __init__(self, **kwargs):
         """Initialize the search behaviour."""
         search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
-        super().__init__(period=search_interval)
+        super().__init__(tick_interval=search_interval)
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""

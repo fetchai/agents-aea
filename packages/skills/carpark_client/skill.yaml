@@ -7,7 +7,7 @@ behaviours:
   - behaviour:
       class_name: MySearchBehaviour
       args:
-        period: 120
+        tick_interval: 120
 handlers:
   - handler:
       class_name: FIPAHandler

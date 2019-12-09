@@ -19,9 +19,6 @@
 
 """This module contains the strategy class."""
 
-import datetime
-from typing import cast
-
 from aea.protocols.oef.models import Description, Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
 

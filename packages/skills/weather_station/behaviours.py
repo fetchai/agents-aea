@@ -19,17 +19,14 @@
 
 """This package contains a scaffold of a behaviour."""
 
-import datetime
 import logging
 import sys
 from typing import cast, Optional, TYPE_CHECKING
 
-from aea.skills.behaviours import TickerBehaviour
-
-from aea.skills.base import Behaviour
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_station.strategy import Strategy
@@ -48,7 +45,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
         services_interval = kwargs.pop('services_interval', DEFAULT_SERVICES_INTERVAL)  # type: int
-        super().__init__(period=services_interval, **kwargs)
+        super().__init__(tick_interval=services_interval, **kwargs)
         self._registered_service_description = None  # type: Optional[Description]
 
     def setup(self) -> None:

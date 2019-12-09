@@ -72,24 +72,24 @@ class OneShotBehaviour(SimpleBehaviour, ABC):
 class TickerBehaviour(SimpleBehaviour, ABC):
     """This behaviour is executed periodically with an interval."""
 
-    def __init__(self, period: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs):
+    def __init__(self, tick_interval: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs):
         """
         Initialize the ticker behaviour.
 
-        :param period: interval of the behaviour in seconds.
+        :param tick_interval: interval of the behaviour in seconds.
         :param start_at: whether to start the behaviour with an offset.
         """
         super().__init__(**kwargs)
 
-        self._period = period
+        self._tick_interval = tick_interval
         self._start_at = start_at if start_at is not None else datetime.datetime.now()  # type: datetime.datetime
 
         self._last_act_time = datetime.datetime.now()
 
     @property
-    def period(self) -> float:
-        """Get the period in seconds."""
-        return self._period
+    def tick_interval(self) -> float:
+        """Get the tick_interval in seconds."""
+        return self._tick_interval
 
     @property
     def start_at(self) -> datetime.datetime:
@@ -109,7 +109,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 
     def is_time_to_act(self) -> bool:
         """
-        Check whether it is time to act, according to the period constraint and the 'start at' constraint.
+        Check whether it is time to act, according to the tick_interval constraint and the 'start at' constraint.
 
         :return: True if it is time to act, false otherwise.
         """
