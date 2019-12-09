@@ -25,12 +25,29 @@ import pytest
 
 import aea
 from aea.connections.local.connection import LocalNode, OEFLocalConnection
-from aea.mail.base import Envelope, InBox, OutBox, Multiplexer
+from aea.mail.base import Envelope, InBox, OutBox, Multiplexer, URI
 from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from .conftest import DummyConnection
+
+
+def test_uri():
+    """Testing the uri initialisation."""
+    uri_raw = 'http://user:pwd@NetLoc:80/path;param?query=arg#frag'
+    uri = URI(uri_raw=uri_raw)
+    assert uri_raw == str(uri)
+    assert uri.scheme == 'http'
+    assert uri.netloc == 'user:pwd@NetLoc:80'
+    assert uri.path == '/path'
+    assert uri.params == 'param'
+    assert uri.query == 'query=arg'
+    assert uri.fragment == 'frag'
+    assert uri.host == 'netloc'
+    assert uri.port == 80
+    assert uri.username == 'user'
+    assert uri.password == 'pwd'
 
 
 def test_envelope_initialisation():

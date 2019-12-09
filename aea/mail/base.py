@@ -26,6 +26,7 @@ from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Thread, Lock
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict, cast
+from urllib.parse import urlparse
 
 from aea.configurations.base import Address, ProtocolId
 from aea.connections.base import ConnectionStatus
@@ -48,36 +49,38 @@ class Empty(Exception):
 class URI:
     """URI following RFC3986."""
 
-    def __init__(self, scheme: str,
-                 path: str,
-                 authority: Optional[str] = None,
-                 host: Optional[str] = None,
-                 port: Optional[int] = None,
-                 query: Optional[dict] = None,
-                 fragment: Optional[str] = None):
+    def __init__(self, uri_raw: str):
         """Initialize the URI."""
-        self.scheme = scheme
-        self.path = path
-        self.authority = authority
-        self.host = host
-        self.port = port
-        self.query = query
-        self.fragment = fragment
+        self.uri_raw = uri_raw
+        parsed = urlparse(uri_raw)
+        self.scheme = parsed.scheme
+        self.netloc = parsed.netloc
+        self.path = parsed.path
+        self.params = parsed.params
+        self.query = parsed.query
+        self.fragment = parsed.fragment
+        self.username = parsed.username
+        self.password = parsed.password
+        self.host = parsed.hostname
+        self.port = parsed.port
 
     def __str__(self):
         """Get string representation."""
-        raise NotImplementedError
+        return self.uri_raw
 
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, URI) \
             and self.scheme == other.scheme \
+            and self.netloc == other.netloc \
             and self.path == other.path \
-            and self.authority == other.authority \
-            and self.host == other.host \
-            and self.port == other.port \
+            and self.params == other.params \
             and self.query == other.query \
-            and self.fragment == other.fragment
+            and self.fragment == other.fragment \
+            and self.username == other.username \
+            and self.password == other.password \
+            and self.host == other.host \
+            and self.port == other.port
 
 
 class EnvelopeContext:
@@ -89,9 +92,9 @@ class EnvelopeContext:
         self.uri = uri  # must follow: https://tools.ietf.org/html/rfc3986.html
 
     @property
-    def uri_str(self):
+    def uri_raw(self) -> str:
         """Get uri in string format."""
-        return str(self._uri)
+        return str(self.uri)
 
     def __eq__(self, other):
         """Compare with another object."""
