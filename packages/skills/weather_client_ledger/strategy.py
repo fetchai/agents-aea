@@ -27,7 +27,6 @@ from aea.skills.base import SharedClass
 
 DEFAULT_COUNTRY = 'UK'
 SEARCH_TERM = 'country'
-DEFAULT_SEARCH_INTERVAL = 5.0
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_CURRENCY_PBK = 'FET'
@@ -44,7 +43,6 @@ class Strategy(SharedClass):
         :return: None
         """
         self._country = kwargs.pop('country') if 'country' in kwargs.keys() else DEFAULT_COUNTRY
-        self._search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
         self._max_row_price = kwargs.pop('max_row_price') if 'max_row_price' in kwargs.keys() else DEFAULT_MAX_ROW_PRICE
         self.max_buyer_tx_fee = kwargs.pop('max_tx_fee') if 'max_tx_fee' in kwargs.keys() else DEFAULT_MAX_TX_FEE
         self._currency_pbk = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
@@ -52,7 +50,6 @@ class Strategy(SharedClass):
         super().__init__(**kwargs)
         self._search_id = 0
         self.is_searching = True
-        self._last_search_time = datetime.datetime.now()
 
     def get_next_search_id(self) -> int:
         """
@@ -61,7 +58,6 @@ class Strategy(SharedClass):
         :return: the next search id
         """
         self._search_id += 1
-        self._last_search_time = datetime.datetime.now()
         return self._search_id
 
     def get_service_query(self) -> Query:
@@ -72,19 +68,6 @@ class Strategy(SharedClass):
         """
         query = Query([Constraint(SEARCH_TERM, ConstraintType("==", self._country))], model=None)
         return query
-
-    def is_time_to_search(self) -> bool:
-        """
-        Check whether it is time to search.
-
-        :return: whether it is time to search
-        """
-        if not self.is_searching:
-            return False
-        now = datetime.datetime.now()
-        diff = now - self._last_search_time
-        result = diff.total_seconds() > self._search_interval
-        return result
 
     def is_acceptable_proposal(self, proposal: Description) -> bool:
         """

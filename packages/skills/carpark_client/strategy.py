@@ -49,8 +49,6 @@ class Strategy(SharedClass):
         self._max_price = kwargs.pop('max_price') if 'max_price' in kwargs.keys() else DEFAULT_MAX_PRICE
         self._max_detection_age = kwargs.pop('max_detection_age') if 'max_detection_age' in kwargs.keys() else DEFAULT_MAX_DETECTION_AGE
         super().__init__(**kwargs)
-        self.is_searching = True
-        self.last_search_time = datetime.datetime.now() - datetime.timedelta(seconds=self._search_interval)
 
     def get_service_query(self) -> Query:
         """

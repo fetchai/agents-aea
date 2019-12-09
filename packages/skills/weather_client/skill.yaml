@@ -6,7 +6,8 @@ url: ""
 behaviours:
   - behaviour:
       class_name: MySearchBehaviour
-      args: {}
+      args:
+        search_interval: 5
 handlers:
   - handler:
       class_name: FIPAHandler
@@ -20,7 +21,6 @@ shared_classes:
       class_name: Strategy
       args:
         country: UK
-        search_interval: 5
         max_row_price: 4
         max_buyer_tx_fee: 1
         currency_pbk: 'FET'

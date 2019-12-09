@@ -109,9 +109,9 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 
     def is_time_to_act(self) -> bool:
         """
-        Check whether it is time to search.
+        Check whether it is time to act, according to the period constraint and the 'start at' constraint.
 
-        :return: whether it is time to search
+        :return: True if it is time to act, false otherwise.
         """
         now = datetime.datetime.now()
         return now > self._start_at and (now - self._last_act_time).total_seconds() > self._period
