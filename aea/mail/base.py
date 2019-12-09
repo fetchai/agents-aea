@@ -61,7 +61,7 @@ class URI:
         self.authority = authority
         self.host = host
         self.port = port
-        self.query = query,
+        self.query = query
         self.fragment = fragment
 
     def __str__(self):
