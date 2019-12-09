@@ -263,12 +263,11 @@ class Handler(ABC):
         return self._config
 
     @abstractmethod
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
 

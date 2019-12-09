@@ -30,7 +30,7 @@ from queue import Queue
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast, Union
 
-from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE, Address
 from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Protocol
@@ -609,12 +609,13 @@ class Filter(object):
         """
         while not self.decision_maker_out_queue.empty():
             tx_message = self.decision_maker_out_queue.get_nowait()  # type: Optional[TransactionMessage]
+            tx_message.counterparty = cast(Address, DECISION_MAKER)
             if tx_message is not None:
                 skill_ids = cast(List[str], tx_message.get("skill_ids"))
                 for skill_id in skill_ids:
                     handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
                     if handler is not None:
                         logger.debug("Calling handler {} of skill {}".format(type(handler), skill_id))
-                        handler.handle(tx_message, DECISION_MAKER)
+                        handler.handle(tx_message)
                     else:
                         logger.warning("No internal handler fetched for skill_id={}".format(skill_id))
