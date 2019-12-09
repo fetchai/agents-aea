@@ -93,7 +93,7 @@ class FIPAHandler(Handler):
             self._handle_propose(fipa_msg, sender, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.DECLINE:
             self._handle_decline(fipa_msg, sender, message_id, dialogue)
-        elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+        elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._handle_match_accept(fipa_msg, sender, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, sender, message_id, dialogue)
@@ -194,8 +194,9 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        logger.info("[{}]: received MATCH_ACCEPT_W_ADDRESS from sender={}".format(self.context.agent_name, sender[-5:]))
-        address = cast(str, msg.get("address"))
+        logger.info("[{}]: received MATCH_ACCEPT_W_INFORM from sender={}".format(self.context.agent_name, sender[-5:]))
+        info = cast(Dict, msg.get("info"))
+        address = cast(str, info.get("address"))
         proposal = cast(Description, dialogue.proposal)
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                     skill_ids=["carpark_client"],
@@ -223,7 +224,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, sender[-5:]))
-        json_data = cast(dict, msg.get("json_data"))
+        json_data = cast(dict, msg.get("info"))
         if 'message_type' in json_data and json_data['message_type'] == 'car_park_data':
             logger.info("[{}]: received the following carpark data={}".format(self.context.agent_name,
                                                                               pprint.pformat(json_data)))
@@ -340,7 +341,7 @@ class MyTransactionHandler(Handler):
                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                      target=new_target_id,
                                      performative=FIPAMessage.Performative.INFORM,
-                                     json_data=json_data)
+                                     info=json_data)
             dialogue.outgoing_extend(inform_msg)
             self.context.outbox.put_message(to=counterparty_pbk,
                                             sender=self.context.agent_public_key,

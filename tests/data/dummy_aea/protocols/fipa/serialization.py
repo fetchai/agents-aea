@@ -69,24 +69,24 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
             performative = fipa_pb2.FIPAMessage.MatchAccept()  # type: ignore
             fipa_msg.match_accept.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.ACCEPT_W_ADDRESS:
-            performative = fipa_pb2.FIPAMessage.AcceptWAddress()  # type: ignore
-            address = msg.get("address")
-            if type(address) == str:
-                performative.address = address
-            fipa_msg.accept_w_address.CopyFrom(performative)
-        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
-            performative = fipa_pb2.FIPAMessage.MatchAcceptWAddress()  # type: ignore
-            address = msg.get("address")
-            if type(address) == str:
-                performative.address = address
-            fipa_msg.match_accept_w_address.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.ACCEPT_W_INFORM:
+            performative = fipa_pb2.FIPAMessage.AcceptWInform()  # type: ignore
+            data = msg.get("info")
+            data_bytes = json.dumps(data).encode("utf-8")
+            performative.bytes = data_bytes
+            fipa_msg.accept_w_inform.CopyFrom(performative)
+        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
+            performative = fipa_pb2.FIPAMessage.MatchAcceptWInform()  # type: ignore
+            data = msg.get("info")
+            data_bytes = json.dumps(data).encode("utf-8")
+            performative.bytes = data_bytes
+            fipa_msg.match_accept_w_inform.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.DECLINE:
             performative = fipa_pb2.FIPAMessage.Decline()  # type: ignore
             fipa_msg.decline.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.INFORM:
             performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
-            data = msg.get("json_data")
+            data = msg.get("info")
             data_bytes = json.dumps(data).encode("utf-8")
             performative.bytes = data_bytes
             fipa_msg.inform.CopyFrom(performative)
@@ -128,17 +128,17 @@ class FIPASerializer(Serializer):
             pass
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
             pass
-        elif performative_id == FIPAMessage.Performative.ACCEPT_W_ADDRESS:
-            address = fipa_pb.accept_w_address.address
-            performative_content['address'] = address
-        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
-            address = fipa_pb.match_accept_w_address.address
-            performative_content['address'] = address
+        elif performative_id == FIPAMessage.Performative.ACCEPT_W_INFORM:
+            info = json.loads(fipa_pb.accept_w_inform.bytes)
+            performative_content['info'] = info
+        elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
+            info = json.loads(fipa_pb.match_accept_w_inform.bytes)
+            performative_content['info'] = info
         elif performative_id == FIPAMessage.Performative.DECLINE:
             pass
         elif performative_id == FIPAMessage.Performative.INFORM:
-            data = json.loads(fipa_pb.inform.bytes)
-            performative_content["json_data"] = data
+            info = json.loads(fipa_pb.inform.bytes)
+            performative_content["info"] = info
         else:
             raise ValueError("Performative not valid: {}.".format(performative))
 

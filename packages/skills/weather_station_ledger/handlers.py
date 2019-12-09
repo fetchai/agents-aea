@@ -185,7 +185,7 @@ class FIPAHandler(Handler):
         """
         Handle the ACCEPT.
 
-        Respond with a MATCH_ACCEPT_W_ADDRESS which contains the address to send the funds to.
+        Respond with a MATCH_ACCEPT_W_INFORM which contains the address to send the funds to.
 
         :param msg: the message
         :param sender: the sender
@@ -197,15 +197,15 @@ class FIPAHandler(Handler):
         new_target = message_id
         logger.info("[{}]: received ACCEPT from sender={}".format(self.context.agent_name,
                                                                   sender[-5:]))
-        logger.info("[{}]: sending MATCH_ACCEPT_W_ADDRESS to sender={}".format(self.context.agent_name,
-                                                                               sender[-5:]))
+        logger.info("[{}]: sending MATCH_ACCEPT_W_INFORM to sender={}".format(self.context.agent_name,
+                                                                              sender[-5:]))
         proposal = cast(Description, dialogue.proposal)
         identifier = cast(str, proposal.values.get("ledger_id"))
         match_accept_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=new_target,
-                                       performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
-                                       address=self.context.agent_addresses[identifier])
+                                       performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                                       info={"address": self.context.agent_addresses[identifier]})
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(to=sender,
                                         sender=self.context.agent_public_key,
@@ -230,7 +230,7 @@ class FIPAHandler(Handler):
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name,
                                                                   sender[-5:]))
 
-        json_data = cast(dict, msg.get("json_data"))
+        json_data = cast(dict, msg.get("info"))
         if "transaction_digest" in json_data.keys():
             tx_digest = json_data['transaction_digest']
             logger.info("[{}]: checking whether transaction={} has been received ...".format(self.context.agent_name,
@@ -250,7 +250,7 @@ class FIPAHandler(Handler):
                                          dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                          target=new_target,
                                          performative=FIPAMessage.Performative.INFORM,
-                                         json_data=dialogue.weather_data)
+                                         info=dialogue.weather_data)
                 dialogue.outgoing_extend(inform_msg)
                 # import pdb; pdb.set_trace()
                 self.context.outbox.put_message(to=sender,

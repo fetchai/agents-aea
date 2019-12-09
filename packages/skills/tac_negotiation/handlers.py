@@ -107,7 +107,7 @@ class FIPANegotiationHandler(Handler):
             self._on_decline(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.ACCEPT:
             self._on_accept(fipa_msg, dialogue)
-        elif fipa_msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+        elif fipa_msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._on_match_accept(fipa_msg, dialogue)
 
     def teardown(self) -> None:
@@ -252,6 +252,8 @@ class FIPANegotiationHandler(Handler):
         if strategy.is_profitable_transaction(transaction_msg, is_seller=dialogue.is_seller):
             logger.info("[{}]: locking the current state (as {}).".format(self.context.agent_name, dialogue.role))
             transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
+            transaction_msg.set('performative', TransactionMessage.Performative.SIGN)
+            transaction_msg.set('skill_ids', ['tac_negotiation'])
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
             logger.debug("[{}]: decline the Accept (as {}).".format(self.context.agent_name, dialogue.role))
@@ -278,10 +280,12 @@ class FIPANegotiationHandler(Handler):
         logger.debug("[{}]: on_match_accept: msg_id={}, dialogue_id={}, origin={}, target={}"
                      .format(self.context.agent_name, match_accept.get("message_id"), match_accept.get("dialogue_id"), dialogue.dialogue_label.dialogue_opponent_pbk, match_accept.get("target")))
         transactions = cast(Transactions, self.context.transactions)
-        transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.get("target")))
-        # # update skill id to route back to tac participation skill
-        # transaction_msg.set('skill_id', 'tac_participation_skill')
-        # self.context.decision_maker_message_queue.put(transaction_msg)
+        transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.get("target")))
+        # update skill id to route back to tac participation skill
+        logger.info("[{}]: proposing tx to decision maker.".format(self.context.agent_name))
+        transaction_msg.set('performative', TransactionMessage.Performative.SIGN)
+        transaction_msg.set('skill_ids', ['tac_participation'])
+        self.context.decision_maker_message_queue.put(transaction_msg)
 
 
 class TransactionHandler(Handler):
@@ -315,11 +319,11 @@ class TransactionHandler(Handler):
             tac_message = dialogue.last_incoming_message
             if tac_message is not None and tac_message.get("performative") == FIPAMessage.Performative.ACCEPT:
                 logger.info("[{}]: sending match accept to {}.".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:]))
-                fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
+                fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
                                        message_id=cast(int, tac_message.get("message_id")) + 1,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=cast(int, tac_message.get("message_id")),
-                                       address=tx_message.get("transaction_digest"))
+                                       info={"address": tx_message.get("address"), "signature": tx_message.get("signature")})
                 dialogue.outgoing_extend(fipa_msg)
                 self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_pbk,
                                                 sender=self.context.agent_public_key,

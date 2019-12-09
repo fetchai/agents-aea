@@ -173,13 +173,13 @@ def test_performative_not_recognized():
             "We expect that the check_consistency will return False"
 
 
-def test_performative_accept_with_address():
+def test_performative_accept_with_inform():
     """Test the serialization - deserialization of the accept_with_address performative."""
     msg = FIPAMessage(message_id=0,
                       dialogue_reference=(str(0), ''),
                       target=1,
-                      performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
-                      address="dummy_address")
+                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                      info={"address": "dummy_address"})
 
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
@@ -195,13 +195,13 @@ def test_performative_accept_with_address():
     assert msg.get("performative") == deserialised_msg.get("performative")
 
 
-def test_performative_match_accept_with_address():
+def test_performative_match_accept_with_inform():
     """Test the serialization - deserialization of the match_accept_with_address performative."""
     msg = FIPAMessage(message_id=0,
                       dialogue_reference=(str(0), ''),
                       target=1,
-                      performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
-                      address="dummy_address")
+                      performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                      info={"address": "dummy_address", "signature": "my_signature"})
 
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
@@ -223,7 +223,7 @@ def test_performative_inform():
                       dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.INFORM,
-                      json_data={"foo": "bar"})
+                      info={"foo": "bar"})
 
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
@@ -251,10 +251,10 @@ def test_performative_string_value():
         "The str value must be accept"
     assert str(FIPAMessage.Performative.MATCH_ACCEPT) == "match_accept",\
         "The str value must be match_accept"
-    assert str(FIPAMessage.Performative.ACCEPT_W_ADDRESS) == "accept_w_address", \
-        "The str value must be accept_w_address"
-    assert str(FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS) == "match_accept_w_address", \
-        "The str value must be match_accept_w_address"
+    assert str(FIPAMessage.Performative.ACCEPT_W_INFORM) == "accept_w_inform", \
+        "The str value must be accept_w_inform"
+    assert str(FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM) == "match_accept_w_inform", \
+        "The str value must be match_accept_w_inform"
     assert str(FIPAMessage.Performative.INFORM) == "inform", \
         "The str value must be inform"
 

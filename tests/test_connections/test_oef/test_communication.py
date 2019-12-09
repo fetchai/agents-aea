@@ -387,35 +387,35 @@ class TestFIPA:
         expected_decline = FIPASerializer().decode(envelope.message)
         assert expected_decline == decline
 
-    def test_match_accept_w_address(self):
-        """Test that a match accept with address can be sent correctly."""
-        match_accept_w_address = FIPAMessage(message_id=0,
-                                             dialogue_reference=(str(0), ''),
-                                             target=0,
-                                             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
-                                             address='my_address')
+    def test_match_accept_w_inform(self):
+        """Test that a match accept with inform can be sent correctly."""
+        match_accept_w_inform = FIPAMessage(message_id=0,
+                                            dialogue_reference=(str(0), ''),
+                                            target=0,
+                                            performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                                            info={"address": "my_address"})
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
-                                       message=FIPASerializer().encode(match_accept_w_address)))
+                                       message=FIPASerializer().encode(match_accept_w_inform)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        returned_match_accept_w_address = FIPASerializer().decode(envelope.message)
-        assert returned_match_accept_w_address == match_accept_w_address
+        returned_match_accept_w_inform = FIPASerializer().decode(envelope.message)
+        assert returned_match_accept_w_inform == match_accept_w_inform
 
-    def test_accept_w_address(self):
+    def test_accept_w_inform(self):
         """Test that an accept with address can be sent correctly."""
-        accept_w_address = FIPAMessage(message_id=0,
-                                       dialogue_reference=(str(0), ''),
-                                       target=0,
-                                       performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
-                                       address='my_address')
+        accept_w_inform = FIPAMessage(message_id=0,
+                                      dialogue_reference=(str(0), ''),
+                                      target=0,
+                                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                                      info={"address": "my_address"})
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
-                                       message=FIPASerializer().encode(accept_w_address)))
+                                       message=FIPASerializer().encode(accept_w_inform)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        returned_accept_w_address = FIPASerializer().decode(envelope.message)
-        assert returned_accept_w_address == accept_w_address
+        returned_accept_w_inform = FIPASerializer().decode(envelope.message)
+        assert returned_accept_w_inform == accept_w_inform
 
     def test_inform(self):
         """Test that an inform can be sent correctly."""
@@ -424,7 +424,7 @@ class TestFIPA:
                              dialogue_reference=(str(0), ''),
                              target=0,
                              performative=FIPAMessage.Performative.INFORM,
-                             json_data=payload)
+                             info=payload)
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,

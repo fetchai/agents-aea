@@ -43,8 +43,8 @@ class FIPAMessage(Message):
         MATCH_ACCEPT = "match_accept"
         DECLINE = "decline"
         INFORM = "inform"
-        ACCEPT_W_ADDRESS = "accept_w_address"
-        MATCH_ACCEPT_W_ADDRESS = "match_accept_w_address"
+        ACCEPT_W_INFORM = "accept_w_inform"
+        MATCH_ACCEPT_W_INFORM = "match_accept_w_inform"
 
         def __str__(self):
             """Get string representation."""
@@ -97,13 +97,11 @@ class FIPAMessage(Message):
                     or performative == FIPAMessage.Performative.MATCH_ACCEPT \
                     or performative == FIPAMessage.Performative.DECLINE:
                 assert len(self.body) == 4
-            elif performative == FIPAMessage.Performative.ACCEPT_W_ADDRESS\
-                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
-                assert self.is_set("address")
-                assert len(self.body) == 5
-            elif performative == FIPAMessage.Performative.INFORM:
-                assert self.is_set("json_data")
-                json_data = self.get("json_data")
+            elif performative == FIPAMessage.Performative.ACCEPT_W_INFORM\
+                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM\
+                    or performative == FIPAMessage.Performative.INFORM:
+                assert self.is_set("info")
+                json_data = self.get("info")
                 assert isinstance(json_data, dict)
                 assert len(self.body) == 5
             else:
@@ -119,9 +117,9 @@ VALID_PREVIOUS_PERFORMATIVES = {
     FIPAMessage.Performative.CFP: [None],
     FIPAMessage.Performative.PROPOSE: [FIPAMessage.Performative.CFP],
     FIPAMessage.Performative.ACCEPT: [FIPAMessage.Performative.PROPOSE],
-    FIPAMessage.Performative.ACCEPT_W_ADDRESS: [FIPAMessage.Performative.PROPOSE],
-    FIPAMessage.Performative.MATCH_ACCEPT: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS],
-    FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS],
-    FIPAMessage.Performative.INFORM: [FIPAMessage.Performative.MATCH_ACCEPT, FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS, FIPAMessage.Performative.INFORM],
-    FIPAMessage.Performative.DECLINE: [FIPAMessage.Performative.CFP, FIPAMessage.Performative.PROPOSE, FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_ADDRESS]
+    FIPAMessage.Performative.ACCEPT_W_INFORM: [FIPAMessage.Performative.PROPOSE],
+    FIPAMessage.Performative.MATCH_ACCEPT: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_INFORM],
+    FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_INFORM],
+    FIPAMessage.Performative.INFORM: [FIPAMessage.Performative.MATCH_ACCEPT, FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM, FIPAMessage.Performative.INFORM],
+    FIPAMessage.Performative.DECLINE: [FIPAMessage.Performative.CFP, FIPAMessage.Performative.PROPOSE, FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_INFORM]
 }  # type: Dict[FIPAMessage.Performative, List[Union[None, FIPAMessage.Performative]]]

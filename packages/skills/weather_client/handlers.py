@@ -83,7 +83,7 @@ class FIPAHandler(Handler):
             self._handle_propose(fipa_msg, sender, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.DECLINE:
             self._handle_decline(fipa_msg, sender, message_id, dialogue)
-        elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+        elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._handle_match_accept(fipa_msg, sender, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, sender, message_id, dialogue)
@@ -191,7 +191,7 @@ class FIPAHandler(Handler):
                                  dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                  target=new_target_id,
                                  performative=FIPAMessage.Performative.INFORM,
-                                 json_data={"Done": "Sending payment via bank transfer"})
+                                 info={"Done": "Sending payment via bank transfer"})
         dialogue.outgoing_extend(inform_msg)
         self.context.outbox.put_message(to=counterparty_pbk,
                                         sender=self.context.agent_public_key,
@@ -212,7 +212,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, sender[-5:]))
-        json_data = cast(dict, msg.get("json_data"))
+        json_data = cast(dict, msg.get("info"))
         if 'weather_data' in json_data.keys():
             weather_data = json_data['weather_data']
             logger.info("[{}]: received the following weather data={}".format(self.context.agent_name,
