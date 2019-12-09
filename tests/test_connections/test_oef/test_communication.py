@@ -390,10 +390,10 @@ class TestFIPA:
     def test_match_accept_w_inform(self):
         """Test that a match accept with inform can be sent correctly."""
         match_accept_w_inform = FIPAMessage(message_id=0,
-                                             dialogue_reference=(str(0), ''),
-                                             target=0,
-                                             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
-                                             info={"address": "my_address"})
+                                            dialogue_reference=(str(0), ''),
+                                            target=0,
+                                            performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                                            info={"address": "my_address"})
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
@@ -405,10 +405,10 @@ class TestFIPA:
     def test_accept_w_inform(self):
         """Test that an accept with address can be sent correctly."""
         accept_w_inform = FIPAMessage(message_id=0,
-                                       dialogue_reference=(str(0), ''),
-                                       target=0,
-                                       performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
-                                       info={"address": "my_address"})
+                                      dialogue_reference=(str(0), ''),
+                                      target=0,
+                                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                                      info={"address": "my_address"})
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
