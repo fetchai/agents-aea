@@ -20,6 +20,7 @@ nav:
   - Autonomous Economic Agent Framework:
     - Welcome: 'index.md'
     - AEA quick start: 'quickstart.md'
+    - Version: 'version.md'
     - The AEA universe:
       - "Vision": 'vision.md'
       - "Application areas": 'app-areas.md'
@@ -27,13 +28,13 @@ nav:
       - "Trust issues": 'trust.md'
       # - "Two-layered machine learning": 'two-layer.md'
     - Demos:
+      - "Car park agent": 'car-park.md'
       - "Gym demo": 'gym-plugin.md'
       - "Gym skill": 'gym-skill.md'
-      - "Weather skills": 'weather-skills.md'
+      - "ML skills": 'ml-skills.md'
       - "TAC skills": 'tac-skills.md'
       - "TAC external app": 'tac.md'
-      - "Car park agent": 'car-park.md'
-      - "ML skills": 'ml-skills.md'
+      - "Weather skills": 'weather-skills.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
       - "Architectural diagram": 'diagram.md'
