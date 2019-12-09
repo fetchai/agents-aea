@@ -252,9 +252,9 @@ def test_performative_string_value():
     assert str(FIPAMessage.Performative.MATCH_ACCEPT) == "match_accept",\
         "The str value must be match_accept"
     assert str(FIPAMessage.Performative.ACCEPT_W_INFORM) == "accept_w_inform", \
-        "The str value must be accept_w_address"
+        "The str value must be accept_w_inform"
     assert str(FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM) == "match_accept_w_inform", \
-        "The str value must be match_accept_w_address"
+        "The str value must be match_accept_w_inform"
     assert str(FIPAMessage.Performative.INFORM) == "inform", \
         "The str value must be inform"
 
