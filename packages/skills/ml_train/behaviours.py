@@ -27,7 +27,7 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-from aea.skills.base import Behaviour
+from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.ml_train.strategy import Strategy
@@ -37,15 +37,16 @@ else:
 logger = logging.getLogger("aea.ml_train_skill")
 
 SERVICE_ID = ''
+DEFAULT_SEARCH_INTERVAL = 5.0
 
 
-# TODO this could be implemented a TickerBehaviour.
-class MySearchBehaviour(Behaviour):
+class MySearchBehaviour(TickerBehaviour):
     """This behaviour searches for data to buy."""
 
     def __init__(self, **kwargs):
-        """Initialise the class."""
-        super().__init__(**kwargs)
+        """Initialize the search behaviour."""
+        search_interval = kwargs.pop('search_interval', DEFAULT_SEARCH_INTERVAL)
+        super().__init__(tick_interval=search_interval)
 
     def setup(self) -> None:
         """
@@ -74,7 +75,7 @@ class MySearchBehaviour(Behaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_time_to_search():
+        if strategy.is_searching:
             query = strategy.get_service_query()
             search_id = strategy.get_next_search_id()
             oef_msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
