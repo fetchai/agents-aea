@@ -248,7 +248,9 @@ We can then launch our agent.
 aea run
 ```
 
-Stop the agent with `CTRL + C`.
+We can see that the agent sends search requests to the OEF and receives search responses from the OEF. Since our agent is only searching on the OEF - and not registered on the OEF - the search response returns an empty list of agents.
+
+We stop the agent with `CTRL + C`.
 
 ## Now it's your turn
 
