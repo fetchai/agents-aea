@@ -124,10 +124,9 @@ This diagram shows the communication between the two agents and the controller. 
         Buyer_Agent->>Seller_Agent: call_for_proposal
         Seller_Agent->>Buyer_Agent: proposal
         Buyer_Agent->>Seller_Agent: accept
-        Buyer_Agent->>Controller: request_transaction
         Seller_Agent->>Buyer_Agent: match_accept
-        Seller_Agent->>Controller: request_transaction
-        Controller->>Controller: transfer_funds
+        Seller_Agent->>Controller: transaction
+        Controller->>Controller: transaction_execution
         Controller->>Seller_Agent: confirm_transaction
         Controller->>Buyer_Agent: confirm_transaction
         

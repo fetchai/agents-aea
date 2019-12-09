@@ -41,6 +41,7 @@ class TransactionMessage(Message):
         """Transaction performative."""
 
         PROPOSE = "propose"
+        SIGN = "sign"
         ACCEPT = "accept"
         REJECT = "reject"
 

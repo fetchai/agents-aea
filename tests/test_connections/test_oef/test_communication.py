@@ -392,8 +392,8 @@ class TestFIPA:
         match_accept_w_address = FIPAMessage(message_id=0,
                                              dialogue_reference=(str(0), ''),
                                              target=0,
-                                             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
-                                             address='my_address')
+                                             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                                             info={"address": "my_address"})
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
@@ -407,8 +407,8 @@ class TestFIPA:
         accept_w_address = FIPAMessage(message_id=0,
                                        dialogue_reference=(str(0), ''),
                                        target=0,
-                                       performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
-                                       address='my_address')
+                                       performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                                       info={"address": "my_address"})
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
@@ -424,7 +424,7 @@ class TestFIPA:
                              dialogue_reference=(str(0), ''),
                              target=0,
                              performative=FIPAMessage.Performative.INFORM,
-                             json_data=payload)
+                             info=payload)
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
