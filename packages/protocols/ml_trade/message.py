@@ -92,7 +92,7 @@ class MLTradeMessage(Message):
             else:
                 raise ValueError("Performative not recognized.")
 
-        except (AssertionError, ValueError, KeyError):  # pragma: no cover
+        except (AssertionError, ValueError, KeyError):
             return False
 
         return True

@@ -32,7 +32,7 @@ from aea.protocols.oef.models import Query
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.ml_trade.message import MLTradeMessage
 else:
-    from ml_trade_protocol.message import MLTradeMessage
+    from ml_trade_protocol.message import MLTradeMessage  # pragma: no cover
 
 
 class MLTradeSerializer(Serializer):
@@ -69,7 +69,7 @@ class MLTradeSerializer(Serializer):
             data = msg.body["data"]
             data_bytes = base64.b64encode(pickle.dumps(data)).decode("utf-8")
             body["data"] = data_bytes
-        else:
+        else:   # pragma: no cover
             raise ValueError("Type not recognized.")
 
         bytes_msg = json.dumps(body).encode("utf-8")
@@ -104,7 +104,7 @@ class MLTradeSerializer(Serializer):
             data_bytes = base64.b64decode(json_body["data"])
             data = pickle.loads(data_bytes)
             body["data"] = data
-        else:
+        else:   # pragma: no cover
             raise ValueError("Type not recognized.")
 
         return MLTradeMessage(performative=msg_type, body=body)
