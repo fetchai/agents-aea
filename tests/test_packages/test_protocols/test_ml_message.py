@@ -52,8 +52,8 @@ def test_ml_message_creation():
     query = Query([Constraint("dataset_id", ConstraintType("==", "fmnist"))], model=dm)
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
     msg_bytes = MLTradeSerializer().encode(msg)
-    reverted_msg = MLTradeSerializer().decode(msg_bytes)
-    assert reverted_msg == msg
+    recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    assert recovered_msg == msg
 
     terms = Description({"batch_size": 5,
                          "price": 10,
@@ -65,14 +65,14 @@ def test_ml_message_creation():
 
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=terms)
     msg_bytes = MLTradeSerializer().encode(msg)
-    reverted_msg = MLTradeSerializer().decode(msg_bytes)
-    assert reverted_msg == msg
+    recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    assert recovered_msg == msg
 
     tx_digest = "This is the transaction digest."
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT, terms=terms, tx_digest=tx_digest)
     msg_bytes = MLTradeSerializer().encode(msg)
-    reverted_msg = MLTradeSerializer().decode(msg_bytes)
-    assert reverted_msg == msg
+    recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    assert recovered_msg == msg
 
     with mock.patch('packages.protocols.ml_trade.message.MLTradeMessage.Performative') as mocked_type:
         mocked_type.ACCEPT.value = "unknown"
@@ -94,5 +94,5 @@ def test_ml_message_creation():
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.DATA, terms=terms, data=data)
     msg_bytes = MLTradeSerializer().encode(msg)
     with pytest.raises(ValueError):
-        reverted_msg = MLTradeSerializer().decode(msg_bytes)
-        assert reverted_msg == msg
+        recovered_msg = MLTradeSerializer().decode(msg_bytes)
+        assert recovered_msg == msg
