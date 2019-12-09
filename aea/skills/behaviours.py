@@ -82,13 +82,13 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         super().__init__(**kwargs)
 
         self._period = period
-        self._start_at = start_at if start_at is None else datetime.datetime.now()
+        self._start_at = start_at if start_at is not None else datetime.datetime.now()  # type: datetime.datetime
 
         self._last_act_time = datetime.datetime.now()
 
     @property
     def period(self) -> float:
-        """Get the period (in seconds)."""
+        """Get the period in seconds."""
         return self._period
 
     @property
