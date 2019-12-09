@@ -176,7 +176,7 @@ class State(SimpleBehaviour, ABC):
         self.next_state = state_name
 
 
-class FMSBehaviour(CompositeBehaviour):
+class FSMBehaviour(CompositeBehaviour):
     """This class implements a finite-state machine behaviour."""
 
     def __init__(self, **kwargs):
@@ -205,6 +205,7 @@ class FMSBehaviour(CompositeBehaviour):
         self.name2state[name] = state
         if initial:
             self._initial_state = name
+            self.current = self._initial_state
 
     @property
     def initial_state(self) -> Optional[str]:
@@ -218,9 +219,9 @@ class FMSBehaviour(CompositeBehaviour):
             raise ValueError("Name is not registered as state.")
         self._initial_state = value
 
-    def get_state(self, name) -> State:
+    def get_state(self, name) -> Optional[State]:
         """Get a state from its name."""
-        return self.name2state[name]
+        return self.name2state.get(name, None)
 
     def reset(self):
         """Reset the behaviour to its initial conditions."""
@@ -229,13 +230,16 @@ class FMSBehaviour(CompositeBehaviour):
     def act(self):
         """Implement the behaviour."""
         if self.current is None:
-            if self.initial_state is None:
-                return
-            else:
-                self.current = self.initial_state
+            return
 
         current_state = self.get_state(self.current)
+        if current_state is None:
+            return
         current_state.act_wrapper()
 
         if current_state.done():
             self.current = current_state.next_state
+
+    def done(self) -> bool:
+        """Return True if the behaviour is terminated, False otherwise."""
+        return self.current is None
