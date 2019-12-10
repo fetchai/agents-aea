@@ -188,7 +188,8 @@ class FIPADialogues(Dialogues):
 
         That is, the message has to
         - be a CFP, and
-        - have the correct msg id and message target.
+        - have the correct msg id and message target
+        - have msg counterparty set.
 
         :param message: the fipa message
 
@@ -209,7 +210,6 @@ class FIPADialogues(Dialogues):
         Check whether an agent message is part of a registered dialogue.
 
         :param fipa_msg: the fipa message
-        :param sender: the sender
         :param agent_pbk: the public key of the agent
 
         :return: boolean indicating whether the message belongs to a registered dialogue

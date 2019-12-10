@@ -89,13 +89,13 @@ class FIPAHandler(Handler):
 
         # handle message
         if msg_performative == FIPAMessage.Performative.PROPOSE:
-            self._handle_propose(fipa_msg, message_id, dialogue)
+            self._handle_propose(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, message_id, dialogue)
+            self._handle_decline(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            self._handle_match_accept(fipa_msg, message_id, dialogue)
+            self._handle_match_accept(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, message_id, dialogue)
+            self._handle_inform(fipa_msg, dialogue)
 
     def teardown(self) -> None:
         """
@@ -109,8 +109,7 @@ class FIPAHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
-        :param sender: the sender
+        :param msg: the message.
         """
         logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
         default_msg = DefaultMessage(type=DefaultMessage.Type.ERROR,
@@ -122,16 +121,15 @@ class FIPAHandler(Handler):
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(default_msg))
 
-    def _handle_propose(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
+    def _handle_propose(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the propose.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = message_id + 1
+        new_message_id = msg.message_id + 1
         new_target_id = message_id
         proposals = cast(List[Description], msg.get("proposal"))
 
@@ -249,7 +247,6 @@ class OEFHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         # convenience representations
@@ -316,7 +313,6 @@ class MyTransactionHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
