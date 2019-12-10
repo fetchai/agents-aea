@@ -54,6 +54,7 @@ class TestTransaction:
                                sender_tx_fee=0,
                                counterparty_tx_fee=0,
                                ledger_id="fetchai",
+                               info={'info': "info_value"},
                                quantities_by_good_pbk={"Unknown": 10})
 
     def test_matches(self):
@@ -69,6 +70,7 @@ class TestTransaction:
                                  sender_tx_fee=0,
                                  counterparty_tx_fee=0,
                                  ledger_id="fetchai",
+                                 info={'info': "info_value"},
                                  quantities_by_good_pbk={"FET": 10})
         assert not msg.matches(msg), "It shouldn't match since it is the same message."
         assert msg == msg, "It should be equal since is the same message."
@@ -84,6 +86,7 @@ class TestTransaction:
                                               sender_tx_fee=0,
                                               counterparty_tx_fee=0,
                                               ledger_id="fetchai",
+                                              info={'info': "info_value"},
                                               quantities_by_good_pbk={"FET": 10})
 
         assert msg.matches(mirrored_message), "It should match since the messages mirror each other"

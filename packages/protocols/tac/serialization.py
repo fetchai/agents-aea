@@ -149,7 +149,7 @@ class TACSerializer(Serializer):
             if msg.is_set("info"):
                 tac_msg.info.extend(_from_dict_to_pairs(msg.get("info")))
             tac_container.error.CopyFrom(tac_msg)
-        else:
+        else:  # pragma: no cover
             raise ValueError("Type not recognized: {}.".format(tac_type))
 
         tac_message_bytes = tac_container.SerializeToString()
@@ -230,7 +230,7 @@ class TACSerializer(Serializer):
             new_body["error_code"] = TACMessage.ErrorCode(tac_container.error.error_code)
             if tac_container.error.info:
                 new_body["info"] = _from_pairs_to_dict(tac_container.error.info)
-        else:
+        else:  # pragma: no cover
             raise ValueError("Type not recognized.")
 
         tac_type = TACMessage.Type(new_body["type"])

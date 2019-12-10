@@ -7,7 +7,8 @@ url: ""
 behaviours:
   - behaviour:
       class_name: MySearchBehaviour
-      args: {}
+      args:
+        search_interval: 30
 handlers:
   - handler:
       class_name: OEFHandler
@@ -24,7 +25,6 @@ shared_classes:
       class_name: Strategy
       args:
         dataset_id: 'fmnist'
-        search_interval: 30
         max_unit_price: 70
         max_buyer_tx_fee: 20
         currency_pbk: 'FET'

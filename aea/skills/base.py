@@ -200,8 +200,9 @@ class Behaviour(ABC):
         """Return True if the behaviour is terminated, False otherwise."""
         return False
 
-    def step(self) -> None:
-        """Update the state of the behaviour. This method must be called only by the framework."""
+    def act_wrapper(self) -> None:
+        """Wrap the call of the action. This method must be called only by the framework."""
+        self.act()
 
     @classmethod
     def parse_module(cls, path: str, behaviours_configs: List[BehaviourConfig], skill_context: SkillContext) -> List['Behaviour']:

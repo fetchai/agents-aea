@@ -17,10 +17,22 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the classes for specific behaviours."""
+import datetime
+from abc import ABC
+from typing import Optional
+
 from aea.skills.base import Behaviour
 
 
-class CyclicBehaviour(Behaviour):
+class SimpleBehaviour(Behaviour, ABC):
+    """This class implements a simple behaviour."""
+
+
+class CompositeBehaviour(Behaviour, ABC):
+    """This class implements a composite behaviour."""
+
+
+class CyclicBehaviour(SimpleBehaviour, ABC):
     """This behaviour is executed until the agent is stopped."""
 
     def __init__(self, **kwargs):
@@ -28,8 +40,9 @@ class CyclicBehaviour(Behaviour):
         super().__init__(**kwargs)
         self._number_of_executions = 0
 
-    def step(self):
-        """Update the state of the behaviour."""
+    def act_wrapper(self) -> None:
+        """Wrap the call of the action. This method must be called only by the framework."""
+        self.act()
         self._number_of_executions += 1
 
     def done(self) -> bool:
@@ -37,9 +50,68 @@ class CyclicBehaviour(Behaviour):
         return False
 
 
-class OneShotBehaviour(CyclicBehaviour):
+class OneShotBehaviour(SimpleBehaviour, ABC):
     """This behaviour is executed only once."""
+
+    def __init__(self, **kwargs):
+        """Initialize the cyclic behaviour."""
+        super().__init__(**kwargs)
+        self._already_executed = False  # type
 
     def done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
-        return self._number_of_executions >= 1
+        return self._already_executed
+
+    def act_wrapper(self) -> None:
+        """Wrap the call of the action. This method must be called only by the framework."""
+        if not self._already_executed:
+            self.act()
+            self._already_executed = True
+
+
+class TickerBehaviour(SimpleBehaviour, ABC):
+    """This behaviour is executed periodically with an interval."""
+
+    def __init__(self, tick_interval: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs):
+        """
+        Initialize the ticker behaviour.
+
+        :param tick_interval: interval of the behaviour in seconds.
+        :param start_at: whether to start the behaviour with an offset.
+        """
+        super().__init__(**kwargs)
+
+        self._tick_interval = tick_interval
+        self._start_at = start_at if start_at is not None else datetime.datetime.now()  # type: datetime.datetime
+
+        self._last_act_time = datetime.datetime.now()
+
+    @property
+    def tick_interval(self) -> float:
+        """Get the tick_interval in seconds."""
+        return self._tick_interval
+
+    @property
+    def start_at(self) -> datetime.datetime:
+        """Get the start time."""
+        return self._start_at
+
+    @property
+    def last_act_time(self) -> datetime.datetime:
+        """Get the last time the act method has been called."""
+        return self._start_at
+
+    def act_wrapper(self) -> None:
+        """Wrap the call of the action. This method must be called only by the framework."""
+        if self.is_time_to_act():
+            self._last_act_time = datetime.datetime.now()
+            self.act()
+
+    def is_time_to_act(self) -> bool:
+        """
+        Check whether it is time to act, according to the tick_interval constraint and the 'start at' constraint.
+
+        :return: True if it is time to act, false otherwise.
+        """
+        now = datetime.datetime.now()
+        return now > self._start_at and (now - self._last_act_time).total_seconds() > self.tick_interval

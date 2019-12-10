@@ -26,6 +26,7 @@ from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Thread, Lock
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict, cast
+from urllib.parse import urlparse
 
 from aea.configurations.base import Address, ProtocolId
 from aea.connections.base import ConnectionStatus
@@ -45,17 +46,116 @@ class Empty(Exception):
     """Exception for when the inbox is empty."""
 
 
+class URI:
+    """URI following RFC3986."""
+
+    def __init__(self, uri_raw: str):
+        """
+        Initialize the URI.
+
+        :param uri_raw: the raw form uri
+        :raises ValueError: if uri_raw is not RFC3986 compliant
+        """
+        self.uri_raw = uri_raw
+        parsed = urlparse(uri_raw)
+        self._scheme = parsed.scheme
+        self._netloc = parsed.netloc
+        self._path = parsed.path
+        self._params = parsed.params
+        self._query = parsed.query
+        self._fragment = parsed.fragment
+        self._username = parsed.username
+        self._password = parsed.password
+        self._host = parsed.hostname
+        self._port = parsed.port
+
+    @property
+    def scheme(self) -> str:
+        """Get the scheme."""
+        return self._scheme
+
+    @property
+    def netloc(self) -> str:
+        """Get the netloc."""
+        return self._netloc
+
+    @property
+    def path(self) -> str:
+        """Get the path."""
+        return self._path
+
+    @property
+    def params(self) -> str:
+        """Get the params."""
+        return self._params
+
+    @property
+    def query(self) -> str:
+        """Get the query."""
+        return self._query
+
+    @property
+    def fragment(self) -> str:
+        """Get the fragment."""
+        return self._fragment
+
+    @property
+    def username(self) -> Optional[str]:
+        """Get the username."""
+        return self._username
+
+    @property
+    def password(self) -> Optional[str]:
+        """Get the password."""
+        return self._password
+
+    @property
+    def host(self) -> Optional[str]:
+        """Get the host."""
+        return self._host
+
+    @property
+    def port(self) -> Optional[int]:
+        """Get the port."""
+        return self._port
+
+    def __str__(self):
+        """Get string representation."""
+        return self.uri_raw
+
+    def __eq__(self, other):
+        """Compare with another object."""
+        return isinstance(other, URI) \
+            and self.scheme == other.scheme \
+            and self.netloc == other.netloc \
+            and self.path == other.path \
+            and self.params == other.params \
+            and self.query == other.query \
+            and self.fragment == other.fragment \
+            and self.username == other.username \
+            and self.password == other.password \
+            and self.host == other.host \
+            and self.port == other.port
+
+
 class EnvelopeContext:
     """Extra information for the handling of an envelope."""
 
-    def __init__(self, connection_id: Optional[str] = None):
+    def __init__(self, connection_id: Optional[str] = None, uri: Optional[URI] = None):
         """Initialize the envelope context."""
         self.connection_id = connection_id
+        self.uri = uri  # must follow: https://tools.ietf.org/html/rfc3986.html
+
+    @property
+    def uri_raw(self) -> str:
+        """Get uri in string format."""
+        return str(self.uri)
 
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, EnvelopeContext) \
-            and self.connection_id == other.connection_id
+            and self.connection_id == other.connection_id \
+            and self.uri == other.uri
 
 
 class EnvelopeSerializer(ABC):

@@ -25,7 +25,6 @@ from aea.protocols.oef.models import Attribute, DataModel, Query, Constraint, Co
 from aea.skills.base import SharedClass
 
 DEFAULT_DATASET_ID = 'UK'
-DEFAULT_SEARCH_INTERVAL = 5.0
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_CURRENCY_PBK = 'FET'
@@ -38,7 +37,6 @@ class Strategy(SharedClass):
     def __init__(self, **kwargs) -> None:
         """Initialize the strategy of the agent."""
         self._dataset_id = kwargs.pop('dataset_id', DEFAULT_DATASET_ID)
-        self._search_interval = kwargs.pop('search_interval', DEFAULT_SEARCH_INTERVAL)
         self._max_unit_price = kwargs.pop('max_unit_price', DEFAULT_MAX_ROW_PRICE)
         self._max_buyer_tx_fee = kwargs.pop('max_buyer_tx_fee', DEFAULT_MAX_TX_FEE)
         self._currency_pbk = kwargs.pop('currency_pbk', DEFAULT_CURRENCY_PBK)
@@ -78,19 +76,6 @@ class Strategy(SharedClass):
         dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
         query = Query([Constraint("dataset_id", ConstraintType("==", self._dataset_id))], model=dm)
         return query
-
-    def is_time_to_search(self) -> bool:
-        """
-        Check whether it is time to search.
-
-        :return: whether it is time to search
-        """
-        if not self.is_searching:
-            return False
-        now = datetime.datetime.now()
-        diff = now - self._last_search_time
-        result = diff.total_seconds() > self._search_interval
-        return result
 
     def is_acceptable_terms(self, terms: Description) -> bool:
         """

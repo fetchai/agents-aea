@@ -23,7 +23,7 @@ from unittest import mock
 import pytest
 
 from packages.protocols.tac.message import TACMessage
-from packages.protocols.tac.serialization import TACSerializer
+from packages.protocols.tac.serialization import TACSerializer, _from_dict_to_pairs
 
 
 def test_tac_message_instantiation():
@@ -146,10 +146,18 @@ def test_tac_serialization():
             TACSerializer().encode(msg)
 
     msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
-                     error_code=TACMessage.ErrorCode.GENERIC_ERROR)
+                     error_code=TACMessage.ErrorCode.GENERIC_ERROR,
+                     info={'msg': "This is info msg."})
     msg.counterparty = "some_name"
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     actual_msg.counterparty = "some_name"
     expected_msg = msg
     assert expected_msg == actual_msg
+
+
+def test_from_dict_to_pairs():
+    """Test the helper function _from_dict_to_pairs."""
+    with pytest.raises(ValueError):
+        test_items_dict = {"Test": b'UnsupportedType'}
+        _from_dict_to_pairs(test_items_dict)
