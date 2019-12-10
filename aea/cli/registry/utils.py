@@ -72,10 +72,6 @@ def request_api(
         pass
     elif resp.status_code == 201:
         click.echo('Successfully created!')
-    elif resp.status_code == 401:
-        raise click.ClickException(
-            resp.json()
-        )
     elif resp.status_code == 403:
         raise click.ClickException(
             'You are not authenticated. '
