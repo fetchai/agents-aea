@@ -21,7 +21,7 @@
 
 import logging
 import sys
-from typing import Optional, cast, TYPE_CHECKING
+from typing import Optional, cast, TYPE_CHECKING, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
@@ -61,8 +61,7 @@ class FIPAHandler(Handler):
         # convenience representations
         fipa_msg = cast(FIPAMessage, message)
         msg_performative = FIPAMessage.Performative(fipa_msg.get('performative'))
-        message_id = cast(int, fipa_msg.get('message_id'))
-        dialogue_reference = cast(str, fipa_msg.get('dialogue_reference'))
+        dialogue_reference = cast(Tuple[str, str], fipa_msg.get('dialogue_reference'))
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
@@ -70,9 +69,7 @@ class FIPAHandler(Handler):
             dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_public_key))
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(dialogue_opponent_pbk=fipa_msg.counterparty,
-                                                                          dialogue_reference=dialogue_reference,
-                                                                          is_seller=True))
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(fipa_msg.counterparty, dialogue_reference, is_seller=True))
             dialogue.incoming_extend(fipa_msg)
         else:
             self._handle_unidentified_dialogue(fipa_msg)
@@ -80,13 +77,13 @@ class FIPAHandler(Handler):
 
         # handle message
         if msg_performative == FIPAMessage.Performative.CFP:
-            self._handle_cfp(fipa_msg, message_id, dialogue)
+            self._handle_cfp(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, message_id, dialogue)
+            self._handle_decline(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.ACCEPT:
-            self._handle_accept(fipa_msg, message_id, dialogue)
+            self._handle_accept(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, message_id, dialogue)
+            self._handle_inform(fipa_msg, dialogue)
 
     def teardown(self) -> None:
         """
@@ -115,19 +112,18 @@ class FIPAHandler(Handler):
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(default_msg))
 
-    def _handle_cfp(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
+    def _handle_cfp(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the CFP.
 
         If the CFP matches the supplied services then send a PROPOSE, otherwise send a DECLINE.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = message_id + 1
-        new_target = message_id
+        new_message_id = cast(int, msg.get('message_id')) + 1
+        new_target = cast(int, msg.get('message_id'))
         logger.info("[{}]: received CFP from sender={}".format(self.context.agent_name,
                                                                msg.counterparty[-5:]))
         query = cast(Query, msg.get("query"))
@@ -170,14 +166,13 @@ class FIPAHandler(Handler):
             strategy.db.set_dialogue_status(str(dialogue.dialogue_label), msg.counterparty[-5:],
                                             "received_cfp", "send_no_proposal")
 
-    def _handle_decline(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
+    def _handle_decline(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the DECLINE.
 
         Close the dialogue.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """
@@ -189,19 +184,18 @@ class FIPAHandler(Handler):
         # dialogues = cast(Dialogues, self.context.dialogues)
         # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE)
 
-    def _handle_accept(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
+    def _handle_accept(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the ACCEPT.
 
         Respond with a MATCH_ACCEPT_W_INFORM which contains the address to send the funds to.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = message_id + 1
-        new_target = message_id
+        new_message_id = cast(int, msg.get('message_id')) + 1
+        new_target = cast(int, msg.get('message_id'))
         logger.info("[{}]: received ACCEPT from sender={}".format(self.context.agent_name,
                                                                   msg.counterparty[-5:]))
         logger.info("[{}]: sending MATCH_ACCEPT_W_INFORM to sender={}".format(self.context.agent_name,
@@ -220,7 +214,7 @@ class FIPAHandler(Handler):
         strategy.db.set_dialogue_status(str(dialogue.dialogue_label), msg.counterparty[-5:],
                                         "received_accept", "send_match_accept")
 
-    def _handle_inform(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
+    def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the INFORM.
 
@@ -228,12 +222,11 @@ class FIPAHandler(Handler):
         If the transaction is settled send the weather data, otherwise do nothing.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = message_id + 1
-        new_target = message_id
+        new_message_id = cast(int, msg.get('message_id')) + 1
+        new_target = cast(int, msg.get('message_id'))
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name,
                                                                   msg.counterparty[-5:]))
 

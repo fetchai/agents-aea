@@ -297,7 +297,7 @@ def test_dialogues():
     dialogues = FIPADialogues()
     result = dialogues.create_self_initiated(dialogue_starter_pbk="starter", dialogue_opponent_pbk="opponent", is_seller=True)
     assert isinstance(result, FIPADialogue)
-    result = dialogues.create_opponent_initiated(dialogue_reference="starter", dialogue_opponent_pbk="", is_seller=False)
+    result = dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_reference=(str(0), ''), is_seller=False)
     assert isinstance(result, FIPADialogue)
     assert result.role == FIPADialogue.AgentRole.BUYER
     assert dialogues.dialogue_stats is not None

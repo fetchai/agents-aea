@@ -66,7 +66,6 @@ class FIPAHandler(Handler):
         # convenience representations
         fipa_msg = cast(FIPAMessage, message)
         msg_performative = FIPAMessage.Performative(message.get('performative'))
-        message_id = cast(int, message.get("message_id"))
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
@@ -79,13 +78,13 @@ class FIPAHandler(Handler):
 
         # handle message
         if msg_performative == FIPAMessage.Performative.PROPOSE:
-            self._handle_propose(fipa_msg, message_id, dialogue)
+            self._handle_propose(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, message_id, dialogue)
+            self._handle_decline(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            self._handle_match_accept(fipa_msg, message_id, dialogue)
+            self._handle_match_accept(fipa_msg, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, message_id, dialogue)
+            self._handle_inform(fipa_msg, dialogue)
 
     def teardown(self) -> None:
         """
@@ -111,17 +110,16 @@ class FIPAHandler(Handler):
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(default_msg))
 
-    def _handle_propose(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
+    def _handle_propose(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the propose.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = message_id + 1
-        new_target_id = message_id
+        new_message_id = cast(int, msg.get('message_id')) + 1
+        new_target = cast(int, msg.get('message_id'))
         proposals = cast(List[Description], msg.get("proposal"))
         if proposals is not []:
             # only take the first proposal
@@ -138,7 +136,7 @@ class FIPAHandler(Handler):
                 dialogue.proposal = proposal
                 accept_msg = FIPAMessage(message_id=new_message_id,
                                          dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                                         target=new_target_id,
+                                         target=new_target,
                                          performative=FIPAMessage.Performative.ACCEPT)
                 dialogue.outgoing_extend(accept_msg)
                 self.context.outbox.put_message(to=msg.counterparty,
@@ -150,7 +148,7 @@ class FIPAHandler(Handler):
                                                                                  msg.counterparty[-5:]))
                 decline_msg = FIPAMessage(message_id=new_message_id,
                                           dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                                          target=new_target_id,
+                                          target=new_target,
                                           performative=FIPAMessage.Performative.DECLINE)
                 dialogue.outgoing_extend(decline_msg)
                 self.context.outbox.put_message(to=msg.counterparty,
@@ -158,7 +156,7 @@ class FIPAHandler(Handler):
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(decline_msg))
 
-    def _handle_decline(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
+    def _handle_decline(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the decline.
 
@@ -169,21 +167,19 @@ class FIPAHandler(Handler):
         """
         logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name, msg.counterparty[-5:]))
 
-    def _handle_match_accept(self, msg: FIPAMessage, message_id: int,
-                             dialogue: Dialogue) -> None:
+    def _handle_match_accept(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the match accept.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = message_id + 1
-        new_target_id = message_id
+        new_message_id = cast(int, msg.get('message_id')) + 1
+        new_target = cast(int, msg.get('message_id'))
         inform_msg = FIPAMessage(message_id=new_message_id,
                                  dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                                 target=new_target_id,
+                                 target=new_target,
                                  performative=FIPAMessage.Performative.INFORM,
                                  info={"Done": "Sending payment via bank transfer"})
         dialogue.outgoing_extend(inform_msg)
@@ -195,12 +191,11 @@ class FIPAHandler(Handler):
                                                                          msg.counterparty[-5:]))
         self._received_tx_message = True
 
-    def _handle_inform(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
+    def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
         Handle the match inform.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """

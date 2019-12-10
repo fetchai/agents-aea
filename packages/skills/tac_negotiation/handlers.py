@@ -22,7 +22,7 @@
 import logging
 import pprint
 import sys
-from typing import Any, Dict, List, Optional, cast, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, cast, TYPE_CHECKING, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.dialogue.base import DialogueLabel
@@ -84,9 +84,7 @@ class FIPANegotiationHandler(Handler):
             query = cast(Query, fipa_msg.get("query"))
             assert query.model is not None, "Query has no data model."
             is_seller = query.model.name == DEMAND_DATAMODEL_NAME
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(fipa_msg.counterparty,
-                                                                          cast(str, fipa_msg.get('dialogue_reference')),
-                                                                          is_seller))
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(message.counterparty, cast(Tuple[str, str], fipa_msg.get('dialogue_reference')), is_seller))
             dialogue.incoming_extend(fipa_msg)
         else:
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
