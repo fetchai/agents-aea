@@ -38,6 +38,7 @@ from aea.cli.install import install
 from aea.cli.list import list as _list
 from aea.cli.login import login
 from aea.cli.loggers import simple_verbosity_option
+from aea.cli.push import push
 from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
@@ -200,3 +201,4 @@ cli.add_command(scaffold)
 cli.add_command(remove)
 cli.add_command(install)
 cli.add_command(run)
+cli.add_command(push)

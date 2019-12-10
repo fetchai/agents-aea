@@ -24,13 +24,20 @@ import os
 import requests
 import tarfile
 import yaml
+import shutil
 
 from typing import List, Dict
 
-from aea.cli.registry.settings import REGISTRY_API_URL, CLI_CONFIG_PATH
+from aea.cli.registry.settings import (
+    REGISTRY_API_URL,
+    CLI_CONFIG_PATH,
+    AUTH_TOKEN_KEY
+)
 
 
-def request_api(method: str, path: str, params=None, data=None) -> Dict:
+def request_api(
+    method: str, path: str, params=None, data=None, auth=False, filepath=None
+) -> Dict:
     """
     Request Registry API.
 
@@ -38,25 +45,51 @@ def request_api(method: str, path: str, params=None, data=None) -> Dict:
     :param path: str URL path.
     :param params: dict GET params.
     :param data: dict POST data.
+    :param auth: bool is auth requied (default False).
 
     :return: dict response from Registry API
     """
+    headers = {}
+    if auth:
+        token = read_cli_config()['auth_token']
+        headers.update({
+            'Authorization': 'Token {}'.format(token)
+        })
+
+    files = None
+    if filepath:
+        files = {'file': open(filepath,'rb')}
+
     resp = requests.request(
         method=method,
         url='{}{}'.format(REGISTRY_API_URL, path),
         params=params,
-        json=data
+        files=files,
+        data=data,
+        headers=headers,
     )
     if resp.status_code == 200:
-        return resp.json()
+        pass
+    elif resp.status_code == 201:
+        click.echo('Successfully created!')
+    elif resp.status_code == 401:
+        raise click.ClickException(
+            resp.json()
+        )
     elif resp.status_code == 403:
-        raise click.ClickException('You are not authenticated.')
+        raise click.ClickException(
+            'You are not authenticated. '
+            'Please sign in with "aea login" command.'
+        )
     elif resp.status_code == 404:
         raise click.ClickException('Not found in Registry.')
+    elif resp.status_code == 400:
+        raise click.ClickException(resp.json())
     else:
         raise click.ClickException(
             'Wrong server response. Status code: {}'.format(resp.status_code)
         )
+    return resp.json()
 
 
 def split_public_id(public_id: str) -> List[str]:
@@ -111,6 +144,18 @@ def _extract(source: str, target: str) -> None:
         raise Exception('Unknown file type: {}'.format(source))
 
     os.remove(source)
+
+
+def _remove_pycache(source_dir: str):
+    pycache_path = os.path.join(source_dir, '__pycache__')
+    if os.path.exists(pycache_path):
+        shutil.rmtree(pycache_path)
+
+
+def _compress(output_filename: str, source_dir: str):
+    _remove_pycache(source_dir)
+    with tarfile.open(output_filename, "w:gz") as f:
+        f.add(source_dir, arcname=os.path.basename(source_dir))
 
 
 def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
@@ -193,18 +238,75 @@ def write_cli_config(dict_conf: Dict) -> None:
         yaml.dump(dict_conf, f, default_flow_style=False)
 
 
+def _load_yaml(filepath):
+    with open(filepath, 'r') as f:
+        try:
+            return yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise click.ClickException(
+                'Loading yaml config from {} failed: {}'.format(
+                    filepath, e
+                )
+            )
+
+
 def read_cli_config() -> Dict:
     """
     Read CLI config from yaml file.
 
     :return: dict CLI config.
     """
-    with open(CLI_CONFIG_PATH, 'r') as f:
-        try:
-            return yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            raise click.ClickException(
-                'Loading CLI config from {} failed: {}'.format(
-                    CLI_CONFIG_PATH, e
-                )
+    return _load_yaml(CLI_CONFIG_PATH)
+
+
+def push_item(item_type: str, item_name: str):
+    item_type_plural = item_type + 's'
+    cwd = os.getcwd()
+
+    items_folder = os.path.join(cwd, item_type_plural)
+    item_path = os.path.join(items_folder, item_name)
+    click.echo(
+        'Searching for {} {} in {} ...'. format(
+        item_name, item_type, items_folder
+    ))
+    if not os.path.exists(item_path):
+        raise click.ClickException(
+            '{} "{}" not found  in {}. Make sure you run push command '
+            'from a correct folder.'.format(
+                item_type.title(), item_name, items_folder
             )
+        )
+
+    output_filename = '{}.tar.gz'.format(item_name)
+    click.echo('Compressing {} {} to {} ...'.format(
+        item_name, item_type, output_filename
+    ))
+    _compress(output_filename, item_path)
+    output_filepath = os.path.join(cwd, output_filename)
+
+    item_config_filepath = os.path.join(item_path, '{}.yaml'.format(item_type))
+    click.echo('Reading {} {} config from...'.format(
+        item_name, item_type, item_config_filepath
+    ))
+    item_config = _load_yaml(item_config_filepath)
+
+    data = {
+        'name': item_name,
+        'description': item_config['description'],
+        'version': item_config['version']
+    }
+    path = '/{}/create'.format(item_type_plural)
+    click.echo('Pushing {} {} to Registry ...'.format(
+        item_name, item_type
+    ))
+    resp = request_api(
+        'POST', path, data=data, auth=True, filepath=output_filepath
+    )
+    click.echo(
+        'Successfully pushed {} {} to the Registry. Public ID: {}'.format(
+            item_type, item_name, resp['public_id']
+        )
+    )
+
+    click.echo('Removing temporary file {}'.format(output_filepath))
+    os.remove(output_filepath)
