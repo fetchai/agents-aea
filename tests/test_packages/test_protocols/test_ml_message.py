@@ -51,8 +51,10 @@ def test_ml_message_creation():
     dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
     query = Query([Constraint("dataset_id", ConstraintType("==", "fmnist"))], model=dm)
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
+    msg.counterparty = "m_agent"
     msg_bytes = MLTradeSerializer().encode(msg)
     recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    recovered_msg.counterparty = "m_agent"
     assert recovered_msg == msg
 
     terms = Description({"batch_size": 5,
@@ -64,14 +66,18 @@ def test_ml_message_creation():
                          "address": "agent1"})
 
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=terms)
+    msg.counterparty = "m_agent"
     msg_bytes = MLTradeSerializer().encode(msg)
     recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    recovered_msg.counterparty = "m_agent"
     assert recovered_msg == msg
 
     tx_digest = "This is the transaction digest."
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT, terms=terms, tx_digest=tx_digest)
+    msg.counterparty = "m_agent"
     msg_bytes = MLTradeSerializer().encode(msg)
     recovered_msg = MLTradeSerializer().decode(msg_bytes)
+    recovered_msg.counterparty = "m_agent"
     assert recovered_msg == msg
 
     with mock.patch('packages.protocols.ml_trade.message.MLTradeMessage.Performative') as mocked_type:
