@@ -281,9 +281,7 @@ def push_item(item_type: str, item_name: str):
     output_filepath = os.path.join(cwd, output_filename)
 
     item_config_filepath = os.path.join(item_path, '{}.yaml'.format(item_type))
-    click.echo('Reading {} {} config from...'.format(
-        item_name, item_type, item_config_filepath
-    ))
+    click.echo('Reading {} {} config ...'.format(item_name, item_type))
     item_config = _load_yaml(item_config_filepath)
 
     data = {
