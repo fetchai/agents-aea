@@ -609,7 +609,7 @@ class Filter(object):
         :return: None
         """
         while not self.decision_maker_out_queue.empty():
-            tx_message = self.decision_maker_out_queue.get_nowait()  # type: Optional[TransactionMessage]
+            tx_message = cast(TransactionMessage, self.decision_maker_out_queue.get_nowait())
             tx_message.counterparty = cast(Address, DECISION_MAKER)
             if tx_message is not None:
                 skill_ids = cast(List[str], tx_message.get("skill_ids"))
