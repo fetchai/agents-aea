@@ -279,17 +279,16 @@ class FIPADialogues(Dialogues):
         self._initiated_dialogues.update({dialogue_label: dialogue})
         return dialogue
 
-    def create_opponent_initiated(self, dialogue_opponent_pbk: Address, dialogue_reference: Tuple[str, str], is_seller: bool) -> Dialogue:
+    def create_opponent_initiated(self, dialogue_opponent_pbk: Address, dialogue_reference: str, is_seller: bool) -> Dialogue:
         """
         Save an opponent initiated dialogue.
 
-        :param dialogue_opponent_pbk: the pbk of the agent with which the dialogue is kept.
-        :param dialogue_id: the id of the dialogue
-        :param sender: the pbk of the sender
-
+        :param dialogue_opponent_pbk: the address of the agent with which the dialogue is kept.
+        :param dialogue_reference: the reference of the dialogue.
+        :param is_seller: keeps track if the counterparty is a seller.
         :return: the created dialogue
         """
-        assert dialogue_reference[0] != '' and dialogue_reference[1] == '', "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
+        assert dialogue_reference[0] != '' and dialogue_opponent_pbk == '', "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
         new_dialogue_reference = (dialogue_reference[0], str(self._next_dialogue_nonce()))
         dialogue_label = DialogueLabel(new_dialogue_reference, dialogue_opponent_pbk, dialogue_opponent_pbk)
         result = self._create(dialogue_label, is_seller)
