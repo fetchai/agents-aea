@@ -70,7 +70,7 @@ class TestSkillError:
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=self.public_key,
                             protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
-        self.my_error_handler.handle(message=msg, sender=envelope.sender)
+        self.my_error_handler.handle(message=msg)
 
     def test_error_skill_unsupported_protocol(self):
         """Test the unsupported error message."""

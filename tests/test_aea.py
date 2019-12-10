@@ -103,7 +103,7 @@ def test_react():
         connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        msg.counterparty = "dummy_agent"
+        msg.counterparty = public_key
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
@@ -125,6 +125,7 @@ def test_react():
             agent.outbox.put(envelope)
             time.sleep(0.5)
             handler = agent.resources.handler_registry.fetch_by_skill('default', "dummy")
+            assert handler is not None
             assert msg in handler.handled_messages, "The message is not inside the handled_messages."
         except Exception:
             raise
@@ -146,7 +147,7 @@ async def test_handle():
         connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        msg.counterparty = "dummy_agent"
+        msg.counterparty = agent_name
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
@@ -225,7 +226,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, cls.resources)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        cls.expected_message.counterparty = "dummy_agent"
+        cls.expected_message.counterparty = cls.agent_name
         envelope = Envelope(to=cls.agent_name, sender=cls.agent_name, protocol_id="default", message=DefaultSerializer().encode(cls.expected_message))
 
         cls.t = Thread(target=cls.aea.start)
@@ -290,7 +291,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.resources.add_skill(cls.error_skill)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        cls.expected_message.counterparty = "dummy_agent"
+        cls.expected_message.counterparty = cls.agent_name
 
         cls.t = Thread(target=cls.aea.start)
         cls.t.start()

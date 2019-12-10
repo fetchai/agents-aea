@@ -86,7 +86,7 @@ def test_oef_message_oef_error():
     """Tests the OEF_ERROR type of message."""
     msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
-
+    msg.counterparty = "agent"
     assert OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
                       operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS),\
         "Expects an oef message Error!"
@@ -94,6 +94,7 @@ def test_oef_message_oef_error():
     assert len(msg_bytes) > 0,\
         "Expects the length of bytes not to be Empty"
     deserialized_msg = OEFSerializer().decode(msg_bytes)
+    deserialized_msg.counterparty = "agent"
     assert msg == deserialized_msg,\
         "Expected the deserialized_msg to me equals to msg"
 

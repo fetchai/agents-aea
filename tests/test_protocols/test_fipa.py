@@ -38,6 +38,7 @@ def test_fipa_cfp_serialization():
                       target=0,
                       performative=FIPAMessage.Performative.CFP,
                       query=query)
+    msg.counterparty = "sender"
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
                         sender="sender",
@@ -50,6 +51,7 @@ def test_fipa_cfp_serialization():
     assert expected_envelope == actual_envelope
 
     actual_msg = FIPASerializer().decode(actual_envelope.message)
+    actual_msg.counterparty = "sender"
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -66,6 +68,7 @@ def test_fipa_cfp_serialization_bytes():
                       target=0,
                       performative=FIPAMessage.Performative.CFP,
                       query=query)
+    msg.counterparty = "sender"
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
                         sender="sender",
@@ -78,10 +81,12 @@ def test_fipa_cfp_serialization_bytes():
     assert expected_envelope == actual_envelope
 
     actual_msg = FIPASerializer().decode(actual_envelope.message)
+    actual_msg.counterparty = "sender"
     expected_msg = msg
     assert expected_msg == actual_msg
 
     deserialised_msg = FIPASerializer().decode(envelope.message)
+    deserialised_msg.counterparty = "sender"
     assert msg.get("performative") == deserialised_msg.get("performative")
 
 
@@ -122,6 +127,7 @@ def test_fipa_accept_serialization():
                       dialogue_reference=(str(0), ''),
                       target=0,
                       performative=FIPAMessage.Performative.ACCEPT)
+    msg.counterparty = "sender"
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
                         sender="sender",
@@ -134,6 +140,7 @@ def test_fipa_accept_serialization():
     assert expected_envelope == actual_envelope
 
     actual_msg = FIPASerializer().decode(actual_envelope.message)
+    actual_msg.counterparty = "sender"
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -144,12 +151,12 @@ def test_performative_match_accept():
                       dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.MATCH_ACCEPT)
-
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
                         sender="sender",
                         protocol_id=FIPAMessage.protocol_id,
                         message=msg_bytes)
+    msg.counterparty = "sender"
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -290,7 +297,7 @@ def test_dialogues():
     dialogues = FIPADialogues()
     result = dialogues.create_self_initiated(dialogue_opponent_pbk="opponent", dialogue_starter_pbk="starter", is_seller=True)
     assert isinstance(result, FIPADialogue)
-    result = dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_reference=(str(0), ''), is_seller=False)
+    result = dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_reference="", is_seller=False)
     assert isinstance(result, FIPADialogue)
     assert result.role == FIPADialogue.AgentRole.BUYER
     assert dialogues.dialogue_stats is not None

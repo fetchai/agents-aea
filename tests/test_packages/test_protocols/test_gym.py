@@ -42,13 +42,17 @@ def test_gym_message_instantiation():
 def test_gym_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""
     msg = GymMessage(performative=GymMessage.Performative.ACT, action='any_action', step_id=1)
+    msg.counterparty = "my_agent"
     msg_bytes = GymSerializer().encode(msg)
     actual_msg = GymSerializer().decode(msg_bytes)
+    actual_msg.counterparty = "my_agent"
     expected_msg = msg
     assert expected_msg == actual_msg
 
     msg = GymMessage(performative=GymMessage.Performative.PERCEPT, observation='any_observation', reward=0.0, info={'some_key': 'some_value'}, done=True, step_id=1)
+    msg.counterparty = "my_agent"
     msg_bytes = GymSerializer().encode(msg)
     actual_msg = GymSerializer().decode(msg_bytes)
+    actual_msg.counterparty = "my_agent"
     expected_msg = msg
     assert expected_msg == actual_msg

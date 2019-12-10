@@ -288,8 +288,8 @@ class FIPADialogues(Dialogues):
         :param is_seller: keeps track if the counterparty is a seller.
         :return: the created dialogue
         """
-        assert dialogue_reference[0] != '' and dialogue_opponent_pbk == '', "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
-        new_dialogue_reference = (dialogue_reference[0], str(self._next_dialogue_nonce()))
+        assert dialogue_reference != '' and dialogue_opponent_pbk == '', "Cannot initiate dialogue with preassigned dialogue_responder_reference!"
+        new_dialogue_reference = (dialogue_reference, str(self._next_dialogue_nonce()))
         dialogue_label = DialogueLabel(new_dialogue_reference, dialogue_opponent_pbk, dialogue_opponent_pbk)
         result = self._create(dialogue_label, is_seller)
         return result

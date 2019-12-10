@@ -33,8 +33,10 @@ from aea.protocols.default.serialization import DefaultSerializer
 def test_default_bytes_serialization():
     """Test that the serialization for the 'simple' protocol works for the BYTES message."""
     expected_msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    expected_msg.counterparty = "my_agent"
     msg_bytes = DefaultSerializer().encode(expected_msg)
     actual_msg = DefaultSerializer().decode(msg_bytes)
+    actual_msg.counterparty = "my_agent"
     assert expected_msg == actual_msg
 
     with pytest.raises(ValueError):
@@ -48,12 +50,15 @@ def test_default_bytes_serialization():
 def test_default_error_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""
     msg = DefaultMessage(type=DefaultMessage.Type.ERROR, error_code=-10001, error_msg="An error", error_data='Some data')
+    msg.counterparty = "my_agent"
     msg_bytes = DefaultSerializer().encode(msg)
     actual_msg = DefaultSerializer().decode(msg_bytes)
+    actual_msg.counterparty = "my_agent"
     expected_msg = msg
     assert expected_msg == actual_msg
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+    msg.counterparty = "my_agent"
     with pytest.raises(ValueError):
         with mock.patch("aea.protocols.default.message.DefaultMessage.Type")\
                 as mock_type_enum:
@@ -65,6 +70,7 @@ def test_default_error_serialization():
             body["content"] = base64.b64encode(content).decode("utf-8")
             bytes_msg = json.dumps(body).encode("utf-8")
             returned_msg = DefaultSerializer().decode(bytes_msg)
+            returned_msg.counterparty = "my_agent"
             assert msg != returned_msg, "Messages must be different"
 
 
