@@ -32,6 +32,7 @@ from typing import Optional, List, Dict, Any, Tuple, cast, Union
 
 from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE, Address
 from aea.configurations.loader import ConfigLoader
+# from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Protocol
 from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext

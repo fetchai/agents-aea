@@ -21,7 +21,7 @@
 
 import logging
 import sys
-from typing import Optional, Tuple, cast, TYPE_CHECKING
+from typing import Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message

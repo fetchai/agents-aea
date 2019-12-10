@@ -32,6 +32,7 @@ from aea.protocols.oef.models import Description, Query, Constraint, ConstraintT
 def test_fipa_cfp_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
     query = Query([Constraint('something', ConstraintType('>', 1))])
+
     msg = FIPAMessage(message_id=0,
                       dialogue_reference=(str(0), ''),
                       target=0,

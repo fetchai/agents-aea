@@ -103,6 +103,7 @@ def test_react():
         connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg.counterparty = "dummy_agent"
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
@@ -145,6 +146,7 @@ async def test_handle():
         connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg.counterparty = "dummy_agent"
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
@@ -223,6 +225,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, cls.resources)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        cls.expected_message.counterparty = "dummy_agent"
         envelope = Envelope(to=cls.agent_name, sender=cls.agent_name, protocol_id="default", message=DefaultSerializer().encode(cls.expected_message))
 
         cls.t = Thread(target=cls.aea.start)
@@ -287,6 +290,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.resources.add_skill(cls.error_skill)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        cls.expected_message.counterparty = "dummy_agent"
 
         cls.t = Thread(target=cls.aea.start)
         cls.t.start()

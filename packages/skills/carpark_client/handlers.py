@@ -89,13 +89,13 @@ class FIPAHandler(Handler):
 
         # handle message
         if msg_performative == FIPAMessage.Performative.PROPOSE:
-            self._handle_propose(fipa_msg, dialogue)
+            self._handle_propose(fipa_msg, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.DECLINE:
-            self._handle_decline(fipa_msg, dialogue)
+            self._handle_decline(fipa_msg, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            self._handle_match_accept(fipa_msg, dialogue)
+            self._handle_match_accept(fipa_msg, message_id, dialogue)
         elif msg_performative == FIPAMessage.Performative.INFORM:
-            self._handle_inform(fipa_msg, dialogue)
+            self._handle_inform(fipa_msg, message_id, dialogue)
 
     def teardown(self) -> None:
         """
@@ -116,12 +116,12 @@ class FIPAHandler(Handler):
                                      error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
                                      error_msg="Invalid dialogue.",
                                      error_data="fipa_message")  # FIPASerializer().encode(msg))
-        self.context.outbox.put_message(to= msg.counterparty,
+        self.context.outbox.put_message(to=msg.counterparty,
                                         sender=self.context.agent_public_key,
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(default_msg))
 
-    def _handle_propose(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
+    def _handle_propose(self, msg: FIPAMessage, message_id: int, dialogue: Dialogue) -> None:
         """
         Handle the propose.
 
@@ -129,7 +129,7 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = msg.message_id + 1
+        new_message_id = message_id + 1
         new_target_id = message_id
         proposals = cast(List[Description], msg.get("proposal"))
 

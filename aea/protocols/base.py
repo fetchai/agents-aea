@@ -59,10 +59,7 @@ class Message:
 
     @counterparty.setter
     def counterparty(self, counterparty: Address) -> None:
-        """
-        Set the counterparty of the message.
-
-        """
+        """Set the counterparty of the message."""
         self._counterparty = counterparty
 
     @property
