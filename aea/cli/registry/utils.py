@@ -24,7 +24,6 @@ import os
 import requests
 import tarfile
 import yaml
-import shutil
 
 from typing import List, Dict
 
@@ -46,19 +45,20 @@ def request_api(
     :param params: dict GET params.
     :param data: dict POST data.
     :param auth: bool is auth requied (default False).
+    :param filepath: str path to file to upload (default None).
 
     :return: dict response from Registry API
     """
     headers = {}
     if auth:
-        token = read_cli_config()['auth_token']
+        token = read_cli_config()[AUTH_TOKEN_KEY]
         headers.update({
             'Authorization': 'Token {}'.format(token)
         })
 
     files = None
     if filepath:
-        files = {'file': open(filepath,'rb')}
+        files = {'file': open(filepath, 'rb')}
 
     resp = requests.request(
         method=method,
@@ -148,18 +148,6 @@ def _extract(source: str, target: str) -> None:
     os.remove(source)
 
 
-def _remove_pycache(source_dir: str):
-    pycache_path = os.path.join(source_dir, '__pycache__')
-    if os.path.exists(pycache_path):
-        shutil.rmtree(pycache_path)
-
-
-def _compress(output_filename: str, source_dir: str):
-    _remove_pycache(source_dir)
-    with tarfile.open(output_filename, "w:gz") as f:
-        f.add(source_dir, arcname=os.path.basename(source_dir))
-
-
 def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
     """
     Fetch connection/protocol/skill from Registry.
@@ -240,7 +228,14 @@ def write_cli_config(dict_conf: Dict) -> None:
         yaml.dump(dict_conf, f, default_flow_style=False)
 
 
-def _load_yaml(filepath):
+def load_yaml(filepath: str) -> Dict:
+    """
+    Read content from yaml file.
+
+    :param filepath: str path to yaml file.
+
+    :return: dict YAML content
+    """
     with open(filepath, 'r') as f:
         try:
             return yaml.safe_load(f)
@@ -258,55 +253,4 @@ def read_cli_config() -> Dict:
 
     :return: dict CLI config.
     """
-    return _load_yaml(CLI_CONFIG_PATH)
-
-
-def push_item(item_type: str, item_name: str):
-    item_type_plural = item_type + 's'
-    cwd = os.getcwd()
-
-    items_folder = os.path.join(cwd, item_type_plural)
-    item_path = os.path.join(items_folder, item_name)
-    click.echo(
-        'Searching for {} {} in {} ...'. format(
-        item_name, item_type, items_folder
-    ))
-    if not os.path.exists(item_path):
-        raise click.ClickException(
-            '{} "{}" not found  in {}. Make sure you run push command '
-            'from a correct folder.'.format(
-                item_type.title(), item_name, items_folder
-            )
-        )
-
-    output_filename = '{}.tar.gz'.format(item_name)
-    click.echo('Compressing {} {} to {} ...'.format(
-        item_name, item_type, output_filename
-    ))
-    _compress(output_filename, item_path)
-    output_filepath = os.path.join(cwd, output_filename)
-
-    item_config_filepath = os.path.join(item_path, '{}.yaml'.format(item_type))
-    click.echo('Reading {} {} config ...'.format(item_name, item_type))
-    item_config = _load_yaml(item_config_filepath)
-
-    data = {
-        'name': item_name,
-        'description': item_config['description'],
-        'version': item_config['version']
-    }
-    path = '/{}/create'.format(item_type_plural)
-    click.echo('Pushing {} {} to Registry ...'.format(
-        item_name, item_type
-    ))
-    resp = request_api(
-        'POST', path, data=data, auth=True, filepath=output_filepath
-    )
-    click.echo(
-        'Successfully pushed {} {} to the Registry. Public ID: {}'.format(
-            item_type, item_name, resp['public_id']
-        )
-    )
-
-    click.echo('Removing temporary file {}'.format(output_filepath))
-    os.remove(output_filepath)
+    return load_yaml(CLI_CONFIG_PATH)

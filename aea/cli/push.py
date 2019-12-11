@@ -20,16 +20,31 @@
 """Implementation of the 'aea push' subcommand."""
 import click
 
-from aea.cli.registry.utils import push_item
+from aea.cli.registry.push import push_item
 
 
 @click.group()
 def push():
-    """Push item to a Registry."""
+    """Push item to Registry."""
     pass
 
 
 @push.command(name='connection')
 @click.argument('connection-name', type=str, required=True)
 def connection(connection_name):
+    """Push connection to Registry."""
     push_item('connection', connection_name)
+
+
+@push.command(name='protocol')
+@click.argument('protocol-name', type=str, required=True)
+def protocol(protocol_name):
+    """Push protocol to Registry."""
+    push_item('protocol', protocol_name)
+
+
+@push.command(name='skill')
+@click.argument('skill-name', type=str, required=True)
+def skill(skill_name):
+    """Push skill to Registry."""
+    push_item('skill', skill_name)

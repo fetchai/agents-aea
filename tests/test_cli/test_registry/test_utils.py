@@ -84,7 +84,9 @@ class RequestAPITestCase(TestCase):
         request_mock.assert_called_once_with(
             method='GET',
             params=None,
-            json=None,
+            data=None,
+            files=None,
+            headers={},
             url=REGISTRY_API_URL + '/path'
         )
         self.assertEqual(result, expected_result)
