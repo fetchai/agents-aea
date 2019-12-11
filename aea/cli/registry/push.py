@@ -22,7 +22,7 @@ import os
 import tarfile
 import shutil
 
-from aea.cli.registry.utils import request_api, load_yaml
+from aea.cli.registry.utils import request_api, load_yaml, clean_tarfiles
 
 
 def _remove_pycache(source_dir: str):
@@ -37,7 +37,16 @@ def _compress(output_filename: str, source_dir: str):
         f.add(source_dir, arcname=os.path.basename(source_dir))
 
 
+@clean_tarfiles
 def push_item(item_type: str, item_name: str) -> None:
+    """
+    Push item to the Registry.
+
+    :param item_type: str type of item (connection/protocol/skill).
+    :param item_name: str item name.
+
+    :return: None
+    """
     item_type_plural = item_type + 's'
     cwd = os.getcwd()
 
@@ -85,4 +94,3 @@ def push_item(item_type: str, item_name: str) -> None:
     )
 
     click.echo('Removing temporary file {}'.format(output_filepath))
-    os.remove(output_filepath)

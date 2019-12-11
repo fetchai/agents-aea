@@ -26,6 +26,7 @@ from aea.cli.registry.push import push_item
 @click.group()
 def push():
     """Push item to Registry."""
+    # no action needed as just a group of command defined here
     pass
 
 

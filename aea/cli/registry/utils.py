@@ -254,3 +254,26 @@ def read_cli_config() -> Dict:
     :return: dict CLI config.
     """
     return load_yaml(CLI_CONFIG_PATH)
+
+
+def _rm_tarfiles():
+    cwd = os.getcwd()
+    for filename in os.listdir(cwd):
+        filepath = os.path.join(cwd, filename)
+        if filepath.endswith('.tar.gz'):
+            os.remove(filepath)
+
+
+def clean_tarfiles(func):
+    """Decorate func to clean tarfiles after executing."""
+    def wrapper(*args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+        except Exception as e:
+            _rm_tarfiles()
+            raise e
+        else:
+            _rm_tarfiles()
+            return result
+
+    return wrapper

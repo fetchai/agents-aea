@@ -107,6 +107,15 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api('GET', '/path')
 
+    def test_request_api_409(self, request_mock):
+        """Test for fetch_package method conflict sever response."""
+        resp_mock = mock.Mock()
+        resp_mock.status_code = 409
+        resp_mock.json = lambda: {'detail': 'some'}
+        request_mock.return_value = resp_mock
+        with self.assertRaises(ClickException):
+            request_api('GET', '/path')
+
     def test_request_api_unexpected_response(self, request_mock):
         """Test for fetch_package method unexpected sever response."""
         resp_mock = mock.Mock()
