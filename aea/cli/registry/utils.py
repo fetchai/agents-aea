@@ -68,6 +68,8 @@ def request_api(
         data=data,
         headers=headers,
     )
+    resp_json = resp.json()
+
     if resp.status_code == 200:
         pass
     elif resp.status_code == 201:
@@ -79,13 +81,17 @@ def request_api(
         )
     elif resp.status_code == 404:
         raise click.ClickException('Not found in Registry.')
+    elif resp.status_code == 409:
+        raise click.ClickException(
+            'Conflict in Registry. {}'.format(resp_json['detail'])
+        )
     elif resp.status_code == 400:
         raise click.ClickException(resp.json())
     else:
         raise click.ClickException(
             'Wrong server response. Status code: {}'.format(resp.status_code)
         )
-    return resp.json()
+    return resp_json
 
 
 def split_public_id(public_id: str) -> List[str]:
