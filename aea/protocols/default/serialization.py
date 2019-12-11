@@ -35,12 +35,12 @@ class DefaultSerializer(Serializer):
         """Encode a 'default' message into bytes."""
         msg = cast(DefaultMessage, msg)
         body = {}  # Dict[str, Any]
-        body["type"] = msg.type
+        body["type"] = msg.type.value
 
-        if msg.type == DefaultMessage.Type.BYTES.value:
+        if msg.type == DefaultMessage.Type.BYTES:
             body["content"] = base64.b64encode(msg.content).decode("utf-8")
-        elif msg.type == DefaultMessage.Type.ERROR.value:
-            body["error_code"] = msg.error_code
+        elif msg.type == DefaultMessage.Type.ERROR:
+            body["error_code"] = msg.error_code.value
             body["error_msg"] = msg.error_msg
             body["error_data"] = msg.error_data
         else:
@@ -56,10 +56,10 @@ class DefaultSerializer(Serializer):
 
         msg_type = DefaultMessage.Type(json_body["type"])
         body["type"] = msg_type
-        if msg_type == DefaultMessage.Type.BYTES.value:
+        if msg_type == DefaultMessage.Type.BYTES:
             content = base64.b64decode(json_body["content"].encode("utf-8"))
             body["content"] = content  # type: ignore
-        elif msg_type == DefaultMessage.Type.ERROR.value:
+        elif msg_type == DefaultMessage.Type.ERROR:
             body["error_code"] = json_body["error_code"]
             body["error_msg"] = json_body["error_msg"]
             body["error_data"] = json_body["error_data"]

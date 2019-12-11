@@ -20,7 +20,7 @@
 
 """This module contains the default message definition."""
 from enum import Enum
-from typing import Optional, cast
+from typing import Optional, cast, Dict, Any
 
 from aea.protocols.base import Message
 
@@ -60,44 +60,46 @@ class DefaultMessage(Message):
         assert self.check_consistency(), "DefaultMessage initialization inconsistent."
 
     @property
-    def type(self) -> str:
+    def type(self) -> Type:
         """Get the type of the message."""
-        return DefaultMessage.Type(self.get("type")).value
+        assert self.is_set("type"), "type is not set"
+        return DefaultMessage.Type(self.get("type"))
 
     @property
     def content(self) -> bytes:
         """Get the content of the message."""
-        assert self.is_set("content")
+        assert self.is_set("content"), "content is not set!"
         return cast(bytes, self.get("content"))
 
     @property
-    def error_code(self) -> str:
+    def error_code(self) -> ErrorCode:
         """Get the error_code of the message."""
-        assert self.is_set("error_code")
-        return str(self.get("error_code"))
+        assert self.is_set("error_code"), "error_code is not set"
+        return DefaultMessage.ErrorCode(self.get("error_code"))
 
     @property
     def error_msg(self) -> str:
         """Get the error message."""
-        assert self.is_set("error_msg")
-        return str(self.get("error_msg"))
+        assert self.is_set("error_msg"), "error_msg is not set"
+        return cast(str, self.get("error_msg"))
 
     @property
-    def error_data(self) -> str:
+    def error_data(self) -> Dict[str, Any]:
         """Get the data of the error message."""
-        assert self.is_set("error_data")
-        return str(self.get("error_data"))
+        assert self.is_set("error_data"), "error_msg is not set."
+        return cast(Dict, self.get("error_data"))
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             ttype = DefaultMessage.Type(self.get("type"))
             if ttype == DefaultMessage.Type.BYTES:
-                assert isinstance(self.content, bytes)
+                assert isinstance(self.content, bytes), "Expect the content to be bytes"
             elif ttype == DefaultMessage.Type.ERROR:
-                assert self.error_code in DefaultMessage.ErrorCode
-                assert self.is_set("error_msg")
-                assert self.is_set("error_data")
+                assert self.error_code in DefaultMessage.ErrorCode, "ErrorCode is not valid"
+                assert isinstance(self.error_code, DefaultMessage.ErrorCode), "error_code has wrong type."
+                assert isinstance(self.error_msg, str), "error_msg should be str"
+                assert isinstance(self.error_data, Dict), "error_data should be str"
             else:
                 raise ValueError("Type not recognized.")
 

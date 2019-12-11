@@ -83,8 +83,8 @@ class TestSkillError:
 
         envelope = self.my_aea.inbox.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
-        assert msg.get("type") == DefaultMessage.Type.ERROR
-        assert msg.get("error_code") == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL.value
+        assert msg.type == DefaultMessage.Type.ERROR
+        assert msg.error_code == DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL
 
     def test_error_decoding_error(self):
         """Test the decoding error."""

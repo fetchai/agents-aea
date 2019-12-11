@@ -85,7 +85,7 @@ class ErrorHandler(Handler):
         logger.warning("Decoding error: {}.".format(envelope))
         encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
         reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.DECODING_ERROR.value,
+                               error_code=DefaultMessage.ErrorCode.DECODING_ERROR,
                                error_msg="Decoding error.",
                                error_data={"envelope": encoded_envelope})
         self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
