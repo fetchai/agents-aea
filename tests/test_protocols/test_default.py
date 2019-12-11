@@ -21,7 +21,6 @@
 
 import base64
 import json
-from typing import cast
 from unittest import mock
 
 import pytest

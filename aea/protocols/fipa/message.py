@@ -70,39 +70,68 @@ class FIPAMessage(Message):
                          **kwargs)
         assert self.check_consistency(), "FIPAMessage initialization inconsistent."
 
+    @property
+    def dialogue_reference(self) -> Tuple[str, str]:
+        """Get the dialogue_reference of the message."""
+        assert self.is_set("dialogue_reference"), " dialogue_reference is not set"
+        return cast(Tuple[str, str], self.get("dialogue_reference"))
+
+    @property
+    def message_id(self) -> int:
+        """Get the message_id of the message."""
+        assert self.is_set("message_id"), "message_id is not set"
+        return cast(int, self.get("message_id"))
+
+    @property
+    def target(self) -> int:
+        """Get the target of the message."""
+        assert self.is_set("target"), "target is not set."
+        return cast(int, self.get("target"))
+
+    @property
+    def performative(self) -> Performative:
+        """Get the performative of the message."""
+        return FIPAMessage.Performative(self.get("performative"))
+
+    @property
+    def query(self):
+        """Get the query of the message."""
+        assert self.is_set("query"), "query is not set."
+        return self.get("query")
+
+    @property
+    def proposal(self) -> List:
+        """Get the proposal list from the message."""
+        assert self.is_set("proposal"), "proposal is not set."
+        return cast(List, self.get("proposal"))
+
+    @property
+    def info(self) -> Dict:
+        """Get hte info from the message."""
+        assert self.is_set("info"), "info is not set."
+        return cast(Dict, self.get("info"))
+
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert self.is_set("dialogue_reference")
-            dialogue_reference = self.get("dialogue_reference")
-            assert type(dialogue_reference) == tuple
-            dialogue_reference = cast(Tuple, dialogue_reference)
-            assert type(dialogue_reference[0]) == str and type(dialogue_reference[0]) == str
-            assert self.is_set("message_id")
-            assert type(self.get("message_id")) == int
-            assert self.is_set("target")
-            assert type(self.get("target")) == int
-            performative = FIPAMessage.Performative(self.get("performative"))
-            if performative == FIPAMessage.Performative.CFP:
-                assert self.is_set("query")
-                query = self.get("query")
-                assert isinstance(query, Query) or isinstance(query, bytes) or query is None
+            assert type(self.dialogue_reference) == tuple
+            assert type(self.dialogue_reference[0]) == str and type(self.dialogue_reference[1]) == str
+            assert isinstance(self.message_id, int)
+            assert isinstance(self.target, int)
+            if self.performative == FIPAMessage.Performative.CFP:
+                assert isinstance(self.query, Query) or isinstance(self.query, bytes) or self.query is None
                 assert len(self.body) == 5
-            elif performative == FIPAMessage.Performative.PROPOSE:
-                assert self.is_set("proposal")
-                proposal = self.get("proposal")
-                assert type(proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in proposal)  # type: ignore
+            elif self.performative == FIPAMessage.Performative.PROPOSE:
+                assert type(self.proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in self.proposal)  # type: ignore
                 assert len(self.body) == 5
-            elif performative == FIPAMessage.Performative.ACCEPT \
-                    or performative == FIPAMessage.Performative.MATCH_ACCEPT \
-                    or performative == FIPAMessage.Performative.DECLINE:
+            elif self.performative == FIPAMessage.Performative.ACCEPT \
+                    or self.performative == FIPAMessage.Performative.MATCH_ACCEPT \
+                    or self.performative == FIPAMessage.Performative.DECLINE:
                 assert len(self.body) == 4
-            elif performative == FIPAMessage.Performative.ACCEPT_W_INFORM\
-                    or performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM\
-                    or performative == FIPAMessage.Performative.INFORM:
-                assert self.is_set("info")
-                json_data = self.get("info")
-                assert isinstance(json_data, dict)
+            elif self.performative == FIPAMessage.Performative.ACCEPT_W_INFORM\
+                    or self.performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM\
+                    or self.performative == FIPAMessage.Performative.INFORM:
+                assert isinstance(self.info, dict)
                 assert len(self.body) == 5
             else:
                 raise ValueError("Performative not recognized.")
