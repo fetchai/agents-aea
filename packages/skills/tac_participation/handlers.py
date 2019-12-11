@@ -249,7 +249,7 @@ class TACHandler(Handler):
         """
         Handle 'on tac error' event emitted by the controller.
 
-        :param error: the error object
+        :param tac_message: The tac message.
 
         :return: None
         """
@@ -294,7 +294,7 @@ class TACHandler(Handler):
         """
         Handle 'on transaction confirmed' event emitted by the controller.
 
-        :param tx_confirmation: the transaction confirmation
+        :param message: the TACMessage.
 
         :return: None
         """
@@ -330,9 +330,7 @@ class TACHandler(Handler):
         """
         Handle dialogue error event emitted by the controller.
 
-        :param message: the dialogue error message
-        :param controller_pbk: the address of the controller
-
+        :param tac_message: the dialogue error message
         :return: None
         """
         logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name,

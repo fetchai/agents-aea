@@ -32,7 +32,6 @@ from typing import Optional, List, Dict, Any, Tuple, cast, Union
 
 from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE, Address
 from aea.configurations.loader import ConfigLoader
-# from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Protocol
 from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext
@@ -609,8 +608,7 @@ class Filter(object):
         :return: None
         """
         while not self.decision_maker_out_queue.empty():
-            tx_message = cast(TransactionMessage, self.decision_maker_out_queue.get_nowait())
-            tx_message.counterparty = cast(Address, DECISION_MAKER)
+            tx_message = self.decision_maker_out_queue.get_nowait()  # type: Optional[TransactionMessage]
             if tx_message is not None:
                 skill_ids = cast(List[str], tx_message.get("skill_ids"))
                 for skill_id in skill_ids:

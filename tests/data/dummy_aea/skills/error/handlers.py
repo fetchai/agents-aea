@@ -49,7 +49,6 @@ class ErrorHandler(Handler):
         Implement the reaction to an envelope.
 
         :param message: the message
-        :param sender: the sender
         """
 
     def teardown(self) -> None:

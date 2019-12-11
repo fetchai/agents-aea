@@ -63,7 +63,6 @@ class FIPAHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         # convenience representations

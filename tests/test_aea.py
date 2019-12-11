@@ -125,7 +125,7 @@ def test_react():
             agent.outbox.put(envelope)
             time.sleep(0.5)
             handler = agent.resources.handler_registry.fetch_by_skill('default', "dummy")
-            assert handler is not None
+            assert handler is not None, "Handler is not set."
             assert msg in handler.handled_messages, "The message is not inside the handled_messages."
         except Exception:
             raise

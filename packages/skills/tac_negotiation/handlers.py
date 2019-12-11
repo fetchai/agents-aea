@@ -306,7 +306,6 @@ class TransactionHandler(Handler):
         Dispatch message to relevant handler and respond.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         tx_message = cast(TransactionMessage, message)
@@ -361,7 +360,6 @@ class OEFSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         # convenience representations

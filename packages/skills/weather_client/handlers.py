@@ -94,7 +94,7 @@ class FIPAHandler(Handler):
         """
         pass
 
-    def _handle_unidentified_dialogue(self, msg: FIPAMessage,) -> None:
+    def _handle_unidentified_dialogue(self, msg: FIPAMessage) -> None:
         """
         Handle an unidentified dialogue.
 
@@ -161,7 +161,6 @@ class FIPAHandler(Handler):
         Handle the decline.
 
         :param msg: the message
-        :param message_id: the message id
         :param dialogue: the dialogue object
         :return: None
         """

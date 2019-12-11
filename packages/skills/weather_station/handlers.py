@@ -69,7 +69,7 @@ class FIPAHandler(Handler):
             dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_public_key))
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(message.counterparty,
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(fipa_msg.counterparty,
                                                                           dialogue_reference, is_seller=True))
             dialogue.incoming_extend(fipa_msg)
         else:

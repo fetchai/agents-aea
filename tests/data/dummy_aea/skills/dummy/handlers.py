@@ -86,7 +86,6 @@ class DummyInternalHandler(Handler):
         Handle message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         self.handled_internal_messages.append(message)
