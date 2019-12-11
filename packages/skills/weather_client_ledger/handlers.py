@@ -319,18 +319,19 @@ class MyTransactionHandler(Handler):
             fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
             new_message_id = cast(int, fipa_msg.get("message_id")) + 1
             new_target_id = cast(int, fipa_msg.get("target")) + 1
+            counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_pbk
             inform_msg = FIPAMessage(message_id=new_message_id,
                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                      target=new_target_id,
                                      performative=FIPAMessage.Performative.INFORM,
                                      info=json_data)
             dialogue.outgoing_extend(inform_msg)
-            self.context.outbox.put_message(to=message.counterparty,
+            self.context.outbox.put_message(to=counterparty_pbk,
                                             sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(inform_msg))
             logger.info("[{}]: informing counterparty={} of transaction digest.".format(self.context.agent_name,
-                                                                                        message.counterparty[-5:]))
+                                                                                        counterparty_pbk[-5:]))
             self._received_tx_message = True
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))

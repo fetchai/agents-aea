@@ -318,7 +318,7 @@ class TestFIPA:
     def test_cfp(self):
         """Test that a CFP can be sent correctly."""
         cfp_message = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.CFP,
-                                query=Query([Constraint('something', ConstraintType('>', 1))]))
+                                  query=Query([Constraint('something', ConstraintType('>', 1))]))
         cfp_message.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,

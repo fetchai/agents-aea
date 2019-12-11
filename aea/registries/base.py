@@ -30,7 +30,7 @@ from queue import Queue
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple, cast, Union
 
-from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE, Address
+from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Protocol
