@@ -54,7 +54,8 @@ class Message:
 
         :return the address
         """
-        assert self._counterparty is not None, "Counterparty not set!"
+        if self._counterparty is None:
+            self._counterparty = ""
         return self._counterparty
 
     @counterparty.setter

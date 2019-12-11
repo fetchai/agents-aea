@@ -33,9 +33,7 @@ class TestBaseSerializations:
     def setup_class(cls):
         """Set up the use case."""
         cls.message = Message(content="hello")
-        cls.message.counterparty = "m_agent"
         cls.message2 = Message(body={"content": "hello"})
-        cls.message2.counterparty = "m_agent"
 
     def test_default_protobuf_serialization(self):
         """Test that the default Protobuf serialization works."""
@@ -48,7 +46,6 @@ class TestBaseSerializations:
         assert expected_envelope == actual_envelope
 
         expected_msg = ProtobufSerializer().decode(expected_envelope.message)
-        expected_msg.counterparty = "m_agent"
         actual_msg = self.message
         assert expected_msg == actual_msg
 
@@ -63,7 +60,6 @@ class TestBaseSerializations:
         assert expected_envelope == actual_envelope
 
         expected_msg = JSONSerializer().decode(expected_envelope.message)
-        expected_msg.counterparty = "m_agent"
         actual_msg = self.message
         assert expected_msg == actual_msg
 

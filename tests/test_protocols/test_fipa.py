@@ -38,7 +38,6 @@ def test_fipa_cfp_serialization():
                       target=0,
                       performative=FIPAMessage.Performative.CFP,
                       query=query)
-    msg.counterparty = "sender"
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
                         sender="sender",
@@ -51,7 +50,6 @@ def test_fipa_cfp_serialization():
     assert expected_envelope == actual_envelope
 
     actual_msg = FIPASerializer().decode(actual_envelope.message)
-    actual_msg.counterparty = "sender"
     expected_msg = msg
     assert expected_msg == actual_msg
 
