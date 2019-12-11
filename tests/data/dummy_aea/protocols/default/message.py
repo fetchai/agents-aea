@@ -60,7 +60,7 @@ class DefaultMessage(Message):
         assert self.check_consistency(), "DefaultMessage initialization inconsistent."
 
     @property
-    def type(self) -> Type:
+    def type(self) -> Type:  # noqa: F821
         """Get the type of the message."""
         assert self.is_set("type"), "type is not set"
         return DefaultMessage.Type(self.get("type"))
@@ -72,7 +72,7 @@ class DefaultMessage(Message):
         return cast(bytes, self.get("content"))
 
     @property
-    def error_code(self) -> ErrorCode:
+    def error_code(self) -> ErrorCode:  # noqa: F821
         """Get the error_code of the message."""
         assert self.is_set("error_code"), "error_code is not set"
         return DefaultMessage.ErrorCode(self.get("error_code"))

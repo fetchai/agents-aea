@@ -77,7 +77,7 @@ class OEFMessage(Message):
         assert self.check_consistency(), "OEFMessage initialization inconsistent."
 
     @property
-    def type(self) -> Type:
+    def type(self) -> Type:  # noqa: F821
         """Get the type of the oef_message."""
         assert self.is_set("type"), "type is not set."
         return OEFMessage.Type(self.get("type"))
@@ -86,7 +86,7 @@ class OEFMessage(Message):
     def id(self) -> int:
         """Get the id of the oef_message."""
         assert self.is_set("id"), "id is not set."
-        return cast(int, self.get(self.get('id')))
+        return cast(int, self.get('id'))
 
     @property
     def service_description(self) -> Description:
@@ -125,7 +125,7 @@ class OEFMessage(Message):
         return cast(List[str], self.get("agents"))
 
     @property
-    def operation(self) -> OEFErrorOperation:
+    def operation(self) -> OEFErrorOperation:  # noqa: F821
         """Get the error_operation code from the message."""
         assert self.is_set("operation"), "operation is not set."
         return OEFMessage.OEFErrorOperation(self.get("operation"))
@@ -146,6 +146,7 @@ class OEFMessage(Message):
         """Check that the data is consistent."""
         try:
             assert self.type is not None, "type must not be None."
+            assert isinstance(self.id, int), "id must be int."
 
             if self.type == OEFMessage.Type.REGISTER_SERVICE:
                 assert isinstance(self.service_description, Description), \

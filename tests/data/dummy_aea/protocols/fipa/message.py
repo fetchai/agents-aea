@@ -89,7 +89,7 @@ class FIPAMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def performative(self) -> Performative:
+    def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         return FIPAMessage.Performative(self.get("performative"))
 
