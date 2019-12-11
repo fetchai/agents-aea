@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
+from typing import cast
+
 import base64
 import copy
 import json
@@ -43,7 +45,8 @@ class OEFSerializer(Serializer):
         :param msg: the message object
         :return: the bytes
         """
-        oef_type = OEFMessage.Type(msg.get("type"))
+        msg = cast(OEFMessage, msg)
+        oef_type = OEFMessage.Type(msg.type)
         new_body = copy.copy(msg.body)
         new_body["type"] = oef_type.value
 
