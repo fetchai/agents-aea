@@ -27,10 +27,16 @@ import yaml
 
 from typing import List, Dict
 
-from aea.cli.registry.settings import REGISTRY_API_URL, CLI_CONFIG_PATH
+from aea.cli.registry.settings import (
+    REGISTRY_API_URL,
+    CLI_CONFIG_PATH,
+    AUTH_TOKEN_KEY
+)
 
 
-def request_api(method: str, path: str, params=None, data=None) -> Dict:
+def request_api(
+    method: str, path: str, params=None, data=None, auth=False, filepath=None
+) -> Dict:
     """
     Request Registry API.
 
@@ -38,25 +44,54 @@ def request_api(method: str, path: str, params=None, data=None) -> Dict:
     :param path: str URL path.
     :param params: dict GET params.
     :param data: dict POST data.
+    :param auth: bool is auth requied (default False).
+    :param filepath: str path to file to upload (default None).
 
     :return: dict response from Registry API
     """
+    headers = {}
+    if auth:
+        token = read_cli_config()[AUTH_TOKEN_KEY]
+        headers.update({
+            'Authorization': 'Token {}'.format(token)
+        })
+
+    files = None
+    if filepath:
+        files = {'file': open(filepath, 'rb')}
+
     resp = requests.request(
         method=method,
         url='{}{}'.format(REGISTRY_API_URL, path),
         params=params,
-        json=data
+        files=files,
+        data=data,
+        headers=headers,
     )
+    resp_json = resp.json()
+
     if resp.status_code == 200:
-        return resp.json()
+        pass
+    elif resp.status_code == 201:
+        click.echo('Successfully created!')
     elif resp.status_code == 403:
-        raise click.ClickException('You are not authenticated.')
+        raise click.ClickException(
+            'You are not authenticated. '
+            'Please sign in with "aea login" command.'
+        )
     elif resp.status_code == 404:
         raise click.ClickException('Not found in Registry.')
+    elif resp.status_code == 409:
+        raise click.ClickException(
+            'Conflict in Registry. {}'.format(resp_json['detail'])
+        )
+    elif resp.status_code == 400:
+        raise click.ClickException(resp.json())
     else:
         raise click.ClickException(
             'Wrong server response. Status code: {}'.format(resp.status_code)
         )
+    return resp_json
 
 
 def split_public_id(public_id: str) -> List[str]:
@@ -193,18 +228,52 @@ def write_cli_config(dict_conf: Dict) -> None:
         yaml.dump(dict_conf, f, default_flow_style=False)
 
 
+def load_yaml(filepath: str) -> Dict:
+    """
+    Read content from yaml file.
+
+    :param filepath: str path to yaml file.
+
+    :return: dict YAML content
+    """
+    with open(filepath, 'r') as f:
+        try:
+            return yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise click.ClickException(
+                'Loading yaml config from {} failed: {}'.format(
+                    filepath, e
+                )
+            )
+
+
 def read_cli_config() -> Dict:
     """
     Read CLI config from yaml file.
 
     :return: dict CLI config.
     """
-    with open(CLI_CONFIG_PATH, 'r') as f:
+    return load_yaml(CLI_CONFIG_PATH)
+
+
+def _rm_tarfiles():
+    cwd = os.getcwd()
+    for filename in os.listdir(cwd):
+        filepath = os.path.join(cwd, filename)
+        if filepath.endswith('.tar.gz'):
+            os.remove(filepath)
+
+
+def clean_tarfiles(func):
+    """Decorate func to clean tarfiles after executing."""
+    def wrapper(*args, **kwargs):
         try:
-            return yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            raise click.ClickException(
-                'Loading CLI config from {} failed: {}'.format(
-                    CLI_CONFIG_PATH, e
-                )
-            )
+            result = func(*args, **kwargs)
+        except Exception as e:
+            _rm_tarfiles()
+            raise e
+        else:
+            _rm_tarfiles()
+            return result
+
+    return wrapper
