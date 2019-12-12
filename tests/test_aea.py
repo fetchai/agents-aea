@@ -60,6 +60,7 @@ def test_initialise_AEA():
     my_AEA.resources = Resources(str(Path(CUR_PATH, "aea")))
     assert my_AEA.resources is not None,\
         "Resources must not be None after set"
+    my_AEA.stop()
 
 
 def test_act():
@@ -102,6 +103,7 @@ def test_react():
         connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg.counterparty = public_key
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
@@ -123,6 +125,7 @@ def test_react():
             agent.outbox.put(envelope)
             time.sleep(0.5)
             handler = agent.resources.handler_registry.fetch_by_skill('default', "dummy")
+            assert handler is not None, "Handler is not set."
             assert msg in handler.handled_messages, "The message is not inside the handled_messages."
         except Exception:
             raise
@@ -144,6 +147,7 @@ async def test_handle():
         connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        msg.counterparty = agent_name
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
@@ -161,13 +165,13 @@ async def test_handle():
         t = Thread(target=agent.start)
         try:
             t.start()
-            time.sleep(1.0)
+            time.sleep(2.0)
             dummy_skill = agent.resources.get_skill("dummy")
             dummy_handler = dummy_skill.handlers[0]
 
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
-            time.sleep(1.0)
+            time.sleep(2.0)
             assert len(dummy_handler.handled_messages) == 1
 
             #   DECODING ERROR
@@ -179,7 +183,7 @@ async def test_handle():
                 message=msg)
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
-            time.sleep(1.0)
+            time.sleep(2.0)
             assert len(dummy_handler.handled_messages) == 2
 
             #   UNSUPPORTED SKILL
@@ -195,7 +199,7 @@ async def test_handle():
                 message=msg)
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
-            time.sleep(1.0)
+            time.sleep(2.0)
             assert len(dummy_handler.handled_messages) == 3
 
         finally:
@@ -222,6 +226,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, cls.resources)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        cls.expected_message.counterparty = cls.agent_name
         envelope = Envelope(to=cls.agent_name, sender=cls.agent_name, protocol_id="default", message=DefaultSerializer().encode(cls.expected_message))
 
         cls.t = Thread(target=cls.aea.start)
@@ -286,6 +291,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.resources.add_skill(cls.error_skill)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
+        cls.expected_message.counterparty = cls.agent_name
 
         cls.t = Thread(target=cls.aea.start)
         cls.t.start()

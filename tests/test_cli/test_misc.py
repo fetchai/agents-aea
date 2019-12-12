@@ -62,6 +62,8 @@ Commands:
   gui           Run the CLI GUI.
   install       Install the dependencies.
   list          List the installed resources.
+  login         Login to Registry account
+  push          Push item to Registry.
   remove        Remove a resource from the agent.
   run           Run the agent.
   scaffold      Scaffold a resource for the agent.

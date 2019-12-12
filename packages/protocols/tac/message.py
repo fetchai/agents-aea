@@ -173,7 +173,12 @@ class TACMessage(Message):
                 assert self.is_set("error_code")
                 error_code = self.get("error_code")
                 assert error_code in set(self.ErrorCode)
-                assert len(self.body) == 2
+                if self.is_set("info"):
+                    info = self.get("info")
+                    assert type(info) == dict
+                    assert len(self.body) == 3
+                else:
+                    assert len(self.body) == 2
             else:
                 raise ValueError("Type not recognized.")
         except (AssertionError, ValueError):  # pragma: no cover

@@ -94,7 +94,7 @@ This diagram shows the communication between the various entities as data is suc
         
         Weather_AEA->>Search: register_service
         Client_AEA->>Search: search
-        Search->>Client_AEA: list_of_agents
+        Search-->>Client_AEA: list_of_agents
         Client_AEA->>Weather_AEA: call_for_proposal
         Weather_AEA->>Client_AEA: propose
         Client_AEA->>Weather_AEA: accept

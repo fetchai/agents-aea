@@ -1,0 +1,40 @@
+name: 'ml_train'
+authors: Fetch.AI Limited
+version: 0.1.0
+license: Apache 2.0
+description: "The ml train and predict skill implements a simple skill which buys training data, trains a model and sells predictions."
+url: ""
+behaviours:
+  - behaviour:
+      class_name: MySearchBehaviour
+      args:
+        search_interval: 30
+handlers:
+  - handler:
+      class_name: OEFHandler
+      args: {}
+  - handler:
+      class_name: TrainHandler
+      args: {}
+  - handler:
+      class_name: MyTransactionHandler
+      args: {}
+tasks: []
+shared_classes:
+  - shared_class:
+      class_name: Strategy
+      args:
+        dataset_id: 'fmnist'
+        max_unit_price: 70
+        max_buyer_tx_fee: 20
+        currency_pbk: 'FET'
+        ledger_id: 'fetchai'
+        is_ledger_tx: False
+  - shared_class:
+      class_name: Model
+      args:
+        model_config_path: "./skills/ml_train/model.json"
+protocols: ['oef', 'ml_trade']
+dependencies:
+  - tensorflow
+  - numpy

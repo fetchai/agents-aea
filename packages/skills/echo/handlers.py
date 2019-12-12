@@ -42,16 +42,15 @@ class EchoHandler(Handler):
         """Set up the handler."""
         logger.info("Echo Handler: setup method called.")
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle the message.
 
         :param message: the message.
-        :param sender: the sender.
         :return: None
         """
-        logger.info("Echo Handler: message={}, sender={}".format(message, sender))
-        self.context.outbox.put_message(to=sender, sender=self.context.agent_name, protocol_id="default",
+        logger.info("Echo Handler: message={}, sender={}".format(message, message.counterparty))
+        self.context.outbox.put_message(to=message.counterparty, sender=self.context.agent_name, protocol_id="default",
                                         message=DefaultSerializer().encode(message))
 
     def teardown(self) -> None:

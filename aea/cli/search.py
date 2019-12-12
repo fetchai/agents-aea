@@ -76,7 +76,7 @@ def connections(ctx: Context, query):
             'GET', '/connections', params={'search': query}
         )
         if not len(resp):
-            click.echo('No connections found.')
+            click.echo('No connections found.')  # pragma: no cover
         else:
             click.echo('Connections found:\n')
             click.echo(format_items(resp))
@@ -103,7 +103,7 @@ def protocols(ctx: Context, query):
             'GET', '/protocols', params={'search': query}
         )
         if not len(resp):
-            click.echo('No protocols found.')
+            click.echo('No protocols found.')  # pragma: no cover
         else:
             click.echo('Protocols found:\n')
             click.echo(format_items(resp))
@@ -130,7 +130,7 @@ def skills(ctx: Context, query):
             'GET', '/skills', params={'search': query}
         )
         if not len(resp):
-            click.echo('No skills found.')
+            click.echo('No skills found.')  # pragma: no cover
         else:
             click.echo('Skills found:\n')
             click.echo(format_skills(resp))

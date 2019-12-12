@@ -347,7 +347,7 @@ class Transaction:
         assert len(self.quantities_by_good_pbk.keys()) == len(set(self.quantities_by_good_pbk.keys()))
 
     @classmethod
-    def from_message(cls, message: TACMessage, sender: Address) -> 'Transaction':
+    def from_message(cls, message: TACMessage) -> 'Transaction':
         """
         Create a transaction from a proposal.
 
@@ -356,7 +356,7 @@ class Transaction:
         """
         assert message.get('type') == TACMessage.Type.TRANSACTION
         return Transaction(cast(str, message.get("transaction_id")),
-                           sender,
+                           message.counterparty,
                            cast(str, message.get("counterparty")),
                            cast(Dict[str, int], message.get("amount_by_currency")),
                            cast(int, message.get("sender_tx_fee")),
@@ -790,9 +790,11 @@ class Game(SharedClass):
     @property
     def holdings_summary(self) -> str:
         """Get holdings summary (a string representing the holdings for every agent)."""
-        result = ""
+        result = "Current good allocation: \n"
         for agent_pbk, agent_state in self.current_agent_states.items():
-            result = result + self.configuration.agent_pbk_to_name[agent_pbk] + " " + str(agent_state.quantities_by_good_pbk) + "\n"
+            result = result + self.configuration.agent_pbk_to_name[agent_pbk] + ":" + "\n"
+            for good_pbk, quantity in agent_state.quantities_by_good_pbk.items():
+                result += "    " + good_pbk + ": " + str(quantity) + "\n"
         return result
 
     @property

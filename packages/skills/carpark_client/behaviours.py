@@ -24,7 +24,7 @@ from typing import cast, TYPE_CHECKING
 
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from aea.skills.base import Behaviour
+from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.carpark_client.strategy import Strategy
@@ -34,7 +34,7 @@ else:
 logger = logging.getLogger("aea.carpark_client_skill")
 
 
-class MySearchBehaviour(Behaviour):
+class MySearchBehaviour(TickerBehaviour):
     """This class scaffolds a behaviour."""
 
     def __init__(self, **kwargs):
@@ -58,7 +58,7 @@ class MySearchBehaviour(Behaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_searching and strategy.is_time_to_search():
+        if strategy.is_searching:
             strategy.on_submit_search()
             self._search_id += 1
             query = strategy.get_service_query()

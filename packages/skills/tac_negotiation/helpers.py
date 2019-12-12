@@ -156,7 +156,7 @@ def generate_transaction_message(proposal_description: Description, dialogue_lab
     goods_component = copy.copy(proposal_description.values)
     [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency']]
     transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                         skill_id="tac_negotiation_skill",
+                                         skill_ids=['tac_negotiation', 'tac_participation'],
                                          transaction_id=transaction_id,
                                          sender=agent_public_key,
                                          counterparty=dialogue_label.dialogue_opponent_pbk,
@@ -165,5 +165,7 @@ def generate_transaction_message(proposal_description: Description, dialogue_lab
                                          is_sender_buyer=not is_seller,
                                          sender_tx_fee=sender_tx_fee,
                                          counterparty_tx_fee=counterparty_tx_fee,
+                                         ledger_id='off_chain',
+                                         info={'dialogue_label': dialogue_label.json},
                                          quantities_by_good_pbk=goods_component)
     return transaction_msg

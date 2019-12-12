@@ -73,7 +73,6 @@ class TestDefault:
         self.multiplexer.put(Envelope(to=self.crypto1.public_key, sender=self.crypto1.public_key,
                                       protocol_id=DefaultMessage.protocol_id,
                                       message=DefaultSerializer().encode(msg)))
-
         recv_msg = self.multiplexer.get(block=True, timeout=3.0)
         assert recv_msg is not None
 
@@ -318,32 +317,39 @@ class TestFIPA:
 
     def test_cfp(self):
         """Test that a CFP can be sent correctly."""
-        cfp_bytes = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.CFP,
-                                query=Query([Constraint('something', ConstraintType('>', 1))]))
+        cfp_message = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.CFP,
+                                  query=Query([Constraint('something', ConstraintType('>', 1))]))
+        cfp_message.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
-                                       message=FIPASerializer().encode(cfp_bytes)))
+                                       message=FIPASerializer().encode(cfp_message)))
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
-        expected_cfp_bytes = FIPASerializer().decode(envelope.message)
-        assert expected_cfp_bytes == cfp_bytes
+        expected_cfp_message = FIPASerializer().decode(envelope.message)
+        expected_cfp_message.counterparty = self.crypto2.public_key
+
+        assert expected_cfp_message == cfp_message
 
         cfp_none = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.CFP,
                                query=None)
+        cfp_none.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_none)))
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_none = FIPASerializer().decode(envelope.message)
+        expected_cfp_none.counterparty = self.crypto2.public_key
         assert expected_cfp_none == cfp_none
 
     def test_propose(self):
         """Test that a Propose can be sent correctly."""
         propose_empty = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0,
                                     performative=FIPAMessage.Performative.PROPOSE, proposal=[])
+        propose_empty.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(propose_empty)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_empty = FIPASerializer().decode(envelope.message)
+        expected_propose_empty.counterparty = self.crypto2.public_key
         assert expected_propose_empty == propose_empty
 
         propose_descriptions = FIPAMessage(message_id=0,
@@ -351,20 +357,25 @@ class TestFIPA:
                                            target=0,
                                            performative=FIPAMessage.Performative.PROPOSE,
                                            proposal=[Description({"foo": "bar"}, DataModel("foobar", [Attribute("foo", str, True)]))])
+
+        propose_descriptions.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(propose_descriptions)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_descriptions = FIPASerializer().decode(envelope.message)
+        expected_propose_descriptions.counterparty = self.crypto2.public_key
         assert expected_propose_descriptions == propose_descriptions
 
     def test_accept(self):
         """Test that an Accept can be sent correctly."""
         accept = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.ACCEPT)
+        accept.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(accept)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_accept = FIPASerializer().decode(envelope.message)
+        expected_accept.counterparty = self.crypto2.public_key
         assert expected_accept == accept
 
     def test_match_accept(self):
@@ -372,51 +383,59 @@ class TestFIPA:
         # NOTE since the OEF SDK doesn't support the match accept, we have to use a fixed message id!
         match_accept = FIPAMessage(message_id=4, dialogue_reference=(str(0), ''), target=3,
                                    performative=FIPAMessage.Performative.MATCH_ACCEPT)
+        match_accept.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(match_accept)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_match_accept = FIPASerializer().decode(envelope.message)
+        expected_match_accept.counterparty = self.crypto2.public_key
         assert expected_match_accept == match_accept
 
     def test_decline(self):
         """Test that a Decline can be sent correctly."""
         decline = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.DECLINE)
+        decline.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(decline)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_decline = FIPASerializer().decode(envelope.message)
+        expected_decline.counterparty = self.crypto2.public_key
         assert expected_decline == decline
 
-    def test_match_accept_w_address(self):
-        """Test that a match accept with address can be sent correctly."""
-        match_accept_w_address = FIPAMessage(message_id=0,
-                                             dialogue_reference=(str(0), ''),
-                                             target=0,
-                                             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
-                                             address='my_address')
+    def test_match_accept_w_inform(self):
+        """Test that a match accept with inform can be sent correctly."""
+        match_accept_w_inform = FIPAMessage(message_id=0,
+                                            dialogue_reference=(str(0), ''),
+                                            target=0,
+                                            performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                                            info={"address": "my_address"})
+        match_accept_w_inform.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
-                                       message=FIPASerializer().encode(match_accept_w_address)))
+                                       message=FIPASerializer().encode(match_accept_w_inform)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        returned_match_accept_w_address = FIPASerializer().decode(envelope.message)
-        assert returned_match_accept_w_address == match_accept_w_address
+        returned_match_accept_w_inform = FIPASerializer().decode(envelope.message)
+        returned_match_accept_w_inform.counterparty = self.crypto2.public_key
+        assert returned_match_accept_w_inform == match_accept_w_inform
 
-    def test_accept_w_address(self):
+    def test_accept_w_inform(self):
         """Test that an accept with address can be sent correctly."""
-        accept_w_address = FIPAMessage(message_id=0,
-                                       dialogue_reference=(str(0), ''),
-                                       target=0,
-                                       performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
-                                       address='my_address')
+        accept_w_inform = FIPAMessage(message_id=0,
+                                      dialogue_reference=(str(0), ''),
+                                      target=0,
+                                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                                      info={"address": "my_address"})
+        accept_w_inform.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
-                                       message=FIPASerializer().encode(accept_w_address)))
+                                       message=FIPASerializer().encode(accept_w_inform)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
-        returned_accept_w_address = FIPASerializer().decode(envelope.message)
-        assert returned_accept_w_address == accept_w_address
+        returned_accept_w_inform = FIPASerializer().decode(envelope.message)
+        returned_accept_w_inform.counterparty = self.crypto2.public_key
+        assert returned_accept_w_inform == accept_w_inform
 
     def test_inform(self):
         """Test that an inform can be sent correctly."""
@@ -425,13 +444,15 @@ class TestFIPA:
                              dialogue_reference=(str(0), ''),
                              target=0,
                              performative=FIPAMessage.Performative.INFORM,
-                             json_data=payload)
+                             info=payload)
+        inform.counterparty = self.crypto2.public_key
         self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
                                        sender=self.crypto1.public_key,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(inform)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_inform = FIPASerializer().decode(envelope.message)
+        returned_inform.counterparty = self.crypto2.public_key
         assert returned_inform == inform
 
     def test_serialisation_fipa(self):
@@ -512,12 +533,10 @@ class TestFIPA:
 
     def test_send(self):
         """Test the send method."""
-        envelope = Envelope(to="receiver", sender="me", protocol_id="tac", message=b'Hello')
+        envelope = Envelope(to=DEFAULT_OEF, sender="me", protocol_id="tac", message=b'Hello')
         self.multiplexer1.put(envelope)
-        self.multiplexer1.get(block=True, timeout=5.0)
-
-        envelope = Envelope(to="receiver", sender="me", protocol_id="unknown", message=b'Hello')
-        self.multiplexer1.put(envelope)
+        received_envelope = self.multiplexer1.get(block=True, timeout=5.0)
+        assert received_envelope is not None
 
     @classmethod
     def teardown_class(cls):
@@ -696,7 +715,7 @@ async def test_send_oef_message(network_node):
 
     msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
     msg_bytes = OEFSerializer().encode(msg)
-    envelope = Envelope(to="recipient", sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     await oef_connection.send(envelope)
     await oef_connection.disconnect()
 

@@ -42,7 +42,8 @@ class AgentContext:
                  decision_maker_message_queue: Queue,
                  ownership_state: OwnershipState,
                  preferences: Preferences,
-                 goal_pursuit_readiness: GoalPursuitReadiness):
+                 goal_pursuit_readiness: GoalPursuitReadiness,
+                 task_queue: Queue):
         """
         Initialize an agent context.
 
@@ -55,6 +56,7 @@ class AgentContext:
         :param ownership_state: the ownership state of the agent
         :param preferences: the preferences of the agent
         :param goal_pursuit_readiness: ready to pursuit its goals
+        :param task_queue: the queue for the task to be processed enqueued by the agent.
         """
         self._agent_name = agent_name
         self._public_keys = public_keys
@@ -66,6 +68,7 @@ class AgentContext:
         self._ownership_state = ownership_state
         self._preferences = preferences
         self._goal_pursuit_readiness = goal_pursuit_readiness
+        self._task_queue = task_queue
 
     @property
     def agent_name(self) -> str:
@@ -126,3 +129,8 @@ class AgentContext:
     def ledger_apis(self) -> LedgerApis:
         """Get the ledger APIs."""
         return self._ledger_apis
+
+    @property
+    def task_queue(self) -> Queue:
+        """Get the task queue."""
+        return self._task_queue

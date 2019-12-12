@@ -19,15 +19,14 @@
 
 """This package contains a scaffold of a behaviour."""
 
-import datetime
 import logging
 import sys
 from typing import cast, Optional, TYPE_CHECKING
 
-from aea.skills.base import Behaviour
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import Description
 from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_station.strategy import Strategy
@@ -37,16 +36,16 @@ else:
 logger = logging.getLogger("aea.weather_station_skill")
 
 SERVICE_ID = ''
+DEFAULT_SERVICES_INTERVAL = 30.0
 
 
-class ServiceRegistrationBehaviour(Behaviour):
+class ServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
-        self._services_interval = kwargs.pop('services_interval', 30)  # type: int
-        super().__init__(**kwargs)
-        self._last_update_time = datetime.datetime.now()  # type: datetime.datetime
+        services_interval = kwargs.pop('services_interval', DEFAULT_SERVICES_INTERVAL)  # type: int
+        super().__init__(tick_interval=services_interval, **kwargs)
         self._registered_service_description = None  # type: Optional[Description]
 
     def setup(self) -> None:
@@ -63,9 +62,8 @@ class ServiceRegistrationBehaviour(Behaviour):
 
         :return: None
         """
-        if self._is_time_to_update_services():
-            self._unregister_service()
-            self._register_service()
+        self._unregister_service()
+        self._register_service()
 
     def teardown(self) -> None:
         """
@@ -113,16 +111,3 @@ class ServiceRegistrationBehaviour(Behaviour):
                                         message=OEFSerializer().encode(msg))
         logger.info("[{}]: unregistering weather station services from OEF.".format(self.context.agent_name))
         self._registered_service_description = None
-
-    def _is_time_to_update_services(self) -> bool:
-        """
-        Check if the agent should update the service directory.
-
-        :return: bool indicating the action
-        """
-        now = datetime.datetime.now()
-        diff = now - self._last_update_time
-        result = diff.total_seconds() > self._services_interval
-        if result:
-            self._last_update_time = now
-        return result

@@ -22,7 +22,7 @@
 import logging
 import pprint
 import sys
-from typing import Dict, List, Optional, Tuple, cast, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, cast, TYPE_CHECKING, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.dialogue.base import DialogueLabel
@@ -66,39 +66,39 @@ class FIPANegotiationHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Dispatch message to relevant handler and respond.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         fipa_msg = cast(FIPAMessage, message)
 
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
-            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key))
+        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_public_key):
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_public_key))
             dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg, sender):
+        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
             query = cast(Query, fipa_msg.get("query"))
             assert query.model is not None, "Query has no data model."
             is_seller = query.model.name == DEMAND_DATAMODEL_NAME
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(sender, cast(Tuple[str, str], fipa_msg.get('dialogue_reference')), is_seller))
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(message.counterparty, cast(Tuple[str, str], fipa_msg.get('dialogue_reference')), is_seller))
             dialogue.incoming_extend(fipa_msg)
         else:
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
             default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES,
                                          content=b'This message belongs to an unidentified dialogue.')
-            self.context.outbox.put_message(to=sender,
+            self.context.outbox.put_message(to=fipa_msg.counterparty,
                                             sender=self.context.agent_public_key,
                                             protocol_id=DefaultMessage.protocol_id,
                                             message=DefaultSerializer().encode(default_msg))
             return
 
         fipa_msg_performative = fipa_msg.get("performative")
-        logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name, fipa_msg_performative))
+        logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name,
+                                                                            fipa_msg_performative))
         if fipa_msg_performative == FIPAMessage.Performative.CFP:
             self._on_cfp(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.PROPOSE:
@@ -107,7 +107,7 @@ class FIPANegotiationHandler(Handler):
             self._on_decline(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.ACCEPT:
             self._on_accept(fipa_msg, dialogue)
-        elif fipa_msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS:
+        elif fipa_msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._on_match_accept(fipa_msg, dialogue)
 
     def teardown(self) -> None:
@@ -133,11 +133,11 @@ class FIPANegotiationHandler(Handler):
         proposal_description = strategy.get_proposal_for_query(query, dialogue.is_seller)
 
         if proposal_description is None:
-            logger.debug("[{}]: sending to {} a Decline{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk,
+            logger.debug("[{}]: sending to {} a Decline{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                   pprint.pformat({
                                                                       "msg_id": new_msg_id,
                                                                       "dialogue_id": cfp.get("dialogue_id"),
-                                                                      "origin": dialogue.dialogue_label.dialogue_opponent_pbk,
+                                                                      "origin": dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                       "target": cfp.get("target")
                                                                   })))
             fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.DECLINE,
@@ -150,11 +150,11 @@ class FIPANegotiationHandler(Handler):
             transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
             transactions = cast(Transactions, self.context.transactions)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
-            logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk,
+            logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                  pprint.pformat({
                                                                      "msg_id": new_msg_id,
                                                                      "dialogue_id": cfp.get("dialogue_id"),
-                                                                     "origin": dialogue.dialogue_label.dialogue_opponent_pbk,
+                                                                     "origin": dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                      "target": cfp.get("message_id"),
                                                                      "propose": proposal_description.values
                                                                  })))
@@ -252,6 +252,8 @@ class FIPANegotiationHandler(Handler):
         if strategy.is_profitable_transaction(transaction_msg, is_seller=dialogue.is_seller):
             logger.info("[{}]: locking the current state (as {}).".format(self.context.agent_name, dialogue.role))
             transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
+            transaction_msg.set('performative', TransactionMessage.Performative.SIGN)
+            transaction_msg.set('skill_ids', ['tac_negotiation'])
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
             logger.debug("[{}]: decline the Accept (as {}).".format(self.context.agent_name, dialogue.role))
@@ -280,7 +282,9 @@ class FIPANegotiationHandler(Handler):
         transactions = cast(Transactions, self.context.transactions)
         transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.get("target")))
         # update skill id to route back to tac participation skill
-        transaction_msg.set('skill_id', 'tac_participation_skill')
+        logger.info("[{}]: proposing tx to decision maker.".format(self.context.agent_name))
+        transaction_msg.set('performative', TransactionMessage.Performative.SIGN)
+        transaction_msg.set('skill_ids', ['tac_participation'])
         self.context.decision_maker_message_queue.put(transaction_msg)
 
 
@@ -297,34 +301,35 @@ class TransactionHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Dispatch message to relevant handler and respond.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         tx_message = cast(TransactionMessage, message)
         if TransactionMessage.Performative(tx_message.get("performative")) == TransactionMessage.Performative.ACCEPT:
-            logger.info("[{}]: transaction confirmed by decision maker, sending match accept.".format(self.context.agent_name))
-            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], tx_message.get("dialogue_label")))
+            logger.info("[{}]: transaction confirmed by decision maker".format(self.context.agent_name))
+            info = cast(Dict[str, Any], tx_message.get("info"))
+            dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
             tac_message = dialogue.last_incoming_message
             if tac_message is not None and tac_message.get("performative") == FIPAMessage.Performative.ACCEPT:
-                fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
+                logger.info("[{}]: sending match accept to {}.".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:]))
+                fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
                                        message_id=cast(int, tac_message.get("message_id")) + 1,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
-                                       target=tac_message.get("message_id"),
-                                       address=tx_message.get("transaction_digest"))
+                                       target=cast(int, tac_message.get("message_id")),
+                                       info={"address": tx_message.get("address"), "signature": tx_message.get("signature")})
                 dialogue.outgoing_extend(fipa_msg)
                 self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_pbk,
                                                 sender=self.context.agent_public_key,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(fipa_msg))
             else:
-                logger.info("[{}]: last message should be of performative accept.".format(self.context.agent_name))
+                logger.warning("[{}]: last message should be of performative accept.".format(self.context.agent_name))
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 
@@ -350,12 +355,11 @@ class OEFSearchHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         # convenience representations

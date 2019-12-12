@@ -20,24 +20,18 @@ message FIPAMessage{
 
     message MatchAccept{}
 
-    message Accept_W_Address{
-        string address = 1;
-    }
-
-    message MatchAccept_W_Address{
-        string address = 1;
-    }
     message Decline{}
+
     message Inform{
         bytes bytes = 1;
     }
 
-    message AcceptWAddress{
-        string address = 1;
+    message AcceptWInform{
+        bytes bytes = 1;
     }
 
-    message MatchAcceptWAddress{
-        string address = 1;
+    message MatchAcceptWInform{
+        bytes bytes = 1;
     }
 
     int32 message_id = 1;
@@ -51,7 +45,7 @@ message FIPAMessage{
         MatchAccept match_accept = 8;
         Decline decline = 9;
         Inform inform = 10;
-        AcceptWAddress accept_w_address = 11;
-        MatchAcceptWAddress match_accept_w_address = 12;
+        AcceptWInform accept_w_inform = 11;
+        MatchAcceptWInform match_accept_w_inform = 12;
     }
 }

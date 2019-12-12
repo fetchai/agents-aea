@@ -17,6 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 """Settings for operating Registry with CLI."""
+import os
 
 
 REGISTRY_API_URL = 'http://localhost:8000'
+CLI_CONFIG_PATH = os.path.join(
+    os.path.expanduser('~'),
+    '.aea',
+    'cli_config.yaml'
+)
+AUTH_TOKEN_KEY = 'auth_token'

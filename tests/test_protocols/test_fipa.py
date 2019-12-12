@@ -32,6 +32,7 @@ from aea.protocols.oef.models import Description, Query, Constraint, ConstraintT
 def test_fipa_cfp_serialization():
     """Test that the serialization for the 'fipa' protocol works."""
     query = Query([Constraint('something', ConstraintType('>', 1))])
+
     msg = FIPAMessage(message_id=0,
                       dialogue_reference=(str(0), ''),
                       target=0,
@@ -65,6 +66,7 @@ def test_fipa_cfp_serialization_bytes():
                       target=0,
                       performative=FIPAMessage.Performative.CFP,
                       query=query)
+    msg.counterparty = "sender"
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
                         sender="sender",
@@ -77,10 +79,12 @@ def test_fipa_cfp_serialization_bytes():
     assert expected_envelope == actual_envelope
 
     actual_msg = FIPASerializer().decode(actual_envelope.message)
+    actual_msg.counterparty = "sender"
     expected_msg = msg
     assert expected_msg == actual_msg
 
     deserialised_msg = FIPASerializer().decode(envelope.message)
+    deserialised_msg.counterparty = "sender"
     assert msg.get("performative") == deserialised_msg.get("performative")
 
 
@@ -121,6 +125,7 @@ def test_fipa_accept_serialization():
                       dialogue_reference=(str(0), ''),
                       target=0,
                       performative=FIPAMessage.Performative.ACCEPT)
+    msg.counterparty = "sender"
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
                         sender="sender",
@@ -133,6 +138,7 @@ def test_fipa_accept_serialization():
     assert expected_envelope == actual_envelope
 
     actual_msg = FIPASerializer().decode(actual_envelope.message)
+    actual_msg.counterparty = "sender"
     expected_msg = msg
     assert expected_msg == actual_msg
 
@@ -143,12 +149,12 @@ def test_performative_match_accept():
                       dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.MATCH_ACCEPT)
-
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
                         sender="sender",
                         protocol_id=FIPAMessage.protocol_id,
                         message=msg_bytes)
+    msg.counterparty = "sender"
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -173,13 +179,13 @@ def test_performative_not_recognized():
             "We expect that the check_consistency will return False"
 
 
-def test_performative_accept_with_address():
+def test_performative_accept_with_inform():
     """Test the serialization - deserialization of the accept_with_address performative."""
     msg = FIPAMessage(message_id=0,
                       dialogue_reference=(str(0), ''),
                       target=1,
-                      performative=FIPAMessage.Performative.ACCEPT_W_ADDRESS,
-                      address="dummy_address")
+                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                      info={"address": "dummy_address"})
 
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
@@ -195,13 +201,13 @@ def test_performative_accept_with_address():
     assert msg.get("performative") == deserialised_msg.get("performative")
 
 
-def test_performative_match_accept_with_address():
+def test_performative_match_accept_with_inform():
     """Test the serialization - deserialization of the match_accept_with_address performative."""
     msg = FIPAMessage(message_id=0,
                       dialogue_reference=(str(0), ''),
                       target=1,
-                      performative=FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS,
-                      address="dummy_address")
+                      performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                      info={"address": "dummy_address", "signature": "my_signature"})
 
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
@@ -223,7 +229,7 @@ def test_performative_inform():
                       dialogue_reference=(str(0), ''),
                       target=1,
                       performative=FIPAMessage.Performative.INFORM,
-                      json_data={"foo": "bar"})
+                      info={"foo": "bar"})
 
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(to="receiver",
@@ -251,10 +257,10 @@ def test_performative_string_value():
         "The str value must be accept"
     assert str(FIPAMessage.Performative.MATCH_ACCEPT) == "match_accept",\
         "The str value must be match_accept"
-    assert str(FIPAMessage.Performative.ACCEPT_W_ADDRESS) == "accept_w_address", \
-        "The str value must be accept_w_address"
-    assert str(FIPAMessage.Performative.MATCH_ACCEPT_W_ADDRESS) == "match_accept_w_address", \
-        "The str value must be match_accept_w_address"
+    assert str(FIPAMessage.Performative.ACCEPT_W_INFORM) == "accept_w_inform", \
+        "The str value must be accept_w_inform"
+    assert str(FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM) == "match_accept_w_inform", \
+        "The str value must be match_accept_w_inform"
     assert str(FIPAMessage.Performative.INFORM) == "inform", \
         "The str value must be inform"
 
@@ -287,7 +293,13 @@ def test_fipa_decoding_unknown_performative():
 def test_dialogues():
     """Test the dialogues model."""
     dialogues = FIPADialogues()
-    result = dialogues.create_self_initiated(dialogue_opponent_pbk="opponent", dialogue_starter_pbk="starter", is_seller=True)
+    result = dialogues.create_self_initiated(dialogue_starter_pbk="starter", dialogue_opponent_pbk="opponent", is_seller=True)
     assert isinstance(result, FIPADialogue)
     result = dialogues.create_opponent_initiated(dialogue_opponent_pbk="opponent", dialogue_reference=(str(0), ''), is_seller=False)
     assert isinstance(result, FIPADialogue)
+    assert result.role == FIPADialogue.AgentRole.BUYER
+    assert dialogues.dialogue_stats is not None
+    dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.SUCCESSFUL, is_self_initiated=True)
+    dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.DECLINED_CFP, is_self_initiated=False)
+    assert dialogues.dialogue_stats.self_initiated == {FIPADialogue.EndState.SUCCESSFUL: 1, FIPADialogue.EndState.DECLINED_PROPOSE: 0, FIPADialogue.EndState.DECLINED_ACCEPT: 0, FIPADialogue.EndState.DECLINED_CFP: 0}
+    assert dialogues.dialogue_stats.other_initiated == {FIPADialogue.EndState.SUCCESSFUL: 0, FIPADialogue.EndState.DECLINED_PROPOSE: 0, FIPADialogue.EndState.DECLINED_ACCEPT: 0, FIPADialogue.EndState.DECLINED_CFP: 1}

@@ -20,6 +20,7 @@
 """This module contains the implementation of an Autonomous Economic Agent."""
 import logging
 from asyncio import AbstractEventLoop
+from concurrent.futures import Executor
 from typing import Optional, cast, List
 
 from aea.agent import Agent
@@ -31,6 +32,7 @@ from aea.decision_maker.base import DecisionMaker
 from aea.mail.base import Envelope
 from aea.registries.base import Filter, Resources
 from aea.skills.error.handlers import ErrorHandler
+from aea.skills.tasks import TaskManager
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +48,8 @@ class AEA(Agent):
                  loop: Optional[AbstractEventLoop] = None,
                  timeout: float = 0.0,
                  debug: bool = False,
-                 max_reactions: int = 20) -> None:
+                 max_reactions: int = 20,
+                 executor: Optional[Executor] = None) -> None:
         """
         Instantiate the agent.
 
@@ -59,12 +62,14 @@ class AEA(Agent):
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
         :param max_reactions: the processing rate of messages per iteration.
+        :param executor: executor for asynchronous execution of tasks.
 
         :return: None
         """
         super().__init__(name=name, wallet=wallet, connections=connections, loop=loop, timeout=timeout, debug=debug)
 
         self.max_reactions = max_reactions
+        self._task_manager = TaskManager(executor)
         self._decision_maker = DecisionMaker(self.name,
                                              self.max_reactions,
                                              self.outbox,
@@ -79,7 +84,8 @@ class AEA(Agent):
                                      self.decision_maker.message_in_queue,
                                      self.decision_maker.ownership_state,
                                      self.decision_maker.preferences,
-                                     self.decision_maker.goal_pursuit_readiness)
+                                     self.decision_maker.goal_pursuit_readiness,
+                                     self.task_manager.task_queue)
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
@@ -108,6 +114,11 @@ class AEA(Agent):
         """Get filter."""
         return self._filter
 
+    @property
+    def task_manager(self) -> TaskManager:
+        """Get the task manager."""
+        return self._task_manager
+
     def setup(self) -> None:
         """
         Set up the agent.
@@ -116,6 +127,7 @@ class AEA(Agent):
         """
         self.resources.load(self.context)
         self.resources.setup()
+        self.task_manager.start()
 
     def act(self) -> None:
         """
@@ -124,7 +136,7 @@ class AEA(Agent):
         :return: None
         """
         for behaviour in self.filter.get_active_behaviours():
-            behaviour.act()
+            behaviour.act_wrapper()
 
     def react(self) -> None:
         """
@@ -159,8 +171,10 @@ class AEA(Agent):
 
         try:
             msg = protocol.serializer.decode(envelope.message)
-        except Exception:
+            msg.counterparty = envelope.sender
+        except Exception as e:
             error_handler.send_decoding_error(envelope)
+            logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
         if not protocol.check(msg):                         # pragma: no cover
@@ -174,7 +188,7 @@ class AEA(Agent):
             return
 
         for handler in handlers:
-            handler.handle(msg, envelope.sender)
+            handler.handle(msg)
 
     def update(self) -> None:
         """
@@ -182,6 +196,7 @@ class AEA(Agent):
 
         :return None
         """
+        # TODO: task should be submitted by the behaviours and handlers
         for task in self.filter.get_active_tasks():
             task.execute()
         self.decision_maker.execute()
@@ -193,5 +208,6 @@ class AEA(Agent):
 
         :return: None
         """
+        self.task_manager.stop()
         if self._resources is not None:
             self._resources.teardown()

@@ -146,11 +146,14 @@ def format_items(items):
     for item in items:
         list_str += (
             '{line}\n'
+            'Public ID: {public_id}\n'
             'Name: {name}\n'
             'Description: {description}\n'
             'Version: {version}\n'
             '{line}\n'.format(
                 name=item['name'],
+                # TODO: switch to unsafe get public_id when every obj has it
+                public_id=item.get('public_id'),
                 description=item['description'],
                 version=item['version'],
                 line='-' * 30
@@ -164,12 +167,15 @@ def format_skills(items):
     for item in items:
         list_str += (
             '{line}\n'
+            'Public ID: {public_id}\n'
             'Name: {name}\n'
             'Description: {description}\n'
             'Protocols: {protocols}\n'
             'Version: {version}\n'
             '{line}\n'.format(
                 name=item['name'],
+                # TODO: switch to unsafe get public_id when every obj has it
+                public_id=item.get('public_id'),
                 description=item['description'],
                 version=item['version'],
                 protocols=''.join(
@@ -212,5 +218,5 @@ class ConnectionsOption(click.Option):
 
             connection_names = set(arg_strip(s) for s in value.split(",") if arg_strip(s) != "")
             return list(connection_names)
-        except Exception:
+        except Exception:  # pragma: no cover
             raise click.BadParameter(value)

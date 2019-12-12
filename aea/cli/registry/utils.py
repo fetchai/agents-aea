@@ -23,29 +23,75 @@ import click
 import os
 import requests
 import tarfile
+import yaml
 
 from typing import List, Dict
 
-from aea.cli.registry.settings import REGISTRY_API_URL
+from aea.cli.registry.settings import (
+    REGISTRY_API_URL,
+    CLI_CONFIG_PATH,
+    AUTH_TOKEN_KEY
+)
 
 
-def request_api(method: str, path: str, params=None) -> Dict:
-    """Request Registry API."""
+def request_api(
+    method: str, path: str, params=None, data=None, auth=False, filepath=None
+) -> Dict:
+    """
+    Request Registry API.
+
+    :param method: str request method ('GET, 'POST', 'PUT', etc.).
+    :param path: str URL path.
+    :param params: dict GET params.
+    :param data: dict POST data.
+    :param auth: bool is auth requied (default False).
+    :param filepath: str path to file to upload (default None).
+
+    :return: dict response from Registry API
+    """
+    headers = {}
+    if auth:
+        token = read_cli_config()[AUTH_TOKEN_KEY]
+        headers.update({
+            'Authorization': 'Token {}'.format(token)
+        })
+
+    files = None
+    if filepath:
+        files = {'file': open(filepath, 'rb')}
+
     resp = requests.request(
         method=method,
         url='{}{}'.format(REGISTRY_API_URL, path),
-        params=params
+        params=params,
+        files=files,
+        data=data,
+        headers=headers,
     )
+    resp_json = resp.json()
+
     if resp.status_code == 200:
-        return resp.json()
+        pass
+    elif resp.status_code == 201:
+        click.echo('Successfully created!')
     elif resp.status_code == 403:
-        raise click.ClickException('You are not authenticated.')
+        raise click.ClickException(
+            'You are not authenticated. '
+            'Please sign in with "aea login" command.'
+        )
     elif resp.status_code == 404:
         raise click.ClickException('Not found in Registry.')
+    elif resp.status_code == 409:
+        raise click.ClickException(
+            'Conflict in Registry. {}'.format(resp_json['detail'])
+        )
+    elif resp.status_code == 400:
+        raise click.ClickException(resp.json())
     else:
         raise click.ClickException(
             'Wrong server response. Status code: {}'.format(resp.status_code)
         )
+    return resp_json
 
 
 def split_public_id(public_id: str) -> List[str]:
@@ -140,3 +186,94 @@ def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
         public_id=public_id,
         obj_type=obj_type
     ))
+
+
+def registry_login(username: str, password: str) -> str:
+    """
+    Login into Registry account.
+
+    :param username: str username.
+    :param password: str password.
+
+    :return: str token
+    """
+    resp = request_api(
+        'POST', '/rest-auth/login/',
+        data={'username': username, 'password': password}
+    )
+    return resp['key']
+
+
+def _init_config_folder() -> None:
+    """
+    Create config folder if not exists.
+
+    :return: None
+    """
+    conf_dir = os.path.dirname(CLI_CONFIG_PATH)
+    if not os.path.exists(conf_dir):
+        os.makedirs(conf_dir)
+
+
+def write_cli_config(dict_conf: Dict) -> None:
+    """
+    Write CLI config into yaml file.
+
+    :param dict_conf: dict config to write.
+
+    :return: None
+    """
+    _init_config_folder()
+    with open(CLI_CONFIG_PATH, 'w') as f:
+        yaml.dump(dict_conf, f, default_flow_style=False)
+
+
+def load_yaml(filepath: str) -> Dict:
+    """
+    Read content from yaml file.
+
+    :param filepath: str path to yaml file.
+
+    :return: dict YAML content
+    """
+    with open(filepath, 'r') as f:
+        try:
+            return yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            raise click.ClickException(
+                'Loading yaml config from {} failed: {}'.format(
+                    filepath, e
+                )
+            )
+
+
+def read_cli_config() -> Dict:
+    """
+    Read CLI config from yaml file.
+
+    :return: dict CLI config.
+    """
+    return load_yaml(CLI_CONFIG_PATH)
+
+
+def _rm_tarfiles():
+    cwd = os.getcwd()
+    for filename in os.listdir(cwd):
+        filepath = os.path.join(cwd, filename)
+        if filepath.endswith('.tar.gz'):
+            os.remove(filepath)
+
+
+def clean_tarfiles(func):
+    """Decorate func to clean tarfiles after executing."""
+    def wrapper(*args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+        except Exception as e:
+            _rm_tarfiles()
+            raise e
+        else:
+            _rm_tarfiles()
+            return result
+
+    return wrapper

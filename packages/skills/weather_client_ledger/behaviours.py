@@ -26,7 +26,7 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from aea.skills.base import Behaviour
+from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_client_ledger.strategy import Strategy
@@ -35,13 +35,16 @@ else:
 
 logger = logging.getLogger("aea.weather_client_ledger_skill")
 
+DEFAULT_SEARCH_INTERVAL = 5.0
 
-class MySearchBehaviour(Behaviour):
-    """This class scaffolds a behaviour."""
+
+class MySearchBehaviour(TickerBehaviour):
+    """This class implements a search behaviour."""
 
     def __init__(self, **kwargs):
-        """Initialise the class."""
-        super().__init__(**kwargs)
+        """Initialize the search behaviour."""
+        search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
+        super().__init__(tick_interval=search_interval, **kwargs)
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
@@ -68,7 +71,7 @@ class MySearchBehaviour(Behaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_time_to_search():
+        if strategy.is_searching:
             query = strategy.get_service_query()
             search_id = strategy.get_next_search_id()
             oef_msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,

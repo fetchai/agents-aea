@@ -304,8 +304,8 @@ class TestFilter:
         """Test that the internal messages are handled."""
         self.aea.setup()
         t = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                               skill_id="dummy",
                                transaction_id="transaction0",
+                               skill_ids=["internal", "dummy"],
                                sender="pk1",
                                counterparty="pk2",
                                is_sender_buyer=True,
@@ -313,12 +313,14 @@ class TestFilter:
                                amount=2,
                                sender_tx_fee=0,
                                counterparty_tx_fee=0,
+                               ledger_id="fetchai",
                                quantities_by_good_pbk={"Unknown": 10})
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()
 
         internal_handler = self.aea.resources.handler_registry.fetch_by_skill("internal", "dummy")
         assert len(internal_handler.handled_internal_messages) == 1
+        self.aea.teardown()
 
     @classmethod
     def teardown_class(cls):

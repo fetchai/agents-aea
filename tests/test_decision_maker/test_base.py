@@ -72,7 +72,7 @@ class TestUtilityPreferencesBase:
         good_endowment = {"good_pbk": 2}
         self.ownership_state.init(amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -88,7 +88,7 @@ class TestUtilityPreferencesBase:
             "We should have the money for the transaction!"
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -109,7 +109,7 @@ class TestUtilityPreferencesBase:
         good_endowment = {"good_pbk": 2}
         self.ownership_state.init(amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -132,7 +132,7 @@ class TestUtilityPreferencesBase:
 
         self.ownership_state.init(amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -148,7 +148,7 @@ class TestUtilityPreferencesBase:
         assert self.ownership_state.amount_by_currency['FET'] < cur_holdings
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -216,7 +216,7 @@ class TestUtilityPreferencesBase:
         self.ownership_state.init(amount_by_currency=currency_holdings, quantities_by_good_pbk=good_holdings)
         self.preferences.init(utility_params_by_good_pbk=utility_params, exchange_params_by_currency=exchange_params, tx_fee=tx_fee)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -279,7 +279,7 @@ class TestDecisionMaker:
     def test_decision_maker_execute(self):
         """Test the execute method."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -329,7 +329,7 @@ class TestDecisionMaker:
     def test_decision_maker_handle_tx_message(self):
         """Test the handle tx meessa method."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -354,7 +354,7 @@ class TestDecisionMaker:
                     assert not self.decision_maker.goal_pursuit_readiness.is_ready
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_id="default",
+                                        skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
                                         counterparty="pk",
@@ -363,6 +363,7 @@ class TestDecisionMaker:
                                         amount=2,
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
+                                        ledger_id="fetchai",
                                         quantities_by_good_pbk={"good_pbk": 10})
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
