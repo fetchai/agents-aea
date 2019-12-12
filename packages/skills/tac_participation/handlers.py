@@ -65,12 +65,11 @@ class OEFHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         oef_message = cast(OEFMessage, message)
@@ -202,12 +201,11 @@ class TACHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         tac_msg = cast(TACMessage, message)
@@ -215,21 +213,21 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         logger.debug("[{}]: Handling controller response. type={}".format(self.context.agent_name, tac_msg_type))
         try:
-            if sender != game.expected_controller_pbk:
+            if message.counterparty != game.expected_controller_pbk:
                 raise ValueError("The sender of the message is not the controller agent we registered with.")
 
             if tac_msg_type == TACMessage.Type.TAC_ERROR:
-                self._on_tac_error(tac_msg, sender)
+                self._on_tac_error(tac_msg)
             elif game.phase.value == Phase.PRE_GAME.value:
                 raise ValueError("We do not expect a controller agent message in the pre game phase.")
             elif game.phase.value == Phase.GAME_REGISTRATION.value:
                 if tac_msg_type == TACMessage.Type.GAME_DATA:
-                    self._on_start(tac_msg, sender)
+                    self._on_start(tac_msg)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
             elif game.phase.value == Phase.GAME.value:
                 if tac_msg_type == TACMessage.Type.TRANSACTION_CONFIRMATION:
-                    self._on_transaction_confirmed(tac_msg, sender)
+                    self._on_transaction_confirmed(tac_msg)
                 elif tac_msg_type == TACMessage.Type.CANCELLED:
                     self._on_cancelled()
                 # elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
@@ -247,11 +245,11 @@ class TACHandler(Handler):
         """
         pass
 
-    def _on_tac_error(self, tac_message: TACMessage, controller_pbk: Address) -> None:
+    def _on_tac_error(self, tac_message: TACMessage) -> None:
         """
         Handle 'on tac error' event emitted by the controller.
 
-        :param error: the error object
+        :param tac_message: The tac message.
 
         :return: None
         """
@@ -262,7 +260,7 @@ class TACHandler(Handler):
             transaction_id = cast(str, info.get("transaction_id")) if (info.get("transaction_id") is not None) else 'NO_TX_ID'
             logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id[-10:]))
 
-    def _on_start(self, tac_message: TACMessage, controller_pbk: Address) -> None:
+    def _on_start(self, tac_message: TACMessage) -> None:
         """
         Handle the 'start' event emitted by the controller.
 
@@ -272,7 +270,7 @@ class TACHandler(Handler):
         """
         logger.info("[{}]: Received start event from the controller. Starting to compete...".format(self.context.agent_name))
         game = cast(Game, self.context.game)
-        game.init(tac_message, controller_pbk)
+        game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE,
                                               amount_by_currency=cast(Dict[str, int], tac_message.get("amount_by_currency")),
@@ -292,11 +290,11 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         game.update_game_phase(Phase.POST_GAME)
 
-    def _on_transaction_confirmed(self, message: TACMessage, controller_pbk: Address) -> None:
+    def _on_transaction_confirmed(self, message: TACMessage) -> None:
         """
         Handle 'on transaction confirmed' event emitted by the controller.
 
-        :param tx_confirmation: the transaction confirmation
+        :param message: the TACMessage.
 
         :return: None
         """
@@ -328,16 +326,16 @@ class TACHandler(Handler):
     #     #     opponent_pbks.remove(agent_pbk)
     #     #     self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
 
-    def _on_dialogue_error(self, tac_message: TACMessage, controller_pbk: Address) -> None:
+    def _on_dialogue_error(self, tac_message: TACMessage) -> None:
         """
         Handle dialogue error event emitted by the controller.
 
-        :param message: the dialogue error message
-        :param controller_pbk: the address of the controller
-
+        :param tac_message: the dialogue error message
         :return: None
         """
-        logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name, tac_message.get("details"), controller_pbk))
+        logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name,
+                                                                                          tac_message.get("details"),
+                                                                                          tac_message.counterparty))
 
     # def _request_state_update(self) -> None:
     #     """
@@ -364,12 +362,11 @@ class TransactionHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Dispatch message to relevant handler and respond.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         tx_message = cast(TransactionMessage, message)

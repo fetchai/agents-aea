@@ -22,7 +22,7 @@
 import logging
 import pprint
 import sys
-from typing import Any, Dict, List, Optional, Tuple, cast, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, cast, TYPE_CHECKING, Tuple
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.dialogue.base import DialogueLabel
@@ -66,39 +66,39 @@ class FIPANegotiationHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Dispatch message to relevant handler and respond.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         fipa_msg = cast(FIPAMessage, message)
 
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, sender, self.context.agent_public_key):
-            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, sender, self.context.agent_public_key))
+        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_public_key):
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_public_key))
             dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg, sender):
+        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
             query = cast(Query, fipa_msg.get("query"))
             assert query.model is not None, "Query has no data model."
             is_seller = query.model.name == DEMAND_DATAMODEL_NAME
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(sender, cast(Tuple[str, str], fipa_msg.get('dialogue_reference')), is_seller))
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(message.counterparty, cast(Tuple[str, str], fipa_msg.get('dialogue_reference')), is_seller))
             dialogue.incoming_extend(fipa_msg)
         else:
             logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
             default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES,
                                          content=b'This message belongs to an unidentified dialogue.')
-            self.context.outbox.put_message(to=sender,
+            self.context.outbox.put_message(to=fipa_msg.counterparty,
                                             sender=self.context.agent_public_key,
                                             protocol_id=DefaultMessage.protocol_id,
                                             message=DefaultSerializer().encode(default_msg))
             return
 
         fipa_msg_performative = fipa_msg.get("performative")
-        logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name, fipa_msg_performative))
+        logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name,
+                                                                            fipa_msg_performative))
         if fipa_msg_performative == FIPAMessage.Performative.CFP:
             self._on_cfp(fipa_msg, dialogue)
         elif fipa_msg_performative == FIPAMessage.Performative.PROPOSE:
@@ -301,12 +301,11 @@ class TransactionHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Dispatch message to relevant handler and respond.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         tx_message = cast(TransactionMessage, message)
@@ -356,12 +355,11 @@ class OEFSearchHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         # convenience representations

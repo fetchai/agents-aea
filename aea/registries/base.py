@@ -615,6 +615,6 @@ class Filter(object):
                     handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
                     if handler is not None:
                         logger.debug("Calling handler {} of skill {}".format(type(handler), skill_id))
-                        handler.handle(tx_message, DECISION_MAKER)
+                        handler.handle(tx_message)
                     else:
                         logger.warning("No internal handler fetched for skill_id={}".format(skill_id))

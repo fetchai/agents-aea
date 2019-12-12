@@ -86,7 +86,6 @@ def test_oef_message_oef_error():
     """Tests the OEF_ERROR type of message."""
     msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
-
     assert OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
                       operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS),\
         "Expects an oef message Error!"

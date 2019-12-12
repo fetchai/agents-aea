@@ -347,7 +347,7 @@ class Transaction:
         assert len(self.quantities_by_good_pbk.keys()) == len(set(self.quantities_by_good_pbk.keys()))
 
     @classmethod
-    def from_message(cls, message: TACMessage, sender: Address) -> 'Transaction':
+    def from_message(cls, message: TACMessage) -> 'Transaction':
         """
         Create a transaction from a proposal.
 
@@ -356,7 +356,7 @@ class Transaction:
         """
         assert message.get('type') == TACMessage.Type.TRANSACTION
         return Transaction(cast(str, message.get("transaction_id")),
-                           sender,
+                           message.counterparty,
                            cast(str, message.get("counterparty")),
                            cast(Dict[str, int], message.get("amount_by_currency")),
                            cast(int, message.get("sender_tx_fee")),
