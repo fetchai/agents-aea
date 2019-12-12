@@ -20,7 +20,7 @@
 """Classes to handle AEA configurations."""
 
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
+from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast, Union
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
@@ -32,6 +32,8 @@ T = TypeVar('T')
 Address = str
 ProtocolId = str
 SkillId = str
+Dependency = dict
+Dependencies = Dict[str, Dependency]
 
 
 class JSONSerializable(ABC):
@@ -170,7 +172,7 @@ class ConnectionConfig(Configuration):
                  url: str = "",
                  class_name: str = "",
                  restricted_to_protocols: Optional[Set[str]] = None,
-                 dependencies: Optional[List[str]] = None,
+                 dependencies: Optional[Dependencies] = None,
                  description: str = "",
                  **config):
         """Initialize a connection configuration object."""
@@ -181,7 +183,7 @@ class ConnectionConfig(Configuration):
         self.url = url
         self.class_name = class_name
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
-        self.dependencies = dependencies if dependencies is not None else []
+        self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.config = config
 
@@ -206,7 +208,7 @@ class ConnectionConfig(Configuration):
         """Initialize from a JSON object."""
         restricted_to_protocols = obj.get("restricted_to_protocols")
         restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
-        dependencies = cast(List[str], obj.get("dependencies", []))
+        dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             authors=cast(str, obj.get("authors")),
@@ -230,7 +232,7 @@ class ProtocolConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
-                 dependencies: Optional[List[str]] = None,
+                 dependencies: Optional[Dependencies] = None,
                  description: str = ""):
         """Initialize a connection configuration object."""
         self.name = name
@@ -238,7 +240,7 @@ class ProtocolConfig(Configuration):
         self.version = version
         self.license = license
         self.url = url
-        self.dependencies = dependencies
+        self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
     @property
@@ -257,7 +259,7 @@ class ProtocolConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        dependencies = cast(List[str], obj.get("dependencies", []))
+        dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ProtocolConfig(
             name=cast(str, obj.get("name")),
             authors=cast(str, obj.get("authors")),
@@ -383,7 +385,7 @@ class SkillConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  protocols: List[str] = None,
-                 dependencies: Optional[List[str]] = None,
+                 dependencies: Optional[Dependencies] = None,
                  description: str = ""):
         """Initialize a skill configuration."""
         self.name = name
@@ -392,7 +394,7 @@ class SkillConfig(Configuration):
         self.license = license
         self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[str]
-        self.dependencies = dependencies
+        self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
@@ -426,7 +428,7 @@ class SkillConfig(Configuration):
         license = cast(str, obj.get("license"))
         url = cast(str, obj.get("url"))
         protocols = cast(List[str], obj.get("protocols", []))
-        dependencies = cast(List[str], obj.get("dependencies", []))
+        dependencies = cast(Dependencies, obj.get("dependencies", {}))
         description = cast(str, obj.get("description"))
         skill_config = SkillConfig(
             name=name,

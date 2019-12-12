@@ -75,7 +75,7 @@ class TestInstallFromRequirementFile:
         os.chdir(cls.cwd)
 
 
-class TestInstallFails:
+class TestInstallFailsWhenDependencyDoesNotExist:
     """Test that the command 'aea install' fails when a dependency is not found."""
 
     @classmethod
@@ -98,12 +98,34 @@ class TestInstallFails:
 
         config_path = Path("protocols", "my_protocol", DEFAULT_PROTOCOL_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
-        config.setdefault("dependencies", []).append("this_dependency_does_not_exist")
+        config.setdefault("dependencies", {}).update({"this_dependency_does_not_exist": {}})
         yaml.safe_dump(config, open(config_path, "w"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        os.chdir(cls.cwd)
+
+
+class TestInstallWithRequirementFailsWhenFileIsBad:
+    """Test that the command 'aea install -r REQ_FILE' fails if the requirement file is not good."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.cwd = os.getcwd()
+        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install", "-r", "bad_requirements.txt"], standalone_mode=False)
+
+    def test_exit_code_equal_to_zero(self):
+        """Assert that the exit code is equal to zero (i.e. success)."""
         assert self.result.exit_code == 1
 
     @classmethod

@@ -38,4 +38,4 @@ shared_classes:
       args: {}
 protocols: ['oef', 'tac']
 dependencies:
-  - numpy
+  numpy: {}

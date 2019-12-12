@@ -33,4 +33,4 @@ shared_classes:
 protocols: ['fipa', 'oef', 'default']
 ledgers: ['fetchai']
 dependencies:
-  - scikit-image
+  scikit-image: {}

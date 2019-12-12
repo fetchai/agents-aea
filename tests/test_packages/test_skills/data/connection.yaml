@@ -9,4 +9,4 @@ restricted_to_protocols: ["gym"]
 config:
   env: 'gyms.env.BanditNArmedRandom'
 dependencies:
-  - gym
+  gym: {}
