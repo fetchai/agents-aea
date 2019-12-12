@@ -183,35 +183,32 @@ class Dialogues:
         return self._dialogues
 
     @abstractmethod
-    def is_permitted_for_new_dialogue(self, msg: Message, sender: str) -> bool:
+    def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
         """
         Check whether an agent message is permitted for a new dialogue.
 
         :param msg: the agent message
-        :param sender: the address of the sender
 
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
 
     @abstractmethod
-    def is_belonging_to_registered_dialogue(self, msg: Message, sender: str, agent_pbk: str) -> bool:
+    def is_belonging_to_registered_dialogue(self, msg: Message, agent_pbk: str) -> bool:
         """
         Check whether an agent message is part of a registered dialogue.
 
         :param msg: the agent message
-        :param sender: the address of the sender
         :param agent_pbk: the public key of the agent
 
         :return: boolean indicating whether the message belongs to a registered dialogue
         """
 
     @abstractmethod
-    def get_dialogue(self, msg: Message, sender: str, agent_pbk: str) -> Dialogue:
+    def get_dialogue(self, msg: Message, agent_pbk: str) -> Dialogue:
         """
         Retrieve dialogue.
 
         :param msg: the agent message
-        :param sender: the address of the sender
         :param agent_pbk: the public key of the agent
 
         :return: the dialogue
