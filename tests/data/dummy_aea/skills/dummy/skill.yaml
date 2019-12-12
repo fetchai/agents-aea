@@ -33,11 +33,5 @@ shared_classes:
         shared_class_arg_1: 1
         shared_class_arg_2: "2"
 protocols: ["default"]
-dependencies:
-  aea:
-    version: "==0.1.8"
-    index: "https://test.pypi.org/simple"
-  fetchai-ledger-api:
-    git: "https://github.com/fetchai/ledger-api-py.git"
-    ref: "master"
+dependencies: {}
 description: "a dummy_skill for testing purposes."

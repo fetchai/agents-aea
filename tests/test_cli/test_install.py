@@ -98,7 +98,18 @@ class TestInstallFailsWhenDependencyDoesNotExist:
 
         config_path = Path("protocols", "my_protocol", DEFAULT_PROTOCOL_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
-        config.setdefault("dependencies", {}).update({"this_dependency_does_not_exist": {}})
+        config.setdefault("dependencies", {}).update(
+            {
+                "this_is_a_test_dependency": {
+                    "version": "==0.1.0",
+                    "index": "https://test.pypi.org/simple"
+                },
+                "this_is_a_test_dependency_on_git": {
+                    "git": "https://github.com/an_user/a_repo.git",
+                    "ref": "master"
+                }
+            }
+        )
         yaml.safe_dump(config, open(config_path, "w"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
 

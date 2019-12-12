@@ -27,5 +27,5 @@ shared_classes:
         ledger_id: 'fetchai'
 protocols: ['oef', 'ml_trade']
 dependencies:
-  - tensorflow
-  - numpy
+  tensorflow: {}
+  numpy: {}

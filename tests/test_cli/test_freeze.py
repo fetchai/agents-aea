@@ -52,7 +52,7 @@ class TestFreeze:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == """aea==0.1.8\nfetchai-ledger-api\nprotobuf\n"""
+        assert self.result.output == """protobuf\n"""
 
     @classmethod
     def teardown_class(cls):
