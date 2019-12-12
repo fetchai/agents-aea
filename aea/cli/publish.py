@@ -16,15 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Settings for operating Registry with CLI."""
-import os
+
+"""Implementation of the 'aea publish' subcommand."""
+import click
+
+from aea.cli.registry.publish import publish_agent
 
 
-REGISTRY_API_URL = 'http://localhost:8000'
-CLI_CONFIG_PATH = os.path.join(
-    os.path.expanduser('~'),
-    '.aea',
-    'cli_config.yaml'
-)
-AUTH_TOKEN_KEY = 'auth_token'
-AGENT_CONFIG_FILENAME = 'aea-config.yaml'
+@click.command(name='publish')
+def publish():
+    """Publish Agent to Registry."""
+    publish_agent()

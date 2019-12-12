@@ -27,6 +27,7 @@ import yaml
 
 from typing import List, Dict
 
+from aea.cli.common import logger
 from aea.cli.registry.settings import (
     REGISTRY_API_URL,
     CLI_CONFIG_PATH,
@@ -73,7 +74,7 @@ def request_api(
     if resp.status_code == 200:
         pass
     elif resp.status_code == 201:
-        click.echo('Successfully created!')
+        logger.debug('Successfully created!')
     elif resp.status_code == 403:
         raise click.ClickException(
             'You are not authenticated. '
