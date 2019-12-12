@@ -23,11 +23,11 @@ import os
 from pathlib import Path
 
 import jsonschema
-from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
 from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
+from ..common.click_testing import CliRunner
 
 
 class TestFreeze:
@@ -52,7 +52,7 @@ class TestFreeze:
 
     def test_correct_output(self):
         """Test that the command has printed the correct output."""
-        assert self.result.output == """protobuf\n"""
+        assert self.result.output == """aea==0.1.8\nfetchai-ledger-api\nprotobuf\n"""
 
     @classmethod
     def teardown_class(cls):

@@ -140,8 +140,8 @@ def delete(ctx: Context, agent_name):
 def freeze(ctx: Context):
     """Get the dependencies."""
     _try_to_load_agent_config(ctx)
-    for d in ctx.get_dependencies():
-        print(d)
+    for dependency_name, dependency_data in sorted(ctx.get_dependencies().items(), key=lambda x: x[0]):
+        print(dependency_name + dependency_data.get("version", ""))
 
 
 @cli.command()

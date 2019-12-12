@@ -37,4 +37,7 @@ dependencies:
   aea:
     version: "==0.1.8"
     index: "https://test.pypi.org/simple"
+  fetchai-ledger-api:
+    git: "https://github.com/fetchai/ledger-api-py.git"
+    ref: "master"
 description: "a dummy_skill for testing purposes."
