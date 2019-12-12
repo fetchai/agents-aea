@@ -67,7 +67,7 @@ class TestSkillError:
     def test_error_handler_handle(self):
         """Test the handle function."""
         msg = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.ACCEPT)
-        msg.counterparty = self.wallet.addresses['default']
+        msg.counterparty = "a_counterparty"
         self.my_error_handler.handle(message=msg)
 
     def test_error_skill_unsupported_protocol(self):

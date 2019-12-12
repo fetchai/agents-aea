@@ -54,8 +54,7 @@ class Message:
 
         :return the address
         """
-        if self._counterparty is None:
-            self._counterparty = ""
+        assert self._counterparty is not None, "Counterparty must not be None."
         return self._counterparty
 
     @counterparty.setter
@@ -112,7 +111,7 @@ class Message:
         """Compare with another object."""
         return isinstance(other, Message) \
             and self.body == other.body \
-            and self.counterparty == other.counterparty
+            and self._counterparty == other._counterparty
 
     def __str__(self):
         """Get the string representation of the message."""
