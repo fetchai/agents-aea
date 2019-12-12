@@ -33,23 +33,23 @@ from aea.configurations.base import Dependency
 def _install_dependency(dependency_name: str, dependency: Dependency):
     logger.info("Installing {}...".format(pprint.pformat(dependency)))
     try:
-        index = dependency.get("index", "")
+        index = dependency.get("index", None)
         git_url = dependency.get("git", None)
         revision = dependency.get("ref", "")
         version_constraint = dependency.get("version", "")
-        command = []
+        command = [sys.executable, "-m", "pip", "install"]
         if git_url is not None:
+            command += ["-i", index] if index is not None else []
             command += ["git+" + git_url + "@" + revision + "#egg=" + dependency_name]
-        elif index is not None:
-            command = [sys.executable, "-m", "pip", "install"]
-            command += ["-i", index] if index else []
+        else:
+            command += ["-i", index] if index is not None else []
             command += [dependency_name + version_constraint]
         logger.debug("Calling '{}'".format(" ".join(command)))
         subp = subprocess.Popen(command)
         subp.wait(30.0)
         assert subp.returncode == 0
-    except Exception:
-        logger.error("An error occurred while installing {}. Stopping...".format(dependency))
+    except Exception as e:
+        logger.error("An error occurred while installing {}: {}".format(dependency, str(e)))
         sys.exit(1)
 
 
