@@ -14,4 +14,13 @@ dependencies:
   - dep3>=1.10.11a1
   - dep4<=1.11.12b2
   - dep5 >= 1.4.5.0
+  - dep6:
+      index: https://test.pypi.org/simple
+  - dep7:
+      git: https://github.com/a-random-username/a-repository.git
+      ref: master
+  - dep8:  # if both 'index' and 'git' are specified, 'git' will be preferred.
+      index: https://test.pypi.org/simple
+      git: https://github.com/a-random-username/a-repository.git
+      ref: master
 description: "a skill for testing purposes."
