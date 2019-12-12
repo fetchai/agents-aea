@@ -19,7 +19,6 @@
 
 """Implementation of the 'aea install' subcommand."""
 import pprint
-import re
 import subprocess
 import sys
 from typing import Optional
@@ -61,6 +60,7 @@ def _install_from_requirement(file: str):
     except Exception:
         logger.error("An error occurred while installing requirement file {}. Stopping...".format(file))
         sys.exit(1)
+
 
 @click.command()
 @click.option('-r', '--requirement', type=str, required=False, default=None,
