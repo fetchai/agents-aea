@@ -71,6 +71,12 @@ class StateUpdateMessage(Message):
                          **kwargs)
         assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
 
+    @property
+    def performative(self) -> Performative:
+        """Get the performative of the message."""
+        assert self.is_set("performative"), "Performative is not set."
+        return StateUpdateMessage.Performative(self.get('performative'))
+
     def check_consistency(self) -> bool:
         """
         Check that the data is consistent.
@@ -78,15 +84,14 @@ class StateUpdateMessage(Message):
         :return: bool
         """
         try:
-            assert self.is_set("performative")
-            performative = self.get("performative")
+            assert self.performative in StateUpdateMessage.Performative, "Invalide performative."
             assert self.is_set("amount_by_currency")
             amount_by_currency = self.get("amount_by_currency")
             amount_by_currency = cast(Currencies, amount_by_currency)
             assert self.is_set("quantities_by_good_pbk")
             quantities_by_good_pbk = self.get("quantities_by_good_pbk")
             quantities_by_good_pbk = cast(Goods, quantities_by_good_pbk)
-            if performative == self.Performative.INITIALIZE:
+            if self.performative == self.Performative.INITIALIZE:
                 assert self.is_set("exchange_params_by_currency")
                 exchange_params_by_currency = self.get("exchange_params_by_currency")
                 exchange_params_by_currency = cast(ExchangeParams, exchange_params_by_currency)
@@ -96,7 +101,7 @@ class StateUpdateMessage(Message):
                 utility_params_by_good_pbk = cast(UtilityParams, utility_params_by_good_pbk)
                 assert quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
                 assert self.is_set("tx_fee")
-            elif performative == self.Performative.APPLY:
+            elif self.performative == self.Performative.APPLY:
                 assert self.get("exchange_params_by_currency") is None
                 assert self.get("utility_params_by_good_pbk") is None
                 assert self.get("tx_fee") is None

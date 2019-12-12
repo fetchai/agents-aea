@@ -28,7 +28,7 @@ class TestTransaction:
 
     def test_message_consistency(self):
         """Test for an error in consistency of a message."""
-        TransactionMessage(performative="performative",
+        TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
                            skill_ids=["default"],
                            transaction_id="transaction0",
                            sender="pk1",
@@ -43,7 +43,7 @@ class TestTransaction:
                            info={'some_string': [1, 2]},
                            transaction_digest='some_string')
         with pytest.raises(AssertionError):
-            TransactionMessage(performative="performative",
+            TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
                                skill_ids=["default"],
                                transaction_id="transaction0",
                                sender="pk",

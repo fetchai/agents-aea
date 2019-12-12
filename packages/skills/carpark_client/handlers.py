@@ -128,9 +128,9 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = cast(int, msg.get("message_id")) + 1
+        new_message_id = msg.message_id
         new_target = cast(int, msg.get("message_id"))
-        proposals = cast(List[Description], msg.get("proposal"))
+        proposals = msg.proposal
 
         if proposals is not []:
             # only take the first proposal
@@ -187,7 +187,7 @@ class FIPAHandler(Handler):
         """
         logger.info("[{}]: received MATCH_ACCEPT_W_INFORM from sender={}".format(self.context.agent_name,
                                                                                  msg.counterparty[-5:]))
-        info = cast(Dict, msg.get("info"))
+        info = msg.info
         address = cast(str, info.get("address"))
         proposal = cast(Description, dialogue.proposal)
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
@@ -214,10 +214,9 @@ class FIPAHandler(Handler):
         :return: None
         """
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, msg.counterparty[-5:]))
-        json_data = cast(dict, msg.get("info"))
-        if 'message_type' in json_data and json_data['message_type'] == 'car_park_data':
+        if 'message_type' in msg.info and msg.info['message_type'] == 'car_park_data':
             logger.info("[{}]: received the following carpark data={}".format(self.context.agent_name,
-                                                                              pprint.pformat(json_data)))
+                                                                              pprint.pformat(msg.info)))
             # dialogues = cast(Dialogues, self.context.dialogues)
             # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
         else:
@@ -247,11 +246,10 @@ class OEFHandler(Handler):
         """
         # convenience representations
         oef_msg = cast(OEFMessage, message)
-        oef_msg_type = OEFMessage.Type(oef_msg.get("type"))
+        oef_msg_type = oef_msg.type
 
         if oef_msg_type is OEFMessage.Type.SEARCH_RESULT:
-            agents = cast(List[str], oef_msg.get("agents"))
-            self._handle_search(agents)
+            self._handle_search(oef_msg.agents)
 
     def teardown(self) -> None:
         """
@@ -313,7 +311,7 @@ class MyTransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         if tx_msg_response is not None and \
-                TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
+                TransactionMessage.Performative(tx_msg_response.performative) == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
 
             json_data = {'transaction_digest': tx_msg_response.get("transaction_digest")}
