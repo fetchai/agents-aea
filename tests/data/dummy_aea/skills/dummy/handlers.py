@@ -43,12 +43,11 @@ class DummyHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         self.handled_messages.append(message)
@@ -82,12 +81,11 @@ class DummyInternalHandler(Handler):
         """
         pass
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         self.handled_internal_messages.append(message)

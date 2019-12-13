@@ -44,12 +44,11 @@ class ErrorHandler(Handler):
         :return: None
         """
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :param sender: the sender
         """
 
     def teardown(self) -> None:

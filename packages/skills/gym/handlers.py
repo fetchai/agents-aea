@@ -49,12 +49,11 @@ class GymHandler(Handler):
         """Set up the handler."""
         logger.info("Gym handler: setup method called.")
 
-    def handle(self, message: Message, sender: str) -> None:
+    def handle(self, message: Message) -> None:
         """
         Handle messages.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         gym_msg = cast(GymMessage, message)

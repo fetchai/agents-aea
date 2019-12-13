@@ -171,6 +171,7 @@ class AEA(Agent):
 
         try:
             msg = protocol.serializer.decode(envelope.message)
+            msg.counterparty = envelope.sender
         except Exception as e:
             error_handler.send_decoding_error(envelope)
             logger.warning("Decoding error. Exception: {}".format(str(e)))
@@ -187,7 +188,7 @@ class AEA(Agent):
             return
 
         for handler in handlers:
-            handler.handle(msg, envelope.sender)
+            handler.handle(msg)
 
     def update(self) -> None:
         """

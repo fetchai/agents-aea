@@ -69,7 +69,7 @@ class TestDialogueBase:
         """Test the dialogue."""
         assert self.dialogue.is_self_initiated
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b'Hello')
-
+        msg.counterparty = "my_agent"
         assert self.dialogue.last_incoming_message is None
         assert self.dialogue.last_outgoing_message is None
 
