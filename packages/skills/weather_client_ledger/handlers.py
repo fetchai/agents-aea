@@ -67,7 +67,6 @@ class FIPAHandler(Handler):
         """
         # convenience representations
         fipa_msg = cast(FIPAMessage, message)
-        msg_performative = FIPAMessage.Performative(message.get('performative'))
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
@@ -79,13 +78,13 @@ class FIPAHandler(Handler):
             return
 
         # handle message
-        if msg_performative == FIPAMessage.Performative.PROPOSE:
+        if fipa_msg.performative == FIPAMessage.Performative.PROPOSE:
             self._handle_propose(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.DECLINE:
+        elif fipa_msg.performative == FIPAMessage.Performative.DECLINE:
             self._handle_decline(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
+        elif fipa_msg.performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._handle_match_accept(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.INFORM:
+        elif fipa_msg.performative == FIPAMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, dialogue)
 
     def teardown(self) -> None:
@@ -120,8 +119,8 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = cast(int, msg.get("message_id")) + 1
-        new_target_id = cast(int, msg.get("message_id"))
+        new_message_id = msg.message_id + 1
+        new_target_id = msg.target + 1
         proposals = cast(List[Description], msg.get("proposal"))
 
         if proposals is not []:
@@ -185,7 +184,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         logger.info("[{}]: received MATCH_ACCEPT_W_INFORM from sender={}".format(self.context.agent_name, msg.counterparty[-5:]))
-        info = cast(dict, msg.get("info"))
+        info = msg.info
         address = cast(str, info.get("address"))
         strategy = cast(Strategy, self.context.strategy)
         proposal = cast(Description, dialogue.proposal)
@@ -215,9 +214,8 @@ class FIPAHandler(Handler):
         :return: None
         """
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, msg.counterparty[-5:]))
-        json_data = cast(dict, msg.get("info"))
-        if 'weather_data' in json_data.keys():
-            weather_data = json_data['weather_data']
+        if 'weather_data' in msg.info.keys():
+            weather_data = msg.info['weather_data']
             logger.info("[{}]: received the following weather data={}".format(self.context.agent_name,
                                                                               pprint.pformat(weather_data)))
             # dialogues = cast(Dialogues, self.context.dialogues)
@@ -245,10 +243,8 @@ class OEFHandler(Handler):
         """
         # convenience representations
         oef_msg = cast(OEFMessage, message)
-        oef_msg_type = OEFMessage.Type(oef_msg.get("type"))
-
-        if oef_msg_type is OEFMessage.Type.SEARCH_RESULT:
-            agents = cast(List[str], oef_msg.get("agents"))
+        if oef_msg.type is OEFMessage.Type.SEARCH_RESULT:
+            agents = oef_msg.agents
             self._handle_search(agents)
 
     def teardown(self) -> None:
@@ -309,16 +305,16 @@ class MyTransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         if tx_msg_response is not None and \
-                TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
+                tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
-            json_data = {'transaction_digest': tx_msg_response.get("transaction_digest")}
-            info = cast(Dict[str, Any], tx_msg_response.get("info"))
+            json_data = {'transaction_digest': tx_msg_response.transaction_digest}
+            info = cast(Dict[str, Any], tx_msg_response.info)
             dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
             fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
-            new_message_id = cast(int, fipa_msg.get("message_id")) + 1
-            new_target_id = cast(int, fipa_msg.get("target")) + 1
+            new_message_id = fipa_msg.message_id + 1
+            new_target_id = fipa_msg.target + 1
             counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_pbk
             inform_msg = FIPAMessage(message_id=new_message_id,
                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,

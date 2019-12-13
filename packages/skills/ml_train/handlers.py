@@ -20,9 +20,7 @@
 """This module contains the handler for the 'ml_train' skill."""
 import logging
 import sys
-from typing import cast, TYPE_CHECKING, Any, Dict, Optional, List, Tuple
-
-import numpy as np
+from typing import cast, TYPE_CHECKING, Optional, List
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -74,10 +72,9 @@ class TrainHandler(Handler):
         :return: None
         """
         ml_msg = cast(MLTradeMessage, message)
-        ml_msg_performative = MLTradeMessage.Performative(ml_msg.get("performative"))
-        if ml_msg_performative == MLTradeMessage.Performative.TERMS:
+        if ml_msg.performative == MLTradeMessage.Performative.TERMS:
             self._handle_terms(ml_msg)
-        elif ml_msg_performative == MLTradeMessage.Performative.DATA:
+        elif ml_msg.performative == MLTradeMessage.Performative.DATA:
             self._handle_data(ml_msg)
 
     def _handle_terms(self, ml_trade_msg: MLTradeMessage) -> None:
@@ -131,8 +128,8 @@ class TrainHandler(Handler):
         :param ml_trade_msg: the ml trade message
         :return: None
         """
-        terms = cast(Description, ml_trade_msg.get("terms"))
-        data = cast(Tuple[np.ndarray, np.ndarray], ml_trade_msg.get("data"))
+        terms = ml_trade_msg.terms
+        data = ml_trade_msg.data
         if data is None:
             logger.info("Received data message with no data from {}".format(ml_trade_msg.counterparty[-5:]))
         else:
@@ -168,10 +165,9 @@ class OEFHandler(Handler):
         """
         # convenience representations
         oef_msg = cast(OEFMessage, message)
-        oef_msg_type = OEFMessage.Type(oef_msg.get("type"))
 
-        if oef_msg_type is OEFMessage.Type.SEARCH_RESULT:
-            agents = cast(List[str], oef_msg.get("agents"))
+        if oef_msg.type is OEFMessage.Type.SEARCH_RESULT:
+            agents = oef_msg.agents
             self._handle_search(agents)
 
     def teardown(self) -> None:
@@ -224,10 +220,10 @@ class MyTransactionHandler(Handler):
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
-        if TransactionMessage.Performative(tx_msg_response.get("performative")) == TransactionMessage.Performative.ACCEPT:
+        if tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
-            transaction_digest = cast(str, tx_msg_response.get("transaction_digest"))
-            info = cast(Dict[str, Any], tx_msg_response.get("info"))
+            transaction_digest = tx_msg_response.transaction_digest
+            info = tx_msg_response.info
             terms = cast(Description, info.get("terms"))
             ml_accept = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT,
                                        tx_digest=transaction_digest,

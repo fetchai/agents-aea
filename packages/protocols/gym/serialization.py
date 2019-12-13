@@ -24,7 +24,7 @@ import copy
 import json
 import pickle
 import sys
-from typing import Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
@@ -45,27 +45,27 @@ class GymSerializer(Serializer):
         :param msg: the message object
         :return: the bytes
         """
-        performative = GymMessage.Performative(msg.get("performative"))
+        msg = cast(GymMessage, msg)
         new_body = copy.copy(msg.body)
-        new_body["performative"] = performative.value
+        new_body["performative"] = msg.performative.value
 
-        if performative == GymMessage.Performative.ACT:
-            action = msg.body["action"]  # type: Any
+        if msg.performative == GymMessage.Performative.ACT:
+            action = msg.action  # type: Any
             action_bytes = base64.b64encode(pickle.dumps(action)).decode("utf-8")
             new_body["action"] = action_bytes
-            new_body["step_id"] = msg.body["step_id"]
-        elif performative == GymMessage.Performative.PERCEPT:
+            new_body["step_id"] = msg.step_id
+        elif msg.performative == GymMessage.Performative.PERCEPT:
             # observation, reward and info are gym implementation specific, done is boolean
-            observation = msg.body["observation"]  # type: Any
+            observation = msg.observation
             observation_bytes = base64.b64encode(pickle.dumps(observation)).decode("utf-8")
             new_body["observation"] = observation_bytes
-            reward = msg.body["reward"]  # type: Any
+            reward = msg.reward  # type: Any
             reward_bytes = base64.b64encode(pickle.dumps(reward)).decode("utf-8")
             new_body["reward"] = reward_bytes
-            info = msg.body["info"]  # type: Any
+            info = msg.info  # type: Any
             info_bytes = base64.b64encode(pickle.dumps(info)).decode("utf-8")
             new_body["info"] = info_bytes
-            new_body["step_id"] = msg.body["step_id"]
+            new_body["step_id"] = msg.step_id
 
         gym_message_bytes = json.dumps(new_body).encode("utf-8")
         return gym_message_bytes

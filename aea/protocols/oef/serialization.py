@@ -29,7 +29,6 @@ import pickle
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description, Query
 
 """default 'to' field for OEF envelopes."""
 DEFAULT_OEF = "oef"

@@ -86,8 +86,8 @@ class DefaultMessage(Message):
     @property
     def error_data(self) -> Dict[str, Any]:
         """Get the data of the error message."""
-        assert self.is_set("error_data"), "error_msg is not set."
-        return cast(Dict, self.get("error_data"))
+        assert self.is_set("error_data"), "error_data is not set."
+        return cast(Dict[str, Any], self.get("error_data"))
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""

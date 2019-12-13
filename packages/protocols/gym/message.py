@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, cast, Dict, Any
 
 from aea.protocols.base import Message
 
@@ -51,28 +51,64 @@ class GymMessage(Message):
         super().__init__(performative=GymMessage.Performative(performative), **kwargs)
         assert self.check_consistency(), "GymMessage initialization inconsistent."
 
+    @property
+    def performative(self) -> Performative:  # noqa: F821
+        """Get the performative of the message."""
+        assert self.is_set("performative"), "Performative is not set."
+        return GymMessage.Performative(self.get('performative'))
+
+    @property
+    def action(self) -> Any:
+        """Get the action from the message."""
+        assert self.is_set("action"), "Action is not set."
+        return cast(Any, self.get("action"))
+
+    @property
+    def step_id(self) -> int:
+        """Get the step id from the message."""
+        assert self.is_set("step_id"), "Step_id is not set."
+        return cast(int, self.get("step_id"))
+
+    @property
+    def observation(self) -> Any:
+        """Get the observation from the message."""
+        assert self.is_set("observation"), "Observation is not set."
+        return cast(Any, self.get("observation"))
+
+    @property
+    def reward(self) -> float:
+        """Get the reward from the message."""
+        assert self.is_set("reward"), "Reward is not set."
+        return cast(float, self.get("reward"))
+
+    @property
+    def done(self) -> bool:
+        """Get the value of the done variable from the message."""
+        assert self.is_set("done"), "Done is not set."
+        return cast(bool, self.get("done"))
+
+    @property
+    def info(self) -> Dict[str, Any]:
+        """Get the info from the message."""
+        assert self.is_set("info"), "Info is not set."
+        return cast(Dict[str, Any], self.get("info"))
+
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert self.is_set("performative")
-            performative = GymMessage.Performative(self.get("performative"))
-            if performative == GymMessage.Performative.ACT:
-                assert self.is_set("action")
-                assert self.is_set("step_id")
-                assert type(self.get("step_id")) == int
+            assert self.performative in GymMessage.Performative
+            if self.performative == GymMessage.Performative.ACT:
+                assert self.is_set("action"), "Action is not set."
+                isinstance(self.step_id, int)
                 assert len(self.body) == 3
-            elif performative == GymMessage.Performative.PERCEPT:
-                assert self.is_set("observation")
-                assert self.is_set("reward")
-                assert type(self.get("reward")) == float
-                assert self.is_set("done")
-                assert type(self.get("done")) == bool
-                assert self.is_set("info")
-                assert type(self.get("info")) == dict
-                assert self.is_set("step_id")
-                assert type(self.get("step_id")) == int
+            elif self.performative == GymMessage.Performative.PERCEPT:
+                assert self.is_set("observation"), "Observation is not set."
+                isinstance(self.reward, float)
+                isinstance(self.done, bool)
+                isinstance(self.info, dict)
+                isinstance(self.step_id, int)
                 assert len(self.body) == 6
-            elif performative == GymMessage.Performative.RESET or performative == GymMessage.Performative.CLOSE:
+            elif self.performative == GymMessage.Performative.RESET or self.performative == GymMessage.Performative.CLOSE:
                 assert len(self.body) == 1
             else:
                 raise ValueError("Performative not recognized.")

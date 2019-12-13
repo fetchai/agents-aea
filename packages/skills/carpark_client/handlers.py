@@ -21,7 +21,7 @@
 import logging
 import pprint
 import sys
-from typing import Any, Dict, List, Optional, cast, TYPE_CHECKING
+from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.dialogue.base import DialogueLabel

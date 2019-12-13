@@ -23,7 +23,6 @@ import sys
 from typing import cast, TYPE_CHECKING
 
 from aea.protocols.base import Message
-from aea.protocols.oef.models import Description, Query
 from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
@@ -59,10 +58,9 @@ class MLTradeHandler(Handler):
         :return: None
         """
         ml_msg = cast(MLTradeMessage, message)
-        ml_msg_performative = MLTradeMessage.Performative(ml_msg.get("performative"))
-        if ml_msg_performative == MLTradeMessage.Performative.CFT:
+        if ml_msg.Performative == MLTradeMessage.Performative.CFT:
             self._handle_cft(ml_msg)
-        elif ml_msg_performative == MLTradeMessage.Performative.ACCEPT:
+        elif ml_msg.performative == MLTradeMessage.Performative.ACCEPT:
             self._handle_accept(ml_msg)
 
     def _handle_cft(self, ml_trade_msg: MLTradeMessage) -> None:
@@ -72,7 +70,7 @@ class MLTradeHandler(Handler):
         :param ml_trade_msg: the ml trade message
         :return: None
         """
-        query = cast(Query, ml_trade_msg.get("query"))
+        query = ml_trade_msg.query
         logger.info("Got a Call for Terms from {}: query={}".format(ml_trade_msg.counterparty[-5:], query))
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_matching_supply(query):
@@ -93,7 +91,7 @@ class MLTradeHandler(Handler):
         :param ml_trade_msg: the ml trade message
         :return: None
         """
-        terms = cast(Description, ml_trade_msg.get("terms"))
+        terms = ml_trade_msg.terms
         logger.info("Got an Accept from {}: {}".format(ml_trade_msg.counterparty[-5:], terms.values))
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_valid_terms(terms):

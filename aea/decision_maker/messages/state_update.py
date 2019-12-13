@@ -23,10 +23,9 @@
 from enum import Enum
 from typing import cast, Dict, Optional, Union
 
-from aea.protocols.base import Message
+from aea.protocols.internal_base import InternalMessage
 
 TransactionId = str
-Address = str
 
 Currencies = Dict[str, int]  # a map from identifier to quantity
 Goods = Dict[str, int]   # a map from identifier to quantity
@@ -34,7 +33,7 @@ UtilityParams = Dict[str, float]   # a map from identifier to quantity
 ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 
 
-class StateUpdateMessage(Message):
+class StateUpdateMessage(InternalMessage):
     """The state update message class."""
 
     protocol_id = "internal"
@@ -72,10 +71,40 @@ class StateUpdateMessage(Message):
         assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
 
     @property
-    def performative(self) -> Performative:
+    def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "Performative is not set."
         return StateUpdateMessage.Performative(self.get('performative'))
+
+    @property
+    def amount_by_currency(self) -> Currencies:
+        """Get the amount by currency."""
+        assert self.is_set("amount_by_currency")
+        return cast(Currencies, self.get("amount_by_currency"))
+
+    @property
+    def quantities_by_good_pbk(self) -> Goods:
+        """Get he quantities by good public keys."""
+        assert self.is_set("quantities_by_good_pbk"), "quantities_by_good_pbk is not set."
+        return cast(Goods, self.get("quantities_by_good_pbk"))
+
+    @property
+    def exchange_params_by_currency(self) -> ExchangeParams:
+        """Get the exchange parameters by currency from the message."""
+        assert self.is_set("exchange_params_by_currency")
+        return cast(ExchangeParams, self.get("exchange_params_by_currency"))
+
+    @property
+    def utility_params_by_good_pbk(self) -> UtilityParams:
+        """Get the utility parameters by good public key."""
+        assert self.is_set("utility_params_by_good_pbk")
+        return cast(UtilityParams, self.get("utility_params_by_good_pbk"))
+
+    @property
+    def tx_fee(self) -> int:
+        """Get the transaction fee."""
+        assert self.is_set("tx_fee")
+        return cast(int, self.get("tx_fee"))
 
     def check_consistency(self) -> bool:
         """
@@ -85,26 +114,18 @@ class StateUpdateMessage(Message):
         """
         try:
             assert self.performative in StateUpdateMessage.Performative, "Invalide performative."
-            assert self.is_set("amount_by_currency")
-            amount_by_currency = self.get("amount_by_currency")
-            amount_by_currency = cast(Currencies, amount_by_currency)
-            assert self.is_set("quantities_by_good_pbk")
-            quantities_by_good_pbk = self.get("quantities_by_good_pbk")
-            quantities_by_good_pbk = cast(Goods, quantities_by_good_pbk)
+            isinstance(self.amount_by_currency, dict)
+            isinstance(self.quantities_by_good_pbk, dict)
             if self.performative == self.Performative.INITIALIZE:
-                assert self.is_set("exchange_params_by_currency")
-                exchange_params_by_currency = self.get("exchange_params_by_currency")
-                exchange_params_by_currency = cast(ExchangeParams, exchange_params_by_currency)
-                assert amount_by_currency.keys() == exchange_params_by_currency.keys()
-                assert self.is_set("utility_params_by_good_pbk")
-                utility_params_by_good_pbk = self.get("utility_params_by_good_pbk")
-                utility_params_by_good_pbk = cast(UtilityParams, utility_params_by_good_pbk)
-                assert quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
-                assert self.is_set("tx_fee")
+                isinstance(self.exchange_params_by_currency, dict)
+                assert self.amount_by_currency.keys() == self.exchange_params_by_currency.keys()
+                isinstance(self.utility_params_by_good_pbk, dict)
+                assert self.quantities_by_good_pbk.keys() == self.utility_params_by_good_pbk.keys()
+                isinstance(self.tx_fee, int)
             elif self.performative == self.Performative.APPLY:
-                assert self.get("exchange_params_by_currency") is None
-                assert self.get("utility_params_by_good_pbk") is None
-                assert self.get("tx_fee") is None
+                assert self.exchange_params_by_currency is None
+                assert self.utility_params_by_good_pbk is None
+                assert self.tx_fee is None
         except (AssertionError, KeyError):
             return False
         return True

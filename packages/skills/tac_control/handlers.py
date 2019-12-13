@@ -67,7 +67,7 @@ class TACHandler(Handler):
         :return: None
         """
         tac_message = cast(TACMessage, message)
-        tac_type = tac_message.get("type")
+        tac_type = tac_message.type
 
         game = cast(Game, self.context.game)
 

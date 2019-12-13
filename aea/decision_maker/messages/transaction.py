@@ -24,7 +24,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union, cast
 
 from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
-from aea.protocols.base import Message
+from aea.protocols.internal_base import InternalMessage
 from aea.configurations.base import Address
 
 TransactionId = str
@@ -32,7 +32,7 @@ OFF_CHAIN = 'off_chain'
 SUPPORTED_LEDGER_IDS = SUPPORTED_LEDGER_APIS + [OFF_CHAIN]
 
 
-class TransactionMessage(Message):
+class TransactionMessage(InternalMessage):
     """The transaction message class."""
 
     protocol_id = "internal"
@@ -96,7 +96,7 @@ class TransactionMessage(Message):
         assert self.check_consistency(), "Transaction message initialization inconsistent."
 
     @property
-    def performative(self) -> Performative: # noqa: F821
+    def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "Performative is not set."
         return TransactionMessage.Performative(self.get('performative'))
@@ -162,7 +162,7 @@ class TransactionMessage(Message):
         return cast(str, self.get("ledger_id"))
 
     @property
-    def info(self) -> Union[Dict[str, Any], None]:
+    def info(self) -> Dict[str, Any]:
         """Get the infos from the message."""
         assert self.is_set("info"), "Info is not set."
         return cast(Dict[str, Any], self.get("info"))

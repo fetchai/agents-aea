@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, cast, Tuple
 import numpy as np
 
 from aea.protocols.base import Message
@@ -53,33 +53,52 @@ class MLTradeMessage(Message):
         super().__init__(performative=MLTradeMessage.Performative(performative), **kwargs)
         assert self.check_consistency(), "MLTradeMessage initialization inconsistent."
 
+    @property
+    def performative(self) -> Performative:  # noqa: F821
+        """Get the performative of the message."""
+        assert self.is_set("performative"), "performative is not set."
+        return MLTradeMessage.Performative(self.get("performative"))
+
+    @property
+    def query(self) -> Query:
+        """Get the query of the message."""
+        assert self.is_set("query"), "query is not set."
+        return cast(Query, self.get("query"))
+
+    @property
+    def terms(self) -> Description:
+        """Get the terms of the message."""
+        assert self.is_set("terms"), "Terms are not set."
+        return cast(Description, self.get("terms"))
+
+    @property
+    def tx_digest(self) -> str:
+        """Get the transaction digest from the message."""
+        assert self.is_set("tx_digest"), "tx_digest is not set."
+        return cast(str, self.get("tx_digest"))
+
+    @property
+    def data(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Get the data from the message."""
+        assert self.is_set("data"), "Data is not set."
+        return cast(Tuple[np.ndarray, np.ndarray], self.get("data"))
+
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert self.is_set("performative")
-            performative = MLTradeMessage.Performative(self.get("performative"))
-            if performative == MLTradeMessage.Performative.CFT:
-                assert self.is_set("query")
-                query = self.get("query")
-                assert isinstance(query, Query)
+            assert self.performative in MLTradeMessage.Performative, "Performative is invalid."
+            if self.performative == MLTradeMessage.Performative.CFT:
+                assert isinstance(self.query, Query)
                 assert len(self.body) == 2
-            elif performative == MLTradeMessage.Performative.TERMS:
-                assert self.is_set("terms")
-                terms = self.get("terms")
-                assert isinstance(terms, Description)
+            elif self.performative == MLTradeMessage.Performative.TERMS:
+                assert isinstance(self.terms, Description)
                 assert len(self.body) == 2
-            elif performative == MLTradeMessage.Performative.ACCEPT:
-                assert self.is_set("terms")
-                terms = self.get("terms")
-                assert isinstance(terms, Description)
-                assert self.is_set("tx_digest")
-                tx_digest = self.get("tx_digest")
-                assert isinstance(tx_digest, str)
+            elif self.performative == MLTradeMessage.Performative.ACCEPT:
+                assert isinstance(self.terms, Description)
+                assert isinstance(self.tx_digest, str)
                 assert len(self.body) == 3
-            elif performative == MLTradeMessage.Performative.DATA:
-                assert self.is_set("terms")
-                terms = self.get("terms")
-                assert isinstance(terms, Description)
+            elif self.performative == MLTradeMessage.Performative.DATA:
+                assert isinstance(self.terms, Description)
                 assert self.is_set("data")
                 # expect data = (X, y)
                 data = self.get("data")
