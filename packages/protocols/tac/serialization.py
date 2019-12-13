@@ -106,7 +106,6 @@ class TACSerializer(Serializer):
             tac_msg.quantities_by_good_pbk.extend(_from_dict_to_pairs(msg.get("quantities_by_good_pbk")))
             tac_msg.utility_params_by_good_pbk.extend(_from_dict_to_pairs(msg.get("utility_params_by_good_pbk")))
             tac_msg.tx_fee = msg.get("tx_fee")
-            import pdb; pdb.set_trace()
             tac_msg.agent_addr_to_name.extend(_from_dict_to_pairs(msg.get("agent_addr_to_name")))
             tac_msg.good_pbk_to_name.extend(_from_dict_to_pairs(msg.get("good_pbk_to_name")))
             tac_msg.version_id = msg.get("version_id")
