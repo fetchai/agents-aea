@@ -24,7 +24,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union, cast
 
 from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
-from aea.protocols.internal_base import InternalMessage
+from aea.decision_maker.internal_base import InternalMessage
 from aea.configurations.base import Address
 
 TransactionId = str

@@ -24,7 +24,7 @@ from typing import Dict, Optional, cast, Any
 from collections import defaultdict
 
 from aea.configurations.base import Address
-from aea.protocols.internal_base import InternalMessage
+from aea.decision_maker.internal_base import InternalMessage
 
 
 class TACMessage(InternalMessage):

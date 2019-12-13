@@ -120,7 +120,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         new_message_id = msg.message_id + 1
-        new_target_id = msg.target + 1
+        new_target_id = msg.message_id
         proposals = cast(List[Description], msg.get("proposal"))
 
         if proposals is not []:
@@ -314,7 +314,7 @@ class MyTransactionHandler(Handler):
             dialogue = dialogues.dialogues[dialogue_label]
             fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
             new_message_id = fipa_msg.message_id + 1
-            new_target_id = fipa_msg.target + 1
+            new_target_id = fipa_msg.message_id
             counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_pbk
             inform_msg = FIPAMessage(message_id=new_message_id,
                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,

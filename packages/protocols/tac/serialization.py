@@ -23,7 +23,7 @@
 import sys
 from typing import Any, Dict, TYPE_CHECKING, cast
 
-from aea.protocols.internal_base import InternalMessage, Serializer
+from aea.decision_maker.internal_base import InternalMessage, Serializer
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac import tac_pb2

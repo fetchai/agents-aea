@@ -23,7 +23,7 @@
 from enum import Enum
 from typing import cast, Dict, Optional, Union
 
-from aea.protocols.internal_base import InternalMessage
+from aea.decision_maker.internal_base import InternalMessage
 
 TransactionId = str
 
@@ -115,12 +115,27 @@ class StateUpdateMessage(InternalMessage):
         try:
             assert self.performative in StateUpdateMessage.Performative, "Invalide performative."
             isinstance(self.amount_by_currency, dict)
+            for key, value in self.amount_by_currency.items():
+                isinstance(key, str)
+                isinstance(value, int)
             isinstance(self.quantities_by_good_pbk, dict)
+            for key, value in self.quantities_by_good_pbk.items():
+                isinstance(key, str)
+                isinstance(value, int)
             if self.performative == self.Performative.INITIALIZE:
                 isinstance(self.exchange_params_by_currency, dict)
+                for key, value in self.exchange_params_by_currency.items():
+                    isinstance(key, str)
+                    isinstance(value, float)
                 assert self.amount_by_currency.keys() == self.exchange_params_by_currency.keys()
                 isinstance(self.utility_params_by_good_pbk, dict)
+                for key, value in self.utility_params_by_good_pbk.items():
+                    isinstance(key, str)
+                    isinstance(value, float)
                 assert self.quantities_by_good_pbk.keys() == self.utility_params_by_good_pbk.keys()
+                utility_params_by_good_pbk = self.get("utility_params_by_good_pbk")
+                utility_params_by_good_pbk = cast(UtilityParams, utility_params_by_good_pbk)
+                assert self.quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
                 isinstance(self.tx_fee, int)
             elif self.performative == self.Performative.APPLY:
                 assert self.exchange_params_by_currency is None

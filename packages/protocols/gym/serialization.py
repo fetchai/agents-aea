@@ -59,10 +59,10 @@ class GymSerializer(Serializer):
             observation = msg.observation
             observation_bytes = base64.b64encode(pickle.dumps(observation)).decode("utf-8")
             new_body["observation"] = observation_bytes
-            reward = msg.reward  # type: Any
+            reward = msg.reward
             reward_bytes = base64.b64encode(pickle.dumps(reward)).decode("utf-8")
             new_body["reward"] = reward_bytes
-            info = msg.info  # type: Any
+            info = msg.info
             info_bytes = base64.b64encode(pickle.dumps(info)).decode("utf-8")
             new_body["info"] = info_bytes
             new_body["step_id"] = msg.step_id

@@ -118,7 +118,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         new_message_id = msg.message_id + 1
-        new_target = msg.target + 1
+        new_target = msg.message_id
         proposals = cast(List[Description], msg.get("proposal"))
         if proposals is not []:
             # only take the first proposal
@@ -174,7 +174,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         new_message_id = msg.message_id + 1
-        new_target = msg.target + 1
+        new_target = msg.message_id
         inform_msg = FIPAMessage(message_id=new_message_id,
                                  dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                  target=new_target,

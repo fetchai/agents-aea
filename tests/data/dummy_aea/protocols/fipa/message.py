@@ -97,7 +97,7 @@ class FIPAMessage(Message):
     def query(self) -> Union[Query, bytes, None]:
         """Get the query of the message."""
         assert self.is_set("query")
-        return self.get("query")
+        return cast(Union[Query, bytes, None], self.get("query"))
 
     @property
     def proposal(self) -> List[Description]:

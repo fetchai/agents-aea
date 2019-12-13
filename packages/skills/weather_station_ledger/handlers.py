@@ -125,7 +125,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         new_message_id = msg.message_id + 1
-        new_target = msg.target + 1
+        new_target = msg.message_id
         logger.info("[{}]: received CFP from sender={}".format(self.context.agent_name,
                                                                msg.counterparty[-5:]))
         query = msg.query
@@ -187,7 +187,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         new_message_id = msg.message_id + 1
-        new_target = msg.target + 1
+        new_target = msg.message_id
         logger.info("[{}]: received ACCEPT from sender={}".format(self.context.agent_name,
                                                                   msg.counterparty[-5:]))
         logger.info("[{}]: sending MATCH_ACCEPT_W_INFORM to sender={}".format(self.context.agent_name,
@@ -217,7 +217,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         new_message_id = msg.message_id + 1
-        new_target = msg.target + 1
+        new_target = msg.message_id
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name,
                                                                   msg.counterparty[-5:]))
 
