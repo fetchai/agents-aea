@@ -145,7 +145,7 @@ class OEFMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert self.type is not None, "type must not be None."
+            assert self.type in OEFMessage.Type, "type must not be None."
             assert isinstance(self.id, int), "id must be int."
 
             if self.type == OEFMessage.Type.REGISTER_SERVICE:

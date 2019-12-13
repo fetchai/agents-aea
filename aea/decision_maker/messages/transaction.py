@@ -96,7 +96,7 @@ class TransactionMessage(Message):
         assert self.check_consistency(), "Transaction message initialization inconsistent."
 
     @property
-    def performative(self) -> Performative:
+    def performative(self) -> Performative: # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "Performative is not set."
         return TransactionMessage.Performative(self.get('performative'))

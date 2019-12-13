@@ -58,8 +58,7 @@ def test_default_error_serialization():
                 as mock_type_enum:
             mock_type_enum.BYTES.value = "unknown"
             body = {}  # Dict[str, Any]
-            msg_type = DefaultMessage.Type(msg.type)
-            body["type"] = str(msg_type.value)
+            body["type"] = str(msg.type.value)
             content = msg.content
             body["content"] = base64.b64encode(content).decode("utf-8")
             bytes_msg = json.dumps(body).encode("utf-8")

@@ -122,7 +122,7 @@ class FIPAMessage(Message):
                 assert isinstance(self.query, Query) or isinstance(self.query, bytes) or self.query is None
                 assert len(self.body) == 5
             elif self.performative == FIPAMessage.Performative.PROPOSE:
-                assert type(self.proposal) == list and all(isinstance(d, Description) or type(d) == bytes for d in self.proposal)  # type: ignore
+                assert type(self.proposal) == list and all(isinstance(d, Description) for d in self.proposal)  # type: ignore
                 assert len(self.body) == 5
             elif self.performative == FIPAMessage.Performative.ACCEPT \
                     or self.performative == FIPAMessage.Performative.MATCH_ACCEPT \

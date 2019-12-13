@@ -52,24 +52,23 @@ class OEFSerializer(Serializer):
         new_body['id'] = msg.id
 
         if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
-            service_description = msg.service_description  # type: Description
+            service_description = msg.service_description
             service_description_bytes = base64.b64encode(pickle.dumps(service_description)).decode("utf-8")
             new_body["service_description"] = service_description_bytes
         elif oef_type in {OEFMessage.Type.REGISTER_AGENT, OEFMessage.Type.UNREGISTER_AGENT}:
-            agent_description = msg.agent_description  # type: Description
+            agent_description = msg.agent_description
             agent_description_bytes = base64.b64encode(pickle.dumps(agent_description)).decode("utf-8")
             new_body["agent_description"] = agent_description_bytes
         elif oef_type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
-            query = msg.query  # type: Query
+            query = msg.query
             query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
             new_body["query"] = query_bytes
         elif oef_type in {OEFMessage.Type.SEARCH_RESULT}:
             # we need this cast because the "agents" field might contains
             # the Protobuf type "RepeatedScalarContainer", which is not JSON serializable.
-            new_body["agents"] = list(msg.body["agents"])
+            new_body["agents"] = msg.agents
         elif oef_type in {OEFMessage.Type.OEF_ERROR}:
-            operation = msg.operation
-            new_body["operation"] = str(operation)
+            new_body["operation"] = msg.operation.value
 
         oef_message_bytes = json.dumps(new_body).encode("utf-8")
         return oef_message_bytes

@@ -246,9 +246,8 @@ class OEFHandler(Handler):
         """
         # convenience representations
         oef_msg = cast(OEFMessage, message)
-        oef_msg_type = oef_msg.type
 
-        if oef_msg_type is OEFMessage.Type.SEARCH_RESULT:
+        if oef_msg.type is OEFMessage.Type.SEARCH_RESULT:
             self._handle_search(oef_msg.agents)
 
     def teardown(self) -> None:
@@ -311,17 +310,17 @@ class MyTransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         if tx_msg_response is not None and \
-                TransactionMessage.Performative(tx_msg_response.performative) == TransactionMessage.Performative.ACCEPT:
+                tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
 
-            json_data = {'transaction_digest': tx_msg_response.get("transaction_digest")}
-            info = cast(Dict[str, Any], tx_msg_response.get("info"))
+            json_data = {'transaction_digest': tx_msg_response.transaction_digest}
+            info = tx_msg_response.info
             dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogue = dialogues.dialogues[dialogue_label]
             fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
-            new_message_id = cast(int, fipa_msg.get("message_id")) + 1
-            new_target_id = cast(int, fipa_msg.get("target")) + 1
+            new_message_id = fipa_msg.message_id
+            new_target_id = fipa_msg.target + 1
             counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_pbk
             inform_msg = FIPAMessage(message_id=new_message_id,
                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,
