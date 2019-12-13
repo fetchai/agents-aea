@@ -24,10 +24,10 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union, cast
 
 from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
+from aea.mail.base import Address
 from aea.protocols.base import Message
 
 TransactionId = str
-Address = str
 OFF_CHAIN = 'off_chain'
 SUPPORTED_LEDGER_IDS = SUPPORTED_LEDGER_APIS + [OFF_CHAIN]
 

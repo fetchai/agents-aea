@@ -26,7 +26,6 @@ from typing import cast, Dict, Optional, Union
 from aea.protocols.base import Message
 
 TransactionId = str
-Address = str
 
 Currencies = Dict[str, int]  # a map from identifier to quantity
 Goods = Dict[str, int]   # a map from identifier to quantity

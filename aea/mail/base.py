@@ -28,7 +28,7 @@ from threading import Thread, Lock
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict, cast
 from urllib.parse import urlparse
 
-from aea.configurations.base import Address, ProtocolId
+from aea.configurations.base import ProtocolId
 from aea.connections.base import ConnectionStatus
 from aea.mail import base_pb2
 
@@ -36,6 +36,9 @@ if TYPE_CHECKING:
     from aea.connections.base import Connection  # pragma: no cover
 
 logger = logging.getLogger(__name__)
+
+
+Address = str
 
 
 class AEAConnectionError(Exception):

@@ -53,7 +53,7 @@ class TACMessage(Message):
 
         GENERIC_ERROR = 0
         REQUEST_NOT_VALID = 1
-        AGENT_PBK_ALREADY_REGISTERED = 2
+        AGENT_ADDR_ALREADY_REGISTERED = 2
         AGENT_NAME_ALREADY_REGISTERED = 3
         AGENT_NOT_REGISTERED = 4
         TRANSACTION_NOT_VALID = 5
@@ -65,7 +65,7 @@ class TACMessage(Message):
     _from_ec_to_msg = {
         ErrorCode.GENERIC_ERROR: "Unexpected error.",
         ErrorCode.REQUEST_NOT_VALID: "Request not recognized",
-        ErrorCode.AGENT_PBK_ALREADY_REGISTERED: "Agent pbk already registered.",
+        ErrorCode.AGENT_ADDR_ALREADY_REGISTERED: "Agent addr already registered.",
         ErrorCode.AGENT_NAME_ALREADY_REGISTERED: "Agent name already registered.",
         ErrorCode.AGENT_NOT_REGISTERED: "Agent not registered.",
         ErrorCode.TRANSACTION_NOT_VALID: "Error in checking transaction",
@@ -144,8 +144,8 @@ class TACMessage(Message):
                 assert quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
                 assert self.is_set("tx_fee")
                 assert type(self.get("tx_fee")) == int
-                assert self.is_set("agent_pbk_to_name")
-                assert type(self.get("agent_pbk_to_name")) in [dict, defaultdict]
+                assert self.is_set("agent_addr_to_name")
+                assert type(self.get("agent_addr_to_name")) in [dict, defaultdict]
                 assert self.is_set("good_pbk_to_name")
                 assert type(self.get("good_pbk_to_name")) in [dict, defaultdict]
                 assert self.is_set("version_id")

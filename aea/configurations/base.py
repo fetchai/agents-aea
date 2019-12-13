@@ -29,7 +29,6 @@ DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
 DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
 T = TypeVar('T')
 
-Address = str
 ProtocolId = str
 SkillId = str
 

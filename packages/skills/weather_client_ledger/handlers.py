@@ -319,7 +319,7 @@ class MyTransactionHandler(Handler):
             fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
             new_message_id = cast(int, fipa_msg.get("message_id")) + 1
             new_target_id = cast(int, fipa_msg.get("target")) + 1
-            counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_pbk
+            counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_addr
             inform_msg = FIPAMessage(message_id=new_message_id,
                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                      target=new_target_id,

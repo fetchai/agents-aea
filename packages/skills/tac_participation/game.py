@@ -25,13 +25,12 @@ from typing import Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.protocols.oef.models import Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
+from aea.mail.base import Address
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac.message import TACMessage
 else:
     from tac_protocol.message import TACMessage
-
-Address = str
 
 logger = logging.getLogger("aea.tac_participation_skill")
 
@@ -52,7 +51,7 @@ class Configuration:
     def __init__(self,
                  version_id: str,
                  tx_fee: int,
-                 agent_pbk_to_name: Dict[Address, str],
+                 agent_addr_to_name: Dict[Address, str],
                  good_pbk_to_name: Dict[Address, str],
                  controller_pbk: Address):
         """
@@ -60,15 +59,15 @@ class Configuration:
 
         :param version_id: the version of the game.
         :param tx_fee: the fee for a transaction.
-        :param agent_pbk_to_name: a dictionary mapping agent public keys to agent names (as strings).
+        :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
         :param good_pbk_to_name: a dictionary mapping good public keys to good names (as strings).
         :param controller_pbk: the public key of the controller
         """
         self._version_id = version_id
-        self._nb_agents = len(agent_pbk_to_name)
+        self._nb_agents = len(agent_addr_to_name)
         self._nb_goods = len(good_pbk_to_name)
         self._tx_fee = tx_fee
-        self._agent_pbk_to_name = agent_pbk_to_name
+        self._agent_addr_to_name = agent_addr_to_name
         self._good_pbk_to_name = good_pbk_to_name
         self._controller_pbk = controller_pbk
 
@@ -95,9 +94,9 @@ class Configuration:
         return self._tx_fee
 
     @property
-    def agent_pbk_to_name(self) -> Dict[Address, str]:
+    def agent_addr_to_name(self) -> Dict[Address, str]:
         """Map agent public keys to names."""
-        return self._agent_pbk_to_name
+        return self._agent_addr_to_name
 
     @property
     def good_pbk_to_name(self) -> Dict[Address, str]:
@@ -105,14 +104,14 @@ class Configuration:
         return self._good_pbk_to_name
 
     @property
-    def agent_pbks(self) -> List[Address]:
+    def agent_addrs(self) -> List[Address]:
         """List of agent public keys."""
-        return list(self._agent_pbk_to_name.keys())
+        return list(self._agent_addr_to_name.keys())
 
     @property
     def agent_names(self):
         """List of agent names."""
-        return list(self._agent_pbk_to_name.values())
+        return list(self._agent_addr_to_name.values())
 
     @property
     def good_pbks(self) -> List[Address]:
@@ -140,7 +139,7 @@ class Configuration:
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
         assert self.nb_agents > 1, "Must have at least two agents."
         assert self.nb_goods > 1, "Must have at least two goods."
-        assert len(self.agent_pbks) == self.nb_agents, "There must be one public key for each agent."
+        assert len(self.agent_addrs) == self.nb_agents, "There must be one public key for each agent."
         assert len(set(self.agent_names)) == self.nb_agents, "Agents' names must be unique."
         assert len(self.good_pbks) == self.nb_goods, "There must be one public key for each good."
         assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
@@ -152,7 +151,7 @@ class Game(SharedClass):
     def __init__(self, **kwargs):
         """Instantiate the game class."""
         self._expected_version_id = kwargs.pop('expected_version_id', '')  # type: str
-        self._expected_controller_pbk = kwargs.pop('expected_controller_pbk', None)  # type: Optional[str]
+        self._expected_controller_addr = kwargs.pop('expected_controller_addr', None)  # type: Optional[str]
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._configuration = None  # type: Optional[Configuration]
@@ -168,10 +167,10 @@ class Game(SharedClass):
         return self._phase
 
     @property
-    def expected_controller_pbk(self) -> Address:
+    def expected_controller_addr(self) -> Address:
         """Get the expected controller pbk."""
-        assert self._expected_controller_pbk is not None, "Expected controller public key not assigned!"
-        return self._expected_controller_pbk
+        assert self._expected_controller_addr is not None, "Expected controller public key not assigned!"
+        return self._expected_controller_addr
 
     @property
     def configuration(self) -> Configuration:
@@ -189,24 +188,24 @@ class Game(SharedClass):
         :return: None
         """
         assert tac_message.get("type") == TACMessage.Type.GAME_DATA, "Wrong TACMessage for initialization of TAC game."
-        assert controller_pbk == self.expected_controller_pbk, "TACMessage from unexpected controller."
+        assert controller_pbk == self.expected_controller_addr, "TACMessage from unexpected controller."
         assert tac_message.get("version_id") == self.expected_version_id, "TACMessage for unexpected game."
         self._configuration = Configuration(cast(str, tac_message.get("version_id")),
                                             cast(int, tac_message.get("tx_fee")),
-                                            cast(Dict[str, str], tac_message.get("agent_pbk_to_name")),
-                                            cast(Dict[str, str], tac_message.get("good_pbk_to_name")),
+                                            cast(Dict[str, str], tac_message.get("agent_addr_to_name")),
+                                            cast(Dict[str, str], tac_message.get("good_addr_to_name")),
                                             controller_pbk)
 
-    def update_expected_controller_pbk(self, controller_pbk: Address):
+    def update_expected_controller_addr(self, controller_addr: Address):
         """
         Overwrite the expected controller pbk.
 
-        :param controller_pbk: the public key of the controller
+        :param controller_addr: the public key of the controller
 
         :return: None
         """
         logger.warning("[{}]: TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.".format(self.context.agent_name))
-        self._expected_controller_pbk = controller_pbk
+        self._expected_controller_addr = controller_addr
 
     def update_game_phase(self, phase: Phase) -> None:
         """

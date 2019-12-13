@@ -27,8 +27,8 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
     ConstraintExpr
+from aea.mail.base import Address
 
-Address = str
 TransactionId = str
 
 SUPPLY_DATAMODEL_NAME = 'supply'
@@ -106,36 +106,36 @@ def build_goods_query(good_pbks: List[str], currency: str, is_searching_for_sell
     return query
 
 
-def generate_transaction_id(agent_pbk: Address, opponent_pbk: Address, dialogue_label: DialogueLabel, agent_is_seller: bool) -> TransactionId:
+def generate_transaction_id(agent_addr: Address, opponent_addr: Address, dialogue_label: DialogueLabel, agent_is_seller: bool) -> TransactionId:
     """
     Make a transaction id.
 
-    :param agent_pbk: the pbk of the agent.
-    :param opponent_pbk: the public key of the opponent.
+    :param agent_addr: the address of the agent.
+    :param opponent_addr: the public key of the opponent.
     :param dialogue_label: the dialogue label
     :param agent_is_seller: boolean indicating if the agent is a seller
     :return: a transaction id
     """
     # the format is {buyer_pbk}_{seller_pbk}_{dialogue_id}_{dialogue_starter_pbk}
-    assert opponent_pbk == dialogue_label.dialogue_opponent_pbk
-    buyer_pbk, seller_pbk = (opponent_pbk, agent_pbk) if agent_is_seller else (agent_pbk, opponent_pbk)
-    transaction_id = "{}_{}_{}_{}_{}".format(buyer_pbk, seller_pbk, dialogue_label.dialogue_starter_reference, dialogue_label.dialogue_responder_reference, dialogue_label.dialogue_starter_pbk)
+    assert opponent_addr == dialogue_label.dialogue_opponent_addr
+    buyer_addr, seller_addr = (opponent_addr, agent_addr) if agent_is_seller else (agent_addr, opponent_addr)
+    transaction_id = "{}_{}_{}_{}_{}".format(buyer_addr, seller_addr, dialogue_label.dialogue_starter_reference, dialogue_label.dialogue_responder_reference, dialogue_label.dialogue_starter_addr)
     return transaction_id
 
 
-def dialogue_label_from_transaction_id(agent_pbk: Address, transaction_id: TransactionId) -> DialogueLabel:
+def dialogue_label_from_transaction_id(agent_addr: Address, transaction_id: TransactionId) -> DialogueLabel:
     """
     Recover dialogue label from transaction id.
 
-    :param agent_pbk: the pbk of the agent.
+    :param agent_addr: the pbk of the agent.
     :param transaction_id: the transaction id
     :return: a dialogue label
     """
-    buyer_pbk, seller_pbk, dialogue_starter_reference, dialogue_responder_reference, dialogue_starter_pbk = transaction_id.split('_')
-    if agent_pbk == buyer_pbk:
-        dialogue_opponent_pbk = seller_pbk
+    buyer_addr, seller_addr, dialogue_starter_reference, dialogue_responder_reference, dialogue_starter_pbk = transaction_id.split('_')
+    if agent_addr == buyer_addr:
+        dialogue_opponent_pbk = seller_addr
     else:
-        dialogue_opponent_pbk = buyer_pbk
+        dialogue_opponent_pbk = buyer_addr
     dialogue_label = DialogueLabel((dialogue_starter_reference, dialogue_responder_reference), dialogue_opponent_pbk, dialogue_starter_pbk)
     return dialogue_label
 
@@ -150,7 +150,7 @@ def generate_transaction_message(proposal_description: Description, dialogue_lab
     :param agent_public_key: the public key of the agent
     :return: a transaction message
     """
-    transaction_id = generate_transaction_id(agent_public_key, dialogue_label.dialogue_opponent_pbk, dialogue_label, is_seller)
+    transaction_id = generate_transaction_id(agent_public_key, dialogue_label.dialogue_opponent_addr, dialogue_label, is_seller)
     sender_tx_fee = proposal_description.values['seller_tx_fee'] if is_seller else proposal_description.values['buyer_tx_fee']
     counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if is_seller else proposal_description.values['seller_tx_fee']
     goods_component = copy.copy(proposal_description.values)
@@ -159,7 +159,7 @@ def generate_transaction_message(proposal_description: Description, dialogue_lab
                                          skill_ids=['tac_negotiation', 'tac_participation'],
                                          transaction_id=transaction_id,
                                          sender=agent_public_key,
-                                         counterparty=dialogue_label.dialogue_opponent_pbk,
+                                         counterparty=dialogue_label.dialogue_opponent_addr,
                                          currency_pbk=proposal_description.values['currency'],
                                          amount=proposal_description.values['price'],
                                          is_sender_buyer=not is_seller,

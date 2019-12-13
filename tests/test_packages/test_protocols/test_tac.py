@@ -46,7 +46,7 @@ def test_tac_message_instantiation():
                       quantities_by_good_pbk={'good_1': 20, 'good_2': 15},
                       utility_params_by_good_pbk={'good_1': 30.0, 'good_2': 50.0},
                       tx_fee=20,
-                      agent_pbk_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
+                      agent_addr_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
                       good_pbk_to_name={'good_1': 'First good', 'good_2': 'Second good'},
                       version_id='game_version_1')
     assert TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
@@ -109,7 +109,7 @@ def test_tac_serialization():
                      quantities_by_good_pbk={'good_1': 20, 'good_2': 15},
                      utility_params_by_good_pbk={'good_1': 30.0, 'good_2': 50.0},
                      tx_fee=20,
-                     agent_pbk_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
+                     agent_addr_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
                      good_pbk_to_name={'good_1': 'First good', 'good_2': 'Second good'},
                      version_id='game_version_1')
     msg_bytes = TACSerializer().encode(msg)
