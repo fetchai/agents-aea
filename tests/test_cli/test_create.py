@@ -297,7 +297,7 @@ class TestCreateFailsWhenAlreadyInAEAProject:
 
     @classmethod
     def setup_class(cls):
-        """Set the tests up."""
+        """Set the test up."""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
@@ -310,8 +310,10 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert cls.result.exit_code == 0
 
+        # calling 'aea create myagent' again within an AEA project - recursively.
         os.chdir(cls.agent_name)
-        # calling 'aea create myagent' again within an AEA project.
+        os.mkdir("another_subdir")
+        os.chdir("another_subdir")
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):

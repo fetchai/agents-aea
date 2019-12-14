@@ -40,6 +40,8 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_REGISTRY_PATH = "../packages"
+DEFAULT_CONNECTION = "oef"
+DEFAULT_SKILL = "error"
 
 
 class Context(object):
