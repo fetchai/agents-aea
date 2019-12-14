@@ -70,6 +70,10 @@ def create(click_context, agent_name):
     """Create an agent."""
     ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
+    if DEFAULT_AEA_CONFIG_FILE in set(map(lambda x: x.name, Path(".").iterdir())):
+        logger.error("The current folder is already an AEA project. Please move to the parent folder.")
+        sys.exit(1)
+
     logger.info("Initializing AEA project '{}'".format(agent_name))
     logger.info("Creating project directory '/{}'".format(agent_name))
 
