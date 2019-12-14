@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Optional, Union, cast, Tuple
+from typing import cast, Tuple
 import numpy as np
 
 from aea.protocols.base import Message
@@ -44,13 +44,13 @@ class MLTradeMessage(Message):
             """Get string representation."""
             return self.value
 
-    def __init__(self, performative: Optional[Union[str, Performative]] = None, **kwargs):
+    def __init__(self, performative: Performative, **kwargs):
         """
         Initialize.
 
         :param type: the type.
         """
-        super().__init__(performative=MLTradeMessage.Performative(performative), **kwargs)
+        super().__init__(performative=performative, **kwargs)
         assert self.check_consistency(), "MLTradeMessage initialization inconsistent."
 
     @property
@@ -86,7 +86,7 @@ class MLTradeMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert self.performative in MLTradeMessage.Performative, "Performative is invalid."
+            assert isinstance(self.performative, MLTradeMessage.Performative), "Performative is invalid type."
             if self.performative == MLTradeMessage.Performative.CFT:
                 assert isinstance(self.query, Query)
                 assert len(self.body) == 2
@@ -99,14 +99,11 @@ class MLTradeMessage(Message):
                 assert len(self.body) == 3
             elif self.performative == MLTradeMessage.Performative.DATA:
                 assert isinstance(self.terms, Description)
-                assert self.is_set("data")
-                # expect data = (X, y)
-                data = self.get("data")
-                assert isinstance(data, tuple)
-                assert len(data) == 2
-                assert isinstance(data[0], np.ndarray)
-                assert isinstance(data[1], np.ndarray)
-                assert data[0].shape[0] == data[1].shape[0]
+                assert isinstance(self.data, tuple)
+                assert len(self.data) == 2
+                assert isinstance(self.data[0], np.ndarray)
+                assert isinstance(self.data[1], np.ndarray)
+                assert self.data[0].shape[0] == self.data[1].shape[0]
                 assert len(self.body) == 3
             else:
                 raise ValueError("Performative not recognized.")

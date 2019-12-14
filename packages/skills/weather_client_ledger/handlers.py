@@ -200,7 +200,8 @@ class FIPAHandler(Handler):
                                     sender_tx_fee=strategy.max_buyer_tx_fee,
                                     counterparty_tx_fee=proposal.values['seller_tx_fee'],
                                     ledger_id=ledger_id,
-                                    info={'dialogue_label': dialogue.dialogue_label.json})
+                                    info={'dialogue_label': dialogue.dialogue_label.json},
+                                    quantities_by_good_pbk={})
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
             self.context.agent_name))

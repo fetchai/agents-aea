@@ -164,19 +164,19 @@ def test_performative_match_accept():
     assert msg.get("performative") == deserialised_msg.get("performative")
 
 
-def test_performative_not_recognized():
-    """Tests an unknown Performative."""
-    msg = FIPAMessage(
-        performative=FIPAMessage.Performative.ACCEPT,
-        message_id=0,
-        dialogue_reference=(str(0), ''),
-        target=1)
+# def test_performative_not_recognized():
+#     """Tests an unknown Performative."""
+#     msg = FIPAMessage(
+#         performative=FIPAMessage.Performative.ACCEPT,
+#         message_id=0,
+#         dialogue_reference=(str(0), ''),
+#         target=1)
 
-    with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
-            as mock_performative_enum:
-        mock_performative_enum.ACCEPT.value = "unknown"
-        assert not msg.check_consistency(),\
-            "We expect that the check_consistency will return False"
+#     with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
+#             as mock_performative_enum:
+#         mock_performative_enum.ACCEPT.value = "unknown"
+#         assert not msg.check_consistency(),\
+#             "We expect that the check_consistency will return False"
 
 
 def test_performative_accept_with_inform():

@@ -45,28 +45,27 @@ class OEFSerializer(Serializer):
         :return: the bytes
         """
         msg = cast(OEFMessage, msg)
-        oef_type = OEFMessage.Type(msg.type)
         new_body = copy.copy(msg.body)
-        new_body["type"] = oef_type.value
+        new_body["type"] = msg.type.value
         new_body['id'] = msg.id
 
-        if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
+        if msg.type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
             service_description = msg.service_description
             service_description_bytes = base64.b64encode(pickle.dumps(service_description)).decode("utf-8")
             new_body["service_description"] = service_description_bytes
-        elif oef_type in {OEFMessage.Type.REGISTER_AGENT, OEFMessage.Type.UNREGISTER_AGENT}:
+        elif msg.type in {OEFMessage.Type.REGISTER_AGENT, OEFMessage.Type.UNREGISTER_AGENT}:
             agent_description = msg.agent_description
             agent_description_bytes = base64.b64encode(pickle.dumps(agent_description)).decode("utf-8")
             new_body["agent_description"] = agent_description_bytes
-        elif oef_type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
+        elif msg.type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
             query = msg.query
             query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
             new_body["query"] = query_bytes
-        elif oef_type in {OEFMessage.Type.SEARCH_RESULT}:
+        elif msg.type in {OEFMessage.Type.SEARCH_RESULT}:
             # we need this cast because the "agents" field might contains
             # the Protobuf type "RepeatedScalarContainer", which is not JSON serializable.
             new_body["agents"] = msg.agents
-        elif oef_type in {OEFMessage.Type.OEF_ERROR}:
+        elif msg.type in {OEFMessage.Type.OEF_ERROR}:
             new_body["operation"] = msg.operation.value
 
         oef_message_bytes = json.dumps(new_body).encode("utf-8")
@@ -81,9 +80,8 @@ class OEFSerializer(Serializer):
         """
         json_msg = json.loads(obj.decode("utf-8"))
         oef_type = OEFMessage.Type(json_msg["type"])
+        oef_id = json_msg['id']
         new_body = copy.copy(json_msg)
-        new_body["type"] = oef_type
-        new_body['id'] = json_msg['id']
 
         if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
             service_description_bytes = base64.b64decode(json_msg["service_description"])
@@ -103,5 +101,5 @@ class OEFSerializer(Serializer):
             operation = json_msg["operation"]
             new_body["operation"] = OEFMessage.OEFErrorOperation(int(operation))
 
-        oef_message = OEFMessage(oef_type=oef_type, body=new_body)
+        oef_message = OEFMessage(type=oef_type, id=oef_id, body=new_body)
         return oef_message

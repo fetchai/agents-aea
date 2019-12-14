@@ -28,19 +28,19 @@ from packages.protocols.tac.serialization import TACSerializer, _from_dict_to_pa
 
 def test_tac_message_instantiation():
     """Test instantiation of the tac message."""
-    assert TACMessage(tac_type=TACMessage.Type.REGISTER,
+    assert TACMessage(type=TACMessage.Type.REGISTER,
                       agent_name='some_name')
-    assert TACMessage(tac_type=TACMessage.Type.UNREGISTER)
-    assert TACMessage(tac_type=TACMessage.Type.TRANSACTION,
+    assert TACMessage(type=TACMessage.Type.UNREGISTER)
+    assert TACMessage(type=TACMessage.Type.TRANSACTION,
                       transaction_id='some_id',
                       transaction_counterparty='some_address',
                       amount_by_currency={'FET': 10},
                       sender_tx_fee=10,
                       counterparty_tx_fee=10,
                       quantities_by_good_pbk={'good_1': 0, 'good_2': 10})
-    assert TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
-    assert TACMessage(tac_type=TACMessage.Type.CANCELLED)
-    assert TACMessage(tac_type=TACMessage.Type.GAME_DATA,
+    assert TACMessage(type=TACMessage.Type.GET_STATE_UPDATE)
+    assert TACMessage(type=TACMessage.Type.CANCELLED)
+    assert TACMessage(type=TACMessage.Type.GAME_DATA,
                       amount_by_currency={'FET': 10},
                       exchange_params_by_currency={'FET': 10.0},
                       quantities_by_good_pbk={'good_1': 20, 'good_2': 15},
@@ -49,37 +49,31 @@ def test_tac_message_instantiation():
                       agent_pbk_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
                       good_pbk_to_name={'good_1': 'First good', 'good_2': 'Second good'},
                       version_id='game_version_1')
-    assert TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+    assert TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
                       transaction_id='some_id',
                       amount_by_currency={'FET': 10},
                       quantities_by_good_pbk={'good_1': 20, 'good_2': 15})
-    assert TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+    assert TACMessage(type=TACMessage.Type.TAC_ERROR,
                       error_code=TACMessage.ErrorCode.GENERIC_ERROR)
     assert str(TACMessage.Type.REGISTER) == 'register'
-
-    msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name='some_name')
-    with mock.patch('packages.protocols.tac.message.TACMessage.Type') as mocked_type:
-        mocked_type.REGISTER.value = "unknown"
-        assert not msg.check_consistency(), \
-            "Expect the consistency to return False"
 
 
 def test_tac_serialization():
     """Test that the serialization for the tac message works."""
-    msg = TACMessage(tac_type=TACMessage.Type.REGISTER,
+    msg = TACMessage(type=TACMessage.Type.REGISTER,
                      agent_name='some_name')
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.UNREGISTER)
+    msg = TACMessage(type=TACMessage.Type.UNREGISTER)
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION,
+    msg = TACMessage(type=TACMessage.Type.TRANSACTION,
                      transaction_id='some_id',
                      transaction_counterparty='some_address',
                      amount_by_currency={'FET': 10},
@@ -91,19 +85,19 @@ def test_tac_serialization():
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
+    msg = TACMessage(type=TACMessage.Type.GET_STATE_UPDATE)
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.CANCELLED)
+    msg = TACMessage(type=TACMessage.Type.CANCELLED)
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
+    msg = TACMessage(type=TACMessage.Type.GAME_DATA,
                      amount_by_currency={'FET': 10},
                      exchange_params_by_currency={'FET': 10.0},
                      quantities_by_good_pbk={'good_1': 20, 'good_2': 15},
@@ -117,7 +111,7 @@ def test_tac_serialization():
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+    msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
                      transaction_id='some_id',
                      amount_by_currency={'FET': 10},
                      quantities_by_good_pbk={'good_1': 20, 'good_2': 15})
@@ -131,7 +125,7 @@ def test_tac_serialization():
             mocked_type.TRANSACTION_CONFIRMATION.value = "unknown"
             TACSerializer().encode(msg)
 
-    msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+    msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                      error_code=TACMessage.ErrorCode.GENERIC_ERROR,
                      info={'msg': "This is info msg."})
     msg_bytes = TACSerializer().encode(msg)

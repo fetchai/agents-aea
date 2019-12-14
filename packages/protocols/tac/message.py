@@ -20,7 +20,7 @@
 
 """This module contains the default message definition."""
 from enum import Enum
-from typing import Dict, Optional, cast, Any
+from typing import Dict, cast, Any
 from collections import defaultdict
 
 from aea.configurations.base import Address
@@ -76,14 +76,14 @@ class TACMessage(Message):
         ErrorCode.DIALOGUE_INCONSISTENT: "The message is inconsistent with the dialogue."
     }  # type: Dict[ErrorCode, str]
 
-    def __init__(self, tac_type: Optional[Type] = None,
+    def __init__(self, type: Type,
                  **kwargs):
         """
         Initialize.
 
         :param tac_type: the type of TAC message.
         """
-        super().__init__(type=tac_type, **kwargs)
+        super().__init__(type=type, **kwargs)
         assert self.check_consistency(), "TACMessage initialization inconsistent."
 
     @property
@@ -185,24 +185,24 @@ class TACMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert self.type in TACMessage.Type, "Type is not valid."
+            assert isinstance(self.type, TACMessage.Type), "Type is not valid type."
             if self.type == TACMessage.Type.REGISTER:
-                isinstance(self.agent_name, str)
+                assert isinstance(self.agent_name, str)
                 assert len(self.body) == 2
             elif self.type == TACMessage.Type.UNREGISTER:
                 assert len(self.body) == 1
             elif self.type == TACMessage.Type.TRANSACTION:
-                isinstance(self.transaction_id, str)
-                isinstance(self.transaction_counterparty, str)
-                isinstance(self.amount_by_currency, dict)
+                assert isinstance(self.transaction_id, str)
+                assert isinstance(self.transaction_counterparty, str)
+                assert isinstance(self.amount_by_currency, dict)
                 for key, int_value in self.amount_by_currency.items():
                     assert type(key) == str and type(int_value) == int
                 assert len(self.amount_by_currency.keys()) == len(set(self.amount_by_currency.keys()))
-                isinstance(self.sender_tx_fee, int)
+                assert isinstance(self.sender_tx_fee, int)
                 assert self.sender_tx_fee >= 0
-                isinstance(self.counterparty_tx_fee, int)
+                assert isinstance(self.counterparty_tx_fee, int)
                 assert self.counterparty_tx_fee >= 0
-                isinstance(self.quantities_by_good_pbk, dict)
+                assert isinstance(self.quantities_by_good_pbk, dict)
                 for key, int_value in self.quantities_by_good_pbk.items():
                     assert type(key) == str and type(int_value) == int
                 assert len(self.quantities_by_good_pbk.keys()) == len(set(self.quantities_by_good_pbk.keys()))
@@ -212,34 +212,32 @@ class TACMessage(Message):
             elif self.type == TACMessage.Type.CANCELLED:
                 assert len(self.body) == 1
             elif self.type == TACMessage.Type.GAME_DATA:
-                isinstance(self.amount_by_currency, dict)
+                assert isinstance(self.amount_by_currency, dict)
                 for key, int_value in self.amount_by_currency.items():
                     assert type(key) == str and type(int_value) == int
-                isinstance(self.exchange_params_by_currency, dict)
+                assert isinstance(self.exchange_params_by_currency, dict)
                 for key, float_value in self.exchange_params_by_currency.items():
                     assert type(key) == str and type(float_value) == float
                 assert self.amount_by_currency.keys() == self.exchange_params_by_currency.keys()
-                isinstance(self.quantities_by_good_pbk, dict)
+                assert isinstance(self.quantities_by_good_pbk, dict)
                 for key, int_value in self.quantities_by_good_pbk.items():
                     assert type(key) == str and type(int_value) == int
-                isinstance(self.utility_params_by_good_pbk, dict)
+                assert isinstance(self.utility_params_by_good_pbk, dict)
                 for key, float_value in self.utility_params_by_good_pbk.items():
                     assert type(key) == str and type(float_value) == float
                 assert self.quantities_by_good_pbk.keys() == self.utility_params_by_good_pbk.keys()
-                isinstance(self.tx_fee, int)
-                assert self.is_set("agent_pbk_to_name")
-                assert type(self.get("agent_pbk_to_name")) in [dict, defaultdict]
-                assert self.is_set("good_pbk_to_name")
-                assert type(self.get("good_pbk_to_name")) in [dict, defaultdict]
-                isinstance(self.version_id, str)
+                assert isinstance(self.tx_fee, int)
+                assert type(self.agent_pbk_to_name) in [dict, defaultdict]
+                assert type(self.good_pbk_to_name) in [dict, defaultdict]
+                assert isinstance(self.version_id, str)
                 assert len(self.body) == 9
             elif self.type == TACMessage.Type.TRANSACTION_CONFIRMATION:
-                isinstance(self.transaction_id, str)
-                isinstance(self.amount_by_currency, dict)
+                assert isinstance(self.transaction_id, str)
+                assert isinstance(self.amount_by_currency, dict)
                 for key, int_value in self.amount_by_currency.items():
                     assert type(key) == str and type(int_value) == int
                 assert len(self.amount_by_currency.keys()) == len(set(self.amount_by_currency.keys()))
-                isinstance(self.quantities_by_good_pbk, dict)
+                assert isinstance(self.quantities_by_good_pbk, dict)
                 for key, int_value in self.quantities_by_good_pbk.items():
                     assert type(key) == str and type(int_value) == int
                 assert len(self.quantities_by_good_pbk.keys()) == len(set(self.quantities_by_good_pbk.keys()))
@@ -257,6 +255,7 @@ class TACMessage(Message):
                     assert len(self.body) == 2
             else:
                 raise ValueError("Type not recognized.")
+
         except (AssertionError, ValueError):  # pragma: no cover
             return False
 

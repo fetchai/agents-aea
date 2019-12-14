@@ -71,7 +71,7 @@ class TestUtilityPreferencesBase:
         currency_endowment = {"FET": 100}
         good_endowment = {"good_pbk": 2}
         self.ownership_state.init(amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment)
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                         skill_ids=["default"],
                                         transaction_id="transaction0",
                                         sender="agent_1",
@@ -82,6 +82,7 @@ class TestUtilityPreferencesBase:
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message),\
@@ -98,6 +99,7 @@ class TestUtilityPreferencesBase:
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message), \
@@ -119,6 +121,7 @@ class TestUtilityPreferencesBase:
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
         list_of_transactions = [tx_message]
         state = self.ownership_state
@@ -142,6 +145,7 @@ class TestUtilityPreferencesBase:
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
         cur_holdings = self.ownership_state.amount_by_currency['FET']
         self.ownership_state.update(tx_message=tx_message)
@@ -158,6 +162,7 @@ class TestUtilityPreferencesBase:
                                         sender_tx_fee=5,
                                         counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
         cur_holdings = self.ownership_state.amount_by_currency['FET']
         self.ownership_state.update(tx_message=tx_message)
@@ -226,6 +231,7 @@ class TestUtilityPreferencesBase:
                                         sender_tx_fee=self.preferences.transaction_fees['seller_tx_fee'],
                                         counterparty_tx_fee=self.preferences.transaction_fees['buyer_tx_fee'],
                                         quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
 
         cur_score = self.preferences.get_score(quantities_by_good_pbk=good_holdings, amount_by_currency=currency_holdings)
@@ -289,6 +295,7 @@ class TestDecisionMaker:
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
 
         self.decision_maker.message_in_queue.put_nowait(tx_message)
@@ -339,6 +346,7 @@ class TestDecisionMaker:
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
                                         quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
 
         with mock.patch.object(self.decision_maker.ledger_apis, "token_balance", return_value=1000000):
@@ -364,7 +372,8 @@ class TestDecisionMaker:
                                         sender_tx_fee=0,
                                         counterparty_tx_fee=0,
                                         ledger_id="fetchai",
-                                        quantities_by_good_pbk={"good_pbk": 10})
+                                        quantities_by_good_pbk={"good_pbk": 10},
+                                        info={'some_info_key': 'some_info_value'})
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
 

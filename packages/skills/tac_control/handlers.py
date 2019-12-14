@@ -94,7 +94,7 @@ class TACHandler(Handler):
         agent_name = message.agent_name
         if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
             logger.error("[{}]: Agent name not in whitelist: '{}'".format(self.context.agent_name, agent_name))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+            tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_public_key,
@@ -106,7 +106,7 @@ class TACHandler(Handler):
         if message.counterparty in game.registration.agent_pbk_to_name:
             logger.error("[{}]: Agent already registered: '{}'".format(self.context.agent_name,
                                                                        game.registration.agent_pbk_to_name[message.counterparty]))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+            tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_PBK_ALREADY_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_public_key,
@@ -115,7 +115,7 @@ class TACHandler(Handler):
 
         if agent_name in game.registration.agent_pbk_to_name.values():
             logger.error("[{}]: Agent with this name already registered: '{}'".format(self.context.agent_name, agent_name))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+            tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_public_key,
@@ -137,7 +137,7 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         if message.counterparty not in game.registration.agent_pbk_to_name:
             logger.error("[{}]: Agent not registered: '{}'".format(self.context.agent_name, message.counterparty))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+            tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NOT_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_public_key,
@@ -183,11 +183,11 @@ class TACHandler(Handler):
         game.settle_transaction(transaction)
 
         # send the transaction confirmation.
-        sender_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+        sender_tac_msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
                                     transaction_id=transaction.transaction_id,
                                     amount_by_currency=transaction.amount_by_currency,
                                     quantities_by_good_pbk=transaction.quantities_by_good_pbk)
-        counterparty_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+        counterparty_tac_msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
                                           transaction_id=transaction.transaction_id,
                                           amount_by_currency=transaction.amount_by_currency,
                                           quantities_by_good_pbk=transaction.quantities_by_good_pbk)
@@ -208,7 +208,7 @@ class TACHandler(Handler):
         """Handle an invalid transaction."""
         tx_id = message.transaction_id[-10:]
         logger.info("[{}]: Handling invalid transaction: {}".format(self.context.agent_name, tx_id))
-        tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+        tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                              error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID,
                              info={"transaction_id": message.transaction_id})
         self.context.outbox.put_message(to=message.counterparty,

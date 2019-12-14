@@ -21,7 +21,7 @@
 """The transaction message module."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
 from aea.decision_maker.messages.base import InternalMessage
@@ -43,7 +43,7 @@ class TransactionMessage(InternalMessage):
         ACCEPT = "accept"
         REJECT = "reject"
 
-    def __init__(self, performative: Union[str, Performative],
+    def __init__(self, performative: Performative,
                  skill_ids: List[str],
                  transaction_id: TransactionId,
                  sender: Address,
@@ -54,9 +54,8 @@ class TransactionMessage(InternalMessage):
                  sender_tx_fee: int,
                  counterparty_tx_fee: int,
                  ledger_id: str,
-                 info: Optional[Dict[str, Any]] = None,
-                 quantities_by_good_pbk: Optional[Dict[str, int]] = None,
-                 transaction_digest: Optional[str] = None,
+                 info: Dict[str, Any],
+                 quantities_by_good_pbk: Dict[str, int],
                  **kwargs):
         """
         Instantiate transaction message.
@@ -74,7 +73,6 @@ class TransactionMessage(InternalMessage):
         :param ledger_id: the ledger id
         :param info: a dictionary for arbitrary information
         :param quantities_by_good_pbk: a map from good pbk to the quantity of that good involved in the transaction.
-        :param transaction_digest: the transaction digest
         """
         super().__init__(performative=performative,
                          skill_ids=skill_ids,
@@ -89,7 +87,6 @@ class TransactionMessage(InternalMessage):
                          ledger_id=ledger_id,
                          info=info,
                          quantities_by_good_pbk=quantities_by_good_pbk,
-                         transaction_digest=transaction_digest,
                          **kwargs)
         assert self.check_consistency(), "Transaction message initialization inconsistent."
 
@@ -172,10 +169,10 @@ class TransactionMessage(InternalMessage):
         return cast(Dict[str, int], self.get("quantities_by_good_pbk"))
 
     @property
-    def transaction_digest(self) -> str:
+    def transaction_digest(self) -> Optional[str]:
         """Get the transaction digest."""
         assert self.is_set("transaction_digest"), "Transaction digest is not set."
-        return cast(str, self.get("transaction_digest"))
+        return cast(Optional[str], self.get("transaction_digest"))
 
     def check_consistency(self) -> bool:
         """
@@ -184,7 +181,7 @@ class TransactionMessage(InternalMessage):
         :return: bool
         """
         try:
-            assert self.performative in TransactionMessage.Performative, "Performative is not valid."
+            assert isinstance(self.performative, TransactionMessage.Performative), "Performative is not of correct type."
             assert isinstance(self.skill_ids, list), "Skill_ids must be of type list."
             assert isinstance(self.transaction_id, str), "Transaction_id must of type str."
             assert isinstance(self.sender, Address), "Sender must be of type address."
@@ -201,46 +198,26 @@ class TransactionMessage(InternalMessage):
             assert isinstance(self.ledger_id, str) and self.ledger_id in SUPPORTED_LEDGER_IDS, "Ledger_id must be str and " \
                                                                                                "must in the supported ledger ids."
 
-            if self.info is not None:
-                assert isinstance(self.info, Dict)
+            if self.performative == self.Performative.PROPOSE or self.performative == self.Performative.SIGN:
+                assert isinstance(self.info, dict)
                 for key, value in self.info.items():
-                    assert type(key) == str
-            if self.quantities_by_good_pbk is not None:
+                    assert isinstance(key, str)
                 assert type(self.quantities_by_good_pbk) == dict
                 for key, value in self.quantities_by_good_pbk.items():
-                    assert type(key) == str and type(value) == int
+                    assert isinstance(key, str)
+                    assert isinstance(value, int)
                 assert len(self.quantities_by_good_pbk.keys()) == len(set(self.quantities_by_good_pbk.keys()))
                 assert all(quantity >= 0 for quantity in self.quantities_by_good_pbk.values())
-            if self.transaction_digest is not None:
-                assert type(self.transaction_digest) == str
-            assert len(self.body) == 14
+                assert len(self.body) == 13
+            elif self.performative == self.Performative.ACCEPT or self.performative == self.Performative.REJECT:
+                assert self.transaction_digest is None or isinstance(self.transaction_digest, str)
+                assert len(self.body) == 14
+            else:
+                raise ValueError("Performative not recognized.")
 
         except (AssertionError, KeyError):
             return False
         return True
-
-    def matches(self, other: 'TransactionMessage') -> bool:
-        """
-        Check if the transaction matches with another (mirroring) transaction.
-
-        :param other: the other transaction to match.
-        :return: True if the two
-        """
-        return isinstance(other, TransactionMessage) \
-            and self.performative == other.performative \
-            and self.skill_ids == other.skill_ids \
-            and self.transaction_id == other.transaction_id \
-            and self.sender == other.counterparty \
-            and self.counterparty == other.sender \
-            and self.is_sender_buyer != other.is_sender_buyer \
-            and self.currency_pbk == other.currency_pbk \
-            and self.amount == other.amount \
-            and self.sender_tx_fee == other.counterparty_tx_fee \
-            and self.counterparty_tx_fee == other.sender_tx_fee \
-            and self.ledger_id == other.ledger_id \
-            and self.info == other.info \
-            and self.quantities_by_good_pbk == other.quantities_by_good_pbk \
-            and self.transaction_digest == other.transaction_digest
 
     @classmethod
     def respond_with(cls, other: 'TransactionMessage', performative: Performative, transaction_digest: Optional[str] = None) -> 'TransactionMessage':
@@ -267,26 +244,3 @@ class TransactionMessage(InternalMessage):
                                     quantities_by_good_pbk=other.quantities_by_good_pbk,
                                     transaction_digest=transaction_digest)
         return tx_msg
-
-    def __eq__(self, other: object) -> bool:
-        """
-        Compare to another object.
-
-        :param other: the other transaction to match.
-        :return: True if the two
-        """
-        return isinstance(other, TransactionMessage) \
-            and self.performative == other.performative \
-            and self.skill_ids == other.skill_ids \
-            and self.transaction_id == other.transaction_id \
-            and self.sender == other.sender \
-            and self.counterparty == other.counterparty \
-            and self.is_sender_buyer == other.is_sender_buyer \
-            and self.currency_pbk == other.currency_pbk \
-            and self.amount == other.amount \
-            and self.sender_tx_fee == other.sender_tx_fee \
-            and self.counterparty_tx_fee == other.counterparty_tx_fee \
-            and self.ledger_id == other.ledger_id \
-            and self.info == other.info \
-            and self.quantities_by_good_pbk == other.quantities_by_good_pbk \
-            and self.transaction_digest == other.transaction_digest

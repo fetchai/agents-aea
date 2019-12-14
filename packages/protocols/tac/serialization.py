@@ -234,5 +234,5 @@ class TACSerializer(Serializer):
 
         tac_type = TACMessage.Type(new_body["type"])
         new_body["type"] = tac_type
-        tac_message = TACMessage(tac_type=tac_type, body=new_body)
+        tac_message = TACMessage(type=tac_type, body=new_body)
         return tac_message

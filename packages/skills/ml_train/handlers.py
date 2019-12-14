@@ -107,7 +107,8 @@ class TrainHandler(Handler):
                                         sender_tx_fee=terms.values["buyer_tx_fee"],
                                         counterparty_tx_fee=terms.values["seller_tx_fee"],
                                         ledger_id=terms.values["ledger_id"],
-                                        info={'terms': terms, 'counterparty_pbk': ml_trade_msg.counterparty})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
+                                        info={'terms': terms, 'counterparty_pbk': ml_trade_msg.counterparty},
+                                        quantities_by_good_pbk={})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
         else:

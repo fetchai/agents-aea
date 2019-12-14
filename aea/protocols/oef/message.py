@@ -20,7 +20,7 @@
 
 """This module contains the default message definition."""
 from enum import Enum
-from typing import Optional, List, cast
+from typing import List, cast
 
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
@@ -66,14 +66,15 @@ class OEFMessage(Message):
             """Get string representation."""
             return str(self.value)
 
-    def __init__(self, oef_type: Optional[Type] = None,
+    def __init__(self, type: Type,
+                 id: int,
                  **kwargs):
         """
         Initialize.
 
         :param oef_type: the type of OEF message.
         """
-        super().__init__(type=oef_type, **kwargs)
+        super().__init__(type=type, id=id, **kwargs)
         assert self.check_consistency(), "OEFMessage initialization inconsistent."
 
     @property
@@ -145,35 +146,40 @@ class OEFMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert self.type in OEFMessage.Type, "type must not be None."
+            assert isinstance(self.type, OEFMessage.Type), "type not of correct type."
             assert isinstance(self.id, int), "id must be int."
-
             if self.type == OEFMessage.Type.REGISTER_SERVICE:
                 assert isinstance(self.service_description, Description), \
                     "service_description must be of type Description."
                 assert isinstance(self.service_id, str), "service_id must be of type str."
+                assert len(self.body) == 4
             elif self.type == OEFMessage.Type.REGISTER_AGENT:
                 assert isinstance(self.agent_description, Description), "agent_description must be of type Description."
                 assert isinstance(self.agent_id, str), "agent_id must be of type str."
+                assert len(self.body) == 4
             elif self.type == OEFMessage.Type.UNREGISTER_SERVICE:
                 assert isinstance(self.service_description, Description), \
                     "service_description must be of type Description."
                 assert isinstance(self.service_id, str), "service_id must be of type str."
+                assert len(self.body) == 4
             elif self.type == OEFMessage.Type.UNREGISTER_AGENT:
                 assert isinstance(self.agent_description, Description), "agent_description must be of type Description."
                 assert isinstance(self.agent_id, str), "agent_id must be of type str."
-            elif self.type == OEFMessage.Type.SEARCH_SERVICES:
+                assert len(self.body) == 4
+            elif self.type == OEFMessage.Type.SEARCH_SERVICES or self.type == OEFMessage.Type.SEARCH_AGENTS:
                 assert isinstance(self.query, Query), "query must be of type Query."
-            elif self.type == OEFMessage.Type.SEARCH_AGENTS:
-                assert isinstance(self.query, Query), "query must be of type Query."
+                assert len(self.body) == 3
             elif self.type == OEFMessage.Type.SEARCH_RESULT:
                 assert type(self.agents) == list and all(type(a) == str for a in self.agents)
+                assert len(self.body) == 3
             elif self.type == OEFMessage.Type.OEF_ERROR:
                 assert isinstance(self.operation, OEFMessage.OEFErrorOperation), \
                     "operation must be type of OEFErrorOperation"
+                assert len(self.body) == 3
             elif self.type == OEFMessage.Type.DIALOGUE_ERROR:
                 assert isinstance(self.dialogue_id, int), "dialogue_id must be of type int."
                 assert isinstance(self.origin, str), "origin must be of type str."
+                assert len(self.body) == 4
             else:
                 raise ValueError("Type not recognized.")
         except (AssertionError, ValueError):

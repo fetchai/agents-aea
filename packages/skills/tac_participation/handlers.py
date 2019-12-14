@@ -167,7 +167,7 @@ class OEFHandler(Handler):
         game = cast(Game, self.context.game)
         game.update_expected_controller_pbk(controller_pbk)
         game.update_game_phase(Phase.GAME_REGISTRATION)
-        tac_msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
+        tac_msg = TACMessage(type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
         tac_bytes = TACSerializer().encode(tac_msg)
         self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
@@ -372,7 +372,7 @@ class TransactionHandler(Handler):
         if tx_message.performative == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction confirmed by decision maker, sending to controller.".format(self.context.agent_name))
             game = cast(Game, self.context.game)
-            msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION,
+            msg = TACMessage(type=TACMessage.Type.TRANSACTION,
                              transaction_id=tx_message.transaction_digest,
                              transaction_counterparty=tx_message.counterparty,
                              amount_by_currency={tx_message.currency_pbk: tx_message.amount},

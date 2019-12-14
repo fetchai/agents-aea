@@ -33,9 +33,10 @@ class TestStateUpdateMessage:
         good_endowment = {"a_good": 2}
         exchange_params = {"FET": 10.0}
         utility_params = {"a_good": 20.0}
+        tx_fee = 10
         assert StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE, amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment,
-                                  exchange_params_by_currency=exchange_params, utility_params_by_good_pbk=utility_params)
-        currency_change = {"FET": - 10}
+                                  exchange_params_by_currency=exchange_params, utility_params_by_good_pbk=utility_params, tx_fee=tx_fee)
+        currency_change = {"FET": 10}
         good_change = {"a_good": 1}
         assert StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY, amount_by_currency=currency_change, quantities_by_good_pbk=good_change)
 
@@ -46,5 +47,6 @@ class TestStateUpdateMessage:
             good_endowment = {"a_good": 2}
             exchange_params = {"UNKNOWN": 10.0}
             utility_params = {"a_good": 20.0}
+            tx_fee = 10
             assert StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE, amount_by_currency=currency_endowment, quantities_by_good_pbk=good_endowment,
-                                      exchange_params_by_currency=exchange_params, utility_params_by_good_pbk=utility_params)
+                                      exchange_params_by_currency=exchange_params, utility_params_by_good_pbk=utility_params, tx_fee=tx_fee)

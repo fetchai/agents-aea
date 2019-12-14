@@ -302,7 +302,7 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
+        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
@@ -322,7 +322,7 @@ class OEFChannel(OEFAgent):
         except ValueError:
             operation = OEFMessage.OEFErrorOperation.OTHER
 
-        msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
+        msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
@@ -338,7 +338,7 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR,
+        msg = OEFMessage(type=OEFMessage.Type.DIALOGUE_ERROR,
                          id=answer_id,
                          dialogue_id=dialogue_id,
                          origin=origin)

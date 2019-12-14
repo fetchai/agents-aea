@@ -201,7 +201,8 @@ class FIPAHandler(Handler):
                                     sender_tx_fee=0,
                                     counterparty_tx_fee=0,
                                     ledger_id='fetchai',
-                                    info={'dialogue_label': dialogue.dialogue_label.json})
+                                    info={'dialogue_label': dialogue.dialogue_label.json},
+                                    quantities_by_good_pbk={})
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
 

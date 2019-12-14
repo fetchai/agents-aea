@@ -170,7 +170,7 @@ class LocalNode:
         destination = envelope.to
 
         if destination not in self._out_queues.keys():
-            msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR, id=STUB_DIALOGUE_ID, dialogue_id=STUB_DIALOGUE_ID, origin=destination)
+            msg = OEFMessage(type=OEFMessage.Type.DIALOGUE_ERROR, id=STUB_DIALOGUE_ID, dialogue_id=STUB_DIALOGUE_ID, origin=destination)
             msg_bytes = OEFSerializer().encode(msg)
             error_envelope = Envelope(to=envelope.sender, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
             await self._send(error_envelope)
@@ -215,7 +215,7 @@ class LocalNode:
         """
         async with self._lock:
             if public_key not in self.services:
-                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE)
+                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE)
                 msg_bytes = OEFSerializer().encode(msg)
                 envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
                 await self._send(envelope)
@@ -235,7 +235,7 @@ class LocalNode:
         """
         async with self._lock:
             if public_key not in self.agents:
-                msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT)
+                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT)
                 msg_bytes = OEFSerializer().encode(msg)
                 envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
                 await self._send(envelope)
@@ -265,7 +265,7 @@ class LocalNode:
                     if query.model == description.data_model:
                         result.append(agent_public_key)
 
-        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
+        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         await self._send(envelope)
@@ -291,7 +291,7 @@ class LocalNode:
                     if description.data_model == query.model:
                         result.append(agent_public_key)
 
-        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
+        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         await self._send(envelope)

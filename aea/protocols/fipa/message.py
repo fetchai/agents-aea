@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Tuple, Union, cast
 
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
@@ -50,10 +50,10 @@ class FIPAMessage(Message):
             """Get string representation."""
             return self.value
 
-    def __init__(self, dialogue_reference: Tuple[str, str] = None,
-                 message_id: Optional[int] = None,
-                 target: Optional[int] = None,
-                 performative: Optional[Union[str, Performative]] = None,
+    def __init__(self, dialogue_reference: Tuple[str, str],
+                 message_id: int,
+                 target: int,
+                 performative: Performative,
                  **kwargs):
         """
         Initialize.
@@ -114,15 +114,16 @@ class FIPAMessage(Message):
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert type(self.dialogue_reference) == tuple
-            assert type(self.dialogue_reference[0]) == str and type(self.dialogue_reference[1]) == str
+            assert isinstance(self.performative, FIPAMessage.Performative)
+            assert isinstance(self.dialogue_reference, tuple)
+            assert isinstance(self.dialogue_reference[0], str) and isinstance(self.dialogue_reference[1], str)
             assert isinstance(self.message_id, int)
             assert isinstance(self.target, int)
             if self.performative == FIPAMessage.Performative.CFP:
                 assert isinstance(self.query, Query) or isinstance(self.query, bytes) or self.query is None
                 assert len(self.body) == 5
             elif self.performative == FIPAMessage.Performative.PROPOSE:
-                assert type(self.proposal) == list and all(isinstance(d, Description) for d in self.proposal)  # type: ignore
+                assert isinstance(self.proposal, list) and all(isinstance(d, Description) for d in self.proposal)
                 assert len(self.body) == 5
             elif self.performative == FIPAMessage.Performative.ACCEPT \
                     or self.performative == FIPAMessage.Performative.MATCH_ACCEPT \
