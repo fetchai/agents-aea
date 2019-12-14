@@ -223,6 +223,8 @@ class Strategy(SharedClass):
             proposal.values["seller_tx_fee"] = seller_tx_fee
             proposal.values["buyer_tx_fee"] = buyer_tx_fee
             if not proposal.values["price"] > 0: continue
+            tx_nonce = transactions.get_next_tx_nonce()
+            proposal.values["tx_nonce"] = tx_nonce
             proposals.append(proposal)
         return proposals
 

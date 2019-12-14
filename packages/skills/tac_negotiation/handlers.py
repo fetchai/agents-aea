@@ -39,13 +39,13 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.tac_negotiation.dialogues import Dialogues
-    from packages.skills.tac_negotiation.helpers import generate_transaction_message, DEMAND_DATAMODEL_NAME
+    from packages.skills.tac_negotiation.helpers import DEMAND_DATAMODEL_NAME
     from packages.skills.tac_negotiation.search import Search
     from packages.skills.tac_negotiation.strategy import Strategy
     from packages.skills.tac_negotiation.transactions import Transactions
 else:
     from tac_negotiation_skill.dialogues import Dialogues
-    from tac_negotiation_skill.helpers import generate_transaction_message, DEMAND_DATAMODEL_NAME
+    from tac_negotiation_skill.helpers import DEMAND_DATAMODEL_NAME
     from tac_negotiation_skill.search import Search
     from tac_negotiation_skill.strategy import Strategy
     from tac_negotiation_skill.transactions import Transactions
@@ -147,8 +147,8 @@ class FIPANegotiationHandler(Handler):
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         else:
-            transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
             transactions = cast(Transactions, self.context.transactions)
+            transaction_msg = transactions.generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
             logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
                                                                  pprint.pformat({
@@ -184,11 +184,11 @@ class FIPANegotiationHandler(Handler):
 
         for num, proposal_description in enumerate(proposals):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
-            transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
+            transactions = cast(Transactions, self.context.transactions)
+            transaction_msg = transactions.generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
 
             if strategy.is_profitable_transaction(transaction_msg, is_seller=dialogue.is_seller):
                 logger.info("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))
-                transactions = cast(Transactions, self.context.transactions)
                 transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
                 transactions.add_pending_initial_acceptance(dialogue.dialogue_label, new_msg_id, transaction_msg)
                 fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.ACCEPT,

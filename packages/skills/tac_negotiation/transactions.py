@@ -50,6 +50,7 @@ class Transactions(SharedClass):
         self._locked_txs_as_seller = {}  # type: Dict[TransactionId, TransactionMessage]
 
         self._last_update_for_transactions = deque()  # type: Deque[Tuple[datetime.datetime, TransactionId]]
+        self._tx_nonce = 0
 
     @property
     def pending_proposals(self) -> Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]:
@@ -60,6 +61,46 @@ class Transactions(SharedClass):
     def pending_initial_acceptances(self) -> Dict[DialogueLabel, Dict[MESSAGE_ID, TransactionMessage]]:
         """Get the pending initial acceptances."""
         return self._pending_initial_acceptances
+
+    def get_next_tx_nonce(self) -> str:
+        """Get the next nonce."""
+        self._tx_nonce += 1
+        return str(self._tx_nonce)
+
+    def get_internal_tx_id(self) -> TransactionId:
+        """Get an id for internal reference of the tx."""
+        self._tx_id += 1
+        return self._tx_id
+
+    def generate_transaction_message(self, proposal_description: Description, dialogue_label: DialogueLabel, is_seller: bool, agent_public_key: str) -> TransactionMessage:
+        """
+        Generate the transaction message from the description and the dialogue.
+
+        :param proposal_description: the description of the proposal
+        :param dialogue_label: the dialogue label
+        :param is_seller: the agent is a seller
+        :param agent_public_key: the public key of the agent
+        :return: a transaction message
+        """
+        sender_tx_fee = proposal_description.values['seller_tx_fee'] if is_seller else proposal_description.values['buyer_tx_fee']
+        counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if is_seller else proposal_description.values['seller_tx_fee']
+        goods_component = copy.copy(proposal_description.values)
+        [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency', 'tx_nonce']]
+        transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                             skill_ids=['tac_negotiation', 'tac_participation'],
+                                             transaction_id=self.get_internal_tx_id(),
+                                             transaction_nonce=proposal_description.values['tx_nonce'],
+                                             sender=agent_public_key,
+                                             counterparty=dialogue_label.dialogue_opponent_pbk,
+                                             currency_pbk=proposal_description.values['currency'],
+                                             amount=proposal_description.values['price'],
+                                             is_sender_buyer=not is_seller,
+                                             sender_tx_fee=sender_tx_fee,
+                                             counterparty_tx_fee=counterparty_tx_fee,
+                                             ledger_id='off_chain',
+                                             info={'dialogue_label': dialogue_label.json},
+                                             quantities_by_good_pbk=goods_component)
+        return transaction_msg
 
     def cleanup_pending_transactions(self) -> None:
         """

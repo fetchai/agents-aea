@@ -50,8 +50,9 @@ def build_goods_datamodel(good_pbks: List[str], is_supply: bool) -> DataModel:
     price_attribute = Attribute('price', int, False, "The price of the goods in the currency.")
     seller_tx_fee_attribute = Attribute('seller_tx_fee', int, False, "The transaction fee payable by the seller in the currency.")
     buyer_tx_fee_attribute = Attribute('buyer_tx_fee', int, False, "The transaction fee payable by the buyer in the currency.")
+    tx_nonce_attribute = Attribute('tx_nonce', str False, "The nonce to distinguish identical descriptions.")
     description = SUPPLY_DATAMODEL_NAME if is_supply else DEMAND_DATAMODEL_NAME
-    attributes = good_quantities_attributes + [currency_attribute, price_attribute, seller_tx_fee_attribute, buyer_tx_fee_attribute]
+    attributes = good_quantities_attributes + [currency_attribute, price_attribute, seller_tx_fee_attribute, buyer_tx_fee_attribute, tx_nonce_attribute]
     data_model = DataModel(description, attributes)
     return data_model
 
@@ -106,66 +107,38 @@ def build_goods_query(good_pbks: List[str], currency: str, is_searching_for_sell
     return query
 
 
-def generate_transaction_id(agent_pbk: Address, opponent_pbk: Address, dialogue_label: DialogueLabel, agent_is_seller: bool) -> TransactionId:
-    """
-    Make a transaction id.
+# def generate_transaction_id(agent_pbk: Address, opponent_pbk: Address, dialogue_label: DialogueLabel, agent_is_seller: bool) -> TransactionId:
+#     """
+#     Make a transaction id.
 
-    :param agent_pbk: the pbk of the agent.
-    :param opponent_pbk: the public key of the opponent.
-    :param dialogue_label: the dialogue label
-    :param agent_is_seller: boolean indicating if the agent is a seller
-    :return: a transaction id
-    """
-    # the format is {buyer_pbk}_{seller_pbk}_{dialogue_id}_{dialogue_starter_pbk}
-    assert opponent_pbk == dialogue_label.dialogue_opponent_pbk
-    buyer_pbk, seller_pbk = (opponent_pbk, agent_pbk) if agent_is_seller else (agent_pbk, opponent_pbk)
-    transaction_id = "{}_{}_{}_{}_{}".format(buyer_pbk, seller_pbk, dialogue_label.dialogue_starter_reference, dialogue_label.dialogue_responder_reference, dialogue_label.dialogue_starter_pbk)
-    return transaction_id
-
-
-def dialogue_label_from_transaction_id(agent_pbk: Address, transaction_id: TransactionId) -> DialogueLabel:
-    """
-    Recover dialogue label from transaction id.
-
-    :param agent_pbk: the pbk of the agent.
-    :param transaction_id: the transaction id
-    :return: a dialogue label
-    """
-    buyer_pbk, seller_pbk, dialogue_starter_reference, dialogue_responder_reference, dialogue_starter_pbk = transaction_id.split('_')
-    if agent_pbk == buyer_pbk:
-        dialogue_opponent_pbk = seller_pbk
-    else:
-        dialogue_opponent_pbk = buyer_pbk
-    dialogue_label = DialogueLabel((dialogue_starter_reference, dialogue_responder_reference), dialogue_opponent_pbk, dialogue_starter_pbk)
-    return dialogue_label
+#     :param agent_pbk: the pbk of the agent.
+#     :param opponent_pbk: the public key of the opponent.
+#     :param dialogue_label: the dialogue label
+#     :param agent_is_seller: boolean indicating if the agent is a seller
+#     :return: a transaction id
+#     """
+#     # the format is {buyer_pbk}_{seller_pbk}_{dialogue_id}_{dialogue_starter_pbk}
+#     assert opponent_pbk == dialogue_label.dialogue_opponent_pbk
+#     buyer_pbk, seller_pbk = (opponent_pbk, agent_pbk) if agent_is_seller else (agent_pbk, opponent_pbk)
+#     transaction_id = "{}_{}_{}_{}_{}".format(buyer_pbk, seller_pbk, dialogue_label.dialogue_starter_reference, dialogue_label.dialogue_responder_reference, dialogue_label.dialogue_starter_pbk)
+#     return transaction_id
 
 
-def generate_transaction_message(proposal_description: Description, dialogue_label: DialogueLabel, is_seller: bool, agent_public_key: str) -> TransactionMessage:
-    """
-    Generate the transaction message from the description and the dialogue.
+# def dialogue_label_from_transaction_id(agent_pbk: Address, transaction_id: TransactionId) -> DialogueLabel:
+#     """
+#     Recover dialogue label from transaction id.
 
-    :param proposal_description: the description of the proposal
-    :param dialogue_label: the dialogue label
-    :param is_seller: the agent is a seller
-    :param agent_public_key: the public key of the agent
-    :return: a transaction message
-    """
-    transaction_id = generate_transaction_id(agent_public_key, dialogue_label.dialogue_opponent_pbk, dialogue_label, is_seller)
-    sender_tx_fee = proposal_description.values['seller_tx_fee'] if is_seller else proposal_description.values['buyer_tx_fee']
-    counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if is_seller else proposal_description.values['seller_tx_fee']
-    goods_component = copy.copy(proposal_description.values)
-    [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency']]
-    transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                         skill_ids=['tac_negotiation', 'tac_participation'],
-                                         transaction_id=transaction_id,
-                                         sender=agent_public_key,
-                                         counterparty=dialogue_label.dialogue_opponent_pbk,
-                                         currency_pbk=proposal_description.values['currency'],
-                                         amount=proposal_description.values['price'],
-                                         is_sender_buyer=not is_seller,
-                                         sender_tx_fee=sender_tx_fee,
-                                         counterparty_tx_fee=counterparty_tx_fee,
-                                         ledger_id='off_chain',
-                                         info={'dialogue_label': dialogue_label.json},
-                                         quantities_by_good_pbk=goods_component)
-    return transaction_msg
+#     :param agent_pbk: the pbk of the agent.
+#     :param transaction_id: the transaction id
+#     :return: a dialogue label
+#     """
+#     buyer_pbk, seller_pbk, dialogue_starter_reference, dialogue_responder_reference, dialogue_starter_pbk = transaction_id.split('_')
+#     if agent_pbk == buyer_pbk:
+#         dialogue_opponent_pbk = seller_pbk
+#     else:
+#         dialogue_opponent_pbk = buyer_pbk
+#     dialogue_label = DialogueLabel((dialogue_starter_reference, dialogue_responder_reference), dialogue_opponent_pbk, dialogue_starter_pbk)
+#     return dialogue_label
+
+
+
