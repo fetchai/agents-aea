@@ -86,7 +86,7 @@ class TACSerializer(Serializer):
         elif msg.type == TACMessage.Type.TRANSACTION:
             tac_msg = tac_pb2.TACAgent.Transaction()  # type: ignore
             tac_msg.transaction_id = msg.transaction_id
-            tac_msg.counterparty = msg.counterparty
+            tac_msg.counterparty = msg.transaction_counterparty
             tac_msg.amount_by_currency.extend(_from_dict_to_pairs(msg.amount_by_currency))
             tac_msg.sender_tx_fee = msg.sender_tx_fee
             tac_msg.counterparty_tx_fee = msg.counterparty_tx_fee
@@ -175,7 +175,7 @@ class TACSerializer(Serializer):
         elif tac_type == "transaction":
             new_body["type"] = TACMessage.Type.TRANSACTION
             new_body["transaction_id"] = tac_container.transaction.transaction_id
-            new_body["counterparty"] = tac_container.transaction.counterparty
+            new_body["transaction_counterparty"] = tac_container.transaction.counterparty
             new_body["amount_by_currency"] = _from_pairs_to_dict(tac_container.transaction.amount_by_currency)
             new_body["sender_tx_fee"] = tac_container.transaction.sender_tx_fee
             new_body["counterparty_tx_fee"] = tac_container.transaction.counterparty_tx_fee

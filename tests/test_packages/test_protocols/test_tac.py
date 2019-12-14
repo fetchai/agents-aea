@@ -33,7 +33,7 @@ def test_tac_message_instantiation():
     assert TACMessage(tac_type=TACMessage.Type.UNREGISTER)
     assert TACMessage(tac_type=TACMessage.Type.TRANSACTION,
                       transaction_id='some_id',
-                      counterparty='some_address',
+                      transaction_counterparty='some_address',
                       amount_by_currency={'FET': 10},
                       sender_tx_fee=10,
                       counterparty_tx_fee=10,
@@ -81,7 +81,7 @@ def test_tac_serialization():
 
     msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION,
                      transaction_id='some_id',
-                     counterparty='some_address',
+                     transaction_counterparty='some_address',
                      amount_by_currency={'FET': 10},
                      sender_tx_fee=10,
                      counterparty_tx_fee=10,
