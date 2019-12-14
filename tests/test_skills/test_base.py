@@ -148,7 +148,7 @@ class TestSkillFromDir:
         """Test that when parsing a skill and an handler is missing, we behave correctly."""
         Path(self.t, "handlers.py").write_text("")
         Skill.from_dir(self.t, self.agent_context)
-        self.mocked_logger_warning.assert_called_with("Handler 'DummyHandler' cannot be found.")
+        self.mocked_logger_warning.assert_called_with("Handler 'DummyInternalHandler' cannot be found.")
 
     def test_missing_behaviour(self):
         """Test that when parsing a skill and a behaviour is missing, we behave correctly."""

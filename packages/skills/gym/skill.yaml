@@ -18,4 +18,4 @@ tasks:
 shared_classes: []
 protocols: ["gym"]
 dependencies:
-  - gym
+  gym: {}

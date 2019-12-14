@@ -36,5 +36,5 @@ shared_classes:
         model_config_path: "./skills/ml_train/model.json"
 protocols: ['oef', 'ml_trade']
 dependencies:
-  - tensorflow
-  - numpy
+  tensorflow: {}
+  numpy: {}

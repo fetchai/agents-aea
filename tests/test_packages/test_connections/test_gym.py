@@ -20,16 +20,14 @@
 """This module contains the tests of the gym connection module."""
 import logging
 
+import gym
 import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
 from packages.connections.gym.connection import GymConnection
-import gym
-
 from packages.protocols.gym.message import GymMessage
 from packages.protocols.gym.serialization import GymSerializer
-
 
 logger = logging.getLogger(__name__)
 
@@ -73,9 +71,10 @@ class TestGymConnection:
         with pytest.raises(ConnectionError):
             await self.gym_con.receive()
 
-    def test_gym_from_config(self):
-        """Test the Connection from config File."""
-        conf = ConnectionConfig()
-        conf.config['env'] = "tests.conftest.DUMMY_ENV"
-        con = GymConnection.from_config(public_key="pk", connection_configuration=conf)
-        assert con is not None
+
+def test_gym_from_config():
+    """Test the Connection from config File."""
+    conf = ConnectionConfig()
+    conf.config['env'] = "tests.conftest.DUMMY_ENV"
+    con = GymConnection.from_config(public_key="pk", connection_configuration=conf)
+    assert con is not None

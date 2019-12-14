@@ -42,20 +42,40 @@
       "type": "object"
     },
     "dependencies": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "$ref": "#/definitions/requirement"
-      }
+      "$ref": "#/definitions/dependencies"
     },
     "description": {
       "type": "string"
     }
   },
   "definitions": {
-    "requirement": {
-      "type": "string",
-      "pattern": "([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9])( *(~=|==|>=|<=|!=|<|>) *v?(?:(?:(?P<epoch>[0-9]+)!)?(?P<release>[0-9]+(?:\\.[0-9]+)*)(?P<pre>[-_\\.]?(?P<pre_l>(a|b|c|rc|alpha|beta|pre|preview))[-_\\.]?(?P<pre_n>[0-9]+)?)?(?P<post>(?:-(?P<post_n1>[0-9]+))|(?:[-_\\.]?(?P<post_l>post|rev|r)[-_\\.]?(?P<post_n2>[0-9]+)?))?(?P<dev>[-_\\.]?(?P<dev_l>dev)[-_\\.]?(?P<dev_n>[0-9]+)?)?)(?:\\+(?P<local>[a-z0-9]+(?:[-_\\.][a-z0-9]+)*))?)?$"
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9])$": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "index": {
+              "type": "string",
+              "pattern": "^http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$"
+            },
+            "git": {
+              "type": "string",
+              "pattern": "^http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$"
+            },
+            "ref": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9/\\.\\-_]+$"
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^(( *(~=|==|>=|<=|!=|<|>) *)([1-9][0-9]*!)?(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\\.post(0|[1-9][0-9]*))?(\\.dev(0|[1-9][0-9]*))?)?$"
+            }
+          }
+        }
+      }
     },
     "resource_name": {
       "type": "string",

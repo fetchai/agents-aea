@@ -9,4 +9,4 @@ restricted_to_protocols: ["gym"]
 config:
   env: '' # put here the dotted path to your Gym Environment class.
 dependencies:
-  - gym
+  gym: {}

@@ -10,5 +10,6 @@ config:
   addr: ${OEF_ADDR:127.0.0.1}
   port: ${OEF_PORT:10000}
 dependencies:
-  - colorlog
-  - oef==0.8.1
+  colorlog: {}
+  oef:
+    version: ==0.8.1

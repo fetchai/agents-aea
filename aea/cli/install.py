@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea install' subcommand."""
-
+import pprint
 import subprocess
 import sys
 from typing import Optional
@@ -26,6 +26,40 @@ from typing import Optional
 import click
 
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.configurations.base import Dependency
+
+
+def _install_dependency(dependency_name: str, dependency: Dependency):
+    logger.info("Installing {}...".format(pprint.pformat(dependency)))
+    try:
+        index = dependency.get("index", None)
+        git_url = dependency.get("git", None)
+        revision = dependency.get("ref", "")
+        version_constraint = dependency.get("version", "")
+        command = [sys.executable, "-m", "pip", "install"]
+        if git_url is not None:
+            command += ["-i", index] if index is not None else []
+            command += ["git+" + git_url + "@" + revision + "#egg=" + dependency_name]
+        else:
+            command += ["-i", index] if index is not None else []
+            command += [dependency_name + version_constraint]
+        logger.debug("Calling '{}'".format(" ".join(command)))
+        subp = subprocess.Popen(command)
+        subp.wait(30.0)
+        assert subp.returncode == 0
+    except Exception as e:
+        logger.error("An error occurred while installing {}: {}".format(dependency, str(e)))
+        sys.exit(1)
+
+
+def _install_from_requirement(file: str):
+    try:
+        subp = subprocess.Popen([sys.executable, "-m", "pip", "install", "-r", file])
+        subp.wait(30.0)
+        assert subp.returncode == 0
+    except Exception:
+        logger.error("An error occurred while installing requirement file {}. Stopping...".format(file))
+        sys.exit(1)
 
 
 @click.command()
@@ -38,17 +72,9 @@ def install(ctx: Context, requirement: Optional[str]):
 
     if requirement:
         logger.debug("Installing the dependencies in '{}'...".format(requirement))
-        dependencies = list(map(lambda x: x.strip(), open(requirement).readlines()))
+        _install_from_requirement(requirement)
     else:
         logger.debug("Installing all the dependencies...")
         dependencies = ctx.get_dependencies()
-
-    for d in dependencies:
-        logger.info("Installing {}...".format(d))
-        try:
-            subp = subprocess.Popen([sys.executable, "-m", "pip", "install", d])
-            subp.wait(30.0)
-            assert subp.returncode == 0
-        except Exception:
-            logger.error("An error occurred while installing {}. Stopping...".format(d))
-            sys.exit(1)
+        for name, d in dependencies.items():
+            _install_dependency(name, d)

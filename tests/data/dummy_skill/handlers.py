@@ -24,7 +24,7 @@ from aea.skills.base import Handler
 
 
 class DummyHandler(Handler):
-    """Echo handler."""
+    """Dummy handler."""
 
     SUPPORTED_PROTOCOL = "default"
 
@@ -51,6 +51,45 @@ class DummyHandler(Handler):
         :return: None
         """
         self.handled_messages.append(message)
+
+    def teardown(self) -> None:
+        """
+        Teardown the handler.
+
+        :return: None
+        """
+        self.nb_teardown_called += 1
+
+
+class DummyInternalHandler(Handler):
+    """Dummy internal handler."""
+
+    SUPPORTED_PROTOCOL = "internal"
+
+    def __init__(self, **kwargs):
+        """Initialize the handler."""
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+        self.handled_internal_messages = []
+        self.nb_teardown_called = 0
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def handle(self, message: Message, sender: str) -> None:
+        """
+        Handle message.
+
+        :param message: the message
+        :param sender: the sender
+        :return: None
+        """
+        self.handled_internal_messages.append(message)
 
     def teardown(self) -> None:
         """
