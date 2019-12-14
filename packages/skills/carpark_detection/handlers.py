@@ -21,7 +21,7 @@
 
 import logging
 import sys
-from typing import Optional, cast, TYPE_CHECKING, Tuple
+from typing import Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.protocols.base import Message
@@ -29,7 +29,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Description, Query
+from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
@@ -60,8 +60,7 @@ class FIPAHandler(Handler):
         """
         # convenience representations
         fipa_msg = cast(FIPAMessage, message)
-        msg_performative = FIPAMessage.Performative(fipa_msg.get('performative'))
-        dialogue_reference = cast(Tuple[str, str], fipa_msg.get('dialogue_reference'))
+        dialogue_reference = fipa_msg.dialogue_reference
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
@@ -76,13 +75,13 @@ class FIPAHandler(Handler):
             return
 
         # handle message
-        if msg_performative == FIPAMessage.Performative.CFP:
+        if fipa_msg.performative == FIPAMessage.Performative.CFP:
             self._handle_cfp(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.DECLINE:
+        elif fipa_msg.performative == FIPAMessage.Performative.DECLINE:
             self._handle_decline(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.ACCEPT:
+        elif fipa_msg.performative == FIPAMessage.Performative.ACCEPT:
             self._handle_accept(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.INFORM:
+        elif fipa_msg.performative == FIPAMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, dialogue)
 
     def teardown(self) -> None:
@@ -122,11 +121,11 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = cast(int, msg.get('message_id')) + 1
-        new_target = cast(int, msg.get('message_id'))
+        new_message_id = msg.message_id + 1
+        new_target = msg.message_id
         logger.info("[{}]: received CFP from sender={}".format(self.context.agent_name,
                                                                msg.counterparty[-5:]))
-        query = cast(Query, msg.get("query"))
+        query = msg.query
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_matching_supply(query) and strategy.has_data():
@@ -194,8 +193,8 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = cast(int, msg.get('message_id')) + 1
-        new_target = cast(int, msg.get('message_id'))
+        new_message_id = msg.message_id + 1
+        new_target = msg.message_id
         logger.info("[{}]: received ACCEPT from sender={}".format(self.context.agent_name,
                                                                   msg.counterparty[-5:]))
         logger.info("[{}]: sending MATCH_ACCEPT_W_INFORM to sender={}".format(self.context.agent_name,
@@ -225,12 +224,12 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = cast(int, msg.get('message_id')) + 1
-        new_target = cast(int, msg.get('message_id'))
+        new_message_id = msg.message_id + 1
+        new_target = msg.message_id
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name,
                                                                   msg.counterparty[-5:]))
 
-        json_data = cast(dict, msg.get("info"))
+        json_data = msg.info
         if "transaction_digest" in json_data.keys():
             tx_digest = json_data['transaction_digest']
             logger.info("[{}]: checking whether transaction={} has been received ...".format(self.context.agent_name,
@@ -257,7 +256,6 @@ class FIPAHandler(Handler):
                                          performative=FIPAMessage.Performative.INFORM,
                                          info=dialogue.carpark_data)
                 dialogue.outgoing_extend(inform_msg)
-                # import pdb; pdb.set_trace()
                 self.context.outbox.put_message(to=msg.counterparty,
                                                 sender=self.context.agent_public_key,
                                                 protocol_id=FIPAMessage.protocol_id,

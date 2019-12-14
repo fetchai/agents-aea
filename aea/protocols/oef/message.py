@@ -20,7 +20,7 @@
 
 """This module contains the default message definition."""
 from enum import Enum
-from typing import Optional, List, cast
+from typing import List, cast
 
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
@@ -66,77 +66,121 @@ class OEFMessage(Message):
             """Get string representation."""
             return str(self.value)
 
-    def __init__(self, oef_type: Optional[Type] = None,
+    def __init__(self, type: Type,
+                 id: int,
                  **kwargs):
         """
         Initialize.
 
-        :param oef_type: the type of OEF message.
+        :param type: the type of OEF message.
+        :param id: the message id.
         """
-        super().__init__(type=oef_type, **kwargs)
+        super().__init__(type=type, id=id, **kwargs)
         assert self.check_consistency(), "OEFMessage initialization inconsistent."
+
+    @property
+    def type(self) -> Type:  # noqa: F821
+        """Get the type of the oef_message."""
+        assert self.is_set("type"), "type is not set."
+        return OEFMessage.Type(self.get("type"))
+
+    @property
+    def id(self) -> int:
+        """Get the id of the oef_message."""
+        assert self.is_set("id"), "id is not set."
+        return cast(int, self.get('id'))
+
+    @property
+    def service_description(self) -> Description:
+        """Get the service_description from the message."""
+        assert self.is_set("service_description"), "service_description is not set"
+        return cast(Description, self.get('service_description'))
+
+    @property
+    def service_id(self) -> str:
+        """Get the service_id from the message."""
+        assert self.is_set("service_id"), "service_id is not set."
+        return cast(str, self.get("service_id"))
+
+    @property
+    def agent_description(self) -> Description:
+        """Get the agent_description from the message."""
+        assert self.is_set("agent_description"), "agent_description is not set."
+        return cast(Description, self.get("agent_description"))
+
+    @property
+    def agent_id(self) -> str:
+        """Get the agent_id from the message."""
+        assert self.is_set("agent_id"), "agent_id is not set."
+        return cast(str, self.get("agent_id"))
+
+    @property
+    def query(self) -> Query:
+        """Get the query from the message."""
+        assert self.is_set("query"), "query is not set."
+        return cast(Query, self.get("query"))
+
+    @property
+    def agents(self) -> List[str]:
+        """Get the agents from the message."""
+        assert self.is_set("agents"), "list of agents is not set."
+        return cast(List[str], self.get("agents"))
+
+    @property
+    def operation(self) -> OEFErrorOperation:  # noqa: F821
+        """Get the error_operation code from the message."""
+        assert self.is_set("operation"), "operation is not set."
+        return OEFMessage.OEFErrorOperation(self.get("operation"))
+
+    @property
+    def dialogue_id(self) -> int:
+        """Get the dialogue_id from the message."""
+        assert self.is_set("dialogue_id"), "dialogue_id is not set."
+        return cast(int, self.get("dialogue_id"))
+
+    @property
+    def origin(self) -> str:
+        """Get the origin from the message."""
+        assert self.is_set("origin"), "origin is not set."
+        return cast(str, self.get("origin"))
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert self.is_set("type")
-            oef_type = OEFMessage.Type(self.get("type"))
-            if oef_type == OEFMessage.Type.REGISTER_SERVICE:
-                assert self.is_set("id")
-                assert self.is_set("service_description")
-                assert self.is_set("service_id")
-                service_description = self.get("service_description")
-                service_id = self.get("service_id")
-                assert isinstance(service_description, Description)
-                assert isinstance(service_id, str)
-            elif oef_type == OEFMessage.Type.REGISTER_AGENT:
-                assert self.is_set("id")
-                assert self.is_set("agent_description")
-                assert self.is_set("agent_id")
-                agent_description = self.get("agent_description")
-                agent_id = self.get("agent_id")
-                assert isinstance(agent_description, Description)
-                assert isinstance(agent_id, str)
-            elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
-                assert self.is_set("id")
-                assert self.is_set("service_description")
-                assert self.is_set("service_id")
-                service_description = self.get("service_description")
-                service_id = self.get("service_id")
-                assert isinstance(service_description, Description)
-                assert isinstance(service_id, str)
-            elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
-                assert self.is_set("id")
-                assert self.is_set("agent_description")
-                assert self.is_set("agent_id")
-                agent_description = self.get("agent_description")
-                agent_id = self.get("agent_id")
-                assert isinstance(agent_description, Description)
-                assert isinstance(agent_id, str)
-            elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
-                assert self.is_set("id")
-                assert self.is_set("query")
-                query = self.get("query")
-                assert isinstance(query, Query)
-            elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-                assert self.is_set("id")
-                assert self.is_set("query")
-                query = self.get("query")
-                assert isinstance(query, Query)
-            elif oef_type == OEFMessage.Type.SEARCH_RESULT:
-                assert self.is_set("id")
-                assert self.is_set("agents")
-                agents = cast(List[str], self.get("agents"))
-                assert type(agents) == list and all(type(a) == str for a in agents)
-            elif oef_type == OEFMessage.Type.OEF_ERROR:
-                assert self.is_set("id")
-                assert self.is_set("operation")
-                operation = self.get("operation")
-                assert operation in set(OEFMessage.OEFErrorOperation)
-            elif oef_type == OEFMessage.Type.DIALOGUE_ERROR:
-                assert self.is_set("id")
-                assert self.is_set("dialogue_id")
-                assert self.is_set("origin")
+            assert isinstance(self.type, OEFMessage.Type), "type not of correct type."
+            assert isinstance(self.id, int), "id must be int."
+            if self.type == OEFMessage.Type.REGISTER_SERVICE:
+                assert isinstance(self.service_description, Description), \
+                    "service_description must be of type Description."
+                assert isinstance(self.service_id, str), "service_id must be of type str."
+                assert len(self.body) == 4
+            elif self.type == OEFMessage.Type.REGISTER_AGENT:
+                assert isinstance(self.agent_description, Description), "agent_description must be of type Description."
+                assert isinstance(self.agent_id, str), "agent_id must be of type str."
+                assert len(self.body) == 4
+            elif self.type == OEFMessage.Type.UNREGISTER_SERVICE:
+                assert isinstance(self.service_description, Description), \
+                    "service_description must be of type Description."
+                assert isinstance(self.service_id, str), "service_id must be of type str."
+                assert len(self.body) == 4
+            elif self.type == OEFMessage.Type.UNREGISTER_AGENT:
+                assert isinstance(self.agent_description, Description), "agent_description must be of type Description."
+                assert isinstance(self.agent_id, str), "agent_id must be of type str."
+                assert len(self.body) == 4
+            elif self.type == OEFMessage.Type.SEARCH_SERVICES or self.type == OEFMessage.Type.SEARCH_AGENTS:
+                assert isinstance(self.query, Query), "query must be of type Query."
+                assert len(self.body) == 3
+            elif self.type == OEFMessage.Type.SEARCH_RESULT:
+                assert type(self.agents) == list and all(type(a) == str for a in self.agents)
+                assert len(self.body) == 3
+            elif self.type == OEFMessage.Type.OEF_ERROR:
+                assert isinstance(self.operation, OEFMessage.OEFErrorOperation), \
+                    "operation must be type of OEFErrorOperation"
+                assert len(self.body) == 3
+            elif self.type == OEFMessage.Type.DIALOGUE_ERROR:
+                assert isinstance(self.dialogue_id, int), "dialogue_id must be of type int."
+                assert isinstance(self.origin, str), "origin must be of type str."
+                assert len(self.body) == 4
             else:
                 raise ValueError("Type not recognized.")
         except (AssertionError, ValueError):

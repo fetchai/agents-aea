@@ -99,11 +99,10 @@ class ProxyEnv(gym.Env):
         # Wait (blocking!) for the response envelope from the environment
         gym_msg = self._queue.get(block=True, timeout=None)  # type: GymMessage
 
-        gym_msg_step_id = gym_msg.get("step_id")
-        if gym_msg_step_id == step_id:
+        if gym_msg.step_id == step_id:
             observation, reward, done, info = self._message_to_percept(gym_msg)
         else:
-            raise ValueError("Unexpected step id! expected={}, actual={}".format(step_id, gym_msg_step_id))
+            raise ValueError("Unexpected step id! expected={}, actual={}".format(step_id, gym_msg.step_id))
 
         return observation, reward, done, info
 
@@ -163,10 +162,11 @@ class ProxyEnv(gym.Env):
         :param: the message received as a response to the action performed in apply_action.
         :return: the standard feedback (observation, reward, done, info) of a gym environment.
         """
-        observation = cast(Any, message.get("observation"))
-        reward = cast(float, message.get("reward"))
-        done = cast(bool, message.get("done"))
-        info = cast(dict, message.get("info"))
+        msg = cast(GymMessage, message)
+        observation = msg.observation
+        reward = msg.reward
+        done = msg.done
+        info = msg.info
 
         return observation, reward, done, info
 

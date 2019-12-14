@@ -23,7 +23,7 @@
 import datetime
 import logging
 from collections import defaultdict, deque
-from typing import Dict, Tuple, Deque, cast
+from typing import Dict, Tuple, Deque
 
 from aea.decision_maker.base import OwnershipState
 from aea.decision_maker.messages.transaction import TransactionMessage, TransactionId
@@ -171,7 +171,7 @@ class Transactions(SharedClass):
 
         :return: None
         """
-        transaction_id = cast(TransactionId, transaction_msg.get("transaction_id"))
+        transaction_id = transaction_msg.transaction_id
         assert transaction_id not in self._locked_txs
         self._register_transaction_with_time(transaction_id)
         self._locked_txs[transaction_id] = transaction_msg
@@ -189,7 +189,7 @@ class Transactions(SharedClass):
 
         :return: the transaction
         """
-        transaction_id = cast(TransactionId, transaction_msg.get("transaction_id"))
+        transaction_id = transaction_msg.transaction_id
         assert transaction_id in self._locked_txs
         transaction_msg = self._locked_txs.pop(transaction_id)
         self._locked_txs_as_buyer.pop(transaction_id, None)

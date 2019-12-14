@@ -57,14 +57,13 @@ class GymHandler(Handler):
         :return: None
         """
         gym_msg = cast(GymMessage, message)
-        gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
-        if gym_msg_performative == GymMessage.Performative.PERCEPT:
+        if gym_msg.performative == GymMessage.Performative.PERCEPT:
             assert self.context.tasks is not None, "Incorrect initialization."
             assert len(self.context.tasks) == 1, "Too many tasks loaded!"
             gym_task = cast(GymTask, self.context.tasks[0])
             gym_task.proxy_env_queue.put(gym_msg)
         else:
-            raise ValueError("Unexpected performative or no step_id: {}".format(gym_msg_performative))
+            raise ValueError("Unexpected performative or no step_id: {}".format(gym_msg.performative))
 
     def teardown(self) -> None:
         """

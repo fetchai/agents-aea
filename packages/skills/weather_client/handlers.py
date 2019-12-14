@@ -65,7 +65,6 @@ class FIPAHandler(Handler):
         """
         # convenience representations
         fipa_msg = cast(FIPAMessage, message)
-        msg_performative = FIPAMessage.Performative(message.get('performative'))
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
@@ -77,13 +76,13 @@ class FIPAHandler(Handler):
             return
 
         # handle message
-        if msg_performative == FIPAMessage.Performative.PROPOSE:
+        if fipa_msg.performative == FIPAMessage.Performative.PROPOSE:
             self._handle_propose(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.DECLINE:
+        elif fipa_msg.performative == FIPAMessage.Performative.DECLINE:
             self._handle_decline(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
+        elif fipa_msg.performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._handle_match_accept(fipa_msg, dialogue)
-        elif msg_performative == FIPAMessage.Performative.INFORM:
+        elif fipa_msg.performative == FIPAMessage.Performative.INFORM:
             self._handle_inform(fipa_msg, dialogue)
 
     def teardown(self) -> None:
@@ -118,9 +117,9 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = cast(int, msg.get('message_id')) + 1
-        new_target = cast(int, msg.get('message_id'))
-        proposals = cast(List[Description], msg.get("proposal"))
+        new_message_id = msg.message_id + 1
+        new_target = msg.message_id
+        proposals = cast(List[Description], msg.proposal)
         if proposals is not []:
             # only take the first proposal
             proposal = proposals[0]
@@ -174,8 +173,8 @@ class FIPAHandler(Handler):
         :param dialogue: the dialogue object
         :return: None
         """
-        new_message_id = cast(int, msg.get('message_id')) + 1
-        new_target = cast(int, msg.get('message_id'))
+        new_message_id = msg.message_id + 1
+        new_target = msg.message_id
         inform_msg = FIPAMessage(message_id=new_message_id,
                                  dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                  target=new_target,
@@ -199,7 +198,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, msg.counterparty[-5:]))
-        json_data = cast(dict, msg.get("info"))
+        json_data = msg.info
         if 'weather_data' in json_data.keys():
             weather_data = json_data['weather_data']
             logger.info("[{}]: received the following weather data={}".format(self.context.agent_name,
@@ -227,10 +226,9 @@ class OEFHandler(Handler):
         """
         # convenience representations
         oef_msg = cast(OEFMessage, message)
-        oef_msg_type = OEFMessage.Type(oef_msg.get("type"))
 
-        if oef_msg_type is OEFMessage.Type.SEARCH_RESULT:
-            agents = cast(List[str], oef_msg.get("agents"))
+        if oef_msg.type is OEFMessage.Type.SEARCH_RESULT:
+            agents = oef_msg.agents
             self._handle_search(agents)
 
     def teardown(self) -> None:

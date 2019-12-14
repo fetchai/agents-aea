@@ -302,7 +302,7 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
+        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
@@ -322,7 +322,7 @@ class OEFChannel(OEFAgent):
         except ValueError:
             operation = OEFMessage.OEFErrorOperation.OTHER
 
-        msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
+        msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
         msg_bytes = OEFSerializer().encode(msg)
         envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
@@ -338,7 +338,7 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR,
+        msg = OEFMessage(type=OEFMessage.Type.DIALOGUE_ERROR,
                          id=answer_id,
                          dialogue_id=dialogue_id,
                          origin=origin)
@@ -373,24 +373,25 @@ class OEFChannel(OEFAgent):
         :return: None
         """
         oef_message = OEFSerializer().decode(envelope.message)
-        oef_type = OEFMessage.Type(oef_message.get("type"))
-        oef_msg_id = cast(int, oef_message.get("id"))
+        oef_message = cast(OEFMessage, oef_message)
+        oef_type = oef_message.type
+        oef_msg_id = oef_message.id
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
-            service_description = cast(Description, oef_message.get("service_description"))
-            service_id = cast(int, oef_message.get("service_id"))
+            service_description = oef_message.service_description
+            service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
             self.register_service(oef_msg_id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
-            service_description = cast(Description, oef_message.get("service_description"))
-            service_id = cast(int, oef_message.get("service_id"))
+            service_description = oef_message.service_description
+            service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
             self.unregister_service(oef_msg_id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-            query = cast(Query, oef_message.get("query"))
+            query = oef_message.query
             oef_query = OEFObjectTranslator.to_oef_query(query)
             self.search_agents(oef_msg_id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
-            query = cast(Query, oef_message.get("query"))
+            query = oef_message.query
             oef_query = OEFObjectTranslator.to_oef_query(query)
             self.search_services(oef_msg_id, oef_query)
         else:

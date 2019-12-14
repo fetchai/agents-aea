@@ -82,7 +82,7 @@ class TACBehaviour(Behaviour):
         search_id = search.get_next_id()
         search.ids_for_tac.add(search_id)
         logger.info("[{}]: Searching for TAC, search_id={}".format(self.context.agent_name, search_id))
-        oef_msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
+        oef_msg = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
                              id=search_id,
                              query=query)
         self.context.outbox.put_message(to=DEFAULT_OEF,

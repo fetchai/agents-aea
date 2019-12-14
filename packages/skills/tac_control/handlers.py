@@ -67,7 +67,7 @@ class TACHandler(Handler):
         :return: None
         """
         tac_message = cast(TACMessage, message)
-        tac_type = tac_message.get("type")
+        tac_type = tac_message.type
 
         game = cast(Game, self.context.game)
 
@@ -91,10 +91,10 @@ class TACHandler(Handler):
         :return: None
         """
         parameters = cast(Parameters, self.context.parameters)
-        agent_name = cast(str, message.get("agent_name"))
+        agent_name = message.agent_name
         if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
             logger.error("[{}]: Agent name not in whitelist: '{}'".format(self.context.agent_name, agent_name))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+            tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_public_key,
@@ -106,7 +106,7 @@ class TACHandler(Handler):
         if message.counterparty in game.registration.agent_pbk_to_name:
             logger.error("[{}]: Agent already registered: '{}'".format(self.context.agent_name,
                                                                        game.registration.agent_pbk_to_name[message.counterparty]))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+            tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_PBK_ALREADY_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_public_key,
@@ -115,7 +115,7 @@ class TACHandler(Handler):
 
         if agent_name in game.registration.agent_pbk_to_name.values():
             logger.error("[{}]: Agent with this name already registered: '{}'".format(self.context.agent_name, agent_name))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+            tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_public_key,
@@ -137,7 +137,7 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         if message.counterparty not in game.registration.agent_pbk_to_name:
             logger.error("[{}]: Agent not registered: '{}'".format(self.context.agent_name, message.counterparty))
-            tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+            tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NOT_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_public_key,
@@ -183,11 +183,11 @@ class TACHandler(Handler):
         game.settle_transaction(transaction)
 
         # send the transaction confirmation.
-        sender_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+        sender_tac_msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
                                     transaction_id=transaction.transaction_id,
                                     amount_by_currency=transaction.amount_by_currency,
                                     quantities_by_good_pbk=transaction.quantities_by_good_pbk)
-        counterparty_tac_msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+        counterparty_tac_msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
                                           transaction_id=transaction.transaction_id,
                                           amount_by_currency=transaction.amount_by_currency,
                                           quantities_by_good_pbk=transaction.quantities_by_good_pbk)
@@ -206,11 +206,11 @@ class TACHandler(Handler):
 
     def _handle_invalid_transaction(self, message: TACMessage) -> None:
         """Handle an invalid transaction."""
-        tx_id = cast(str, message.get("transaction_id"))[-10:] if (message.get("transaction_id") is not None) else 'NO_TX_ID'
+        tx_id = message.transaction_id[-10:]
         logger.info("[{}]: Handling invalid transaction: {}".format(self.context.agent_name, tx_id))
-        tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+        tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                              error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID,
-                             info={"transaction_id": message.get("transaction_id")})
+                             info={"transaction_id": message.transaction_id})
         self.context.outbox.put_message(to=message.counterparty,
                                         sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,
@@ -246,7 +246,7 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         oef_message = cast(OEFMessage, message)
-        oef_type = oef_message.get("type")
+        oef_type = oef_message.type
 
         logger.debug("[{}]: Handling OEF message. type={}".format(self.context.agent_name, oef_type))
         if oef_type == OEFMessage.Type.OEF_ERROR:
@@ -265,7 +265,7 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         logger.error("[{}]: Received OEF error: answer_id={}, operation={}"
-                     .format(self.context.agent_name, oef_error.get("id"), oef_error.get("operation")))
+                     .format(self.context.agent_name, oef_error.id, oef_error.operation))
 
     def _on_dialogue_error(self, dialogue_error: OEFMessage) -> None:
         """
@@ -276,7 +276,7 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         logger.error("[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}"
-                     .format(self.context.agent_name, dialogue_error.get("id"), dialogue_error.get("dialogue_id"), dialogue_error.get("origin")))
+                     .format(self.context.agent_name, dialogue_error.id, dialogue_error.dialogue_id, dialogue_error.origin))
 
     def teardown(self) -> None:
         """

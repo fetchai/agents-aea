@@ -109,7 +109,7 @@ class TACBehaviour(Behaviour):
         self._oef_msg_id += 1
         desc = Description({"version": self.context.parameters.version_id}, data_model=CONTROLLER_DATAMODEL)
         logger.info("[{}]: Registering TAC data model".format(self.context.agent_name))
-        oef_msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
+        oef_msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE,
                              id=self._oef_msg_id,
                              service_description=desc,
                              service_id="")
@@ -127,7 +127,7 @@ class TACBehaviour(Behaviour):
         """
         self._oef_msg_id += 1
         logger.info("[{}]: Unregistering TAC data model".format(self.context.agent_name))
-        oef_msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE,
+        oef_msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_SERVICE,
                              id=self._oef_msg_id,
                              service_description=self._registered_desc,
                              service_id="")
@@ -145,7 +145,7 @@ class TACBehaviour(Behaviour):
         logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))
         for agent_public_key in game.configuration.agent_pbks:
             agent_state = game.current_agent_states[agent_public_key]
-            tac_msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
+            tac_msg = TACMessage(type=TACMessage.Type.GAME_DATA,
                                  amount_by_currency=agent_state.balance_by_currency,
                                  exchange_params_by_currency=agent_state.exchange_params_by_currency,
                                  quantities_by_good_pbk=agent_state.quantities_by_good_pbk,
@@ -166,7 +166,7 @@ class TACBehaviour(Behaviour):
         game = cast(Game, self.context.game)
         logger.info("[{}]: Notifying agents that TAC is cancelled.".format(self.context.agent_name))
         for agent_pbk in game.registration.agent_pbk_to_name.keys():
-            tac_msg = TACMessage(tac_type=TACMessage.Type.CANCELLED)
+            tac_msg = TACMessage(type=TACMessage.Type.CANCELLED)
             self.context.outbox.put_message(to=agent_pbk,
                                             sender=self.context.agent_public_key,
                                             protocol_id=TACMessage.protocol_id,

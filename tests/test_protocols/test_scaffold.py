@@ -26,5 +26,5 @@ import pytest
 def test_scaffold_message():
     """Testing the creation of a scaffold message."""
     with pytest.raises(NotImplementedError):
-        msg = MyScaffoldMessage()
+        msg = MyScaffoldMessage(performative='')
         assert not msg.check_consistency(), "Not Implemented Error"

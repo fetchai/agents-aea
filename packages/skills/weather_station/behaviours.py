@@ -83,7 +83,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         desc = strategy.get_service_description()
         self._registered_service_description = desc
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
+        msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE,
                          id=oef_msg_id,
                          service_description=desc,
                          service_id=SERVICE_ID)
@@ -101,7 +101,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE,
+        msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_SERVICE,
                          id=oef_msg_id,
                          service_description=self._registered_service_description,
                          service_id=SERVICE_ID)

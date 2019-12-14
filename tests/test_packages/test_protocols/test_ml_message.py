@@ -19,7 +19,6 @@
 
 """This module contains the tests of the ml_messages module."""
 import logging
-from unittest import mock
 
 import pytest
 
@@ -73,20 +72,6 @@ def test_ml_message_creation():
     msg_bytes = MLTradeSerializer().encode(msg)
     recovered_msg = MLTradeSerializer().decode(msg_bytes)
     assert recovered_msg == msg
-
-    with mock.patch('packages.protocols.ml_trade.message.MLTradeMessage.Performative') as mocked_type:
-        mocked_type.ACCEPT.value = "unknown"
-        assert msg.check_consistency() is False
-
-    with mock.patch('packages.protocols.ml_trade.message.MLTradeMessage.Performative') as mocked_type:
-        mocked_type.ACCEPT.value = "unknown"
-        with pytest.raises(ValueError, match="Type not recognized."):
-            MLTradeSerializer().encode(msg)
-
-    with mock.patch('packages.protocols.ml_trade.message.MLTradeMessage.Performative') as mocked_type:
-        mocked_type.ACCEPT.value = "unknown"
-        with pytest.raises(ValueError, match="Type not recognized."):
-            MLTradeSerializer().decode(msg_bytes)
 
     #  TODO: Need to change the __eq__ function : Error message is :
     #  ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()

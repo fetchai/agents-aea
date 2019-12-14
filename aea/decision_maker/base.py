@@ -114,18 +114,17 @@ class OwnershipState:
         or enough holdings if it is a seller.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        currency_pbk = cast(str, tx_message.get("currency_pbk"))
-        if tx_message.get("is_sender_buyer"):
+        currency_pbk = tx_message.currency_pbk
+        if tx_message.is_sender_buyer:
             # check if we have the money to cover amount and tx fee.
-            result = self.amount_by_currency[currency_pbk] >= cast(int, tx_message.get("amount")) + cast(int, tx_message.get("sender_tx_fee"))
+            result = self.amount_by_currency[currency_pbk] >= tx_message.amount + tx_message.sender_tx_fee
         else:
             # check if we have the goods.
             result = True
-            quantities_by_good_pbk = cast(Dict[str, int], tx_message.get("quantities_by_good_pbk"))
-            for good_pbk, quantity in quantities_by_good_pbk.items():
+            for good_pbk, quantity in tx_message.quantities_by_good_pbk.items():
                 result = result and (self.quantities_by_good_pbk[good_pbk] >= quantity)
             # check if we have the money to cover tx fee.
-            result = self.amount_by_currency[currency_pbk] + cast(int, tx_message.get("amount")) >= cast(int, tx_message.get("sender_tx_fee"))
+            result = self.amount_by_currency[currency_pbk] + tx_message.amount >= tx_message.sender_tx_fee
         return result
 
     def apply_state_update(self, amount_deltas_by_currency: Dict[str, int], quantity_deltas_by_good_pbk: Dict[str, int]) -> 'OwnershipState':
@@ -166,17 +165,15 @@ class OwnershipState:
         :param tx_message:
         :return: None
         """
-        currency_pbk = cast(str, tx_message.get("currency_pbk"))
-        if tx_message.get("is_sender_buyer"):
-            diff = cast(int, tx_message.get("amount")) + cast(int, tx_message.get("sender_tx_fee"))
-            self._amount_by_currency[currency_pbk] -= diff
+        if tx_message.is_sender_buyer:
+            diff = tx_message.amount + tx_message.sender_tx_fee
+            self._amount_by_currency[tx_message.currency_pbk] -= diff
         else:
-            diff = cast(int, tx_message.get("amount")) - cast(int, tx_message.get("sender_tx_fee"))
-            self._amount_by_currency[currency_pbk] += diff
+            diff = tx_message.amount - tx_message.sender_tx_fee
+            self._amount_by_currency[tx_message.currency_pbk] += diff
 
-        quantities_by_good_pbk = cast(Dict[str, int], tx_message.get("quantities_by_good_pbk"))
-        for good_pbk, quantity in quantities_by_good_pbk.items():
-            quantity_delta = quantity if tx_message.get("is_sender_buyer") else -quantity
+        for good_pbk, quantity in tx_message.quantities_by_good_pbk.items():
+            quantity_delta = quantity if tx_message.is_sender_buyer else -quantity
             self._quantities_by_good_pbk[good_pbk] += quantity_delta
 
     def __copy__(self):
@@ -464,15 +461,12 @@ class DecisionMaker:
             logger.warning("[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(self._agent_name))
             is_affordable = True
         else:
-            amount = cast(int, tx_message.get("amount"))
-            counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
-            sender_tx_fee = cast(int, tx_message.get("sender_tx_fee"))
             # adjust payment amount to reflect transaction fee split
-            transfer_amount = amount - counterparty_tx_fee
-            max_tx_fee = sender_tx_fee + counterparty_tx_fee
+            transfer_amount = tx_message.amount - tx_message.counterparty_tx_fee
+            max_tx_fee = tx_message.sender_tx_fee + tx_message.counterparty_tx_fee
             payable = transfer_amount + max_tx_fee
-            crypto_object = self._wallet.crypto_objects.get(tx_message.get("ledger_id"))
-            balance = self.ledger_apis.token_balance(crypto_object.identifier, cast(str, crypto_object.address))
+            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+            balance = self.ledger_apis.token_balance(crypto_object.identifier, crypto_object.address)
             is_affordable = payable <= balance
         return is_affordable
 
@@ -485,18 +479,15 @@ class DecisionMaker:
         """
         if tx_message.get("ledger_id") == 'off_chain':
             logger.info("[{}]: Cannot settle transaction, settlememt happens off chain!".format(self._agent_name))
-            tx_digest = cast(Optional[str], tx_message.get("transaction_id"))
+            tx_digest = cast(Optional[str], tx_message.transaction_id)
         else:
             logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
-            amount = cast(int, tx_message.get("amount"))
-            counterparty_tx_fee = cast(int, tx_message.get("counterparty_tx_fee"))
-            sender_tx_fee = cast(int, tx_message.get("sender_tx_fee"))
-            counterparty_address = cast(str, tx_message.get("counterparty"))
+            amount = tx_message.amount
             # adjust payment amount to reflect transaction fee split
-            amount -= counterparty_tx_fee
-            tx_fee = counterparty_tx_fee + sender_tx_fee
-            crypto_object = self._wallet.crypto_objects.get(tx_message.get("ledger_id"))
-            tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object, counterparty_address, amount, tx_fee)
+            amount -= tx_message.counterparty_tx_fee
+            tx_fee = tx_message.counterparty_tx_fee + tx_message.sender_tx_fee
+            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+            tx_digest = self.ledger_apis.transfer(crypto_object.identifier, crypto_object, tx_message.counterparty, amount, tx_fee)
         return tx_digest
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
@@ -509,17 +500,10 @@ class DecisionMaker:
         performative = state_update_message.get("performative")
         if performative == StateUpdateMessage.Performative.INITIALIZE:
             logger.info("[{}]: Applying state initialization!".format(self._agent_name))
-            amount_by_currency = cast(Dict[str, int], state_update_message.get("amount_by_currency"))
-            quantities_by_good_pbk = cast(Dict[str, int], state_update_message.get("quantities_by_good_pbk"))
-            self.ownership_state.init(amount_by_currency=amount_by_currency, quantities_by_good_pbk=quantities_by_good_pbk, agent_name=self._agent_name)
-            exchange_params_by_currency = cast(Dict[str, float], state_update_message.get("exchange_params_by_currency"))
-            utility_params_by_good_pbk = cast(Dict[str, float], state_update_message.get("utility_params_by_good_pbk"))
-            tx_fee = cast(int, state_update_message.get("tx_fee"))
-            self.preferences.init(exchange_params_by_currency=exchange_params_by_currency, utility_params_by_good_pbk=utility_params_by_good_pbk, tx_fee=tx_fee, agent_name=self._agent_name)
+            self.ownership_state.init(amount_by_currency=state_update_message.amount_by_currency, quantities_by_good_pbk=state_update_message.quantities_by_good_pbk, agent_name=self._agent_name)
+            self.preferences.init(exchange_params_by_currency=state_update_message.exchange_params_by_currency, utility_params_by_good_pbk=state_update_message.utility_params_by_good_pbk, tx_fee=state_update_message.tx_fee, agent_name=self._agent_name)
             self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
         elif performative == StateUpdateMessage.Performative.APPLY:
             logger.info("[{}]: Applying state update!".format(self._agent_name))
-            amount_by_currency = cast(Dict[str, int], state_update_message.get("amount_by_currency"))
-            quantities_by_good_pbk = cast(Dict[str, int], state_update_message.get("quantities_by_good_pbk"))
-            new_ownership_state = self.ownership_state.apply_state_update(amount_deltas_by_currency=amount_by_currency, quantity_deltas_by_good_pbk=quantities_by_good_pbk)
+            new_ownership_state = self.ownership_state.apply_state_update(amount_deltas_by_currency=state_update_message.amount_by_currency, quantity_deltas_by_good_pbk=state_update_message.quantities_by_good_pbk)
             self._ownership_state = new_ownership_state
