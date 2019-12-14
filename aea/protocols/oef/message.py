@@ -72,7 +72,8 @@ class OEFMessage(Message):
         """
         Initialize.
 
-        :param oef_type: the type of OEF message.
+        :param type: the type of OEF message.
+        :param id: the message id.
         """
         super().__init__(type=type, id=id, **kwargs)
         assert self.check_consistency(), "OEFMessage initialization inconsistent."

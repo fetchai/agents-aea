@@ -107,7 +107,7 @@ class TestOEF:
             """
             request_id = 1
             search_query_empty_model = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
+            search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
                                         query=search_query_empty_model)
             self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
                                           protocol_id=OEFMessage.protocol_id,
@@ -127,7 +127,7 @@ class TestOEF:
             request_id = 2
             data_model = DataModel("foobar", [Attribute("foo", str, True)])
             search_query = Query([Constraint("foo", ConstraintType("==", "bar"))], model=data_model)
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id, query=search_query)
+            search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=request_id, query=search_query)
             self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
                                           protocol_id=OEFMessage.protocol_id,
                                           message=OEFSerializer().encode(search_request)))
@@ -158,13 +158,13 @@ class TestOEF:
             """Test that a register service request works correctly."""
             foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
             desc = Description({"bar": 1}, data_model=foo_datamodel)
-            msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
+            msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
                                           protocol_id=OEFMessage.protocol_id, message=msg_bytes))
             time.sleep(0.5)
 
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=2,
+            search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=2,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel))
             self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
                                           protocol_id=OEFMessage.protocol_id,
@@ -201,7 +201,7 @@ class TestOEF:
             cls.request_id = 1
             cls.foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
             cls.desc = Description({"bar": 1}, data_model=cls.foo_datamodel)
-            msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE, id=cls.request_id, service_description=cls.desc,
+            msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE, id=cls.request_id, service_description=cls.desc,
                              service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             cls.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=cls.crypto1.public_key,
@@ -210,7 +210,7 @@ class TestOEF:
             time.sleep(1.0)
 
             cls.request_id += 1
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=cls.request_id,
+            search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=cls.request_id,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))],
                                                     model=cls.foo_datamodel))
             cls.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=cls.crypto1.public_key,
@@ -233,7 +233,7 @@ class TestOEF:
             4. assert that no result is found.
             """
             self.request_id += 1
-            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE, id=self.request_id,
+            msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_SERVICE, id=self.request_id,
                              service_description=self.desc, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
             self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
@@ -242,7 +242,7 @@ class TestOEF:
             time.sleep(1.0)
 
             self.request_id += 1
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=self.request_id,
+            search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=self.request_id,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))],
                                                     model=self.foo_datamodel))
             self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
@@ -277,7 +277,7 @@ class TestOEF:
             """Test that the search count increases."""
             request_id = 1
             search_query_empty_model = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
-            search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
+            search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
                                         query=search_query_empty_model)
             self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
                                           protocol_id=OEFMessage.protocol_id,
@@ -703,7 +703,7 @@ async def test_send_oef_message(network_node):
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
 
-    msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
+    msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=0,
                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
     msg_bytes = OEFSerializer().encode(msg)
     envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
@@ -713,7 +713,7 @@ async def test_send_oef_message(network_node):
     data_model = DataModel("foobar", attributes=[])
     query = Query(constraints=[], model=data_model)
 
-    msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
+    msg = OEFMessage(type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
     msg_bytes = OEFSerializer().encode(msg)
     envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     await oef_connection.send(envelope)

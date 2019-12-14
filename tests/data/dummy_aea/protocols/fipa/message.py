@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union, cast, Any
+from typing import Dict, List, Tuple, Union, cast
 
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
@@ -50,10 +50,10 @@ class FIPAMessage(Message):
             """Get string representation."""
             return self.value
 
-    def __init__(self, dialogue_reference: Tuple[str, str] = None,
-                 message_id: Optional[int] = None,
-                 target: Optional[int] = None,
-                 performative: Optional[Union[str, Performative]] = None,
+    def __init__(self, dialogue_reference: Tuple[str, str],
+                 message_id: int,
+                 target: int,
+                 performative: Performative,
                  **kwargs):
         """
         Initialize.
@@ -73,19 +73,19 @@ class FIPAMessage(Message):
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
         """Get the dialogue_reference of the message."""
-        assert self.is_set("dialogue_reference")
+        assert self.is_set("dialogue_reference"), " dialogue_reference is not set"
         return cast(Tuple[str, str], self.get("dialogue_reference"))
 
     @property
     def message_id(self) -> int:
         """Get the message_id of the message."""
-        assert self.is_set("message_id")
+        assert self.is_set("message_id"), "message_id is not set"
         return cast(int, self.get("message_id"))
 
     @property
     def target(self) -> int:
         """Get the target of the message."""
-        assert self.is_set("target")
+        assert self.is_set("target"), "target is not set."
         return cast(int, self.get("target"))
 
     @property
@@ -94,35 +94,36 @@ class FIPAMessage(Message):
         return FIPAMessage.Performative(self.get("performative"))
 
     @property
-    def query(self) -> Union[Query, bytes, None]:
+    def query(self):
         """Get the query of the message."""
-        assert self.is_set("query")
-        return cast(Union[Query, bytes, None], self.get("query"))
+        assert self.is_set("query"), "query is not set."
+        return self.get("query")
 
     @property
-    def proposal(self) -> List[Description]:
+    def proposal(self) -> List:
         """Get the proposal list from the message."""
-        assert self.is_set("proposal")
-        return cast(List[Description], self.get("proposal"))
+        assert self.is_set("proposal"), "proposal is not set."
+        return cast(List, self.get("proposal"))
 
     @property
-    def info(self) -> Dict[str, Any]:
+    def info(self) -> Dict:
         """Get hte info from the message."""
-        assert self.is_set("info")
-        return cast(Dict[str, Any], self.get("info"))
+        assert self.is_set("info"), "info is not set."
+        return cast(Dict, self.get("info"))
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert type(self.dialogue_reference) == Tuple[str, str]
-            assert type(self.dialogue_reference[0]) == str and type(self.dialogue_reference[1]) == str
+            assert isinstance(self.performative, FIPAMessage.Performative)
+            assert isinstance(self.dialogue_reference, tuple)
+            assert isinstance(self.dialogue_reference[0], str) and isinstance(self.dialogue_reference[1], str)
             assert isinstance(self.message_id, int)
             assert isinstance(self.target, int)
             if self.performative == FIPAMessage.Performative.CFP:
                 assert isinstance(self.query, Query) or isinstance(self.query, bytes) or self.query is None
                 assert len(self.body) == 5
             elif self.performative == FIPAMessage.Performative.PROPOSE:
-                assert type(self.proposal) == list and all(isinstance(d, Description) for d in self.proposal)
+                assert isinstance(self.proposal, list) and all(isinstance(d, Description) for d in self.proposal)
                 assert len(self.body) == 5
             elif self.performative == FIPAMessage.Performative.ACCEPT \
                     or self.performative == FIPAMessage.Performative.MATCH_ACCEPT \

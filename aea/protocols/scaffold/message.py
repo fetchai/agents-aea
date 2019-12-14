@@ -42,7 +42,7 @@ class MyScaffoldMessage(Message):
         """
         Initialize.
 
-        :param oef_type: the type of message.
+        :param performative: the type of message.
         """
         super().__init__(performative=performative, **kwargs)
         assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."

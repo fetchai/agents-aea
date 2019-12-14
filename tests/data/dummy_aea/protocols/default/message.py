@@ -20,7 +20,7 @@
 
 """This module contains the default message definition."""
 from enum import Enum
-from typing import Optional, cast
+from typing import cast, Dict, Any
 
 from aea.protocols.base import Message
 
@@ -49,7 +49,7 @@ class DefaultMessage(Message):
         UNSUPPORTED_SKILL = -10004
         INVALID_DIALOGUE = -10005
 
-    def __init__(self, type: Optional[Type] = None,
+    def __init__(self, type: Type,
                  **kwargs):
         """
         Initialize.
@@ -84,22 +84,24 @@ class DefaultMessage(Message):
         return cast(str, self.get("error_msg"))
 
     @property
-    def error_data(self) -> str:
+    def error_data(self) -> Dict[str, Any]:
         """Get the data of the error message."""
-        assert self.is_set("error_data"), "error_msg is not set."
-        return cast(str, self.get("error_data"))
+        assert self.is_set("error_data"), "error_data is not set."
+        return cast(Dict[str, Any], self.get("error_data"))
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            ttype = DefaultMessage.Type(self.get("type"))
-            if ttype == DefaultMessage.Type.BYTES:
+            assert isinstance(self.type, DefaultMessage.Type)
+            if self.type == DefaultMessage.Type.BYTES:
                 assert isinstance(self.content, bytes), "Expect the content to be bytes"
-            elif ttype == DefaultMessage.Type.ERROR:
+                assert len(self.body) == 2
+            elif self.type == DefaultMessage.Type.ERROR:
                 assert self.error_code in DefaultMessage.ErrorCode, "ErrorCode is not valid"
-                assert isinstance(self.error_code, DefaultMessage.ErrorCode), "error_code is wrong type."
+                assert isinstance(self.error_code, DefaultMessage.ErrorCode), "error_code has wrong type."
                 assert isinstance(self.error_msg, str), "error_msg should be str"
-                assert isinstance(self.error_data, str), "error_data should be str"
+                assert isinstance(self.error_data, dict), "error_data should be dict"
+                assert len(self.body) == 4
             else:
                 raise ValueError("Type not recognized.")
 
