@@ -91,7 +91,7 @@ class TACHandler(Handler):
         :return: None
         """
         parameters = cast(Parameters, self.context.parameters)
-        agent_name = cast(str, message.get("agent_name"))
+        agent_name = message.agent_name
         if len(parameters.whitelist) != 0 and agent_name not in parameters.whitelist:
             logger.error("[{}]: Agent name not in whitelist: '{}'".format(self.context.agent_name, agent_name))
             tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
@@ -206,11 +206,11 @@ class TACHandler(Handler):
 
     def _handle_invalid_transaction(self, message: TACMessage) -> None:
         """Handle an invalid transaction."""
-        tx_id = cast(str, message.get("transaction_id"))[-10:] if (message.get("transaction_id") is not None) else 'NO_TX_ID'
+        tx_id = message.transaction_id[-10:]
         logger.info("[{}]: Handling invalid transaction: {}".format(self.context.agent_name, tx_id))
         tac_msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
                              error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID,
-                             info={"transaction_id": message.get("transaction_id")})
+                             info={"transaction_id": message.transaction_id})
         self.context.outbox.put_message(to=message.counterparty,
                                         sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,
@@ -246,7 +246,7 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         oef_message = cast(OEFMessage, message)
-        oef_type = oef_message.get("type")
+        oef_type = oef_message.type
 
         logger.debug("[{}]: Handling OEF message. type={}".format(self.context.agent_name, oef_type))
         if oef_type == OEFMessage.Type.OEF_ERROR:
@@ -265,7 +265,7 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         logger.error("[{}]: Received OEF error: answer_id={}, operation={}"
-                     .format(self.context.agent_name, oef_error.get("id"), oef_error.get("operation")))
+                     .format(self.context.agent_name, oef_error.id, oef_error.operation))
 
     def _on_dialogue_error(self, dialogue_error: OEFMessage) -> None:
         """
@@ -276,7 +276,7 @@ class OEFRegistrationHandler(Handler):
         :return: None
         """
         logger.error("[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}"
-                     .format(self.context.agent_name, dialogue_error.get("id"), dialogue_error.get("dialogue_id"), dialogue_error.get("origin")))
+                     .format(self.context.agent_name, dialogue_error.id, dialogue_error.dialogue_id, dialogue_error.origin))
 
     def teardown(self) -> None:
         """

@@ -121,7 +121,7 @@ class FIPAHandler(Handler):
         """
         new_message_id = msg.message_id + 1
         new_target_id = msg.message_id
-        proposals = cast(List[Description], msg.get("proposal"))
+        proposals = msg.proposal
 
         if proposals is not []:
             # only take the first proposal

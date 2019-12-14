@@ -75,24 +75,25 @@ class FIPADialogue(Dialogue):
         """Get role of agent in dialogue."""
         return self._role
 
-    def is_valid_next_message(self, fipa_msg: FIPAMessage) -> bool:
+    def is_valid_next_message(self, fipa_msg: Message) -> bool:
         """
         Check whether this is a valid next message in the dialogue.
 
         :return: True if yes, False otherwise.
         """
-        this_message_id = fipa_msg.get("message_id")
-        this_target = fipa_msg.get("target")
-        this_performative = cast(FIPAMessage.Performative, fipa_msg.get("performative"))
-        last_outgoing_message = self.last_outgoing_message
+        fipa_msg = cast(FIPAMessage, fipa_msg)
+        this_message_id = fipa_msg.message_id
+        this_target = fipa_msg.target
+        this_performative = fipa_msg.performative
+        last_outgoing_message = cast(FIPAMessage, self.last_outgoing_message)
         if last_outgoing_message is None:
             result = this_message_id == FIPAMessage.STARTING_MESSAGE_ID and \
                 this_target == FIPAMessage.STARTING_TARGET and \
                 this_performative == FIPAMessage.Performative.CFP
         else:
-            last_message_id = cast(int, last_outgoing_message.get("message_id"))
-            last_target = cast(int, last_outgoing_message.get("target"))
-            last_performative = cast(FIPAMessage.Performative, last_outgoing_message.get("performative"))
+            last_message_id = last_outgoing_message.message_id
+            last_target = last_outgoing_message.target
+            last_performative = last_outgoing_message.performative
             result = this_message_id == last_message_id + 1 and \
                 this_target == last_target + 1 and \
                 last_performative in VALID_PREVIOUS_PERFORMATIVES[this_performative]
@@ -196,9 +197,9 @@ class FIPADialogues(Dialogues):
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
         fipa_msg = cast(FIPAMessage, fipa_msg)
-        this_message_id = fipa_msg.get("message_id")
-        this_target = fipa_msg.get("target")
-        this_performative = fipa_msg.get("performative")
+        this_message_id = fipa_msg.message_id
+        this_target = fipa_msg.target
+        this_performative = fipa_msg.performative
 
         result = this_message_id == FIPAMessage.STARTING_MESSAGE_ID and \
             this_target == FIPAMessage.STARTING_TARGET and \
@@ -215,7 +216,7 @@ class FIPADialogues(Dialogues):
         :return: boolean indicating whether the message belongs to a registered dialogue
         """
         fipa_msg = cast(FIPAMessage, fipa_msg)
-        dialogue_reference = cast(Tuple[str, str], fipa_msg.get("dialogue_reference"))
+        dialogue_reference = fipa_msg.dialogue_reference
         alt_dialogue_reference = (dialogue_reference[0], '')
         self_initiated_dialogue_label = DialogueLabel(dialogue_reference, fipa_msg.counterparty, agent_pbk)
         alt_self_initiated_dialogue_label = DialogueLabel(alt_dialogue_reference, fipa_msg.counterparty, agent_pbk)
@@ -248,7 +249,7 @@ class FIPADialogues(Dialogues):
         :return: the dialogue
         """
         fipa_msg = cast(FIPAMessage, fipa_msg)
-        dialogue_reference = cast(Tuple[str, str], fipa_msg.get("dialogue_reference"))
+        dialogue_reference = fipa_msg.dialogue_reference
         self_initiated_dialogue_label = DialogueLabel(dialogue_reference, fipa_msg.counterparty, agent_pbk)
         other_initiated_dialogue_label = DialogueLabel(dialogue_reference, fipa_msg.counterparty, fipa_msg.counterparty)
         if other_initiated_dialogue_label in self.dialogues:

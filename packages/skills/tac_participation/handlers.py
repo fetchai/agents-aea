@@ -21,7 +21,7 @@
 
 import logging
 import sys
-from typing import Dict, List, Optional, cast, TYPE_CHECKING
+from typing import List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.state_update import StateUpdateMessage
@@ -73,7 +73,7 @@ class OEFHandler(Handler):
         :return: None
         """
         oef_message = cast(OEFMessage, message)
-        oef_type = oef_message.get("type")
+        oef_type = oef_message.type
 
         logger.debug("[{}]: Handling OEF message. type={}".format(self.context.agent_name, oef_type))
         if oef_type == OEFMessage.Type.SEARCH_RESULT:
@@ -100,7 +100,7 @@ class OEFHandler(Handler):
         :return: None
         """
         logger.error("[{}]: Received OEF error: answer_id={}, operation={}"
-                     .format(self.context.agent_name, oef_error.get("id"), oef_error.get("operation")))
+                     .format(self.context.agent_name, oef_error.id, oef_error.operation))
 
     def _on_dialogue_error(self, dialogue_error: OEFMessage) -> None:
         """
@@ -111,7 +111,7 @@ class OEFHandler(Handler):
         :return: None
         """
         logger.error("[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}"
-                     .format(self.context.agent_name, dialogue_error.get("id"), dialogue_error.get("dialogue_id"), dialogue_error.get("origin")))
+                     .format(self.context.agent_name, dialogue_error.id, dialogue_error.dialogue_id, dialogue_error.origin))
 
     def _on_search_result(self, search_result: OEFMessage) -> None:
         """
@@ -122,9 +122,8 @@ class OEFHandler(Handler):
         :return: None
         """
         search = cast(Search, self.context.search)
-        search_id = search_result.get("id")
-        agents = search_result.get("agents")
-        agents = cast(List[str], agents)
+        search_id = search_result.id
+        agents = search_result.agents
         logger.debug("[{}]: on search result: {} {}".format(self.context.agent_name, search_id, agents))
         if search_id in search.ids_for_tac:
             self._on_controller_search_result(agents)
@@ -209,7 +208,7 @@ class TACHandler(Handler):
         :return: None
         """
         tac_msg = cast(TACMessage, message)
-        tac_msg_type = TACMessage.Type(tac_msg.get("type"))
+        tac_msg_type = tac_msg.type
         game = cast(Game, self.context.game)
         logger.debug("[{}]: Handling controller response. type={}".format(self.context.agent_name, tac_msg_type))
         try:
@@ -253,10 +252,10 @@ class TACHandler(Handler):
 
         :return: None
         """
-        error_code = TACMessage.ErrorCode(tac_message.get("error_code"))
+        error_code = tac_message.error_code
         logger.error("[{}]: Received error from the controller. error_msg={}".format(self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)))
         if error_code == TACMessage.ErrorCode.TRANSACTION_NOT_VALID:
-            info = cast(Dict, tac_message.get("info"))
+            info = tac_message.info
             transaction_id = cast(str, info.get("transaction_id")) if (info.get("transaction_id") is not None) else 'NO_TX_ID'
             logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id[-10:]))
 
@@ -273,11 +272,11 @@ class TACHandler(Handler):
         game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE,
-                                              amount_by_currency=cast(Dict[str, int], tac_message.get("amount_by_currency")),
-                                              quantities_by_good_pbk=cast(Dict[str, int], tac_message.get("quantities_by_good_pbk")),
-                                              exchange_params_by_currency=cast(Dict[str, float], tac_message.get("exchange_params_by_currency")),
-                                              utility_params_by_good_pbk=cast(Dict[str, float], tac_message.get("utility_params_by_good_pbk")),
-                                              tx_fee=cast(int, tac_message.get("tx_fee")))
+                                              amount_by_currency=tac_message.amount_by_currency,
+                                              quantities_by_good_pbk=tac_message.quantities_by_good_pbk,
+                                              exchange_params_by_currency=tac_message.exchange_params_by_currency,
+                                              utility_params_by_good_pbk=tac_message.utility_params_by_good_pbk,
+                                              tx_fee=tac_message.tx_fee)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
     def _on_cancelled(self) -> None:
@@ -298,10 +297,10 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, cast(str, message.get("transaction_id"))[-10:]))
+        logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.transaction_id[-10:]))
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY,
-                                              amount_by_currency=cast(Dict[str, int], message.get("amount_by_currency")),
-                                              quantities_by_good_pbk=cast(Dict[str, int], message.get("quantities_by_good_pbk")))
+                                              amount_by_currency=message.amount_by_currency,
+                                              quantities_by_good_pbk=message.quantities_by_good_pbk)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
     # def _on_state_update(self, tac_message: TACMessage, controller_pbk: Address) -> None:
@@ -326,16 +325,16 @@ class TACHandler(Handler):
     #     #     opponent_pbks.remove(agent_pbk)
     #     #     self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
 
-    def _on_dialogue_error(self, tac_message: TACMessage) -> None:
-        """
-        Handle dialogue error event emitted by the controller.
+    # def _on_dialogue_error(self, tac_message: TACMessage) -> None:
+    #     """
+    #     Handle dialogue error event emitted by the controller.
 
-        :param tac_message: the dialogue error message
-        :return: None
-        """
-        logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name,
-                                                                                          tac_message.get("details"),
-                                                                                          tac_message.counterparty))
+    #     :param tac_message: the dialogue error message
+    #     :return: None
+    #     """
+    #     logger.warning("[{}]: Received Dialogue error from: details={}, sender={}".format(self.context.agent_name,
+    #                                                                                       tac_message.details,
+    #                                                                                       tac_message.counterparty))
 
     # def _request_state_update(self) -> None:
     #     """
@@ -370,16 +369,16 @@ class TransactionHandler(Handler):
         :return: None
         """
         tx_message = cast(TransactionMessage, message)
-        if TransactionMessage.Performative(tx_message.get("performative")) == TransactionMessage.Performative.ACCEPT:
+        if tx_message.performative == TransactionMessage.Performative.ACCEPT:
             logger.info("[{}]: transaction confirmed by decision maker, sending to controller.".format(self.context.agent_name))
             game = cast(Game, self.context.game)
             msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION,
-                             transaction_id=tx_message.get("transaction_digest"),
-                             counterparty=tx_message.get("counterparty"),
-                             amount_by_currency={tx_message.get("currency_pbk"): tx_message.get("amount")},
-                             sender_tx_fee=tx_message.get("sender_tx_fee"),
-                             counterparty_tx_fee=tx_message.get("counterparty_tx_fee"),
-                             quantities_by_good_pbk=tx_message.get("quantities_by_good_pbk"))
+                             transaction_id=tx_message.transaction_digest,
+                             transaction_counterparty=tx_message.counterparty,
+                             amount_by_currency={tx_message.currency_pbk: tx_message.amount},
+                             sender_tx_fee=tx_message.sender_tx_fee,
+                             counterparty_tx_fee=tx_message.counterparty_tx_fee,
+                             quantities_by_good_pbk=tx_message.quantities_by_good_pbk)
             self.context.outbox.put_message(to=game.configuration.controller_pbk,
                                             sender=self.context.agent_public_key,
                                             protocol_id=TACMessage.protocol_id,

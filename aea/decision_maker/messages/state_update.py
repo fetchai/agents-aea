@@ -21,9 +21,9 @@
 """The state update message module."""
 
 from enum import Enum
-from typing import cast, Dict, Optional, Union
+from typing import cast, Dict, Optional
 
-from aea.decision_maker.internal_base import InternalMessage
+from aea.decision_maker.messages.base import InternalMessage
 
 TransactionId = str
 
@@ -36,15 +36,13 @@ ExchangeParams = Dict[str, float]   # a map from identifier to quantity
 class StateUpdateMessage(InternalMessage):
     """The state update message class."""
 
-    protocol_id = "internal"
-
     class Performative(Enum):
         """State update performative."""
 
         INITIALIZE = "initialize"
         APPLY = "apply"
 
-    def __init__(self, performative: Union[str, Performative],
+    def __init__(self, performative: Performative,
                  amount_by_currency: Currencies,
                  quantities_by_good_pbk: Goods,
                  exchange_params_by_currency: Optional[ExchangeParams] = None,
@@ -61,13 +59,19 @@ class StateUpdateMessage(InternalMessage):
         :param utility_params_by_good_pbk: the utility params.
         :param tx_fee: the tx fee.
         """
-        super().__init__(performative=performative,
-                         amount_by_currency=amount_by_currency,
-                         quantities_by_good_pbk=quantities_by_good_pbk,
-                         exchange_params_by_currency=exchange_params_by_currency,
-                         utility_params_by_good_pbk=utility_params_by_good_pbk,
-                         tx_fee=tx_fee,
-                         **kwargs)
+        if performative == self.Performative.INITIALIZE:
+            super().__init__(performative=performative,
+                             amount_by_currency=amount_by_currency,
+                             quantities_by_good_pbk=quantities_by_good_pbk,
+                             exchange_params_by_currency=exchange_params_by_currency,
+                             utility_params_by_good_pbk=utility_params_by_good_pbk,
+                             tx_fee=tx_fee,
+                             **kwargs)
+        else:
+            super().__init__(performative=performative,
+                             amount_by_currency=amount_by_currency,
+                             quantities_by_good_pbk=quantities_by_good_pbk,
+                             **kwargs)
         assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
 
     @property
@@ -115,32 +119,32 @@ class StateUpdateMessage(InternalMessage):
         try:
             assert self.performative in StateUpdateMessage.Performative, "Invalide performative."
             isinstance(self.amount_by_currency, dict)
-            for key, value in self.amount_by_currency.items():
+            for key, int_value in self.amount_by_currency.items():
                 isinstance(key, str)
-                isinstance(value, int)
+                isinstance(int_value, int)
             isinstance(self.quantities_by_good_pbk, dict)
-            for key, value in self.quantities_by_good_pbk.items():
+            for key, int_value in self.quantities_by_good_pbk.items():
                 isinstance(key, str)
-                isinstance(value, int)
+                isinstance(int_value, int)
             if self.performative == self.Performative.INITIALIZE:
                 isinstance(self.exchange_params_by_currency, dict)
-                for key, value in self.exchange_params_by_currency.items():
+                for key, float_value in self.exchange_params_by_currency.items():
                     isinstance(key, str)
-                    isinstance(value, float)
+                    isinstance(float_value, float)
                 assert self.amount_by_currency.keys() == self.exchange_params_by_currency.keys()
                 isinstance(self.utility_params_by_good_pbk, dict)
-                for key, value in self.utility_params_by_good_pbk.items():
+                for key, float_value in self.utility_params_by_good_pbk.items():
                     isinstance(key, str)
-                    isinstance(value, float)
+                    isinstance(float_value, float)
                 assert self.quantities_by_good_pbk.keys() == self.utility_params_by_good_pbk.keys()
-                utility_params_by_good_pbk = self.get("utility_params_by_good_pbk")
-                utility_params_by_good_pbk = cast(UtilityParams, utility_params_by_good_pbk)
-                assert self.quantities_by_good_pbk.keys() == utility_params_by_good_pbk.keys()
+                assert self.quantities_by_good_pbk.keys() == self.utility_params_by_good_pbk.keys()
                 isinstance(self.tx_fee, int)
+                assert len(self.body) == 6
             elif self.performative == self.Performative.APPLY:
-                assert self.exchange_params_by_currency is None
-                assert self.utility_params_by_good_pbk is None
-                assert self.tx_fee is None
+                assert not self.is_set("exchange_params_by_currency")
+                assert not self.is_set("utility_params_by_good_pbk")
+                assert not self.is_set("tx_fee")
+                assert len(self.body) == 3
         except (AssertionError, KeyError):
             return False
         return True

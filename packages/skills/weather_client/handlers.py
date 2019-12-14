@@ -119,7 +119,7 @@ class FIPAHandler(Handler):
         """
         new_message_id = msg.message_id + 1
         new_target = msg.message_id
-        proposals = cast(List[Description], msg.get("proposal"))
+        proposals = cast(List[Description], msg.proposal)
         if proposals is not []:
             # only take the first proposal
             proposal = proposals[0]
@@ -198,7 +198,7 @@ class FIPAHandler(Handler):
         :return: None
         """
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name, msg.counterparty[-5:]))
-        json_data = cast(dict, msg.get("info"))
+        json_data = msg.info
         if 'weather_data' in json_data.keys():
             weather_data = json_data['weather_data']
             logger.info("[{}]: received the following weather data={}".format(self.context.agent_name,

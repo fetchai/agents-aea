@@ -20,7 +20,6 @@
 
 """This module contains the base message and serialization definition."""
 
-from abc import abstractmethod, ABC
 from copy import copy
 from typing import Any, Dict, Optional
 
@@ -28,7 +27,7 @@ from typing import Any, Dict, Optional
 class InternalMessage:
     """This class implements a message."""
 
-    protocol_id = 'base'
+    protocol_id = "internal"
 
     def __init__(self, body: Optional[Dict] = None,
                  **kwargs):
@@ -94,34 +93,4 @@ class InternalMessage:
 
     def __str__(self):
         """Get the string representation of the message."""
-        return "Message(" + " ".join(map(lambda key_value: str(key_value[0]) + "=" + str(key_value[1]), self.body.items())) + ")"
-
-
-class Encoder(ABC):
-    """Encoder interface."""
-
-    @abstractmethod
-    def encode(self, msg: InternalMessage) -> bytes:
-        """
-        Encode a message.
-
-        :param msg: the message to be encoded.
-        :return: the encoded message.
-        """
-
-
-class Decoder(ABC):
-    """Decoder interface."""
-
-    @abstractmethod
-    def decode(self, obj: bytes) -> InternalMessage:
-        """
-        Decode a message.
-
-        :param obj: the sequence of bytes to be decoded.
-        :return: the decoded message.
-        """
-
-
-class Serializer(Encoder, Decoder, ABC):
-    """The implementations of this class defines a serialization layer for a protocol."""
+        return "InternalMessage(" + " ".join(map(lambda key_value: str(key_value[0]) + "=" + str(key_value[1]), self.body.items())) + ")"

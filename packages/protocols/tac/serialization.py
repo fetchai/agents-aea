@@ -23,7 +23,7 @@
 import sys
 from typing import Any, Dict, TYPE_CHECKING, cast
 
-from aea.decision_maker.internal_base import InternalMessage, Serializer
+from aea.protocols.base import Message, Serializer
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac import tac_pb2
@@ -65,7 +65,7 @@ def _from_pairs_to_dict(pairs):
 class TACSerializer(Serializer):
     """Serialization for the TAC protocol."""
 
-    def encode(self, msg: InternalMessage) -> bytes:
+    def encode(self, msg: Message) -> bytes:
         """
         Decode the message.
 
@@ -154,7 +154,7 @@ class TACSerializer(Serializer):
         tac_message_bytes = tac_container.SerializeToString()
         return tac_message_bytes
 
-    def decode(self, obj: bytes) -> InternalMessage:
+    def decode(self, obj: bytes) -> Message:
         """
         Decode the message.
 

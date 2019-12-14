@@ -21,7 +21,7 @@
 from enum import Enum
 import logging
 import sys
-from typing import Dict, List, Optional, cast, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 from aea.protocols.oef.models import Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
@@ -188,13 +188,13 @@ class Game(SharedClass):
 
         :return: None
         """
-        assert tac_message.get("type") == TACMessage.Type.GAME_DATA, "Wrong TACMessage for initialization of TAC game."
+        assert tac_message.type == TACMessage.Type.GAME_DATA, "Wrong TACMessage for initialization of TAC game."
         assert controller_pbk == self.expected_controller_pbk, "TACMessage from unexpected controller."
-        assert tac_message.get("version_id") == self.expected_version_id, "TACMessage for unexpected game."
-        self._configuration = Configuration(cast(str, tac_message.get("version_id")),
-                                            cast(int, tac_message.get("tx_fee")),
-                                            cast(Dict[str, str], tac_message.get("agent_pbk_to_name")),
-                                            cast(Dict[str, str], tac_message.get("good_pbk_to_name")),
+        assert tac_message.version_id == self.expected_version_id, "TACMessage for unexpected game."
+        self._configuration = Configuration(tac_message.version_id,
+                                            tac_message.tx_fee,
+                                            tac_message.agent_pbk_to_name,
+                                            tac_message.good_pbk_to_name,
                                             controller_pbk)
 
     def update_expected_controller_pbk(self, controller_pbk: Address):

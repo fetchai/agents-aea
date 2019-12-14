@@ -84,7 +84,7 @@ class TrainHandler(Handler):
         :param ml_trade_msg: the ml trade message
         :return: None
         """
-        terms = cast(Description, ml_trade_msg.get("terms"))
+        terms = ml_trade_msg.terms
         logger.info("Received terms message from {}: terms={}".format(ml_trade_msg.counterparty[-5:], terms.values))
 
         strategy = cast(Strategy, self.context.strategy)

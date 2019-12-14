@@ -354,14 +354,14 @@ class Transaction:
         :param message: the message
         :return: Transaction
         """
-        assert message.get('type') == TACMessage.Type.TRANSACTION
-        return Transaction(cast(str, message.get("transaction_id")),
+        assert message.type == TACMessage.Type.TRANSACTION
+        return Transaction(message.transaction_id,
                            message.counterparty,
-                           cast(str, message.get("counterparty")),
-                           cast(Dict[str, int], message.get("amount_by_currency")),
-                           cast(int, message.get("sender_tx_fee")),
-                           cast(int, message.get("counterparty_tx_fee")),
-                           cast(Dict[str, int], message.get("quantities_by_good_pbk")))
+                           message.transaction_counterparty,
+                           message.amount_by_currency,
+                           message.sender_tx_fee,
+                           message.counterparty_tx_fee,
+                           message.quantities_by_good_pbk)
 
     def matches(self, other: 'Transaction') -> bool:
         """
