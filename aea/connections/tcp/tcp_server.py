@@ -54,7 +54,7 @@ class TCPServerConnection(TCPConnection):
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
 
-        self._read_tasks_to_address = dict()  # type: Dict[Future, str]
+        self._read_tasks_to_address = dict()  # type: Dict[Future, Address]
 
     async def handle(self, reader: StreamReader, writer: StreamWriter) -> None:
         """

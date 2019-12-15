@@ -73,7 +73,7 @@ class StateUpdateMessage(InternalMessage):
 
     @property
     def quantities_by_good_id(self) -> Goods:
-        """Get he quantities by good id."""
+        """Get the quantities by good id."""
         assert self.is_set("quantities_by_good_id"), "quantities_by_good_id is not set."
         return cast(Goods, self.get("quantities_by_good_id"))
 
