@@ -166,9 +166,9 @@ def gui(ctx: Context, port):
 def generate_key(ctx: Context, type_):
     """Generate private keys."""
     def _can_write(path) -> bool:
-        if Path(DEFAULT_PRIVATE_KEY_FILE).exists():
+        if Path(path).exists():
             value = click.confirm('The file {} already exists. Do you want to overwrite it?'
-                                  .format(DEFAULT_PRIVATE_KEY_FILE), default=False)
+                                  .format(path), default=False)
             return value
         else:
             return True
