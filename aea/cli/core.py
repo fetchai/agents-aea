@@ -105,7 +105,7 @@ def create(click_context, agent_name):
         logger.exception(e)
         shutil.rmtree(agent_name, ignore_errors=True)
         sys.exit(1)
-
+DEFAULT_PRIVATE_KEY_FILE
 
 @cli.command()
 @click.argument('agent_name', type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True)
@@ -165,12 +165,23 @@ def gui(ctx: Context, port):
 @pass_ctx
 def generate_key(ctx: Context, type_):
     """Generate private keys."""
+    def _can_write(path) -> bool:
+        if Path(DEFAULT_PRIVATE_KEY_FILE).exists():
+            value = click.confirm('The file {} already exists. Do you want to overwrite it?'
+                                  .format(DEFAULT_PRIVATE_KEY_FILE), default=False)
+            return value
+        else:
+            return True
+
     if type_ == DefaultCrypto.identifier or type_ == "all":
-        DefaultCrypto().dump(open(DEFAULT_PRIVATE_KEY_FILE, "wb"))
+        if _can_write(DEFAULT_PRIVATE_KEY_FILE):
+            DefaultCrypto().dump(open(DEFAULT_PRIVATE_KEY_FILE, "wb"))
     if type_ == FetchAICrypto.identifier or type_ == "all":
-        FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
+        if _can_write(FETCHAI_PRIVATE_KEY_FILE):
+            FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
     if type_ == EthereumCrypto.identifier or type_ == "all":
-        EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
+        if _can_write(ETHEREUM_PRIVATE_KEY_FILE):
+            EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
 
 
 @cli.command()
