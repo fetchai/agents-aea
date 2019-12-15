@@ -86,7 +86,7 @@ class AEAJsonPathType(click.ParamType):
 @click.group()
 @pass_ctx
 def config(ctx: Context):
-    """Read/write the configurations."""
+    """Read or modify a configuration."""
     _try_to_load_agent_config(ctx)
 
 
