@@ -105,8 +105,8 @@ class TACSerializer(Serializer):
             tac_msg.quantities_by_good_pbk.extend(_from_dict_to_pairs(msg.quantities_by_good_pbk))
             tac_msg.utility_params_by_good_pbk.extend(_from_dict_to_pairs(msg.utility_params_by_good_pbk))
             tac_msg.tx_fee = msg.tx_fee
-            tac_msg.agent_pbk_to_name.extend(_from_dict_to_pairs(msg.get("agent_pbk_to_name")))
-            tac_msg.good_pbk_to_name.extend(_from_dict_to_pairs(msg.get("good_pbk_to_name")))
+            tac_msg.agent_addr_to_name.extend(_from_dict_to_pairs(msg.agent_addr_to_name))
+            tac_msg.good_pbk_to_name.extend(_from_dict_to_pairs(msg.good_pbk_to_name))
             tac_msg.version_id = msg.version_id
             tac_container.game_data.CopyFrom(tac_msg)
         elif msg.type == TACMessage.Type.TRANSACTION_CONFIRMATION:
@@ -124,7 +124,7 @@ class TACSerializer(Serializer):
         #     game_data.quantities_by_good_pbk.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["quantities_by_good_pbk"])))  # type: ignore
         #     game_data.utility_params_by_good_pbk.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["utility_params_by_good_pbk"])))  # type: ignore
         #     game_data.tx_fee = game_data_json["tx_fee"]  # type: ignore
-        #     game_data.agent_pbk_to_name.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["agent_pbk_to_name"])))  # type: ignore
+        #     game_data.agent_addr_to_name.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["agent_addr_to_name"])))  # type: ignore
         #     game_data.good_pbk_to_name.extend(_from_dict_to_pairs(cast(Dict[str, str], game_data_json["good_pbk_to_name"])))  # type: ignore
 
         #     tac_msg.initial_state.CopyFrom(game_data)
@@ -191,7 +191,7 @@ class TACSerializer(Serializer):
             new_body["quantities_by_good_pbk"] = _from_pairs_to_dict(tac_container.game_data.quantities_by_good_pbk)
             new_body["utility_params_by_good_pbk"] = _from_pairs_to_dict(tac_container.game_data.utility_params_by_good_pbk)
             new_body["tx_fee"] = tac_container.game_data.tx_fee
-            new_body["agent_pbk_to_name"] = _from_pairs_to_dict(tac_container.game_data.agent_pbk_to_name)
+            new_body["agent_addr_to_name"] = _from_pairs_to_dict(tac_container.game_data.agent_addr_to_name)
             new_body["good_pbk_to_name"] = _from_pairs_to_dict(tac_container.game_data.good_pbk_to_name)
             new_body["version_id"] = tac_container.game_data.version_id
         elif tac_type == "transaction_confirmation":
@@ -207,7 +207,7 @@ class TACSerializer(Serializer):
         #         quantities_by_good_pbk=_from_pairs_to_dict(tac_container.state_update.game_data.quantities_by_good_pbk),
         #         utility_params_by_good_pbk=_from_pairs_to_dict(tac_container.state_update.game_data.utility_params_by_good_pbk),
         #         tx_fee=tac_container.state_update.game_data.tx_fee,
-        #         agent_pbk_to_name=_from_pairs_to_dict(tac_container.state_update.game_data.agent_pbk_to_name),
+        #         agent_addr_to_name=_from_pairs_to_dict(tac_container.state_update.game_data.agent_addr_to_name),
         #         good_pbk_to_name=_from_pairs_to_dict(tac_container.state_update.game_data.good_pbk_to_name),
         #         version_id=tac_container.state_update.game_data.version_id
         #     )

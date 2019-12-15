@@ -143,7 +143,7 @@ class TACBehaviour(Behaviour):
         game.create()
         logger.info("[{}]: Started competition:\n{}".format(self.context.agent_name, game.holdings_summary))
         logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))
-        for agent_public_key in game.configuration.agent_pbks:
+        for agent_public_key in game.configuration.agent_addrs:
             agent_state = game.current_agent_states[agent_public_key]
             tac_msg = TACMessage(type=TACMessage.Type.GAME_DATA,
                                  amount_by_currency=agent_state.balance_by_currency,
@@ -151,7 +151,7 @@ class TACBehaviour(Behaviour):
                                  quantities_by_good_pbk=agent_state.quantities_by_good_pbk,
                                  utility_params_by_good_pbk=agent_state.utility_params_by_good_pbk,
                                  tx_fee=game.configuration.tx_fee,
-                                 agent_pbk_to_name=game.configuration.agent_pbk_to_name,
+                                 agent_addr_to_name=game.configuration.agent_addr_to_name,
                                  good_pbk_to_name=game.configuration.good_pbk_to_name,
                                  version_id=game.configuration.version_id)
             logger.debug("[{}]: sending game data to '{}': {}"
@@ -165,9 +165,9 @@ class TACBehaviour(Behaviour):
         """Notify agents that the TAC is cancelled."""
         game = cast(Game, self.context.game)
         logger.info("[{}]: Notifying agents that TAC is cancelled.".format(self.context.agent_name))
-        for agent_pbk in game.registration.agent_pbk_to_name.keys():
+        for agent_pbk in game.registration.agent_addr_to_name.keys():
             tac_msg = TACMessage(type=TACMessage.Type.CANCELLED)
-            self.context.outbox.put_message(to=agent_pbk,
+            self.context.outbox.put_message(to=agent_addr,
                                             sender=self.context.agent_public_key,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))

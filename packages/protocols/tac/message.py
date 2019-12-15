@@ -54,7 +54,7 @@ class TACMessage(Message):
 
         GENERIC_ERROR = 0
         REQUEST_NOT_VALID = 1
-        AGENT_PBK_ALREADY_REGISTERED = 2
+        AGENT_ADDR_ALREADY_REGISTERED = 2
         AGENT_NAME_ALREADY_REGISTERED = 3
         AGENT_NOT_REGISTERED = 4
         TRANSACTION_NOT_VALID = 5
@@ -66,7 +66,7 @@ class TACMessage(Message):
     _from_ec_to_msg = {
         ErrorCode.GENERIC_ERROR: "Unexpected error.",
         ErrorCode.REQUEST_NOT_VALID: "Request not recognized",
-        ErrorCode.AGENT_PBK_ALREADY_REGISTERED: "Agent pbk already registered.",
+        ErrorCode.AGENT_ADDR_ALREADY_REGISTERED: "Agent addr already registered.",
         ErrorCode.AGENT_NAME_ALREADY_REGISTERED: "Agent name already registered.",
         ErrorCode.AGENT_NOT_REGISTERED: "Agent not registered.",
         ErrorCode.TRANSACTION_NOT_VALID: "Error in checking transaction",
@@ -227,8 +227,8 @@ class TACMessage(Message):
                     assert type(key) == str and type(float_value) == float
                 assert self.quantities_by_good_pbk.keys() == self.utility_params_by_good_pbk.keys()
                 assert isinstance(self.tx_fee, int)
-                assert type(self.agent_pbk_to_name) in [dict, defaultdict]
-                assert type(self.good_pbk_to_name) in [dict, defaultdict]
+                assert type(self.agent_addr_to_name) in [dict, defaultdict]
+                assert type(self.good_addr_to_name) in [dict, defaultdict]
                 assert isinstance(self.version_id, str)
                 assert len(self.body) == 9
             elif self.type == TACMessage.Type.TRANSACTION_CONFIRMATION:

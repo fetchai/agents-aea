@@ -132,11 +132,11 @@ class FIPANegotiationHandler(Handler):
         proposal_description = strategy.get_proposal_for_query(query, dialogue.is_seller)
 
         if proposal_description is None:
-            logger.debug("[{}]: sending to {} a Decline{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
+            logger.debug("[{}]: sending to {} a Decline{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                                                                   pprint.pformat({
                                                                       "msg_id": new_msg_id,
                                                                       "dialogue_reference": cfp.dialogue_reference,
-                                                                      "origin": dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
+                                                                      "origin": dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                                                                       "target": cfp.target
                                                                   })))
             fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.DECLINE,
@@ -149,11 +149,11 @@ class FIPANegotiationHandler(Handler):
             transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
             transactions = cast(Transactions, self.context.transactions)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
-            logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
+            logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                                                                  pprint.pformat({
                                                                      "msg_id": new_msg_id,
                                                                      "dialogue_reference": cfp.dialogue_reference,
-                                                                     "origin": dialogue.dialogue_label.dialogue_opponent_pbk[-5:],
+                                                                     "origin": dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                                                                      "target": cfp.message_id,
                                                                      "propose": proposal_description.values
                                                                  })))
@@ -163,7 +163,7 @@ class FIPANegotiationHandler(Handler):
                                    target=cfp.message_id,
                                    proposal=[proposal_description])
         dialogue.outgoing_extend(fipa_msg)
-        self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_pbk,
+        self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
                                         sender=self.context.agent_public_key,
                                         protocol_id=FIPAMessage.protocol_id,
                                         message=FIPASerializer().encode(fipa_msg))
@@ -203,7 +203,7 @@ class FIPANegotiationHandler(Handler):
                 dialogues = cast(Dialogues, self.context.dialogues)
                 dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
             dialogue.outgoing_extend(fipa_msg)
-            self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_pbk,
+            self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
                                             sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(fipa_msg))
@@ -217,7 +217,7 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         logger.debug("[{}]: on_decline: msg_id={}, dialogue_reference={}, origin={}, target={}"
-                     .format(self.context.agent_name, decline.message_id, decline.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_pbk, decline.target))
+                     .format(self.context.agent_name, decline.message_id, decline.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_addr, decline.target))
         target = decline.target
         dialogues = cast(Dialogues, self.context.dialogues)
 
@@ -242,7 +242,7 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         logger.debug("[{}]: on_accept: msg_id={}, dialogue_reference={}, origin={}, target={}"
-                     .format(self.context.agent_name, accept.message_id, accept.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_pbk, accept.target))
+                     .format(self.context.agent_name, accept.message_id, accept.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_addr, accept.target))
         new_msg_id = accept.message_id + 1
         transactions = cast(Transactions, self.context.transactions)
         transaction_msg = transactions.pop_pending_proposal(dialogue.dialogue_label, accept.target)
@@ -263,7 +263,7 @@ class FIPANegotiationHandler(Handler):
             dialogue.outgoing_extend(fipa_msg)
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
-            self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_pbk,
+            self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
                                             sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(fipa_msg))
@@ -277,7 +277,7 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         logger.debug("[{}]: on_match_accept: msg_id={}, dialogue_reference={}, origin={}, target={}"
-                     .format(self.context.agent_name, match_accept.message_id, match_accept.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_pbk, match_accept.target))
+                     .format(self.context.agent_name, match_accept.message_id, match_accept.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_addr, match_accept.target))
         transactions = cast(Transactions, self.context.transactions)
         transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.target))
         # update skill id to route back to tac participation skill
@@ -316,14 +316,14 @@ class TransactionHandler(Handler):
             dialogue = dialogues.dialogues[dialogue_label]
             fipa_message = cast(FIPAMessage, dialogue.last_incoming_message)
             if fipa_message is not None and fipa_message.performative == FIPAMessage.Performative.ACCEPT:
-                logger.info("[{}]: sending match accept to {}.".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_pbk[-5:]))
+                logger.info("[{}]: sending match accept to {}.".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_addr[-5:]))
                 fipa_msg = FIPAMessage(performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
                                        message_id=fipa_message.message_id + 1,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=fipa_message.message_id,
                                        info={"signature": 'PLACEHOLDER'})  # TODO: tx_message.signature})
                 dialogue.outgoing_extend(fipa_msg)
-                self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_pbk,
+                self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
                                                 sender=self.context.agent_public_key,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(fipa_msg))

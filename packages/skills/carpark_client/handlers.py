@@ -273,18 +273,18 @@ class OEFHandler(Handler):
             logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
 
             # pick first agent found
-            opponent_pbk = agents[0]
+            opponent_addr = agents[0]
             dialogues = cast(Dialogues, self.context.dialogues)
-            dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key, is_seller=False)
+            dialogue = dialogues.create_self_initiated(opponent_addr, self.context.agent_public_key, is_seller=False)
             query = strategy.get_service_query()
-            logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
+            logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_addr[-5:]))
             cfp_msg = FIPAMessage(message_id=STARTING_MESSAGE_ID,
                                   dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                   performative=FIPAMessage.Performative.CFP,
                                   target=STARTING_TARGET_ID,
                                   query=query)
             dialogue.outgoing_extend(cfp_msg)
-            self.context.outbox.put_message(to=opponent_pbk,
+            self.context.outbox.put_message(to=opponent_addr,
                                             sender=self.context.agent_public_key,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(cfp_msg))
@@ -322,7 +322,7 @@ class MyTransactionHandler(Handler):
             fipa_msg = cast(FIPAMessage, dialogue.last_incoming_message)
             new_message_id = fipa_msg.message_id + 1
             new_target_id = fipa_msg.message_id
-            counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_pbk
+            counterparty_pbk = dialogue.dialogue_label.dialogue_opponent_addr
             inform_msg = FIPAMessage(message_id=new_message_id,
                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                      target=new_target_id,

@@ -29,6 +29,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
 from aea.protocols.oef.message import OEFMessage
 from aea.skills.base import Handler
+from aea.mail.base import Address
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac.message import TACMessage
@@ -41,8 +42,6 @@ else:
     from tac_participation_skill.game import Game, Phase
     from tac_participation_skill.search import Search
 
-
-Address = str
 
 logger = logging.getLogger("aea.tac_participation_skill")
 
@@ -130,11 +129,11 @@ class OEFHandler(Handler):
         else:
             logger.debug("[{}]: Unknown search id: search_id={}".format(self.context.agent_name, search_id))
 
-    def _on_controller_search_result(self, agent_pbks: List[Address]) -> None:
+    def _on_controller_search_result(self, agent_addrs: List[Address]) -> None:
         """
         Process the search result for a controller.
 
-        :param agent_pbks: list of agent pbks
+        :param agent_addrs: list of agent addresses
 
         :return: None
         """
@@ -143,48 +142,48 @@ class OEFHandler(Handler):
             logger.debug("[{}]: Ignoring controller search result, the agent is already competing.".format(self.context.agent_name))
             return
 
-        if len(agent_pbks) == 0:
+        if len(agent_addrs) == 0:
             logger.info("[{}]: Couldn't find the TAC controller. Retrying...".format(self.context.agent_name))
-        elif len(agent_pbks) > 1:
+        elif len(agent_addrs) > 1:
             logger.error("[{}]: Found more than one TAC controller. Retrying...".format(self.context.agent_name))
         # elif self._rejoin:
         #     logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
-        #     controller_pbk = agent_pbks[0]
-        #     self._rejoin_tac(controller_pbk)
+        #     controller_addr = agent_addrs[0]
+        #     self._rejoin_tac(controller_addr)
         else:
             logger.info("[{}]: Found the TAC controller. Registering...".format(self.context.agent_name))
-            controller_pbk = agent_pbks[0]
-            self._register_to_tac(controller_pbk)
+            controller_addr = agent_addrs[0]
+            self._register_to_tac(controller_addr)
 
-    def _register_to_tac(self, controller_pbk: Address) -> None:
+    def _register_to_tac(self, controller_addr: Address) -> None:
         """
         Register to active TAC Controller.
 
-        :param controller_pbk: the public key of the controller.
+        :param controller_addr: the public key of the controller.
 
         :return: None
         """
         game = cast(Game, self.context.game)
-        game.update_expected_controller_pbk(controller_pbk)
+        game.update_expected_controller_addr(controller_addr)
         game.update_game_phase(Phase.GAME_REGISTRATION)
         tac_msg = TACMessage(type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
         tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
-    # def _rejoin_tac(self, controller_pbk: Address) -> None:
+    # def _rejoin_tac(self, controller_addr: Address) -> None:
     #     """
     #     Rejoin the TAC run by a Controller.
 
-    #     :param controller_pbk: the public key of the controller.
+    #     :param controller_addr: the public key of the controller.
 
     #     :return: None
     #     """
     #     game = cast(Game, self.context.game)
-    #     game.update_expected_controller_pbk(controller_pbk)
+    #     game.update_expected_controller_addr(controller_addr)
     #     game.update_game_phase(Phase.GAME_SETUP)
     #     tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
     #     tac_bytes = TACSerializer().encode(tac_msg)
-    #     self.context.outbox.put_message(to=controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+    #     self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
 
 class TACHandler(Handler):
@@ -212,7 +211,7 @@ class TACHandler(Handler):
         game = cast(Game, self.context.game)
         logger.debug("[{}]: Handling controller response. type={}".format(self.context.agent_name, tac_msg_type))
         try:
-            if message.counterparty != game.expected_controller_pbk:
+            if message.counterparty != game.expected_controller_addr:
                 raise ValueError("The sender of the message is not the controller agent we registered with.")
 
             if tac_msg_type == TACMessage.Type.TAC_ERROR:
@@ -321,8 +320,8 @@ class TACHandler(Handler):
     #     self._initial_agent_state = AgentStateUpdate(game_data.money, game_data.endowment, game_data.utility_params)
     #     self._agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
     #     # if self.strategy.is_world_modeling:
-    #     #     opponent_pbks = self.game_configuration.agent_pbks
-    #     #     opponent_pbks.remove(agent_pbk)
+    #     #     opponent_pbks = self.game_configuration.agent_addrs
+    #     #     opponent_pbks.remove(agent_addr)
     #     #     self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
 
     # def _on_dialogue_error(self, tac_message: TACMessage) -> None:
@@ -345,7 +344,7 @@ class TACHandler(Handler):
     #     tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
     #     tac_bytes = TACSerializer().encode(tac_msg)
     #     game = cast(Game, self.context.game)
-    #     self.context.outbox.put_message(to=game.expected_controller_pbk, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+    #     self.context.outbox.put_message(to=game.expected_controller_addr, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
 
 class TransactionHandler(Handler):

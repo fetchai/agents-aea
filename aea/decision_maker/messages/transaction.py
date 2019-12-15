@@ -25,7 +25,8 @@ from typing import Any, Dict, List, Optional, cast
 
 from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
 from aea.decision_maker.messages.base import InternalMessage
-from aea.configurations.base import Address
+from aea.mail.base import Address
+
 
 TransactionId = str
 OFF_CHAIN = 'off_chain'

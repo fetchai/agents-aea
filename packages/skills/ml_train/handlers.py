@@ -107,7 +107,7 @@ class TrainHandler(Handler):
                                         sender_tx_fee=terms.values["buyer_tx_fee"],
                                         counterparty_tx_fee=terms.values["seller_tx_fee"],
                                         ledger_id=terms.values["ledger_id"],
-                                        info={'terms': terms, 'counterparty_pbk': ml_trade_msg.counterparty},
+                                        info={'terms': terms, 'counterparty_addr': ml_trade_msg.counterparty},
                                         quantities_by_good_pbk={})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
@@ -194,10 +194,10 @@ class OEFHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_searching = False
         query = strategy.get_service_query()
-        for opponent_pbk in agents:
-            logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
+        for opponent_address in agents:
+            logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_address[-5:]))
             cft_msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
-            self.context.outbox.put_message(to=opponent_pbk,
+            self.context.outbox.put_message(to=opponent_address,
                                             sender=self.context.agent_public_key,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(cft_msg))
