@@ -59,7 +59,7 @@ class TestGui:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.proc.terminate()
         cls.proc.wait(2.0)
         os.chdir(cls.cwd)
