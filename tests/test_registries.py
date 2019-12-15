@@ -314,7 +314,8 @@ class TestFilter:
                                sender_tx_fee=0,
                                counterparty_tx_fee=0,
                                ledger_id="fetchai",
-                               quantities_by_good_pbk={"Unknown": 10})
+                               quantities_by_good_pbk={"Unknown": 10},
+                               info={})
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()
 
