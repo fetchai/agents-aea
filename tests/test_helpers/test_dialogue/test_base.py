@@ -30,8 +30,8 @@ class TestDialogueBase:
     @classmethod
     def setup(cls):
         """Initialise the class."""
-        cls.dialogue_label = DialogueLabel(dialogue_reference=(str(0), ''), dialogue_opponent_pbk="opponent",
-                                           dialogue_starter_pbk="starter")
+        cls.dialogue_label = DialogueLabel(dialogue_reference=(str(0), ''), dialogue_opponent_addr="opponent",
+                                           dialogue_starter_addr="starter")
         cls.dialogue = Dialogue(dialogue_label=cls.dialogue_label)
         cls.dialogues = Dialogues()
 
@@ -39,15 +39,15 @@ class TestDialogueBase:
         """Test the dialogue_label."""
         assert self.dialogue_label.dialogue_starter_reference == str(0)
         assert self.dialogue_label.dialogue_responder_reference == ''
-        assert self.dialogue_label.dialogue_opponent_pbk == "opponent"
-        assert self.dialogue_label.dialogue_starter_pbk == "starter"
+        assert self.dialogue_label.dialogue_opponent_addr == "opponent"
+        assert self.dialogue_label.dialogue_starter_addr == "starter"
         assert str(self.dialogue_label) == "{}_{}_{}_{}".format(self.dialogue_label.dialogue_starter_reference,
                                                                 self.dialogue_label.dialogue_responder_reference,
-                                                                self.dialogue_label.dialogue_opponent_pbk,
-                                                                self.dialogue_label.dialogue_starter_pbk)
+                                                                self.dialogue_label.dialogue_opponent_addr,
+                                                                self.dialogue_label.dialogue_starter_addr)
 
-        dialogue_label2 = DialogueLabel(dialogue_reference=(str(0), ''), dialogue_opponent_pbk="opponent",
-                                        dialogue_starter_pbk="starter")
+        dialogue_label2 = DialogueLabel(dialogue_reference=(str(0), ''), dialogue_opponent_addr="opponent",
+                                        dialogue_starter_addr="starter")
 
         assert dialogue_label2 == self.dialogue_label
 
@@ -60,8 +60,8 @@ class TestDialogueBase:
         assert self.dialogue_label.json == dict(
             dialogue_starter_reference=str(0),
             dialogue_responder_reference='',
-            dialogue_opponent_pbk="opponent",
-            dialogue_starter_pbk="starter"
+            dialogue_opponent_addr="opponent",
+            dialogue_starter_addr="starter"
         )
         assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
 

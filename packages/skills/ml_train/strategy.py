@@ -39,7 +39,7 @@ class Strategy(SharedClass):
         self._dataset_id = kwargs.pop('dataset_id', DEFAULT_DATASET_ID)
         self._max_unit_price = kwargs.pop('max_unit_price', DEFAULT_MAX_ROW_PRICE)
         self._max_buyer_tx_fee = kwargs.pop('max_buyer_tx_fee', DEFAULT_MAX_TX_FEE)
-        self._currency_pbk = kwargs.pop('currency_pbk', DEFAULT_CURRENCY_PBK)
+        self._currency_id = kwargs.pop('currency_id', DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop('ledger_id', DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop('is_ledger_tx', False)
         super().__init__(**kwargs)
@@ -87,7 +87,7 @@ class Strategy(SharedClass):
         result = (terms.values['price'] - terms.values['seller_tx_fee'] > 0) and \
             (terms.values['price'] <= self._max_unit_price * terms.values['batch_size']) and \
             (terms.values['buyer_tx_fee'] <= self._max_buyer_tx_fee) and \
-            (terms.values['currency_pbk'] == self._currency_pbk) and \
+            (terms.values['currency_id'] == self._currency_id) and \
             (terms.values['ledger_id'] == self._ledger_id)
         return result
 

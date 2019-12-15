@@ -102,9 +102,9 @@ class Strategy(SharedClass):
         """
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=is_supply)
-        good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_supply else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
+        good_id_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_id) if is_supply else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
         currency = list(ownership_state_after_locks.amount_by_currency.keys())[0]
-        desc = build_goods_description(good_pbk_to_quantities=good_pbk_to_quantities, currency=currency, is_supply=is_supply)
+        desc = build_goods_description(good_id_to_quantities=good_id_to_quantities, currency=currency, is_supply=is_supply)
         return desc
 
     def _supplied_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
@@ -115,8 +115,8 @@ class Strategy(SharedClass):
         :return: a dictionary of quantities supplied
         """
         supply = {}  # type: Dict[str, int]
-        for good_pbk, quantity in good_holdings.items():
-            supply[good_pbk] = quantity - 1 if quantity > 1 else 0
+        for good_id, quantity in good_holdings.items():
+            supply[good_id] = quantity - 1 if quantity > 1 else 0
         return supply
 
     def _demanded_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
@@ -127,8 +127,8 @@ class Strategy(SharedClass):
         :return: a dictionary of quantities supplied
         """
         demand = {}  # type: Dict[str, int]
-        for good_pbk in good_holdings.keys():
-            demand[good_pbk] = 1
+        for good_id in good_holdings.keys():
+            demand[good_id] = 1
         return demand
 
     def get_own_services_query(self, is_searching_for_sellers: bool) -> Query:
@@ -145,9 +145,9 @@ class Strategy(SharedClass):
         """
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=not is_searching_for_sellers)
-        good_pbk_to_quantities = self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk)
+        good_id_to_quantities = self._demanded_goods(ownership_state_after_locks.quantities_by_good_id) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.quantities_by_good_id)
         currency = list(ownership_state_after_locks.amount_by_currency.keys())[0]
-        query = build_goods_query(good_pbks=list(good_pbk_to_quantities.keys()), currency=currency, is_searching_for_sellers=is_searching_for_sellers)
+        query = build_goods_query(good_ids=list(good_id_to_quantities.keys()), currency=currency, is_searching_for_sellers=is_searching_for_sellers)
         return query
 
     def _get_proposal_for_query(self, query: Query, is_seller: bool) -> Optional[Description]:
@@ -198,19 +198,19 @@ class Strategy(SharedClass):
         """
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=is_seller)
-        good_pbk_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_pbk) if is_seller else self._demanded_goods(ownership_state_after_locks.quantities_by_good_pbk)
-        nil_proposal_dict = {good_pbk: 0 for good_pbk, quantity in good_pbk_to_quantities.items()}  # type: Dict[str, int]
+        good_id_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_id) if is_seller else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
+        nil_proposal_dict = {good_id: 0 for good_id, quantity in good_id_to_quantities.items()}  # type: Dict[str, int]
         proposals = []
         seller_tx_fee = self.context.agent_preferences.transaction_fees['seller_tx_fee']
         buyer_tx_fee = self.context.agent_preferences.transaction_fees['buyer_tx_fee']
         currency = list(self.context.agent_ownership_state.amount_by_currency.keys())[0]
-        for good_pbk, quantity in good_pbk_to_quantities.items():
+        for good_id, quantity in good_id_to_quantities.items():
             if is_seller and quantity == 0: continue
             proposal_dict = nil_proposal_dict
-            proposal_dict[good_pbk] = 1
-            proposal = build_goods_description(good_pbk_to_quantities=proposal_dict, currency=currency, is_supply=is_seller)
+            proposal_dict[good_id] = 1
+            proposal = build_goods_description(good_id_to_quantities=proposal_dict, currency=currency, is_supply=is_seller)
             if is_seller:
-                delta_good_holdings = {good_pbk: quantity * -1 for good_pbk, quantity in proposal_dict.items()}  # type: Dict[str, int]
+                delta_good_holdings = {good_id: quantity * -1 for good_id, quantity in proposal_dict.items()}  # type: Dict[str, int]
             else:
                 delta_good_holdings = proposal_dict
             marginal_utility_from_delta_good_holdings = self.context.agent_preferences.marginal_utility(ownership_state=ownership_state_after_locks, delta_good_holdings=delta_good_holdings)

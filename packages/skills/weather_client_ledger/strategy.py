@@ -44,7 +44,7 @@ class Strategy(SharedClass):
         self._country = kwargs.pop('country') if 'country' in kwargs.keys() else DEFAULT_COUNTRY
         self._max_row_price = kwargs.pop('max_row_price') if 'max_row_price' in kwargs.keys() else DEFAULT_MAX_ROW_PRICE
         self.max_buyer_tx_fee = kwargs.pop('max_tx_fee') if 'max_tx_fee' in kwargs.keys() else DEFAULT_MAX_TX_FEE
-        self._currency_pbk = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
+        self._currency_id = kwargs.pop('currency_id') if 'currency_id' in kwargs.keys() else DEFAULT_CURRENCY_PBK
         self._ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
         super().__init__(**kwargs)
         self._search_id = 0
@@ -76,7 +76,7 @@ class Strategy(SharedClass):
         """
         result = (proposal.values['price'] - proposal.values['seller_tx_fee'] > 0) and \
             (proposal.values['price'] <= self._max_row_price * proposal.values['rows']) and \
-            (proposal.values['currency_pbk'] == self._currency_pbk) and \
+            (proposal.values['currency_id'] == self._currency_id) and \
             (proposal.values['ledger_id'] == self._ledger_id)
         return result
 

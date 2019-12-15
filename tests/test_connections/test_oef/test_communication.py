@@ -63,14 +63,14 @@ class TestDefault:
     def setup_class(cls):
         """Set the test up."""
         cls.crypto1 = DefaultCrypto()
-        cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.connection = OEFConnection(cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000)
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
 
     def test_send_message(self):
         """Test that a default byte message can be sent correctly."""
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        self.multiplexer.put(Envelope(to=self.crypto1.public_key, sender=self.crypto1.public_key,
+        self.multiplexer.put(Envelope(to=self.crypto1.address, sender=self.crypto1.address,
                                       protocol_id=DefaultMessage.protocol_id,
                                       message=DefaultSerializer().encode(msg)))
         recv_msg = self.multiplexer.get(block=True, timeout=3.0)
@@ -96,7 +96,7 @@ class TestOEF:
         def setup_class(cls):
             """Set the test up."""
             cls.crypto1 = DefaultCrypto()
-            cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.connection = OEFConnection(cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000)
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
 
@@ -109,7 +109,7 @@ class TestOEF:
             search_query_empty_model = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
             search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
                                         query=search_query_empty_model)
-            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.address,
                                           protocol_id=OEFMessage.protocol_id,
                                           message=OEFSerializer().encode(search_request)))
 
@@ -128,7 +128,7 @@ class TestOEF:
             data_model = DataModel("foobar", [Attribute("foo", str, True)])
             search_query = Query([Constraint("foo", ConstraintType("==", "bar"))], model=data_model)
             search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=request_id, query=search_query)
-            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.address,
                                           protocol_id=OEFMessage.protocol_id,
                                           message=OEFSerializer().encode(search_request)))
 
@@ -150,7 +150,7 @@ class TestOEF:
         def setup_class(cls):
             """Set the test up."""
             cls.crypto1 = DefaultCrypto()
-            cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.connection = OEFConnection(cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000)
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
 
@@ -160,21 +160,21 @@ class TestOEF:
             desc = Description({"bar": 1}, data_model=foo_datamodel)
             msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.address,
                                           protocol_id=OEFMessage.protocol_id, message=msg_bytes))
             time.sleep(0.5)
 
             search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=2,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel))
-            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.address,
                                           protocol_id=OEFMessage.protocol_id,
                                           message=OEFSerializer().encode(search_request)))
             envelope = self.multiplexer.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id") == 2
-            if search_result.get("agents") != [self.crypto1.public_key]:
-                logger.warning('search_result.get("agents") != [self.crypto1.public_key] FAILED in test_oef/test_communication.py')
+            if search_result.get("agents") != [self.crypto1.address]:
+                logger.warning('search_result.get("agents") != [self.crypto1.address] FAILED in test_oef/test_communication.py')
 
         @classmethod
         def teardown_class(cls):
@@ -194,7 +194,7 @@ class TestOEF:
             - Check that the registration worked.
             """
             cls.crypto1 = DefaultCrypto()
-            cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.connection = OEFConnection(cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000)
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
 
@@ -204,7 +204,7 @@ class TestOEF:
             msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE, id=cls.request_id, service_description=cls.desc,
                              service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            cls.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=cls.crypto1.public_key,
+            cls.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=cls.crypto1.address,
                                          protocol_id=OEFMessage.protocol_id, message=msg_bytes))
 
             time.sleep(1.0)
@@ -213,16 +213,16 @@ class TestOEF:
             search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=cls.request_id,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))],
                                                     model=cls.foo_datamodel))
-            cls.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=cls.crypto1.public_key,
+            cls.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=cls.crypto1.address,
                                          protocol_id=OEFMessage.protocol_id,
                                          message=OEFSerializer().encode(search_request)))
             envelope = cls.multiplexer.get(block=True, timeout=5.0)
             search_result = OEFSerializer().decode(envelope.message)
             assert search_result.get("type") == OEFMessage.Type.SEARCH_RESULT
             assert search_result.get("id") == cls.request_id
-            if search_result.get("agents") != [cls.crypto1.public_key]:
+            if search_result.get("agents") != [cls.crypto1.address]:
                 logger.warning(
-                    'search_result.get("agents") != [self.crypto1.public_key] FAILED in test_oef/test_communication.py')
+                    'search_result.get("agents") != [self.crypto1.address] FAILED in test_oef/test_communication.py')
 
         def test_unregister_service(self):
             """Test that an unregister service request works correctly.
@@ -236,7 +236,7 @@ class TestOEF:
             msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_SERVICE, id=self.request_id,
                              service_description=self.desc, service_id="")
             msg_bytes = OEFSerializer().encode(msg)
-            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.address,
                                           protocol_id=OEFMessage.protocol_id, message=msg_bytes))
 
             time.sleep(1.0)
@@ -245,7 +245,7 @@ class TestOEF:
             search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=self.request_id,
                                         query=Query([Constraint("bar", ConstraintType("==", 1))],
                                                     model=self.foo_datamodel))
-            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.address,
                                           protocol_id=OEFMessage.protocol_id,
                                           message=OEFSerializer().encode(search_request)))
 
@@ -267,7 +267,7 @@ class TestOEF:
         def setup_class(cls):
             """Set the tests up."""
             cls.crypto1 = DefaultCrypto()
-            cls.connection = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
+            cls.connection = OEFConnection(cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000)
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
 
@@ -279,7 +279,7 @@ class TestOEF:
             search_query_empty_model = Query([Constraint("foo", ConstraintType("==", "bar"))], model=None)
             search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES, id=request_id,
                                         query=search_query_empty_model)
-            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.public_key,
+            self.multiplexer.put(Envelope(to=DEFAULT_OEF, sender=self.crypto1.address,
                                           protocol_id=OEFMessage.protocol_id,
                                           message=OEFSerializer().encode(search_request)))
 
@@ -308,8 +308,8 @@ class TestFIPA:
         """Set up the test class."""
         cls.crypto1 = DefaultCrypto()
         cls.crypto2 = DefaultCrypto()
-        cls.connection1 = OEFConnection(cls.crypto1.public_key, oef_addr="127.0.0.1", oef_port=10000)
-        cls.connection2 = OEFConnection(cls.crypto2.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        cls.connection1 = OEFConnection(cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000)
+        cls.connection2 = OEFConnection(cls.crypto2.address, oef_addr="127.0.0.1", oef_port=10000)
         cls.multiplexer1 = Multiplexer([cls.connection1])
         cls.multiplexer2 = Multiplexer([cls.connection2])
         cls.multiplexer1.connect()
@@ -319,37 +319,37 @@ class TestFIPA:
         """Test that a CFP can be sent correctly."""
         cfp_message = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.CFP,
                                   query=Query([Constraint('something', ConstraintType('>', 1))]))
-        cfp_message.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+        cfp_message.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address, sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(cfp_message)))
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_message = FIPASerializer().decode(envelope.message)
-        expected_cfp_message.counterparty = self.crypto2.public_key
+        expected_cfp_message.counterparty = self.crypto2.address
 
         assert expected_cfp_message == cfp_message
 
         cfp_none = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.CFP,
                                query=None)
-        cfp_none.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+        cfp_none.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address, sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(cfp_none)))
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_none = FIPASerializer().decode(envelope.message)
-        expected_cfp_none.counterparty = self.crypto2.public_key
+        expected_cfp_none.counterparty = self.crypto2.address
         assert expected_cfp_none == cfp_none
 
     def test_propose(self):
         """Test that a Propose can be sent correctly."""
         propose_empty = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0,
                                     performative=FIPAMessage.Performative.PROPOSE, proposal=[])
-        propose_empty.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+        propose_empty.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address, sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(propose_empty)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_empty = FIPASerializer().decode(envelope.message)
-        expected_propose_empty.counterparty = self.crypto2.public_key
+        expected_propose_empty.counterparty = self.crypto2.address
         assert expected_propose_empty == propose_empty
 
         propose_descriptions = FIPAMessage(message_id=0,
@@ -358,24 +358,24 @@ class TestFIPA:
                                            performative=FIPAMessage.Performative.PROPOSE,
                                            proposal=[Description({"foo": "bar"}, DataModel("foobar", [Attribute("foo", str, True)]))])
 
-        propose_descriptions.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+        propose_descriptions.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address, sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(propose_descriptions)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_propose_descriptions = FIPASerializer().decode(envelope.message)
-        expected_propose_descriptions.counterparty = self.crypto2.public_key
+        expected_propose_descriptions.counterparty = self.crypto2.address
         assert expected_propose_descriptions == propose_descriptions
 
     def test_accept(self):
         """Test that an Accept can be sent correctly."""
         accept = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.ACCEPT)
-        accept.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+        accept.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address, sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(accept)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_accept = FIPASerializer().decode(envelope.message)
-        expected_accept.counterparty = self.crypto2.public_key
+        expected_accept.counterparty = self.crypto2.address
         assert expected_accept == accept
 
     def test_match_accept(self):
@@ -383,24 +383,24 @@ class TestFIPA:
         # NOTE since the OEF SDK doesn't support the match accept, we have to use a fixed message id!
         match_accept = FIPAMessage(message_id=4, dialogue_reference=(str(0), ''), target=3,
                                    performative=FIPAMessage.Performative.MATCH_ACCEPT)
-        match_accept.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+        match_accept.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address, sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(match_accept)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_match_accept = FIPASerializer().decode(envelope.message)
-        expected_match_accept.counterparty = self.crypto2.public_key
+        expected_match_accept.counterparty = self.crypto2.address
         assert expected_match_accept == match_accept
 
     def test_decline(self):
         """Test that a Decline can be sent correctly."""
         decline = FIPAMessage(message_id=0, dialogue_reference=(str(0), ''), target=0, performative=FIPAMessage.Performative.DECLINE)
-        decline.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key, sender=self.crypto1.public_key,
+        decline.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address, sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id, message=FIPASerializer().encode(decline)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_decline = FIPASerializer().decode(envelope.message)
-        expected_decline.counterparty = self.crypto2.public_key
+        expected_decline.counterparty = self.crypto2.address
         assert expected_decline == decline
 
     def test_match_accept_w_inform(self):
@@ -410,14 +410,14 @@ class TestFIPA:
                                             target=0,
                                             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
                                             info={"address": "my_address"})
-        match_accept_w_inform.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
-                                       sender=self.crypto1.public_key,
+        match_accept_w_inform.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address,
+                                       sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(match_accept_w_inform)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_match_accept_w_inform = FIPASerializer().decode(envelope.message)
-        returned_match_accept_w_inform.counterparty = self.crypto2.public_key
+        returned_match_accept_w_inform.counterparty = self.crypto2.address
         assert returned_match_accept_w_inform == match_accept_w_inform
 
     def test_accept_w_inform(self):
@@ -427,14 +427,14 @@ class TestFIPA:
                                       target=0,
                                       performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                                       info={"address": "my_address"})
-        accept_w_inform.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
-                                       sender=self.crypto1.public_key,
+        accept_w_inform.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address,
+                                       sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(accept_w_inform)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_accept_w_inform = FIPASerializer().decode(envelope.message)
-        returned_accept_w_inform.counterparty = self.crypto2.public_key
+        returned_accept_w_inform.counterparty = self.crypto2.address
         assert returned_accept_w_inform == accept_w_inform
 
     def test_inform(self):
@@ -445,14 +445,14 @@ class TestFIPA:
                              target=0,
                              performative=FIPAMessage.Performative.INFORM,
                              info=payload)
-        inform.counterparty = self.crypto2.public_key
-        self.multiplexer1.put(Envelope(to=self.crypto2.public_key,
-                                       sender=self.crypto1.public_key,
+        inform.counterparty = self.crypto2.address
+        self.multiplexer1.put(Envelope(to=self.crypto2.address,
+                                       sender=self.crypto1.address,
                                        protocol_id=FIPAMessage.protocol_id,
                                        message=FIPASerializer().encode(inform)))
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_inform = FIPASerializer().decode(envelope.message)
-        returned_inform.counterparty = self.crypto2.public_key
+        returned_inform.counterparty = self.crypto2.address
         assert returned_inform == inform
 
     def test_serialisation_fipa(self):
@@ -555,7 +555,7 @@ class TestOefConnection:
     def test_connection(self):
         """Test that an OEF connection can be established to the OEF."""
         crypto = DefaultCrypto()
-        connection = OEFConnection(crypto.public_key, oef_addr="127.0.0.1", oef_port=10000)
+        connection = OEFConnection(crypto.address, oef_addr="127.0.0.1", oef_port=10000)
         multiplexer = Multiplexer([connection])
         multiplexer.connect()
         multiplexer.disconnect()
@@ -564,14 +564,14 @@ class TestOefConnection:
     # @pytest.mark.asyncio
     # async def test_oef_connect(self):
     #     """Test the OEFConnection."""
-    #     con = OEFConnection(public_key="pk", oef_addr="this_is_not_an_address")
+    #     con = OEFConnection(address="pk", oef_addr="this_is_not_an_address")
     #     assert not con.connection_status.is_connected
     #     with pytest.raises(ConnectionError):
     #         await con.connect()
 
     def test_oef_from_config(self):
         """Test the Connection from config File."""
-        con = OEFConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
+        con = OEFConnection.from_config(address="pk", connection_configuration=ConnectionConfig())
         assert not con.connection_status.is_connected, "We are connected..."
 
 
@@ -698,15 +698,15 @@ async def test_send_oef_message(network_node):
     """Test the send oef message."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    public_key = wallet.public_keys['default']
-    oef_connection = OEFConnection(public_key=public_key, oef_addr="127.0.0.1", oef_port=10000)
+    address = wallet.addresses['default']
+    oef_connection = OEFConnection(address=address, oef_addr="127.0.0.1", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
 
     msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=0,
                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
     msg_bytes = OEFSerializer().encode(msg)
-    envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to=DEFAULT_OEF, sender=address, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     with pytest.raises(ValueError):
         await oef_connection.send(envelope)
 
@@ -715,7 +715,7 @@ async def test_send_oef_message(network_node):
 
     msg = OEFMessage(type=OEFMessage.Type.SEARCH_AGENTS, id=0, query=query)
     msg_bytes = OEFSerializer().encode(msg)
-    envelope = Envelope(to=DEFAULT_OEF, sender=public_key, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+    envelope = Envelope(to=DEFAULT_OEF, sender=address, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
     await oef_connection.send(envelope)
     await oef_connection.disconnect()
 
@@ -725,7 +725,7 @@ async def test_cancelled_receive(network_node):
     """Test the case when a receive request is cancelled."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection = OEFConnection(address=wallet.addresses['default'], oef_addr="127.0.0.1", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
 
@@ -749,7 +749,7 @@ async def test_exception_during_receive(network_node):
     """Test the case when there is an exception during a receive request."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection = OEFConnection(address=wallet.addresses['default'], oef_addr="127.0.0.1", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
 
@@ -766,7 +766,7 @@ async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="a_fake_address", oef_port=10000)
+    oef_connection = OEFConnection(address=wallet.addresses['default'], oef_addr="a_fake_address", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
 
     patch = unittest.mock.patch.object(aea.connections.oef.connection.logger, 'warning')
@@ -787,7 +787,7 @@ async def test_connecting_twice_is_ok(network_node):
     """Test that calling 'connect' twice works as expected."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    oef_connection = OEFConnection(public_key=wallet.public_keys['default'], oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection = OEFConnection(address=wallet.addresses['default'], oef_addr="127.0.0.1", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
 
     assert not oef_connection.connection_status.is_connected

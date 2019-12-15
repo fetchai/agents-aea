@@ -88,7 +88,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                                  service_description=registration.registered_goods_demanded_description,
                                  service_id="")
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
             registration.registered_goods_demanded_description = None
@@ -99,7 +99,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                                  service_description=registration.registered_goods_supplied_description,
                                  service_id="")
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
             registration.registered_goods_supplied_description = None
@@ -127,7 +127,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                                  service_description=goods_supplied_description,
                                  service_id="")
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
 
@@ -140,7 +140,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                                  service_description=goods_demanded_description,
                                  service_id="")
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
 
@@ -170,7 +170,7 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                                      id=search_id,
                                      query=query)
                 self.context.outbox.put_message(to=DEFAULT_OEF,
-                                                sender=self.context.agent_public_key,
+                                                sender=self.context.agent_address,
                                                 protocol_id=OEFMessage.protocol_id,
                                                 message=OEFSerializer().encode(oef_msg))
 
@@ -186,6 +186,6 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                                      id=search_id,
                                      query=query)
                 self.context.outbox.put_message(to=DEFAULT_OEF,
-                                                sender=self.context.agent_public_key,
+                                                sender=self.context.agent_address,
                                                 protocol_id=OEFMessage.protocol_id,
                                                 message=OEFSerializer().encode(oef_msg))

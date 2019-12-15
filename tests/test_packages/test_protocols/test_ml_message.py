@@ -58,7 +58,7 @@ def test_ml_message_creation():
                          "price": 10,
                          "seller_tx_fee": 5,
                          "buyer_tx_fee": 2,
-                         "currency_pbk": "public_key",
+                         "currency_id": "FET",
                          "ledger_id": "fetch",
                          "address": "agent1"})
 
