@@ -79,14 +79,14 @@ def send(self, envelope: Envelope):
     	self.channel.send(envelope)
 ```
 -->
-### `from_config(cls, public_key: str, connection_configuration: ConnectionConfig)`
+### `from_config(cls, address: Address, connection_configuration: ConnectionConfig)`
 <!--
 ``` python
 @classmethod
-   	def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+   	def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
-        return OEFConnection(public_key, oef_addr, oef_port)
+        return OEFConnection(address, oef_addr, oef_port)
 ```
 -->
 

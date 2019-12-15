@@ -21,7 +21,7 @@
 # from enum import Enum
 # import base64
 # import json
-from unittest import mock
+# from unittest import mock
 
 from aea.protocols.oef.message import OEFMessage
 from aea.protocols.oef.models import DataModel, Attribute, Query, Constraint, ConstraintType, Description
@@ -55,38 +55,35 @@ def test_oef_message_consistency():
     foo_datamodel = DataModel("foo", [Attribute("bar", int,
                                                 True, "A bar attribute.")])
     msg = OEFMessage(
-        oef_type=OEFMessage.Type.SEARCH_AGENTS,
+        type=OEFMessage.Type.SEARCH_AGENTS,
         id=2,
         query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel)
     )
     assert msg.check_consistency(), "We expect the consistency to return TRUE"
-    with mock.patch("aea.protocols.oef.message.OEFMessage.Type")\
-            as mock_type_enum:
-        mock_type_enum.SEARCH_AGENTS.value = "unknown"
-        assert not msg.check_consistency(),\
-            "Expect the consistency to return False"
 
     attribute_foo = Attribute("foo", int, True, "a foo attribute.")
     attribute_bar = Attribute("bar", str, True, "a bar attribute.")
     data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
     description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
-    msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_AGENT,
+    msg = OEFMessage(type=OEFMessage.Type.REGISTER_AGENT,
                      id=0,
                      agent_description=description_foobar,
-                     agent_id="public_key")
+                     agent_id="address")
     assert msg.check_consistency()
 
-    msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_AGENT, id=0, agent_description=description_foobar,
-                     agent_id="public_key")
+    msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_AGENT,
+                     id=0,
+                     agent_description=description_foobar,
+                     agent_id="address")
 
     assert msg.check_consistency()
 
 
 def test_oef_message_oef_error():
     """Tests the OEF_ERROR type of message."""
-    msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
+    msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=0,
                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
-    assert OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=0,
+    assert OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=0,
                       operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS),\
         "Expects an oef message Error!"
     msg_bytes = OEFSerializer().encode(msg)
@@ -97,9 +94,9 @@ def test_oef_message_oef_error():
         "Expected the deserialized_msg to me equals to msg"
 
 
-def test_oef_message_DialogeError():
+def test_oef_message_dialoge_error():
     """Tests the OEFMEssage of type DialogueError."""
-    assert OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR,
+    assert OEFMessage(type=OEFMessage.Type.DIALOGUE_ERROR,
                       id=0,
                       dialogue_id=1,
                       origin="myKey"),\

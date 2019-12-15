@@ -225,9 +225,9 @@ ledger_apis:
 
 ### Update the skill configs
 
-In the weather station skill config (`my_weather_station/skills/weather_station_ledger/skill.yaml`) under strategy, amend the `currency_pbk` and `ledger_id` as follows.
+In the weather station skill config (`my_weather_station/skills/weather_station_ledger/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 ``` bash
-currency_pbk: 'ETH'
+currency_id: 'ETH'
 ledger_id: 'ethereum'
 ```
 Amend `ledgers` to the following.
@@ -235,10 +235,10 @@ Amend `ledgers` to the following.
 ledgers: ['ethereum']
 ```
 
-In the weather client skill config (`my_weather_client/skills/weather_client_ledger/skill.yaml`) under strategy change the `currency_pbk` and `ledger_id`.
+In the weather client skill config (`my_weather_client/skills/weather_client_ledger/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 ``` bash
 max_buyer_tx_fee: 20000
-currency_pbk: 'ETH'
+currency_id: 'ETH'
 ledger_id: 'ethereum'
 ```
 Amend `ledgers` to the following.

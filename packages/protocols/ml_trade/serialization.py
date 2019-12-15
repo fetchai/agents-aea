@@ -23,11 +23,10 @@ import base64
 import json
 import pickle
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from aea.protocols.oef.models import Query
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.ml_trade.message import MLTradeMessage
@@ -41,32 +40,31 @@ class MLTradeSerializer(Serializer):
     def encode(self, msg: Message) -> bytes:
         """Encode a 'ml_trade' message into bytes."""
         body = {}  # Dict[str, Any]
+        msg = cast(MLTradeMessage, msg)
+        body["performative"] = msg.performative.value
 
-        msg_type = MLTradeMessage.Performative(msg.get("performative"))
-        body["performative"] = str(msg_type.value)
-
-        if msg_type == MLTradeMessage.Performative.CFT:
-            query = msg.body["query"]  # type: Query
+        if msg.performative == MLTradeMessage.Performative.CFT:
+            query = msg.query
             query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
             body["query"] = query_bytes
-        elif msg_type == MLTradeMessage.Performative.TERMS:
-            terms = msg.body["terms"]
+        elif msg.performative == MLTradeMessage.Performative.TERMS:
+            terms = msg.terms
             terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")
             body["terms"] = terms_bytes
-        elif msg_type == MLTradeMessage.Performative.ACCEPT:
+        elif msg.performative == MLTradeMessage.Performative.ACCEPT:
             # encoding terms
-            terms = msg.body["terms"]
+            terms = msg.terms
             terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")
             body["terms"] = terms_bytes
             # encoding tx_digest
-            body["tx_digest"] = msg.body["tx_digest"]
-        elif msg_type == MLTradeMessage.Performative.DATA:
+            body["tx_digest"] = msg.tx_digest
+        elif msg.performative == MLTradeMessage.Performative.DATA:
             # encoding terms
-            terms = msg.body["terms"]
+            terms = msg.terms
             terms_bytes = base64.b64encode(pickle.dumps(terms)).decode("utf-8")
             body["terms"] = terms_bytes
             # encoding data
-            data = msg.body["data"]
+            data = msg.data
             data_bytes = base64.b64encode(pickle.dumps(data)).decode("utf-8")
             body["data"] = data_bytes
         else:   # pragma: no cover

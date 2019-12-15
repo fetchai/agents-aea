@@ -55,7 +55,7 @@ class Strategy(SharedClass):
         """
         self._price_per_row = kwargs.pop('price_per_row') if 'price_per_row' in kwargs.keys() else DEFAULT_PRICE_PER_ROW
         self._seller_tx_fee = kwargs.pop('seller_tx_fee') if 'seller_tx_fee' in kwargs.keys() else DEFAULT_SELLER_TX_FEE
-        self._currency_pbk = kwargs.pop('currency_pbk') if 'currency_pbk' in kwargs.keys() else DEFAULT_CURRENCY_PBK
+        self._currency_id = kwargs.pop('currency_id') if 'currency_id' in kwargs.keys() else DEFAULT_CURRENCY_PBK
         self._ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
         self._date_one = kwargs.pop('date_one') if 'date_one' in kwargs.keys() else DEFAULT_DATE_ONE
         self._date_two = kwargs.pop('date_two') if 'date_two' in kwargs.keys() else DEFAULT_DATE_TWO
@@ -105,7 +105,7 @@ class Strategy(SharedClass):
         proposal = Description({"rows": rows,
                                 "price": total_price,
                                 "seller_tx_fee": self._seller_tx_fee,
-                                "currency_pbk": self._currency_pbk,
+                                "currency_id": self._currency_id,
                                 "ledger_id": self._ledger_id})
         return (proposal, weather_data)
 
