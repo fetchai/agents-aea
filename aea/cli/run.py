@@ -134,13 +134,13 @@ def _verify_ledger_apis_access() -> None:
         _try_to_instantiate_ethereum_ledger_api(ethereum_ledger_config.addr, ethereum_ledger_config.port)
 
 
-def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Connection:
+def _setup_connection(connection_name: str, address: str, ctx: Context) -> Connection:
     """
     Set up a connection.
 
     :param connection_name: the name of the connection.
     :param ctx: the CLI context object.
-    :param public_key: the path of the public key.
+    :param address: the address.
     :return: a Connection object.
     :raises AEAConfigException: if the connection name provided as argument is not declared in the configuration file,
                               | or if the connection type is not supported by the framework.
@@ -170,7 +170,7 @@ def _setup_connection(connection_name: str, public_key: str, ctx: Context) -> Co
     if connection_class is None:
         raise AEAConfigException("Connection class '{}' not found.".format(connection_class_name))
 
-    connection = connection_class.from_config(public_key, connection_config)
+    connection = connection_class.from_config(address, connection_config)
     return connection
 
 
@@ -202,7 +202,7 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
     _try_to_load_protocols(ctx)
     try:
         for connection_name in connection_names:
-            connection = _setup_connection(connection_name, wallet.public_keys[FETCHAI], ctx)
+            connection = _setup_connection(connection_name, wallet.addresses[FETCHAI], ctx)
             connections.append(connection)
     except AEAConfigException as e:
         logger.error(str(e))

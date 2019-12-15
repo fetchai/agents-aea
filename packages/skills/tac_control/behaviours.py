@@ -114,7 +114,7 @@ class TACBehaviour(Behaviour):
                              service_description=desc,
                              service_id="")
         self.context.outbox.put_message(to=DEFAULT_OEF,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=OEFMessage.protocol_id,
                                         message=OEFSerializer().encode(oef_msg))
         self._registered_desc = desc
@@ -132,7 +132,7 @@ class TACBehaviour(Behaviour):
                              service_description=self._registered_desc,
                              service_id="")
         self.context.outbox.put_message(to=DEFAULT_OEF,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=OEFMessage.protocol_id,
                                         message=OEFSerializer().encode(oef_msg))
         self._registered_desc = None
@@ -143,8 +143,8 @@ class TACBehaviour(Behaviour):
         game.create()
         logger.info("[{}]: Started competition:\n{}".format(self.context.agent_name, game.holdings_summary))
         logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))
-        for agent_public_key in game.configuration.agent_addrs:
-            agent_state = game.current_agent_states[agent_public_key]
+        for agent_address in game.configuration.agent_addrs:
+            agent_state = game.current_agent_states[agent_address]
             tac_msg = TACMessage(type=TACMessage.Type.GAME_DATA,
                                  amount_by_currency=agent_state.balance_by_currency,
                                  exchange_params_by_currency=agent_state.exchange_params_by_currency,
@@ -155,9 +155,9 @@ class TACBehaviour(Behaviour):
                                  good_id_to_name=game.configuration.good_id_to_name,
                                  version_id=game.configuration.version_id)
             logger.debug("[{}]: sending game data to '{}': {}"
-                         .format(self.context.agent_name, agent_public_key, str(tac_msg)))
-            self.context.outbox.put_message(to=agent_public_key,
-                                            sender=self.context.agent_public_key,
+                         .format(self.context.agent_name, agent_address, str(tac_msg)))
+            self.context.outbox.put_message(to=agent_address,
+                                            sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))
 
@@ -168,7 +168,7 @@ class TACBehaviour(Behaviour):
         for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TACMessage(type=TACMessage.Type.CANCELLED)
             self.context.outbox.put_message(to=agent_addr,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))
         logger.info("[{}]: Finished competition:\n{}".format(self.context.agent_name, game.holdings_summary))

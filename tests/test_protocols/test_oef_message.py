@@ -68,13 +68,13 @@ def test_oef_message_consistency():
     msg = OEFMessage(type=OEFMessage.Type.REGISTER_AGENT,
                      id=0,
                      agent_description=description_foobar,
-                     agent_id="public_key")
+                     agent_id="address")
     assert msg.check_consistency()
 
     msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_AGENT,
                      id=0,
                      agent_description=description_foobar,
-                     agent_id="public_key")
+                     agent_id="address")
 
     assert msg.check_consistency()
 

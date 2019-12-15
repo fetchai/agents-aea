@@ -85,7 +85,7 @@ class StateUpdateMessage(InternalMessage):
 
     @property
     def utility_params_by_good_id(self) -> UtilityParams:
-        """Get the utility parameters by good public key."""
+        """Get the utility parameters by good id."""
         assert self.is_set("utility_params_by_good_id")
         return cast(UtilityParams, self.get("utility_params_by_good_id"))
 

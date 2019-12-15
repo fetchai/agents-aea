@@ -76,11 +76,11 @@ class MLTradeHandler(Handler):
         if not strategy.is_matching_supply(query):
             return
         terms = strategy.generate_terms()
-        logger.info("[{}]: sending to the public_key={} a Terms message: {}"
+        logger.info("[{}]: sending to the address={} a Terms message: {}"
                     .format(self.context.agent_name, ml_trade_msg.counterparty[-5:], terms.values))
         terms_msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=terms)
         self.context.outbox.put_message(to=ml_trade_msg.counterparty,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=MLTradeMessage.protocol_id,
                                         message=MLTradeSerializer().encode(terms_msg))
 
@@ -98,11 +98,11 @@ class MLTradeHandler(Handler):
             return
         batch_size = terms.values["batch_size"]
         data = strategy.sample_data(batch_size)
-        logger.info("[{}]: sending to public_key={} a Data message: shape={}"
+        logger.info("[{}]: sending to address={} a Data message: shape={}"
                     .format(self.context.agent_name, ml_trade_msg.counterparty[-5:], data[0].shape))
         data_msg = MLTradeMessage(performative=MLTradeMessage.Performative.DATA, terms=terms, data=data)
         self.context.outbox.put_message(to=ml_trade_msg.counterparty,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=MLTradeMessage.protocol_id,
                                         message=MLTradeSerializer().encode(data_msg))
 

@@ -32,7 +32,7 @@ from fetch.p2p.api.http_calls import HTTPCalls
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, AEAConnectionError
+from aea.mail.base import Envelope, AEAConnectionError, Address
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +40,13 @@ logger = logging.getLogger(__name__)
 class PeerToPeerChannel:
     """A wrapper for an SDK or API."""
 
-    def __init__(self, public_key: str, provider_addr: str, provider_port: int):
+    def __init__(self, address: Address, provider_addr: str, provider_port: int):
         """
         Initialize a channel.
 
-        :param public_key: the public key
+        :param address: the address
         """
-        self.public_key = public_key
+        self.address = address
         self.provider_addr = provider_addr
         self.provider_port = provider_port
         self.in_queue = None  # type: Optional[asyncio.Queue]
@@ -76,8 +76,8 @@ class PeerToPeerChannel:
         """Try to register to the provider."""
         try:
             assert self._httpCall is not None
-            logger.info(self.public_key)
-            query = self._httpCall.register(sender_address=self.public_key, mailbox=True)
+            logger.info(self.address)
+            query = self._httpCall.register(sender_address=self.address, mailbox=True)
             return query['status'] == "OK"
         except Exception:  # pragma: no cover
             logger.warning("Could not register to the provider.")
@@ -103,7 +103,7 @@ class PeerToPeerChannel:
         assert self.in_queue is not None
         assert self.loop is not None
         while not self.stopped:
-            messages = self._httpCall.get_messages(sender_address=self.public_key)  # type: List[Dict[str, Any]]
+            messages = self._httpCall.get_messages(sender_address=self.address)  # type: List[Dict[str, Any]]
             for message in messages:
                 logger.debug("Received message: {}".format(message))
                 envelope = Envelope(to=message['TO']['RECEIVER_ADDRESS'],
@@ -123,7 +123,7 @@ class PeerToPeerChannel:
         assert self._httpCall is not None
         with self.lock:
             if not self.stopped:
-                self._httpCall.unregister(self.public_key)
+                self._httpCall.unregister(self.address)
                 # self._httpCall.disconnect()
                 self.stopped = True
                 self.thread.join()
@@ -134,16 +134,16 @@ class PeerToPeerConnection(Connection):
 
     restricted_to_protocols = set()  # type: Set[str]
 
-    def __init__(self, public_key: str, provider_addr: str, provider_port: int = 8000, connection_id: str = "p2p",
+    def __init__(self, address: Address, provider_addr: str, provider_port: int = 8000, connection_id: str = "p2p",
                  restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize a connection to an SDK or API.
 
-        :param public_key: the public key used in the protocols.
+        :param address: the address used in the protocols.
         """
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
-        self.channel = PeerToPeerChannel(public_key, provider_addr, provider_port)
-        self.public_key = public_key
+        self.channel = PeerToPeerChannel(address, provider_addr, provider_port)
+        self.address = address
 
     async def connect(self) -> None:
         """
@@ -197,15 +197,15 @@ class PeerToPeerConnection(Connection):
             return None
 
     @classmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         """
         Get the P2P connection from the connection configuration.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
         addr = cast(str, connection_configuration.config.get("addr"))
         port = cast(int, connection_configuration.config.get("port"))
-        return PeerToPeerConnection(public_key, addr, port,
+        return PeerToPeerConnection(address, addr, port,
                                     restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

@@ -111,7 +111,7 @@ class Parameters(SharedClass):
 
     @property
     def whitelist(self) -> Set[str]:
-        """Whitelist of agent public keys allowed into the TAC instance."""
+        """Whitelist of agent addresses allowed into the TAC instance."""
         return self._whitelist
 
     @property

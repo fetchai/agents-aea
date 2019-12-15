@@ -31,10 +31,10 @@ QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 
 def generate_good_id_to_name(nb_goods: int) -> Dict[str, str]:
     """
-    Generate public keys for things.
+    Generate ids for things.
 
     :param nb_goods: the number of things.
-    :return: a dictionary mapping goods' public keys to names.
+    :return: a dictionary mapping goods' ids to names.
     """
     max_number_of_digits = math.ceil(math.log10(nb_goods))
     string_format = 'tac_good_{:0' + str(max_number_of_digits) + '}'

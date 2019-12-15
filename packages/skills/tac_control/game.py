@@ -76,8 +76,8 @@ class Configuration:
         :param nb_agents: the number of agents.
         :param nb_goods: the number of goods.
         :param tx_fee: the fee for a transaction.
-        :param agent_addr_to_name: a dictionary mapping agent public keys to agent names (as strings).
-        :param good_id_to_name: a dictionary mapping good public keys to good names (as strings).
+        :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
+        :param good_id_to_name: a dictionary mapping good ids to good names (as strings).
         """
         self._version_id = version_id
         self._nb_agents = nb_agents
@@ -110,17 +110,17 @@ class Configuration:
 
     @property
     def agent_addr_to_name(self) -> Dict[Address, str]:
-        """Map agent public keys to names."""
+        """Map agent addresses to names."""
         return self._agent_addr_to_name
 
     @property
-    def good_id_to_name(self) -> Dict[Address, str]:
-        """Map good public keys to names."""
+    def good_id_to_name(self) -> Dict[str, str]:
+        """Map good ids to names."""
         return self._good_id_to_name
 
     @property
-    def agent_addrs(self) -> List[Address]:
-        """List of agent public keys."""
+    def agent_addresses(self) -> List[Address]:
+        """List of agent addresses."""
         return list(self._agent_addr_to_name.keys())
 
     @property
@@ -130,7 +130,7 @@ class Configuration:
 
     @property
     def good_ids(self) -> List[Address]:
-        """List of good public keys."""
+        """List of good ids."""
         return list(self._good_id_to_name.keys())
 
     @property
@@ -149,9 +149,9 @@ class Configuration:
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
         assert self.nb_agents > 1, "Must have at least two agents."
         assert self.nb_goods > 1, "Must have at least two goods."
-        assert len(self.agent_addrs) == self.nb_agents, "There must be one public key for each agent."
+        assert len(self.agent_addresses) == self.nb_agents, "There must be one address for each agent."
         assert len(set(self.agent_names)) == self.nb_agents, "Agents' names must be unique."
-        assert len(self.good_ids) == self.nb_goods, "There must be one public key for each good."
+        assert len(self.good_ids) == self.nb_goods, "There must be one id for each good."
         assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
 
 
@@ -299,13 +299,13 @@ class Transaction:
 
     @property
     def buyer_addr(self) -> Address:
-        """Get the public key of the buyer."""
+        """Get the address of the buyer."""
         result = self.sender if self.is_sender_buyer else self.counterparty
         return result
 
     @property
     def seller_addr(self) -> Address:
-        """Get the public key of the seller."""
+        """Get the address of the seller."""
         result = self.counterparty if self.is_sender_buyer else self.sender
         return result
 
@@ -606,7 +606,7 @@ class Registration:
 
     @property
     def agent_addr_to_name(self) -> Dict[str, str]:
-        """Get the registered agent public keys and their names."""
+        """Get the registered agent addresses and their names."""
         return self._agent_addr_to_name
 
     @property
@@ -618,7 +618,7 @@ class Registration:
         """
         Register an agent.
 
-         :param agent_addr: the Address of the agent
+        :param agent_addr: the Address of the agent
         :param agent_name: the name of the agent
         :return: None
         """

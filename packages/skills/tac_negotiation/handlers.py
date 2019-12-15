@@ -76,8 +76,8 @@ class FIPANegotiationHandler(Handler):
 
         logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_public_key):
-            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_public_key))
+        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_address):
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address))
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
             query = fipa_msg.query
@@ -90,7 +90,7 @@ class FIPANegotiationHandler(Handler):
             default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES,
                                          content=b'This message belongs to an unidentified dialogue.')
             self.context.outbox.put_message(to=fipa_msg.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=DefaultMessage.protocol_id,
                                             message=DefaultSerializer().encode(default_msg))
             return
@@ -146,7 +146,7 @@ class FIPANegotiationHandler(Handler):
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         else:
-            transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
+            transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_address)
             transactions = cast(Transactions, self.context.transactions)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
             logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_addr[-5:],
@@ -164,7 +164,7 @@ class FIPANegotiationHandler(Handler):
                                    proposal=[proposal_description])
         dialogue.outgoing_extend(fipa_msg)
         self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=FIPAMessage.protocol_id,
                                         message=FIPASerializer().encode(fipa_msg))
 
@@ -183,7 +183,7 @@ class FIPANegotiationHandler(Handler):
 
         for num, proposal_description in enumerate(proposals):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
-            transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
+            transaction_msg = generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_address)
 
             if strategy.is_profitable_transaction(transaction_msg, is_seller=dialogue.is_seller):
                 logger.info("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))
@@ -204,7 +204,7 @@ class FIPANegotiationHandler(Handler):
                 dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
             dialogue.outgoing_extend(fipa_msg)
             self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(fipa_msg))
 
@@ -264,7 +264,7 @@ class FIPANegotiationHandler(Handler):
             dialogues = cast(Dialogues, self.context.dialogues)
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_ACCEPT, dialogue.is_self_initiated)
             self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(fipa_msg))
 
@@ -324,7 +324,7 @@ class TransactionHandler(Handler):
                                        info={"signature": 'PLACEHOLDER'})  # TODO: tx_message.signature})
                 dialogue.outgoing_extend(fipa_msg)
                 self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
-                                                sender=self.context.agent_public_key,
+                                                sender=self.context.agent_address,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(fipa_msg))
             else:
@@ -368,8 +368,8 @@ class OEFSearchHandler(Handler):
             agents = oef_msg.agents
             search_id = oef_msg.id
             search = cast(Search, self.context.search)
-            if self.context.agent_public_key in agents:
-                agents.remove(self.context.agent_public_key)
+            if self.context.agent_address in agents:
+                agents.remove(self.context.agent_address)
             if search_id in search.ids_for_sellers:
                 self._handle_search(agents, search_id, is_searching_for_sellers=True)
             elif search_id in search.ids_for_buyers:
@@ -399,7 +399,7 @@ class OEFSearchHandler(Handler):
             query = strategy.get_own_services_query(is_searching_for_sellers)
 
             for opponent_addr in agents:
-                dialogue = dialogues.create_self_initiated(opponent_addr, self.context.agent_public_key, not is_searching_for_sellers)
+                dialogue = dialogues.create_self_initiated(opponent_addr, self.context.agent_address, not is_searching_for_sellers)
                 logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_addr[-5:]))
                 fipa_msg = FIPAMessage(message_id=FIPAMessage.STARTING_MESSAGE_ID,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
@@ -408,7 +408,7 @@ class OEFSearchHandler(Handler):
                                        query=query)
                 dialogue.outgoing_extend(fipa_msg)
                 self.context.outbox.put_message(to=opponent_addr,
-                                                sender=self.context.agent_public_key,
+                                                sender=self.context.agent_address,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(fipa_msg))
         else:

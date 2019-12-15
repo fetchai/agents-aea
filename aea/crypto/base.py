@@ -32,9 +32,9 @@ class Crypto(ABC):
     @abstractmethod
     def entity(self) -> Any:
         """
-        Return a public key.
+        Return an entity object.
 
-        :return: a public key string
+        :return: an entity object
         """
 
     @property

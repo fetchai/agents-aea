@@ -79,8 +79,8 @@ class FIPAHandler(Handler):
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_public_key):
-            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_public_key))
+        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_address):
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address))
             dialogue.incoming_extend(fipa_msg)
         else:
             self._handle_unidentified_dialogue(fipa_msg)
@@ -116,7 +116,7 @@ class FIPAHandler(Handler):
                                      error_msg="Invalid dialogue.",
                                      error_data="fipa_message")  # FIPASerializer().encode(msg))
         self.context.outbox.put_message(to=msg.counterparty,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(default_msg))
 
@@ -151,7 +151,7 @@ class FIPAHandler(Handler):
                                          performative=FIPAMessage.Performative.ACCEPT)
                 dialogue.outgoing_extend(accept_msg)
                 self.context.outbox.put_message(to=msg.counterparty,
-                                                sender=self.context.agent_public_key,
+                                                sender=self.context.agent_address,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(accept_msg))
             else:
@@ -163,7 +163,7 @@ class FIPAHandler(Handler):
                                           performative=FIPAMessage.Performative.DECLINE)
                 dialogue.outgoing_extend(decline_msg)
                 self.context.outbox.put_message(to=msg.counterparty,
-                                                sender=self.context.agent_public_key,
+                                                sender=self.context.agent_address,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(decline_msg))
 
@@ -193,7 +193,7 @@ class FIPAHandler(Handler):
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                     skill_ids=["carpark_client"],
                                     transaction_id="transaction0",
-                                    sender=self.context.agent_public_keys['fetchai'],
+                                    sender=self.context.agent_addresss['fetchai'],
                                     counterparty=address,
                                     is_sender_buyer=True,
                                     currency_id="FET",
@@ -275,7 +275,7 @@ class OEFHandler(Handler):
             # pick first agent found
             opponent_addr = agents[0]
             dialogues = cast(Dialogues, self.context.dialogues)
-            dialogue = dialogues.create_self_initiated(opponent_addr, self.context.agent_public_key, is_seller=False)
+            dialogue = dialogues.create_self_initiated(opponent_addr, self.context.agent_address, is_seller=False)
             query = strategy.get_service_query()
             logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_addr[-5:]))
             cfp_msg = FIPAMessage(message_id=STARTING_MESSAGE_ID,
@@ -285,7 +285,7 @@ class OEFHandler(Handler):
                                   query=query)
             dialogue.outgoing_extend(cfp_msg)
             self.context.outbox.put_message(to=opponent_addr,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(cfp_msg))
         else:
@@ -330,7 +330,7 @@ class MyTransactionHandler(Handler):
                                      info=json_data)
             dialogue.outgoing_extend(inform_msg)
             self.context.outbox.put_message(to=counterparty_id,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(inform_msg))
             logger.info("[{}]: informing counterparty={} of transaction digest.".format(self.context.agent_name, counterparty_id[-5:]))

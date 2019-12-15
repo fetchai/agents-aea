@@ -27,5 +27,5 @@ class TestScaffold:
 
     def test_scaffold_connection(self):
         """Test the initialisation of the scaffold_connection."""
-        m_connection = MyScaffoldConnection("my_scaffold_connection", public_key="pk")
-        assert m_connection.public_key == "pk"
+        m_connection = MyScaffoldConnection("my_scaffold_connection", address="pk")
+        assert m_connection.address == "pk"

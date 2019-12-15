@@ -315,7 +315,8 @@ class TestFilter:
                                counterparty_tx_fee=0,
                                ledger_id="fetchai",
                                quantities_by_good_id={"Unknown": 10},
-                               info={})
+                               info={},
+                               transaction_digest='some_tx_digest')
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()
 

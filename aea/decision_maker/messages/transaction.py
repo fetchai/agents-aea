@@ -165,7 +165,7 @@ class TransactionMessage(InternalMessage):
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
-        """Get he quantities by good public keys."""
+        """Get the quantities by good ids."""
         assert self.is_set("quantities_by_good_id"), "quantities_by_good_id is not set."
         return cast(Dict[str, int], self.get("quantities_by_good_id"))
 

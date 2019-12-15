@@ -67,18 +67,18 @@ class DialogueLabel:
 
     @property
     def dialogue_opponent_addr(self) -> str:
-        """Get the public key of the dialogue opponent."""
+        """Get the address of the dialogue opponent."""
         return self._dialogue_opponent_addr
 
     @property
     def dialogue_starter_addr(self) -> str:
-        """Get the public key of the dialogue starter."""
+        """Get the address of the dialogue starter."""
         return self._dialogue_starter_addr
 
     def __eq__(self, other) -> bool:
         """Check for equality between two DialogueLabel objects."""
         if type(other) == DialogueLabel:
-            return self.dialogue_reference == other.dialogue_reference and self._dialogue_starter_addr == other.dialogue_starter_addr and self._dialogue_opponent_addr == other.dialogue_opponent_addr
+            return self.dialogue_reference == other.dialogue_reference and self.dialogue_starter_addr == other.dialogue_starter_addr and self.dialogue_opponent_addr == other.dialogue_opponent_addr
         else:
             return False
 

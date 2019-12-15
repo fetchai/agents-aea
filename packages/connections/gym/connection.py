@@ -31,7 +31,7 @@ import gym
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.helpers.base import locate
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.gym.message import GymMessage
@@ -50,9 +50,9 @@ DEFAULT_GYM = "gym"
 class GymChannel:
     """A wrapper of the gym environment."""
 
-    def __init__(self, public_key: str, gym_env: gym.Env):
+    def __init__(self, address: Address, gym_env: gym.Env):
         """Initialize a gym channel."""
-        self.public_key = public_key
+        self.address = address
         self.gym_env = gym_env
         self._lock = threading.Lock()
 
@@ -60,16 +60,16 @@ class GymChannel:
 
     def connect(self) -> Optional[asyncio.Queue]:
         """
-        Connect a public key to the gym.
+        Connect an address to the gym.
 
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        if self.public_key in self._queues:
+        if self.address in self._queues:
             return None
 
-        assert len(self._queues.keys()) == 0, "Only one public key can register to a gym."
+        assert len(self._queues.keys()) == 0, "Only one address can register to a gym."
         q = asyncio.Queue()  # type: asyncio.Queue
-        self._queues[self.public_key] = q
+        self._queues[self.address] = q
         return q
 
     def send(self, envelope: Envelope) -> None:
@@ -132,7 +132,7 @@ class GymChannel:
         :return: None
         """
         with self._lock:
-            self._queues.pop(self.public_key, None)
+            self._queues.pop(self.address, None)
 
 
 class GymConnection(Connection):
@@ -140,17 +140,17 @@ class GymConnection(Connection):
 
     restricted_to_protocols = {"gym"}
 
-    def __init__(self, public_key: str, gym_env: gym.Env, connection_id: str = "gym", **kwargs):
+    def __init__(self, address: Address, gym_env: gym.Env, connection_id: str = "gym", **kwargs):
         """
         Initialize a connection to a local gym environment.
 
-        :param public_key: the public key used in the protocols.
+        :param address: the address used in the protocols.
         :param gym_env: the gym environment.
         :param connection_id: the connection id.
         """
         super().__init__(connection_id=connection_id, **kwargs)
-        self.public_key = public_key
-        self.channel = GymChannel(public_key, gym_env)
+        self.address = address
+        self.channel = GymChannel(address, gym_env)
 
         self._connection = None  # type: Optional[asyncio.Queue]
 
@@ -211,16 +211,16 @@ class GymConnection(Connection):
         self._connection = None
 
     @classmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         """
         Get the Gym connection from the connection configuration.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
         gym_env_package = cast(str, connection_configuration.config.get('env'))
         gym_env = locate(gym_env_package)
-        return GymConnection(public_key, gym_env(),
+        return GymConnection(address, gym_env(),
                              connection_id=connection_configuration.name,
                              restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

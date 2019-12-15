@@ -39,7 +39,7 @@ def build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
     """
     Build a data model for supply and demand of goods (i.e. for offered or requested goods).
 
-    :param good_ids: a list of public keys (i.e. identifiers) of the relevant goods.
+    :param good_ids: a list of ids (i.e. identifiers) of the relevant goods.
     :param currency: the currency used for trading.
     :param is_supply: Boolean indicating whether it is a supply or demand data model
 
@@ -60,7 +60,7 @@ def build_goods_description(good_id_to_quantities: Dict[str, int], currency: str
     """
     Get the service description (good quantities supplied or demanded and their price).
 
-    :param good_id_to_quantities: a dictionary mapping the public keys of the goods to the quantities.
+    :param good_id_to_quantities: a dictionary mapping the ids of the goods to the quantities.
     :param currency: the currency used for pricing and transacting.
     :param is_supply: True if the description is indicating supply, False if it's indicating demand.
 
@@ -81,14 +81,14 @@ def build_goods_query(good_ids: List[str], currency: str, is_searching_for_selle
         - to look for sellers if the agent is a buyer, or
         - to look for buyers if the agent is a seller.
 
-    In particular, if the agent is a buyer and the demanded good public keys are {'tac_good_0', 'tac_good_2', 'tac_good_3'}, the resulting constraint expression is:
+    In particular, if the agent is a buyer and the demanded good ids are {'tac_good_0', 'tac_good_2', 'tac_good_3'}, the resulting constraint expression is:
 
         tac_good_0 >= 1 OR tac_good_2 >= 1 OR tac_good_3 >= 1
 
     That is, the OEF will return all the sellers that have at least one of the good in the query
     (assuming that the sellers are registered with the data model specified).
 
-    :param good_ids: the list of good public keys to put in the query
+    :param good_ids: the list of good ids to put in the query
     :param currency: the currency used for pricing and transacting.
     :param is_searching_for_sellers: Boolean indicating whether the query is for sellers (supply) or buyers (demand).
 
@@ -111,7 +111,7 @@ def generate_transaction_id(agent_addr: Address, opponent_addr: Address, dialogu
     Make a transaction id.
 
     :param agent_addr: the address of the agent.
-    :param opponent_addr: the public key of the opponent.
+    :param opponent_addr: the address of the opponent.
     :param dialogue_label: the dialogue label
     :param agent_is_seller: boolean indicating if the agent is a seller
     :return: a transaction id
@@ -140,17 +140,17 @@ def dialogue_label_from_transaction_id(agent_addr: Address, transaction_id: Tran
     return dialogue_label
 
 
-def generate_transaction_message(proposal_description: Description, dialogue_label: DialogueLabel, is_seller: bool, agent_public_key: str) -> TransactionMessage:
+def generate_transaction_message(proposal_description: Description, dialogue_label: DialogueLabel, is_seller: bool, agent_addr: Address) -> TransactionMessage:
     """
     Generate the transaction message from the description and the dialogue.
 
     :param proposal_description: the description of the proposal
     :param dialogue_label: the dialogue label
     :param is_seller: the agent is a seller
-    :param agent_public_key: the public key of the agent
+    :param agent_addr: the address of the agent
     :return: a transaction message
     """
-    transaction_id = generate_transaction_id(agent_public_key, dialogue_label.dialogue_opponent_addr, dialogue_label, is_seller)
+    transaction_id = generate_transaction_id(agent_addr, dialogue_label.dialogue_opponent_addr, dialogue_label, is_seller)
     sender_tx_fee = proposal_description.values['seller_tx_fee'] if is_seller else proposal_description.values['buyer_tx_fee']
     counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if is_seller else proposal_description.values['seller_tx_fee']
     goods_component = copy.copy(proposal_description.values)
@@ -158,7 +158,7 @@ def generate_transaction_message(proposal_description: Description, dialogue_lab
     transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                          skill_ids=['tac_negotiation', 'tac_participation'],
                                          transaction_id=transaction_id,
-                                         sender=agent_public_key,
+                                         sender=agent_addr,
                                          counterparty=dialogue_label.dialogue_opponent_addr,
                                          currency_id=proposal_description.values['currency'],
                                          amount=proposal_description.values['price'],

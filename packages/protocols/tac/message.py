@@ -130,7 +130,7 @@ class TACMessage(Message):
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
-        """Get the quantities of the good public keys from the message."""
+        """Get the quantities of the good ids from the message."""
         assert self.is_set('quantities_by_good_id')
         return cast(Dict[str, int], self.get("quantities_by_good_id"))
 

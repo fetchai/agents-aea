@@ -99,7 +99,7 @@ class TrainHandler(Handler):
             tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                         skill_ids=['ml_train'],
                                         transaction_id=strategy.get_next_transition_id(),
-                                        sender=self.context.agent_public_keys[terms.values["ledger_id"]],
+                                        sender=self.context.agent_addresses[terms.values["ledger_id"]],
                                         counterparty=terms.values["address"],
                                         is_sender_buyer=True,
                                         currency_id=terms.values['currency_id'],
@@ -117,7 +117,7 @@ class TrainHandler(Handler):
                                        tx_digest=DUMMY_DIGEST,
                                        terms=terms)
             self.context.outbox.put_message(to=ml_trade_msg.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: sending dummy transaction digest ...".format(self.context.agent_name))
@@ -198,7 +198,7 @@ class OEFHandler(Handler):
             logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_address[-5:]))
             cft_msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
             self.context.outbox.put_message(to=opponent_address,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(cft_msg))
 
@@ -230,7 +230,7 @@ class MyTransactionHandler(Handler):
                                        tx_digest=transaction_digest,
                                        terms=terms)
             self.context.outbox.put_message(to=message.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."

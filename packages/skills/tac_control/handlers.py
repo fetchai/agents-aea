@@ -59,7 +59,7 @@ class TACHandler(Handler):
         """
         Handle a register message.
 
-        If the public key is already registered, answer with an error message.
+        If the address is already registered, answer with an error message.
 
         :param message: the 'get agent state' TACMessage.
         :return: None
@@ -83,7 +83,7 @@ class TACHandler(Handler):
         """
         Handle a register message.
 
-        If the public key is not registered, answer with an error message.
+        If the address is not registered, answer with an error message.
 
         :param message: the 'get agent state' TACMessage.
         :return: None
@@ -95,7 +95,7 @@ class TACHandler(Handler):
             tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST)
             self.context.outbox.put_message(to=message.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))
             return
@@ -107,7 +107,7 @@ class TACHandler(Handler):
             tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_ADDR_ALREADY_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))
 
@@ -116,7 +116,7 @@ class TACHandler(Handler):
             tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))
 
@@ -127,7 +127,7 @@ class TACHandler(Handler):
         """
         Handle a unregister message.
 
-        If the public key is not registered, answer with an error message.
+        If the address is not registered, answer with an error message.
 
         :param message: the 'get agent state' TACMessage.
         :return: None
@@ -138,7 +138,7 @@ class TACHandler(Handler):
             tac_msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
                                  error_code=TACMessage.ErrorCode.AGENT_NOT_REGISTERED)
             self.context.outbox.put_message(to=message.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))
         else:
@@ -190,11 +190,11 @@ class TACHandler(Handler):
                                           amount_by_currency=transaction.amount_by_currency,
                                           quantities_by_good_id=transaction.quantities_by_good_id)
         self.context.outbox.put_message(to=message.counterparty,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=TACMessage.protocol_id,
                                         message=TACSerializer().encode(sender_tac_msg))
         self.context.outbox.put_message(to=transaction.counterparty,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=TACMessage.protocol_id,
                                         message=TACSerializer().encode(counterparty_tac_msg))
 
@@ -210,7 +210,7 @@ class TACHandler(Handler):
                              error_code=TACMessage.ErrorCode.TRANSACTION_NOT_VALID,
                              info={"transaction_id": message.transaction_id})
         self.context.outbox.put_message(to=message.counterparty,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=TACMessage.protocol_id,
                                         message=TACSerializer().encode(tac_msg))
 

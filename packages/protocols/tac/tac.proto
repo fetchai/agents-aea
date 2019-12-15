@@ -32,7 +32,7 @@ message TACController {
         repeated StrIntPair quantities_by_good_id = 3;
         repeated StrFloatPair utility_params_by_good_id = 4;
         int64 tx_fee = 5;
-        repeated StrStrPair agent_id_to_name = 6;
+        repeated StrStrPair agent_addr_to_name = 6;
         repeated StrStrPair good_id_to_name = 7;
         string version_id = 8;
     }

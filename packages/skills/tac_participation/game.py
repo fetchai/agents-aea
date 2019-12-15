@@ -60,8 +60,8 @@ class Configuration:
         :param version_id: the version of the game.
         :param tx_fee: the fee for a transaction.
         :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
-        :param good_id_to_name: a dictionary mapping good public keys to good names (as strings).
-        :param controller_addr: the public key of the controller
+        :param good_id_to_name: a dictionary mapping good ids to good names (as strings).
+        :param controller_addr: the address of the controller
         """
         self._version_id = version_id
         self._nb_agents = len(agent_addr_to_name)
@@ -95,17 +95,17 @@ class Configuration:
 
     @property
     def agent_addr_to_name(self) -> Dict[Address, str]:
-        """Map agent public keys to names."""
+        """Map agent addresses to names."""
         return self._agent_addr_to_name
 
     @property
     def good_id_to_name(self) -> Dict[Address, str]:
-        """Map good public keys to names."""
+        """Map good ids to names."""
         return self._good_id_to_name
 
     @property
-    def agent_addrs(self) -> List[Address]:
-        """List of agent public keys."""
+    def agent_addresses(self) -> List[Address]:
+        """List of agent addresses."""
         return list(self._agent_addr_to_name.keys())
 
     @property
@@ -115,7 +115,7 @@ class Configuration:
 
     @property
     def good_ids(self) -> List[Address]:
-        """List of good public keys."""
+        """List of good ids."""
         return list(self._good_id_to_name.keys())
 
     @property
@@ -139,9 +139,9 @@ class Configuration:
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
         assert self.nb_agents > 1, "Must have at least two agents."
         assert self.nb_goods > 1, "Must have at least two goods."
-        assert len(self.agent_addrs) == self.nb_agents, "There must be one public key for each agent."
+        assert len(self.agent_addrs) == self.nb_agents, "There must be one address for each agent."
         assert len(set(self.agent_names)) == self.nb_agents, "Agents' names must be unique."
-        assert len(self.good_ids) == self.nb_goods, "There must be one public key for each good."
+        assert len(self.good_ids) == self.nb_goods, "There must be one id for each good."
         assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
 
 
@@ -169,7 +169,7 @@ class Game(SharedClass):
     @property
     def expected_controller_addr(self) -> Address:
         """Get the expected controller pbk."""
-        assert self._expected_controller_addr is not None, "Expected controller public key not assigned!"
+        assert self._expected_controller_addr is not None, "Expected controller address not assigned!"
         return self._expected_controller_addr
 
     @property
@@ -183,7 +183,7 @@ class Game(SharedClass):
         Populate data structures with the game data.
 
         :param tac_message: the tac message with the game instance data
-        :param controller_addr: the public key of the controller
+        :param controller_addr: the address of the controller
 
         :return: None
         """
@@ -200,7 +200,7 @@ class Game(SharedClass):
         """
         Overwrite the expected controller pbk.
 
-        :param controller_addr: the public key of the controller
+        :param controller_addr: the address of the controller
 
         :return: None
         """

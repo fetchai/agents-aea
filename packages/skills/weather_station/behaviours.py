@@ -88,7 +88,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                          service_description=desc,
                          service_id=SERVICE_ID)
         self.context.outbox.put_message(to=DEFAULT_OEF,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=OEFMessage.protocol_id,
                                         message=OEFSerializer().encode(msg))
         logger.info("[{}]: updating weather station services on OEF.".format(self.context.agent_name))
@@ -106,7 +106,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                          service_description=self._registered_service_description,
                          service_id=SERVICE_ID)
         self.context.outbox.put_message(to=DEFAULT_OEF,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=OEFMessage.protocol_id,
                                         message=OEFSerializer().encode(msg))
         logger.info("[{}]: unregistering weather station services from OEF.".format(self.context.agent_name))

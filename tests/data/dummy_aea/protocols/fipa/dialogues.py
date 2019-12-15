@@ -211,7 +211,7 @@ class FIPADialogues(Dialogues):
         Check whether an agent message is part of a registered dialogue.
 
         :param fipa_msg: the fipa message
-        :param agent_addr: the public key of the agent
+        :param agent_addr: the address of the agent
 
         :return: boolean indicating whether the message belongs to a registered dialogue
         """
@@ -243,7 +243,7 @@ class FIPADialogues(Dialogues):
         Retrieve dialogue.
 
         :param fipa_msg: the fipa message
-        :param agent_addr: the public key of the agent
+        :param agent_addr: the address of the agent
 
         :return: the dialogue
         """

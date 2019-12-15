@@ -46,14 +46,14 @@ class TestP2p:
         cls.port = 8000
         m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
         cls.ent = entity.Entity.from_hex(m_fet_key)
-        cls.p2p_connection = PeerToPeerConnection(public_key=cls.ent.public_key_hex,
+        cls.p2p_connection = PeerToPeerConnection(address=cls.ent.public_key_hex,
                                                   provider_addr=cls.address,
                                                   provider_port=cls.port)
         cls.p2p_connection.loop = asyncio.get_event_loop()
 
     async def test_initialization(self):
         """Test the initialisation of the class."""
-        assert self.p2p_connection.public_key == self.ent.public_key_hex
+        assert self.p2p_connection.address == self.ent.address_hex
 
     async def test_connection(self):
         """Test the connection and disconnection from the p2p connection."""
@@ -84,7 +84,7 @@ async def test_p2p_receive():
     port = 8000
     m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
     ent = entity.Entity.from_hex(m_fet_key)
-    p2p_connection = PeerToPeerConnection(public_key=ent.public_key_hex, provider_addr=address, provider_port=port)
+    p2p_connection = PeerToPeerConnection(address=ent.address_hex, provider_addr=address, provider_port=port)
     p2p_connection.loop = asyncio.get_event_loop()
 
     fake_get_messages_empty = MagicMock(return_value=[])
@@ -117,5 +117,5 @@ async def test_p2p_receive():
 
 def test_p2p_from_config():
     """Test the Connection from config File."""
-    con = PeerToPeerConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
+    con = PeerToPeerConnection.from_config(address="pk", connection_configuration=ConnectionConfig())
     assert not con.connection_status.is_connected, "We are connected..."

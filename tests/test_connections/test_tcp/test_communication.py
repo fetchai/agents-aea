@@ -111,8 +111,8 @@ class TestTCPClientConnection:
     async def test_receive_cancelled(self):
         """Test that cancelling a receive task works correctly."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
+        tcp_server = TCPServerConnection("address_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("address_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -122,7 +122,7 @@ class TestTCPClientConnection:
             await asyncio.sleep(0.1)
             task.cancel()
             await asyncio.sleep(0.1)
-            mock_logger_debug.assert_called_with("[{}] Read cancelled.".format("public_key_client"))
+            mock_logger_debug.assert_called_with("[{}] Read cancelled.".format("address_client"))
             assert task.result() is None
 
         await tcp_client.disconnect()
@@ -132,8 +132,8 @@ class TestTCPClientConnection:
     async def test_receive_raises_struct_error(self):
         """Test the case when a receive raises a struct error."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
+        tcp_server = TCPServerConnection("address_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("address_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -152,8 +152,8 @@ class TestTCPClientConnection:
     async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
+        tcp_server = TCPServerConnection("address_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("address_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -171,7 +171,7 @@ class TestTCPClientConnection:
     async def test_from_config(self):
         """Test the creation of the connection from a configuration."""
         port = get_unused_tcp_port()
-        TCPClientConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=port))
+        TCPClientConnection.from_config("address", ConnectionConfig(host="127.0.0.1", port=port))
 
 
 class TestTCPServerConnection:
@@ -181,8 +181,8 @@ class TestTCPServerConnection:
     async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
+        tcp_server = TCPServerConnection("address_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("address_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -200,4 +200,4 @@ class TestTCPServerConnection:
     async def test_from_config(self):
         """Test the creation of the connection from a configuration."""
         port = get_unused_tcp_port()
-        TCPServerConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=port))
+        TCPServerConnection.from_config("address", ConnectionConfig(host="127.0.0.1", port=port))

@@ -159,7 +159,7 @@ class OEFHandler(Handler):
         """
         Register to active TAC Controller.
 
-        :param controller_addr: the public key of the controller.
+        :param controller_addr: the address of the controller.
 
         :return: None
         """
@@ -168,13 +168,13 @@ class OEFHandler(Handler):
         game.update_game_phase(Phase.GAME_REGISTRATION)
         tac_msg = TACMessage(type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
         tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_address, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
     # def _rejoin_tac(self, controller_addr: Address) -> None:
     #     """
     #     Rejoin the TAC run by a Controller.
 
-    #     :param controller_addr: the public key of the controller.
+    #     :param controller_addr: the address of the controller.
 
     #     :return: None
     #     """
@@ -183,7 +183,7 @@ class OEFHandler(Handler):
     #     game.update_game_phase(Phase.GAME_SETUP)
     #     tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
     #     tac_bytes = TACSerializer().encode(tac_msg)
-    #     self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+    #     self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_address, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
 
 class TACHandler(Handler):
@@ -307,7 +307,7 @@ class TACHandler(Handler):
     #     Update the game instance with a State Update from the controller.
 
     #     :param tac_message: the state update
-    #     :param controller_addr: the public key of the controller
+    #     :param controller_addr: the address of the controller
 
     #     :return: None
     #     """
@@ -344,7 +344,7 @@ class TACHandler(Handler):
     #     tac_msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
     #     tac_bytes = TACSerializer().encode(tac_msg)
     #     game = cast(Game, self.context.game)
-    #     self.context.outbox.put_message(to=game.expected_controller_addr, sender=self.context.agent_public_key, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+    #     self.context.outbox.put_message(to=game.expected_controller_addr, sender=self.context.agent_address, protocol_id=TACMessage.protocol_id, message=tac_bytes)
 
 
 class TransactionHandler(Handler):
@@ -379,7 +379,7 @@ class TransactionHandler(Handler):
                              counterparty_tx_fee=tx_message.counterparty_tx_fee,
                              quantities_by_good_id=tx_message.quantities_by_good_id)
             self.context.outbox.put_message(to=game.configuration.controller_addr,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(msg))
         else:
