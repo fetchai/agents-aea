@@ -89,7 +89,7 @@ class TestGenerateKey:
 
     @classmethod
     def teardown_class(cls):
-        """Tear the test down"""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         shutil.rmtree(cls.t)
 

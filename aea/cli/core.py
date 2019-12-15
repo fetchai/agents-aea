@@ -36,8 +36,8 @@ from aea.cli.add import connection, skill
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, DEFAULT_REGISTRY_PATH
 from aea.cli.install import install
 from aea.cli.list import list as _list
-from aea.cli.login import login
 from aea.cli.loggers import simple_verbosity_option
+from aea.cli.login import login
 from aea.cli.push import push
 from aea.cli.remove import remove
 from aea.cli.run import run
@@ -105,7 +105,7 @@ def create(click_context, agent_name):
         logger.exception(e)
         shutil.rmtree(agent_name, ignore_errors=True)
         sys.exit(1)
-DEFAULT_PRIVATE_KEY_FILE
+
 
 @cli.command()
 @click.argument('agent_name', type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True)
