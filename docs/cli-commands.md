@@ -4,6 +4,7 @@
 | ------------------------------------------- | ---------------------------------------------------------------------------- |		
 | `add connection/protocol/skill [name]`      | Add connection, protocol, or skill, called `[name]`, to the agent.           |	
 | `add-key default/fetchai/ethereum file`     | Add a private key from a file.	                                             |
+| `config get/set json_path [value]`          | Get an attribute specified by `json_path`, or set it to `[value]`.           |		
 | `create NAME`                               | Create a new aea project called `[name]`.                                    |		
 | `delete NAME`                               | Delete an aea project. See below for disabling a resource.                   |		
 | `fetch NAME`                                | Fetch an aea project called `[name]`.                                        |		
