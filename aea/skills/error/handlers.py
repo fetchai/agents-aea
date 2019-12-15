@@ -67,10 +67,10 @@ class ErrorHandler(Handler):
         """
         logger.warning("Unsupported protocol: {}".format(envelope.protocol_id))
         reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL.value,
+                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
                                error_msg="Unsupported protocol.",
                                error_data={"protocol_id": envelope.protocol_id})
-        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
+        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_address,
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
 
@@ -87,7 +87,7 @@ class ErrorHandler(Handler):
                                error_code=DefaultMessage.ErrorCode.DECODING_ERROR,
                                error_msg="Decoding error.",
                                error_data={"envelope": encoded_envelope})
-        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
+        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_address,
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
 
@@ -101,10 +101,10 @@ class ErrorHandler(Handler):
         logger.warning("Invalid message wrt protocol: {}.".format(envelope.protocol_id))
         encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
         reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE.value,
+                               error_code=DefaultMessage.ErrorCode.INVALID_MESSAGE,
                                error_msg="Invalid message.",
                                error_data={"envelope": encoded_envelope})
-        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
+        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_address,
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))
 
@@ -118,9 +118,9 @@ class ErrorHandler(Handler):
         logger.warning("Cannot handle envelope: no handler registered for the protocol '{}'.".format(envelope.protocol_id))
         encoded_envelope = base64.b85encode(envelope.encode()).decode("utf-8")
         reply = DefaultMessage(type=DefaultMessage.Type.ERROR,
-                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_SKILL.value,
+                               error_code=DefaultMessage.ErrorCode.UNSUPPORTED_SKILL,
                                error_msg="Unsupported skill.",
                                error_data={"envelope": encoded_envelope})
-        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_public_key,
+        self.context.outbox.put_message(to=envelope.sender, sender=self.context.agent_address,
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(reply))

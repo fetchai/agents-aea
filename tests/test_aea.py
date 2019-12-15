@@ -46,8 +46,8 @@ from .conftest import CUR_PATH
 def test_initialise_AEA():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
-    public_key_1 = "public_key"
-    connections1 = [OEFLocalConnection(public_key_1, node)]
+    address_1 = "address"
+    connections1 = [OEFLocalConnection(address_1, node)]
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
     ledger_apis = LedgerApis({})
@@ -70,8 +70,8 @@ def test_act():
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
-        public_key = wallet.public_keys['default']
-        connections = [OEFLocalConnection(public_key, node)]
+        address = wallet.addresses['default']
+        connections = [OEFLocalConnection(address, node)]
 
         agent = AEA(
             agent_name,
@@ -98,17 +98,17 @@ def test_react():
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
-        public_key = wallet.public_keys['default']
-        connection = OEFLocalConnection(public_key, node)
+        address = wallet.addresses['default']
+        connection = OEFLocalConnection(address, node)
         connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        msg.counterparty = public_key
+        msg.counterparty = address
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
-            to=public_key,
-            sender=public_key,
+            to=address,
+            sender=address,
             protocol_id="default",
             message=message_bytes)
 
@@ -142,8 +142,8 @@ async def test_handle():
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({})
-        public_key = wallet.public_keys['default']
-        connection = OEFLocalConnection(public_key, node)
+        address = wallet.addresses['default']
+        connection = OEFLocalConnection(address, node)
         connections = [connection]
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
@@ -151,8 +151,8 @@ async def test_handle():
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
-            to=public_key,
-            sender=public_key,
+            to=address,
+            sender=address,
             protocol_id="unknown_protocol",
             message=message_bytes)
 
@@ -177,8 +177,8 @@ async def test_handle():
             #   DECODING ERROR
             msg = "hello".encode("utf-8")
             envelope = Envelope(
-                to=public_key,
-                sender=public_key,
+                to=address,
+                sender=address,
                 protocol_id='default',
                 message=msg)
             expected_envelope = envelope
@@ -193,8 +193,8 @@ async def test_handle():
                             dialogue_reference=(str(0), ''),
                             target=1))
             envelope = Envelope(
-                to=public_key,
-                sender=public_key,
+                to=address,
+                sender=address,
                 protocol_id="fipa",
                 message=msg)
             expected_envelope = envelope

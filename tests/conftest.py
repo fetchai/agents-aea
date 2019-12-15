@@ -39,7 +39,7 @@ from oef.agents import AsyncioCore, OEFAgent
 from aea import AEA_DIR
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +133,7 @@ class DummyConnection(Connection):
         self._queue.put_nowait(envelope)
 
     @classmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         """Return a connection obj fom a configuration."""
 
 

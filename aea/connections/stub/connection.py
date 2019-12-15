@@ -29,7 +29,7 @@ from watchdog.observers import Observer
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 
 logger = logging.getLogger(__name__)
 
@@ -219,11 +219,11 @@ class StubConnection(Connection):
         self.output_file.flush()
 
     @classmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         """
         Get the OEF connection from the connection configuration.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """

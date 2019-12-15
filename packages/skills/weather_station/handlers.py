@@ -63,8 +63,8 @@ class FIPAHandler(Handler):
 
         # recover dialogue
         dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_public_key):
-            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_public_key))
+        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_address):
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address))
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
             dialogue = cast(Dialogue, dialogues.create_opponent_initiated(fipa_msg.counterparty,
@@ -107,7 +107,7 @@ class FIPAHandler(Handler):
                                      error_msg="Invalid dialogue.",
                                      error_data="fipa_message")  # FIPASerializer().encode(msg)
         self.context.outbox.put_message(to=msg.counterparty,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(default_msg))
 
@@ -142,7 +142,7 @@ class FIPAHandler(Handler):
                                        proposal=[proposal])
             dialogue.outgoing_extend(proposal_msg)
             self.context.outbox.put_message(to=msg.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(proposal_msg))
         else:
@@ -154,7 +154,7 @@ class FIPAHandler(Handler):
                                       performative=FIPAMessage.Performative.DECLINE)
             dialogue.outgoing_extend(decline_msg)
             self.context.outbox.put_message(to=msg.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(decline_msg))
 
@@ -198,7 +198,7 @@ class FIPAHandler(Handler):
                                        info={"address": "no_address"})
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(to=msg.counterparty,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=FIPAMessage.protocol_id,
                                         message=FIPASerializer().encode(match_accept_msg))
 
@@ -227,7 +227,7 @@ class FIPAHandler(Handler):
                                      info=dialogue.weather_data)
             dialogue.outgoing_extend(inform_msg)
             self.context.outbox.put_message(to=msg.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(inform_msg))
             # dialogues = cast(Dialogues, self.context.dialogues)

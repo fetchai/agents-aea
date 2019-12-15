@@ -99,16 +99,16 @@ class TrainHandler(Handler):
             tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                         skill_ids=['ml_train'],
                                         transaction_id=strategy.get_next_transition_id(),
-                                        sender=self.context.agent_public_keys[terms.values["ledger_id"]],
+                                        sender=self.context.agent_addresses[terms.values["ledger_id"]],
                                         counterparty=terms.values["address"],
                                         is_sender_buyer=True,
-                                        currency_pbk=terms.values['currency_pbk'],
+                                        currency_id=terms.values['currency_id'],
                                         amount=terms.values["price"],
                                         sender_tx_fee=terms.values["buyer_tx_fee"],
                                         counterparty_tx_fee=terms.values["seller_tx_fee"],
                                         ledger_id=terms.values["ledger_id"],
-                                        info={'terms': terms, 'counterparty_pbk': ml_trade_msg.counterparty},
-                                        quantities_by_good_pbk={})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
+                                        info={'terms': terms, 'counterparty_addr': ml_trade_msg.counterparty},
+                                        quantities_by_good_id={})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
         else:
@@ -117,7 +117,7 @@ class TrainHandler(Handler):
                                        tx_digest=DUMMY_DIGEST,
                                        terms=terms)
             self.context.outbox.put_message(to=ml_trade_msg.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: sending dummy transaction digest ...".format(self.context.agent_name))
@@ -194,11 +194,11 @@ class OEFHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_searching = False
         query = strategy.get_service_query()
-        for opponent_pbk in agents:
-            logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
+        for opponent_address in agents:
+            logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_address[-5:]))
             cft_msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
-            self.context.outbox.put_message(to=opponent_pbk,
-                                            sender=self.context.agent_public_key,
+            self.context.outbox.put_message(to=opponent_address,
+                                            sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(cft_msg))
 
@@ -230,7 +230,7 @@ class MyTransactionHandler(Handler):
                                        tx_digest=transaction_digest,
                                        terms=terms)
             self.context.outbox.put_message(to=message.counterparty,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."

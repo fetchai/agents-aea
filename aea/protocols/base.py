@@ -27,7 +27,8 @@ from typing import Any, Dict, Optional
 
 from google.protobuf.struct_pb2 import Struct
 
-from aea.configurations.base import ProtocolConfig, Address
+from aea.configurations.base import ProtocolConfig
+from aea.mail.base import Address
 
 
 class Message:

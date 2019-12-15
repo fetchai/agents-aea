@@ -23,7 +23,7 @@ shared_classes:
         country: UK
         max_row_price: 4
         max_buyer_tx_fee: 1
-        currency_pbk: 'FET'
+        currency_id: 'FET'
         ledger_id: 'None'
   - shared_class:
       class_name: Dialogues

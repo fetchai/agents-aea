@@ -29,12 +29,11 @@ DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
 DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
 T = TypeVar('T')
 
-Address = str
 ProtocolId = str
 SkillId = str
 """
 A dependency is a dictionary with the following (optional) keys:
-    - version: a version specifier(s) (e.g. '==0.1.0'). 
+    - version: a version specifier(s) (e.g. '==0.1.0').
     - index: the PyPI index where to download the package from (default: https://pypi.org)
     - git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
     - ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
@@ -47,8 +46,8 @@ A dictionary from package name to dependency data structure (see above).
 The package name must satisfy the constraints on Python packages names.
 For details, see https://www.python.org/dev/peps/pep-0426/#name.
 
-The main advantage of having a dictionary is that we implicitly filter out dependency duplicates. 
-We cannot have two items with the same package name since the keys of a YAML object form a set. 
+The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
+We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 Dependencies = Dict[str, Dependency]
 

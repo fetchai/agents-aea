@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Optional, Set
 from aea.configurations.base import ConnectionConfig
 
 if TYPE_CHECKING:
-    from aea.mail.base import Envelope  # pragma: no cover
+    from aea.mail.base import Envelope, Address  # pragma: no cover
 
 
 logger = logging.getLogger(__name__)
@@ -123,11 +123,11 @@ class Connection(ABC):
 
     @classmethod
     @abstractmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: 'Address', connection_configuration: ConnectionConfig) -> 'Connection':
         """
         Initialize a connection instance from a configuration.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration.
         :return: an instance of the concrete connection class.
         """

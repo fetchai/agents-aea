@@ -12,7 +12,7 @@ This means it is possible to, at any point, grab the `context` and have access t
 For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
 
 ``` python
-self.context.outbox.put_message(to=recipient, sender=self.context.agent_public_key,protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
+self.context.outbox.put_message(to=recipient, sender=self.context.agent_address, protocol_id=DefaultMessage.protocol_id, message=DefaultSerializer().encode(reply))
 ``` 
 
 Importantly, however, a skill does not have access to the context of another skill or protected AEA components like the `DecisionMaker`.

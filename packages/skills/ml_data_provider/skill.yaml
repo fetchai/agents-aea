@@ -23,7 +23,7 @@ shared_classes:
         seller_tx_fee: 0
         buyer_tx_fee: 10
         dataset_id: 'fmnist'
-        currency_pbk: 'FET'
+        currency_id: 'FET'
         ledger_id: 'fetchai'
 protocols: ['oef', 'ml_trade']
 dependencies:

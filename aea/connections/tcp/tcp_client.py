@@ -27,7 +27,7 @@ from typing import Optional, cast
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.connections.tcp.base import TCPConnection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class TCPClientConnection(TCPConnection):
     """This class implements a TCP client."""
 
     def __init__(self,
-                 public_key: str,
+                 address: Address,
                  host: str,
                  port: int,
                  connection_id: str = "tcp_client",
@@ -46,20 +46,20 @@ class TCPClientConnection(TCPConnection):
         """
         Initialize a TCP channel.
 
-        :param public_key: public key.
+        :param address: address.
         :param host: the socket bind address.
         :param port: the socket bind port.
         :param connection_id: the identifier for the connection object.
         """
-        super().__init__(public_key, host, port, connection_id, **kwargs)
+        super().__init__(address, host, port, connection_id, **kwargs)
 
         self._reader, self._writer = (None, None)  # type: Optional[StreamReader], Optional[StreamWriter]
 
     async def setup(self):
         """Set the connection up."""
         self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
-        public_key_bytes = self.public_key.encode("utf-8")
-        await self._send(self._writer, public_key_bytes)
+        address_bytes = self.address.encode("utf-8")
+        await self._send(self._writer, address_bytes)
 
     async def teardown(self):
         """Tear the connection down."""
@@ -77,14 +77,14 @@ class TCPClientConnection(TCPConnection):
             assert self._reader is not None
             data = await self._recv(self._reader)
             if data is None:
-                logger.debug("[{}] No data received.".format(self.public_key))
+                logger.debug("[{}] No data received.".format(self.address))
                 return None
-            logger.debug("[{}] Message received: {!r}".format(self.public_key, data))
+            logger.debug("[{}] Message received: {!r}".format(self.address, data))
             envelope = Envelope.decode(data)  # TODO handle decoding error
-            logger.debug("[{}] Decoded envelope: {}".format(self.public_key, envelope))
+            logger.debug("[{}] Decoded envelope: {}".format(self.address, envelope))
             return envelope
         except CancelledError:
-            logger.debug("[{}] Read cancelled.".format(self.public_key))
+            logger.debug("[{}] Read cancelled.".format(self.address))
             return None
         except struct.error as e:
             logger.debug("Struct error: {}".format(str(e)))
@@ -98,15 +98,15 @@ class TCPClientConnection(TCPConnection):
         return self._writer
 
     @classmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         """Get the TCP server connection from the connection configuration.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        address = cast(str, connection_configuration.config.get("address"))
-        port = cast(int, connection_configuration.config.get("port"))
-        return TCPClientConnection(public_key, address, port,
+        server_address = cast(str, connection_configuration.config.get("address"))
+        server_port = cast(int, connection_configuration.config.get("port"))
+        return TCPClientConnection(address, server_address, server_port,
                                    connection_id=connection_configuration.name,
                                    restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

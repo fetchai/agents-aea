@@ -25,7 +25,7 @@ from asyncio import CancelledError, StreamWriter, StreamReader
 from typing import Optional, Set
 
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class TCPConnection(Connection, ABC):
     restricted_to_protocols = set()  # type: Set[str]
 
     def __init__(self,
-                 public_key: str,
+                 address: Address,
                  host: str,
                  port: int,
                  connection_id: str,
@@ -44,14 +44,14 @@ class TCPConnection(Connection, ABC):
         """
         Initialize the TCP connection.
 
-        :param public_key: the public key used for identification.
+        :param address: the address used for identification.
         :param host: the host to connect to.
         :param port: the port to connect to.
         :param connection_id: the identifier of the connection object.
         :param restricted_to_protocols: the only supported protocols for this connection.
         """
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
-        self.public_key = public_key
+        self.address = address
 
         self.host = host
         self.port = port
@@ -118,7 +118,7 @@ class TCPConnection(Connection, ABC):
         return data
 
     async def _send(self, writer, data):
-        logger.debug("[{}] Send a message".format(self.public_key))
+        logger.debug("[{}] Send a message".format(self.address))
         nbytes = struct.pack("I", len(data))
         logger.debug("#bytes: {!r}".format(nbytes))
         try:
@@ -140,4 +140,4 @@ class TCPConnection(Connection, ABC):
             data = envelope.encode()
             await self._send(writer, data)
         else:
-            logger.error("[{}]: Cannot send envelope {}".format(self.public_key, envelope))
+            logger.error("[{}]: Cannot send envelope {}".format(self.address, envelope))
