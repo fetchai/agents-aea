@@ -99,7 +99,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -141,7 +141,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -193,7 +193,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -243,7 +243,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

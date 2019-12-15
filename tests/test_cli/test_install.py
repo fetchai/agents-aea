@@ -49,7 +49,7 @@ class TestInstall:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
@@ -71,7 +71,7 @@ class TestInstallFromRequirementFile:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
@@ -119,7 +119,7 @@ class TestInstallFailsWhenDependencyDoesNotExist:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
@@ -141,5 +141,5 @@ class TestInstallWithRequirementFailsWhenFileIsBad:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)

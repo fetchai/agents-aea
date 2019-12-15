@@ -122,7 +122,7 @@ class TestAddKey:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         shutil.rmtree(cls.t)
 

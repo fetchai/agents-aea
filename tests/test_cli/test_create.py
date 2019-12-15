@@ -165,7 +165,7 @@ class TestCreate:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -207,7 +207,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -245,7 +245,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -283,8 +283,55 @@ class TestCreateFailsWhenExceptionOccurs:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestCreateFailsWhenAlreadyInAEAProject:
+    """Test that 'aea create' sub-command fails when it is called within an AEA project."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert cls.result.exit_code == 0
+
+        # calling 'aea create myagent' again within an AEA project - recursively.
+        os.chdir(cls.agent_name)
+        os.mkdir("another_subdir")
+        os.chdir("another_subdir")
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    def test_log_error_message(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: "The current folder is already an AEA project. Please move to the parent folder.".
+        """
+        s = "The current folder is already an AEA project. Please move to the parent folder."
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        cls.mocked_logger_error = cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
