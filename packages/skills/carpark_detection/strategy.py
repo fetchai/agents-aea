@@ -105,7 +105,7 @@ class Strategy(SharedClass):
             {
                 "latitude": lat,
                 "longitude": lon,
-                "unique_id": self.context.agent_public_key
+                "unique_id": self.context.agent_address
             }, data_model=CarParkDataModel()
         )
 

@@ -21,7 +21,6 @@
 """This module contains the scaffold message definition."""
 
 from enum import Enum
-from typing import Optional
 
 from aea.protocols.base import Message
 
@@ -31,20 +30,21 @@ class MyScaffoldMessage(Message):
 
     protocol_id = "my_scaffold_protocol"
 
-    class Type(Enum):
+    class Performative(Enum):
         """Scaffold Message types."""
 
         def __str__(self):
             """Get string representation."""
             return self.value   # pragma: no cover
 
-    def __init__(self, oef_type: Optional[Type] = None, **kwargs):
+    def __init__(self, performative: Performative,
+                 **kwargs):
         """
         Initialize.
 
-        :param oef_type: the type of message.
+        :param performative: the type of message.
         """
-        super().__init__(type=oef_type, **kwargs)
+        super().__init__(performative=performative, **kwargs)
         assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:

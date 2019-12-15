@@ -39,7 +39,7 @@ class TestGymConnection:
     def setup_class(cls):
         """Initialise the class."""
         cls.env = gym.GoalEnv()
-        cls.gym_con = GymConnection(public_key="my_key", gym_env=cls.env)
+        cls.gym_con = GymConnection(address="my_key", gym_env=cls.env)
 
     def test_gym_connection_initialization(self):
         """Test the connection None return value after connect()."""
@@ -76,5 +76,5 @@ def test_gym_from_config():
     """Test the Connection from config File."""
     conf = ConnectionConfig()
     conf.config['env'] = "tests.conftest.DUMMY_ENV"
-    con = GymConnection.from_config(public_key="pk", connection_configuration=conf)
+    con = GymConnection.from_config(address="pk", connection_configuration=conf)
     assert con is not None

@@ -48,7 +48,7 @@ class ProxyAgent(Agent):
         :return: None
         """
         wallet = Wallet({DEFAULT: None})
-        super().__init__(name, [GymConnection(wallet.public_keys.get(DEFAULT), gym_env)], wallet, timeout=0)
+        super().__init__(name, [GymConnection(wallet.addresses.get(DEFAULT), gym_env)], wallet, timeout=0)
         self.proxy_env_queue = proxy_env_queue
 
     def setup(self) -> None:

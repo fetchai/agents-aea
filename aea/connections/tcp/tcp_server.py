@@ -27,7 +27,7 @@ from typing import Dict, Optional, Tuple, cast
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.connections.tcp.base import TCPConnection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class TCPServerConnection(TCPConnection):
     """This class implements a TCP server."""
 
     def __init__(self,
-                 public_key: str,
+                 address: Address,
                  host: str,
                  port: int,
                  connection_id: str = "tcp_server",
@@ -46,15 +46,15 @@ class TCPServerConnection(TCPConnection):
         """
         Initialize a TCP channel.
 
-        :param public_key: public key.
+        :param address: address.
         :param host: the socket bind address.
         """
-        super().__init__(public_key, host, port, connection_id, **kwargs)
+        super().__init__(address, host, port, connection_id, **kwargs)
 
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]
 
-        self._read_tasks_to_public_key = dict()  # type: Dict[Future, str]
+        self._read_tasks_to_address = dict()  # type: Dict[Future, Address]
 
     async def handle(self, reader: StreamReader, writer: StreamWriter) -> None:
         """
@@ -64,15 +64,15 @@ class TCPServerConnection(TCPConnection):
         :param writer: the stream writer.
         :return: None
         """
-        logger.debug("Waiting for client public key...")
-        public_key_bytes = await self._recv(reader)
-        if public_key_bytes:
-            public_key_bytes = cast(bytes, public_key_bytes)
-            public_key = public_key_bytes.decode("utf-8")
-            logger.debug("Public key of the client: {}".format(public_key))
-            self.connections[public_key] = (reader, writer)
+        logger.debug("Waiting for client address...")
+        address_bytes = await self._recv(reader)
+        if address_bytes:
+            address_bytes = cast(bytes, address_bytes)
+            address = address_bytes.decode("utf-8")
+            logger.debug("Public key of the client: {}".format(address))
+            self.connections[address] = (reader, writer)
             read_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
-            self._read_tasks_to_public_key[read_task] = public_key
+            self._read_tasks_to_address[read_task] = address
 
     async def receive(self, *args, **kwargs) -> Optional['Envelope']:
         """
@@ -80,13 +80,13 @@ class TCPServerConnection(TCPConnection):
 
         :return: the received envelope, or None if an error occurred.
         """
-        if len(self._read_tasks_to_public_key) == 0:
+        if len(self._read_tasks_to_address) == 0:
             logger.warning("Tried to read from the TCP server. However, there is no open connection to read from.")
             return None
 
         try:
             logger.debug("Waiting for incoming messages...")
-            done, pending = await asyncio.wait(self._read_tasks_to_public_key.keys(), return_when=asyncio.FIRST_COMPLETED)  # type: ignore
+            done, pending = await asyncio.wait(self._read_tasks_to_address.keys(), return_when=asyncio.FIRST_COMPLETED)  # type: ignore
 
             # take the first
             task = next(iter(done))
@@ -95,10 +95,10 @@ class TCPServerConnection(TCPConnection):
                 logger.debug("[{}]: No data received.")
                 return None
             envelope = Envelope.decode(envelope_bytes)
-            public_key = self._read_tasks_to_public_key.pop(task)
-            reader = self.connections[public_key][0]
+            address = self._read_tasks_to_address.pop(task)
+            reader = self.connections[address][0]
             new_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
-            self._read_tasks_to_public_key[new_task] = public_key
+            self._read_tasks_to_address[new_task] = address
             return envelope
         except asyncio.CancelledError:
             logger.debug("Receiving loop cancelled.")
@@ -117,7 +117,7 @@ class TCPServerConnection(TCPConnection):
         for pbk, (reader, _) in self.connections.items():
             reader.feed_eof()
 
-        for t in self._read_tasks_to_public_key:
+        for t in self._read_tasks_to_address:
             t.cancel()
 
         self._server.close()
@@ -131,15 +131,15 @@ class TCPServerConnection(TCPConnection):
         return writer
 
     @classmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         """Get the TCP server connection from the connection configuration.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        address = cast(str, connection_configuration.config.get("address"))
+        server_address = cast(str, connection_configuration.config.get("address"))
         port = cast(int, connection_configuration.config.get("port"))
-        return TCPServerConnection(public_key, address, port,
+        return TCPServerConnection(address, server_address, port,
                                    connection_id=connection_configuration.name,
                                    restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

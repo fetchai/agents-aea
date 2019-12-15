@@ -28,7 +28,7 @@ from threading import Thread, Lock
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict, cast
 from urllib.parse import urlparse
 
-from aea.configurations.base import Address, ProtocolId
+from aea.configurations.base import ProtocolId
 from aea.connections.base import ConnectionStatus
 from aea.mail import base_pb2
 
@@ -36,6 +36,9 @@ if TYPE_CHECKING:
     from aea.connections.base import Connection  # pragma: no cover
 
 logger = logging.getLogger(__name__)
+
+
+Address = str
 
 
 class AEAConnectionError(Exception):
@@ -215,8 +218,8 @@ class Envelope:
         """
         Initialize a Message object.
 
-        :param to: the public key of the receiver.
-        :param sender: the public key of the sender.
+        :param to: the address of the receiver.
+        :param sender: the address of the sender.
         :param protocol_id: the protocol id.
         :param message: the protocol-specific message
         """
@@ -228,22 +231,22 @@ class Envelope:
 
     @property
     def to(self) -> Address:
-        """Get public key of receiver."""
+        """Get address of receiver."""
         return self._to
 
     @to.setter
     def to(self, to: Address) -> None:
-        """Set public key of receiver."""
+        """Set address of receiver."""
         self._to = to
 
     @property
     def sender(self) -> Address:
-        """Get public key of sender."""
+        """Get address of sender."""
         return self._sender
 
     @sender.setter
     def sender(self, sender: Address) -> None:
-        """Set public key of sender."""
+        """Set address of sender."""
         self._sender = sender
 
     @property

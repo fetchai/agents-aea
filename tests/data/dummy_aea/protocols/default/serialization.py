@@ -33,18 +33,16 @@ class DefaultSerializer(Serializer):
 
     def encode(self, msg: Message) -> bytes:
         """Encode a 'default' message into bytes."""
+        msg = cast(DefaultMessage, msg)
         body = {}  # Dict[str, Any]
+        body["type"] = msg.type.value
 
-        msg_type = DefaultMessage.Type(msg.get("type"))
-        body["type"] = str(msg_type.value)
-
-        if msg_type == DefaultMessage.Type.BYTES:
-            content = cast(bytes, msg.get("content"))
-            body["content"] = base64.b64encode(content).decode("utf-8")
-        elif msg_type == DefaultMessage.Type.ERROR:
-            body["error_code"] = cast(str, msg.get("error_code"))
-            body["error_msg"] = cast(str, msg.get("error_msg"))
-            body["error_data"] = cast(str, msg.get("error_data"))
+        if msg.type == DefaultMessage.Type.BYTES:
+            body["content"] = base64.b64encode(msg.content).decode("utf-8")
+        elif msg.type == DefaultMessage.Type.ERROR:
+            body["error_code"] = msg.error_code.value
+            body["error_msg"] = msg.error_msg
+            body["error_data"] = msg.error_data
         else:
             raise ValueError("Type not recognized.")
 

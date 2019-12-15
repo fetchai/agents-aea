@@ -87,7 +87,7 @@ class TestStubConnection:
 
     def test_connection_from_config(self):
         """Test loading a connection from config file."""
-        stub_con = StubConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig())
+        stub_con = StubConnection.from_config(address="pk", connection_configuration=ConnectionConfig())
         assert not stub_con.connection_status.is_connected
 
     def test_send_message(self):
@@ -125,7 +125,7 @@ def test_connection_from_config():
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
-    stub_con = StubConnection.from_config(public_key="pk", connection_configuration=ConnectionConfig(
+    stub_con = StubConnection.from_config(address="pk", connection_configuration=ConnectionConfig(
         input_file=input_file_path,
         output_file=output_file_path
     ))
