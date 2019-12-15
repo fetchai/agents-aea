@@ -24,16 +24,13 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import cast
 
 import click
-from click import pass_context
-from jsonschema import ValidationError
 
-import aea
+import aea.cli.create
 from aea.cli.add import add
-from aea.cli.add import connection, skill
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, DEFAULT_REGISTRY_PATH
+from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.cli.create import create
 from aea.cli.install import install
 from aea.cli.list import list as _list
 from aea.cli.loggers import simple_verbosity_option
@@ -43,15 +40,12 @@ from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, PrivateKeyPathConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, \
     _validate_private_key_path
-
-DEFAULT_CONNECTION = "oef"
-DEFAULT_SKILL = "error"
 
 
 @click.group(name="aea")
@@ -61,50 +55,6 @@ DEFAULT_SKILL = "error"
 def cli(ctx) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent."""
     ctx.obj = Context(cwd=".")
-
-
-@cli.command()
-@click.argument('agent_name', type=str, required=True)
-@pass_context
-def create(click_context, agent_name):
-    """Create an agent."""
-    ctx = cast(Context, click_context.obj)
-    path = Path(agent_name)
-    logger.info("Initializing AEA project '{}'".format(agent_name))
-    logger.info("Creating project directory '/{}'".format(agent_name))
-
-    # create the agent's directory
-    try:
-        path.mkdir(exist_ok=False)
-
-        # create a config file inside it
-        logger.info("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
-        config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, authors="", version="v1", license="", url="", registry_path=DEFAULT_REGISTRY_PATH, description="")
-        agent_config.default_connection = DEFAULT_CONNECTION
-        ctx.agent_loader.dump(agent_config, config_file)
-
-        # next commands must be done from the agent's directory -> overwrite ctx.cwd
-        ctx.agent_config = agent_config
-        ctx.cwd = agent_config.agent_name
-
-        logger.info("Default connections:")
-        click_context.invoke(connection, connection_name=DEFAULT_CONNECTION)
-
-        logger.info("Default skills:")
-        click_context.invoke(skill, skill_name=DEFAULT_SKILL)
-
-    except OSError:
-        logger.error("Directory already exist. Aborting...")
-        sys.exit(1)
-    except ValidationError as e:
-        logger.error(str(e))
-        shutil.rmtree(agent_name, ignore_errors=True)
-        sys.exit(1)
-    except Exception as e:
-        logger.exception(e)
-        shutil.rmtree(agent_name, ignore_errors=True)
-        sys.exit(1)
 
 
 @cli.command()
@@ -204,6 +154,7 @@ def add_key(ctx: Context, type_, file):
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
+cli.add_command(create)
 cli.add_command(add)
 cli.add_command(_list)
 cli.add_command(login)
