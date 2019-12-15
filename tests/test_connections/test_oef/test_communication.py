@@ -698,7 +698,7 @@ async def test_send_oef_message(network_node):
     """Test the send oef message."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    address = wallet.addresss['default']
+    address = wallet.addresses['default']
     oef_connection = OEFConnection(address=address, oef_addr="127.0.0.1", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
@@ -725,7 +725,7 @@ async def test_cancelled_receive(network_node):
     """Test the case when a receive request is cancelled."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    oef_connection = OEFConnection(address=wallet.addresss['default'], oef_addr="127.0.0.1", oef_port=10000)
+    oef_connection = OEFConnection(address=wallet.addresses['default'], oef_addr="127.0.0.1", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
 

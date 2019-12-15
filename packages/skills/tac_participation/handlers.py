@@ -129,11 +129,11 @@ class OEFHandler(Handler):
         else:
             logger.debug("[{}]: Unknown search id: search_id={}".format(self.context.agent_name, search_id))
 
-    def _on_controller_search_result(self, agent_addrs: List[Address]) -> None:
+    def _on_controller_search_result(self, agent_addresses: List[Address]) -> None:
         """
         Process the search result for a controller.
 
-        :param agent_addrs: list of agent addresses
+        :param agent_addresses: list of agent addresses
 
         :return: None
         """
@@ -142,17 +142,17 @@ class OEFHandler(Handler):
             logger.debug("[{}]: Ignoring controller search result, the agent is already competing.".format(self.context.agent_name))
             return
 
-        if len(agent_addrs) == 0:
+        if len(agent_addresses) == 0:
             logger.info("[{}]: Couldn't find the TAC controller. Retrying...".format(self.context.agent_name))
-        elif len(agent_addrs) > 1:
+        elif len(agent_addresses) > 1:
             logger.error("[{}]: Found more than one TAC controller. Retrying...".format(self.context.agent_name))
         # elif self._rejoin:
         #     logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
-        #     controller_addr = agent_addrs[0]
+        #     controller_addr = agent_addresses[0]
         #     self._rejoin_tac(controller_addr)
         else:
             logger.info("[{}]: Found the TAC controller. Registering...".format(self.context.agent_name))
-            controller_addr = agent_addrs[0]
+            controller_addr = agent_addresses[0]
             self._register_to_tac(controller_addr)
 
     def _register_to_tac(self, controller_addr: Address) -> None:
@@ -320,7 +320,7 @@ class TACHandler(Handler):
     #     self._initial_agent_state = AgentStateUpdate(game_data.money, game_data.endowment, game_data.utility_params)
     #     self._agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
     #     # if self.strategy.is_world_modeling:
-    #     #     opponent_addrs = self.game_configuration.agent_addrs
+    #     #     opponent_addrs = self.game_configuration.agent_addresses
     #     #     opponent_addrs.remove(agent_addr)
     #     #     self._world_state = WorldState(opponent_addrs, self.game_configuration.good_addrs, self.initial_agent_state)
 

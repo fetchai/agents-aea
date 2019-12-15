@@ -192,7 +192,7 @@ class FIPAHandler(Handler):
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                     skill_ids=["weather_client_ledger"],
                                     transaction_id="transaction0",
-                                    sender=self.context.agent_addresss[ledger_id],
+                                    sender=self.context.agent_addresses[ledger_id],
                                     counterparty=address,
                                     is_sender_buyer=True,
                                     currency_id=proposal.values['currency_id'],

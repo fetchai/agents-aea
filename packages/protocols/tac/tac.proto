@@ -52,7 +52,7 @@ message TACController {
         enum ErrorCode {
             GENERIC_ERROR = 0;
             REQUEST_NOT_VALID = 1;
-            AGENT_PBK_ALREADY_REGISTERED = 2;
+            AGENT_ADDR_ALREADY_REGISTERED = 2;
             AGENT_NAME_ALREADY_REGISTERED = 3;
             AGENT_NOT_REGISTERED = 4;
             TRANSACTION_NOT_VALID = 5;

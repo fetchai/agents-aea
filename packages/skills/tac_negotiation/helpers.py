@@ -116,7 +116,7 @@ def generate_transaction_id(agent_addr: Address, opponent_addr: Address, dialogu
     :param agent_is_seller: boolean indicating if the agent is a seller
     :return: a transaction id
     """
-    # the format is {buyer_id}_{seller_id}_{dialogue_id}_{dialogue_starter_id}
+    # the format is {buyer_addr}_{seller_addr}_{dialogue_id}_{dialogue_starter_id}
     assert opponent_addr == dialogue_label.dialogue_opponent_addr
     buyer_addr, seller_addr = (opponent_addr, agent_addr) if agent_is_seller else (agent_addr, opponent_addr)
     transaction_id = "{}_{}_{}_{}_{}".format(buyer_addr, seller_addr, dialogue_label.dialogue_starter_reference, dialogue_label.dialogue_responder_reference, dialogue_label.dialogue_starter_addr)

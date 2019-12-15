@@ -68,7 +68,7 @@ class Configuration:
                  nb_goods: int,
                  tx_fee: int,
                  agent_addr_to_name: Dict[Address, str],
-                 good_id_to_name: Dict[Address, str]):
+                 good_id_to_name: Dict[str, str]):
         """
         Instantiate a game configuration.
 
@@ -727,7 +727,7 @@ class Game(SharedClass):
                     {good_id: endowment for good_id, endowment in zip(list(good_id_to_name.keys()), self.initialization.endowments[i])},
                     {good_id: utility_param for good_id, utility_param in zip(list(good_id_to_name.keys()), self.initialization.utility_params[i])}
                 ))
-            for agent_addr, i in zip(self.configuration.agent_addrs, range(self.configuration.nb_agents)))
+            for agent_addr, i in zip(self.configuration.agent_addresses, range(self.configuration.nb_agents)))
 
         self._current_agent_states = dict(
             (agent_addr,
@@ -737,7 +737,7 @@ class Game(SharedClass):
                     {good_id: endowment for good_id, endowment in zip(list(good_id_to_name.keys()), self.initialization.endowments[i])},
                     {good_id: utility_param for good_id, utility_param in zip(list(good_id_to_name.keys()), self.initialization.utility_params[i])}
                 ))
-            for agent_addr, i in zip(self.configuration.agent_addrs, range(self.configuration.nb_agents)))
+            for agent_addr, i in zip(self.configuration.agent_addresses, range(self.configuration.nb_agents)))
 
         self._current_good_states = dict(
             (good_id,

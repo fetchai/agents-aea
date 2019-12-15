@@ -52,7 +52,7 @@ class Configuration:
                  version_id: str,
                  tx_fee: int,
                  agent_addr_to_name: Dict[Address, str],
-                 good_id_to_name: Dict[Address, str],
+                 good_id_to_name: Dict[str, str],
                  controller_addr: Address):
         """
         Instantiate a game configuration.
@@ -139,7 +139,7 @@ class Configuration:
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
         assert self.nb_agents > 1, "Must have at least two agents."
         assert self.nb_goods > 1, "Must have at least two goods."
-        assert len(self.agent_addrs) == self.nb_agents, "There must be one address for each agent."
+        assert len(self.agent_addresses) == self.nb_agents, "There must be one address for each agent."
         assert len(set(self.agent_names)) == self.nb_agents, "Agents' names must be unique."
         assert len(self.good_ids) == self.nb_goods, "There must be one id for each good."
         assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."

@@ -303,7 +303,7 @@ class LocalNode:
         destination_queue._loop.call_soon_threadsafe(destination_queue.put_nowait, envelope)  # type: ignore
         logger.debug("Send envelope {}".format(envelope))
 
-    async def disconnect(self, address: str) -> None:
+    async def disconnect(self, address: Address) -> None:
         """
         Disconnect.
 

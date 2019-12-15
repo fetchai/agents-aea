@@ -143,7 +143,7 @@ class TACBehaviour(Behaviour):
         game.create()
         logger.info("[{}]: Started competition:\n{}".format(self.context.agent_name, game.holdings_summary))
         logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))
-        for agent_address in game.configuration.agent_addrs:
+        for agent_address in game.configuration.agent_addresses:
             agent_state = game.current_agent_states[agent_address]
             tac_msg = TACMessage(type=TACMessage.Type.GAME_DATA,
                                  amount_by_currency=agent_state.balance_by_currency,
