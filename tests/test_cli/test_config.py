@@ -100,3 +100,78 @@ class TestConfigGet:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+class TestConfigSet:
+    """Test that the command 'aea config set' works as expected."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
+        os.chdir(Path(cls.t, "dummy_aea"))
+
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+        cls.runner = CliRunner()
+
+    def test_set_agent_name(self):
+        """Test setting the agent name."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "agent.agent_name", "new_name"], standalone_mode=False)
+        assert result.exit_code == 0
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "agent.agent_name"], standalone_mode=False)
+        assert result.exit_code == 0
+        assert result.output == "new_name\n"
+
+    def test_set_skill_name(self):
+        """Test setting the 'dummy' skill name."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.name", "new_dummy_name"], standalone_mode=False)
+        assert result.exit_code == 0
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "skills.dummy.name"], standalone_mode=False)
+        assert result.exit_code == 0
+        assert result.output == "new_dummy_name\n"
+
+    def test_no_recognized_root(self):
+        """Test that the 'get' fails because the root is not recognized."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "wrong_root.agent_name", "value"], standalone_mode=False)
+        assert result.exit_code == 1
+        assert result.exception.message == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections']"
+
+    def test_too_short_path_but_root_correct(self):
+        """Test that the 'get' fails because the path is too short but the root is correct."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "agent"], standalone_mode=False)
+        assert result.exit_code == 1
+        assert result.exception.message == "The path is too short. Please specify a path up to an attribute name."
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy", "value"], standalone_mode=False)
+        assert result.exit_code == 1
+        assert result.exception.message == "The path is too short. Please specify a path up to an attribute name."
+
+    def test_resource_not_existing(self):
+        """Test that the 'get' fails because the resource does not exist."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "connections.non_existing_connection.name", "value"], standalone_mode=False)
+        assert result.exit_code == 1
+        assert result.exception.message == "Resource connections/non_existing_connection does not exist."
+
+    def test_attribute_not_found(self):
+        """Test that the 'get' fails because the attribute is not found."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.non_existing_attribute", "value"], standalone_mode=False)
+        assert result.exit_code == 1
+        self.mocked_logger_error.assert_called_with("Attribute not found.")
+
+    def test_set_fails_when_setting_non_primitive_type(self):
+        """Test that setting the 'dummy' skill behaviours fails because not a primitive type."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.behaviours", "value"], standalone_mode=False)
+        assert result.exit_code == 1
+        self.mocked_logger_error.assert_called_with("Attribute is not of primitive type.")
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardowm the test."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
