@@ -55,7 +55,7 @@ class TestSearchProtocols:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
@@ -86,7 +86,7 @@ class TestSearchConnections:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
@@ -115,7 +115,7 @@ class TestSearchSkills:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 

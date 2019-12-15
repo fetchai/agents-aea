@@ -693,7 +693,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -736,7 +736,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -781,7 +781,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -825,7 +825,7 @@ class TestRunFailsWhenConnectionNotDeclared:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -871,7 +871,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -917,7 +917,7 @@ class TestRunFailsWhenConnectionNotComplete:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -963,7 +963,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -1008,7 +1008,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -1053,7 +1053,7 @@ class TestRunFailsWhenProtocolNotComplete:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:

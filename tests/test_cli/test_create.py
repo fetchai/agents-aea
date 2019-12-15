@@ -165,7 +165,7 @@ class TestCreate:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -207,7 +207,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -245,7 +245,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -283,7 +283,7 @@ class TestCreateFailsWhenExceptionOccurs:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:

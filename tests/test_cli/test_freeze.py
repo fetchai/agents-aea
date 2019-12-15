@@ -56,5 +56,5 @@ class TestFreeze:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)

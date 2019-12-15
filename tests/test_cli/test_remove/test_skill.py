@@ -78,7 +78,7 @@ class TestRemoveSkill:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -121,7 +121,7 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -167,7 +167,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:

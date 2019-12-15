@@ -82,7 +82,7 @@ class TestScaffoldConnection:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -133,7 +133,7 @@ class TestScaffoldConnectionFailsWhenDirectoryAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -186,7 +186,7 @@ class TestScaffoldConnectionFailsWhenConnectionAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -239,7 +239,7 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -283,7 +283,7 @@ class TestScaffoldConnectionFailsWhenExceptionOccurs:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:

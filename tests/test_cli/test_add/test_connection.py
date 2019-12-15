@@ -94,7 +94,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -136,7 +136,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -183,7 +183,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -228,7 +228,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

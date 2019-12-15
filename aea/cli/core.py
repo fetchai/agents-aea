@@ -36,8 +36,8 @@ from aea.cli.add import connection, skill
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, DEFAULT_REGISTRY_PATH
 from aea.cli.install import install
 from aea.cli.list import list as _list
-from aea.cli.login import login
 from aea.cli.loggers import simple_verbosity_option
+from aea.cli.login import login
 from aea.cli.push import push
 from aea.cli.remove import remove
 from aea.cli.run import run
@@ -165,12 +165,23 @@ def gui(ctx: Context, port):
 @pass_ctx
 def generate_key(ctx: Context, type_):
     """Generate private keys."""
+    def _can_write(path) -> bool:
+        if Path(path).exists():
+            value = click.confirm('The file {} already exists. Do you want to overwrite it?'
+                                  .format(path), default=False)
+            return value
+        else:
+            return True
+
     if type_ == DefaultCrypto.identifier or type_ == "all":
-        DefaultCrypto().dump(open(DEFAULT_PRIVATE_KEY_FILE, "wb"))
+        if _can_write(DEFAULT_PRIVATE_KEY_FILE):
+            DefaultCrypto().dump(open(DEFAULT_PRIVATE_KEY_FILE, "wb"))
     if type_ == FetchAICrypto.identifier or type_ == "all":
-        FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
+        if _can_write(FETCHAI_PRIVATE_KEY_FILE):
+            FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
     if type_ == EthereumCrypto.identifier or type_ == "all":
-        EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
+        if _can_write(ETHEREUM_PRIVATE_KEY_FILE):
+            EthereumCrypto().dump(open(ETHEREUM_PRIVATE_KEY_FILE, "wb"))
 
 
 @cli.command()
