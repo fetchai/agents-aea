@@ -43,13 +43,13 @@ class TestTCPCommunication:
         cls.host = "127.0.0.1"
         cls.port = get_unused_tcp_port()
 
-        cls.server_pbk = "server_pbk"
-        cls.client_pbk_1 = "client_pbk_1"
-        cls.client_pbk_2 = "client_pbk_2"
+        cls.server_addr = "server_addr"
+        cls.client_addr_1 = "client_addr_1"
+        cls.client_addr_2 = "client_addr_2"
 
-        cls.server_conn = TCPServerConnection(cls.server_pbk, cls.host, cls.port)
-        cls.client_conn_1 = TCPClientConnection(cls.client_pbk_1, cls.host, cls.port)
-        cls.client_conn_2 = TCPClientConnection(cls.client_pbk_2, cls.host, cls.port)
+        cls.server_conn = TCPServerConnection(cls.server_addr, cls.host, cls.port)
+        cls.client_conn_1 = TCPClientConnection(cls.client_addr_1, cls.host, cls.port)
+        cls.client_conn_2 = TCPClientConnection(cls.client_addr_2, cls.host, cls.port)
 
         cls.server_multiplexer = Multiplexer([cls.server_conn])
         cls.client_1_multiplexer = Multiplexer([cls.client_conn_1])
@@ -73,7 +73,7 @@ class TestTCPCommunication:
         """Test that envelopes can be sent from a client to a server."""
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg_bytes = DefaultSerializer().encode(msg)
-        expected_envelope = Envelope(to=self.server_pbk, sender=self.client_pbk_1, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
+        expected_envelope = Envelope(to=self.server_addr, sender=self.client_addr_1, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
         self.client_1_multiplexer.put(expected_envelope)
         actual_envelope = self.server_multiplexer.get(block=True, timeout=5.0)
 
@@ -84,13 +84,13 @@ class TestTCPCommunication:
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg_bytes = DefaultSerializer().encode(msg)
 
-        expected_envelope = Envelope(to=self.client_pbk_1, sender=self.server_pbk, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
+        expected_envelope = Envelope(to=self.client_addr_1, sender=self.server_addr, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
         self.server_multiplexer.put(expected_envelope)
         actual_envelope = self.client_1_multiplexer.get(block=True, timeout=5.0)
 
         assert expected_envelope == actual_envelope
 
-        expected_envelope = Envelope(to=self.client_pbk_2, sender=self.server_pbk, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
+        expected_envelope = Envelope(to=self.client_addr_2, sender=self.server_addr, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
         self.server_multiplexer.put(expected_envelope)
         actual_envelope = self.client_2_multiplexer.get(block=True, timeout=5.0)
 

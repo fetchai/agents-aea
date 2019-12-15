@@ -92,8 +92,8 @@ class DialogueLabel:
         return {
             "dialogue_starter_reference": self.dialogue_starter_reference,
             "dialogue_responder_reference": self.dialogue_responder_reference,
-            "dialogue_opponent_pbk": self.dialogue_opponent_addr,
-            "dialogue_starter_pbk": self.dialogue_starter_addr
+            "dialogue_opponent_addr": self.dialogue_opponent_addr,
+            "dialogue_starter_addr": self.dialogue_starter_addr
         }
 
     @classmethod
@@ -101,8 +101,8 @@ class DialogueLabel:
         """Get dialogue label from json."""
         dialogue_label = DialogueLabel(
             (cast(str, obj.get('dialogue_starter_reference')), cast(str, obj.get('dialogue_responder_reference'))),
-            cast(str, obj.get('dialogue_opponent_pbk')),
-            cast(str, obj.get('dialogue_starter_pbk'))
+            cast(str, obj.get('dialogue_opponent_addr')),
+            cast(str, obj.get('dialogue_starter_addr'))
         )
         return dialogue_label
 

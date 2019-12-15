@@ -117,7 +117,7 @@ def test_multiplexer_connect_one_raises_error_many_connections():
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
 
-    connection_1 = OEFLocalConnection("my_pbk", node)
+    connection_1 = OEFLocalConnection("my_addr", node)
     connection_2 = StubConnection(input_file_path, output_file_path)
     connection_3 = DummyConnection()
     multiplexer = Multiplexer([connection_1, connection_2, connection_3])
@@ -172,7 +172,7 @@ def test_multiplexer_disconnect_one_raises_error_many_connections():
         input_file_path = d / "input_file.csv"
         output_file_path = d / "input_file.csv"
 
-        connection_1 = OEFLocalConnection("my_pbk", node)
+        connection_1 = OEFLocalConnection("my_addr", node)
         connection_2 = StubConnection(input_file_path, output_file_path)
         connection_3 = DummyConnection()
         multiplexer = Multiplexer([connection_1, connection_2, connection_3])

@@ -309,12 +309,12 @@ class TestFilter:
                                sender="pk1",
                                counterparty="pk2",
                                is_sender_buyer=True,
-                               currency_pbk="Unknown",
+                               currency_id="Unknown",
                                amount=2,
                                sender_tx_fee=0,
                                counterparty_tx_fee=0,
                                ledger_id="fetchai",
-                               quantities_by_good_pbk={"Unknown": 10},
+                               quantities_by_good_id={"Unknown": 10},
                                info={})
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()

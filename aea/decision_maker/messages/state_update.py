@@ -44,18 +44,18 @@ class StateUpdateMessage(InternalMessage):
 
     def __init__(self, performative: Performative,
                  amount_by_currency: Currencies,
-                 quantities_by_good_pbk: Goods,
+                 quantities_by_good_id: Goods,
                  **kwargs):
         """
         Instantiate transaction message.
 
         :param performative: the performative
         :param amount_by_currency: the amounts of currencies.
-        :param quantities_by_good_pbk: the quantities of goods.
+        :param quantities_by_good_id: the quantities of goods.
         """
         super().__init__(performative=performative,
                          amount_by_currency=amount_by_currency,
-                         quantities_by_good_pbk=quantities_by_good_pbk,
+                         quantities_by_good_id=quantities_by_good_id,
                          **kwargs)
         assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
 
@@ -72,10 +72,10 @@ class StateUpdateMessage(InternalMessage):
         return cast(Currencies, self.get("amount_by_currency"))
 
     @property
-    def quantities_by_good_pbk(self) -> Goods:
-        """Get he quantities by good public keys."""
-        assert self.is_set("quantities_by_good_pbk"), "quantities_by_good_pbk is not set."
-        return cast(Goods, self.get("quantities_by_good_pbk"))
+    def quantities_by_good_id(self) -> Goods:
+        """Get he quantities by good id."""
+        assert self.is_set("quantities_by_good_id"), "quantities_by_good_id is not set."
+        return cast(Goods, self.get("quantities_by_good_id"))
 
     @property
     def exchange_params_by_currency(self) -> ExchangeParams:
@@ -84,10 +84,10 @@ class StateUpdateMessage(InternalMessage):
         return cast(ExchangeParams, self.get("exchange_params_by_currency"))
 
     @property
-    def utility_params_by_good_pbk(self) -> UtilityParams:
+    def utility_params_by_good_id(self) -> UtilityParams:
         """Get the utility parameters by good public key."""
-        assert self.is_set("utility_params_by_good_pbk")
-        return cast(UtilityParams, self.get("utility_params_by_good_pbk"))
+        assert self.is_set("utility_params_by_good_id")
+        return cast(UtilityParams, self.get("utility_params_by_good_id"))
 
     @property
     def tx_fee(self) -> int:
@@ -107,8 +107,8 @@ class StateUpdateMessage(InternalMessage):
             for key, int_value in self.amount_by_currency.items():
                 assert isinstance(key, str)
                 assert isinstance(int_value, int)
-            assert isinstance(self.quantities_by_good_pbk, dict)
-            for key, int_value in self.quantities_by_good_pbk.items():
+            assert isinstance(self.quantities_by_good_id, dict)
+            for key, int_value in self.quantities_by_good_id.items():
                 assert isinstance(key, str)
                 assert isinstance(int_value, int)
             if self.performative == self.Performative.INITIALIZE:
@@ -117,12 +117,11 @@ class StateUpdateMessage(InternalMessage):
                     assert isinstance(key, str)
                     assert isinstance(float_value, float)
                 assert self.amount_by_currency.keys() == self.exchange_params_by_currency.keys()
-                assert isinstance(self.utility_params_by_good_pbk, dict)
-                for key, float_value in self.utility_params_by_good_pbk.items():
+                assert isinstance(self.utility_params_by_good_id, dict)
+                for key, float_value in self.utility_params_by_good_id.items():
                     assert isinstance(key, str)
                     assert isinstance(float_value, float)
-                assert self.quantities_by_good_pbk.keys() == self.utility_params_by_good_pbk.keys()
-                assert self.quantities_by_good_pbk.keys() == self.utility_params_by_good_pbk.keys()
+                assert self.quantities_by_good_id.keys() == self.utility_params_by_good_id.keys()
                 assert isinstance(self.tx_fee, int)
                 assert len(self.body) == 6
             elif self.performative == self.Performative.APPLY:

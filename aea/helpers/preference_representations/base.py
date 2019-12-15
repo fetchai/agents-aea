@@ -23,18 +23,18 @@ import math
 from typing import Dict
 
 
-def logarithmic_utility(utility_params_by_good_pbk: Dict[str, float], quantities_by_good_pbk: Dict[str, int], quantity_shift: int = 1) -> float:
+def logarithmic_utility(utility_params_by_good_id: Dict[str, float], quantities_by_good_id: Dict[str, int], quantity_shift: int = 1) -> float:
     """
     Compute agent's utility given her utility function params and a good bundle.
 
-    :param utility_params_by_good_pbk: utility params by good identifier
-    :param quantities_by_good_pbk: quantities by good identifier
+    :param utility_params_by_good_id: utility params by good identifier
+    :param quantities_by_good_id: quantities by good identifier
     :param quantity_shift: a non-negative factor to shift the quantities in the utility function (to ensure the natural logarithm can be used on the entire range of quantities)
     :return: utility value
     """
     assert quantity_shift >= 0, "The quantity_shift argument must be a non-negative integer."
-    goodwise_utility = [utility_params_by_good_pbk[good_pbk] * math.log(quantity + quantity_shift) if quantity + quantity_shift > 0 else -10000
-                        for good_pbk, quantity in quantities_by_good_pbk.items()]
+    goodwise_utility = [utility_params_by_good_id[good_id] * math.log(quantity + quantity_shift) if quantity + quantity_shift > 0 else -10000
+                        for good_id, quantity in quantities_by_good_id.items()]
     return sum(goodwise_utility)
 
 

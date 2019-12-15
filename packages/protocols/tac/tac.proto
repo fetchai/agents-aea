@@ -29,18 +29,18 @@ message TACController {
     message GameData {
         repeated StrIntPair amount_by_currency = 1;
         repeated StrFloatPair exchange_params_by_currency = 2;
-        repeated StrIntPair quantities_by_good_pbk = 3;
-        repeated StrFloatPair utility_params_by_good_pbk = 4;
+        repeated StrIntPair quantities_by_good_id = 3;
+        repeated StrFloatPair utility_params_by_good_id = 4;
         int64 tx_fee = 5;
-        repeated StrStrPair agent_pbk_to_name = 6;
-        repeated StrStrPair good_pbk_to_name = 7;
+        repeated StrStrPair agent_id_to_name = 6;
+        repeated StrStrPair good_id_to_name = 7;
         string version_id = 8;
     }
 
     message TransactionConfirmation {
         string transaction_id = 1;
         repeated StrIntPair amount_by_currency = 2;
-        repeated StrIntPair quantities_by_good_pbk = 3;
+        repeated StrIntPair quantities_by_good_id = 3;
     }
 
     message StateUpdate {
@@ -82,7 +82,7 @@ message TACAgent {
         repeated StrIntPair amount_by_currency = 3;
         int64 sender_tx_fee = 4;
         int64 counterparty_tx_fee = 5;
-        repeated StrIntPair quantities_by_good_pbk = 6;
+        repeated StrIntPair quantities_by_good_id = 6;
     }
 
     message GetStateUpdate {

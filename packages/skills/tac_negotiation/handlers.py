@@ -398,16 +398,16 @@ class OEFSearchHandler(Handler):
             dialogues = cast(Dialogues, self.context.dialogues)
             query = strategy.get_own_services_query(is_searching_for_sellers)
 
-            for opponent_pbk in agents:
-                dialogue = dialogues.create_self_initiated(opponent_pbk, self.context.agent_public_key, not is_searching_for_sellers)
-                logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_pbk[-5:]))
+            for opponent_addr in agents:
+                dialogue = dialogues.create_self_initiated(opponent_addr, self.context.agent_public_key, not is_searching_for_sellers)
+                logger.info("[{}]: sending CFP to agent={}".format(self.context.agent_name, opponent_addr[-5:]))
                 fipa_msg = FIPAMessage(message_id=FIPAMessage.STARTING_MESSAGE_ID,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        performative=FIPAMessage.Performative.CFP,
                                        target=FIPAMessage.STARTING_TARGET,
                                        query=query)
                 dialogue.outgoing_extend(fipa_msg)
-                self.context.outbox.put_message(to=opponent_pbk,
+                self.context.outbox.put_message(to=opponent_addr,
                                                 sender=self.context.agent_public_key,
                                                 protocol_id=FIPAMessage.protocol_id,
                                                 message=FIPASerializer().encode(fipa_msg))

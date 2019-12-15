@@ -50,13 +50,13 @@ class TransactionMessage(InternalMessage):
                  sender: Address,
                  counterparty: Address,
                  is_sender_buyer: bool,
-                 currency_pbk: str,
+                 currency_id: str,
                  amount: int,
                  sender_tx_fee: int,
                  counterparty_tx_fee: int,
                  ledger_id: str,
                  info: Dict[str, Any],
-                 quantities_by_good_pbk: Dict[str, int],
+                 quantities_by_good_id: Dict[str, int],
                  **kwargs):
         """
         Instantiate transaction message.
@@ -67,13 +67,13 @@ class TransactionMessage(InternalMessage):
         :param sender: the sender of the transaction.
         :param counterparty: the counterparty of the transaction.
         :param is_sender_buyer: whether the transaction is sent by a buyer.
-        :param currency_pbk: the currency of the transaction.
+        :param currency_id: the currency of the transaction.
         :param sender_tx_fee: the part of the tx fee paid by the sender
         :param counterparty_tx_fee: the part of the tx fee paid by the counterparty
         :param amount: the amount of money involved.
         :param ledger_id: the ledger id
         :param info: a dictionary for arbitrary information
-        :param quantities_by_good_pbk: a map from good pbk to the quantity of that good involved in the transaction.
+        :param quantities_by_good_id: a map from good id to the quantity of that good involved in the transaction.
         """
         super().__init__(performative=performative,
                          skill_ids=skill_ids,
@@ -81,13 +81,13 @@ class TransactionMessage(InternalMessage):
                          sender=sender,
                          counterparty=counterparty,
                          is_sender_buyer=is_sender_buyer,
-                         currency_pbk=currency_pbk,
+                         currency_id=currency_id,
                          sender_tx_fee=sender_tx_fee,
                          counterparty_tx_fee=counterparty_tx_fee,
                          amount=amount,
                          ledger_id=ledger_id,
                          info=info,
-                         quantities_by_good_pbk=quantities_by_good_pbk,
+                         quantities_by_good_id=quantities_by_good_id,
                          **kwargs)
         assert self.check_consistency(), "Transaction message initialization inconsistent."
 
@@ -128,10 +128,10 @@ class TransactionMessage(InternalMessage):
         return cast(bool, self.get("is_sender_buyer"))
 
     @property
-    def currency_pbk(self) -> str:
-        """Get the currency pbk."""
-        assert self.is_set("currency_pbk"), "Currency_pbk is not set."
-        return cast(str, self.get("currency_pbk"))
+    def currency_id(self) -> str:
+        """Get the currency id."""
+        assert self.is_set("currency_id"), "Currency_id is not set."
+        return cast(str, self.get("currency_id"))
 
     @property
     def amount(self) -> int:
@@ -164,10 +164,10 @@ class TransactionMessage(InternalMessage):
         return cast(Dict[str, Any], self.get("info"))
 
     @property
-    def quantities_by_good_pbk(self) -> Dict[str, int]:
+    def quantities_by_good_id(self) -> Dict[str, int]:
         """Get he quantities by good public keys."""
-        assert self.is_set("quantities_by_good_pbk"), "quantities_by_good_pbk is not set."
-        return cast(Dict[str, int], self.get("quantities_by_good_pbk"))
+        assert self.is_set("quantities_by_good_id"), "quantities_by_good_id is not set."
+        return cast(Dict[str, int], self.get("quantities_by_good_id"))
 
     @property
     def transaction_digest(self) -> Optional[str]:
@@ -189,7 +189,7 @@ class TransactionMessage(InternalMessage):
             assert isinstance(self.counterparty, Address), "Counterparty must be of type address"
             assert self.sender != self.counterparty, "Sender must be different of counterparty."
             assert isinstance(self.is_sender_buyer, bool), "Is_sender_buyer must be of type bool."
-            assert isinstance(self.currency_pbk, str), "Currency_pbk must be of type str."
+            assert isinstance(self.currency_id, str), "Currency_id must be of type str."
             assert isinstance(self.amount, int), "Amount must be of type int"
             assert self.amount >= 0, "Amount must be more than zero."
             assert isinstance(self.sender_tx_fee, int), "Sender_tx_fee must be of type int."
@@ -203,12 +203,12 @@ class TransactionMessage(InternalMessage):
                 assert isinstance(self.info, dict)
                 for key, value in self.info.items():
                     assert isinstance(key, str)
-                assert type(self.quantities_by_good_pbk) == dict
-                for key, value in self.quantities_by_good_pbk.items():
+                assert type(self.quantities_by_good_id) == dict
+                for key, value in self.quantities_by_good_id.items():
                     assert isinstance(key, str)
                     assert isinstance(value, int)
-                assert len(self.quantities_by_good_pbk.keys()) == len(set(self.quantities_by_good_pbk.keys()))
-                assert all(quantity >= 0 for quantity in self.quantities_by_good_pbk.values())
+                assert len(self.quantities_by_good_id.keys()) == len(set(self.quantities_by_good_id.keys()))
+                assert all(quantity >= 0 for quantity in self.quantities_by_good_id.values())
                 assert len(self.body) == 13
             elif self.performative == self.Performative.ACCEPT or self.performative == self.Performative.REJECT:
                 assert self.transaction_digest is None or isinstance(self.transaction_digest, str)
@@ -236,12 +236,12 @@ class TransactionMessage(InternalMessage):
                                     sender=other.sender,
                                     counterparty=other.counterparty,
                                     is_sender_buyer=other.is_sender_buyer,
-                                    currency_pbk=other.currency_pbk,
+                                    currency_id=other.currency_id,
                                     sender_tx_fee=other.sender_tx_fee,
                                     counterparty_tx_fee=other.counterparty_tx_fee,
                                     amount=other.amount,
                                     ledger_id=other.ledger_id,
                                     info=other.info,
-                                    quantities_by_good_pbk=other.quantities_by_good_pbk,
+                                    quantities_by_good_id=other.quantities_by_good_id,
                                     transaction_digest=transaction_digest)
         return tx_msg

@@ -148,11 +148,11 @@ class TACBehaviour(Behaviour):
             tac_msg = TACMessage(type=TACMessage.Type.GAME_DATA,
                                  amount_by_currency=agent_state.balance_by_currency,
                                  exchange_params_by_currency=agent_state.exchange_params_by_currency,
-                                 quantities_by_good_pbk=agent_state.quantities_by_good_pbk,
-                                 utility_params_by_good_pbk=agent_state.utility_params_by_good_pbk,
+                                 quantities_by_good_id=agent_state.quantities_by_good_id,
+                                 utility_params_by_good_id=agent_state.utility_params_by_good_id,
                                  tx_fee=game.configuration.tx_fee,
                                  agent_addr_to_name=game.configuration.agent_addr_to_name,
-                                 good_pbk_to_name=game.configuration.good_pbk_to_name,
+                                 good_id_to_name=game.configuration.good_id_to_name,
                                  version_id=game.configuration.version_id)
             logger.debug("[{}]: sending game data to '{}': {}"
                          .format(self.context.agent_name, agent_public_key, str(tac_msg)))
@@ -165,7 +165,7 @@ class TACBehaviour(Behaviour):
         """Notify agents that the TAC is cancelled."""
         game = cast(Game, self.context.game)
         logger.info("[{}]: Notifying agents that TAC is cancelled.".format(self.context.agent_name))
-        for agent_pbk in game.registration.agent_addr_to_name.keys():
+        for agent_addr in game.registration.agent_addr_to_name.keys():
             tac_msg = TACMessage(type=TACMessage.Type.CANCELLED)
             self.context.outbox.put_message(to=agent_addr,
                                             sender=self.context.agent_public_key,

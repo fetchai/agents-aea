@@ -52,24 +52,24 @@ class Configuration:
                  version_id: str,
                  tx_fee: int,
                  agent_addr_to_name: Dict[Address, str],
-                 good_pbk_to_name: Dict[Address, str],
-                 controller_pbk: Address):
+                 good_id_to_name: Dict[Address, str],
+                 controller_addr: Address):
         """
         Instantiate a game configuration.
 
         :param version_id: the version of the game.
         :param tx_fee: the fee for a transaction.
         :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
-        :param good_pbk_to_name: a dictionary mapping good public keys to good names (as strings).
-        :param controller_pbk: the public key of the controller
+        :param good_id_to_name: a dictionary mapping good public keys to good names (as strings).
+        :param controller_addr: the public key of the controller
         """
         self._version_id = version_id
         self._nb_agents = len(agent_addr_to_name)
-        self._nb_goods = len(good_pbk_to_name)
+        self._nb_goods = len(good_id_to_name)
         self._tx_fee = tx_fee
         self._agent_addr_to_name = agent_addr_to_name
-        self._good_pbk_to_name = good_pbk_to_name
-        self._controller_pbk = controller_pbk
+        self._good_id_to_name = good_id_to_name
+        self._controller_addr = controller_addr
 
         self._check_consistency()
 
@@ -99,9 +99,9 @@ class Configuration:
         return self._agent_addr_to_name
 
     @property
-    def good_pbk_to_name(self) -> Dict[Address, str]:
+    def good_id_to_name(self) -> Dict[Address, str]:
         """Map good public keys to names."""
-        return self._good_pbk_to_name
+        return self._good_id_to_name
 
     @property
     def agent_addrs(self) -> List[Address]:
@@ -114,19 +114,19 @@ class Configuration:
         return list(self._agent_addr_to_name.values())
 
     @property
-    def good_pbks(self) -> List[Address]:
+    def good_ids(self) -> List[Address]:
         """List of good public keys."""
-        return list(self._good_pbk_to_name.keys())
+        return list(self._good_id_to_name.keys())
 
     @property
     def good_names(self) -> List[str]:
         """List of good names."""
-        return list(self._good_pbk_to_name.values())
+        return list(self._good_id_to_name.values())
 
     @property
-    def controller_pbk(self) -> str:
-        """Get the controller pbk."""
-        return self._controller_pbk
+    def controller_addr(self) -> str:
+        """Get the controller address."""
+        return self._controller_addr
 
     def _check_consistency(self):
         """
@@ -141,7 +141,7 @@ class Configuration:
         assert self.nb_goods > 1, "Must have at least two goods."
         assert len(self.agent_addrs) == self.nb_agents, "There must be one public key for each agent."
         assert len(set(self.agent_names)) == self.nb_agents, "Agents' names must be unique."
-        assert len(self.good_pbks) == self.nb_goods, "There must be one public key for each good."
+        assert len(self.good_ids) == self.nb_goods, "There must be one public key for each good."
         assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
 
 
@@ -178,12 +178,12 @@ class Game(SharedClass):
         assert self._configuration is not None, "Game configuration not assigned!"
         return self._configuration
 
-    def init(self, tac_message: TACMessage, controller_pbk: Address) -> None:
+    def init(self, tac_message: TACMessage, controller_addr: Address) -> None:
         """
         Populate data structures with the game data.
 
         :param tac_message: the tac message with the game instance data
-        :param controller_pbk: the public key of the controller
+        :param controller_addr: the public key of the controller
 
         :return: None
         """
@@ -192,8 +192,8 @@ class Game(SharedClass):
         assert tac_message.version_id == self.expected_version_id, "TACMessage for unexpected game."
         self._configuration = Configuration(tac_message.version_id,
                                             tac_message.tx_fee,
-                                            tac_message.agent_pbk_to_name,
-                                            tac_message.good_pbk_to_name,
+                                            tac_message.agent_addr_to_name,
+                                            tac_message.good_id_to_name,
                                             controller_addr)
 
     def update_expected_controller_addr(self, controller_addr: Address):

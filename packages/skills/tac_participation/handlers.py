@@ -272,9 +272,9 @@ class TACHandler(Handler):
         game.update_game_phase(Phase.GAME)
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE,
                                               amount_by_currency=tac_message.amount_by_currency,
-                                              quantities_by_good_pbk=tac_message.quantities_by_good_pbk,
+                                              quantities_by_good_id=tac_message.quantities_by_good_id,
                                               exchange_params_by_currency=tac_message.exchange_params_by_currency,
-                                              utility_params_by_good_pbk=tac_message.utility_params_by_good_pbk,
+                                              utility_params_by_good_id=tac_message.utility_params_by_good_id,
                                               tx_fee=tac_message.tx_fee)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
@@ -299,20 +299,20 @@ class TACHandler(Handler):
         logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.transaction_id[-10:]))
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY,
                                               amount_by_currency=message.amount_by_currency,
-                                              quantities_by_good_pbk=message.quantities_by_good_pbk)
+                                              quantities_by_good_id=message.quantities_by_good_id)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
-    # def _on_state_update(self, tac_message: TACMessage, controller_pbk: Address) -> None:
+    # def _on_state_update(self, tac_message: TACMessage, controller_addr: Address) -> None:
     #     """
     #     Update the game instance with a State Update from the controller.
 
     #     :param tac_message: the state update
-    #     :param controller_pbk: the public key of the controller
+    #     :param controller_addr: the public key of the controller
 
     #     :return: None
     #     """
     #     game = cast(Game, self.context.game)
-    #     game.init(tac_message, controller_pbk)
+    #     game.init(tac_message, controller_addr)
     #     game.update_game_phase(Phase.GAME)
     #     # for tx in message.get("transactions"):
     #     #     self.agent_state.update(tx, tac_message.get("initial_state").get("tx_fee"))
@@ -320,9 +320,9 @@ class TACHandler(Handler):
     #     self._initial_agent_state = AgentStateUpdate(game_data.money, game_data.endowment, game_data.utility_params)
     #     self._agent_state = AgentState(game_data.money, game_data.endowment, game_data.utility_params)
     #     # if self.strategy.is_world_modeling:
-    #     #     opponent_pbks = self.game_configuration.agent_addrs
-    #     #     opponent_pbks.remove(agent_addr)
-    #     #     self._world_state = WorldState(opponent_pbks, self.game_configuration.good_pbks, self.initial_agent_state)
+    #     #     opponent_addrs = self.game_configuration.agent_addrs
+    #     #     opponent_addrs.remove(agent_addr)
+    #     #     self._world_state = WorldState(opponent_addrs, self.game_configuration.good_addrs, self.initial_agent_state)
 
     # def _on_dialogue_error(self, tac_message: TACMessage) -> None:
     #     """
@@ -374,11 +374,11 @@ class TransactionHandler(Handler):
             msg = TACMessage(type=TACMessage.Type.TRANSACTION,
                              transaction_id=tx_message.transaction_digest,
                              transaction_counterparty=tx_message.counterparty,
-                             amount_by_currency={tx_message.currency_pbk: tx_message.amount},
+                             amount_by_currency={tx_message.currency_id: tx_message.amount},
                              sender_tx_fee=tx_message.sender_tx_fee,
                              counterparty_tx_fee=tx_message.counterparty_tx_fee,
-                             quantities_by_good_pbk=tx_message.quantities_by_good_pbk)
-            self.context.outbox.put_message(to=game.configuration.controller_pbk,
+                             quantities_by_good_id=tx_message.quantities_by_good_id)
+            self.context.outbox.put_message(to=game.configuration.controller_addr,
                                             sender=self.context.agent_public_key,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(msg))

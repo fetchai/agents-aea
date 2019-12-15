@@ -60,8 +60,8 @@ class TestDialogueBase:
         assert self.dialogue_label.json == dict(
             dialogue_starter_reference=str(0),
             dialogue_responder_reference='',
-            dialogue_opponent_pbk="opponent",
-            dialogue_starter_pbk="starter"
+            dialogue_opponent_addr="opponent",
+            dialogue_starter_addr="starter"
         )
         assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
 

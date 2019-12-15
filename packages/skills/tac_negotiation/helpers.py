@@ -35,17 +35,17 @@ SUPPLY_DATAMODEL_NAME = 'supply'
 DEMAND_DATAMODEL_NAME = 'demand'
 
 
-def build_goods_datamodel(good_pbks: List[str], is_supply: bool) -> DataModel:
+def build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
     """
     Build a data model for supply and demand of goods (i.e. for offered or requested goods).
 
-    :param good_pbks: a list of public keys (i.e. identifiers) of the relevant goods.
+    :param good_ids: a list of public keys (i.e. identifiers) of the relevant goods.
     :param currency: the currency used for trading.
     :param is_supply: Boolean indicating whether it is a supply or demand data model
 
     :return: the data model.
     """
-    good_quantities_attributes = [Attribute(good_pbk, int, True, "A good on offer.") for good_pbk in good_pbks]
+    good_quantities_attributes = [Attribute(good_id, int, True, "A good on offer.") for good_id in good_ids]
     currency_attribute = Attribute('currency', str, True, "The currency for pricing and transacting the goods.")
     price_attribute = Attribute('price', int, False, "The price of the goods in the currency.")
     seller_tx_fee_attribute = Attribute('seller_tx_fee', int, False, "The transaction fee payable by the seller in the currency.")
@@ -56,24 +56,24 @@ def build_goods_datamodel(good_pbks: List[str], is_supply: bool) -> DataModel:
     return data_model
 
 
-def build_goods_description(good_pbk_to_quantities: Dict[str, int], currency: str, is_supply: bool) -> Description:
+def build_goods_description(good_id_to_quantities: Dict[str, int], currency: str, is_supply: bool) -> Description:
     """
     Get the service description (good quantities supplied or demanded and their price).
 
-    :param good_pbk_to_quantities: a dictionary mapping the public keys of the goods to the quantities.
+    :param good_id_to_quantities: a dictionary mapping the public keys of the goods to the quantities.
     :param currency: the currency used for pricing and transacting.
     :param is_supply: True if the description is indicating supply, False if it's indicating demand.
 
     :return: the description to advertise on the Service Directory.
     """
-    data_model = build_goods_datamodel(good_pbks=list(good_pbk_to_quantities.keys()), is_supply=is_supply)
-    values = cast(Dict[str, Union[int, str]], good_pbk_to_quantities)
+    data_model = build_goods_datamodel(good_ids=list(good_id_to_quantities.keys()), is_supply=is_supply)
+    values = cast(Dict[str, Union[int, str]], good_id_to_quantities)
     values.update({'currency': currency})
     desc = Description(values, data_model=data_model)
     return desc
 
 
-def build_goods_query(good_pbks: List[str], currency: str, is_searching_for_sellers: bool) -> Query:
+def build_goods_query(good_ids: List[str], currency: str, is_searching_for_sellers: bool) -> Query:
     """
     Build buyer or seller search query.
 
@@ -88,18 +88,18 @@ def build_goods_query(good_pbks: List[str], currency: str, is_searching_for_sell
     That is, the OEF will return all the sellers that have at least one of the good in the query
     (assuming that the sellers are registered with the data model specified).
 
-    :param good_pbks: the list of good public keys to put in the query
+    :param good_ids: the list of good public keys to put in the query
     :param currency: the currency used for pricing and transacting.
     :param is_searching_for_sellers: Boolean indicating whether the query is for sellers (supply) or buyers (demand).
 
     :return: the query
     """
-    data_model = build_goods_datamodel(good_pbks=good_pbks, is_supply=is_searching_for_sellers)
-    constraints = [Constraint(good_pbk, ConstraintType(">=", 1)) for good_pbk in good_pbks]
+    data_model = build_goods_datamodel(good_ids=good_ids, is_supply=is_searching_for_sellers)
+    constraints = [Constraint(good_id, ConstraintType(">=", 1)) for good_id in good_ids]
     constraints.append(Constraint('currency', ConstraintType("==", currency)))
     constraint_expr = cast(List[ConstraintExpr], constraints)
 
-    if len(good_pbks) > 1:
+    if len(good_ids) > 1:
         constraint_expr = [Or(constraint_expr)]
 
     query = Query(constraint_expr, model=data_model)
@@ -116,7 +116,7 @@ def generate_transaction_id(agent_addr: Address, opponent_addr: Address, dialogu
     :param agent_is_seller: boolean indicating if the agent is a seller
     :return: a transaction id
     """
-    # the format is {buyer_pbk}_{seller_pbk}_{dialogue_id}_{dialogue_starter_pbk}
+    # the format is {buyer_id}_{seller_id}_{dialogue_id}_{dialogue_starter_id}
     assert opponent_addr == dialogue_label.dialogue_opponent_addr
     buyer_addr, seller_addr = (opponent_addr, agent_addr) if agent_is_seller else (agent_addr, opponent_addr)
     transaction_id = "{}_{}_{}_{}_{}".format(buyer_addr, seller_addr, dialogue_label.dialogue_starter_reference, dialogue_label.dialogue_responder_reference, dialogue_label.dialogue_starter_addr)
@@ -131,12 +131,12 @@ def dialogue_label_from_transaction_id(agent_addr: Address, transaction_id: Tran
     :param transaction_id: the transaction id
     :return: a dialogue label
     """
-    buyer_addr, seller_addr, dialogue_starter_reference, dialogue_responder_reference, dialogue_starter_pbk = transaction_id.split('_')
+    buyer_addr, seller_addr, dialogue_starter_reference, dialogue_responder_reference, dialogue_starter_addr = transaction_id.split('_')
     if agent_addr == buyer_addr:
-        dialogue_opponent_pbk = seller_addr
+        dialogue_opponent_addr = seller_addr
     else:
-        dialogue_opponent_pbk = buyer_addr
-    dialogue_label = DialogueLabel((dialogue_starter_reference, dialogue_responder_reference), dialogue_opponent_pbk, dialogue_starter_pbk)
+        dialogue_opponent_addr = buyer_addr
+    dialogue_label = DialogueLabel((dialogue_starter_reference, dialogue_responder_reference), dialogue_opponent_addr, dialogue_starter_addr)
     return dialogue_label
 
 
@@ -160,12 +160,12 @@ def generate_transaction_message(proposal_description: Description, dialogue_lab
                                          transaction_id=transaction_id,
                                          sender=agent_public_key,
                                          counterparty=dialogue_label.dialogue_opponent_addr,
-                                         currency_pbk=proposal_description.values['currency'],
+                                         currency_id=proposal_description.values['currency'],
                                          amount=proposal_description.values['price'],
                                          is_sender_buyer=not is_seller,
                                          sender_tx_fee=sender_tx_fee,
                                          counterparty_tx_fee=counterparty_tx_fee,
                                          ledger_id='off_chain',
                                          info={'dialogue_label': dialogue_label.json},
-                                         quantities_by_good_pbk=goods_component)
+                                         quantities_by_good_id=goods_component)
     return transaction_msg

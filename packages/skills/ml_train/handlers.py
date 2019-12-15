@@ -102,13 +102,13 @@ class TrainHandler(Handler):
                                         sender=self.context.agent_public_keys[terms.values["ledger_id"]],
                                         counterparty=terms.values["address"],
                                         is_sender_buyer=True,
-                                        currency_pbk=terms.values['currency_pbk'],
+                                        currency_id=terms.values['currency_id'],
                                         amount=terms.values["price"],
                                         sender_tx_fee=terms.values["buyer_tx_fee"],
                                         counterparty_tx_fee=terms.values["seller_tx_fee"],
                                         ledger_id=terms.values["ledger_id"],
                                         info={'terms': terms, 'counterparty_addr': ml_trade_msg.counterparty},
-                                        quantities_by_good_pbk={})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
+                                        quantities_by_good_id={})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
         else:

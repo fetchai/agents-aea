@@ -184,11 +184,11 @@ class TACHandler(Handler):
         sender_tac_msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
                                     transaction_id=transaction.transaction_id,
                                     amount_by_currency=transaction.amount_by_currency,
-                                    quantities_by_good_pbk=transaction.quantities_by_good_pbk)
+                                    quantities_by_good_id=transaction.quantities_by_good_id)
         counterparty_tac_msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
                                           transaction_id=transaction.transaction_id,
                                           amount_by_currency=transaction.amount_by_currency,
-                                          quantities_by_good_pbk=transaction.quantities_by_good_pbk)
+                                          quantities_by_good_id=transaction.quantities_by_good_id)
         self.context.outbox.put_message(to=message.counterparty,
                                         sender=self.context.agent_public_key,
                                         protocol_id=TACMessage.protocol_id,
