@@ -34,6 +34,7 @@ class MyScaffoldConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
     restricted_to_protocols = set()  # type: Set[str]
+    excluded_protocols = set()  # type: Set[str]
 
     def __init__(self, connection_id: str, address: Address, *args, **kwargs):
         """

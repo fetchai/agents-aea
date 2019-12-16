@@ -44,15 +44,18 @@ class ConnectionStatus(object):
 class Connection(ABC):
     """Abstract definition of a connection."""
 
-    def __init__(self, connection_id: str, restricted_to_protocols: Optional[Set[str]] = None):
+    def __init__(self, connection_id: str, restricted_to_protocols: Optional[Set[str]] = None,
+                 excluded_protocols: Optional[Set[str]] = None):
         """
         Initialize the connection.
 
         :param connection_id: the connection identifier.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
+        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
         self._connection_id = connection_id
         self._restricted_to_protocols = self._get_restricted_to_protocols(restricted_to_protocols)
+        self._excluded_protocols = self._get_excluded_protocols(excluded_protocols)
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
@@ -62,6 +65,15 @@ class Connection(ABC):
             return restricted_to_protocols
         elif hasattr(type(self), "restricted_to_protocols") and isinstance(getattr(type(self), "restricted_to_protocols"), set):
             return getattr(type(self), "restricted_to_protocols")
+        else:
+            return set()
+
+    def _get_excluded_protocols(self, excluded_protocols: Optional[Set[str]] = None) -> Set[str]:
+        if excluded_protocols is not None:
+            return excluded_protocols
+        elif hasattr(type(self), "excluded_protocols") and isinstance(
+                getattr(type(self), "excluded_protocols"), set):
+            return getattr(type(self), "excluded_protocols")
         else:
             return set()
 
@@ -90,6 +102,11 @@ class Connection(ABC):
     def restricted_to_protocols(self) -> Set[str]:
         """Get the restricted to protocols.."""
         return self._restricted_to_protocols
+
+    @property
+    def excluded_protocols(self) -> Set[str]:
+        """Get the restricted to protocols.."""
+        return self._excluded_protocols
 
     @property
     def connection_status(self) -> ConnectionStatus:

@@ -325,14 +325,15 @@ class OEFLocalConnection(Connection):
     """
 
     def __init__(self, address: Address, local_node: LocalNode, connection_id: str = "local",
-                 restricted_to_protocols: Optional[Set[str]] = None):
+                 restricted_to_protocols: Optional[Set[str]] = None, excluded_protocols: Optional[Set[str]] = None):
         """
         Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
 
         :param address: the address used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
+                         excluded_protocols=excluded_protocols)
         self._address = address
         self._local_node = local_node
 

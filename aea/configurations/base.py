@@ -238,7 +238,7 @@ class ConnectionConfig(Configuration):
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
             restricted_to_protocols=cast(Set[str], restricted_to_protocols),
-            excluded_protocols= cast(Set[str], excluded_protocols),
+            excluded_protocols=cast(Set[str], excluded_protocols),
             dependencies=dependencies,
             description=cast(str, obj.get("description")),
             **cast(dict, obj.get("config"))
