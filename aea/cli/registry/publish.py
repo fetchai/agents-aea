@@ -28,6 +28,7 @@ from aea.cli.registry.settings import AGENT_CONFIG_FILENAME
 
 
 def _compress(output_filename: str, *filepaths):
+    """Compare the output file."""
     with tarfile.open(output_filename, "w:gz") as f:
         for filepath in filepaths:
             f.add(filepath, arcname=os.path.basename(filepath))
@@ -35,6 +36,7 @@ def _compress(output_filename: str, *filepaths):
 
 @clean_tarfiles
 def publish_agent():
+    """Publish an agent."""
     cwd = os.getcwd()
     agent_config_path = os.path.join(cwd, AGENT_CONFIG_FILENAME)
     if not os.path.exists(agent_config_path):
