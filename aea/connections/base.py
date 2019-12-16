@@ -71,8 +71,7 @@ class Connection(ABC):
     def _get_excluded_protocols(self, excluded_protocols: Optional[Set[str]] = None) -> Set[str]:
         if excluded_protocols is not None:
             return excluded_protocols
-        elif hasattr(type(self), "excluded_protocols") and isinstance(
-                getattr(type(self), "excluded_protocols"), set):
+        elif hasattr(type(self), "excluded_protocols") and isinstance(getattr(type(self), "excluded_protocols"), set):
             return getattr(type(self), "excluded_protocols")
         else:
             return set()
