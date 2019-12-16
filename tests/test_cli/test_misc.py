@@ -64,6 +64,7 @@ Commands:
   install       Install the dependencies.
   list          List the installed resources.
   login         Login to Registry account
+  publish       Publish Agent to Registry.
   push          Push item to Registry.
   remove        Remove a resource from the agent.
   run           Run the agent.

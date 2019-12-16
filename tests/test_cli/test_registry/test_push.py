@@ -29,7 +29,7 @@ from aea.cli.registry.push import push_item, _remove_pycache
 
 @mock.patch('aea.cli.registry.utils._rm_tarfiles')
 @mock.patch('aea.cli.registry.push.os.getcwd', return_value='cwd')
-@mock.patch('aea.cli.registry.push._compress')
+@mock.patch('aea.cli.registry.push._compress_dir')
 @mock.patch(
     'aea.cli.registry.push.load_yaml',
     return_value={'description': 'some-description', 'version': 'some-version'}
