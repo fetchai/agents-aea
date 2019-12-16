@@ -1,0 +1,24 @@
+aea_version: 0.1.14
+agent_name: m_other_namne
+authors: ''
+connections:
+- oef
+- p2p
+default_connection: oef
+description: ''
+ledger_apis: []
+license: ''
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: []
+protocols:
+- default
+- fipa
+- oef
+registry_path: ../packages
+skills:
+- error
+- weather_station
+url: ''
+version: v1
