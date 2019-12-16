@@ -192,7 +192,8 @@ class OEFObjectTranslator:
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    def __init__(self, address: Address, oef_addr: str, oef_port: int, core: AsyncioCore, excluded_protocols: List[str]):
+    def __init__(self, address: Address, oef_addr: str, oef_port: int, core: AsyncioCore,
+                 excluded_protocols: Optional[List[str]] = None):
         """
         Initialize.
 
@@ -355,9 +356,10 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        if envelope.protocol_id in self.excluded_protocols:
-            logger.error("This envelope cannot be sent with the oef connection: protocol_id={}".format(envelope.protocol_id))
-            raise ValueError("Cannot send message.")
+        if self.excluded_protocols is not None:
+            if envelope.protocol_id in self.excluded_protocols:
+                logger.error("This envelope cannot be sent with the oef connection: protocol_id={}".format(envelope.protocol_id))
+                raise ValueError("Cannot send message.")
         elif envelope.protocol_id == "oef":
             self.send_oef_message(envelope)
         else:
@@ -404,7 +406,7 @@ class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
     restricted_to_protocols = set()  # type: Set[str]
-    excluded_protocols = set()  # type Set[str]
+    excluded_protocols = set()  # type: Set[str]
 
     def __init__(self, address: Address, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef",
                  restricted_to_protocols: Optional[Set[str]] = None,
@@ -423,7 +425,8 @@ class OEFConnection(Connection):
                          excluded_protocols=excluded_protocols)
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
-        self.channel = OEFChannel(address, oef_addr, oef_port, core=self._core, excluded_protocols=excluded_protocols)
+        self.channel = OEFChannel(address, oef_addr, oef_port, core=self._core,
+                                  excluded_protocols=excluded_protocols)  # type: ignore
 
         self._connection_check_thread = None  # type: Optional[Thread]
 

@@ -6,7 +6,7 @@ url: ""
 description: "The oef connection provides a wrapper around the OEF sdk."
 class_name: OEFConnection
 restricted_to_protocols: []
-excluded_protocols: ['gym']
+excluded_protocols: ["gym"]
 config:
   addr: ${OEF_ADDR:127.0.0.1}
   port: ${OEF_PORT:10000}

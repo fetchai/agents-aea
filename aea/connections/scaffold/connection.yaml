@@ -6,5 +6,6 @@ url: ""
 description: "The scaffold connection provides a scaffold for a connection to be implemented by the developer."
 class_name: MyScaffoldConnection
 restricted_to_protocols: []
+excluded_protocols: []
 config:
   foo: bar
