@@ -40,7 +40,8 @@ logger = logging.getLogger(__name__)
 class PeerToPeerChannel:
     """A wrapper for an SDK or API."""
 
-    def __init__(self, address: Address, provider_addr: str, provider_port: int):
+    def __init__(self, address: Address, provider_addr: str, provider_port: int,
+                 excluded_protocols: Optional[List[str]] = None):
         """
         Initialize a channel.
 
@@ -52,7 +53,7 @@ class PeerToPeerChannel:
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[asyncio.AbstractEventLoop]
         self._httpCall = None  # type: Optional[HTTPCalls]
-
+        self.excluded_protocols = excluded_protocols
         self.thread = Thread(target=self.receiving_loop)
         self.lock = threading.Lock()
         self.stopped = True
@@ -91,6 +92,13 @@ class PeerToPeerChannel:
         :return: None
         """
         assert self._httpCall is not None
+
+        if self.excluded_protocols is not None:
+            if envelope.protocol_id in self.excluded_protocols:
+                logger.error(
+                    "This envelope cannot be sent with the oef connection: protocol_id={}".format(envelope.protocol_id))
+                raise ValueError("Cannot send message.")
+
         self._httpCall.send_message(sender_address=envelope.sender,
                                     receiver_address=envelope.to,
                                     protocol=envelope.protocol_id,
@@ -135,14 +143,14 @@ class PeerToPeerConnection(Connection):
     restricted_to_protocols = set()  # type: Set[str]
 
     def __init__(self, address: Address, provider_addr: str, provider_port: int = 8000, connection_id: str = "p2p",
-                 restricted_to_protocols: Optional[Set[str]] = None):
+                 restricted_to_protocols: Optional[Set[str]] = None, excluded_protocols: Optional[Set[str]] = None):
         """
         Initialize a connection to an SDK or API.
 
         :param address: the address used in the protocols.
         """
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
-        self.channel = PeerToPeerChannel(address, provider_addr, provider_port)
+        self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=excluded_protocols)
         self.address = address
 
     async def connect(self) -> None:
