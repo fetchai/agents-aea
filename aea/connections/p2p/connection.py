@@ -150,7 +150,7 @@ class PeerToPeerConnection(Connection):
         :param address: the address used in the protocols.
         """
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
-        self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=excluded_protocols)
+        self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=excluded_protocols)  # type: ignore
         self.address = address
 
     async def connect(self) -> None:
