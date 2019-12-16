@@ -27,9 +27,10 @@ from pathlib import Path
 
 import click
 
-import aea.cli.create
+import aea
 from aea.cli.add import add
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.install import install
 from aea.cli.list import list as _list
@@ -159,6 +160,7 @@ cli.add_command(add)
 cli.add_command(_list)
 cli.add_command(login)
 cli.add_command(search)
+cli.add_command(config)
 cli.add_command(scaffold)
 cli.add_command(remove)
 cli.add_command(install)
