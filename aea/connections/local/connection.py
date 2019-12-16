@@ -397,4 +397,5 @@ class OEFLocalConnection(Connection):
         local_node = LocalNode()
         return OEFLocalConnection(address, local_node,
                                   connection_id=connection_configuration.name,
-                                  restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
+                                  restricted_to_protocols=set(connection_configuration.restricted_to_protocols),
+                                  excluded_protocols=set(connection_configuration.excluded_protocols))

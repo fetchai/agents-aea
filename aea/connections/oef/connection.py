@@ -192,7 +192,7 @@ class OEFObjectTranslator:
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    def __init__(self, address: Address, oef_addr: str, oef_port: int, core: AsyncioCore):
+    def __init__(self, address: Address, oef_addr: str, oef_port: int, core: AsyncioCore, excluded_protocols: List[str]):
         """
         Initialize.
 
@@ -205,6 +205,7 @@ class OEFChannel(OEFAgent):
         self.address = address
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[AbstractEventLoop]
+        self.excluded_protocols = excluded_protocols
 
     def on_message(self, msg_id: int, dialogue_id: int, origin: Address, content: bytes) -> None:
         """
@@ -354,7 +355,7 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        if envelope.protocol_id == "gym":
+        if envelope.protocol_id in self.excluded_protocols:
             logger.error("This envelope cannot be sent with the oef connection: protocol_id={}".format(envelope.protocol_id))
             raise ValueError("Cannot send message.")
         elif envelope.protocol_id == "oef":
@@ -403,9 +404,11 @@ class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
     restricted_to_protocols = set()  # type: Set[str]
+    excluded_protocols = set()  # type Set[str]
 
     def __init__(self, address: Address, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef",
-                 restricted_to_protocols: Optional[Set[str]] = None):
+                 restricted_to_protocols: Optional[Set[str]] = None,
+                 excluded_protocols: Optional[Set[str]] = None):
         """
         Initialize.
 
@@ -414,11 +417,13 @@ class OEFConnection(Connection):
         :param oef_port: the OEF port.
         :param connection_id: the identifier of the connection object.
         :param restricted_to_protocols: the only supported protocols for this connection.
+        :param excluded_protocols: the excluded protocols for this conenction.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
+                         excluded_protocols=excluded_protocols)
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
-        self.channel = OEFChannel(address, oef_addr, oef_port, core=self._core)
+        self.channel = OEFChannel(address, oef_addr, oef_port, core=self._core, excluded_protocols=excluded_protocols)
 
         self._connection_check_thread = None  # type: Optional[Thread]
 
@@ -539,4 +544,5 @@ class OEFConnection(Connection):
         oef_port = cast(int, connection_configuration.config.get("port"))
         return OEFConnection(address, oef_addr, oef_port,
                              connection_id=connection_configuration.name,
-                             restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
+                             restricted_to_protocols=set(connection_configuration.restricted_to_protocols),
+                             excluded_protocols=set(connection_configuration.excluded_protocols))
