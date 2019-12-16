@@ -213,7 +213,7 @@ class TransactionMessage(InternalMessage):
             elif self.performative == self.Performative.ACCEPT or self.performative == self.Performative.REJECT:
                 assert self.transaction_digest is None or isinstance(self.transaction_digest, str)
                 assert len(self.body) == 14
-            else:
+            else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")
 
         except (AssertionError, KeyError):

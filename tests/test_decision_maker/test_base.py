@@ -30,6 +30,7 @@ import aea.decision_maker.base
 from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG
 from aea.crypto.wallet import Wallet, FETCHAI
 from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
+from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import OutBox, Multiplexer  # , Envelope
@@ -65,6 +66,23 @@ class TestUtilityPreferencesBase:
         assert self.ownership_state.amount_by_currency is not None
         assert self.ownership_state.quantities_by_good_id is not None
         assert self.ownership_state.is_initialized
+
+    def test_body(self):
+        """Test the setter for the body."""
+        msg = InternalMessage()
+        msg.body = {"test_key": "test_value"}
+
+        other_msg = InternalMessage(body={"test_key": "test_value"})
+        assert msg == other_msg, "Messages should be equal."
+        assert msg.check_consistency(), "It is true."
+        assert str(msg) == msg.__str__()
+        assert msg._body is not None
+        msg.body = {"Test": "My_test"}
+        assert msg._body == {"Test": "My_test"}, "Message body must be equal with the above dictionary."
+        msg.set("Test", 2)
+        assert msg._body["Test"] == 2, "body['Test'] should be equal to 2."
+        msg.unset("Test")
+        assert "Test" not in msg._body.keys(), "Test should not exist."
 
     def test_transaction_is_consistent(self):
         """Test the consistency of the transaction message."""
