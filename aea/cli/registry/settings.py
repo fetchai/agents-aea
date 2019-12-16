@@ -27,4 +27,3 @@ CLI_CONFIG_PATH = os.path.join(
     'cli_config.yaml'
 )
 AUTH_TOKEN_KEY = 'auth_token'
-AGENT_CONFIG_FILENAME = 'aea-config.yaml'

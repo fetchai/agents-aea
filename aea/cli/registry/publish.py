@@ -24,7 +24,7 @@ import tarfile
 
 from aea.cli.common import logger
 from aea.cli.registry.utils import clean_tarfiles, load_yaml, request_api
-from aea.cli.registry.settings import AGENT_CONFIG_FILENAME
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 
 def _compress(output_filename: str, *filepaths):
@@ -38,7 +38,7 @@ def _compress(output_filename: str, *filepaths):
 def publish_agent():
     """Publish an agent."""
     cwd = os.getcwd()
-    agent_config_path = os.path.join(cwd, AGENT_CONFIG_FILENAME)
+    agent_config_path = os.path.join(cwd, DEFAULT_AEA_CONFIG_FILE)
     if not os.path.exists(agent_config_path):
         raise click.ClickException(
             'Agent config not found in {}. Make sure you run push command '
