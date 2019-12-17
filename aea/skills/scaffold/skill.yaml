@@ -5,23 +5,23 @@ license: Apache 2.0
 url: ""
 description: "The scaffold skill is a scaffold for your own skill implementation."
 behaviours:
-  - behaviour:
-      class_name: MyScaffoldBehaviour
-      args:
-        foo: bar
+  scaffold:
+    class_name: MyScaffoldBehaviour
+    args:
+      foo: bar
 handlers:
-  - handler:
-      class_name: MyScaffoldHandler
-      args:
-        foo: bar
+  scaffold:
+    class_name: MyScaffoldHandler
+    args:
+      foo: bar
 tasks:
-  - task:
-      class_name: MyScaffoldTask
-      args:
-        foo: bar
+  scaffold:
+    class_name: MyScaffoldTask
+    args:
+      foo: bar
 shared_classes:
-  - shared_class:
-      class_name: MySharedClass
-      args:
-        foo: bar
+  scaffold:
+    class_name: MySharedClass
+    args:
+      foo: bar
 protocols: []

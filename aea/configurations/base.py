@@ -434,10 +434,10 @@ class SkillConfig(Configuration):
             "url": self.url,
             "protocols": self.protocols,
             "dependencies": self.dependencies,
-            "handlers": [{"handler": h.json} for _, h in self.handlers.read_all()],
-            "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
-            "tasks": [{"task": t.json} for _, t in self.tasks.read_all()],
-            "shared_classes": [{"shared_class": s.json} for _, s in self.shared_classes.read_all()],
+            "handlers": {key: h.json for key, h in self.handlers.read_all()},
+            "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
+            "tasks": {key: t.json for key, t in self.tasks.read_all()},
+            "shared_classes": {key: s.json for key, s in self.shared_classes.read_all()},
             "description": self.description
         }
 
@@ -463,21 +463,21 @@ class SkillConfig(Configuration):
             description=description
         )
 
-        for b in obj.get("behaviours", []):  # type: ignore
-            behaviour_config = BehaviourConfig.from_json(b["behaviour"])
-            skill_config.behaviours.create(behaviour_config.class_name, behaviour_config)
+        for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():  # type: ignore
+            behaviour_config = BehaviourConfig.from_json(behaviour_data)
+            skill_config.behaviours.create(behaviour_id, behaviour_config)
 
-        for t in obj.get("tasks", []):  # type: ignore
-            task_config = TaskConfig.from_json(t["task"])
-            skill_config.tasks.create(task_config.class_name, task_config)
+        for task_id, task_data in obj.get("tasks", {}).items():  # type: ignore
+            task_config = TaskConfig.from_json(task_data)
+            skill_config.tasks.create(task_id, task_config)
 
-        for h in obj.get("handlers", []):  # type: ignore
-            handler_config = HandlerConfig.from_json(h["handler"])
-            skill_config.handlers.create(handler_config.class_name, handler_config)
+        for handler_id, handler_data in obj.get("handlers", {}).items():  # type: ignore
+            handler_config = HandlerConfig.from_json(handler_data)
+            skill_config.handlers.create(handler_id, handler_config)
 
-        for s in obj.get("shared_classes", []):  # type: ignore
-            shared_class_config = SharedClassConfig.from_json(s["shared_class"])
-            skill_config.shared_classes.create(shared_class_config.class_name, shared_class_config)
+        for shared_class_id, shared_class_data in obj.get("shared_classes", {}).items():  # type: ignore
+            shared_class_config = SharedClassConfig.from_json(shared_class_data)
+            skill_config.shared_classes.create(shared_class_id, shared_class_config)
 
         return skill_config
 
