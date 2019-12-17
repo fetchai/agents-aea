@@ -10,4 +10,4 @@ config:
   input_file: "./input_file"
   output_file: "./output_file"
 dependencies:
-  - watchdog
+  watchdog: {}

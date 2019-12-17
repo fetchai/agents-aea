@@ -43,13 +43,13 @@ class TestTCPCommunication:
         cls.host = "127.0.0.1"
         cls.port = get_unused_tcp_port()
 
-        cls.server_pbk = "server_pbk"
-        cls.client_pbk_1 = "client_pbk_1"
-        cls.client_pbk_2 = "client_pbk_2"
+        cls.server_addr = "server_addr"
+        cls.client_addr_1 = "client_addr_1"
+        cls.client_addr_2 = "client_addr_2"
 
-        cls.server_conn = TCPServerConnection(cls.server_pbk, cls.host, cls.port)
-        cls.client_conn_1 = TCPClientConnection(cls.client_pbk_1, cls.host, cls.port)
-        cls.client_conn_2 = TCPClientConnection(cls.client_pbk_2, cls.host, cls.port)
+        cls.server_conn = TCPServerConnection(cls.server_addr, cls.host, cls.port)
+        cls.client_conn_1 = TCPClientConnection(cls.client_addr_1, cls.host, cls.port)
+        cls.client_conn_2 = TCPClientConnection(cls.client_addr_2, cls.host, cls.port)
 
         cls.server_multiplexer = Multiplexer([cls.server_conn])
         cls.client_1_multiplexer = Multiplexer([cls.client_conn_1])
@@ -73,7 +73,7 @@ class TestTCPCommunication:
         """Test that envelopes can be sent from a client to a server."""
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg_bytes = DefaultSerializer().encode(msg)
-        expected_envelope = Envelope(to=self.server_pbk, sender=self.client_pbk_1, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
+        expected_envelope = Envelope(to=self.server_addr, sender=self.client_addr_1, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
         self.client_1_multiplexer.put(expected_envelope)
         actual_envelope = self.server_multiplexer.get(block=True, timeout=5.0)
 
@@ -84,13 +84,13 @@ class TestTCPCommunication:
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg_bytes = DefaultSerializer().encode(msg)
 
-        expected_envelope = Envelope(to=self.client_pbk_1, sender=self.server_pbk, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
+        expected_envelope = Envelope(to=self.client_addr_1, sender=self.server_addr, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
         self.server_multiplexer.put(expected_envelope)
         actual_envelope = self.client_1_multiplexer.get(block=True, timeout=5.0)
 
         assert expected_envelope == actual_envelope
 
-        expected_envelope = Envelope(to=self.client_pbk_2, sender=self.server_pbk, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
+        expected_envelope = Envelope(to=self.client_addr_2, sender=self.server_addr, protocol_id=DefaultMessage.protocol_id, message=msg_bytes)
         self.server_multiplexer.put(expected_envelope)
         actual_envelope = self.client_2_multiplexer.get(block=True, timeout=5.0)
 
@@ -111,8 +111,8 @@ class TestTCPClientConnection:
     async def test_receive_cancelled(self):
         """Test that cancelling a receive task works correctly."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
+        tcp_server = TCPServerConnection("address_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("address_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -122,7 +122,7 @@ class TestTCPClientConnection:
             await asyncio.sleep(0.1)
             task.cancel()
             await asyncio.sleep(0.1)
-            mock_logger_debug.assert_called_with("[{}] Read cancelled.".format("public_key_client"))
+            mock_logger_debug.assert_called_with("[{}] Read cancelled.".format("address_client"))
             assert task.result() is None
 
         await tcp_client.disconnect()
@@ -132,8 +132,8 @@ class TestTCPClientConnection:
     async def test_receive_raises_struct_error(self):
         """Test the case when a receive raises a struct error."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
+        tcp_server = TCPServerConnection("address_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("address_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -152,8 +152,8 @@ class TestTCPClientConnection:
     async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
+        tcp_server = TCPServerConnection("address_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("address_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -171,7 +171,7 @@ class TestTCPClientConnection:
     async def test_from_config(self):
         """Test the creation of the connection from a configuration."""
         port = get_unused_tcp_port()
-        TCPClientConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=port))
+        TCPClientConnection.from_config("address", ConnectionConfig(host="127.0.0.1", port=port))
 
 
 class TestTCPServerConnection:
@@ -181,8 +181,8 @@ class TestTCPServerConnection:
     async def test_receive_raises_exception(self):
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
-        tcp_server = TCPServerConnection("public_key_server", "127.0.0.1", port)
-        tcp_client = TCPClientConnection("public_key_client", "127.0.0.1", port)
+        tcp_server = TCPServerConnection("address_server", "127.0.0.1", port)
+        tcp_client = TCPClientConnection("address_client", "127.0.0.1", port)
 
         await tcp_server.connect()
         await tcp_client.connect()
@@ -200,4 +200,4 @@ class TestTCPServerConnection:
     async def test_from_config(self):
         """Test the creation of the connection from a configuration."""
         port = get_unused_tcp_port()
-        TCPServerConnection.from_config("public_key", ConnectionConfig(host="127.0.0.1", port=port))
+        TCPServerConnection.from_config("address", ConnectionConfig(host="127.0.0.1", port=port))

@@ -84,7 +84,9 @@ class RequestAPITestCase(TestCase):
         request_mock.assert_called_once_with(
             method='GET',
             params=None,
-            json=None,
+            data=None,
+            files=None,
+            headers={},
             url=REGISTRY_API_URL + '/path'
         )
         self.assertEqual(result, expected_result)
@@ -101,6 +103,15 @@ class RequestAPITestCase(TestCase):
         """Test for fetch_package method not authorized sever response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 403
+        request_mock.return_value = resp_mock
+        with self.assertRaises(ClickException):
+            request_api('GET', '/path')
+
+    def test_request_api_409(self, request_mock):
+        """Test for fetch_package method conflict sever response."""
+        resp_mock = mock.Mock()
+        resp_mock.status_code = 409
+        resp_mock.json = lambda: {'detail': 'some'}
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api('GET', '/path')

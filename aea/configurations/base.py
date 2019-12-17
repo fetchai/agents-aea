@@ -29,9 +29,27 @@ DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
 DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
 T = TypeVar('T')
 
-Address = str
 ProtocolId = str
 SkillId = str
+"""
+A dependency is a dictionary with the following (optional) keys:
+    - version: a version specifier(s) (e.g. '==0.1.0').
+    - index: the PyPI index where to download the package from (default: https://pypi.org)
+    - git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
+    - ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
+If the 'git' field is set, the 'version' field will be ignored.
+They are supposed to be forwarded to the 'pip' command.
+"""
+Dependency = dict
+"""
+A dictionary from package name to dependency data structure (see above).
+The package name must satisfy the constraints on Python packages names.
+For details, see https://www.python.org/dev/peps/pep-0426/#name.
+
+The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
+We cannot have two items with the same package name since the keys of a YAML object form a set.
+"""
+Dependencies = Dict[str, Dependency]
 
 
 class JSONSerializable(ABC):
@@ -170,7 +188,7 @@ class ConnectionConfig(Configuration):
                  url: str = "",
                  class_name: str = "",
                  restricted_to_protocols: Optional[Set[str]] = None,
-                 dependencies: Optional[List[str]] = None,
+                 dependencies: Optional[Dependencies] = None,
                  description: str = "",
                  **config):
         """Initialize a connection configuration object."""
@@ -181,7 +199,7 @@ class ConnectionConfig(Configuration):
         self.url = url
         self.class_name = class_name
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
-        self.dependencies = dependencies if dependencies is not None else []
+        self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.config = config
 
@@ -206,7 +224,7 @@ class ConnectionConfig(Configuration):
         """Initialize from a JSON object."""
         restricted_to_protocols = obj.get("restricted_to_protocols")
         restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
-        dependencies = cast(List[str], obj.get("dependencies", []))
+        dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             authors=cast(str, obj.get("authors")),
@@ -230,7 +248,7 @@ class ProtocolConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  url: str = "",
-                 dependencies: Optional[List[str]] = None,
+                 dependencies: Optional[Dependencies] = None,
                  description: str = ""):
         """Initialize a connection configuration object."""
         self.name = name
@@ -238,7 +256,7 @@ class ProtocolConfig(Configuration):
         self.version = version
         self.license = license
         self.url = url
-        self.dependencies = dependencies
+        self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
     @property
@@ -257,7 +275,7 @@ class ProtocolConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        dependencies = cast(List[str], obj.get("dependencies", []))
+        dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ProtocolConfig(
             name=cast(str, obj.get("name")),
             authors=cast(str, obj.get("authors")),
@@ -383,7 +401,7 @@ class SkillConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  protocols: List[str] = None,
-                 dependencies: Optional[List[str]] = None,
+                 dependencies: Optional[Dependencies] = None,
                  description: str = ""):
         """Initialize a skill configuration."""
         self.name = name
@@ -392,7 +410,7 @@ class SkillConfig(Configuration):
         self.license = license
         self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[str]
-        self.dependencies = dependencies
+        self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
@@ -426,7 +444,7 @@ class SkillConfig(Configuration):
         license = cast(str, obj.get("license"))
         url = cast(str, obj.get("url"))
         protocols = cast(List[str], obj.get("protocols", []))
-        dependencies = cast(List[str], obj.get("dependencies", []))
+        dependencies = cast(Dependencies, obj.get("dependencies", {}))
         description = cast(str, obj.get("description"))
         skill_config = SkillConfig(
             name=name,

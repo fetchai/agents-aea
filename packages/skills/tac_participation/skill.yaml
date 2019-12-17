@@ -28,5 +28,5 @@ shared_classes:
       class_name: Game
       args:
         expected_version_id: v1
-        # expected_controller_pbk: '' # optionally, provide a key for the controller you expect!
+        # expected_controller_addr: '' # optionally, provide an address for the controller you expect!
 protocols: ['oef', 'tac']

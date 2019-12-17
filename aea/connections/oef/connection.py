@@ -43,7 +43,7 @@ from oef.schema import Description as OEFDescription, DataModel as OEFDataModel,
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
 from aea.protocols.oef.message import OEFMessage
@@ -192,26 +192,27 @@ class OEFObjectTranslator:
 class OEFChannel(OEFAgent):
     """The OEFChannel connects the OEF Agent with the connection."""
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int, core: AsyncioCore):
+    def __init__(self, address: Address, oef_addr: str, oef_port: int, core: AsyncioCore):
         """
         Initialize.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
         """
-        super().__init__(public_key, oef_addr=oef_addr, oef_port=oef_port, core=core,
+        super().__init__(address, oef_addr=oef_addr, oef_port=oef_port, core=core,
                          logger=lambda *x: None, logger_debug=lambda *x: None)
+        self.address = address
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.loop = None  # type: Optional[AbstractEventLoop]
 
-    def on_message(self, msg_id: int, dialogue_id: int, origin: str, content: bytes) -> None:
+    def on_message(self, msg_id: int, dialogue_id: int, origin: Address, content: bytes) -> None:
         """
         On message event handler.
 
         :param msg_id: the message id.
         :param dialogue_id: the dialogue id.
-        :param origin: the public key of the sender.
+        :param origin: the address of the sender.
         :param content: the bytes content.
         :return: None
         """
@@ -222,13 +223,13 @@ class OEFChannel(OEFAgent):
         envelope = Envelope.decode(content)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
-    def on_cfp(self, msg_id: int, dialogue_id: int, origin: str, target: int, query: CFP_TYPES) -> None:
+    def on_cfp(self, msg_id: int, dialogue_id: int, origin: Address, target: int, query: CFP_TYPES) -> None:
         """
         On cfp event handler.
 
         :param msg_id: the message id.
         :param dialogue_id: the dialogue id.
-        :param origin: the public key of the sender.
+        :param origin: the address of the sender.
         :param target: the message target.
         :param query: the query.
         :return: None
@@ -246,16 +247,16 @@ class OEFChannel(OEFAgent):
                           performative=FIPAMessage.Performative.CFP,
                           query=query if query != b"" else None)
         msg_bytes = FIPASerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.address, sender=origin, protocol_id=FIPAMessage.protocol_id, message=msg_bytes)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
-    def on_propose(self, msg_id: int, dialogue_id: int, origin: str, target: int, b_proposals: PROPOSE_TYPES) -> None:
+    def on_propose(self, msg_id: int, dialogue_id: int, origin: Address, target: int, b_proposals: PROPOSE_TYPES) -> None:
         """
         On propose event handler.
 
         :param msg_id: the message id.
         :param dialogue_id: the dialogue id.
-        :param origin: the public key of the sender.
+        :param origin: the address of the sender.
         :param target: the message target.
         :param b_proposals: the proposals.
         :return: None
@@ -264,13 +265,13 @@ class OEFChannel(OEFAgent):
         assert self.loop is not None
         logger.warning('Dropping incompatible on_propose: msg_id={}, dialogue_id={}, origin={}, target={}'.format(msg_id, dialogue_id, origin, target))
 
-    def on_accept(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
+    def on_accept(self, msg_id: int, dialogue_id: int, origin: Address, target: int) -> None:
         """
         On accept event handler.
 
         :param msg_id: the message id.
         :param dialogue_id: the dialogue id.
-        :param origin: the public key of the sender.
+        :param origin: the address of the sender.
         :param target: the message target.
         :return: None
         """
@@ -278,13 +279,13 @@ class OEFChannel(OEFAgent):
         assert self.loop is not None
         logger.warning('Dropping incompatible on_accept: msg_id={}, dialogue_id={}, origin={}, target={}'.format(msg_id, dialogue_id, origin, target))
 
-    def on_decline(self, msg_id: int, dialogue_id: int, origin: str, target: int) -> None:
+    def on_decline(self, msg_id: int, dialogue_id: int, origin: Address, target: int) -> None:
         """
         On decline event handler.
 
         :param msg_id: the message id.
         :param dialogue_id: the dialogue id.
-        :param origin: the public key of the sender.
+        :param origin: the address of the sender.
         :param target: the message target.
         :return: None
         """
@@ -292,7 +293,7 @@ class OEFChannel(OEFAgent):
         assert self.loop is not None
         logger.warning('Dropping incompatible on_decline: msg_id={}, dialogue_id={}, origin={}, target={}'.format(msg_id, dialogue_id, origin, target))
 
-    def on_search_result(self, search_id: int, agents: List[str]) -> None:
+    def on_search_result(self, search_id: int, agents: List[Address]) -> None:
         """
         On accept event handler.
 
@@ -302,9 +303,9 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
+        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=agents)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.address, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def on_oef_error(self, answer_id: int, operation: oef.messages.OEFErrorOperation) -> None:
@@ -322,12 +323,12 @@ class OEFChannel(OEFAgent):
         except ValueError:
             operation = OEFMessage.OEFErrorOperation.OTHER
 
-        msg = OEFMessage(oef_type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
+        msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=answer_id, operation=operation)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.address, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
-    def on_dialogue_error(self, answer_id: int, dialogue_id: int, origin: str) -> None:
+    def on_dialogue_error(self, answer_id: int, dialogue_id: int, origin: Address) -> None:
         """
         On dialogue error event handler.
 
@@ -338,12 +339,12 @@ class OEFChannel(OEFAgent):
         """
         assert self.in_queue is not None
         assert self.loop is not None
-        msg = OEFMessage(oef_type=OEFMessage.Type.DIALOGUE_ERROR,
+        msg = OEFMessage(type=OEFMessage.Type.DIALOGUE_ERROR,
                          id=answer_id,
                          dialogue_id=dialogue_id,
                          origin=origin)
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=self.public_key, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(to=self.address, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop).result()
 
     def send(self, envelope: Envelope) -> None:
@@ -373,24 +374,25 @@ class OEFChannel(OEFAgent):
         :return: None
         """
         oef_message = OEFSerializer().decode(envelope.message)
-        oef_type = OEFMessage.Type(oef_message.get("type"))
-        oef_msg_id = cast(int, oef_message.get("id"))
+        oef_message = cast(OEFMessage, oef_message)
+        oef_type = oef_message.type
+        oef_msg_id = oef_message.id
         if oef_type == OEFMessage.Type.REGISTER_SERVICE:
-            service_description = cast(Description, oef_message.get("service_description"))
-            service_id = cast(int, oef_message.get("service_id"))
+            service_description = oef_message.service_description
+            service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
             self.register_service(oef_msg_id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
-            service_description = cast(Description, oef_message.get("service_description"))
-            service_id = cast(int, oef_message.get("service_id"))
+            service_description = oef_message.service_description
+            service_id = oef_message.service_id
             oef_service_description = OEFObjectTranslator.to_oef_description(service_description)
             self.unregister_service(oef_msg_id, oef_service_description, service_id)
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
-            query = cast(Query, oef_message.get("query"))
+            query = oef_message.query
             oef_query = OEFObjectTranslator.to_oef_query(query)
             self.search_agents(oef_msg_id, oef_query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
-            query = cast(Query, oef_message.get("query"))
+            query = oef_message.query
             oef_query = OEFObjectTranslator.to_oef_query(query)
             self.search_services(oef_msg_id, oef_query)
         else:
@@ -402,12 +404,12 @@ class OEFConnection(Connection):
 
     restricted_to_protocols = set()  # type: Set[str]
 
-    def __init__(self, public_key: str, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef",
+    def __init__(self, address: Address, oef_addr: str, oef_port: int = 10000, connection_id: str = "oef",
                  restricted_to_protocols: Optional[Set[str]] = None):
         """
         Initialize.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
         :param connection_id: the identifier of the connection object.
@@ -416,7 +418,7 @@ class OEFConnection(Connection):
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
-        self.channel = OEFChannel(public_key, oef_addr, oef_port, core=self._core)
+        self.channel = OEFChannel(address, oef_addr, oef_port, core=self._core)
 
         self._connection_check_thread = None  # type: Optional[Thread]
 
@@ -525,16 +527,16 @@ class OEFConnection(Connection):
             self.channel.send(envelope)
 
     @classmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         """
         Get the OEF connection from the connection configuration.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
-        return OEFConnection(public_key, oef_addr, oef_port,
+        return OEFConnection(address, oef_addr, oef_port,
                              connection_id=connection_configuration.name,
                              restricted_to_protocols=set(connection_configuration.restricted_to_protocols))

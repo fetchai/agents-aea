@@ -11,5 +11,5 @@ tasks:
       args: {}
 shared_classes: []
 protocols: []
-dependencies: []
+dependencies: {}
 description: "Raise an exception, at some point."

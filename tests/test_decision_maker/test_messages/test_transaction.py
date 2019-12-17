@@ -28,65 +28,27 @@ class TestTransaction:
 
     def test_message_consistency(self):
         """Test for an error in consistency of a message."""
-        TransactionMessage(performative="performative",
-                           skill_ids=["default"],
-                           transaction_id="transaction0",
-                           sender="pk1",
-                           counterparty="pk2",
-                           is_sender_buyer=True,
-                           currency_pbk="FET",
-                           amount=2,
-                           sender_tx_fee=0,
-                           counterparty_tx_fee=0,
-                           ledger_id="fetchai",
-                           quantities_by_good_pbk={"Unknown": 10},
-                           info={'some_string': [1, 2]},
-                           transaction_digest='some_string')
+        assert TransactionMessage(performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+                                  skill_callback_ids=["default"],
+                                  tx_id="transaction0",
+                                  tx_sender_addr="pk1",
+                                  tx_counterparty_addr="pk2",
+                                  tx_amount_by_currency_id={"Unknown": 2},
+                                  tx_sender_fee=0,
+                                  tx_counterparty_fee=0,
+                                  tx_quantities_by_good_id={"Unknown": 10},
+                                  ledger_id="fetchai",
+                                  info={'some_string': [1, 2]},
+                                  tx_digest='some_string')
         with pytest.raises(AssertionError):
-            TransactionMessage(performative="performative",
-                               skill_ids=["default"],
-                               transaction_id="transaction0",
-                               sender="pk",
-                               counterparty="pk",
-                               is_sender_buyer=True,
-                               currency_pbk="Unknown",
-                               amount=2,
-                               sender_tx_fee=0,
-                               counterparty_tx_fee=0,
+            TransactionMessage(performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+                               skill_callback_ids=["default"],
+                               tx_id="transaction0",
+                               tx_sender_addr="pk",
+                               tx_counterparty_addr="pk",
+                               tx_amount_by_currency_id={"Unknown": 2},
+                               tx_sender_fee=0,
+                               tx_counterparty_fee=0,
+                               tx_quantities_by_good_id={"Unknown": 10},
                                ledger_id="fetchai",
-                               info={'info': "info_value"},
-                               quantities_by_good_pbk={"Unknown": 10})
-
-    def test_matches(self):
-        """Test if the transaction matches with another transaction."""
-        msg = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                 skill_ids=["default"],
-                                 transaction_id="transaction0",
-                                 sender="agent_1",
-                                 counterparty="pk",
-                                 is_sender_buyer=True,
-                                 currency_pbk="FET",
-                                 amount=2,
-                                 sender_tx_fee=0,
-                                 counterparty_tx_fee=0,
-                                 ledger_id="fetchai",
-                                 info={'info': "info_value"},
-                                 quantities_by_good_pbk={"FET": 10})
-        assert not msg.matches(msg), "It shouldn't match since it is the same message."
-        assert msg == msg, "It should be equal since is the same message."
-
-        mirrored_message = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                                              skill_ids=["default"],
-                                              transaction_id="transaction0",
-                                              sender="pk",
-                                              counterparty="agent_1",
-                                              is_sender_buyer=False,
-                                              currency_pbk="FET",
-                                              amount=2,
-                                              sender_tx_fee=0,
-                                              counterparty_tx_fee=0,
-                                              ledger_id="fetchai",
-                                              info={'info': "info_value"},
-                                              quantities_by_good_pbk={"FET": 10})
-
-        assert msg.matches(mirrored_message), "It should match since the messages mirror each other"
+                               info={'info': "info_value"})

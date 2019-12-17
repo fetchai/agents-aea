@@ -29,25 +29,26 @@ This module contains the classes required for dialogue management.
 from abc import abstractmethod
 from typing import Dict, List, Optional, Tuple, cast
 
+from aea.mail.base import Address
 from aea.protocols.base import Message
 
 
 class DialogueLabel:
     """The dialogue label class acts as an identifier for dialogues."""
 
-    def __init__(self, dialogue_reference: Tuple[str, str], dialogue_opponent_pbk: str, dialogue_starter_pbk: str) -> None:
+    def __init__(self, dialogue_reference: Tuple[str, str], dialogue_opponent_addr: Address, dialogue_starter_addr: Address) -> None:
         """
         Initialize a dialogue label.
 
         :param dialogue_reference: the reference of the dialogue.
-        :param dialogue_opponent_pbk: the pbk of the agent with which the dialogue is kept.
-        :param dialogue_starter_pbk: the pbk of the agent which started the dialogue.
+        :param dialogue_opponent_addr: the addr of the agent with which the dialogue is kept.
+        :param dialogue_starter_addr: the addr of the agent which started the dialogue.
 
         :return: None
         """
         self._dialogue_reference = dialogue_reference
-        self._dialogue_opponent_pbk = dialogue_opponent_pbk
-        self._dialogue_starter_pbk = dialogue_starter_pbk
+        self._dialogue_opponent_addr = dialogue_opponent_addr
+        self._dialogue_starter_addr = dialogue_starter_addr
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
@@ -65,25 +66,25 @@ class DialogueLabel:
         return self._dialogue_reference[1]
 
     @property
-    def dialogue_opponent_pbk(self) -> str:
-        """Get the public key of the dialogue opponent."""
-        return self._dialogue_opponent_pbk
+    def dialogue_opponent_addr(self) -> str:
+        """Get the address of the dialogue opponent."""
+        return self._dialogue_opponent_addr
 
     @property
-    def dialogue_starter_pbk(self) -> str:
-        """Get the public key of the dialogue starter."""
-        return self._dialogue_starter_pbk
+    def dialogue_starter_addr(self) -> str:
+        """Get the address of the dialogue starter."""
+        return self._dialogue_starter_addr
 
     def __eq__(self, other) -> bool:
         """Check for equality between two DialogueLabel objects."""
         if type(other) == DialogueLabel:
-            return self.dialogue_reference == other.dialogue_reference and self._dialogue_starter_pbk == other.dialogue_starter_pbk and self._dialogue_opponent_pbk == other.dialogue_opponent_pbk
+            return self.dialogue_reference == other.dialogue_reference and self.dialogue_starter_addr == other.dialogue_starter_addr and self.dialogue_opponent_addr == other.dialogue_opponent_addr
         else:
             return False
 
     def __hash__(self) -> int:
         """Turn object into hash."""
-        return hash((self.dialogue_reference, self.dialogue_opponent_pbk, self.dialogue_starter_pbk))
+        return hash((self.dialogue_reference, self.dialogue_opponent_addr, self.dialogue_starter_addr))
 
     @property
     def json(self) -> Dict:
@@ -91,8 +92,8 @@ class DialogueLabel:
         return {
             "dialogue_starter_reference": self.dialogue_starter_reference,
             "dialogue_responder_reference": self.dialogue_responder_reference,
-            "dialogue_opponent_pbk": self.dialogue_opponent_pbk,
-            "dialogue_starter_pbk": self.dialogue_starter_pbk
+            "dialogue_opponent_addr": self.dialogue_opponent_addr,
+            "dialogue_starter_addr": self.dialogue_starter_addr
         }
 
     @classmethod
@@ -100,14 +101,15 @@ class DialogueLabel:
         """Get dialogue label from json."""
         dialogue_label = DialogueLabel(
             (cast(str, obj.get('dialogue_starter_reference')), cast(str, obj.get('dialogue_responder_reference'))),
-            cast(str, obj.get('dialogue_opponent_pbk')),
-            cast(str, obj.get('dialogue_starter_pbk'))
+            cast(str, obj.get('dialogue_opponent_addr')),
+            cast(str, obj.get('dialogue_starter_addr'))
         )
         return dialogue_label
 
     def __str__(self):
         """Get the string representation."""
-        return "{}_{}_{}_{}".format(self.dialogue_starter_reference, self.dialogue_responder_reference, self.dialogue_opponent_pbk, self.dialogue_starter_pbk)
+        return "{}_{}_{}_{}".format(self.dialogue_starter_reference, self.dialogue_responder_reference,
+                                    self.dialogue_opponent_addr, self.dialogue_starter_addr)
 
 
 class Dialogue:
@@ -122,7 +124,7 @@ class Dialogue:
         :return: None
         """
         self._dialogue_label = dialogue_label
-        self._is_self_initiated = dialogue_label.dialogue_opponent_pbk is not dialogue_label.dialogue_starter_pbk
+        self._is_self_initiated = dialogue_label.dialogue_opponent_addr is not dialogue_label.dialogue_starter_addr
         self._outgoing_messages = []  # type: List[Message]
         self._incoming_messages = []  # type: List[Message]
 
@@ -183,36 +185,33 @@ class Dialogues:
         return self._dialogues
 
     @abstractmethod
-    def is_permitted_for_new_dialogue(self, msg: Message, sender: str) -> bool:
+    def is_permitted_for_new_dialogue(self, msg: Message) -> bool:
         """
         Check whether an agent message is permitted for a new dialogue.
 
         :param msg: the agent message
-        :param sender: the address of the sender
 
         :return: a boolean indicating whether the message is permitted for a new dialogue
         """
 
     @abstractmethod
-    def is_belonging_to_registered_dialogue(self, msg: Message, sender: str, agent_pbk: str) -> bool:
+    def is_belonging_to_registered_dialogue(self, msg: Message, agent_addr: Address) -> bool:
         """
         Check whether an agent message is part of a registered dialogue.
 
         :param msg: the agent message
-        :param sender: the address of the sender
-        :param agent_pbk: the public key of the agent
+        :param agent_addr: the address of the agent
 
         :return: boolean indicating whether the message belongs to a registered dialogue
         """
 
     @abstractmethod
-    def get_dialogue(self, msg: Message, sender: str, agent_pbk: str) -> Dialogue:
+    def get_dialogue(self, msg: Message, agent_addr: Address) -> Dialogue:
         """
         Retrieve dialogue.
 
         :param msg: the agent message
-        :param sender: the address of the sender
-        :param agent_pbk: the public key of the agent
+        :param agent_addr: the address of the agent
 
         :return: the dialogue
         """

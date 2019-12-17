@@ -55,6 +55,7 @@ Options:
 Commands:
   add           Add a resource to the agent.
   add-key       Add a private key to the wallet.
+  config        Read or modify a configuration.
   create        Create an agent.
   delete        Delete an agent.
   freeze        Get the dependencies.
@@ -63,6 +64,8 @@ Commands:
   install       Install the dependencies.
   list          List the installed resources.
   login         Login to Registry account
+  publish       Publish Agent to Registry.
+  push          Push item to Registry.
   remove        Remove a resource from the agent.
   run           Run the agent.
   scaffold      Scaffold a resource for the agent.

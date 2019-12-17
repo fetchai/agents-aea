@@ -23,6 +23,7 @@ import inspect
 import json
 import os
 import re
+from enum import Enum
 from pathlib import Path
 from typing import TextIO, Type, TypeVar, Generic
 
@@ -39,11 +40,25 @@ _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig)
 
 
+class ConfigurationType(Enum):
+    """Configuration types."""
+
+    AGENT = "agent"
+    PROTOCOL = "protocol"
+    CONNECTION = "connection"
+    SKILL = "skill"
+
+
 class ConfigLoader(Generic[T]):
     """This class implement parsing, serialization and validation functionalities for the 'aea' configuration files."""
 
     def __init__(self, schema_filename: str, configuration_type: Type[T]):
-        """Initialize the parser for configuration files."""
+        """
+        Initialize the parser for configuration files.
+
+        :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
+        :param configuration_type:
+        """
         self.schema = json.load(open(os.path.join(_SCHEMAS_DIR, schema_filename)))
         root_path = "file://{}{}".format(Path(_SCHEMAS_DIR).absolute(), os.path.sep)
         self.resolver = jsonschema.RefResolver(root_path, self.schema)
@@ -72,6 +87,20 @@ class ConfigLoader(Generic[T]):
         result = configuration.json
         self.validator.validate(instance=result)
         yaml.safe_dump(result, fp)
+
+    @classmethod
+    def from_configuration_type(cls, configuration_type: ConfigurationType) -> 'ConfigLoader':
+        """Get the configuration loader from the type."""
+        if configuration_type == ConfigurationType.AGENT:
+            return ConfigLoader("aea-config_schema.json", AgentConfig)
+        elif configuration_type == ConfigurationType.PROTOCOL:
+            return ConfigLoader("protocol-config_schema.json", ProtocolConfig)
+        elif configuration_type == ConfigurationType.CONNECTION:
+            return ConfigLoader("connection-config_schema.json", ConnectionConfig)
+        elif configuration_type == ConfigurationType.SKILL:
+            return ConfigLoader("skill-config_schema.json", SkillConfig)
+        else:
+            raise ValueError("Invalid configuration type.")
 
 
 def _config_loader():

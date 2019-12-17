@@ -21,7 +21,7 @@
 """Serialization for the FIPA protocol."""
 import json
 import pickle
-from typing import Tuple, cast
+from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
@@ -35,17 +35,18 @@ class FIPASerializer(Serializer):
 
     def encode(self, msg: Message) -> bytes:
         """Encode a FIPA message into bytes."""
+        msg = cast(FIPAMessage, msg)
         fipa_msg = fipa_pb2.FIPAMessage()
-        fipa_msg.message_id = msg.get("message_id")
-        dialogue_reference = cast(Tuple[str, str], msg.get("dialogue_reference"))
+        fipa_msg.message_id = msg.message_id
+        dialogue_reference = msg.dialogue_reference
         fipa_msg.dialogue_starter_reference = dialogue_reference[0]
         fipa_msg.dialogue_responder_reference = dialogue_reference[1]
-        fipa_msg.target = msg.get("target")
+        fipa_msg.target = msg.target
 
-        performative_id = FIPAMessage.Performative(msg.get("performative"))
+        performative_id = msg.performative
         if performative_id == FIPAMessage.Performative.CFP:
             performative = fipa_pb2.FIPAMessage.CFP()  # type: ignore
-            query = msg.get("query")
+            query = msg.query
             if query is None or query == b"":
                 nothing = fipa_pb2.FIPAMessage.CFP.Nothing()  # type: ignore
                 performative.nothing.CopyFrom(nothing)
@@ -59,7 +60,7 @@ class FIPASerializer(Serializer):
             fipa_msg.cfp.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.PROPOSE:
             performative = fipa_pb2.FIPAMessage.Propose()  # type: ignore
-            proposal = cast(Description, msg.get("proposal"))
+            proposal = msg.proposal
             p_array_bytes = [pickle.dumps(p) for p in proposal]
             performative.proposal.extend(p_array_bytes)
             fipa_msg.propose.CopyFrom(performative)
@@ -71,13 +72,13 @@ class FIPASerializer(Serializer):
             fipa_msg.match_accept.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.ACCEPT_W_INFORM:
             performative = fipa_pb2.FIPAMessage.AcceptWInform()  # type: ignore
-            data = msg.get("info")
+            data = msg.info
             data_bytes = json.dumps(data).encode("utf-8")
             performative.bytes = data_bytes
             fipa_msg.accept_w_inform.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             performative = fipa_pb2.FIPAMessage.MatchAcceptWInform()  # type: ignore
-            data = msg.get("info")
+            data = msg.info
             data_bytes = json.dumps(data).encode("utf-8")
             performative.bytes = data_bytes
             fipa_msg.match_accept_w_inform.CopyFrom(performative)
@@ -86,7 +87,7 @@ class FIPASerializer(Serializer):
             fipa_msg.decline.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.INFORM:
             performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
-            data = msg.get("info")
+            data = msg.info
             data_bytes = json.dumps(data).encode("utf-8")
             performative.bytes = data_bytes
             fipa_msg.inform.CopyFrom(performative)

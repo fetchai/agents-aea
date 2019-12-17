@@ -58,11 +58,11 @@ class MySearchBehaviour(TickerBehaviour):
         if strategy.is_searching:
             query = strategy.get_service_query()
             search_id = strategy.get_next_search_id()
-            oef_msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
+            oef_msg = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
                                  id=search_id,
                                  query=query)
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
 

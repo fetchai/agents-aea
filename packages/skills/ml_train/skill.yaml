@@ -27,7 +27,7 @@ shared_classes:
         dataset_id: 'fmnist'
         max_unit_price: 70
         max_buyer_tx_fee: 20
-        currency_pbk: 'FET'
+        currency_id: 'FET'
         ledger_id: 'fetchai'
         is_ledger_tx: False
   - shared_class:
@@ -36,5 +36,5 @@ shared_classes:
         model_config_path: "./skills/ml_train/model.json"
 protocols: ['oef', 'ml_trade']
 dependencies:
-  - tensorflow
-  - numpy
+  tensorflow: {}
+  numpy: {}

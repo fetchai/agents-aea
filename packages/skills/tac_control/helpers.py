@@ -29,16 +29,16 @@ from typing import Dict, List, Tuple
 QUANTITY_SHIFT = 1  # Any non-negative integer is fine.
 
 
-def generate_good_pbk_to_name(nb_goods: int) -> Dict[str, str]:
+def generate_good_id_to_name(nb_goods: int) -> Dict[str, str]:
     """
-    Generate public keys for things.
+    Generate ids for things.
 
     :param nb_goods: the number of things.
-    :return: a dictionary mapping goods' public keys to names.
+    :return: a dictionary mapping goods' ids to names.
     """
     max_number_of_digits = math.ceil(math.log10(nb_goods))
     string_format = 'tac_good_{:0' + str(max_number_of_digits) + '}'
-    return {string_format.format(i) + '_pbk': string_format.format(i) for i in range(nb_goods)}
+    return {string_format.format(i) + '_id': string_format.format(i) for i in range(nb_goods)}
 
 
 def determine_scaling_factor(money_endowment: int) -> float:

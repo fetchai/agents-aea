@@ -44,7 +44,7 @@ class Strategy(SharedClass):
         self.dataset_id = kwargs.pop('dataset_id', DEFAULT_DATASET_ID)
         self.seller_tx_fee = kwargs.pop('seller_tx_fee', DEFAULT_SELLER_TX_FEE)
         self.buyer_tx_fee = kwargs.pop('buyer_tx_fee', DEFAULT_BUYER_TX_FEE)
-        self.currency_pbk = kwargs.pop('currency_pbk', DEFAULT_CURRENCY_PBK)
+        self.currency_id = kwargs.pop('currency_id', DEFAULT_CURRENCY_PBK)
         self.ledger_id = kwargs.pop('ledger_id', DEFAULT_LEDGER_ID)
         super().__init__(**kwargs)
         self._oef_msg_id = 0
@@ -105,7 +105,7 @@ class Strategy(SharedClass):
                                 "price": self.price_per_data_batch,
                                 "seller_tx_fee": self.seller_tx_fee,
                                 "buyer_tx_fee": self.buyer_tx_fee,
-                                "currency_pbk": self.currency_pbk,
+                                "currency_id": self.currency_id,
                                 "ledger_id": self.ledger_id,
                                 "address": address})
         return proposal

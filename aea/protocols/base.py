@@ -28,6 +28,7 @@ from typing import Any, Dict, Optional
 from google.protobuf.struct_pb2 import Struct
 
 from aea.configurations.base import ProtocolConfig
+from aea.mail.base import Address
 
 
 class Message:
@@ -43,8 +44,24 @@ class Message:
         :param body: the dictionary of values to hold.
         :param kwargs: any additional value to add to the body. It will overwrite the body values.
         """
+        self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
+
+    @property
+    def counterparty(self) -> Address:
+        """
+        Get the counterparty of the message in Address form.
+
+        :return the address
+        """
+        assert self._counterparty is not None, "Counterparty must not be None."
+        return self._counterparty
+
+    @counterparty.setter
+    def counterparty(self, counterparty: Address) -> None:
+        """Set the counterparty of the message."""
+        self._counterparty = counterparty
 
     @property
     def body(self) -> Dict:
@@ -94,7 +111,8 @@ class Message:
     def __eq__(self, other):
         """Compare with another object."""
         return isinstance(other, Message) \
-            and self.body == other.body
+            and self.body == other.body \
+            and self._counterparty == other._counterparty
 
     def __str__(self):
         """Get the string representation of the message."""
