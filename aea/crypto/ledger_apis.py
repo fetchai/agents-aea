@@ -232,17 +232,6 @@ class LedgerApis(object):
 
         return is_successful
 
-    def sign(self, crypto_object: Crypto, signing_payload: Dict[str, Any]) -> str:
-        """
-        Sign the payload.
-
-        :param crypto_object: the crypto object that contains the fucntions for signing transactions.
-        :param signing_payload: the payload to be signed
-
-        :return: tx signature
-        """
-        return 'stub_signature'
-
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
     """

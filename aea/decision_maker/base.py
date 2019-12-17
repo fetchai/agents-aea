@@ -111,38 +111,38 @@ class OwnershipState:
         """
         Check if the transaction is consistent.
 
-        E.g. check that the agent state has enough money if it is a buyer
-        or enough holdings if it is a seller.
+        E.g. check that the agent state has enough money if it is a buyer or enough holdings if it is a seller.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        assert len(tx_message.tx_amount_by_currency_id) == 1
+        result = len(tx_message.tx_amount_by_currency_id) == 1
         for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
-            if amount >= 0:
+            if amount >= 0 and all(quantity <= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
                 # check if we have the money to cover amount and tx fee.
-                result = self.amount_by_currency_id[currency_id] >= amount + tx_message.tx_sender_fee
-            else:
+                transfer_amount = amount - tx_message.tx_counterparty_fee
+                max_tx_fee = tx_message.tx_sender_fee + tx_message.tx_counterparty_fee
+                max_payable = transfer_amount + max_tx_fee
+                result = (transfer_amount >= 0) and (self.amount_by_currency_id[currency_id] >= max_payable)
+            elif amount <= 0 and all(quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
                 # check if we have the goods.
-                result = True
-                for good_id, quantity in tx_message.tx_quantities_by_good_id.items():
-                    result = result and (self.quantities_by_good_id[good_id] >= quantity)
-                # check if we have the money to cover tx fee.
-                result = self.amount_by_currency_id[currency_id] + amount >= tx_message.tx_sender_fee
+                result = all(self.quantities_by_good_id[good_id] >= quantity for good_id, quantity in tx_message.tx_quantities_by_good_id.items())
+            else:
+                result = False
         return result
 
-    def apply_state_update(self, amount_deltas_by_currency_id: Dict[str, int], quantity_deltas_by_good_id: Dict[str, int]) -> 'OwnershipState':
+    def apply_state_update(self, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int]) -> 'OwnershipState':
         """
         Apply a list of transactions to the current state.
 
-        :param amount_deltas_by_currency_id: the delta in the currency amounts
-        :param quantity_deltas_by_good_id: the delta in the quantities by good
+        :param amount_by_currency_id: the delta in the currency amounts
+        :param quantities_by_good_id: the delta in the quantities by good
         :return: the final state.
         """
         new_state = copy.copy(self)
 
-        for currency, amount_delta in amount_deltas_by_currency_id.items():
+        for currency, amount_delta in amount_by_currency_id.items():
             new_state._amount_by_currency_id[currency] += amount_delta
 
-        for good_id, quantity_delta in quantity_deltas_by_good_id.items():
+        for good_id, quantity_delta in quantities_by_good_id.items():
             new_state._quantities_by_good_id[good_id] += quantity_delta
 
         return new_state
@@ -167,8 +167,9 @@ class OwnershipState:
         :param tx_message:
         :return: None
         """
-        assert len(tx_message.tx_amount_by_currency_id) == 1
+        assert self.check_transaction_is_consistent(tx_message)
         for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
+            # we apply the worst case where all the tx_sender_fee is used up in the transaction
             if amount >= 0:
                 diff = amount + tx_message.tx_sender_fee
                 self._amount_by_currency_id[currency_id] -= diff
@@ -176,8 +177,7 @@ class OwnershipState:
                 diff = amount - tx_message.tx_sender_fee
                 self._amount_by_currency_id[currency_id] += diff
 
-            for good_id, quantity in tx_message.tx_quantities_by_good_id.items():
-                quantity_delta = quantity if amount >= 0 else -quantity
+            for good_id, quantity_delta in tx_message.tx_quantities_by_good_id.items():
                 self._quantities_by_good_id[good_id] += quantity_delta
 
     def __copy__(self):
@@ -465,8 +465,9 @@ class DecisionMaker:
 
         If the transaction amount is negative, then the agent is the seller, so abort.
         """
-        assert len(tx_message.tx_amount_by_currency_id) == 1
-        return list(tx_message.tx_amount_by_currency_id.values())[0] >= 0
+        result = len(tx_message.tx_amount_by_currency_id) == 1
+        result = result and list(tx_message.tx_amount_by_currency_id.values())[0] >= 0
+        return result
 
     def _is_utility_enhancing(self, tx_message: TransactionMessage) -> bool:
         """
@@ -520,10 +521,10 @@ class DecisionMaker:
             assert len(tx_message.tx_amount_by_currency_id) == 1
             amount = list(tx_message.tx_amount_by_currency_id.values())[0]
             # adjust payment amount to reflect transaction fee split
-            amount -= tx_message.tx_counterparty_fee
+            payable = amount - tx_message.tx_counterparty_fee
             max_tx_fee = tx_message.tx_counterparty_fee + tx_message.tx_sender_fee
             crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
-            tx_digest = self.ledger_apis.transfer(crypto_object, tx_message.tx_counterparty_addr, amount, max_tx_fee)
+            tx_digest = self.ledger_apis.transfer(crypto_object, tx_message.tx_counterparty_addr, payable, max_tx_fee)
         return tx_digest
 
     def _handle_tx_message_for_signing(self, tx_message: TransactionMessage) -> None:
@@ -551,9 +552,10 @@ class DecisionMaker:
         :return: whether the transaction is acceptable or not
         """
         is_valid_ledger_id = self._is_valid_ledger_id(tx_message)
+        is_valid_tx_hash = self._is_valid_tx_hash(tx_message)
         is_utility_enhancing = self._is_utility_enhancing(tx_message)
         is_affordable = self._is_affordable(tx_message)
-        return is_valid_ledger_id and is_utility_enhancing and is_affordable
+        return is_valid_ledger_id and is_valid_tx_hash and is_utility_enhancing and is_affordable
 
     def _is_valid_ledger_id(self, tx_message: TransactionMessage) -> bool:
         """
@@ -568,6 +570,18 @@ class DecisionMaker:
             valid = False
         return valid
 
+    def _is_valid_tx_hash(self, tx_message: TransactionMessage) -> bool:
+        """
+        Check if the tx hash is present and matches the terms.
+
+        :param tx_message: the transaction message
+        :return: whether the transaction hash is valid
+        """
+        # TODO check the hash matches the terms of the transaction, this means dm requires knowledge of how the hash is composed
+        tx_hash = tx_message.signing_payload.get('tx_hash')
+        valid = isinstance(tx_hash, bytes)
+        return valid
+
     def _sign_tx(self, tx_message: TransactionMessage) -> str:
         """
         Sign the tx.
@@ -576,7 +590,9 @@ class DecisionMaker:
         :return: the signature of the signing payload
         """
         crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
-        tx_signature = self.ledger_apis.sign(crypto_object, tx_message.signing_payload)
+        tx_hash = tx_message.signing_payload.get('tx_hash')
+        assert isinstance(tx_hash, bytes)
+        tx_signature = crypto_object.sign_transaction(tx_hash)
         return tx_signature
 
     def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
@@ -594,5 +610,5 @@ class DecisionMaker:
             self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
         elif performative == StateUpdateMessage.Performative.APPLY:
             logger.info("[{}]: Applying state update!".format(self._agent_name))
-            new_ownership_state = self.ownership_state.apply_state_update(amount_deltas_by_currency_id=state_update_message.amount_by_currency_id, quantity_deltas_by_good_id=state_update_message.quantities_by_good_id)
+            new_ownership_state = self.ownership_state.apply_state_update(amount_by_currency_id=state_update_message.amount_by_currency_id, quantities_by_good_id=state_update_message.quantities_by_good_id)
             self._ownership_state = new_ownership_state

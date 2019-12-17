@@ -90,8 +90,13 @@ class Transactions(SharedClass):
         counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if is_seller else proposal_description.values['seller_tx_fee']
         goods_component = copy.copy(proposal_description.values)
         [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency_id', 'tx_nonce']]
+        tx_hash = tx_hash_from_values(tx_sender_add=agent_addr,
+                                      tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
+                                      tx_quantities_by_good_id=goods_component,
+                                      tx_amount_by_currency_id={proposal_description.values['currency_id']: proposal_description.values['price']},
+                                      tx_nonce=proposal_description.values['tx_nonce'])
         transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-                                             skill_callback_ids=['tac_negotiation', 'tac_participation'],
+                                             skill_callback_ids=['tac_negotiation'],
                                              tx_id=self.get_internal_tx_id(),
                                              tx_sender_addr=agent_addr,
                                              tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
@@ -101,7 +106,8 @@ class Transactions(SharedClass):
                                              tx_quantities_by_good_id=goods_component,
                                              ledger_id=OFF_CHAIN,
                                              info={'dialogue_label': dialogue_label.json},
-                                             signing_payload={'nonce': proposal_description.values['tx_nonce']})
+                                             signing_payload={'tx_hash': tx_hash,
+                                                              'tx_nonce': proposal_description.values['tx_nonce']})
         return transaction_msg
 
     def cleanup_pending_transactions(self) -> None:

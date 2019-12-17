@@ -20,6 +20,7 @@
 
 """This class contains the helpers for FIPA negotiation."""
 
+import collections
 from typing import Dict, List, Union, cast
 
 from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
@@ -99,3 +100,73 @@ def build_goods_query(good_ids: List[str], currency_id: str, is_searching_for_se
 
     query = Query(constraint_expr, model=data_model)
     return query
+
+def _get_hash(self, tx_sender_addr: Address,
+              tx_counterparty_addr: Address,
+              good_ids: List[int],
+              sender_supplied_quantities: List[int],
+              counterparty_supplied_quantities: List[int],
+              tx_amount: int,
+              tx_nonce: str) -> bytes:
+    """
+    Generate a hash from transaction information.
+
+    :param tx_sender_addr: the sender address
+    :param tx_counterparty_addr: the counterparty address
+    :param good_ids: the list of good ids
+    :param sender_supplied_quantities: the quantities supplied by the sender (must all be positive)
+    :param counterparty_supplied_quantities: the quantities supplied by the counterparty (must all be positive)
+    :param tx_amount: the amount of the transaction
+    :param tx_nonce: the nonce of the transaction
+    :return: the hash
+    """
+    aggregate_hash = keccak256(b''.join(
+        [good_ids[0].to_bytes(32, 'big'), sender_supplied_quantities[0].to_bytes(32, 'big'), counterparty_supplied_quantities[0].to_bytes(32, 'big')]))
+    for i in range(len(good_ids)):
+        if not i == 0:
+            aggregate_hash = keccak256(b''.join(
+                [aggregate_hash, good_ids[i].to_bytes(32, 'big'), sender_supplied_quantities[i].to_bytes(32, 'big'),
+                 counterparty_supplied_quantities[i].to_bytes(32, 'big')]))
+
+    m_list = []
+    m_list.append(tx_sender_addr)
+    m_list.append(tx_counterparty_addr)
+    m_list.append(aggregate_hash)
+    m_list.append(tx_amount.to_bytes(32, 'big'))
+    m_list.append(tx_nonce.to_bytes(32, 'big'))
+    return keccak256(b''.join(m_list))
+
+def tx_hash_from_values(self, tx_sender_addr: str,
+                        tx_counterparty_addr: str,
+                        tx_quantities_by_good_id: Dict[str, int],
+                        tx_amount_by_currency_id: Dict[str, int],
+                        tx_nonce: str) -> bytes:
+    """
+    Get the hash for a transaction based on the transaction message.
+
+    :param tx_message: the transaction message
+    :return: the hash
+    """
+    converted = {int(good_id): quantity for good_id, quantity in tx_quantities_by_good_id.values()}
+    ordered = collections.OrderedDict(sorted(converted.items()))
+    good_ids = []  # type: List[int]
+    sender_supplied_quantities = []  # type: List[int]
+    counterparty_supplied_quantities = []  # type: List[int]
+    for good_id, quantity in ordered.items():
+        good_ids.append(good_id)
+        if quantity >=0:
+            sender_supplied_quantities.append(quantity)
+            counterparty_supplied_quantities.append(0)
+        else:
+            sender_supplied_quantities.append(0)
+            counterparty_supplied_quantities.append(quantity)
+    assert len(tx_amount_by_currency_id) == 1
+    tx_amount = list(tx_amount_by_currency_id.values())[0]
+    tx_hash = _get_hash(tx_sender_addr=tx_sender_addr,
+                        tx_counterparty_addr=tx_counterparty_addr,
+                        good_ids=good_ids,
+                        sender_supplied_quantities=sender_supplied_quantities,
+                        counterparty_supplied_quantities=counterparty_supplied_quantities,
+                        tx_amount=tx_amount,
+                        tx_nonce=tx_nonce)
+    return tx_hash

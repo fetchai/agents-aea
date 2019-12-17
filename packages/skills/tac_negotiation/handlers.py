@@ -252,8 +252,6 @@ class FIPANegotiationHandler(Handler):
         if strategy.is_profitable_transaction(transaction_msg, is_seller=dialogue.is_seller):
             logger.info("[{}]: locking the current state (as {}).".format(self.context.agent_name, dialogue.role))
             transactions.add_locked_tx(transaction_msg, as_seller=dialogue.is_seller)
-            transaction_msg.set('performative', TransactionMessage.Performative.PROPOSE_FOR_SIGNING)
-            transaction_msg.set('skill_callback_ids', ['tac_negotiation'])
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
             logger.debug("[{}]: decline the Accept (as {}).".format(self.context.agent_name, dialogue.role))
@@ -281,11 +279,7 @@ class FIPANegotiationHandler(Handler):
                      .format(self.context.agent_name, match_accept.message_id, match_accept.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_addr, match_accept.target))
         transactions = cast(Transactions, self.context.transactions)
         transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.target))
-        # update skill id to route back to tac participation skill
-        logger.info("[{}]: proposing tx to decision maker.".format(self.context.agent_name))
-        transaction_msg.set('performative', TransactionMessage.Performative.PROPOSE_FOR_SIGNING)
-        transaction_msg.set('skill_callback_ids', ['tac_participation'])
-        self.context.decision_maker_message_queue.put(transaction_msg)
+        send to dc maker for off chain settlement
 
 
 class TransactionHandler(Handler):
@@ -322,7 +316,7 @@ class TransactionHandler(Handler):
                                        message_id=fipa_message.message_id + 1,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=fipa_message.message_id,
-                                       info={"signature": 'PLACEHOLDER'})  # TODO: tx_message.signature})
+                                       info={"tx_signature": tx_message.tx_signature})
                 dialogue.outgoing_extend(fipa_msg)
                 self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
                                                 sender=self.context.agent_address,

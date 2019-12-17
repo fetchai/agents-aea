@@ -103,6 +103,16 @@ class EthereumCrypto(Crypto):
         signature = self._account.sign_message(m_message)
         return signature
 
+    def sign_transaction(self, tx_hash: bytes) -> bytes:
+        """
+        Sing a transaction hash.
+
+        :param tx_hash: the transaction hash
+        :return: Signed message in bytes
+        """
+        signature = self.entity.signHash(tx_hash)
+        return signature
+
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""
         account = Account.create()
