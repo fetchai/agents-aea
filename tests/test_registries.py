@@ -222,10 +222,10 @@ class TestResources:
         assert tasks == error_skill_context.tasks
         assert getattr(error_skill_context, "agent_name") == self.agent_name
 
-        assert handlers[0].context == dummy_skill.skill_context
-        assert behaviours[0].context == dummy_skill.skill_context
-        assert tasks[0].context == dummy_skill.skill_context
-        assert shared_classes[0].context == dummy_skill.skill_context
+        assert handlers["dummy"].context == dummy_skill.skill_context
+        assert behaviours["dummy"].context == dummy_skill.skill_context
+        assert tasks["dummy"].context == dummy_skill.skill_context
+        assert shared_classes["dummy"].context == dummy_skill.skill_context
 
     def test_handler_configuration_loading(self):
         """Test that the handler configurations are loaded correctly."""
@@ -265,7 +265,7 @@ class TestResources:
         """Test that the shared class configurations are loaded correctly."""
         dummy_skill = self.resources.get_skill("dummy")
         assert len(dummy_skill.shared_classes) == 1
-        dummy_shared_class = dummy_skill.shared_classes[0]
+        dummy_shared_class = dummy_skill.shared_classes["dummy"]
 
         assert dummy_shared_class.config == {
             "shared_class_arg_1": 1,

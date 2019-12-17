@@ -40,16 +40,8 @@
       "additionalProperties": false,
       "uniqueItems": true,
       "patternProperties": {
-        ".*": {
+        "^[^\\d\\W]\\w*\\Z": {
           "$ref": "#/definitions/handler"
-        }
-      },
-      "items": {
-        "type": "object",
-        "properties": {
-          "handler": {
-            "$ref": "#/definitions/handler"
-          }
         }
       }
     },
@@ -57,7 +49,7 @@
       "type": "object",
       "uniqueItems": true,
       "patternProperties": {
-        ".*": {
+        "^[^\\d\\W]\\w*\\Z": {
           "$ref": "#/definitions/behaviour"
         }
       }
@@ -66,7 +58,7 @@
       "type": "object",
       "uniqueItems": true,
       "patternProperties": {
-        ".*": {
+        "^[^\\d\\W]\\w*\\Z": {
           "$ref": "#/definitions/task"
         }
       }
@@ -75,7 +67,7 @@
       "type": "object",
       "uniqueItems": true,
       "patternProperties": {
-        ".*": {
+        "^[^\\d\\W]\\w*\\Z": {
           "$ref": "#/definitions/shared_class"
         }
       }

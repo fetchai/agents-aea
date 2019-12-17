@@ -167,7 +167,7 @@ async def test_handle():
             t.start()
             time.sleep(2.0)
             dummy_skill = agent.resources.get_skill("dummy")
-            dummy_handler = dummy_skill.handlers[0]
+            dummy_handler = dummy_skill.handlers["dummy"]
 
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
