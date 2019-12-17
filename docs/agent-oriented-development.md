@@ -1,10 +1,10 @@
-# Agent-oriented problem solving
-In this section, we highlight some of the most fundamental characteristics of the agent-based approach to solution development, and problem solving in general, which may be different from some of the existing paradigms and methodologies people are used to. We hope to be able to guide you towards having the right mindset when designing your own agent-based solutions to real world problems. 
+# Agent-oriented development
+In this section, we highlight some of the most fundamental characteristics of the agent-oriented approach to solution development which might be different from some of the existing paradigms and methodologies developers are used to. With this piece, we hope to be able to guide you towards having the right mindset when designing your own agent-based solutions to real world problems. 
 
 <!-- Our aim with the following discussion is that we guide you--> 
 
 ## Decentralisation
-First and foremost is decentralisation. Multi-agent systems (MAS) are inherently decentralised. The vision is an environment in which every individual is able to directly connect with everyone else and interact with them without having to rely on a third-party to facilitate this. This is in direct contrast to centralised systems in which a single entity is the central point of authority, through which all interactions happen. Systems based on the client-server model are an example of centralised systems in which <!--a central facility (the server) provides a set of services to the clients. Furthermore, in these systems,--> clients interact with one another, regarding a specific service (e.g. communication, trade), through the server. 
+First and foremost is decentralisation. Multi-agent systems (MAS) are inherently decentralised. The vision is an environment in which every agent is able to directly connect with everyone else and interact with them without having to rely on a third-party to facilitate this. This is in direct contrast to centralised systems in which a single entity is the central point of authority, through which all interactions happen. Systems based on the client-server model are an example of centralised systems in which <!--a central facility (the server) provides a set of services to the clients. Furthermore, in these systems,--> clients interact with one another, regarding a specific service (e.g. communication, trade), through the server.
 
 Note, this is not to say that facilitators and middlemen have no place in a Multi-Agent System; rather it is the 'commanding reliance on middlemen' that MAS disagrees with.
 
@@ -26,9 +26,33 @@ As such, a distinctive characteristic of a multi-agent environment is that it is
 
 There are practical implications that follow from the above when it comes to designing an agent. For example, it is not rational for an agent to automatically rely on the information it receives from other agents. The information could be incomplete; what is unrevealed may have been deemed private for strategic reasons. The information could be uncertain, the result of an inaccurate prediction. Or it could be an outright lie, due to the adversarial nature of the environment. Therefore there is a degree of uncertainty attached to almost all information an agent receives in a multi-agent system. One could argue for taking a sceptical approach; treating everything as uncertain, unless proved otherwise.  
 
-Therefore when designing an agent, one has to be aware of this conflicts of interest, and take this into account when for example the agent gathers information from other agents .    
-
 ## Asynchronization
+
+The conflicting nature of multi-agent systems, being comprised of selfish autonomous agents, points to _asynchronisation_ as the preferred method of managing processes and interactions.
+
+In general, asynchronisation refers to the decoupling of events that do interact within the same system but do not occur at predetermined intervals, not necessarily relying on each other's existence to function. This is in contrast with synchronous systems in which processes must be aware of one another, where one's execution depends in some way on the other.
+
+In the context of multi-agent systems, the decentralised and potentially conflicting nature of the environment<!-- means that there are no control over every aspect of the system, for example, there are no guarantees on how other agents behave. Moreover, we mentioned that agents are inherently self-interested and may be designed heterogeneously. Therefore, an agent's interaction with another agent --> 
+creates uncertainty over the behaviour of the whole system, in particular of other agents. For example, suppose an agent _i_ requests a resource from an agent _j_. Since MAS often tends to be distributed, there is the usual uncertainties with communication over a network: _j_ may never receive _i_'s request. In addition, since agents are self-interest, _j_ may reply much later, to the point the answer is no longer needed. For example, if _i_ no longer needs that resource. This could be because _j_ assigns a low priority to answering _i_ over its other tasks. As mentioned in the previous section, _j_'s response might be incomplete, uncertain, or incorrect, or _j_ may simply decide not to reply for some reason. 
+
+All of this means that there are always uncertainties attached to an agent's interactions with the environment, including other agents. 
+
+They are not coordinated with each other, they could occur simultaneously or not because they have their own separate agenda.
+
+In general, asynchronisation is the paradigm in which events that do interact within the same system do not occur at predetermined intervals and do not necessarily rely on each other's existence to function. They are not coordinated with each other, they could occur simultaneously or not because they have their own separate agenda.
+
+In the context of designing agents, asynchronisation refers to the practice of decoupling processes as much as possible, making them independent of one another. 
+
+Because 
+
+asynchronous describes the relationship between two or more events/objects that do interact within the same system but do not occur at predetermined intervals and do not necessarily rely on each other's existence to function. They are not coordinated with each other, meaning they could occur simultaneously or not because they have their own separate agenda.
+
+Synchronous, or Synchronized means "connected", or "dependent" in some way. In other words, two synchronous tasks must be aware of one another, and one task must execute in some way that is dependent on the other, such as wait to start until the other task has completed.
+Asynchronous means they are totally independent and neither one must consider the other in any way, either in initiation or in execution.
+
+asynchronisation refers to the decoupling of processes which do interact with one another, but at the same time are totally independent. Neither one must consider the other in any way, either in initiation or in execution. One of the reasons to pursue asynchronisation is to increase fault-tolerance and scalability. In an environment in which processes are controlled by different entities and do not 
+
+
 
 Another inherent difference: Agents are autonomous, thus:
 

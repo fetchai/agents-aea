@@ -19,7 +19,7 @@ nav:
 
   - Autonomous Economic Agent Framework:
     - Welcome: 'index.md'
-    - Agent-oriented approach: 'agent-oriented-approach.md'
+    - Agent-oriented development: 'agent-oriented-development.md'
     - AEA quick start: 'quickstart.md'
     - Version: 'version.md'
     - The AEA universe:
