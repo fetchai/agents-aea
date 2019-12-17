@@ -268,57 +268,66 @@ class Transaction:
     """Convenience representation of a transaction."""
 
     def __init__(self,
-                 transaction_id: TransactionId,
-                 sender: Address,
-                 counterparty: Address,
+                 id: TransactionId,
+                 sender_addr: Address,
+                 counterparty_addr: Address,
                  amount_by_currency_id: Dict[str, int],
-                 sender_tx_fee: int,
-                 counterparty_tx_fee: int,
-                 quantities_by_good_id: Dict[str, int]) -> None:
+                 sender_fee: int,
+                 counterparty_fee: int,
+                 quantities_by_good_id: Dict[str, int],
+                 nonce: int,
+                 sender_signature: bytes,
+                 counterparty_signature: bytes) -> None:
         """
         Instantiate transaction request.
 
-        :param transaction_id: the id of the transaction.
-        :param sender: the sender of the transaction.
-        :param counterparty: the counterparty of the transaction.
+        :param id: the id of the transaction.
+        :param sender_addr: the sender of the transaction.
+        :param tx_counterparty_addr: the counterparty of the transaction.
         :param amount_by_currency_id: the currency used.
-        :param sender_tx_fee: the transaction fee covered by the sender.
-        :param counterparty_tx_fee: the transaction fee covered by the counterparty.
+        :param sender_fee: the transaction fee covered by the sender.
+        :param counterparty_fee: the transaction fee covered by the counterparty.
         :param quantities_by_good_id: a map from good pbk to the quantity of that good involved in the transaction.
+        :param nonce: the nonce of the transaction
+        :param sender_signature: the signature of the transaction sender
+        :param counterparty_signature: the signature of the transaction counterparty
         :return: None
         """
-        self.transaction_id = transaction_id
-        self.sender = sender
-        self.counterparty = counterparty
-        self.is_sender_buyer = any(value <= 0 for value in amount_by_currency_id.values())
+        self.id = id
+        self.sender_addr = sender_addr
+        self.counterparty_addr = counterparty_addr
         self.amount_by_currency_id = amount_by_currency_id
-        self.sender_tx_fee = sender_tx_fee
-        self.counterparty_tx_fee = counterparty_tx_fee
+        self.sender_fee = sender_fee
+        self.counterparty_fee = counterparty_fee
         self.quantities_by_good_id = quantities_by_good_id
+        self.nonce = nonce
+        self.sender_signature = sender_signature
+        self.counterparty_signature = counterparty_signature
         self._check_consistency()
+        self.is_sender_buyer = all(value <= 0 for value in amount_by_currency_id.values())
 
     @property
     def buyer_addr(self) -> Address:
         """Get the address of the buyer."""
-        result = self.sender if self.is_sender_buyer else self.counterparty
+        result = self.sender_addr if self.is_sender_buyer else self.counterparty_addr
         return result
 
     @property
     def seller_addr(self) -> Address:
         """Get the address of the seller."""
-        result = self.counterparty if self.is_sender_buyer else self.sender
+        result = self.counterparty_addr if self.is_sender_buyer else self.sender_addr
         return result
 
     @property
     def buyer_tx_fee(self) -> int:
         """Get the tx fee of the buyer."""
-        result = self.sender_tx_fee if self.is_sender_buyer else self.counterparty_tx_fee
+        result = self.sender_fee if self.is_sender_buyer else self.counterparty_fee
         return result
 
     @property
     def seller_tx_fee(self) -> int:
         """Get the tx fee of the seller."""
-        result = self.counterparty_tx_fee if self.is_sender_buyer else self.sender_tx_fee
+        result = self.counterparty_fee if self.is_sender_buyer else self.sender_fee
         return result
 
     @property
@@ -340,11 +349,13 @@ class Transaction:
         :return: None
         :raises AssertionError if some constraint is not satisfied.
         """
-        assert self.sender != self.counterparty
+        assert self.sender_addr != self.counterparty_addr
         assert len(self.amount_by_currency_id.keys()) == 1  # For now we restrict to one currency per transaction.
-        assert self.sender_tx_fee >= 0
-        assert self.counterparty_tx_fee >= 0
+        assert self.sender_fee >= 0
+        assert self.counterparty_fee >= 0
         assert len(self.quantities_by_good_id.keys()) == len(set(self.quantities_by_good_id.keys()))
+        assert (all(amount >= 0 for amount in self.amount_by_currency_id.values()) and all(quantity <= 0 for quantity in self.quantities_by_good_id.values())) or \
+            (all(amount <= 0 for amount in self.amount_by_currency_id.values()) and all(quantity >= 0 for quantity in self.quantities_by_good_id.values()))
 
     @classmethod
     def from_message(cls, message: TACMessage) -> 'Transaction':
@@ -355,47 +366,29 @@ class Transaction:
         :return: Transaction
         """
         assert message.type == TACMessage.Type.TRANSACTION
-        return Transaction(message.transaction_id,
-                           message.counterparty,
-                           message.transaction_counterparty,
+        return Transaction(message.tx_id,
+                           message.tx_sender_addr,
+                           message.tx_counterparty_addr,
                            message.amount_by_currency_id,
-                           message.sender_tx_fee,
-                           message.counterparty_tx_fee,
-                           message.quantities_by_good_id)
-
-    def matches(self, other: 'Transaction') -> bool:
-        """
-        Check if the transaction matches with another (mirroring) transaction.
-
-        Two transaction requests do match if:
-        - the transaction id is the same;
-        - one of them is from a buyer and the other one is from a seller
-        - the counterparty and the origin field are consistent.
-        - the amount and the quantities are equal.
-
-        :param other: the other transaction to match.
-        :return: True if the two
-        """
-        return self.transaction_id == other.transaction_id \
-            and self.sender == other.counterparty \
-            and self.counterparty == other.sender \
-            and self.is_sender_buyer != other.is_sender_buyer \
-            and self.amount_by_currency_id == {x: y * -1 for x, y in other.amount_by_currency_id.items()} \
-            and self.sender_tx_fee == other.counterparty_tx_fee \
-            and self.counterparty_tx_fee == other.sender_tx_fee \
-            and self.quantities_by_good_id == {x: y * -1 for x, y in other.quantities_by_good_id.items()}
+                           message.tx_sender_fee,
+                           message.tx_counterparty_fee,
+                           message.quantities_by_good_id,
+                           message.tx_nonce,
+                           message.tx_sender_signature,
+                           message.tx_counterparty_signature)
 
     def __eq__(self, other):
         """Compare to another object."""
         return isinstance(other, Transaction) \
-            and self.transaction_id == other.transaction_id \
-            and self.sender == other.sender \
-            and self.counterparty == other.counterparty \
-            and self.is_sender_buyer == other.is_sender_buyer \
+            and self.id == other.id \
+            and self.sender_addr == other.sender_addr \
+            and self.counterparty_addr == other.counterparty_addr \
             and self.amount_by_currency_id == other.amount_by_currency_id \
-            and self.sender_tx_fee == other.sender_tx_fee \
-            and self.counterparty_tx_fee == other.counterparty_tx_fee \
-            and self.quantities_by_good_id == other.quantities_by_good_id
+            and self.sender_fee == other.sender_fee \
+            and self.counterparty_fee == other.counterparty_fee \
+            and self.quantities_by_good_id == other.quantities_by_good_id \
+            and self.sender_signature == other.sender_signature \
+            and self.counterparty_signature == other.counterparty_signature
 
 
 class AgentState:
@@ -574,7 +567,7 @@ class Transactions:
         :param transaction: the transaction
         :return: None
         """
-        self._pending[transaction.transaction_id] = transaction
+        self._pending[transaction.id] = transaction
 
     def pop_pending(self, transaction_id: TransactionId) -> Transaction:
         """
@@ -593,8 +586,8 @@ class Transactions:
         :return: None
         """
         self._confirmed.append(transaction)
-        self._confirmed_per_agent[transaction.sender].append(transaction)
-        self._confirmed_per_agent[transaction.counterparty].append(transaction)
+        self._confirmed_per_agent[transaction.sender_addr].append(transaction)
+        self._confirmed_per_agent[transaction.counterparty_addr].append(transaction)
 
 
 class Registration:

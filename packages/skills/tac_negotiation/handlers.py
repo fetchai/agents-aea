@@ -148,7 +148,7 @@ class FIPANegotiationHandler(Handler):
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         else:
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
+            transaction_msg = transactions.generate_transaction_message(TransactionMessage.Performative.PROPOSE_FOR_SIGNING, proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
             logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                                                                  pprint.pformat({
@@ -185,7 +185,7 @@ class FIPANegotiationHandler(Handler):
         for num, proposal_description in enumerate(proposals):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.generate_transaction_message(proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
+            transaction_msg = transactions.generate_transaction_message(TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT, proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
 
             if strategy.is_profitable_transaction(transaction_msg, is_seller=dialogue.is_seller):
                 logger.info("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))
@@ -278,8 +278,9 @@ class FIPANegotiationHandler(Handler):
         logger.debug("[{}]: on_match_accept: msg_id={}, dialogue_reference={}, origin={}, target={}"
                      .format(self.context.agent_name, match_accept.message_id, match_accept.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_addr, match_accept.target))
         transactions = cast(Transactions, self.context.transactions)
-        transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, cast(int, match_accept.target))
-        send to dc maker for off chain settlement
+        transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, match_accept.target)
+        transaction_msg.info['tx_counterparty_signature'] = match_accept.info.get('tx_signature')
+        self.context.decision_maker_message_queue.put(transaction_msg)
 
 
 class TransactionHandler(Handler):

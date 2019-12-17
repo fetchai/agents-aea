@@ -85,12 +85,15 @@ class TACSerializer(Serializer):
             tac_container.unregister.CopyFrom(tac_msg)
         elif msg.type == TACMessage.Type.TRANSACTION:
             tac_msg = tac_pb2.TACAgent.Transaction()  # type: ignore
-            tac_msg.transaction_id = msg.transaction_id
-            tac_msg.counterparty = msg.transaction_counterparty
+            tac_msg.tx_id = msg.tx_id
+            tac_msg.tx_sender_addr = msg.tx_sender_addr
+            tac_msg.tx_counterparty_addr = msg.tx_counterparty_addr
             tac_msg.amount_by_currency_id.extend(_from_dict_to_pairs(msg.amount_by_currency_id))
-            tac_msg.sender_tx_fee = msg.sender_tx_fee
-            tac_msg.counterparty_tx_fee = msg.counterparty_tx_fee
+            tac_msg.tx_sender_fee = msg.tx_sender_fee
+            tac_msg.tx_counterparty_fee = msg.tx_counterparty_fee
             tac_msg.quantities_by_good_id.extend(_from_dict_to_pairs(msg.quantities_by_good_id))
+            tac_msg.tx_sender_signature = msg.tx_sender_signature
+            tac_msg.tx_counterparty_signature = msg.tx_counterparty_signature
             tac_container.transaction.CopyFrom(tac_msg)
         elif msg.type == TACMessage.Type.GET_STATE_UPDATE:
             tac_msg = tac_pb2.TACAgent.GetStateUpdate()  # type: ignore
@@ -111,7 +114,7 @@ class TACSerializer(Serializer):
             tac_container.game_data.CopyFrom(tac_msg)
         elif msg.type == TACMessage.Type.TRANSACTION_CONFIRMATION:
             tac_msg = tac_pb2.TACController.TransactionConfirmation()  # type: ignore
-            tac_msg.transaction_id = msg.transaction_id
+            tac_msg.tx_id = msg.tx_id
             tac_msg.amount_by_currency_id.extend(_from_dict_to_pairs(msg.amount_by_currency_id))
             tac_msg.quantities_by_good_id.extend(_from_dict_to_pairs(msg.quantities_by_good_id))
             tac_container.transaction_confirmation.CopyFrom(tac_msg)
@@ -174,12 +177,15 @@ class TACSerializer(Serializer):
             new_body["type"] = TACMessage.Type.UNREGISTER
         elif tac_type == "transaction":
             new_body["type"] = TACMessage.Type.TRANSACTION
-            new_body["transaction_id"] = tac_container.transaction.transaction_id
-            new_body["transaction_counterparty"] = tac_container.transaction.counterparty
+            new_body["tx_id"] = tac_container.transaction.tx_id
+            new_body["tx_sender_addr"] = tac_container.transaction.tx_sender_addr
+            new_body["tx_counterparty_addr"] = tac_container.transaction.tx_counterparty_addr
             new_body["amount_by_currency_id"] = _from_pairs_to_dict(tac_container.transaction.amount_by_currency_id)
-            new_body["sender_tx_fee"] = tac_container.transaction.sender_tx_fee
-            new_body["counterparty_tx_fee"] = tac_container.transaction.counterparty_tx_fee
+            new_body["tx_sender_fee"] = tac_container.transaction.tx_sender_fee
+            new_body["tx_counterparty_fee"] = tac_container.transaction.tx_counterparty_fee
             new_body["quantities_by_good_id"] = _from_pairs_to_dict(tac_container.transaction.quantities_by_good_id)
+            new_body["tx_sender_signature"] = tac_container.transaction.tx_sender_signature
+            new_body["tx_counterparty_signature"] = tac_container.transaction.tx_counterparty_signature
         elif tac_type == "get_state_update":
             new_body["type"] = TACMessage.Type.GET_STATE_UPDATE
         elif tac_type == "cancelled":
@@ -196,7 +202,7 @@ class TACSerializer(Serializer):
             new_body["version_id"] = tac_container.game_data.version_id
         elif tac_type == "transaction_confirmation":
             new_body["type"] = TACMessage.Type.TRANSACTION_CONFIRMATION
-            new_body["transaction_id"] = tac_container.transaction_confirmation.transaction_id
+            new_body["tx_id"] = tac_container.transaction_confirmation.tx_id
             new_body["amount_by_currency_id"] = _from_pairs_to_dict(tac_container.transaction_confirmation.amount_by_currency_id)
             new_body["quantities_by_good_id"] = _from_pairs_to_dict(tac_container.transaction_confirmation.quantities_by_good_id)
         # elif tac_type == "state_update":
