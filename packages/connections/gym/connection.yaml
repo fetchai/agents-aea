@@ -6,6 +6,7 @@ description: "The gym connection wraps an OpenAI gym."
 url: ""
 class_name: GymConnection
 restricted_to_protocols: ["gym"]
+excluded_protocols: []
 config:
   env: '' # put here the dotted path to your Gym Environment class.
 dependencies:

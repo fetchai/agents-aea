@@ -38,6 +38,13 @@
         "type": "string"
       }
     },
+    "excluded_protocols": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
     "config": {
       "type": "object"
     },
