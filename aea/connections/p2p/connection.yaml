@@ -6,7 +6,7 @@ url: ""
 description: "The p2p connection provides a connection with the fetch.ai mail provider."
 class_name: PeerToPeerConnection
 restricted_to_protocols: []
-excluded_protocols: []
+excluded_protocols: ["gym"]
 config:
   addr: ${addr:127.0.0.1}
   port: ${port:8000}
