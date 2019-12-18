@@ -20,6 +20,7 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
+import sys
 
 import unittest.mock
 
@@ -32,9 +33,11 @@ def test_delete_agent():
     agent_name = "test_agent_id"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "delete"
-        assert param_list[2] == agent_name
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "delete"
+        assert param_list[4] == agent_name
         return 0
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
@@ -54,9 +57,11 @@ def test_delete_agent_fail():
     agent_name = "test_agent_id"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "delete"
-        assert param_list[2] == agent_name
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "delete"
+        assert param_list[4] == agent_name
         return 1
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):

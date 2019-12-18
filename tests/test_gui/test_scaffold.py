@@ -20,6 +20,7 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
+import sys
 
 import unittest.mock
 
@@ -37,10 +38,12 @@ def test_scaffold_item():
     connection_name = "test_connection"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "scaffold"
-        assert param_list[2] == "connection"
-        assert param_list[3] == connection_name
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "scaffold"
+        assert param_list[4] == "connection"
+        assert param_list[5] == connection_name
         assert agent_name in dir
         return 0
 
@@ -66,10 +69,12 @@ def test_scaffold_agent_fail():
     connection_name = "test_connection"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "scaffold"
-        assert param_list[2] == "connection"
-        assert param_list[3] == connection_name
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "scaffold"
+        assert param_list[4] == "connection"
+        assert param_list[5] == connection_name
         assert agent_name in dir
         return 1
 
