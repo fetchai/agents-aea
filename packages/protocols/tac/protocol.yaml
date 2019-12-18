@@ -2,5 +2,6 @@ name: tac
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
+uuid: ""
 url: ""
 description: "The tac protocol implements the messages an AEA needs to participate in the TAC."

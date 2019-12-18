@@ -2,6 +2,7 @@ name: tac_participation
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
+uuid: ""
 url: ""
 description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
 behaviours:

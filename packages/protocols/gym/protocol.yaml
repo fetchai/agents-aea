@@ -2,5 +2,6 @@ name: gym
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
+uuid: ""
 url: ""
 description: "The gym protocol implements the messages an agent needs to engage with a gym connection."

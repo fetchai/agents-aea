@@ -186,7 +186,6 @@ class ConnectionConfig(Configuration):
                  authors: str = "",
                  version: str = "",
                  license: str = "",
-                 uuid: str = "",
                  url: str = "",
                  class_name: str = "",
                  restricted_to_protocols: Optional[Set[str]] = None,
@@ -239,7 +238,6 @@ class ConnectionConfig(Configuration):
             authors=cast(str, obj.get("authors")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            uuid=cast(str, obj.get("uuid")),
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
             restricted_to_protocols=cast(Set[str], restricted_to_protocols),
@@ -258,7 +256,6 @@ class ProtocolConfig(Configuration):
                  authors: str = "",
                  version: str = "",
                  license: str = "",
-                 uuid: str = "",
                  url: str = "",
                  dependencies: Optional[Dependencies] = None,
                  description: str = ""):
@@ -295,7 +292,6 @@ class ProtocolConfig(Configuration):
             authors=cast(str, obj.get("authors")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            uuid=cast(str, obj.get("uuid")),
             url=cast(str, obj.get("url")),
             dependencies=dependencies,
             description=cast(str, obj.get("description")),
@@ -414,7 +410,6 @@ class SkillConfig(Configuration):
                  authors: str = "",
                  version: str = "",
                  license: str = "",
-                 uuid: str = "",
                  url: str = "",
                  protocols: List[str] = None,
                  dependencies: Optional[Dependencies] = None,
@@ -460,7 +455,6 @@ class SkillConfig(Configuration):
         authors = cast(str, obj.get("authors"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
-        uuid = cast(str, obj.get("uuid"))
         url = cast(str, obj.get("url"))
         protocols = cast(List[str], obj.get("protocols", []))
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
@@ -470,7 +464,6 @@ class SkillConfig(Configuration):
             authors=authors,
             version=version,
             license=license,
-            uuid=uuid,
             url=url,
             protocols=protocols,
             dependencies=dependencies,
