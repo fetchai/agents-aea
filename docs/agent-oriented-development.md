@@ -46,12 +46,12 @@ All of this makes asynchronisation the preferred method for designing agent proc
 
 ## Complex, Incomplete, Inconsistent and Uncertain
 
-The forth characteristic related to the environment in which agents are expected to operate in, an these have been mentioned a number of times in the previous sections. 
+The forth characteristic is related to the environment in which agents are expected to operate in, and these have been mentioned a number of times in the previous sections. 
 
 The environment agents are suited for typically tend to be complex, to the point that it is usually impossible for any single agent to perceive the whole of the environment on its own. This means that at any point in time, any agent has a limited knowledge about the state of the environment. In other words, the agents;' information tend to be incomplete due to the complexity and sophistication of the world in which they reside. 
 
-Consider an agent which represents a driverless vehicle. The complexity of the problem of driving on the road makes it impossible for a single vehicle to have an accurate and up-to-date knowledge of the state of the whole environment. This means the an agent's model of the world uncertain. For instance, the vehicle, though its sensor may detect green light at a junction, and by being aware of what it means, it may infer that it is safe for it to cross a junction. However, that simply may not be true as another car in the opposite direction may still cross the junction violating their red light. Therefore, there is uncertainty associated with the knowledge "it is safe to cross the road because the light is green", and the agent must recognise that. 
+Consider an agent which represents a driverless vehicle. The complexity of the problem of driving on the road makes it impossible for a single vehicle to have an accurate and up-to-date knowledge of the overall state of the world . This means that an agent's model of the world is at best uncertain. For instance, the vehicle, through its sensor may detect green light at a junction, and by being aware of what it means, it may infer that it is safe to cross a junction. However, that simply may not be true as another car in the opposite direction may still cross the junction violating their red light. Therefore, there is uncertainty associated with the knowledge "it is safe to cross the road because the light is green", and the agent must recognise that. 
 
-Furthermore, the often conflicting nature of the environment means information obtained from multiple sources (agents) may be inconsistent. Again, this must be taken into consideration when designing an agent which is expected to operate successfully in an environment of potentially conflicting nature. 
+Furthermore, the often conflicting nature of the environment means information obtained from multiple sources (agents) may be inconsistent. Again, this must be taken into consideration when designing an agent which is expected to operate successfully in a potentially conflicting environment. 
 
 <br />
