@@ -72,7 +72,7 @@ def locate(path):
     return object
 
 
-def generate_uuid(user_name: str, package_name: str, version: str, nonce: Optional[int] = None) -> str:
+def generate_public_id(user_name: str, package_name: str, version: str, nonce: Optional[int] = None) -> str:
     """Generate a unique id for the package."""
     import hashlib
     string_for_hash = "".join([user_name, package_name, version, str(nonce)])

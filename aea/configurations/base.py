@@ -21,7 +21,7 @@
 
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
-# from aea.helpers.base import generate_uuid
+# from aea.helpers.base import generate_public_id
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
@@ -198,7 +198,7 @@ class ConnectionConfig(Configuration):
         self.user_name = user_name
         self.version = version
         self.license = license
-        self.uuid = ""  # generate_uuid(user_name=self.user_name, package_name=self.name, version=self.version)
+        self.public_id = ""
         self.url = url
         self.class_name = class_name
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -215,7 +215,7 @@ class ConnectionConfig(Configuration):
             "user_name": self.user_name,
             "version": self.version,
             "license": self.license,
-            "uuid": self.uuid,
+            "public_id": self.public_id,
             "url": self.url,
             "class_name": self.class_name,
             "restricted_to_protocols": self.restricted_to_protocols,
@@ -264,7 +264,7 @@ class ProtocolConfig(Configuration):
         self.user_name = user_name
         self.version = version
         self.license = license
-        self.uuid = ""  # generate_uuid(user_name=self.user_name, package_name=self.name, version=self.version)
+        self.public_id = ""
         self.url = url
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -277,7 +277,7 @@ class ProtocolConfig(Configuration):
             "user_name": self.user_name,
             "version": self.version,
             "license": self.license,
-            "uuid": self.uuid,
+            "public_id": self.public_id,
             "url": self.url,
             "dependencies": self.dependencies,
             "description": self.description
@@ -419,7 +419,7 @@ class SkillConfig(Configuration):
         self.user_name = user_name
         self.version = version
         self.license = license
-        self.uuid = ""  # generate_uuid(user_name=self.user_name, package_name=self.name, version=self.version)
+        self.public_id = ""
         self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[str]
         self.dependencies = dependencies if dependencies is not None else {}
@@ -437,7 +437,7 @@ class SkillConfig(Configuration):
             "user_name": self.user_name,
             "version": self.version,
             "license": self.license,
-            "uuid": self.uuid,
+            "public_id": self.public_id,
             "url": self.url,
             "protocols": self.protocols,
             "dependencies": self.dependencies,

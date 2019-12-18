@@ -24,7 +24,7 @@
     "license": {
       "type": "string"
     },
-    "uuid": {
+    "public_id": {
       "type": "string"
     },
     "url": {
