@@ -6,6 +6,7 @@ url: ""
 class_name: DummyConnection
 restricted_to_protocols:
   - "default"
+excluded_protocols: []
 config: {}
 dependencies:
   dep1: {version: "==1.0.0"}
@@ -13,4 +14,4 @@ dependencies:
   dep3: {version: ">=1.10.11a1"}
   dep4: {version: "<=1.11.12b2"}
 
-description: "dummy_connection connection description [Fill in]"
+description: "dummy_connection connection description."

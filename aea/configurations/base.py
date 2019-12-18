@@ -188,6 +188,7 @@ class ConnectionConfig(Configuration):
                  url: str = "",
                  class_name: str = "",
                  restricted_to_protocols: Optional[Set[str]] = None,
+                 excluded_protocols: Optional[Set[str]] = None,
                  dependencies: Optional[Dependencies] = None,
                  description: str = "",
                  **config):
@@ -199,6 +200,7 @@ class ConnectionConfig(Configuration):
         self.url = url
         self.class_name = class_name
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
+        self.excluded_protocols = excluded_protocols if excluded_protocols is not None else set()
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.config = config
@@ -214,6 +216,7 @@ class ConnectionConfig(Configuration):
             "url": self.url,
             "class_name": self.class_name,
             "restricted_to_protocols": self.restricted_to_protocols,
+            "excluded_protocols": self.excluded_protocols,
             "dependencies": self.dependencies,
             "description": self.description,
             "config": self.config
@@ -224,6 +227,8 @@ class ConnectionConfig(Configuration):
         """Initialize from a JSON object."""
         restricted_to_protocols = obj.get("restricted_to_protocols")
         restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
+        excluded_protocols = obj.get("excluded_protocols")
+        excluded_protocols = excluded_protocols if excluded_protocols is not None else set()
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
@@ -233,6 +238,7 @@ class ConnectionConfig(Configuration):
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
             restricted_to_protocols=cast(Set[str], restricted_to_protocols),
+            excluded_protocols=cast(Set[str], excluded_protocols),
             dependencies=dependencies,
             description=cast(str, obj.get("description")),
             **cast(dict, obj.get("config"))

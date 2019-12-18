@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Methods for CLI push functionality."""
+
 import click
 import os
 import tarfile
@@ -32,7 +33,7 @@ def _remove_pycache(source_dir: str):
         shutil.rmtree(pycache_path)
 
 
-def _compress(output_filename: str, source_dir: str):
+def _compress_dir(output_filename: str, source_dir: str):
     _remove_pycache(source_dir)
     with tarfile.open(output_filename, "w:gz") as f:
         f.add(source_dir, arcname=os.path.basename(source_dir))
@@ -70,7 +71,7 @@ def push_item(item_type: str, item_name: str) -> None:
         'Compressing {} {} to {} ...'
         .format(item_name, item_type, output_filename)
     )
-    _compress(output_filename, item_path)
+    _compress_dir(output_filename, item_path)
     output_filepath = os.path.join(cwd, output_filename)
 
     item_config_filepath = os.path.join(item_path, '{}.yaml'.format(item_type))

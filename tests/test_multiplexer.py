@@ -327,7 +327,8 @@ def test_send_message_no_supported_protocol():
         address_1 = "address_1"
         connection_1_id = "local_1"
         connection_1 = OEFLocalConnection(address_1, node, connection_id=connection_1_id,
-                                          restricted_to_protocols={"my_private_protocol"})
+                                          restricted_to_protocols={"my_private_protocol"},
+                                          excluded_protocols={"my_other_protocol"})
         multiplexer = Multiplexer([connection_1])
 
         multiplexer.connect()

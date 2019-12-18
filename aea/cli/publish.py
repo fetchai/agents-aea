@@ -17,27 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Main entry point for CLI GUI."""
-import aea.cli_gui
+"""Implementation of the 'aea publish' subcommand."""
+import click
 
-import argparse
+from aea.cli.registry.publish import publish_agent
 
-parser = argparse.ArgumentParser(description='Launch the gui through python')
-parser.add_argument(
-    '-p',
-    '--port',
-    help='Port that the web server listens on',
-    type=int,
-    default=8080)
 
-parser.add_argument('-H',
-                    '--host',
-                    help='host that the web server serves from',
-                    type=str,
-                    default="127.0.0.1")
-
-args, unknown = parser.parse_known_args()
-
-# If we're running in stand alone mode, run the application
-if __name__ == '__main__':
-    aea.cli_gui.run(args.port, args.host)  # pragma: no cover
+@click.command(name='publish')
+def publish():
+    """Publish Agent to Registry."""
+    publish_agent()
