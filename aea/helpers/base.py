@@ -68,3 +68,12 @@ def locate(path):
         except AttributeError:
             return None
     return object
+
+
+def generate_uuid(author: str, package_name: str, version: str) -> str:
+    """Generate a unique id for the package."""
+    import base64
+    encoded_str = base64.b64encode(author.encode('utf8')).hex() +\
+        base64.b64encode(package_name.encode('utf8')).hex() +\
+        base64.b64encode(version.encode('utf8')).hex()
+    return encoded_str

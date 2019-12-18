@@ -21,6 +21,7 @@
 
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
+from aea.helpers.base import generate_uuid
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
@@ -238,7 +239,7 @@ class ConnectionConfig(Configuration):
             authors=cast(str, obj.get("authors")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            uuid=cast(str,obj.get("uuid")),
+            uuid=cast(str, obj.get("uuid")),
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
             restricted_to_protocols=cast(Set[str], restricted_to_protocols),
@@ -613,11 +614,3 @@ class AgentConfig(Configuration):
         agent_config.default_connection = default_connection_name
 
         return agent_config
-
-
-def generate_uuid(author: str, package_name: str, version: str) -> str:
-    import base64
-    encoded_str = base64.b64encode(author.encode('utf8')).hex() +\
-        base64.b64encode(package_name.encode('utf8')).hex() +\
-        base64.b64encode(version.encode('utf8')).hex()
-    return encoded_str
