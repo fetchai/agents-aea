@@ -414,7 +414,7 @@ class TestDecisionMaker:
 
         self.mocked_logger_warning.assert_called_with("[{}]: Message received by the decision maker is not of protocol_id=internal.".format(self.agent_name))
 
-    def test_is_affordable(self):
+    def test_is_affordable_off_chain(self):
         """Test the off_chain message."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
                                         skill_ids=["default"],
@@ -432,6 +432,42 @@ class TestDecisionMaker:
 
         assert self.decision_maker._is_affordable(tx_message)
 
+    def test_settle_tx_off_chain(self):
+        """Test the off_chain message."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                        skill_ids=["default"],
+                                        transaction_id="transaction0",
+                                        sender="agent_1",
+                                        counterparty="pk",
+                                        is_sender_buyer=True,
+                                        currency_id="FET",
+                                        amount=2,
+                                        sender_tx_fee=0,
+                                        counterparty_tx_fee=0,
+                                        ledger_id="off_chain",
+                                        quantities_by_good_id={"good_id": 10},
+                                        info={'some_info_key': 'some_info_value'})
+
+        tx_digest = self.decision_maker._settle_tx(tx_message)
+        assert tx_digest == tx_message.transaction_id
+
+    def test__is_utility_enhancing(self):
+        """Test the off_chain message."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
+                                        skill_ids=["default"],
+                                        transaction_id="transaction0",
+                                        sender="agent_1",
+                                        counterparty="pk",
+                                        is_sender_buyer=True,
+                                        currency_id="FET",
+                                        amount=2,
+                                        sender_tx_fee=0,
+                                        counterparty_tx_fee=0,
+                                        ledger_id="off_chain",
+                                        quantities_by_good_id={"good_id": 10},
+                                        info={'some_info_key': 'some_info_value'})
+        self.decision_maker.ownership_state._quantities_by_good_id = None
+        assert self.decision_maker._is_utility_enhancing(tx_message)
 
     @classmethod
     def teardown_class(cls):
