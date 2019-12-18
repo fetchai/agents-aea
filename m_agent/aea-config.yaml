@@ -1,0 +1,21 @@
+aea_version: 0.1.14
+agent_name: m_agent
+authors: ''
+connections:
+- oef
+- p3p
+default_connection: oef
+description: ''
+ledger_apis: []
+license: ''
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: []
+protocols:
+- default
+registry_path: ../packages
+skills:
+- error
+url: ''
+version: v1
