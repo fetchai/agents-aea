@@ -1,6 +1,6 @@
 aea_version: 0.1.7
 agent_name: Agent0
-authors: Fetch.AI Limited
+user_name: fetchai
 connections:
 - local
 default_connection: local

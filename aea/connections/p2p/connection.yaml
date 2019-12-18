@@ -1,7 +1,8 @@
 name: p2p
-authors: Fetch.AI Limited
+user_name: fetchai
 version: 0.1.0
 license: Apache 2.0
+uuid: ""
 url: ""
 description: "The p2p connection provides a connection with the fetch.ai mail provider."
 class_name: PeerToPeerConnection

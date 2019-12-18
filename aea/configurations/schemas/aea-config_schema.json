@@ -6,7 +6,7 @@
   "required": [
     "aea_version",
     "agent_name",
-    "authors",
+    "user_name",
     "version",
     "license",
     "url",
@@ -23,7 +23,7 @@
     "agent_name": {
       "type": "string"
     },
-    "authors": {
+    "user_name": {
       "type": "string"
     },
     "version": {

@@ -21,7 +21,7 @@
 
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
-from aea.helpers.base import generate_uuid
+# from aea.helpers.base import generate_uuid
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
@@ -183,7 +183,7 @@ class ConnectionConfig(Configuration):
 
     def __init__(self,
                  name: str = "",
-                 authors: str = "",
+                 user_name: str = "",
                  version: str = "",
                  license: str = "",
                  url: str = "",
@@ -195,10 +195,10 @@ class ConnectionConfig(Configuration):
                  **config):
         """Initialize a connection configuration object."""
         self.name = name
-        self.authors = authors
+        self.user_name = user_name
         self.version = version
         self.license = license
-        self.uuid = generate_uuid(author=self.authors, package_name=self.name, version=self.version)
+        self.uuid = ""  # generate_uuid(user_name=self.user_name, package_name=self.name, version=self.version)
         self.url = url
         self.class_name = class_name
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -212,7 +212,7 @@ class ConnectionConfig(Configuration):
         """Return the JSON representation."""
         return {
             "name": self.name,
-            "authors": self.authors,
+            "user_name": self.user_name,
             "version": self.version,
             "license": self.license,
             "uuid": self.uuid,
@@ -235,7 +235,7 @@ class ConnectionConfig(Configuration):
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
-            authors=cast(str, obj.get("authors")),
+            user_name=cast(str, obj.get("user_name")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
@@ -253,7 +253,7 @@ class ProtocolConfig(Configuration):
 
     def __init__(self,
                  name: str = "",
-                 authors: str = "",
+                 user_name: str = "",
                  version: str = "",
                  license: str = "",
                  url: str = "",
@@ -261,10 +261,10 @@ class ProtocolConfig(Configuration):
                  description: str = ""):
         """Initialize a connection configuration object."""
         self.name = name
-        self.authors = authors
+        self.user_name = user_name
         self.version = version
         self.license = license
-        self.uuid = generate_uuid(author=self.authors, package_name=self.name, version=self.version)
+        self.uuid = ""  # generate_uuid(user_name=self.user_name, package_name=self.name, version=self.version)
         self.url = url
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -274,7 +274,7 @@ class ProtocolConfig(Configuration):
         """Return the JSON representation."""
         return {
             "name": self.name,
-            "authors": self.authors,
+            "user_name": self.user_name,
             "version": self.version,
             "license": self.license,
             "uuid": self.uuid,
@@ -289,7 +289,7 @@ class ProtocolConfig(Configuration):
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ProtocolConfig(
             name=cast(str, obj.get("name")),
-            authors=cast(str, obj.get("authors")),
+            user_name=cast(str, obj.get("user_name")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
@@ -407,7 +407,7 @@ class SkillConfig(Configuration):
 
     def __init__(self,
                  name: str = "",
-                 authors: str = "",
+                 user_name: str = "",
                  version: str = "",
                  license: str = "",
                  url: str = "",
@@ -416,10 +416,10 @@ class SkillConfig(Configuration):
                  description: str = ""):
         """Initialize a skill configuration."""
         self.name = name
-        self.authors = authors
+        self.user_name = user_name
         self.version = version
         self.license = license
-        self.uuid = generate_uuid(author=self.authors, package_name=self.name, version=self.version)
+        self.uuid = ""  # generate_uuid(user_name=self.user_name, package_name=self.name, version=self.version)
         self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[str]
         self.dependencies = dependencies if dependencies is not None else {}
@@ -434,7 +434,7 @@ class SkillConfig(Configuration):
         """Return the JSON representation."""
         return {
             "name": self.name,
-            "authors": self.authors,
+            "user_name": self.user_name,
             "version": self.version,
             "license": self.license,
             "uuid": self.uuid,
@@ -452,7 +452,7 @@ class SkillConfig(Configuration):
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
         name = cast(str, obj.get("name"))
-        authors = cast(str, obj.get("authors"))
+        user_name = cast(str, obj.get("user_name"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
         url = cast(str, obj.get("url"))
@@ -461,7 +461,7 @@ class SkillConfig(Configuration):
         description = cast(str, obj.get("description"))
         skill_config = SkillConfig(
             name=name,
-            authors=authors,
+            user_name=user_name,
             version=version,
             license=license,
             url=url,
@@ -495,7 +495,7 @@ class AgentConfig(Configuration):
     def __init__(self,
                  agent_name: str = "",
                  aea_version: str = "",
-                 authors: str = "",
+                 user_name: str = "",
                  version: str = "",
                  license: str = "",
                  url: str = "",
@@ -507,7 +507,7 @@ class AgentConfig(Configuration):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
         self.aea_version = aea_version
-        self.authors = authors
+        self.user_name = user_name
         self.version = version
         self.license = license
         self.url = url
@@ -556,7 +556,7 @@ class AgentConfig(Configuration):
         return {
             "agent_name": self.agent_name,
             "aea_version": self.aea_version,
-            "authors": self.authors,
+            "user_name": self.user_name,
             "version": self.version,
             "license": self.license,
             "url": self.url,
@@ -587,7 +587,7 @@ class AgentConfig(Configuration):
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
-            authors=cast(str, obj.get("authors")),
+            user_name=cast(str, obj.get("user_name")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),

@@ -1,8 +1,8 @@
 name: dummy
-authors: Fetch.AI Limited
+user_name: fetchai
 version: 0.1.0
 license: Apache 2.0
-uuid: "cf82d159767fc2ff76cb8a0edaca5f61fbd482ba24392852434c168f3c87d026"
+uuid: ""
 url: ""
 behaviours:
   - behaviour:

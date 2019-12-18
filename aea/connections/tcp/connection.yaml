@@ -1,7 +1,8 @@
 name: tcp
-authors: Fetch.AI Limited
+user_name: fetchai
 version: 0.1.0
 license: Apache 2.0
+uuid: ""
 url: ""
 class_name: TCPClientConnection  # this can be eitehr TCPClientConnection or TCPServerConnection
 restricted_to_protocols: []

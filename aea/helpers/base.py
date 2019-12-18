@@ -20,6 +20,8 @@
 """Miscellaneous helpers."""
 
 import builtins
+from typing import Optional
+
 import importlib.util
 import logging
 import os
@@ -70,10 +72,10 @@ def locate(path):
     return object
 
 
-def generate_uuid(author: str, package_name: str, version: str) -> str:
+def generate_uuid(user_name: str, package_name: str, version: str, nonce: Optional[int] = None) -> str:
     """Generate a unique id for the package."""
     import hashlib
-    string_for_hash = "".join([author, package_name, version])
+    string_for_hash = "".join([user_name, package_name, version, str(nonce)])
     m_hash = hashlib.sha3_256()
     m_hash.update(string_for_hash.encode())
     encoded_str = m_hash.digest().hex()

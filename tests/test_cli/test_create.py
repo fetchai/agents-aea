@@ -103,7 +103,7 @@ class TestCreate:
     def test_authors_field_is_empty_string(self):
         """Check that the 'authors' field in the config file is the empty string."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["authors"] == ""
+        assert agent_config_instance["user_name"] == ""
 
     def test_connections_contains_only_oef(self):
         """Check that the 'connections' list contains only the 'oef' connection."""
