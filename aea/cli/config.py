@@ -20,14 +20,14 @@
 """Implementation of the 'aea list' subcommand."""
 import sys
 from pathlib import Path
-from typing import Tuple, Dict, List
+from typing import Dict, List, cast
 
 import click
 import yaml
 
 from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config, logger
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, \
-    DEFAULT_CONNECTION_CONFIG_FILE, Configuration
+    DEFAULT_CONNECTION_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, ConfigurationType
 
 ALLOWED_PATH_ROOTS = ["agent", "skills", "protocols", "connections"]
@@ -121,8 +121,8 @@ def config(ctx: Context):
 @pass_ctx
 def get(ctx: Context, json_path: List[str]):
     """Get a field."""
-    config_loader = ctx.config.get("configuration_loader")
-    configuration_file_path = ctx.config.get("configuration_file_path")
+    config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
+    configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
     configuration_object = yaml.safe_load(open(configuration_file_path))
     config_loader.validator.validate(instance=configuration_object)
@@ -152,8 +152,8 @@ def get(ctx: Context, json_path: List[str]):
 @pass_ctx
 def set(ctx: Context, json_path: List[str], value):
     """Set a field."""
-    config_loader = ctx.config.get("configuration_loader")
-    configuration_file_path = ctx.config.get("configuration_file_path")
+    config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
+    configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
     configuration_dict = yaml.safe_load(open(configuration_file_path))
     config_loader.validator.validate(instance=configuration_dict)
@@ -166,7 +166,7 @@ def set(ctx: Context, json_path: List[str], value):
         logger.error(str(e))
         sys.exit(1)
 
-    if not attribute_name in parent_object:
+    if attribute_name not in parent_object:
         logger.error("Attribute '{}' not found.".format(attribute_name))
         sys.exit(1)
     if not isinstance(parent_object.get(attribute_name), (str, int, bool, float)):
