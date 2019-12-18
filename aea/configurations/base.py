@@ -185,6 +185,7 @@ class ConnectionConfig(Configuration):
                  authors: str = "",
                  version: str = "",
                  license: str = "",
+                 uuid: str = "",
                  url: str = "",
                  class_name: str = "",
                  restricted_to_protocols: Optional[Set[str]] = None,
@@ -197,6 +198,7 @@ class ConnectionConfig(Configuration):
         self.authors = authors
         self.version = version
         self.license = license
+        self.uuid = generate_uuid(author=self.authors, package_name=self.name, version=self.version)
         self.url = url
         self.class_name = class_name
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -213,6 +215,7 @@ class ConnectionConfig(Configuration):
             "authors": self.authors,
             "version": self.version,
             "license": self.license,
+            "uuid": self.uuid,
             "url": self.url,
             "class_name": self.class_name,
             "restricted_to_protocols": self.restricted_to_protocols,
@@ -235,6 +238,7 @@ class ConnectionConfig(Configuration):
             authors=cast(str, obj.get("authors")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            uuid=cast(str,obj.get("uuid")),
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
             restricted_to_protocols=cast(Set[str], restricted_to_protocols),
@@ -253,6 +257,7 @@ class ProtocolConfig(Configuration):
                  authors: str = "",
                  version: str = "",
                  license: str = "",
+                 uuid: str = "",
                  url: str = "",
                  dependencies: Optional[Dependencies] = None,
                  description: str = ""):
@@ -261,6 +266,7 @@ class ProtocolConfig(Configuration):
         self.authors = authors
         self.version = version
         self.license = license
+        self.uuid = generate_uuid(author=self.authors, package_name=self.name, version=self.version)
         self.url = url
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -273,6 +279,7 @@ class ProtocolConfig(Configuration):
             "authors": self.authors,
             "version": self.version,
             "license": self.license,
+            "uuid": self.uuid,
             "url": self.url,
             "dependencies": self.dependencies,
             "description": self.description
@@ -287,6 +294,7 @@ class ProtocolConfig(Configuration):
             authors=cast(str, obj.get("authors")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
+            uuid=cast(str, obj.get("uuid")),
             url=cast(str, obj.get("url")),
             dependencies=dependencies,
             description=cast(str, obj.get("description")),
@@ -405,6 +413,7 @@ class SkillConfig(Configuration):
                  authors: str = "",
                  version: str = "",
                  license: str = "",
+                 uuid: str = "",
                  url: str = "",
                  protocols: List[str] = None,
                  dependencies: Optional[Dependencies] = None,
@@ -414,6 +423,7 @@ class SkillConfig(Configuration):
         self.authors = authors
         self.version = version
         self.license = license
+        self.uuid = generate_uuid(author=self.authors, package_name=self.name, version=self.version)
         self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[str]
         self.dependencies = dependencies if dependencies is not None else {}
@@ -431,6 +441,7 @@ class SkillConfig(Configuration):
             "authors": self.authors,
             "version": self.version,
             "license": self.license,
+            "uuid": self.uuid,
             "url": self.url,
             "protocols": self.protocols,
             "dependencies": self.dependencies,
@@ -448,6 +459,7 @@ class SkillConfig(Configuration):
         authors = cast(str, obj.get("authors"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
+        uuid = cast(str, obj.get("uuid"))
         url = cast(str, obj.get("url"))
         protocols = cast(List[str], obj.get("protocols", []))
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
@@ -457,6 +469,7 @@ class SkillConfig(Configuration):
             authors=authors,
             version=version,
             license=license,
+            uuid=uuid,
             url=url,
             protocols=protocols,
             dependencies=dependencies,
@@ -600,3 +613,11 @@ class AgentConfig(Configuration):
         agent_config.default_connection = default_connection_name
 
         return agent_config
+
+
+def generate_uuid(author: str, package_name: str, version: str) -> str:
+    import base64
+    encoded_str = base64.b64encode(author.encode('utf8')).hex() +\
+        base64.b64encode(package_name.encode('utf8')).hex() +\
+        base64.b64encode(version.encode('utf8')).hex()
+    return encoded_str
