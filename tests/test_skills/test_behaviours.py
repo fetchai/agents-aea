@@ -17,12 +17,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the behaviours."""
-from aea.skills.behaviours import SequenceBehaviour, OneShotBehaviour, CyclicBehaviour, FSMBehaviour, State
+from aea.skills.behaviours import SequenceBehaviour, OneShotBehaviour, FSMBehaviour, State
 
 
 def test_sequence_behaviour():
     """Test the sequence behaviour."""
-
     outputs = []
 
     class MySequenceBehaviour(SequenceBehaviour):
@@ -32,7 +31,6 @@ def test_sequence_behaviour():
 
         def teardown(self) -> None:
             pass
-
 
     class SimpleOneShotBehaviour(OneShotBehaviour):
 
@@ -64,10 +62,8 @@ def test_sequence_behaviour():
     assert outputs == ["a", "b", "c"]
 
 
-
 def test_fms_behaviour():
     """Test the finite-state machine behaviour."""
-
     outputs = []
 
     class MyFSMBehaviour(FSMBehaviour):
@@ -77,7 +73,6 @@ def test_fms_behaviour():
 
         def teardown(self) -> None:
             pass
-
 
     class SimpleOneShotBehaviour(State):
 
@@ -94,7 +89,7 @@ def test_fms_behaviour():
 
         def act(self) -> None:
             outputs.append(self.id)
-            self.set_next_state(str(self.id + 1))
+            self.next_state = str(self.id + 1)
             self.executed = True
 
         def done(self) -> bool:
