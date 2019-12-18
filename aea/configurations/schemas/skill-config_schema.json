@@ -36,62 +36,39 @@
       }
     },
     "handlers": {
-      "type": "array",
+      "type": "object",
       "additionalProperties": false,
       "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "required": [
-          "handler"
-        ],
-        "properties": {
-          "handler": {
-            "$ref": "#/definitions/handler"
-          }
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/handler"
         }
       }
     },
     "behaviours": {
-      "type": "array",
+      "type": "object",
       "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "behaviour"
-        ],
-        "properties": {
-          "behaviour": {
-            "$ref": "#/definitions/behaviour"
-          }
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/behaviour"
         }
       }
     },
     "tasks": {
-      "type": "array",
+      "type": "object",
       "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "task"
-        ],
-        "properties": {
-          "task": {
-            "$ref": "#/definitions/task"
-          }
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/task"
         }
       }
     },
     "shared_classes": {
-      "type": "array",
+      "type": "object",
       "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "properties": {
-          "task": {
-            "$ref": "#/definitions/shared_class"
-          }
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/shared_class"
         }
       }
     },

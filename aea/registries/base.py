@@ -509,11 +509,11 @@ class Resources(object):
         skill_id = skill.config.name
         self._skills[skill_id] = skill
         if skill.handlers is not None:
-            self.handler_registry.register((None, skill_id), cast(List[Handler], skill.handlers))
+            self.handler_registry.register((None, skill_id), cast(List[Handler], list(skill.handlers.values())))
         if skill.behaviours is not None:
-            self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], skill.behaviours))
+            self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], list(skill.behaviours.values())))
         if skill.tasks is not None:
-            self.task_registry.register((None, skill_id), cast(List[Task], skill.tasks))
+            self.task_registry.register((None, skill_id), cast(List[Task], list(skill.tasks.values())))
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""

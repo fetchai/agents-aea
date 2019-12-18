@@ -97,6 +97,7 @@ class TestProtocolsSchema:
                                  os.path.join(ROOT_DIR, "aea", "protocols", "oef"),
                                  os.path.join(ROOT_DIR, "aea", "protocols", "scaffold"),
                                  os.path.join(ROOT_DIR, "packages", "protocols", "gym"),
+                                 os.path.join(ROOT_DIR, "packages", "protocols", "ml_trade"),
                                  os.path.join(ROOT_DIR, "packages", "protocols", "tac"),
                              ])
     def test_validate_protocol_config(self, protocol_path):
@@ -143,9 +144,22 @@ class TestSkillsSchema:
                              [
                                  os.path.join(ROOT_DIR, "aea", "skills", "error"),
                                  os.path.join(ROOT_DIR, "aea", "skills", "scaffold"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "carpark_client"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "carpark_detection"),
                                  os.path.join(ROOT_DIR, "packages", "skills", "echo"),
                                  os.path.join(ROOT_DIR, "packages", "skills", "gym"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "ml_data_provider"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "ml_train"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "tac_control"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "tac_negotiation"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "tac_participation"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "weather_client"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "weather_client_ledger"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "weather_station"),
+                                 os.path.join(ROOT_DIR, "packages", "skills", "weather_station_ledger"),
                                  os.path.join(CUR_PATH, "data", "dummy_skill"),
+                                 os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy"),
+                                 os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "error"),
                                  os.path.join(CUR_PATH, "data", "dependencies_skill"),
                                  os.path.join(CUR_PATH, "data", "exception_skill")
                              ])

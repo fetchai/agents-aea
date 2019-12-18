@@ -4,18 +4,18 @@ version: 0.1.0
 license: Apache 2.0
 description: "The gym skill wraps an RL agent."
 url: ""
-behaviours: []
+behaviours: {}
 handlers:
-  - handler:
-      class_name: GymHandler
-      args:
-        foo: bar
+  gym:
+    class_name: GymHandler
+    args:
+      foo: bar
 tasks:
-  - task:
-      class_name: GymTask
-      args:
-        nb_steps: 4000
-shared_classes: []
+  gym:
+    class_name: GymTask
+    args:
+      nb_steps: 4000
+shared_classes: {}
 protocols: ["gym"]
 dependencies:
   gym: {}
