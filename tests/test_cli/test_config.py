@@ -187,13 +187,13 @@ class TestConfigSet:
         """Test that the 'get' fails because the attribute is not found."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.non_existing_attribute", "value"], standalone_mode=False)
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with("Attribute non_existing_attribute not found.")
+        self.mocked_logger_error.assert_called_with("Attribute 'non_existing_attribute' not found.")
 
     def test_set_fails_when_setting_non_primitive_type(self):
         """Test that setting the 'dummy' skill behaviours fails because not a primitive type."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.behaviours", "value"], standalone_mode=False)
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with("Attribute behaviours is not of primitive type.")
+        self.mocked_logger_error.assert_called_with("Attribute 'behaviours' is not of primitive type.")
 
     def test_get_fails_when_setting_nested_object(self):
         """Test that setting a nested object in 'dummy' skill fails because path is not valid."""
