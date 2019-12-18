@@ -193,7 +193,6 @@ class TransactionMessage(InternalMessage):
             assert self.tx_counterparty_fee >= 0, "Tx_counterparty_fee must be greater or equal to zero."
             assert isinstance(self.tx_quantities_by_good_id, dict) and all((isinstance(key, str) and isinstance(value, int)) for key, value in self.tx_quantities_by_good_id.items()), "Tx_quantities_by_good_id must be of type Dict[str, int]."
             assert len(self.tx_quantities_by_good_id.keys()) == len(set(self.tx_quantities_by_good_id.keys())), "Good ids must be unique in tx_quantities_by_good_id."
-            assert all(quantity >= 0 for quantity in self.tx_quantities_by_good_id.values()), "Good quantities must be positive in tx_quantities_by_good_id."
             assert isinstance(self.ledger_id, str) and self.ledger_id in SUPPORTED_LEDGER_IDS, "Ledger_id must be str and " \
                                                                                                "must in the supported ledger ids."
             assert isinstance(self.info, dict) and all(isinstance(key, str) for key in self.info.keys()), "Info must be of type Dict[str, Any]."

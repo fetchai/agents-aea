@@ -92,6 +92,7 @@ class TACSerializer(Serializer):
             tac_msg.tx_sender_fee = msg.tx_sender_fee
             tac_msg.tx_counterparty_fee = msg.tx_counterparty_fee
             tac_msg.quantities_by_good_id.extend(_from_dict_to_pairs(msg.quantities_by_good_id))
+            tac_msg.tx_nonce = msg.tx_nonce
             tac_msg.tx_sender_signature = msg.tx_sender_signature
             tac_msg.tx_counterparty_signature = msg.tx_counterparty_signature
             tac_container.transaction.CopyFrom(tac_msg)
@@ -184,6 +185,7 @@ class TACSerializer(Serializer):
             new_body["tx_sender_fee"] = tac_container.transaction.tx_sender_fee
             new_body["tx_counterparty_fee"] = tac_container.transaction.tx_counterparty_fee
             new_body["quantities_by_good_id"] = _from_pairs_to_dict(tac_container.transaction.quantities_by_good_id)
+            new_body["tx_nonce"] = tac_container.transaction.tx_nonce
             new_body["tx_sender_signature"] = tac_container.transaction.tx_sender_signature
             new_body["tx_counterparty_signature"] = tac_container.transaction.tx_counterparty_signature
         elif tac_type == "get_state_update":

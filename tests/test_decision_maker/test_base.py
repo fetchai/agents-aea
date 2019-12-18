@@ -69,14 +69,14 @@ class TestUtilityPreferencesBase:
     def test_transaction_is_consistent(self):
         """Test the consistency of the transaction message."""
         currency_endowment = {"FET": 100}
-        good_endowment = {"good_id": 2}
+        good_endowment = {"good_id": 20}
         self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
                                         tx_id="transaction0",
                                         tx_sender_addr="agent_1",
                                         tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 1},
+                                        tx_amount_by_currency_id={"FET": -1},
                                         tx_sender_fee=0,
                                         tx_counterparty_fee=0,
                                         tx_quantities_by_good_id={"good_id": 10},
@@ -94,12 +94,12 @@ class TestUtilityPreferencesBase:
                                         tx_amount_by_currency_id={"FET": 1},
                                         tx_sender_fee=0,
                                         tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
+                                        tx_quantities_by_good_id={"good_id": -10},
                                         info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
 
         assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message), \
-            "We should have the money for the transaction!"
+            "We should have the goods for the transaction!"
 
     def test_apply(self):
         """Test the apply function."""
@@ -111,7 +111,7 @@ class TestUtilityPreferencesBase:
                                         tx_id="transaction0",
                                         tx_sender_addr="agent_1",
                                         tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 20},
+                                        tx_amount_by_currency_id={"FET": -20},
                                         tx_sender_fee=5,
                                         tx_counterparty_fee=0,
                                         tx_quantities_by_good_id={"good_id": 10},
@@ -119,29 +119,33 @@ class TestUtilityPreferencesBase:
                                         ledger_id="fetchai")
         list_of_transactions = [tx_message]
         state = self.ownership_state
-        new_state = self.ownership_state.apply(transactions=list_of_transactions)
+        new_state = self.ownership_state.apply_transactions(transactions=list_of_transactions)
         assert state != new_state, "after applying a list_of_transactions must have a different state!"
 
     def test_transaction_update(self):
         """Test the tranasction update."""
         currency_endowment = {"FET": 100}
-        good_endowment = {"good_id": 2}
+        good_endowment = {"good_id": 20}
 
         self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
+        assert self.ownership_state.amount_by_currency_id == currency_endowment
+        assert self.ownership_state.quantities_by_good_id == good_endowment
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
                                         tx_id="transaction0",
                                         tx_sender_addr="agent_1",
                                         tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 20},
+                                        tx_amount_by_currency_id={"FET": -20},
                                         tx_sender_fee=5,
                                         tx_counterparty_fee=0,
                                         tx_quantities_by_good_id={"good_id": 10},
                                         info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
-        cur_holdings = self.ownership_state.amount_by_currency_id['FET']
         self.ownership_state.update(tx_message=tx_message)
-        assert self.ownership_state.amount_by_currency_id['FET'] < cur_holdings
+        expected_amount_by_currency_id = {"FET": 75}
+        expected_quantities_by_good_id = {"good_id": 30}
+        assert self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
+        assert self.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
@@ -151,12 +155,14 @@ class TestUtilityPreferencesBase:
                                         tx_amount_by_currency_id={"FET": 20},
                                         tx_sender_fee=5,
                                         tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
+                                        tx_quantities_by_good_id={"good_id": -10},
                                         info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
-        cur_holdings = self.ownership_state.amount_by_currency_id['FET']
         self.ownership_state.update(tx_message=tx_message)
-        assert self.ownership_state.amount_by_currency_id['FET'] < cur_holdings
+        expected_amount_by_currency_id = {"FET": 90}
+        expected_quantities_by_good_id = {"good_id": 20}
+        assert self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
+        assert self.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
 
     # # PREFERENCES
     def test_preferences_properties(self):
@@ -215,7 +221,7 @@ class TestUtilityPreferencesBase:
                                         tx_id="transaction0",
                                         tx_sender_addr="agent_1",
                                         tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 20},
+                                        tx_amount_by_currency_id={"FET": -20},
                                         tx_sender_fee=self.preferences.transaction_fees['seller_tx_fee'],
                                         tx_counterparty_fee=self.preferences.transaction_fees['buyer_tx_fee'],
                                         tx_quantities_by_good_id={"good_id": 10},
@@ -223,7 +229,7 @@ class TestUtilityPreferencesBase:
                                         ledger_id="fetchai")
 
         cur_score = self.preferences.get_score(quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings)
-        new_state = self.ownership_state.apply([tx_message])
+        new_state = self.ownership_state.apply_transactions([tx_message])
         new_score = self.preferences.get_score(quantities_by_good_id=new_state.quantities_by_good_id, amount_by_currency_id=new_state.amount_by_currency_id)
         dif_scores = new_score - cur_score
         score_difference = self.preferences.get_score_diff_from_transaction(ownership_state=self.ownership_state, tx_message=tx_message)
@@ -277,7 +283,7 @@ class TestDecisionMaker:
                                         tx_id="transaction0",
                                         tx_sender_addr="agent_1",
                                         tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 20},
+                                        tx_amount_by_currency_id={"FET": -20},
                                         tx_sender_fee=0,
                                         tx_counterparty_fee=0,
                                         tx_quantities_by_good_id={"good_id": 10},
@@ -326,7 +332,7 @@ class TestDecisionMaker:
                                         tx_id="transaction0",
                                         tx_sender_addr="agent_1",
                                         tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 2},
+                                        tx_amount_by_currency_id={"FET": -2},
                                         tx_sender_fee=0,
                                         tx_counterparty_fee=0,
                                         tx_quantities_by_good_id={"good_id": 10},
@@ -350,7 +356,7 @@ class TestDecisionMaker:
                                         tx_id="transaction0",
                                         tx_sender_addr="agent_1",
                                         tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 2},
+                                        tx_amount_by_currency_id={"FET": -2},
                                         tx_sender_fee=0,
                                         tx_counterparty_fee=0,
                                         tx_quantities_by_good_id={"good_id": 10},
