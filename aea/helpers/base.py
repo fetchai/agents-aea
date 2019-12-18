@@ -72,8 +72,9 @@ def locate(path):
 
 def generate_uuid(author: str, package_name: str, version: str) -> str:
     """Generate a unique id for the package."""
-    import base64
-    encoded_str = base64.b64encode(author.encode('utf8')).hex() +\
-        base64.b64encode(package_name.encode('utf8')).hex() +\
-        base64.b64encode(version.encode('utf8')).hex()
+    import hashlib
+    string_for_hash = "".join([author, package_name, version])
+    m_hash = hashlib.sha3_256()
+    m_hash.update(string_for_hash.encode())
+    encoded_str = m_hash.digest().hex()
     return encoded_str

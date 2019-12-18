@@ -2,7 +2,7 @@ name: 'default'
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
-uuid: "526d56305932677551556b6754476c746158526c5a413d3d5a47566d5958567364413d3d4d4334784c6a413d"
+uuid: "c90642a276582a581060ca12cdc25addf1bf8dfb13bef4e39bf35f122eb62da9"
 url: ""
 description: "The default protocol allows for any bytes message."
 dependencies: {}

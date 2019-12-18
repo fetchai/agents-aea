@@ -2,7 +2,7 @@ name: dummy
 authors: Fetch.AI Limited
 version: 0.1.0
 license: Apache 2.0
-uuid: "526d56305932677551556b6754476c746158526c5a413d3d5a48567462586b3d4d4334784c6a413d"
+uuid: "cf82d159767fc2ff76cb8a0edaca5f61fbd482ba24392852434c168f3c87d026"
 url: ""
 behaviours:
   - behaviour:
