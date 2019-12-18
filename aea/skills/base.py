@@ -27,12 +27,12 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Optional, List, Dict, Any, cast
+from typing import Optional, Dict, Any, cast
 
-from aea.connections.base import ConnectionStatus
 from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, \
     ProtocolId, DEFAULT_SKILL_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
+from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
@@ -504,10 +504,10 @@ class Skill:
         """
         self.config = config
         self.skill_context = skill_context
-        self.handlers = handlers
-        self.behaviours = behaviours
-        self.tasks = tasks
-        self.shared_classes = shared_classes
+        self.handlers = handlers if handlers is not None else {}
+        self.behaviours = behaviours if behaviours is not None else {}
+        self.tasks = tasks if tasks is not None else {}
+        self.shared_classes = shared_classes if shared_classes is not None else {}
 
     @classmethod
     def from_dir(cls, directory: str, agent_context: AgentContext) -> 'Skill':
