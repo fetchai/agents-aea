@@ -210,17 +210,21 @@ class TestResources:
     def test_skill_loading(self):
         """Test that the skills have been loaded correctly."""
         dummy_skill = self.resources.get_skill("dummy")
-        error_skill_context = dummy_skill.skill_context
+        skill_context = dummy_skill.skill_context
 
         handlers = dummy_skill.handlers
         behaviours = dummy_skill.behaviours
         tasks = dummy_skill.tasks
         shared_classes = dummy_skill.shared_classes
 
-        assert handlers == error_skill_context.handlers
-        assert behaviours == error_skill_context.behaviours
-        assert tasks == error_skill_context.tasks
-        assert getattr(error_skill_context, "agent_name") == self.agent_name
+        assert len(handlers) == len(skill_context.handlers.__dict__)
+        assert len(behaviours) == len(skill_context.behaviours.__dict__)
+        assert len(tasks) == len(skill_context.tasks.__dict__)
+
+        assert handlers["dummy"] == skill_context.handlers.dummy
+        assert behaviours["dummy"] == skill_context.behaviours.dummy
+        assert tasks["dummy"] == skill_context.tasks.dummy
+        assert shared_classes["dummy"] == skill_context.dummy
 
         assert handlers["dummy"].context == dummy_skill.skill_context
         assert behaviours["dummy"].context == dummy_skill.skill_context

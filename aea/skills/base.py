@@ -26,6 +26,7 @@ import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
+from types import SimpleNamespace
 from typing import Optional, List, Dict, Any, cast
 
 from aea.connections.base import ConnectionStatus
@@ -127,22 +128,22 @@ class SkillContext:
         return self._agent_context.task_queue
 
     @property
-    def handlers(self) -> Optional[Dict[str, 'Handler']]:
+    def handlers(self) -> SimpleNamespace:
         """Get handlers of the skill."""
         assert self._skill is not None, "Skill not initialized."
-        return self._skill.handlers
+        return SimpleNamespace(**self._skill.handlers)
 
     @property
-    def behaviours(self) -> Optional[Dict[str, 'Behaviour']]:
+    def behaviours(self) -> SimpleNamespace:
         """Get behaviours of the skill."""
         assert self._skill is not None, "Skill not initialized."
-        return self._skill.behaviours
+        return SimpleNamespace(**self._skill.behaviours)
 
     @property
-    def tasks(self) -> Optional[Dict[str, 'Task']]:
+    def tasks(self) -> SimpleNamespace:
         """Get tasks of the skill."""
         assert self._skill is not None, "Skill not initialized."
-        return self._skill.tasks
+        return SimpleNamespace(**self._skill.tasks)
 
     def __getattr__(self, item) -> Any:
         """Get attribute."""
