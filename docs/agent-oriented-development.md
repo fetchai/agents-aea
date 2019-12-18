@@ -28,12 +28,12 @@ There are practical implications that follow from the above when it comes to des
 
 ## Asynchronization
 
-The conflicting nature of multi-agent systems, being comprised of self-interested autonomous agents, points to _asynchronisation_ as the preferred method for designing and managing processes and interactions.
+The conflicting nature of multi-agent systems, consisting of self-interested autonomous agents, points to _asynchronisation_ as the preferred method for designing and managing processes and interactions.
 
 In general, asynchronisation refers to the decoupling of events that do interact with one another but do not occur at predetermined intervals, not necessarily relying on each other's existence to function. This is in contrast with _synchronous_ systems in which processes are aware of one another, where one's execution depends in some way on the other.
 
 In the context of multi-agent systems, the decentralised and potentially conflicting nature of the environment<!-- means that there are no control over every aspect of the system, for example, there are no guarantees on how other agents behave. Moreover, we mentioned that agents are inherently self-interested and may be designed heterogeneously. Therefore, an agent's interaction with another agent --> 
-creates uncertainty over the behaviour of the whole system, in particular of other agents. For example, suppose an agent _i_ sends a message requesting some resources from an agent _j_. Since MAS often tends to be distributed, there is the usual uncertainties with communication over a network: _j_ may never receive _i_'s request, or may receive it after a long delay. Furthermore, _j_ could receive the request in time and respond immediately, but as mentioned in the last section, its answer might be incomplete (gives only some of the requested resources), uncertain (promises to give the resources, but cannot be fully trusted), or incorrect (sends a wrong resource). In addition, since agents are self-interested, _j_ may _decide_ to reply much later, to the point that the resource is no longer useful to agent _i_, or _j_ may simply decide not to respond at all. There might a myriad of reasons why it may choose to do that; it could be because _j_ assigns a low priority to answering _i_ over its other tasks. But that's beside the point. The take away is that the agent's autonomy strongly influences what can be expected of them, and of an environment inhabited by them. Therefore, developing for a system whose constituents are autonomous, e.g. agents in a multi-agent system, is fundamentally different from one whose constituents aren't, e.g. objects in an object-oriented system.
+creates uncertainty over the behaviour of the whole system, in particular of other agents. For example, suppose an agent _i_ sends a message requesting some resources from an agent _j_. Since MAS often tends to be distributed, there is the usual uncertainties with communication over a network: _j_ may never receive _i_'s request, or may receive it after a long delay. Furthermore, _j_ could receive the request in time and respond immediately, but as mentioned in the last section, its answer might be incomplete (gives only some of the requested resources), uncertain (promises to give the resources, but cannot be fully trusted), or incorrect (sends a wrong resource). In addition, since agents are self-interested, _j_ may _decide_ to reply much later, to the point that the resource is no longer useful to agent _i_, or _j_ may simply decide not to respond at all. There might be a myriad of reasons why it may choose to do that; it could be because _j_ assigns a low priority to answering _i_ over its other tasks. But that's beside the point. The take away is that agents' autonomy strongly influences what can be expected of them, and of an environment inhabited by them. As such, developing for a system whose constituents are autonomous, e.g. agents in a multi-agent system, is fundamentally different from one whose constituents aren't, e.g. objects in an object-oriented system.
 
 <!-- ### Agents vs Objects -->
 
@@ -42,39 +42,16 @@ In object-oriented systems, objects are entities that encapsulate state and perf
 We cannot take for granted that an agent _j_ will execute an action (the equivalent of a method in object-oriented systems) just because another agent _i_ wants it to; this action may not be in the best interests of agent _i_. So we do not think of agents as invoking methods on one another, rather as _requesting_ actions. If _i_ requests _j_ to perform an action, then _j_ may or may not perform the action. It may choose to do it later or do it in exchange for something. The locus of control is therefore different in object-oriented and agent-oriented systems. In the former, the decision lies with the object invoking the method, whereas in the latter, the decision lies with the agent receiving the request. This distinction could be summarised by the following slogan (from <a href="https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519" target=_blank>An Introduction to MultiAgent Systems</a> by <a href="https://www.cs.ox.ac.uk/people/michael.wooldridge/" target=_blank>Michael Wooldridge</a>):
 >objects do it for free; agents do it because they want to.
 
-In practice: your decision making and action should be as much as possible independent of interactions with others; decoupling of decision/actions and interactions. Try to interact with others but decide/act based on information/responses you have and shouldn’t wait to get all responses
-
-In the context of designing agents, asynchronisation refers to the practice of decoupling processes as much as possible, making them independent of one another. 
-
-asynchronisation refers to the decoupling of processes which do interact with one another, but at the same time are totally independent. Neither one must consider the other in any way, either in initiation or in execution. One of the reasons to pursue asynchronisation is to increase fault-tolerance and scalability. In an environment in which processes are controlled by different entities and do not 
-
-defs:
-
-asynchronous describes the relationship between two or more events/objects that do interact within the same system but do not occur at predetermined intervals and do not necessarily rely on each other's existence to function. They are not coordinated with each other, meaning they could occur simultaneously or not because they have their own separate agenda.
-
-Synchronous, or Synchronized means "connected", or "dependent" in some way. In other words, two synchronous tasks must be aware of one another, and one task must execute in some way that is dependent on the other, such as wait to start until the other task has completed.
-Asynchronous means they are totally independent and neither one must consider the other in any way, either in initiation or in execution.
-
-
-
-
-Another inherent difference: Agents are autonomous, thus:
-
-**Asynchronization**; agent vs object (want vs must); no guarantees w.r.t. Responses (may lie/incomplete (see above), respond later (you are low priority to them), don’t respond because they don’t want to)
-
-In practice: your decision making and action should be as much as possible independent of interactions with others; decoupling of decision/actions and interactions. Try to interact with others but decide/act based on information/responses you have and shouldn’t wait to get all responses
+All of this makes asynchronisation the preferred method for designing agent processes and interactions. An agent's interactions should be independent of each other, as much as possible, and of the agent's decision making processes and actions. This means the success or failure of, or delay in any single interaction does not block the agent's other tasks. 
 
 ## Complex, Incomplete, Inconsistent and Uncertain
 
-The forth key characteristic of ... which has practical implications on development is has been repeated throughout (the above) 
+The forth characteristic related to the environment in which agents are expected to operate in, an these have been mentioned a number of times in the previous sections. 
 
+The environment agents are suited for typically tend to be complex, to the point that it is usually impossible for any single agent to perceive the whole of the environment on its own. This means that at any point in time, any agent has a limited knowledge about the state of the environment. In other words, the agents;' information tend to be incomplete due to the complexity and sophistication of the world in which they reside. 
 
-Be aware that usually:
+Consider an agent which represents a driverless vehicle. The complexity of the problem of driving on the road makes it impossible for a single vehicle to have an accurate and up-to-date knowledge of the state of the whole environment. This means the an agent's model of the world uncertain. For instance, the vehicle, though its sensor may detect green light at a junction, and by being aware of what it means, it may infer that it is safe for it to cross a junction. However, that simply may not be true as another car in the opposite direction may still cross the junction violating their red light. Therefore, there is uncertainty associated with the knowledge "it is safe to cross the road because the light is green", and the agent must recognise that. 
 
-**Complex** world, (thus, since hard to see everything) **incomplete** information/model of the world, (even worse) **inconsistent** information, (thus, due to the last two) **uncertain** knowledge. 
-
-In practice: there are degrees of uncertainty to information (partly due to conflict), e.g. information received may not be fully trusted, based on (not fully accurate) predictions.
-
-Cannot write a programme in which you make calls to sources, wait for all to come back and act based on the collection of all responses. The other agents may not come back to you (selfish, autonomy), may come back later on (autonomy, agent vs object) when the response is no longer useful for you, their information may be incomplete/incorrect (conflicting interest), may be uncertain (based on flawed prediction), inconsistent with information from other sources. So should build an approximate model based on all the information one has. 
+Furthermore, the often conflicting nature of the environment means information obtained from multiple sources (agents) may be inconsistent. Again, this must be taken into consideration when designing an agent which is expected to operate successfully in an environment of potentially conflicting nature. 
 
 <br />
