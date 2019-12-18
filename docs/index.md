@@ -10,9 +10,6 @@ The framework is super modular, easily extensible, and highly composable.
 
 The AEA framework attempts to make agent development as straightforward as web development using popular web frameworks.
 
-The AEA framework attempts to make agent development as straightforward as popular web frameworks did to web development.
-
-
 AEAs achieve their goals with the help of the Fetch.ai OEF - a search and discovery platform for agents - and the Fetch.ai blockchain. Third party systems, such as Ethereum, may also allow AEA integration.
 
 <div class="admonition note">
