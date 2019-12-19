@@ -75,7 +75,7 @@ class TestUtilityPreferencesBase:
         other_msg = InternalMessage(body={"test_key": "test_value"})
         assert msg == other_msg, "Messages should be equal."
         assert msg.check_consistency(), "It is true."
-        assert str(msg) == msg.__str__()
+        assert str(msg) == 'InternalMessage(test_key=test_value)'
         assert msg._body is not None
         msg.body = {"Test": "My_test"}
         assert msg._body == {"Test": "My_test"}, "Message body must be equal with the above dictionary."
@@ -404,55 +404,49 @@ class TestDecisionMaker:
 
     def test_is_affordable_off_chain(self):
         """Test the off_chain message."""
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_ids=["default"],
-                                        transaction_id="transaction0",
-                                        sender="agent_1",
-                                        counterparty="pk",
-                                        is_sender_buyer=True,
-                                        currency_id="FET",
-                                        amount=2,
-                                        sender_tx_fee=0,
-                                        counterparty_tx_fee=0,
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"good_id": 10},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
                                         ledger_id="off_chain",
-                                        quantities_by_good_id={"good_id": 10},
                                         info={'some_info_key': 'some_info_value'})
 
         assert self.decision_maker._is_affordable(tx_message)
 
     def test_settle_tx_off_chain(self):
         """Test the off_chain message."""
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_ids=["default"],
-                                        transaction_id="transaction0",
-                                        sender="agent_1",
-                                        counterparty="pk",
-                                        is_sender_buyer=True,
-                                        currency_id="FET",
-                                        amount=2,
-                                        sender_tx_fee=0,
-                                        counterparty_tx_fee=0,
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"good_id": 10},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
                                         ledger_id="off_chain",
-                                        quantities_by_good_id={"good_id": 10},
                                         info={'some_info_key': 'some_info_value'})
 
         tx_digest = self.decision_maker._settle_tx(tx_message)
-        assert tx_digest == tx_message.transaction_id
+        assert tx_digest == "off_chain_settlement"
 
     def test__is_utility_enhancing(self):
-        """Test the off_chain message."""
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_ids=["default"],
-                                        transaction_id="transaction0",
-                                        sender="agent_1",
-                                        counterparty="pk",
-                                        is_sender_buyer=True,
-                                        currency_id="FET",
-                                        amount=2,
-                                        sender_tx_fee=0,
-                                        counterparty_tx_fee=0,
+        """Test the utility enhancing for off_chain message."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"good_id": 10},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
                                         ledger_id="off_chain",
-                                        quantities_by_good_id={"good_id": 10},
                                         info={'some_info_key': 'some_info_value'})
         self.decision_maker.ownership_state._quantities_by_good_id = None
         assert self.decision_maker._is_utility_enhancing(tx_message)
