@@ -236,7 +236,7 @@ aea add protocol oef
 
 ## Step 7: Run the agent
 
-We first start an oef node (see the <a href="../connection/" target=_blank>connection section</a> for more details) in a separate terminal window.
+We first start an oef node (see the <a href="../connection/">connection section</a> for more details) in a separate terminal window.
 
 ```bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json

@@ -26,7 +26,7 @@ The `Message` class in the `protocols/base.py` module provides an abstract class
 A number of protocols come packaged up with the AEA framework.
 
 * `default`: this protocol provides a bare bones implementation for an AEA protocol which includes a `DefaultMessage` class and a `DefaultSerialization` class with functions for managing serialisation. Use this protocol as a starting point for building custom protocols.
-* `oef`: this protocol provides the AEA protocol implementation for communication with the OEF including an `OEFMessage` class for hooking up to OEF services and search agents. Utility classes are available in the `models.py` module which provides OEF specific requirements such as classes needed to perform querying on the OEF such as `Description`, `Query`, and `Constraint`, to name a few.
+* `oef`: this protocol provides the AEA protocol implementation for communication with the OEF including an `OEFMessage` class for hooking up to OEF services and search agents. Utility classes are available in the `models.py` module which provides OEF specific requirements, such as classes, needed to perform querying on the OEF, such as `Description`, `Query`, and `Constraint`, to name a few.
 * `fipa`: this protocol provides classes and functions necessary for communication between AEAs via the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language. For example, the `FIPAMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
 

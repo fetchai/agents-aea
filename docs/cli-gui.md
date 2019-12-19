@@ -4,7 +4,7 @@ These instructions will take you through building an agent, starting an OEF Node
 
 ## Preliminaries
 
-Follow the Preliminaries and Installation instructions <a href="../quickstart" target=_blank>here</a>.
+Follow the Preliminaries and Installation instructions <a href="../quickstart">here</a>.
 
 Install the extra dependencies for the CLI GUI.
 
