@@ -138,8 +138,12 @@ def test_real_search():
     )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
-    assert len(data) == 5
+    assert len(data) == 6
     i = 0
+
+    assert data[i]['id'] == 'gym'
+    assert data[i]['description'] == 'The gym connection wraps an OpenAI gym.'
+    i += 1
     assert data[i]['id'] == 'local'
     assert data[i]['description'] == 'The local connection provides a stub for an OEF node.'
     i += 1
@@ -154,4 +158,3 @@ def test_real_search():
     i += 1
     assert data[i]['id'] == 'tcp'
     assert data[i]['description'] == ''
-
