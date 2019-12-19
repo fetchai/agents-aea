@@ -18,35 +18,13 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Useful classes for the OEF protocol."""
+"""Useful classes for the OEF search."""
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from typing import Dict, Type, Union, Optional, List, Any
 
 ATTRIBUTE_TYPES = Union[float, str, bool, int]
-
-
-class JSONSerializable(ABC):
-    """Interface for JSON-serializable objects."""
-
-    @abstractmethod
-    def to_json(self) -> Dict:
-        """
-        Return the JSON representation of the object.
-
-        :return: the JSON object.
-        """
-
-    @classmethod
-    @abstractmethod
-    def from_json(cls, d: Dict) -> Any:
-        """
-        Parse the JSON representation of the object.
-
-        :param d: the JSON object.
-        :return: the equivalent Python object.
-        """
 
 
 class Attribute:

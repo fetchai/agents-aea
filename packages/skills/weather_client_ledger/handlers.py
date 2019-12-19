@@ -25,20 +25,23 @@ from typing import Any, Dict, List, Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 from aea.decision_maker.messages.transaction import TransactionMessage
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.fipa.message import FIPAMessage
+    from packages.protocols.fipa.serialization import FIPASerializer
+    from packages.protocols.oef.message import OEFMessage
     from packages.skills.weather_client_ledger.dialogues import Dialogue, Dialogues
     from packages.skills.weather_client_ledger.strategy import Strategy
 else:
+    from fipa_protocol.message import FIPAMessage
+    from fipa_protocol.serialization import FIPASerializer
+    from oef_protocol.message import OEFMessage
     from weather_client_ledger_skill.dialogues import Dialogue, Dialogues
     from weather_client_ledger_skill.strategy import Strategy
 

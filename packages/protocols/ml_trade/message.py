@@ -23,8 +23,8 @@ from enum import Enum
 from typing import cast, Tuple
 import numpy as np
 
+from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
-from aea.protocols.oef.models import Description, Query
 
 
 class MLTradeMessage(Message):

@@ -22,13 +22,13 @@ import asyncio
 from asyncio import CancelledError
 
 import aea
-import aea.connections.tcp.base
+# import packages.connections.tcp.base
 import pytest
 import unittest.mock
 
-from aea.connections.tcp.tcp_client import TCPClientConnection
-from aea.connections.tcp.tcp_server import TCPServerConnection
 from aea.mail.base import Envelope
+from packages.connections.tcp.tcp_client import TCPClientConnection
+from packages.connections.tcp.tcp_server import TCPServerConnection
 from tests.conftest import get_unused_tcp_port
 
 

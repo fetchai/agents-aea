@@ -23,9 +23,9 @@
 # import json
 # from unittest import mock
 
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import DataModel, Attribute, Query, Constraint, ConstraintType, Description
-from aea.protocols.oef.serialization import OEFSerializer
+from aea.helpers.search.models import DataModel, Attribute, Query, Constraint, ConstraintType, Description
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import OEFSerializer
 
 
 def test_oef_type_string_value():

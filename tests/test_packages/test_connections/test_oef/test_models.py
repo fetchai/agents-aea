@@ -23,8 +23,8 @@ from unittest import mock
 
 import pytest
 
-from aea.connections.oef.connection import OEFObjectTranslator
-from aea.protocols.oef.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint, ConstraintType
+from aea.helpers.search.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint, ConstraintType
+from packages.connections.oef.connection import OEFObjectTranslator
 
 
 class TestTranslator:

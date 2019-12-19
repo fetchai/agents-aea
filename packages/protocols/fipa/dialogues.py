@@ -27,12 +27,17 @@ This module contains the classes required for FIPA dialogue management.
 """
 
 from enum import Enum
-from typing import Dict, Tuple, cast
+import sys
+from typing import Dict, Tuple, cast, TYPE_CHECKING
 
 from aea.helpers.dialogue.base import DialogueLabel, Dialogue, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
-from aea.protocols.fipa.message import FIPAMessage, VALID_PREVIOUS_PERFORMATIVES
+
+if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.fipa.message import FIPAMessage, VALID_PREVIOUS_PERFORMATIVES
+else:
+    from fipa_protocol.message import FIPAMessage, VALID_PREVIOUS_PERFORMATIVES  # pragma: no cover
 
 
 class FIPADialogue(Dialogue):

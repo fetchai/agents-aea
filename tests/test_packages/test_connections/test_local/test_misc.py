@@ -23,12 +23,12 @@ import unittest.mock
 
 import pytest
 
-from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.mail.base import Envelope, AEAConnectionError, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
+from packages.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.protocols.fipa.message import FIPAMessage
+from packages.protocols.fipa.serialization import FIPASerializer
 
 
 def test_connection():

@@ -33,21 +33,20 @@ from oef.query import ConstraintExpr
 
 import aea
 from aea.configurations.base import ConnectionConfig
-from aea.connections.oef.connection import OEFConnection
-from aea.connections.oef.connection import OEFObjectTranslator
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
+from aea.helpers.search.models import Description, DataModel, Attribute, Query, Constraint, ConstraintType, \
+    ConstraintTypes
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.protocols.fipa import fipa_pb2
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description, DataModel, Attribute, Query, Constraint, ConstraintType, \
-    ConstraintTypes
-from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from ...conftest import CUR_PATH
+from packages.connections.oef.connection import OEFConnection, OEFObjectTranslator
+from packages.protocols.fipa import fipa_pb2
+from packages.protocols.fipa.message import FIPAMessage
+from packages.protocols.fipa.serialization import FIPASerializer
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from ....conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 

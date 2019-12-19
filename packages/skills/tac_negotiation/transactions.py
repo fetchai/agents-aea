@@ -30,8 +30,8 @@ from typing import Dict, Tuple, Deque, TYPE_CHECKING
 from aea.decision_maker.base import OwnershipState
 from aea.decision_maker.messages.transaction import TransactionMessage, TransactionId, OFF_CHAIN
 from aea.helpers.dialogue.base import DialogueLabel
+from aea.helpers.search.models import Description
 from aea.mail.base import Address
-from aea.protocols.oef.models import Description
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING or "pytest" in sys.modules:

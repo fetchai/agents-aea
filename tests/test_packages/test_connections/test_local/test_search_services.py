@@ -23,13 +23,13 @@ import time
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.local.connection import LocalNode, OEFLocalConnection
+from aea.helpers.search.models import Query, DataModel, Description, Constraint, ConstraintType
 from aea.mail.base import Envelope, AEAConnectionError, Multiplexer, InBox
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Query, DataModel, Description, Constraint, ConstraintType
-from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.protocols.fipa.message import FIPAMessage
+from packages.protocols.fipa.serialization import FIPASerializer
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
 
 class TestEmptySearch:

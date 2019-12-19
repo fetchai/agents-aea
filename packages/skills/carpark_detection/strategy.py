@@ -25,7 +25,7 @@ import sys
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING, cast
 import time
 
-from aea.protocols.oef.models import Description, Query
+from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING or "pytest" in sys.modules:

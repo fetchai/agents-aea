@@ -22,8 +22,8 @@
 from enum import Enum
 from typing import List, cast
 
+from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
-from aea.protocols.oef.models import Description, Query
 
 
 class OEFMessage(Message):

@@ -21,13 +21,19 @@
 """Serialization for the FIPA protocol."""
 import json
 import pickle
-from typing import cast
+import sys
+from typing import cast, TYPE_CHECKING
 
+from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from aea.protocols.fipa import fipa_pb2
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.oef.models import Description, Query
+
+if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.fipa import fipa_pb2
+    from packages.protocols.fipa.message import FIPAMessage
+else:
+    from fipa_protocol import fipa_pb2  # pragma: no cover
+    from fipa_protocol.message import FIPAMessage  # pragma: no cover
 
 
 class FIPASerializer(Serializer):

@@ -24,18 +24,20 @@ import sys
 from typing import Optional, cast, TYPE_CHECKING
 
 from aea.configurations.base import ProtocolId
+from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Description, Query
 from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.fipa.message import FIPAMessage
+    from packages.protocols.fipa.serialization import FIPASerializer
     from packages.skills.carpark_detection.dialogues import Dialogue, Dialogues
     from packages.skills.carpark_detection.strategy import Strategy
 else:
+    from fipa_protocol.message import FIPAMessage
+    from fipa_protocol.serialization import FIPASerializer
     from carpark_detection_skill.dialogues import Dialogue, Dialogues
     from carpark_detection_skill.strategy import Strategy
 

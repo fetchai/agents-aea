@@ -24,17 +24,19 @@ import logging
 import sys
 from typing import cast, Optional, TYPE_CHECKING
 
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description, DataModel, Attribute
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.helpers.search.models import Description, DataModel, Attribute
 from aea.skills.base import Behaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
+    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
     from packages.protocols.tac.message import TACMessage
     from packages.protocols.tac.serialization import TACSerializer
     from packages.skills.tac_control.game import Game, Phase
     from packages.skills.tac_control.parameters import Parameters
 else:
+    from oef_protocol.message import OEFMessage
+    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
     from tac_protocol.message import TACMessage
     from tac_protocol.serialization import TACSerializer
     from tac_control_skill.game import Game, Phase

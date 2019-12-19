@@ -23,15 +23,21 @@ import asyncio
 import logging
 from asyncio import Queue, AbstractEventLoop
 from collections import defaultdict
+import sys
 from threading import Thread
-from typing import Dict, List, Optional, Set, cast
+from typing import Dict, List, Optional, Set, cast, TYPE_CHECKING
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
+from aea.helpers.search.models import Description, Query
 from aea.mail.base import Envelope, AEAConnectionError, Address
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description, Query
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+
+if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
+    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+else:
+    from oef_protocol.message import OEFMessage
+    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
 
@@ -325,8 +331,7 @@ class OEFLocalConnection(Connection):
     """
 
     def __init__(self, address: Address, local_node: LocalNode, connection_id: str = "local",
-                 restricted_to_protocols: Optional[Set[str]] = None,
-                 excluded_protocols: Optional[Set[str]] = None):
+                 restricted_to_protocols: Optional[Set[str]] = None, excluded_protocols: Optional[Set[str]] = None):
         """
         Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
 

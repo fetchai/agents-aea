@@ -26,7 +26,7 @@ import random
 import sys
 from typing import Dict, Optional, cast, TYPE_CHECKING
 
-from aea.protocols.oef.models import Query, Description
+from aea.helpers.search.models import Query, Description
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.skills.base import SharedClass
 

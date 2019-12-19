@@ -17,20 +17,17 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the dataModel for the weather agent."""
+"""This test module contains the tests for the OEF serializer."""
 
-from aea.helpers.search.models import DataModel, Attribute
+from aea.helpers.search.models import Attribute, DataModel, Description
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import OEFSerializer
 
-SCHEME = {'country': "UK", 'city': "Cambridge"}
 
-
-class WEATHER_STATION_DATAMODEL (DataModel):
-    """Data model for the weather Agent."""
-
-    def __init__(self):
-        """Initialise the dataModel."""
-        self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)
-        self.ATTRIBUTE_CITY = Attribute("city", str, True)
-
-        super().__init__("weather_station_datamodel", [self.ATTRIBUTE_COUNTRY,
-                                                       self.ATTRIBUTE_CITY])
+def test_oef_serialization():
+    """Testing the serialization of the OEF."""
+    foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
+    desc = Description({"bar": 1}, data_model=foo_datamodel)
+    msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
+    msg_bytes = OEFSerializer().encode(msg)
+    assert len(msg_bytes) > 0
