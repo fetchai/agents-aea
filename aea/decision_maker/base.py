@@ -467,7 +467,8 @@ class DecisionMaker:
         If the transaction amount is positive, then the agent is the seller, so abort.
         """
         result = len(tx_message.tx_amount_by_currency_id) == 1
-        result = result and list(tx_message.tx_amount_by_currency_id.values())[0] <= 0
+        for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
+            result = result and amount <= 0
         return result
 
     def _is_utility_enhancing(self, tx_message: TransactionMessage) -> bool:
@@ -526,12 +527,12 @@ class DecisionMaker:
         else:
             logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
             assert len(tx_message.tx_amount_by_currency_id) == 1
-            amount = list(tx_message.tx_amount_by_currency_id.values())[0]
-            # adjust payment amount to reflect transaction fee split
-            payable = amount - tx_message.tx_counterparty_fee
-            max_tx_fee = tx_message.tx_counterparty_fee + tx_message.tx_sender_fee
-            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
-            tx_digest = self.ledger_apis.transfer(crypto_object, tx_message.tx_counterparty_addr, payable, max_tx_fee)
+            for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
+                # adjust payment amount to reflect transaction fee split
+                payable = -amount - tx_message.tx_counterparty_fee
+                max_tx_fee = tx_message.tx_counterparty_fee + tx_message.tx_sender_fee
+                crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+                tx_digest = self.ledger_apis.transfer(crypto_object, tx_message.tx_counterparty_addr, payable, max_tx_fee)
         return tx_digest
 
     def _handle_tx_message_for_signing(self, tx_message: TransactionMessage) -> None:

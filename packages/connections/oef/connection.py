@@ -367,7 +367,7 @@ class OEFChannel(OEFAgent):
             if envelope.protocol_id in self.excluded_protocols:
                 logger.error("This envelope cannot be sent with the oef connection: protocol_id={}".format(envelope.protocol_id))
                 raise ValueError("Cannot send message.")
-        elif envelope.protocol_id == "oef":
+        if envelope.protocol_id == "oef":
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)

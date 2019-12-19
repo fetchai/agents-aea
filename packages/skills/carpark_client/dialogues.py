@@ -35,7 +35,7 @@ from aea.skills.base import SharedClass
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.fipa.dialogues import FIPADialogues, FIPADialogue
 else:
-    from fipa_protocol.dialogues import FIPADialogues
+    from fipa_protocol.dialogues import FIPADialogues, FIPADialogue
 
 
 class Dialogue(FIPADialogue):
