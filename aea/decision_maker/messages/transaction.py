@@ -208,7 +208,7 @@ class TransactionMessage(InternalMessage):
                 assert isinstance(self.signing_payload, dict) and all(isinstance(key, str) for key in self.signing_payload.keys()), "Signing_payload must be of type Dict[str, Any]"
                 assert isinstance(self.tx_signature, str), "Tx_signature must be of type str"
                 assert len(self.body) == 13
-            else:
+            else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")
 
         except (AssertionError, KeyError):

@@ -21,6 +21,7 @@
 import os
 
 from aea.crypto.ethereum import EthereumCrypto
+from web3 import Web3
 from ..conftest import ROOT_DIR
 
 PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/eth_private_key.txt")
@@ -45,5 +46,6 @@ def test_initialization():
 def test_sign_transaction():
     """Test the signing function for the eth_crypto."""
     account = EthereumCrypto(PRIVATE_KEY_PATH)
-    sign_bytes = account.sign_transaction(b'Hello')
+    tx = Web3.solidityKeccak(['bytes'], [b'hello'])
+    sign_bytes = account.sign_transaction(tx)
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"

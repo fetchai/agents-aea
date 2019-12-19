@@ -702,7 +702,6 @@ async def test_send_oef_message(network_node):
     oef_connection = OEFConnection(address=address, oef_addr="127.0.0.1", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
-
     msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=0,
                      operation=OEFMessage.OEFErrorOperation.SEARCH_AGENTS)
     msg_bytes = OEFSerializer().encode(msg)

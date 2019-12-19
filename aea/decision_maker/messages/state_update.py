@@ -126,7 +126,7 @@ class StateUpdateMessage(InternalMessage):
                 assert len(self.body) == 6
             elif self.performative == self.Performative.APPLY:
                 assert len(self.body) == 3
-            else:
+            else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")
 
         except (AssertionError, KeyError):
