@@ -31,7 +31,6 @@ import click
 import jsonschema  # type: ignore
 from dotenv import load_dotenv
 
-import aea
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
     DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies
