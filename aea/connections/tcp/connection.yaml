@@ -1,8 +1,8 @@
 name: tcp
-user_name: fetchai
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
-public_id: ""
+fingerprint: ""
 url: ""
 class_name: TCPClientConnection  # this can be eitehr TCPClientConnection or TCPServerConnection
 restricted_to_protocols: []

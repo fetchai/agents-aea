@@ -1,8 +1,8 @@
 name: scaffold_skill
-user_name: fetchai
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
-public_id: ""
+fingerprint: ""
 url: ""
 description: "The scaffold skill is a scaffold for your own skill implementation."
 behaviours:

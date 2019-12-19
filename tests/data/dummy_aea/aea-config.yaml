@@ -1,6 +1,6 @@
 aea_version: 0.1.7
 agent_name: Agent0
-user_name: fetchai
+author: fetchai
 connections:
 - local
 default_connection: local

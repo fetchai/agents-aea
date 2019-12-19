@@ -5,7 +5,7 @@
   "type": "object",
   "required": [
     "name",
-    "user_name",
+    "author",
     "version",
     "license",
     "url"
@@ -14,7 +14,7 @@
     "name": {
       "$ref": "#/definitions/resource_name"
     },
-    "user_name": {
+    "author": {
       "type": "string"
     },
     "version": {
@@ -23,7 +23,7 @@
     "license": {
       "type": "string"
     },
-    "public_id": {
+    "fingerprint": {
       "type": "string"
     },
     "url": {

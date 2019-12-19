@@ -1,8 +1,8 @@
 name: scaffold_connection
-user_name: fetchai
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
-public_id: ""
+fingerprint: ""
 url: ""
 description: "The scaffold connection provides a scaffold for a connection to be implemented by the developer."
 class_name: MyScaffoldConnection

@@ -1,8 +1,8 @@
 name: 'ml_data_provider'
-user_name: fetchai
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
-public_id: ""
+fingerprint: ""
 description: "The ml data provider skill implements a provider for Machine Learning datasets in order to monetize data."
 url: ""
 behaviours:
