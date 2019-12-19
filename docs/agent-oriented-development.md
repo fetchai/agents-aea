@@ -1,8 +1,6 @@
 # Agent-oriented development
 In this section, we highlight some of the most fundamental characteristics of the agent-oriented approach to solution development, which might be different from some of the existing paradigms and methodologies you may be used to. We hope that with this, we can guide you towards having the right mindset when you are designing your own agent-based solutions to real world problems. 
 
-<center>![Decentralisation](assets/decentralisation.jpg)</center>
-
 ## Decentralisation
 Multi-Agent Systems (**MAS**) are inherently decentralised. The vision is, an environment in which every agent is able to directly connect with everyone else and interact with them without having to rely on third-parties to facilitate this. This is in direct contrast to centralised systems in which a single entity is the central point of authority, through which all interactions happen. For example systems based on the client-server architecture, in which clients interact with one another, regarding a specific service (e.g. communication, trade), only through the server.
 
@@ -15,8 +13,6 @@ Note, this is not to say that facilitators and middlemen have no place in a mult
 **Decentralisation vs distribution:** It is important to emphasise that by decentralisation we do not mean distribution; although multi-agent systems typically do tend to also be distributed. A distributed system is one whose components are physically located in different places and connected over a network. A fully centralised system, owned and operated by a single entity, may in fact be highly distributed. Google's infrastructure is an example of this, where all of the components are distributed across the globe, yet designed to work together highly efficiently and function in unison. Decentralisation on the other hand refers to a system whose components may be owned, operated, and managed by different stakeholders, each with their own personal objectives, interests, and preferences, which may not necessarily be aligned with one another or that of the system itself. Therefore, distribution refers to the physical placement of a system's components, whereas decentralisation refers to **a)** the diversity of ownership and control over a system's constituents, and **b)** the absence of a central point of authority between them.
 
 **Example:** To better illustrate the distinction between centralised and decentralised systems, consider another example: search and discoverability in a commerce environment. In a centralised system (say amazon.com), there is a single search service -- provided, owned and run by the commerce company itself -- which takes care of all search related functionality for every product within their domain. So to be discoverable in this system, all sellers must register their products with this particular service. However in a decentralised system, there may not necessarily be a single search service provider. There may be multiple such services, run by different, perhaps competing entities. Each seller has the freedom to register with (i.e. make themselves known to) one or a handful of services. On the buyers side, the more services they contact and query, the higher their chances of finding the product they are looking for. 
-
-<center>![Conflicting Environment](assets/conflicting.jpg)</center>
 
 ## Conflicting Environment
 
@@ -32,8 +28,6 @@ As such, a distinctive characteristic of a multi-agent environment, is that it i
 
 Therefore one can argue, that there is a degree of uncertainty attached to almost all information an agent receives or infers in a multi-agent system. It wouldn't then be illogical for an agent to take a sceptical approach: treating everything as uncertain, unless proved otherwise.
 
-<center>![Asynchronisation](assets/asynchronisation.jpg)</center>
-
 ## Asynchronisation
 
 The conflicting nature of multi-agent systems, consisting of self-interested autonomous agents, points to _asynchronisation_ as the preferred method of designing and managing processes and interactions.
@@ -48,8 +42,6 @@ We cannot take for granted that an agent _j_ will execute an action (the equival
 >objects do it for free; agents do it because they want to.
 
 All of this makes asynchronisation the preferred method for designing agent processes and interactions. An agent's interactions should be independent of each other, as much as possible, and of the agent's decision making processes and actions. This means the success or failure of, or delay in any single interaction does not block the agent's other tasks. 
-
-<center>![Driverless Vehicle](assets/driverless_car.jpg)</center>
 
 ## Complex, Incomplete, Inconsistent and Uncertain
 
