@@ -1,7 +1,8 @@
 name: 'default'
-authors: Fetch.AI Limited
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
+fingerprint: ""
 url: ""
 description: "The default protocol allows for any bytes message."
 dependencies: {}

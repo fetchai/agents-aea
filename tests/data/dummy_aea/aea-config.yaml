@@ -1,11 +1,12 @@
 aea_version: 0.1.7
 agent_name: Agent0
-authors: Fetch.AI Limited
+author: fetchai
 connections:
 - local
 default_connection: local
 description: dummy_aea agent description [Fill in]
 license: Apache 2.0
+fingerprint: ""
 logging_config:
   disable_existing_loggers: false
   version: 1

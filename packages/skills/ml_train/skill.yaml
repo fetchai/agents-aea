@@ -1,7 +1,8 @@
 name: 'ml_train'
-authors: Fetch.AI Limited
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
+fingerprint: ""
 description: "The ml train and predict skill implements a simple skill which buys training data, trains a model and sells predictions."
 url: ""
 behaviours:
