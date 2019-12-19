@@ -6,6 +6,7 @@ connections:
 default_connection: local
 description: dummy_aea agent description [Fill in]
 license: Apache 2.0
+fingerprint: ""
 logging_config:
   disable_existing_loggers: false
   version: 1
