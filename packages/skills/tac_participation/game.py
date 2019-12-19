@@ -23,7 +23,7 @@ import logging
 import sys
 from typing import Dict, List, Optional, TYPE_CHECKING
 
-from aea.protocols.oef.models import Query, Constraint, ConstraintType
+from aea.helpers.search.models import Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
 from aea.mail.base import Address
 

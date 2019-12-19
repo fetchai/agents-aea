@@ -27,16 +27,17 @@ from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message
-from aea.protocols.oef.message import OEFMessage
 from aea.skills.base import Handler
 from aea.mail.base import Address
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
     from packages.protocols.tac.message import TACMessage
     from packages.protocols.tac.serialization import TACSerializer
     from packages.skills.tac_participation.game import Game, Phase
     from packages.skills.tac_participation.search import Search
 else:
+    from oef_protocol.message import OEFMessage
     from tac_protocol.message import TACMessage
     from tac_protocol.serialization import TACSerializer
     from tac_participation_skill.game import Game, Phase

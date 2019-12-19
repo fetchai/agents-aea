@@ -19,7 +19,7 @@
 
 """This package contains the dataModel for the weather agent."""
 
-from aea.protocols.oef.models import DataModel, Attribute
+from aea.helpers.search.models import DataModel, Attribute
 
 SCHEME = {'country': "UK", 'city': "Cambridge"}
 

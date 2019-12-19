@@ -6,6 +6,7 @@ fingerprint: ""
 description: "The gym connection wraps an OpenAI gym."
 url: ""
 class_name: GymConnection
+protocols: ["gym"]
 restricted_to_protocols: ["gym"]
 excluded_protocols: []
 config:

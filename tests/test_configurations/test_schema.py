@@ -93,8 +93,8 @@ class TestProtocolsSchema:
     @pytest.mark.parametrize("protocol_path",
                              [
                                  os.path.join(ROOT_DIR, "aea", "protocols", "default"),
-                                 os.path.join(ROOT_DIR, "aea", "protocols", "fipa"),
-                                 os.path.join(ROOT_DIR, "aea", "protocols", "oef"),
+                                 os.path.join(ROOT_DIR, "packages", "protocols", "fipa"),
+                                 os.path.join(ROOT_DIR, "packages", "protocols", "oef"),
                                  os.path.join(ROOT_DIR, "aea", "protocols", "scaffold"),
                                  os.path.join(ROOT_DIR, "packages", "protocols", "gym"),
                                  os.path.join(ROOT_DIR, "packages", "protocols", "ml_trade"),
@@ -118,8 +118,8 @@ class TestConnectionsSchema:
 
     @pytest.mark.parametrize("connection_path",
                              [
-                                 os.path.join(ROOT_DIR, "aea", "connections", "local"),
-                                 os.path.join(ROOT_DIR, "aea", "connections", "oef"),
+                                 os.path.join(ROOT_DIR, "packages", "connections", "local"),
+                                 os.path.join(ROOT_DIR, "packages", "connections", "oef"),
                                  os.path.join(ROOT_DIR, "aea", "connections", "scaffold"),
                                  os.path.join(ROOT_DIR, "packages", "connections", "gym"),
                                  os.path.join(CUR_PATH, "data", "dummy_connection")

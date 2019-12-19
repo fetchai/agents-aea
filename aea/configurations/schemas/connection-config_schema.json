@@ -10,7 +10,8 @@
     "license",
     "url",
     "class_name",
-    "config"
+    "config",
+    "protocols"
   ],
   "properties": {
     "name": {
@@ -33,6 +34,14 @@
     },
     "class_name": {
       "type": "string"
+    },
+    "protocols": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
     },
     "restricted_to_protocols": {
       "type": "array",

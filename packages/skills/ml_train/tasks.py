@@ -19,17 +19,11 @@
 
 """This module contains the tasks for the 'ml_train' skill."""
 import logging
-import sys
-from typing import TYPE_CHECKING, Tuple
+from typing import Tuple
 
 import numpy as np
 from tensorflow import keras
 from aea.skills.base import Task
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    pass
-else:
-    pass
 
 logger = logging.getLogger("aea.gym_skill")
 
