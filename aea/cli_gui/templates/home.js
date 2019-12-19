@@ -517,8 +517,8 @@ class Controller{
         });
 
         this.$event_pump.on('model_searchReadSuccess', function(e, data) {
-            self.view.setSearchType(data[1])
-            self.view.build_table(data[0], 'searchItemsTable');
+            self.view.setSearchType(data["item_type"])
+            self.view.build_table(data["search_result"], 'searchItemsTable');
             self.handleButtonStates()
         });
 

@@ -243,9 +243,7 @@ paths:
         200:
           description: Successfully read item list operation
           schema:
-            type: array
-            items:
-              type: string
+            type: object
 
   /oef:
     post:

@@ -19,6 +19,7 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
+import sys
 import time
 import unittest.mock
 
@@ -32,7 +33,7 @@ def test_create_and_run_oef():
     pid = DummyPID(None, "A thing of beauty is a joy forever\n", "Testing Error\n")
 
     def _dummy_call_aea_async(param_list, dir_arg):
-        assert param_list[0] == "python"
+        assert param_list[0] == sys.executable
         assert "launch.py" in param_list[1]
         return pid
 
@@ -116,7 +117,7 @@ def test_create_and_run_oef_fail():
     app = create_app()
 
     def _dummy_call_aea_async(param_list, dir_arg):
-        assert param_list[0] == "python"
+        assert param_list[0] == sys.executable
         assert "launch.py" in param_list[1]
         return None
 

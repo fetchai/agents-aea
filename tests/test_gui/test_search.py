@@ -56,14 +56,13 @@ def _test_search_items_with_query(item_type: str, query: str):
         )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
-    assert len(data[0]) == 2
-    assert data[0][0]['id'] == 'default'
-    assert data[0][0]['description'] == 'The default item allows for any byte logic.'
-    assert data[0][1]['id'] == 'oef'
-    assert data[0][1]['description'] == 'The oef item implements the OEF specific logic.'
-    assert data[0][1]['description'] == 'The oef item implements the OEF specific logic.'
-    assert data[1] == item_type
-    assert data[2] == 'test'
+    assert len(data["search_result"]) == 2
+    assert data["search_result"][0]['id'] == 'default'
+    assert data["search_result"][0]['description'] == 'The default item allows for any byte logic.'
+    assert data["search_result"][1]['id'] == 'oef'
+    assert data["search_result"][1]['description'] == 'The oef item implements the OEF specific logic.'
+    assert data["item_type"] == item_type
+    assert data["search_term"] == 'test'
 
 
 def _test_search_items(item_type: str):

@@ -68,6 +68,6 @@ RUN sudo make clean
 
 RUN pipenv --python python3.7
 RUN pipenv install --dev
-RUN pipenv run pip3 install .
+RUN pipenv run pip3 install .[all]
 
 CMD ["/bin/bash"]

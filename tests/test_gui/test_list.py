@@ -19,6 +19,7 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
+import sys
 
 import unittest.mock
 
@@ -47,9 +48,11 @@ def _test_list_items(item_type: str):
     agent_name = "test_agent_id"
 
     def _dummy_call_aea_async(param_list, dir_arg):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "list"
-        assert param_list[2] == item_type + "s"
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "list"
+        assert param_list[4] == item_type + "s"
         assert agent_name in dir_arg
         return pid
 
@@ -76,9 +79,11 @@ def _test_list_items_none(item_type: str):
     agent_name = "NONE"
 
     def _dummy_call_aea_async(param_list, dir_arg):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "list"
-        assert param_list[2] == item_type + "s"
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "list"
+        assert param_list[4] == item_type + "s"
         return pid
 
     with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
@@ -99,9 +104,11 @@ def _test_list_items_fail(item_type: str):
     agent_name = "test_agent_id"
 
     def _dummy_call_aea_async(param_list, dir_arg):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "list"
-        assert param_list[2] == item_type + "s"
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "list"
+        assert param_list[4] == item_type + "s"
         assert agent_name in dir_arg
         return pid
 
