@@ -21,8 +21,10 @@
 
 from typing import cast
 
+from aea.cli import cli
 from aea.protocols.oef.models import Description, Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
+from tests.common.click_testing import CliRunner
 
 DEFAULT_COUNTRY = 'UK'
 SEARCH_TERM = 'country'
@@ -30,6 +32,8 @@ DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_CURRENCY_PBK = 'FET'
 DEFAULT_LEDGER_ID = 'fetchai'
+
+CLI_LOG_OPTION = ["-v", "OFF"]
 
 
 class Strategy(SharedClass):
@@ -41,11 +45,29 @@ class Strategy(SharedClass):
 
         :return: None
         """
-        self._country = kwargs.pop('country') if 'country' in kwargs.keys() else DEFAULT_COUNTRY
-        self._max_row_price = kwargs.pop('max_row_price') if 'max_row_price' in kwargs.keys() else DEFAULT_MAX_ROW_PRICE
-        self.max_buyer_tx_fee = kwargs.pop('max_tx_fee') if 'max_tx_fee' in kwargs.keys() else DEFAULT_MAX_TX_FEE
-        self._currency_id = kwargs.pop('currency_id') if 'currency_id' in kwargs.keys() else DEFAULT_CURRENCY_PBK
-        self._ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
+
+        self.runner = CliRunner()
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.country",
+                                 DEFAULT_COUNTRY], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.max_row_price",
+                                 DEFAULT_MAX_ROW_PRICE], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.max_tx_fee",
+                                 DEFAULT_MAX_TX_FEE], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.currency_id",
+                                 DEFAULT_CURRENCY_PBK], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.ledger_id",
+                                 DEFAULT_LEDGER_ID], standalone_mode=False)
+
         super().__init__(**kwargs)
         self._search_id = 0
         self.is_searching = True

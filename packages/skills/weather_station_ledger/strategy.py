@@ -23,8 +23,10 @@ import sys
 import time
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 
+from aea.cli import cli
 from aea.protocols.oef.models import Description, Query
 from aea.skills.base import SharedClass
+from tests.common.click_testing import CliRunner
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_station_ledger.db_communication import DBCommunication
@@ -40,6 +42,7 @@ DEFAULT_LEDGER_ID = 'fetchai'
 DEFAULT_DATE_ONE = "3/10/2019"
 DEFAULT_DATE_TWO = "15/10/2019"
 
+CLI_LOG_OPTION = ["-v", "OFF"]
 
 class Strategy(SharedClass):
     """This class defines a strategy for the agent."""
@@ -53,12 +56,30 @@ class Strategy(SharedClass):
 
         :return: None
         """
-        self._price_per_row = kwargs.pop('price_per_row') if 'price_per_row' in kwargs.keys() else DEFAULT_PRICE_PER_ROW
-        self._seller_tx_fee = kwargs.pop('seller_tx_fee') if 'seller_tx_fee' in kwargs.keys() else DEFAULT_SELLER_TX_FEE
-        self._currency_id = kwargs.pop('currency_id') if 'currency_id' in kwargs.keys() else DEFAULT_CURRENCY_PBK
-        self._ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
-        self._date_one = kwargs.pop('date_one') if 'date_one' in kwargs.keys() else DEFAULT_DATE_ONE
-        self._date_two = kwargs.pop('date_two') if 'date_two' in kwargs.keys() else DEFAULT_DATE_TWO
+        self.runner = CliRunner()
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.price_per_row",
+                                 DEFAULT_PRICE_PER_ROW], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.seller_tx_fee",
+                                 DEFAULT_SELLER_TX_FEE], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.currency_id",
+                                 DEFAULT_CURRENCY_PBK], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.ledger_id",
+                                 DEFAULT_LEDGER_ID], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.date_one",
+                                 DEFAULT_DATE_ONE], standalone_mode=False)
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.weather_station.shared_classes.strategy.args.date_two",
+                                 DEFAULT_DATE_TWO], standalone_mode=False)
         super().__init__(**kwargs)
         self.db = DBCommunication()
         self._oef_msg_id = 0
