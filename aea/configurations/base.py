@@ -243,7 +243,7 @@ class ConnectionConfig(Configuration):
             restricted_to_protocols=cast(Set[str], restricted_to_protocols),
             excluded_protocols=cast(Set[str], excluded_protocols),
             dependencies=dependencies,
-            description=cast(str, obj.get("description")),
+            description=cast(str, obj.get("description", "")),
             **cast(dict, obj.get("config"))
         )
 
@@ -294,7 +294,7 @@ class ProtocolConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             dependencies=dependencies,
-            description=cast(str, obj.get("description")),
+            description=cast(str, obj.get("description", "")),
         )
 
 
@@ -458,7 +458,7 @@ class SkillConfig(Configuration):
         url = cast(str, obj.get("url"))
         protocols = cast(List[str], obj.get("protocols", []))
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
-        description = cast(str, obj.get("description"))
+        description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
             name=name,
             author=author,
@@ -595,7 +595,7 @@ class AgentConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
-            description=cast(str, obj.get("description")),
+            description=cast(str, obj.get("description", "")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
             private_key_paths=cast(Dict, private_key_paths),
             ledger_apis=cast(Dict, ledger_apis)

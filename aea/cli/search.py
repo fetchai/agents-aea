@@ -42,7 +42,14 @@ def search(ctx: Context, registry):
     if registry:
         ctx.set_config("is_registry", True)
     else:
-        registry = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
+        # if the search is executed from an agent directory:
+        if hasattr(ctx, "agent_config"):
+            # take the path defined by the user, and distinguish between absolute and relative path.
+            path = Path(ctx.agent_config.registry_path)
+            registry = path if path.is_absolute() else Path(ctx.cwd) / path
+        else:
+            # use the default registry path. This works only for source installations.
+            registry = DEFAULT_REGISTRY_PATH
         ctx.set_config("registry", registry)
         logger.debug("Using registry {}".format(registry))
 

@@ -138,29 +138,23 @@ def test_real_search():
     )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
-
     assert len(data) == 6
     i = 0
+
     assert data[i]['id'] == 'gym'
     assert data[i]['description'] == 'The gym connection wraps an OpenAI gym.'
     i += 1
-
     assert data[i]['id'] == 'local'
     assert data[i]['description'] == 'The local connection provides a stub for an OEF node.'
     i += 1
-
     assert data[i]['id'] == 'oef'
     assert data[i]['description'] == 'The oef connection provides a wrapper around the OEF sdk.'
     i += 1
-
     assert data[i]['id'] == 'p2p'
     assert data[i]['description'] == 'The p2p connection provides a connection with the fetch.ai mail provider.'
     i += 1
-
     assert data[i]['id'] == 'stub'
     assert data[i]['description'] == 'The stub connection implements a connection stub which reads/writes messages from/to file.'
     i += 1
-
     assert data[i]['id'] == 'tcp'
-    assert data[i]['description'] == 'None'
-    i += 1
+    assert data[i]['description'] == ''
