@@ -146,8 +146,8 @@ class TACBehaviour(Behaviour):
         for agent_address in game.configuration.agent_addresses:
             agent_state = game.current_agent_states[agent_address]
             tac_msg = TACMessage(type=TACMessage.Type.GAME_DATA,
-                                 amount_by_currency=agent_state.balance_by_currency,
-                                 exchange_params_by_currency=agent_state.exchange_params_by_currency,
+                                 amount_by_currency_id=agent_state.balance_by_currency_id,
+                                 exchange_params_by_currency_id=agent_state.exchange_params_by_currency_id,
                                  quantities_by_good_id=agent_state.quantities_by_good_id,
                                  utility_params_by_good_id=agent_state.utility_params_by_good_id,
                                  tx_fee=game.configuration.tx_fee,

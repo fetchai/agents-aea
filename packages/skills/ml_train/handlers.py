@@ -96,19 +96,17 @@ class TrainHandler(Handler):
 
         if strategy.is_ledger_tx:
             # propose the transaction to the decision maker for settlement on the ledger
-            tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                        skill_ids=['ml_train'],
-                                        transaction_id=strategy.get_next_transition_id(),
-                                        sender=self.context.agent_addresses[terms.values["ledger_id"]],
-                                        counterparty=terms.values["address"],
-                                        is_sender_buyer=True,
-                                        currency_id=terms.values['currency_id'],
-                                        amount=terms.values["price"],
-                                        sender_tx_fee=terms.values["buyer_tx_fee"],
-                                        counterparty_tx_fee=terms.values["seller_tx_fee"],
+            tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=['ml_train'],
+                                        tx_id=strategy.get_next_transition_id(),
+                                        tx_sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
+                                        tx_counterparty_addr=terms.values["address"],
+                                        tx_amount_by_currency_id={terms.values['currency_id']: terms.values["price"]},
+                                        tx_sender_fee=terms.values["buyer_tx_fee"],
+                                        tx_counterparty_fee=terms.values["seller_tx_fee"],
+                                        tx_quantities_by_good_id={},
                                         ledger_id=terms.values["ledger_id"],
-                                        info={'terms': terms, 'counterparty_addr': ml_trade_msg.counterparty},
-                                        quantities_by_good_id={})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
+                                        info={'terms': terms, 'counterparty_addr': ml_trade_msg.counterparty})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
         else:
@@ -221,20 +219,19 @@ class MyTransactionHandler(Handler):
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
-        if tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
+        if tx_msg_response.performative == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
-            transaction_digest = tx_msg_response.transaction_digest
             info = tx_msg_response.info
             terms = cast(Description, info.get("terms"))
             ml_accept = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT,
-                                       tx_digest=transaction_digest,
+                                       tx_digest=tx_msg_response.tx_digest,
                                        terms=terms)
             self.context.outbox.put_message(to=message.counterparty,
                                             sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."
-                        .format(self.context.agent_name, message.counterparty[-5:], transaction_digest, terms.values))
+                        .format(self.context.agent_name, message.counterparty[-5:], tx_msg_response.tx_digest, terms.values))
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 

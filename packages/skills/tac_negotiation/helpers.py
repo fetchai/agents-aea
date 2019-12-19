@@ -20,22 +20,19 @@
 
 """This class contains the helpers for FIPA negotiation."""
 
-import copy
+import collections
 from typing import Dict, List, Union, cast
+from web3 import Web3
 
-from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.helpers.dialogue.base import DialogueLabel
+from aea.mail.base import Address
 from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
     ConstraintExpr
-from aea.mail.base import Address
-
-TransactionId = str
 
 SUPPLY_DATAMODEL_NAME = 'supply'
 DEMAND_DATAMODEL_NAME = 'demand'
 
 
-def build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
+def _build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
     """
     Build a data model for supply and demand of goods (i.e. for offered or requested goods).
 
@@ -46,34 +43,35 @@ def build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
     :return: the data model.
     """
     good_quantities_attributes = [Attribute(good_id, int, True, "A good on offer.") for good_id in good_ids]
-    currency_attribute = Attribute('currency', str, True, "The currency for pricing and transacting the goods.")
+    currency_attribute = Attribute('currency_id', str, True, "The currency for pricing and transacting the goods.")
     price_attribute = Attribute('price', int, False, "The price of the goods in the currency.")
     seller_tx_fee_attribute = Attribute('seller_tx_fee', int, False, "The transaction fee payable by the seller in the currency.")
     buyer_tx_fee_attribute = Attribute('buyer_tx_fee', int, False, "The transaction fee payable by the buyer in the currency.")
+    tx_nonce_attribute = Attribute('tx_nonce', str, False, "The nonce to distinguish identical descriptions.")
     description = SUPPLY_DATAMODEL_NAME if is_supply else DEMAND_DATAMODEL_NAME
-    attributes = good_quantities_attributes + [currency_attribute, price_attribute, seller_tx_fee_attribute, buyer_tx_fee_attribute]
+    attributes = good_quantities_attributes + [currency_attribute, price_attribute, seller_tx_fee_attribute, buyer_tx_fee_attribute, tx_nonce_attribute]
     data_model = DataModel(description, attributes)
     return data_model
 
 
-def build_goods_description(good_id_to_quantities: Dict[str, int], currency: str, is_supply: bool) -> Description:
+def build_goods_description(good_id_to_quantities: Dict[str, int], currency_id: str, is_supply: bool) -> Description:
     """
     Get the service description (good quantities supplied or demanded and their price).
 
     :param good_id_to_quantities: a dictionary mapping the ids of the goods to the quantities.
-    :param currency: the currency used for pricing and transacting.
+    :param currency_id: the currency used for pricing and transacting.
     :param is_supply: True if the description is indicating supply, False if it's indicating demand.
 
     :return: the description to advertise on the Service Directory.
     """
-    data_model = build_goods_datamodel(good_ids=list(good_id_to_quantities.keys()), is_supply=is_supply)
+    data_model = _build_goods_datamodel(good_ids=list(good_id_to_quantities.keys()), is_supply=is_supply)
     values = cast(Dict[str, Union[int, str]], good_id_to_quantities)
-    values.update({'currency': currency})
+    values.update({'currency_id': currency_id})
     desc = Description(values, data_model=data_model)
     return desc
 
 
-def build_goods_query(good_ids: List[str], currency: str, is_searching_for_sellers: bool) -> Query:
+def build_goods_query(good_ids: List[str], currency_id: str, is_searching_for_sellers: bool) -> Query:
     """
     Build buyer or seller search query.
 
@@ -89,14 +87,14 @@ def build_goods_query(good_ids: List[str], currency: str, is_searching_for_selle
     (assuming that the sellers are registered with the data model specified).
 
     :param good_ids: the list of good ids to put in the query
-    :param currency: the currency used for pricing and transacting.
+    :param currency_id: the currency used for pricing and transacting.
     :param is_searching_for_sellers: Boolean indicating whether the query is for sellers (supply) or buyers (demand).
 
     :return: the query
     """
-    data_model = build_goods_datamodel(good_ids=good_ids, is_supply=is_searching_for_sellers)
+    data_model = _build_goods_datamodel(good_ids=good_ids, is_supply=is_searching_for_sellers)
     constraints = [Constraint(good_id, ConstraintType(">=", 1)) for good_id in good_ids]
-    constraints.append(Constraint('currency', ConstraintType("==", currency)))
+    constraints.append(Constraint('currency_id', ConstraintType("==", currency_id)))
     constraint_expr = cast(List[ConstraintExpr], constraints)
 
     if len(good_ids) > 1:
@@ -106,66 +104,73 @@ def build_goods_query(good_ids: List[str], currency: str, is_searching_for_selle
     return query
 
 
-def generate_transaction_id(agent_addr: Address, opponent_addr: Address, dialogue_label: DialogueLabel, agent_is_seller: bool) -> TransactionId:
+def _get_hash(tx_sender_addr: Address,
+              tx_counterparty_addr: Address,
+              good_ids: List[int],
+              sender_supplied_quantities: List[int],
+              counterparty_supplied_quantities: List[int],
+              tx_amount: int,
+              tx_nonce: int) -> bytes:
     """
-    Make a transaction id.
+    Generate a hash from transaction information.
 
-    :param agent_addr: the address of the agent.
-    :param opponent_addr: the address of the opponent.
-    :param dialogue_label: the dialogue label
-    :param agent_is_seller: boolean indicating if the agent is a seller
-    :return: a transaction id
+    :param tx_sender_addr: the sender address
+    :param tx_counterparty_addr: the counterparty address
+    :param good_ids: the list of good ids
+    :param sender_supplied_quantities: the quantities supplied by the sender (must all be positive)
+    :param counterparty_supplied_quantities: the quantities supplied by the counterparty (must all be positive)
+    :param tx_amount: the amount of the transaction
+    :param tx_nonce: the nonce of the transaction
+    :return: the hash
     """
-    # the format is {buyer_addr}_{seller_addr}_{dialogue_id}_{dialogue_starter_id}
-    assert opponent_addr == dialogue_label.dialogue_opponent_addr
-    buyer_addr, seller_addr = (opponent_addr, agent_addr) if agent_is_seller else (agent_addr, opponent_addr)
-    transaction_id = "{}_{}_{}_{}_{}".format(buyer_addr, seller_addr, dialogue_label.dialogue_starter_reference, dialogue_label.dialogue_responder_reference, dialogue_label.dialogue_starter_addr)
-    return transaction_id
+    aggregate_hash = Web3.keccak(b''.join(
+        [good_ids[0].to_bytes(32, 'big'), sender_supplied_quantities[0].to_bytes(32, 'big'), counterparty_supplied_quantities[0].to_bytes(32, 'big')]))
+    for i in range(len(good_ids)):
+        if not i == 0:
+            aggregate_hash = Web3.keccak(b''.join(
+                [aggregate_hash, good_ids[i].to_bytes(32, 'big'), sender_supplied_quantities[i].to_bytes(32, 'big'),
+                 counterparty_supplied_quantities[i].to_bytes(32, 'big')]))
+
+    m_list = []  # type: List[bytes]
+    m_list.append(tx_sender_addr.encode('utf-8'))
+    m_list.append(tx_counterparty_addr.encode('utf-8'))
+    m_list.append(aggregate_hash)
+    m_list.append(tx_amount.to_bytes(32, 'big'))
+    m_list.append(tx_nonce.to_bytes(32, 'big'))
+    return Web3.keccak(b''.join(m_list))
 
 
-def dialogue_label_from_transaction_id(agent_addr: Address, transaction_id: TransactionId) -> DialogueLabel:
+def tx_hash_from_values(tx_sender_addr: str,
+                        tx_counterparty_addr: str,
+                        tx_quantities_by_good_id: Dict[str, int],
+                        tx_amount_by_currency_id: Dict[str, int],
+                        tx_nonce: int) -> bytes:
     """
-    Recover dialogue label from transaction id.
+    Get the hash for a transaction based on the transaction message.
 
-    :param agent_addr: the pbk of the agent.
-    :param transaction_id: the transaction id
-    :return: a dialogue label
+    :param tx_message: the transaction message
+    :return: the hash
     """
-    buyer_addr, seller_addr, dialogue_starter_reference, dialogue_responder_reference, dialogue_starter_addr = transaction_id.split('_')
-    if agent_addr == buyer_addr:
-        dialogue_opponent_addr = seller_addr
-    else:
-        dialogue_opponent_addr = buyer_addr
-    dialogue_label = DialogueLabel((dialogue_starter_reference, dialogue_responder_reference), dialogue_opponent_addr, dialogue_starter_addr)
-    return dialogue_label
-
-
-def generate_transaction_message(proposal_description: Description, dialogue_label: DialogueLabel, is_seller: bool, agent_addr: Address) -> TransactionMessage:
-    """
-    Generate the transaction message from the description and the dialogue.
-
-    :param proposal_description: the description of the proposal
-    :param dialogue_label: the dialogue label
-    :param is_seller: the agent is a seller
-    :param agent_addr: the address of the agent
-    :return: a transaction message
-    """
-    transaction_id = generate_transaction_id(agent_addr, dialogue_label.dialogue_opponent_addr, dialogue_label, is_seller)
-    sender_tx_fee = proposal_description.values['seller_tx_fee'] if is_seller else proposal_description.values['buyer_tx_fee']
-    counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if is_seller else proposal_description.values['seller_tx_fee']
-    goods_component = copy.copy(proposal_description.values)
-    [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency']]
-    transaction_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                         skill_ids=['tac_negotiation', 'tac_participation'],
-                                         transaction_id=transaction_id,
-                                         sender=agent_addr,
-                                         counterparty=dialogue_label.dialogue_opponent_addr,
-                                         currency_id=proposal_description.values['currency'],
-                                         amount=proposal_description.values['price'],
-                                         is_sender_buyer=not is_seller,
-                                         sender_tx_fee=sender_tx_fee,
-                                         counterparty_tx_fee=counterparty_tx_fee,
-                                         ledger_id='off_chain',
-                                         info={'dialogue_label': dialogue_label.json},
-                                         quantities_by_good_id=goods_component)
-    return transaction_msg
+    converted = {int(good_id): quantity for good_id, quantity in tx_quantities_by_good_id.items()}
+    ordered = collections.OrderedDict(sorted(converted.items()))
+    good_ids = []  # type: List[int]
+    sender_supplied_quantities = []  # type: List[int]
+    counterparty_supplied_quantities = []  # type: List[int]
+    for good_id, quantity in ordered.items():
+        good_ids.append(good_id)
+        if quantity >= 0:
+            sender_supplied_quantities.append(quantity)
+            counterparty_supplied_quantities.append(0)
+        else:
+            sender_supplied_quantities.append(0)
+            counterparty_supplied_quantities.append(quantity)
+    assert len(tx_amount_by_currency_id) == 1
+    tx_amount = list(tx_amount_by_currency_id.values())[0]
+    tx_hash = _get_hash(tx_sender_addr=tx_sender_addr,
+                        tx_counterparty_addr=tx_counterparty_addr,
+                        good_ids=good_ids,
+                        sender_supplied_quantities=sender_supplied_quantities,
+                        counterparty_supplied_quantities=counterparty_supplied_quantities,
+                        tx_amount=tx_amount,
+                        tx_nonce=tx_nonce)
+    return tx_hash

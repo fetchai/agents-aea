@@ -188,20 +188,17 @@ class FIPAHandler(Handler):
         address = cast(str, info.get("address"))
         strategy = cast(Strategy, self.context.strategy)
         proposal = cast(Description, dialogue.proposal)
-        ledger_id = cast(str, proposal.values.get("ledger_id"))
-        tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                    skill_ids=["weather_client_ledger"],
-                                    transaction_id="transaction0",
-                                    sender=self.context.agent_addresses[ledger_id],
-                                    counterparty=address,
-                                    is_sender_buyer=True,
-                                    currency_id=proposal.values['currency_id'],
-                                    amount=proposal.values['price'],
-                                    sender_tx_fee=strategy.max_buyer_tx_fee,
-                                    counterparty_tx_fee=proposal.values['seller_tx_fee'],
-                                    ledger_id=ledger_id,
-                                    info={'dialogue_label': dialogue.dialogue_label.json},
-                                    quantities_by_good_id={})
+        tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                    skill_callback_ids=["weather_client_ledger"],
+                                    tx_id="transaction0",
+                                    tx_sender_addr=self.context.agent_addresses[proposal.values['ledger_id']],
+                                    tx_counterparty_addr=address,
+                                    tx_amount_by_currency_id={proposal.values['currency_id']: proposal.values['price']},
+                                    tx_sender_fee=strategy.max_buyer_tx_fee,
+                                    tx_counterparty_fee=proposal.values['seller_tx_fee'],
+                                    tx_quantities_by_good_id={},
+                                    ledger_id=proposal.values['ledger_id'],
+                                    info={'dialogue_label': dialogue.dialogue_label.json})
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
             self.context.agent_name))
@@ -306,9 +303,9 @@ class MyTransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         if tx_msg_response is not None and \
-                tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
+                tx_msg_response.performative == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
-            json_data = {'transaction_digest': tx_msg_response.transaction_digest}
+            json_data = {'transaction_digest': tx_msg_response.tx_digest}
             info = cast(Dict[str, Any], tx_msg_response.info)
             dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)

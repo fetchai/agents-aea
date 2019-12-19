@@ -271,9 +271,9 @@ class TACHandler(Handler):
         game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE,
-                                              amount_by_currency=tac_message.amount_by_currency,
+                                              amount_by_currency_id=tac_message.amount_by_currency_id,
                                               quantities_by_good_id=tac_message.quantities_by_good_id,
-                                              exchange_params_by_currency=tac_message.exchange_params_by_currency,
+                                              exchange_params_by_currency_id=tac_message.exchange_params_by_currency_id,
                                               utility_params_by_good_id=tac_message.utility_params_by_good_id,
                                               tx_fee=tac_message.tx_fee)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
@@ -296,9 +296,9 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.transaction_id[-10:]))
+        logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.tx_id[-10:]))
         state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY,
-                                              amount_by_currency=message.amount_by_currency,
+                                              amount_by_currency_id=message.amount_by_currency_id,
                                               quantities_by_good_id=message.quantities_by_good_id)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
@@ -368,16 +368,21 @@ class TransactionHandler(Handler):
         :return: None
         """
         tx_message = cast(TransactionMessage, message)
-        if tx_message.performative == TransactionMessage.Performative.ACCEPT:
+        if tx_message.performative == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT:
             logger.info("[{}]: transaction confirmed by decision maker, sending to controller.".format(self.context.agent_name))
             game = cast(Game, self.context.game)
+            tx_counterparty_signature = cast(bytes, tx_message.info.get('tx_counterparty_signature'))
+            assert tx_counterparty_signature is not None
             msg = TACMessage(type=TACMessage.Type.TRANSACTION,
-                             transaction_id=tx_message.transaction_digest,
-                             transaction_counterparty=tx_message.counterparty,
-                             amount_by_currency={tx_message.currency_id: tx_message.amount},
-                             sender_tx_fee=tx_message.sender_tx_fee,
-                             counterparty_tx_fee=tx_message.counterparty_tx_fee,
-                             quantities_by_good_id=tx_message.quantities_by_good_id)
+                             tx_id=tx_message.tx_id,
+                             tx_sender_addr=tx_message.tx_sender_addr,
+                             tx_counterparty_addr=tx_message.tx_counterparty_addr,
+                             amount_by_currency_id=tx_message.tx_amount_by_currency_id,
+                             tx_sender_fee=tx_message.tx_sender_fee,
+                             tx_counterparty_fee=tx_message.tx_counterparty_fee,
+                             quantities_by_good_id=tx_message.tx_quantities_by_good_id,
+                             tx_sender_signature=tx_message.tx_signature,
+                             tx_counterparty_signature=tx_message.info.get('tx_counterparty_signature'))
             self.context.outbox.put_message(to=game.configuration.controller_addr,
                                             sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,

@@ -38,13 +38,13 @@ def logarithmic_utility(utility_params_by_good_id: Dict[str, float], quantities_
     return sum(goodwise_utility)
 
 
-def linear_utility(exchange_params_by_currency: Dict[str, float], balance_by_currency: Dict[str, int]) -> float:
+def linear_utility(exchange_params_by_currency_id: Dict[str, float], balance_by_currency_id: Dict[str, int]) -> float:
     """
     Compute agent's utility given her utility function params and a good bundle.
 
-    :param exchange_params_by_currency: exchange params by currency
-    :param balance_by_currency: balance by currency
+    :param exchange_params_by_currency_id: exchange params by currency
+    :param balance_by_currency_id: balance by currency
     :return: utility value
     """
-    money_utility = [exchange_params_by_currency[currency] * balance for currency, balance in balance_by_currency.items()]
+    money_utility = [exchange_params_by_currency_id[currency_id] * balance for currency_id, balance in balance_by_currency_id.items()]
     return sum(money_utility)

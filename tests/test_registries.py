@@ -307,20 +307,18 @@ class TestFilter:
     def test_handle_internal_messages(self):
         """Test that the internal messages are handled."""
         self.aea.setup()
-        t = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                               transaction_id="transaction0",
-                               skill_ids=["internal", "dummy"],
-                               sender="pk1",
-                               counterparty="pk2",
-                               is_sender_buyer=True,
-                               currency_id="Unknown",
-                               amount=2,
-                               sender_tx_fee=0,
-                               counterparty_tx_fee=0,
+        t = TransactionMessage(performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+                               tx_id="transaction0",
+                               skill_callback_ids=["internal", "dummy"],
+                               tx_sender_addr="pk1",
+                               tx_counterparty_addr="pk2",
+                               tx_amount_by_currency_id={"FET": 2},
+                               tx_sender_fee=0,
+                               tx_counterparty_fee=0,
+                               tx_quantities_by_good_id={"Unknown": 10},
                                ledger_id="fetchai",
-                               quantities_by_good_id={"Unknown": 10},
                                info={},
-                               transaction_digest='some_tx_digest')
+                               tx_digest='some_tx_digest')
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()
 

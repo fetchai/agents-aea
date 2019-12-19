@@ -610,8 +610,8 @@ class Filter(object):
         while not self.decision_maker_out_queue.empty():
             tx_message = self.decision_maker_out_queue.get_nowait()  # type: Optional[TransactionMessage]
             if tx_message is not None:
-                skill_ids = tx_message.skill_ids
-                for skill_id in skill_ids:
+                skill_callback_ids = tx_message.skill_callback_ids
+                for skill_id in skill_callback_ids:
                     handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
                     if handler is not None:
                         logger.debug("Calling handler {} of skill {}".format(type(handler), skill_id))

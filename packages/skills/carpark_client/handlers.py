@@ -190,19 +190,17 @@ class FIPAHandler(Handler):
         info = msg.info
         address = cast(str, info.get("address"))
         proposal = cast(Description, dialogue.proposal)
-        tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE,
-                                    skill_ids=["carpark_client"],
-                                    transaction_id="transaction0",
-                                    sender=self.context.agent_addresses['fetchai'],
-                                    counterparty=address,
-                                    is_sender_buyer=True,
-                                    currency_id="FET",
-                                    amount=proposal.values['price'],
-                                    sender_tx_fee=0,
-                                    counterparty_tx_fee=0,
-                                    ledger_id='fetchai',
-                                    info={'dialogue_label': dialogue.dialogue_label.json},
-                                    quantities_by_good_id={})
+        tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                    skill_callback_ids=["carpark_client"],
+                                    tx_id="transaction0",
+                                    tx_sender_addr=self.context.agent_addresses['fetchai'],
+                                    tx_counterparty_addr=address,
+                                    tx_amount_by_currency_id={proposal.values['currency_id']: proposal.values['price']},
+                                    tx_sender_fee=0,
+                                    tx_counterparty_fee=0,
+                                    tx_quantities_by_good_id={},
+                                    ledger_id=proposal.values['ledger_id'],
+                                    info={'dialogue_label': dialogue.dialogue_label.json})
         self.context.decision_maker_message_queue.put_nowait(tx_msg)
         logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
 
@@ -311,10 +309,10 @@ class MyTransactionHandler(Handler):
         """
         tx_msg_response = cast(TransactionMessage, message)
         if tx_msg_response is not None and \
-                tx_msg_response.performative == TransactionMessage.Performative.ACCEPT:
+                tx_msg_response.performative == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT:
             logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
 
-            json_data = {'transaction_digest': tx_msg_response.transaction_digest}
+            json_data = {'transaction_digest': tx_msg_response.tx_digest}
             info = tx_msg_response.info
             dialogue_label = DialogueLabel.from_json(cast(Dict[str, str], info.get("dialogue_label")))
             dialogues = cast(Dialogues, self.context.dialogues)

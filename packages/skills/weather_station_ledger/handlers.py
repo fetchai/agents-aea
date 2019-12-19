@@ -29,7 +29,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.protocols.fipa.message import FIPAMessage
 from aea.protocols.fipa.serialization import FIPASerializer
-from aea.protocols.oef.models import Description
+from aea.protocols.oef.models import Description, Query
 from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
@@ -128,7 +128,7 @@ class FIPAHandler(Handler):
         new_target = msg.message_id
         logger.info("[{}]: received CFP from sender={}".format(self.context.agent_name,
                                                                msg.counterparty[-5:]))
-        query = msg.query
+        query = cast(Query, msg.query)
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_matching_supply(query):

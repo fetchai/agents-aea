@@ -56,6 +56,11 @@ class SkillContext:
         self._skill = None  # type: Optional[Skill]
 
     @property
+    def shared_state(self) -> Dict[str, Any]:
+        """Get the shared state dictionary."""
+        return self._agent_context.shared_state
+
+    @property
     def agent_name(self) -> str:
         """Get agent name."""
         return self._agent_context.agent_name

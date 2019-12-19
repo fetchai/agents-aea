@@ -42,10 +42,10 @@ def test_get_address():
     assert fet_crypto.get_address_from_public_key(fet_crypto.public_key) is not None, "Get address must work"
 
 
-def test_sign_message():
+def test_sign_transaction():
     """Test the signing process."""
     fet_crypto = FetchAICrypto()
-    signature = fet_crypto.sign_transaction(message=b'HelloWorld')
+    signature = fet_crypto.sign_transaction(tx_hash=b'HelloWorld')
     assert len(signature) > 1, "The len(signature) must be more than 0"
 
 

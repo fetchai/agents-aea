@@ -20,7 +20,7 @@
 """This module contains the agent context class."""
 
 from queue import Queue
-from typing import Dict
+from typing import Any, Dict
 
 from aea.connections.base import ConnectionStatus
 from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
@@ -58,6 +58,7 @@ class AgentContext:
         :param goal_pursuit_readiness: ready to pursuit its goals
         :param task_queue: the queue for the task to be processed enqueued by the agent.
         """
+        self._shared_state = {}  # type: Dict[str, Any]
         self._agent_name = agent_name
         self._public_keys = public_keys
         self._addresses = addresses
@@ -69,6 +70,11 @@ class AgentContext:
         self._preferences = preferences
         self._goal_pursuit_readiness = goal_pursuit_readiness
         self._task_queue = task_queue
+
+    @property
+    def shared_state(self) -> Dict[str, Any]:
+        """Get the shared state dictionary."""
+        return self._shared_state
 
     @property
     def agent_name(self) -> str:
