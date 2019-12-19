@@ -37,10 +37,10 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.skills.weather_client_ledger.dialogues import Dialogue, Dialogues
-    from packages.skills.weather_client_ledger.strategy import Strategy
+    from packages.skills.weather_client_ledger.strategy import Strategy, DEFAULT_MAX_TX_FEE
 else:
     from weather_client_ledger_skill.dialogues import Dialogue, Dialogues
-    from weather_client_ledger_skill.strategy import Strategy
+    from weather_client_ledger_skill.strategy import Strategy, DEFAULT_MAX_TX_FEE
 
 logger = logging.getLogger("aea.weather_client_ledger_skill")
 
@@ -186,7 +186,7 @@ class FIPAHandler(Handler):
         logger.info("[{}]: received MATCH_ACCEPT_W_INFORM from sender={}".format(self.context.agent_name, msg.counterparty[-5:]))
         info = msg.info
         address = cast(str, info.get("address"))
-        strategy = cast(Strategy, self.context.strategy)
+        # strategy = cast(Strategy, self.context.strategy)
         proposal = cast(Description, dialogue.proposal)
         tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                     skill_callback_ids=["weather_client_ledger"],
@@ -194,7 +194,7 @@ class FIPAHandler(Handler):
                                     tx_sender_addr=self.context.agent_addresses[proposal.values['ledger_id']],
                                     tx_counterparty_addr=address,
                                     tx_amount_by_currency_id={proposal.values['currency_id']: proposal.values['price']},
-                                    tx_sender_fee=strategy.max_buyer_tx_fee,
+                                    tx_sender_fee=DEFAULT_MAX_TX_FEE,
                                     tx_counterparty_fee=proposal.values['seller_tx_fee'],
                                     tx_quantities_by_good_id={},
                                     ledger_id=proposal.values['ledger_id'],

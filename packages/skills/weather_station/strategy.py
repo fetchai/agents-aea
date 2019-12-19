@@ -119,15 +119,15 @@ class Strategy(SharedClass):
         :param query: the query
         :return: a tuple of proposal and the weather data
         """
-        fetched_data = self.db.get_data_for_specific_dates(self._date_one, self._date_two)  # TODO: fetch real data
+        fetched_data = self.db.get_data_for_specific_dates(DEFAULT_DATE_ONE, DEFAULT_DATE_TWO)  # TODO: fetch real data
         weather_data, rows = self._build_data_payload(fetched_data)
-        total_price = self._price_per_row * rows
-        assert total_price - self._seller_tx_fee > 0, "This sale would generate a loss, change the configs!"
+        total_price = DEFAULT_PRICE_PER_ROW * rows
+        assert total_price - DEFAULT_SELLER_TX_FEE > 0, "This sale would generate a loss, change the configs!"
         proposal = Description({"rows": rows,
                                 "price": total_price,
-                                "seller_tx_fee": self._seller_tx_fee,
-                                "currency_id": self._currency_id,
-                                "ledger_id": self._ledger_id})
+                                "seller_tx_fee": DEFAULT_SELLER_TX_FEE,
+                                "currency_id": DEFAULT_CURRENCY_PBK,
+                                "ledger_id": DEFAULT_LEDGER_ID})
         return (proposal, weather_data)
 
     def _build_data_payload(self, fetched_data: Dict[str, int]) -> Tuple[Dict[str, List[Dict[str, Any]]], int]:

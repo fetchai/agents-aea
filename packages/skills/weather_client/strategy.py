@@ -44,23 +44,23 @@ class Strategy(SharedClass):
         self.runner = CliRunner()
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.country",
+                                 "skills.weather_client.shared_classes.strategy.args.country",
                                  DEFAULT_COUNTRY], standalone_mode=False)
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.max_row_price",
+                                 "skills.weather_client.shared_classes.strategy.args.max_row_price",
                                  DEFAULT_MAX_ROW_PRICE], standalone_mode=False)
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.max_tx_fee",
+                                 "skills.weather_client.shared_classes.strategy.args.max_tx_fee",
                                  DEFAULT_MAX_TX_FEE], standalone_mode=False)
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.currency_id",
+                                 "skills.weather_client.shared_classes.strategy.args.currency_id",
                                  DEFAULT_CURRENCY_PBK], standalone_mode=False)
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.ledger_id",
+                                 "skills.weather_client.shared_classes.strategy.args.ledger_id",
                                  DEFAULT_LEDGER_ID], standalone_mode=False)
         super().__init__(**kwargs)
         self._search_id = 0
@@ -81,7 +81,7 @@ class Strategy(SharedClass):
 
         :return: the query
         """
-        query = Query([Constraint(SEARCH_TERM, ConstraintType("==", self._country))], model=None)
+        query = Query([Constraint(SEARCH_TERM, ConstraintType("==", DEFAULT_COUNTRY))], model=None)
         return query
 
     def is_acceptable_proposal(self, proposal: Description) -> bool:
@@ -91,7 +91,7 @@ class Strategy(SharedClass):
         :return: whether it is acceptable
         """
         result = (proposal.values['price'] - proposal.values['seller_tx_fee'] > 0) and \
-            (proposal.values['price'] <= self._max_row_price * proposal.values['rows']) and \
-            (proposal.values['currency_id'] == self._currency_id) and \
-            (proposal.values['ledger_id'] == self._ledger_id)
+                 (proposal.values['price'] <= DEFAULT_MAX_ROW_PRICE * proposal.values['rows']) and \
+                 (proposal.values['currency_id'] == DEFAULT_CURRENCY_PBK) and \
+                 (proposal.values['ledger_id'] == DEFAULT_LEDGER_ID)
         return result

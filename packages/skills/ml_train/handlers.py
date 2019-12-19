@@ -32,13 +32,13 @@ from aea.skills.base import Handler
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.ml_trade.message import MLTradeMessage
     from packages.protocols.ml_trade.serialization import MLTradeSerializer
-    from packages.skills.ml_train.strategy import Strategy
+    from packages.skills.ml_train.strategy import Strategy, DEFAULT_IS_LEDGER_TX
     from packages.skills.ml_train.tasks import MLTrainTask
     # from packages.skills.ml_train.tasks import MLTask
 else:
     from ml_trade_protocol.message import MLTradeMessage
     from ml_trade_protocol.serialization import MLTradeSerializer
-    from ml_train_skill.strategy import Strategy
+    from ml_train_skill.strategy import Strategy, DEFAULT_IS_LEDGER_TX
     from ml_train_skill.tasks import MLTrainTask
 
 logger = logging.getLogger("aea.ml_train_skill")
@@ -94,7 +94,7 @@ class TrainHandler(Handler):
             logger.info("[{}]: rejecting, terms are not acceptable and/or affordable".format(self.context.agent_name))
             return
 
-        if strategy.is_ledger_tx:
+        if DEFAULT_IS_LEDGER_TX:
             # propose the transaction to the decision maker for settlement on the ledger
             tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=['ml_train'],

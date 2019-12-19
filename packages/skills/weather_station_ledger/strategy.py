@@ -44,6 +44,7 @@ DEFAULT_DATE_TWO = "15/10/2019"
 
 CLI_LOG_OPTION = ["-v", "OFF"]
 
+
 class Strategy(SharedClass):
     """This class defines a strategy for the agent."""
 
@@ -59,26 +60,26 @@ class Strategy(SharedClass):
         self.runner = CliRunner()
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.price_per_row",
+                                 "skills.weather_station_ledger.shared_classes.strategy.args.price_per_row",
                                  DEFAULT_PRICE_PER_ROW], standalone_mode=False)
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.seller_tx_fee",
+                                 "skills.weather_station_ledger.shared_classes.strategy.args.seller_tx_fee",
                                  DEFAULT_SELLER_TX_FEE], standalone_mode=False)
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.currency_id",
+                                 "skills.weather_station_ledger.shared_classes.strategy.args.currency_id",
                                  DEFAULT_CURRENCY_PBK], standalone_mode=False)
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.ledger_id",
+                                 "skills.weather_station_ledger.shared_classes.strategy.args.ledger_id",
                                  DEFAULT_LEDGER_ID], standalone_mode=False)
 
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.date_one",
+                                 "skills.weather_station_ledger.shared_classes.strategy.args.date_one",
                                  DEFAULT_DATE_ONE], standalone_mode=False)
         self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
-                                 "skills.weather_station.shared_classes.strategy.args.date_two",
+                                 "skills.weather_station_ledger.shared_classes.strategy.args.date_two",
                                  DEFAULT_DATE_TWO], standalone_mode=False)
         super().__init__(**kwargs)
         self.db = DBCommunication()
@@ -119,15 +120,15 @@ class Strategy(SharedClass):
         :param query: the query
         :return: a tuple of proposal and the weather data
         """
-        fetched_data = self.db.get_data_for_specific_dates(self._date_one, self._date_two)  # TODO: fetch real data
+        fetched_data = self.db.get_data_for_specific_dates(DEFAULT_DATE_ONE, DEFAULT_DATE_TWO)  # TODO: fetch real data
         weather_data, rows = self._build_data_payload(fetched_data)
-        total_price = self._price_per_row * rows
-        assert total_price - self._seller_tx_fee > 0, "This sale would generate a loss, change the configs!"
+        total_price = DEFAULT_PRICE_PER_ROW * rows
+        assert total_price - DEFAULT_SELLER_TX_FEE > 0, "This sale would generate a loss, change the configs!"
         proposal = Description({"rows": rows,
                                 "price": total_price,
-                                "seller_tx_fee": self._seller_tx_fee,
-                                "currency_id": self._currency_id,
-                                "ledger_id": self._ledger_id})
+                                "seller_tx_fee": DEFAULT_SELLER_TX_FEE,
+                                "currency_id": DEFAULT_CURRENCY_PBK,
+                                "ledger_id": DEFAULT_LEDGER_ID})
         return (proposal, weather_data)
 
     def _build_data_payload(self, fetched_data: Dict[str, int]) -> Tuple[Dict[str, List[Dict[str, Any]]], int]:

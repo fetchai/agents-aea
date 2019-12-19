@@ -22,8 +22,10 @@
 import time
 from typing import cast
 
+from aea.cli import cli
 from aea.protocols.oef.models import Description, Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
+from tests.common.click_testing import CliRunner
 
 DEFAULT_COUNTRY = 'UK'
 SEARCH_TERM = 'country'
@@ -31,6 +33,8 @@ DEFAULT_SEARCH_INTERVAL = 5.0
 DEFAULT_MAX_PRICE = 4000
 DEFAULT_MAX_DETECTION_AGE = 60 * 60   # 1 hour
 DEFAULT_NO_FINDSEARCH_INTERVAL = 5
+
+CLI_LOG_OPTION = ["-v", "OFF"]
 
 
 class Strategy(SharedClass):
@@ -47,6 +51,29 @@ class Strategy(SharedClass):
         self._no_find_search_interval = cast(float, kwargs.pop('no_find_search_interval')) if 'no_find_search_interval' in kwargs.keys() else DEFAULT_NO_FINDSEARCH_INTERVAL
         self._max_price = kwargs.pop('max_price') if 'max_price' in kwargs.keys() else DEFAULT_MAX_PRICE
         self._max_detection_age = kwargs.pop('max_detection_age') if 'max_detection_age' in kwargs.keys() else DEFAULT_MAX_DETECTION_AGE
+
+        self.runner = CliRunner()
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.carpark_client.shared_classes.strategy.args.country",
+                                 DEFAULT_COUNTRY], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.carpark_client.shared_classes.strategy.args.search_interval",
+                                 DEFAULT_SEARCH_INTERVAL], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.carpark_client.shared_classes.strategy.args.no_find_search_interval",
+                                 DEFAULT_NO_FINDSEARCH_INTERVAL], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.carpark_client.shared_classes.strategy.args.max_price",
+                                 DEFAULT_MAX_PRICE], standalone_mode=False)
+
+        self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set",
+                                 "skills.carpark_client.shared_classes.strategy.args.max_detection_age",
+                                 DEFAULT_MAX_DETECTION_AGE], standalone_mode=False)
+
         super().__init__(**kwargs)
 
         self.is_searching = True
