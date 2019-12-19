@@ -6,6 +6,7 @@ fingerprint: ""
 url: ""
 description: "The oef connection provides a wrapper around the OEF sdk."
 class_name: OEFConnection
+protocols: ["oef", "fipa"]
 restricted_to_protocols: []
 excluded_protocols: ["gym"]
 config:

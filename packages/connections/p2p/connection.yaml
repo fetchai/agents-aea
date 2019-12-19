@@ -6,6 +6,7 @@ fingerprint: ""
 url: ""
 description: "The p2p connection provides a connection with the fetch.ai mail provider."
 class_name: PeerToPeerConnection
+protocols: []
 restricted_to_protocols: []
 excluded_protocols: ["gym"]
 config:

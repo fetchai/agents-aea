@@ -5,6 +5,7 @@ license: Apache 2.0
 fingerprint: ""
 url: ""
 class_name: DummyConnection
+protocols: []
 restricted_to_protocols:
   - "default"
 excluded_protocols: []

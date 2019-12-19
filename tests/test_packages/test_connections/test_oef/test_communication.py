@@ -31,7 +31,7 @@ import pytest
 from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
 
-import aea
+import packages
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
@@ -727,7 +727,7 @@ async def test_cancelled_receive(network_node):
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
 
-    patch = unittest.mock.patch.object(aea.connections.oef.connection.logger, 'debug')
+    patch = unittest.mock.patch.object(packages.connections.oef.connection.logger, 'debug')
     mocked_logger_debug = patch.__enter__()
 
     async def receive():
@@ -767,7 +767,7 @@ async def test_cannot_connect_to_oef():
     oef_connection = OEFConnection(address=wallet.addresses['default'], oef_addr="a_fake_address", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
 
-    patch = unittest.mock.patch.object(aea.connections.oef.connection.logger, 'warning')
+    patch = unittest.mock.patch.object(packages.connections.oef.connection.logger, 'warning')
     mocked_logger_warning = patch.__enter__()
 
     async def try_to_connect():

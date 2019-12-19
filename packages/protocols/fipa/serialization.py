@@ -32,7 +32,7 @@ if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.fipa import fipa_pb2
     from packages.protocols.fipa.message import FIPAMessage
 else:
-    from fipa_protocol import fipa_pb2  # pragma: no cover
+    import fipa_protocol.fipa_pb2 as fipa_pb2  # pragma: no cover
     from fipa_protocol.message import FIPAMessage  # pragma: no cover
 
 

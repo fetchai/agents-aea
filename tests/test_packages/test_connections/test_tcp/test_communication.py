@@ -24,7 +24,7 @@ import unittest.mock
 
 import pytest
 
-import aea
+import packages
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
@@ -117,7 +117,7 @@ class TestTCPClientConnection:
         await tcp_server.connect()
         await tcp_client.connect()
 
-        with unittest.mock.patch.object(aea.connections.tcp.tcp_client.logger, "debug") as mock_logger_debug:
+        with unittest.mock.patch.object(packages.connections.tcp.tcp_client.logger, "debug") as mock_logger_debug:
             task = asyncio.ensure_future(tcp_client.receive())
             await asyncio.sleep(0.1)
             task.cancel()
@@ -138,7 +138,7 @@ class TestTCPClientConnection:
         await tcp_server.connect()
         await tcp_client.connect()
 
-        with unittest.mock.patch.object(aea.connections.tcp.tcp_client.logger, "debug") as mock_logger_debug:
+        with unittest.mock.patch.object(packages.connections.tcp.tcp_client.logger, "debug") as mock_logger_debug:
             with unittest.mock.patch.object(tcp_client, "_recv", side_effect=struct.error):
                 task = asyncio.ensure_future(tcp_client.receive())
                 await asyncio.sleep(0.1)
@@ -187,7 +187,7 @@ class TestTCPServerConnection:
         await tcp_server.connect()
         await tcp_client.connect()
         await asyncio.sleep(0.1)
-        with unittest.mock.patch.object(aea.connections.tcp.tcp_server.logger, "error") as mock_logger_error:
+        with unittest.mock.patch.object(packages.connections.tcp.tcp_server.logger, "error") as mock_logger_error:
             with unittest.mock.patch("asyncio.wait", side_effect=Exception("generic exception")):
                 result = await tcp_server.receive()
                 assert result is None

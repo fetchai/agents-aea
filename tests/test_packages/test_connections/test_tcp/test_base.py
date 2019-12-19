@@ -21,7 +21,7 @@
 import asyncio
 from asyncio import CancelledError
 
-import aea
+import packages
 # import packages.connections.tcp.base
 import pytest
 import unittest.mock
@@ -43,7 +43,7 @@ async def test_connect_twice():
 
     await tcp_connection.connect()
     await asyncio.sleep(0.1)
-    with unittest.mock.patch.object(aea.connections.tcp.base.logger, "warning") as mock_logger_warning:
+    with unittest.mock.patch.object(packages.connections.tcp.base.logger, "warning") as mock_logger_warning:
         await tcp_connection.connect()
         mock_logger_warning.assert_called_with("Connection already set up.")
 
@@ -59,7 +59,7 @@ async def test_connect_raises_exception():
     loop = asyncio.get_event_loop()
     tcp_connection.loop = loop
 
-    with unittest.mock.patch.object(aea.connections.tcp.base.logger, "error") as mock_logger_error:
+    with unittest.mock.patch.object(packages.connections.tcp.base.logger, "error") as mock_logger_error:
         with unittest.mock.patch.object(tcp_connection, "setup", side_effect=Exception("error during setup")):
             await tcp_connection.connect()
             mock_logger_error.assert_called_with("error during setup")
@@ -71,7 +71,7 @@ async def test_disconnect_when_already_disconnected():
     port = get_unused_tcp_port()
     tcp_connection = TCPServerConnection("address", "127.0.0.1", port)
 
-    with unittest.mock.patch.object(aea.connections.tcp.base.logger, "warning") as mock_logger_warning:
+    with unittest.mock.patch.object(packages.connections.tcp.base.logger, "warning") as mock_logger_warning:
         await tcp_connection.disconnect()
         mock_logger_warning.assert_called_with("Connection already disconnected.")
 
@@ -83,7 +83,7 @@ async def test_send_to_unknown_destination():
     port = get_unused_tcp_port()
     tcp_connection = TCPServerConnection(address, "127.0.0.1", port)
     envelope = Envelope(to="non_existing_destination", sender="address", protocol_id="default", message=b"")
-    with unittest.mock.patch.object(aea.connections.tcp.base.logger, "error") as mock_logger_error:
+    with unittest.mock.patch.object(packages.connections.tcp.base.logger, "error") as mock_logger_error:
         await tcp_connection.send(envelope)
         mock_logger_error.assert_called_with("[{}]: Cannot send envelope {}".format(address, envelope))
 
