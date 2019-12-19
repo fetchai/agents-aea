@@ -57,6 +57,12 @@ class TestConfigGet:
         assert result.exit_code == 0
         assert result.output == "dummy\n"
 
+    def test_get_nested_attribute(self):
+        """Test getting the 'dummy' skill name."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "skills.dummy.behaviours.dummy.class_name"], standalone_mode=False)
+        assert result.exit_code == 0
+        assert result.output == "DummyBehaviour\n"
+
     def test_no_recognized_root(self):
         """Test that the 'get' fails because the root is not recognized."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "wrong_root.agent_name"], standalone_mode=False)
@@ -83,14 +89,28 @@ class TestConfigGet:
         """Test that the 'get' fails because the attribute is not found."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "skills.dummy.non_existing_attribute"], standalone_mode=False)
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with("Attribute not found.")
+        self.mocked_logger_error.assert_called_with("Attribute 'non_existing_attribute' not found.")
 
     def test_get_fails_when_getting_non_primitive_type(self):
         """Test that getting the 'dummy' skill behaviours fails because not a primitive type."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "skills.dummy.behaviours"],
                                     standalone_mode=False)
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with("Attribute is not of primitive type.")
+        self.mocked_logger_error.assert_called_with("Attribute 'behaviours' is not of primitive type.")
+
+    def test_get_fails_when_getting_nested_object(self):
+        """Test that getting a nested object in 'dummy' skill fails because path is not valid."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "skills.dummy.non_existing_attribute.dummy"],
+                                    standalone_mode=False)
+        assert result.exit_code == 1
+        self.mocked_logger_error.assert_called_with("Cannot get attribute 'non_existing_attribute'")
+
+    def test_get_fails_when_getting_non_dict_attribute(self):
+        """Test that the get fails because the path point to a non-dict object."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "skills.dummy.protocols.protocol"],
+                                    standalone_mode=False)
+        assert result.exit_code == 1
+        self.mocked_logger_error.assert_called_with("The target object is not a dictionary.")
 
     @classmethod
     def teardown_class(cls):
@@ -133,6 +153,14 @@ class TestConfigSet:
         assert result.exit_code == 0
         assert result.output == "new_dummy_name\n"
 
+    def test_set_nested_attribute(self):
+        """Test setting a nested attribute."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.behaviours.dummy.class_name", "new_dummy_name"], standalone_mode=False)
+        assert result.exit_code == 0
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "get", "skills.dummy.behaviours.dummy.class_name"], standalone_mode=False)
+        assert result.exit_code == 0
+        assert result.output == "new_dummy_name\n"
+
     def test_no_recognized_root(self):
         """Test that the 'get' fails because the root is not recognized."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "wrong_root.agent_name", "value"], standalone_mode=False)
@@ -159,13 +187,27 @@ class TestConfigSet:
         """Test that the 'get' fails because the attribute is not found."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.non_existing_attribute", "value"], standalone_mode=False)
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with("Attribute not found.")
+        self.mocked_logger_error.assert_called_with("Attribute 'non_existing_attribute' not found.")
 
     def test_set_fails_when_setting_non_primitive_type(self):
         """Test that setting the 'dummy' skill behaviours fails because not a primitive type."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.behaviours", "value"], standalone_mode=False)
         assert result.exit_code == 1
-        self.mocked_logger_error.assert_called_with("Attribute is not of primitive type.")
+        self.mocked_logger_error.assert_called_with("Attribute 'behaviours' is not of primitive type.")
+
+    def test_get_fails_when_setting_nested_object(self):
+        """Test that setting a nested object in 'dummy' skill fails because path is not valid."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.non_existing_attribute.dummy", "new_value"],
+                                    standalone_mode=False)
+        assert result.exit_code == 1
+        self.mocked_logger_error.assert_called_with("Cannot get attribute 'non_existing_attribute'")
+
+    def test_get_fails_when_setting_non_dict_attribute(self):
+        """Test that the set fails because the path point to a non-dict object."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "config", "set", "skills.dummy.protocols.protocol", "new_value"],
+                                    standalone_mode=False)
+        assert result.exit_code == 1
+        self.mocked_logger_error.assert_called_with("The target object is not a dictionary.")
 
     @classmethod
     def teardown_class(cls):
