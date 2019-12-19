@@ -102,7 +102,7 @@ class TrainHandler(Handler):
                                         tx_id=strategy.get_next_transition_id(),
                                         tx_sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
                                         tx_counterparty_addr=terms.values["address"],
-                                        tx_amount_by_currency_id={terms.values['currency_id']: terms.values["price"]},
+                                        tx_amount_by_currency_id={terms.values['currency_id']: - terms.values["price"]},
                                         tx_sender_fee=terms.values["buyer_tx_fee"],
                                         tx_counterparty_fee=terms.values["seller_tx_fee"],
                                         tx_quantities_by_good_id={},
@@ -227,12 +227,12 @@ class MyTransactionHandler(Handler):
             ml_accept = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT,
                                        tx_digest=tx_msg_response.tx_digest,
                                        terms=terms)
-            self.context.outbox.put_message(to=message.counterparty,
+            self.context.outbox.put_message(to=tx_msg_response.tx_counterparty_addr,
                                             sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."
-                        .format(self.context.agent_name, message.counterparty[-5:], tx_msg_response.tx_digest, terms.values))
+                        .format(self.context.agent_name, tx_msg_response.tx_counterparty_addr[-5:], tx_msg_response.tx_digest, terms.values))
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 

@@ -39,6 +39,8 @@ else:
 DEFAULT_PRICE = 2000
 DEFAULT_DB_IS_REL_TO_CWD = False
 DEFAULT_DB_REL_DIR = "temp_files_placeholder"
+DEFAULT_CURRENCY_ID = 'FET'
+DEFAULT_LEDGER_ID = 'fetchai'
 
 logger = logging.getLogger("aea.carpark_detection_skill")
 
@@ -64,6 +66,8 @@ class Strategy(SharedClass):
             db_dir = os.path.join(os.path.dirname(__file__), DEFAULT_DB_REL_DIR)
 
         self.data_price_fet = kwargs.pop('data_price_fet') if 'data_price_fet' in kwargs.keys() else DEFAULT_PRICE
+        self.currency_id = kwargs.pop('currency_id') if 'currency_id' in kwargs.keys() else DEFAULT_CURRENCY_ID
+        self.ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
         super().__init__(**kwargs)
 
         self.db = DetectionDatabase(db_dir, False)
@@ -151,6 +155,8 @@ class Strategy(SharedClass):
             "lat": data[0]["lat"],
             "lon": data[0]["lon"],
             "price": self.data_price_fet,
+            "currency_id": self.currency_id,
+            "ledger_id": self.ledger_id,
             "last_detection_time": last_detection_time,
             "max_spaces": max_spaces,
         })

@@ -198,7 +198,7 @@ class FIPAHandler(Handler):
                                     tx_id="transaction0",
                                     tx_sender_addr=self.context.agent_addresses['fetchai'],
                                     tx_counterparty_addr=address,
-                                    tx_amount_by_currency_id={proposal.values['currency_id']: proposal.values['price']},
+                                    tx_amount_by_currency_id={proposal.values['currency_id']: - proposal.values['price']},
                                     tx_sender_fee=0,
                                     tx_counterparty_fee=0,
                                     tx_quantities_by_good_id={},
