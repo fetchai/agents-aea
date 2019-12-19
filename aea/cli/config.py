@@ -20,13 +20,14 @@
 """Implementation of the 'aea list' subcommand."""
 import sys
 from pathlib import Path
-from typing import Tuple, Dict
+from typing import Dict, List, cast
 
 import click
+import yaml
 
 from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config, logger
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, \
-    DEFAULT_CONNECTION_CONFIG_FILE, Configuration
+    DEFAULT_CONNECTION_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, ConfigurationType
 
 ALLOWED_PATH_ROOTS = ["agent", "skills", "protocols", "connections"]
@@ -64,10 +65,9 @@ class AEAJsonPathType(click.ParamType):
         if root == "agent":
             config_loader = ConfigLoader.from_configuration_type(ConfigurationType.AGENT)
             path_to_resource_configuration = DEFAULT_AEA_CONFIG_FILE
-            agent_config = config_loader.load(open(path_to_resource_configuration))
             ctx.obj.set_config("configuration_file_path", path_to_resource_configuration)
             ctx.obj.set_config("configuration_loader", config_loader)
-            return agent_config, parts[1:]
+            return parts[1:]
         else:
             # navigate the resources of the agent to reach the target configuration file.
             resource_type = root
@@ -77,10 +77,36 @@ class AEAJsonPathType(click.ParamType):
                 self.fail("Resource {}/{} does not exist.".format(resource_type, resource_name))
             path_to_resource_configuration = path_to_resource_directory / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type]
             config_loader = ConfigLoader.from_configuration_type(ConfigurationType(root[:-1]))
-            resource_config = config_loader.load(open(path_to_resource_configuration))
             ctx.obj.set_config("configuration_file_path", path_to_resource_configuration)
             ctx.obj.set_config("configuration_loader", config_loader)
-            return resource_config, parts[2:]
+            return parts[2:]
+
+
+def _get_parent_object(obj: dict, dotted_path: List[str]):
+    """
+    Given a nested dictionary, return the object denoted by the dotted path (if any).
+
+    In particular if dotted_path = [], it returns the same object.
+
+    :param obj: the dictionary.
+    :param dotted_path: the path to the object.
+    :return: the target dictionary
+    :raise ValueError: if the path is not valid.
+    """
+    index = 0
+    current_object = obj
+    while index < len(dotted_path):
+        current_attribute_name = dotted_path[index]
+        current_object = current_object.get(current_attribute_name, None)
+        # if the dictionary does not have the key we want, fail.
+        if current_object is None:
+            raise ValueError("Cannot get attribute '{}'".format(current_attribute_name))
+        index += 1
+    # if we are not at the last step and the attribute value is not a dictionary, fail.
+    if isinstance(current_object, dict):
+        return current_object
+    else:
+        raise ValueError("The target object is not a dictionary.")
 
 
 @click.group()
@@ -93,22 +119,30 @@ def config(ctx: Context):
 @config.command()
 @click.argument("JSON_PATH", required=True, type=AEAJsonPathType())
 @pass_ctx
-def get(ctx: Context, json_path: Tuple[Configuration, str]):
+def get(ctx: Context, json_path: List[str]):
     """Get a field."""
-    configuration_obj, attribute_path = json_path
-    if len(attribute_path) > 1:
-        logger.error("Path to attribute is too complex.")
+    config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
+    configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
+
+    configuration_object = yaml.safe_load(open(configuration_file_path))
+    config_loader.validator.validate(instance=configuration_object)
+
+    parent_object_path = json_path[:-1]
+    attribute_name = json_path[-1]
+    try:
+        parent_object = _get_parent_object(configuration_object, parent_object_path)
+    except ValueError as e:
+        logger.error(str(e))
         sys.exit(1)
 
-    attribute_name = attribute_path[0]
-    if not hasattr(configuration_obj, attribute_name):
-        logger.error("Attribute not found.")
+    if attribute_name not in parent_object:
+        logger.error("Attribute '{}' not found.".format(attribute_name))
         sys.exit(1)
-    if not isinstance(getattr(configuration_obj, attribute_name), (str, int, bool)):
-        logger.error("Attribute is not of primitive type.")
+    if not isinstance(parent_object.get(attribute_name), (str, int, bool, float)):
+        logger.error("Attribute '{}' is not of primitive type.".format(attribute_name))
         sys.exit(1)
 
-    attribute_value = getattr(configuration_obj, attribute_path[0])
+    attribute_value = parent_object.get(attribute_name)
     print(attribute_value)
 
 
@@ -116,26 +150,34 @@ def get(ctx: Context, json_path: Tuple[Configuration, str]):
 @click.argument("JSON_PATH", required=True, type=AEAJsonPathType())
 @click.argument("VALUE", required=True, type=str)
 @pass_ctx
-def set(ctx: Context, json_path: Tuple[Configuration, str], value):
+def set(ctx: Context, json_path: List[str], value):
     """Set a field."""
-    configuration_obj, attribute_path = json_path
-    if len(attribute_path) > 1:
-        logger.error("Path to attribute is too complex.")
+    config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
+    configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
+
+    configuration_dict = yaml.safe_load(open(configuration_file_path))
+    config_loader.validator.validate(instance=configuration_dict)
+
+    parent_object_path = json_path[:-1]
+    attribute_name = json_path[-1]
+    try:
+        parent_object = _get_parent_object(configuration_dict, parent_object_path)
+    except ValueError as e:
+        logger.error(str(e))
         sys.exit(1)
 
-    attribute_name = attribute_path[0]
-    if not hasattr(configuration_obj, attribute_name):
-        logger.error("Attribute not found.")
+    if attribute_name not in parent_object:
+        logger.error("Attribute '{}' not found.".format(attribute_name))
         sys.exit(1)
-    if not isinstance(getattr(configuration_obj, attribute_name), (str, int, bool)):
-        logger.error("Attribute is not of primitive type.")
+    if not isinstance(parent_object.get(attribute_name), (str, int, bool, float)):
+        logger.error("Attribute '{}' is not of primitive type.".format(attribute_name))
         sys.exit(1)
+
+    parent_object[attribute_name] = value
 
     try:
-        configuration_file_path = ctx.config["configuration_file_path"]
-        configuration_loader = ctx.config["configuration_loader"]
-        setattr(configuration_obj, attribute_path[0], value)
-        configuration_loader.dump(configuration_obj, open(configuration_file_path, "w"))
+        configuration_obj = config_loader.configuration_type.from_json(configuration_dict)
+        config_loader.dump(configuration_obj, open(configuration_file_path, "w"))
     except Exception:
         logger.error("Attribute or value not valid.")
         sys.exit(1)

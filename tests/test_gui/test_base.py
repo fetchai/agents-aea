@@ -58,6 +58,14 @@ class TempCWD:
         self.cwd = os.getcwd()
         os.chdir(self.temp_dir)
 
+    def __enter__(self):
+        """Create the empty directory in a context manager."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Restore the initial conditions."""
+        self.destroy()
+
     def destroy(self):
         """Destroy the cwd and restore the old one."""
         os.chdir(self.cwd)

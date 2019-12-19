@@ -43,18 +43,18 @@ class StateUpdateMessage(InternalMessage):
         APPLY = "apply"
 
     def __init__(self, performative: Performative,
-                 amount_by_currency: Currencies,
+                 amount_by_currency_id: Currencies,
                  quantities_by_good_id: Goods,
                  **kwargs):
         """
         Instantiate transaction message.
 
         :param performative: the performative
-        :param amount_by_currency: the amounts of currencies.
+        :param amount_by_currency_id: the amounts of currencies.
         :param quantities_by_good_id: the quantities of goods.
         """
         super().__init__(performative=performative,
-                         amount_by_currency=amount_by_currency,
+                         amount_by_currency_id=amount_by_currency_id,
                          quantities_by_good_id=quantities_by_good_id,
                          **kwargs)
         assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
@@ -66,10 +66,10 @@ class StateUpdateMessage(InternalMessage):
         return StateUpdateMessage.Performative(self.get('performative'))
 
     @property
-    def amount_by_currency(self) -> Currencies:
+    def amount_by_currency_id(self) -> Currencies:
         """Get the amount by currency."""
-        assert self.is_set("amount_by_currency")
-        return cast(Currencies, self.get("amount_by_currency"))
+        assert self.is_set("amount_by_currency_id")
+        return cast(Currencies, self.get("amount_by_currency_id"))
 
     @property
     def quantities_by_good_id(self) -> Goods:
@@ -78,10 +78,10 @@ class StateUpdateMessage(InternalMessage):
         return cast(Goods, self.get("quantities_by_good_id"))
 
     @property
-    def exchange_params_by_currency(self) -> ExchangeParams:
+    def exchange_params_by_currency_id(self) -> ExchangeParams:
         """Get the exchange parameters by currency from the message."""
-        assert self.is_set("exchange_params_by_currency")
-        return cast(ExchangeParams, self.get("exchange_params_by_currency"))
+        assert self.is_set("exchange_params_by_currency_id")
+        return cast(ExchangeParams, self.get("exchange_params_by_currency_id"))
 
     @property
     def utility_params_by_good_id(self) -> UtilityParams:
@@ -103,8 +103,8 @@ class StateUpdateMessage(InternalMessage):
         """
         try:
             assert isinstance(self.performative, StateUpdateMessage.Performative)
-            assert isinstance(self.amount_by_currency, dict)
-            for key, int_value in self.amount_by_currency.items():
+            assert isinstance(self.amount_by_currency_id, dict)
+            for key, int_value in self.amount_by_currency_id.items():
                 assert isinstance(key, str)
                 assert isinstance(int_value, int)
             assert isinstance(self.quantities_by_good_id, dict)
@@ -112,11 +112,11 @@ class StateUpdateMessage(InternalMessage):
                 assert isinstance(key, str)
                 assert isinstance(int_value, int)
             if self.performative == self.Performative.INITIALIZE:
-                assert isinstance(self.exchange_params_by_currency, dict)
-                for key, float_value in self.exchange_params_by_currency.items():
+                assert isinstance(self.exchange_params_by_currency_id, dict)
+                for key, float_value in self.exchange_params_by_currency_id.items():
                     assert isinstance(key, str)
                     assert isinstance(float_value, float)
-                assert self.amount_by_currency.keys() == self.exchange_params_by_currency.keys()
+                assert self.amount_by_currency_id.keys() == self.exchange_params_by_currency_id.keys()
                 assert isinstance(self.utility_params_by_good_id, dict)
                 for key, float_value in self.utility_params_by_good_id.items():
                     assert isinstance(key, str)

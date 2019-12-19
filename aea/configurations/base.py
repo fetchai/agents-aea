@@ -21,6 +21,7 @@
 
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
+# from aea.helpers.base import generate_fingerprint
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
@@ -182,7 +183,7 @@ class ConnectionConfig(Configuration):
 
     def __init__(self,
                  name: str = "",
-                 authors: str = "",
+                 author: str = "",
                  version: str = "",
                  license: str = "",
                  url: str = "",
@@ -194,9 +195,10 @@ class ConnectionConfig(Configuration):
                  **config):
         """Initialize a connection configuration object."""
         self.name = name
-        self.authors = authors
+        self.author = author
         self.version = version
         self.license = license
+        self.fingerprint = ""
         self.url = url
         self.class_name = class_name
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -210,9 +212,10 @@ class ConnectionConfig(Configuration):
         """Return the JSON representation."""
         return {
             "name": self.name,
-            "authors": self.authors,
+            "author": self.author,
             "version": self.version,
             "license": self.license,
+            "fingerprint": self.fingerprint,
             "url": self.url,
             "class_name": self.class_name,
             "restricted_to_protocols": self.restricted_to_protocols,
@@ -232,7 +235,7 @@ class ConnectionConfig(Configuration):
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
-            authors=cast(str, obj.get("authors")),
+            author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
@@ -250,7 +253,7 @@ class ProtocolConfig(Configuration):
 
     def __init__(self,
                  name: str = "",
-                 authors: str = "",
+                 author: str = "",
                  version: str = "",
                  license: str = "",
                  url: str = "",
@@ -258,9 +261,10 @@ class ProtocolConfig(Configuration):
                  description: str = ""):
         """Initialize a connection configuration object."""
         self.name = name
-        self.authors = authors
+        self.author = author
         self.version = version
         self.license = license
+        self.fingerprint = ""
         self.url = url
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -270,9 +274,10 @@ class ProtocolConfig(Configuration):
         """Return the JSON representation."""
         return {
             "name": self.name,
-            "authors": self.authors,
+            "author": self.author,
             "version": self.version,
             "license": self.license,
+            "fingerprint": self.fingerprint,
             "url": self.url,
             "dependencies": self.dependencies,
             "description": self.description
@@ -284,7 +289,7 @@ class ProtocolConfig(Configuration):
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         return ProtocolConfig(
             name=cast(str, obj.get("name")),
-            authors=cast(str, obj.get("authors")),
+            author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
@@ -402,7 +407,7 @@ class SkillConfig(Configuration):
 
     def __init__(self,
                  name: str = "",
-                 authors: str = "",
+                 author: str = "",
                  version: str = "",
                  license: str = "",
                  url: str = "",
@@ -411,9 +416,10 @@ class SkillConfig(Configuration):
                  description: str = ""):
         """Initialize a skill configuration."""
         self.name = name
-        self.authors = authors
+        self.author = author
         self.version = version
         self.license = license
+        self.fingerprint = ""
         self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[str]
         self.dependencies = dependencies if dependencies is not None else {}
@@ -428,16 +434,17 @@ class SkillConfig(Configuration):
         """Return the JSON representation."""
         return {
             "name": self.name,
-            "authors": self.authors,
+            "author": self.author,
             "version": self.version,
             "license": self.license,
+            "fingerprint": self.fingerprint,
             "url": self.url,
             "protocols": self.protocols,
             "dependencies": self.dependencies,
-            "handlers": [{"handler": h.json} for _, h in self.handlers.read_all()],
-            "behaviours": [{"behaviour": b.json} for _, b in self.behaviours.read_all()],
-            "tasks": [{"task": t.json} for _, t in self.tasks.read_all()],
-            "shared_classes": [{"shared_class": s.json} for _, s in self.shared_classes.read_all()],
+            "handlers": {key: h.json for key, h in self.handlers.read_all()},
+            "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
+            "tasks": {key: t.json for key, t in self.tasks.read_all()},
+            "shared_classes": {key: s.json for key, s in self.shared_classes.read_all()},
             "description": self.description
         }
 
@@ -445,7 +452,7 @@ class SkillConfig(Configuration):
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
         name = cast(str, obj.get("name"))
-        authors = cast(str, obj.get("authors"))
+        author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
         url = cast(str, obj.get("url"))
@@ -454,7 +461,7 @@ class SkillConfig(Configuration):
         description = cast(str, obj.get("description"))
         skill_config = SkillConfig(
             name=name,
-            authors=authors,
+            author=author,
             version=version,
             license=license,
             url=url,
@@ -463,21 +470,21 @@ class SkillConfig(Configuration):
             description=description
         )
 
-        for b in obj.get("behaviours", []):  # type: ignore
-            behaviour_config = BehaviourConfig.from_json(b["behaviour"])
-            skill_config.behaviours.create(behaviour_config.class_name, behaviour_config)
+        for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():  # type: ignore
+            behaviour_config = BehaviourConfig.from_json(behaviour_data)
+            skill_config.behaviours.create(behaviour_id, behaviour_config)
 
-        for t in obj.get("tasks", []):  # type: ignore
-            task_config = TaskConfig.from_json(t["task"])
-            skill_config.tasks.create(task_config.class_name, task_config)
+        for task_id, task_data in obj.get("tasks", {}).items():  # type: ignore
+            task_config = TaskConfig.from_json(task_data)
+            skill_config.tasks.create(task_id, task_config)
 
-        for h in obj.get("handlers", []):  # type: ignore
-            handler_config = HandlerConfig.from_json(h["handler"])
-            skill_config.handlers.create(handler_config.class_name, handler_config)
+        for handler_id, handler_data in obj.get("handlers", {}).items():  # type: ignore
+            handler_config = HandlerConfig.from_json(handler_data)
+            skill_config.handlers.create(handler_id, handler_config)
 
-        for s in obj.get("shared_classes", []):  # type: ignore
-            shared_class_config = SharedClassConfig.from_json(s["shared_class"])
-            skill_config.shared_classes.create(shared_class_config.class_name, shared_class_config)
+        for shared_class_id, shared_class_data in obj.get("shared_classes", {}).items():  # type: ignore
+            shared_class_config = SharedClassConfig.from_json(shared_class_data)
+            skill_config.shared_classes.create(shared_class_id, shared_class_config)
 
         return skill_config
 
@@ -488,9 +495,10 @@ class AgentConfig(Configuration):
     def __init__(self,
                  agent_name: str = "",
                  aea_version: str = "",
-                 authors: str = "",
+                 author: str = "",
                  version: str = "",
                  license: str = "",
+                 fingerprint: str = "",
                  url: str = "",
                  registry_path: str = "",
                  description: str = "",
@@ -500,9 +508,10 @@ class AgentConfig(Configuration):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
         self.aea_version = aea_version
-        self.authors = authors
+        self.author = author
         self.version = version
         self.license = license
+        self.fingerprint = fingerprint
         self.url = url
         self.registry_path = registry_path
         self.description = description
@@ -549,9 +558,10 @@ class AgentConfig(Configuration):
         return {
             "agent_name": self.agent_name,
             "aea_version": self.aea_version,
-            "authors": self.authors,
+            "author": self.author,
             "version": self.version,
             "license": self.license,
+            "fingerprint": self.fingerprint,
             "url": self.url,
             "registry_path": self.registry_path,
             "description": self.description,
@@ -580,7 +590,7 @@ class AgentConfig(Configuration):
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
-            authors=cast(str, obj.get("authors")),
+            author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),

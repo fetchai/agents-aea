@@ -20,7 +20,7 @@
 
 """This module contains the FIPA message definition."""
 from enum import Enum
-from typing import Dict, List, Tuple, Union, cast
+from typing import Any, Dict, List, Tuple, Union, cast
 
 from aea.protocols.base import Message
 from aea.protocols.oef.models import Description, Query
@@ -94,22 +94,22 @@ class FIPAMessage(Message):
         return FIPAMessage.Performative(self.get("performative"))
 
     @property
-    def query(self):
+    def query(self) -> Union[Query, bytes, None]:
         """Get the query of the message."""
         assert self.is_set("query"), "query is not set."
-        return self.get("query")
+        return cast(Union[Query, bytes, None], self.get("query"))
 
     @property
-    def proposal(self) -> List:
+    def proposal(self) -> List[Description]:
         """Get the proposal list from the message."""
         assert self.is_set("proposal"), "proposal is not set."
-        return cast(List, self.get("proposal"))
+        return cast(List[Description], self.get("proposal"))
 
     @property
-    def info(self) -> Dict:
+    def info(self) -> Dict[str, Any]:
         """Get hte info from the message."""
         assert self.is_set("info"), "info is not set."
-        return cast(Dict, self.get("info"))
+        return cast(Dict[str, Any], self.get("info"))
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""

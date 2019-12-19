@@ -103,8 +103,8 @@ class Strategy(SharedClass):
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=is_supply)
         good_id_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_id) if is_supply else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
-        currency = list(ownership_state_after_locks.amount_by_currency.keys())[0]
-        desc = build_goods_description(good_id_to_quantities=good_id_to_quantities, currency=currency, is_supply=is_supply)
+        currency_id = list(ownership_state_after_locks.amount_by_currency_id.keys())[0]
+        desc = build_goods_description(good_id_to_quantities=good_id_to_quantities, currency_id=currency_id, is_supply=is_supply)
         return desc
 
     def _supplied_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
@@ -146,8 +146,8 @@ class Strategy(SharedClass):
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=not is_searching_for_sellers)
         good_id_to_quantities = self._demanded_goods(ownership_state_after_locks.quantities_by_good_id) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.quantities_by_good_id)
-        currency = list(ownership_state_after_locks.amount_by_currency.keys())[0]
-        query = build_goods_query(good_ids=list(good_id_to_quantities.keys()), currency=currency, is_searching_for_sellers=is_searching_for_sellers)
+        currency_id = list(ownership_state_after_locks.amount_by_currency_id.keys())[0]
+        query = build_goods_query(good_ids=list(good_id_to_quantities.keys()), currency_id=currency_id, is_searching_for_sellers=is_searching_for_sellers)
         return query
 
     def _get_proposal_for_query(self, query: Query, is_seller: bool) -> Optional[Description]:
@@ -203,17 +203,17 @@ class Strategy(SharedClass):
         proposals = []
         seller_tx_fee = self.context.agent_preferences.transaction_fees['seller_tx_fee']
         buyer_tx_fee = self.context.agent_preferences.transaction_fees['buyer_tx_fee']
-        currency = list(self.context.agent_ownership_state.amount_by_currency.keys())[0]
+        currency_id = list(self.context.agent_ownership_state.amount_by_currency_id.keys())[0]
         for good_id, quantity in good_id_to_quantities.items():
             if is_seller and quantity == 0: continue
             proposal_dict = nil_proposal_dict
             proposal_dict[good_id] = 1
-            proposal = build_goods_description(good_id_to_quantities=proposal_dict, currency=currency, is_supply=is_seller)
+            proposal = build_goods_description(good_id_to_quantities=proposal_dict, currency_id=currency_id, is_supply=is_seller)
             if is_seller:
-                delta_good_holdings = {good_id: quantity * -1 for good_id, quantity in proposal_dict.items()}  # type: Dict[str, int]
+                delta_quantities_by_good_id = {good_id: quantity * -1 for good_id, quantity in proposal_dict.items()}  # type: Dict[str, int]
             else:
-                delta_good_holdings = proposal_dict
-            marginal_utility_from_delta_good_holdings = self.context.agent_preferences.marginal_utility(ownership_state=ownership_state_after_locks, delta_good_holdings=delta_good_holdings)
+                delta_quantities_by_good_id = proposal_dict
+            marginal_utility_from_delta_good_holdings = self.context.agent_preferences.marginal_utility(ownership_state=ownership_state_after_locks, delta_quantities_by_good_id=delta_quantities_by_good_id)
             switch = -1 if is_seller else 1
             breakeven_price_rounded = round(marginal_utility_from_delta_good_holdings) * switch
             if is_seller:
@@ -223,6 +223,8 @@ class Strategy(SharedClass):
             proposal.values["seller_tx_fee"] = seller_tx_fee
             proposal.values["buyer_tx_fee"] = buyer_tx_fee
             if not proposal.values["price"] > 0: continue
+            tx_nonce = transactions.get_next_tx_nonce()
+            proposal.values["tx_nonce"] = tx_nonce
             proposals.append(proposal)
         return proposals
 

@@ -19,6 +19,7 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
+import sys
 import time
 
 import unittest.mock
@@ -32,9 +33,11 @@ def test_create_agent():
     agent_name = "test_agent_id"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "create"
-        assert param_list[2] == agent_name
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "create"
+        assert param_list[4] == agent_name
         return 0
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
@@ -54,9 +57,11 @@ def test_create_agent_fail():
     agent_name = "test_agent_id"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "create"
-        assert param_list[2] == agent_name
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "create"
+        assert param_list[4] == agent_name
         return 1
 
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
@@ -73,43 +78,40 @@ def test_create_agent_fail():
 def test_real_create():
     """Really create an agent (have to test the call_aea at some point)."""
     # Set up a temporary current working directory to make agents in
-    temp_cwd = TempCWD()
-    app = create_app()
+    with TempCWD():
+        app = create_app()
 
-    agent_id = "test_agent_id"
-    response_create = app.post(
-        'api/agent',
-        content_type='application/json',
-        data=json.dumps(agent_id))
-    assert response_create.status_code == 201
-    data = json.loads(response_create.get_data(as_text=True))
-    assert data == agent_id
+        agent_id = "test_agent_id"
+        response_create = app.post(
+            'api/agent',
+            content_type='application/json',
+            data=json.dumps(agent_id))
+        assert response_create.status_code == 201
+        data = json.loads(response_create.get_data(as_text=True))
+        assert data == agent_id
 
-    # Give it a bit of time so the polling funcionts get called
-    time.sleep(1)
+        # Give it a bit of time so the polling funcionts get called
+        time.sleep(1)
 
-    # Check that we can actually see this agent too
-    response_agents = app.get(
-        'api/agent',
-        data=None,
-        content_type='application/json',
-    )
-    data = json.loads(response_agents.get_data(as_text=True))
-    assert response_agents.status_code == 200
-    assert len(data) == 1
-    assert data[0]['id'] == agent_id
-    assert data[0]['description'] == "placeholder description"
-
-    # do same but this time find that this is not an agent directory.
-    with unittest.mock.patch("os.path.isdir", return_value=False):
+        # Check that we can actually see this agent too
         response_agents = app.get(
             'api/agent',
             data=None,
             content_type='application/json',
         )
-    data = json.loads(response_agents.get_data(as_text=True))
-    assert response_agents.status_code == 200
-    assert len(data) == 0
+        data = json.loads(response_agents.get_data(as_text=True))
+        assert response_agents.status_code == 200
+        assert len(data) == 1
+        assert data[0]['id'] == agent_id
+        assert data[0]['description'] == "placeholder description"
 
-    # Destroy the temporary current working directory and put cwd back to what it was before
-    temp_cwd.destroy()
+        # do same but this time find that this is not an agent directory.
+        with unittest.mock.patch("os.path.isdir", return_value=False):
+            response_agents = app.get(
+                'api/agent',
+                data=None,
+                content_type='application/json',
+            )
+        data = json.loads(response_agents.get_data(as_text=True))
+        assert response_agents.status_code == 200
+        assert len(data) == 0

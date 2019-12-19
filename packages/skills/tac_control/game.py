@@ -268,70 +268,79 @@ class Transaction:
     """Convenience representation of a transaction."""
 
     def __init__(self,
-                 transaction_id: TransactionId,
-                 sender: Address,
-                 counterparty: Address,
-                 amount_by_currency: Dict[str, int],
-                 sender_tx_fee: int,
-                 counterparty_tx_fee: int,
-                 quantities_by_good_id: Dict[str, int]) -> None:
+                 id: TransactionId,
+                 sender_addr: Address,
+                 counterparty_addr: Address,
+                 amount_by_currency_id: Dict[str, int],
+                 sender_fee: int,
+                 counterparty_fee: int,
+                 quantities_by_good_id: Dict[str, int],
+                 nonce: int,
+                 sender_signature: bytes,
+                 counterparty_signature: bytes) -> None:
         """
         Instantiate transaction request.
 
-        :param transaction_id: the id of the transaction.
-        :param sender: the sender of the transaction.
-        :param counterparty: the counterparty of the transaction.
-        :param amount_by_currency: the currency used.
-        :param sender_tx_fee: the transaction fee covered by the sender.
-        :param counterparty_tx_fee: the transaction fee covered by the counterparty.
+        :param id: the id of the transaction.
+        :param sender_addr: the sender of the transaction.
+        :param tx_counterparty_addr: the counterparty of the transaction.
+        :param amount_by_currency_id: the currency used.
+        :param sender_fee: the transaction fee covered by the sender.
+        :param counterparty_fee: the transaction fee covered by the counterparty.
         :param quantities_by_good_id: a map from good pbk to the quantity of that good involved in the transaction.
+        :param nonce: the nonce of the transaction
+        :param sender_signature: the signature of the transaction sender
+        :param counterparty_signature: the signature of the transaction counterparty
         :return: None
         """
-        self.transaction_id = transaction_id
-        self.sender = sender
-        self.counterparty = counterparty
-        self.is_sender_buyer = any(value <= 0 for value in amount_by_currency.values())
-        self.amount_by_currency = amount_by_currency
-        self.sender_tx_fee = sender_tx_fee
-        self.counterparty_tx_fee = counterparty_tx_fee
+        self.id = id
+        self.sender_addr = sender_addr
+        self.counterparty_addr = counterparty_addr
+        self.amount_by_currency_id = amount_by_currency_id
+        self.sender_fee = sender_fee
+        self.counterparty_fee = counterparty_fee
         self.quantities_by_good_id = quantities_by_good_id
+        self.nonce = nonce
+        self.sender_signature = sender_signature
+        self.counterparty_signature = counterparty_signature
         self._check_consistency()
+        self.is_sender_buyer = all(value <= 0 for value in amount_by_currency_id.values())
 
     @property
     def buyer_addr(self) -> Address:
         """Get the address of the buyer."""
-        result = self.sender if self.is_sender_buyer else self.counterparty
+        result = self.sender_addr if self.is_sender_buyer else self.counterparty_addr
         return result
 
     @property
     def seller_addr(self) -> Address:
         """Get the address of the seller."""
-        result = self.counterparty if self.is_sender_buyer else self.sender
+        result = self.counterparty_addr if self.is_sender_buyer else self.sender_addr
         return result
 
     @property
     def buyer_tx_fee(self) -> int:
         """Get the tx fee of the buyer."""
-        result = self.sender_tx_fee if self.is_sender_buyer else self.counterparty_tx_fee
+        result = self.sender_fee if self.is_sender_buyer else self.counterparty_fee
         return result
 
     @property
     def seller_tx_fee(self) -> int:
         """Get the tx fee of the seller."""
-        result = self.counterparty_tx_fee if self.is_sender_buyer else self.sender_tx_fee
+        result = self.counterparty_fee if self.is_sender_buyer else self.sender_fee
         return result
 
     @property
     def amount(self) -> int:
         """Get the amount."""
-        assert len(self.amount_by_currency) == 1
-        return list(self.amount_by_currency.values())[0]
+        assert len(self.amount_by_currency_id) == 1
+        return list(self.amount_by_currency_id.values())[0]
 
     @property
-    def currency(self) -> str:
+    def currency_id(self) -> str:
         """Get the currency."""
-        assert len(self.amount_by_currency) == 1
-        return list(self.amount_by_currency.keys())[0]
+        assert len(self.amount_by_currency_id) == 1
+        return list(self.amount_by_currency_id.keys())[0]
 
     def _check_consistency(self) -> None:
         """
@@ -340,11 +349,13 @@ class Transaction:
         :return: None
         :raises AssertionError if some constraint is not satisfied.
         """
-        assert self.sender != self.counterparty
-        assert len(self.amount_by_currency.keys()) == 1  # For now we restrict to one currency per transaction.
-        assert self.sender_tx_fee >= 0
-        assert self.counterparty_tx_fee >= 0
+        assert self.sender_addr != self.counterparty_addr
+        assert len(self.amount_by_currency_id.keys()) == 1  # For now we restrict to one currency per transaction.
+        assert self.sender_fee >= 0
+        assert self.counterparty_fee >= 0
         assert len(self.quantities_by_good_id.keys()) == len(set(self.quantities_by_good_id.keys()))
+        assert (all(amount >= 0 for amount in self.amount_by_currency_id.values()) and all(quantity <= 0 for quantity in self.quantities_by_good_id.values())) or \
+            (all(amount <= 0 for amount in self.amount_by_currency_id.values()) and all(quantity >= 0 for quantity in self.quantities_by_good_id.values()))
 
     @classmethod
     def from_message(cls, message: TACMessage) -> 'Transaction':
@@ -355,80 +366,62 @@ class Transaction:
         :return: Transaction
         """
         assert message.type == TACMessage.Type.TRANSACTION
-        return Transaction(message.transaction_id,
-                           message.counterparty,
-                           message.transaction_counterparty,
-                           message.amount_by_currency,
-                           message.sender_tx_fee,
-                           message.counterparty_tx_fee,
-                           message.quantities_by_good_id)
-
-    def matches(self, other: 'Transaction') -> bool:
-        """
-        Check if the transaction matches with another (mirroring) transaction.
-
-        Two transaction requests do match if:
-        - the transaction id is the same;
-        - one of them is from a buyer and the other one is from a seller
-        - the counterparty and the origin field are consistent.
-        - the amount and the quantities are equal.
-
-        :param other: the other transaction to match.
-        :return: True if the two
-        """
-        return self.transaction_id == other.transaction_id \
-            and self.sender == other.counterparty \
-            and self.counterparty == other.sender \
-            and self.is_sender_buyer != other.is_sender_buyer \
-            and self.amount_by_currency == {x: y * -1 for x, y in other.amount_by_currency.items()} \
-            and self.sender_tx_fee == other.counterparty_tx_fee \
-            and self.counterparty_tx_fee == other.sender_tx_fee \
-            and self.quantities_by_good_id == {x: y * -1 for x, y in other.quantities_by_good_id.items()}
+        return Transaction(message.tx_id,
+                           message.tx_sender_addr,
+                           message.tx_counterparty_addr,
+                           message.amount_by_currency_id,
+                           message.tx_sender_fee,
+                           message.tx_counterparty_fee,
+                           message.quantities_by_good_id,
+                           message.tx_nonce,
+                           message.tx_sender_signature,
+                           message.tx_counterparty_signature)
 
     def __eq__(self, other):
         """Compare to another object."""
         return isinstance(other, Transaction) \
-            and self.transaction_id == other.transaction_id \
-            and self.sender == other.sender \
-            and self.counterparty == other.counterparty \
-            and self.is_sender_buyer == other.is_sender_buyer \
-            and self.amount_by_currency == other.amount_by_currency \
-            and self.sender_tx_fee == other.sender_tx_fee \
-            and self.counterparty_tx_fee == other.counterparty_tx_fee \
-            and self.quantities_by_good_id == other.quantities_by_good_id
+            and self.id == other.id \
+            and self.sender_addr == other.sender_addr \
+            and self.counterparty_addr == other.counterparty_addr \
+            and self.amount_by_currency_id == other.amount_by_currency_id \
+            and self.sender_fee == other.sender_fee \
+            and self.counterparty_fee == other.counterparty_fee \
+            and self.quantities_by_good_id == other.quantities_by_good_id \
+            and self.sender_signature == other.sender_signature \
+            and self.counterparty_signature == other.counterparty_signature
 
 
 class AgentState:
     """Represent the state of an agent during the game."""
 
-    def __init__(self, amount_by_currency: Dict[str, int],
-                 exchange_params_by_currency: Dict[str, float],
+    def __init__(self, amount_by_currency_id: Dict[str, int],
+                 exchange_params_by_currency_id: Dict[str, float],
                  quantities_by_good_id: Dict[str, int],
                  utility_params_by_good_id: Dict[str, float]):
         """
         Instantiate an agent state object.
 
-        :param amount_by_currency: the amount for each currency
-        :param exchange_params_by_currency: the exchange parameters of the different currencies
+        :param amount_by_currency_id: the amount for each currency
+        :param exchange_params_by_currency_id: the exchange parameters of the different currencies
         :param quantities_by_good_id: the quantities for each good.
         :param utility_params_by_good_id: the utility params for every good.
         """
-        assert len(amount_by_currency.keys()) == len(exchange_params_by_currency.keys())
+        assert len(amount_by_currency_id.keys()) == len(exchange_params_by_currency_id.keys())
         assert len(quantities_by_good_id.keys()) == len(utility_params_by_good_id.keys())
-        self._balance_by_currency = copy.copy(amount_by_currency)
-        self._exchange_params_by_currency = copy.copy(exchange_params_by_currency)
+        self._balance_by_currency_id = copy.copy(amount_by_currency_id)
+        self._exchange_params_by_currency_id = copy.copy(exchange_params_by_currency_id)
         self._quantities_by_good_id = quantities_by_good_id
         self._utility_params_by_good_id = copy.copy(utility_params_by_good_id)
 
     @property
-    def balance_by_currency(self) -> Dict[str, int]:
+    def balance_by_currency_id(self) -> Dict[str, int]:
         """Get the balance for each currency."""
-        return copy.copy(self._balance_by_currency)
+        return copy.copy(self._balance_by_currency_id)
 
     @property
-    def exchange_params_by_currency(self) -> Dict[str, float]:
+    def exchange_params_by_currency_id(self) -> Dict[str, float]:
         """Get the exchange parameters for each currency."""
-        return copy.copy(self._exchange_params_by_currency)
+        return copy.copy(self._exchange_params_by_currency_id)
 
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
@@ -449,7 +442,7 @@ class AgentState:
         :return: the score.
         """
         goods_score = logarithmic_utility(self.utility_params_by_good_id, self.quantities_by_good_id)
-        money_score = linear_utility(self.exchange_params_by_currency, self.balance_by_currency)
+        money_score = linear_utility(self.exchange_params_by_currency_id, self.balance_by_currency_id)
         score = goods_score + money_score
         return score
 
@@ -475,10 +468,10 @@ class AgentState:
         """
         if tx.is_sender_buyer:
             # check if we have the money as the buyer.
-            result = self.balance_by_currency[tx.currency] >= tx.amount + tx.buyer_tx_fee
+            result = self.balance_by_currency_id[tx.currency_id] >= tx.amount + tx.buyer_tx_fee
         else:
             # check if we have the diff and the goods as the seller.
-            result = self.balance_by_currency[tx.currency] + tx.amount >= tx.seller_tx_fee
+            result = self.balance_by_currency_id[tx.currency_id] + tx.amount >= tx.seller_tx_fee
             for good_id, quantity in tx.quantities_by_good_id.items():
                 result = result and (self.quantities_by_good_id[good_id] >= quantity)
         return result
@@ -503,14 +496,14 @@ class AgentState:
         :param tx: the transaction.
         :return: None
         """
-        new_balance_by_currency = self.balance_by_currency
+        new_balance_by_currency_id = self.balance_by_currency_id
         if tx.is_sender_buyer:
             total = tx.amount + tx.buyer_tx_fee
-            new_balance_by_currency[tx.currency] -= total
+            new_balance_by_currency_id[tx.currency_id] -= total
         else:
             diff = tx.amount - tx.seller_tx_fee
-            new_balance_by_currency[tx.currency] += diff
-        self._balance_by_currency = new_balance_by_currency
+            new_balance_by_currency_id[tx.currency_id] += diff
+        self._balance_by_currency_id = new_balance_by_currency_id
 
         new_quantities_by_good_id = self.quantities_by_good_id
         for good_id, quantity in tx.quantities_by_good_id.items():
@@ -520,16 +513,16 @@ class AgentState:
 
     def __copy__(self):
         """Copy the object."""
-        return AgentState(self.balance_by_currency,
-                          self.exchange_params_by_currency,
+        return AgentState(self.balance_by_currency_id,
+                          self.exchange_params_by_currency_id,
                           self.quantities_by_good_id,
                           self.utility_params_by_good_id)
 
     def __str__(self):
         """From object to string."""
         return "AgentState{}".format(pprint.pformat({
-            "balance_by_currency": self.balance_by_currency,
-            "exchange_params_by_currency": self.exchange_params_by_currency,
+            "balance_by_currency_id": self.balance_by_currency_id,
+            "exchange_params_by_currency_id": self.exchange_params_by_currency_id,
             "quantities_by_good_id": self.quantities_by_good_id,
             "utility_params_by_good_id": self.utility_params_by_good_id
         }))
@@ -537,8 +530,8 @@ class AgentState:
     def __eq__(self, other) -> bool:
         """Compare equality of two instances of the class."""
         return isinstance(other, AgentState) and \
-            self.balance_by_currency == other.balance_by_currency and \
-            self.exchange_params_by_currency == other.exchange_params_by_currency and \
+            self.balance_by_currency_id == other.balance_by_currency_id and \
+            self.exchange_params_by_currency_id == other.exchange_params_by_currency_id and \
             self.quantities_by_good_id == other.quantities_by_good_id and \
             self.utility_params_by_good_id == other.utility_params_by_good_id
 
@@ -574,7 +567,7 @@ class Transactions:
         :param transaction: the transaction
         :return: None
         """
-        self._pending[transaction.transaction_id] = transaction
+        self._pending[transaction.id] = transaction
 
     def pop_pending(self, transaction_id: TransactionId) -> Transaction:
         """
@@ -593,8 +586,8 @@ class Transactions:
         :return: None
         """
         self._confirmed.append(transaction)
-        self._confirmed_per_agent[transaction.sender].append(transaction)
-        self._confirmed_per_agent[transaction.counterparty].append(transaction)
+        self._confirmed_per_agent[transaction.sender_addr].append(transaction)
+        self._confirmed_per_agent[transaction.counterparty_addr].append(transaction)
 
 
 class Registration:
@@ -778,7 +771,7 @@ class Game(SharedClass):
     @property
     def agent_balances(self) -> Dict[str, int]:
         """Get the current agent balances."""
-        result = {agent_addr: agent_state.balance_by_currency[DEFAULT_CURRENCY] for agent_addr, agent_state in self.current_agent_states.items()}
+        result = {agent_addr: agent_state.balance_by_currency_id[DEFAULT_CURRENCY] for agent_addr, agent_state in self.current_agent_states.items()}
         return result
 
     @property

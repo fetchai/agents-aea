@@ -6,7 +6,7 @@
   "required": [
     "aea_version",
     "agent_name",
-    "authors",
+    "author",
     "version",
     "license",
     "url",
@@ -23,13 +23,16 @@
     "agent_name": {
       "type": "string"
     },
-    "authors": {
+    "author": {
       "type": "string"
     },
     "version": {
       "type": "string"
     },
     "license": {
+      "type": "string"
+    },
+     "fingerprint": {
       "type": "string"
     },
     "url": {

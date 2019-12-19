@@ -1,15 +1,16 @@
 name: exception
-authors: Fetch.AI Limited
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
+fingerprint: ""
 url: ""
-behaviours: []
-handlers: []
+behaviours: {}
+handlers: {}
 tasks:
-  - task:
-      class_name: ExceptionTask
-      args: {}
-shared_classes: []
+  exception:
+    class_name: ExceptionTask
+    args: {}
+shared_classes: {}
 protocols: []
 dependencies: {}
 description: "Raise an exception, at some point."

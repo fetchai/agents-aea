@@ -509,11 +509,11 @@ class Resources(object):
         skill_id = skill.config.name
         self._skills[skill_id] = skill
         if skill.handlers is not None:
-            self.handler_registry.register((None, skill_id), cast(List[Handler], skill.handlers))
+            self.handler_registry.register((None, skill_id), cast(List[Handler], list(skill.handlers.values())))
         if skill.behaviours is not None:
-            self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], skill.behaviours))
+            self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], list(skill.behaviours.values())))
         if skill.tasks is not None:
-            self.task_registry.register((None, skill_id), cast(List[Task], skill.tasks))
+            self.task_registry.register((None, skill_id), cast(List[Task], list(skill.tasks.values())))
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""
@@ -610,8 +610,8 @@ class Filter(object):
         while not self.decision_maker_out_queue.empty():
             tx_message = self.decision_maker_out_queue.get_nowait()  # type: Optional[TransactionMessage]
             if tx_message is not None:
-                skill_ids = tx_message.skill_ids
-                for skill_id in skill_ids:
+                skill_callback_ids = tx_message.skill_callback_ids
+                for skill_id in skill_callback_ids:
                     handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
                     if handler is not None:
                         logger.debug("Calling handler {} of skill {}".format(type(handler), skill_id))
