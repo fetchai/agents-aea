@@ -1,8 +1,8 @@
 ## Autonomous Economic Agent Framework
 
-The AEA framework provides the tools for creating autonomous economic agents. Autonomous Economic Agents (AEAs) work continuously for your benefit without you having to do anything more than write them and start them up.
+The AEA framework provides the tools for creating autonomous economic agents. Autonomous Economic Agents (AEAs) work continuously for your benefit without you having to do anything more than writing them and starting them up.
 
-AEAs act independently of constant input and autonomously develop new capabilities. Their goal is to create economic gain for you, their owner. AEAs have a wide range of application areas. Check out the <a href="/aea/gym-plugin/" target=_blank>demo section</a> for examples.
+AEAs act independently of constant input and autonomously develop new capabilities. Their goal is to create economic gain for you, their owner. AEAs have a wide range of application areas. Check out the <a href="/aea/gym-plugin/" target=_blank>demo section</a> for some examples.
 
 It is a Python-based development suite which equips you with an efficient and easy to understand set of tools for building autonomous economic agents.
 
