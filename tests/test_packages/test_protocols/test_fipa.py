@@ -172,7 +172,7 @@ def test_performative_match_accept():
 #         dialogue_reference=(str(0), ''),
 #         target=1)
 
-#     with mock.patch("aea.protocols.fipa.message.FIPAMessage.Performative")\
+#     with mock.patch("packages.protocols.fipa.message.FIPAMessage.Performative")\
 #             as mock_performative_enum:
 #         mock_performative_enum.ACCEPT.value = "unknown"
 #         assert not msg.check_consistency(),\
