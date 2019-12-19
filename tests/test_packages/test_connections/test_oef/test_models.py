@@ -176,7 +176,7 @@ class TestCheckValidity:
             m_constraint.check("HelloWorld")
 
         m_constraint = ConstraintType("==", 3)
-        with mock.patch("aea.protocols.oef.models.ConstraintTypes") as mocked_types:
+        with mock.patch("packages.protocols.oef.models.ConstraintTypes") as mocked_types:
             mocked_types.EQUAL.value = "unknown"
             assert not m_constraint._check_validity(), "My constraint must not be valid"
 
