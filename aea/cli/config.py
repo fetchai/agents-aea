@@ -177,6 +177,7 @@ def set(ctx: Context, json_path: List[str], value):
 
     try:
         configuration_obj = config_loader.configuration_type.from_json(configuration_dict)
+        config_loader.validator.validate(instance=configuration_obj.json)
         config_loader.dump(configuration_obj, open(configuration_file_path, "w"))
     except Exception:
         logger.error("Attribute or value not valid.")

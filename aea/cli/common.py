@@ -40,7 +40,7 @@ from aea.configurations.loader import ConfigLoader
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
-DEFAULT_REGISTRY_PATH = str(Path(aea.AEA_DIR, "..", "packages").resolve())
+DEFAULT_REGISTRY_PATH = str(Path("..", "packages"))
 DEFAULT_CONNECTION = "oef"
 DEFAULT_SKILL = "error"
 
