@@ -32,6 +32,9 @@
     "license": {
       "type": "string"
     },
+     "fingerprint": {
+      "type": "string"
+    },
     "url": {
       "type": "string"
     },

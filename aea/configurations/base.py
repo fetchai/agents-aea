@@ -498,6 +498,7 @@ class AgentConfig(Configuration):
                  author: str = "",
                  version: str = "",
                  license: str = "",
+                 fingerprint: str = "",
                  url: str = "",
                  registry_path: str = "",
                  description: str = "",
@@ -510,6 +511,7 @@ class AgentConfig(Configuration):
         self.author = author
         self.version = version
         self.license = license
+        self.fingerprint = fingerprint
         self.url = url
         self.registry_path = registry_path
         self.description = description
@@ -559,6 +561,7 @@ class AgentConfig(Configuration):
             "author": self.author,
             "version": self.version,
             "license": self.license,
+            "fingerprint": self.fingerprint,
             "url": self.url,
             "registry_path": self.registry_path,
             "description": self.description,
