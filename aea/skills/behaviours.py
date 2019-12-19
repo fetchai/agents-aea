@@ -88,8 +88,8 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 
         self._tick_interval = tick_interval
         self._start_at = start_at if start_at is not None else datetime.datetime.now()  # type: datetime.datetime
-
-        self._last_act_time = datetime.datetime.now()
+        # note, we set _last_act_time to be in the past so the ticker starts immediately
+        self._last_act_time = datetime.datetime.now() - datetime.timedelta(seconds=tick_interval)
 
     @property
     def tick_interval(self) -> float:
