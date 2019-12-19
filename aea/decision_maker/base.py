@@ -117,7 +117,10 @@ class OwnershipState:
         """
         result = len(tx_message.tx_amount_by_currency_id) == 1
         for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
-            if amount <= 0 and all(quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
+            if amount == 0 and all(quantity == 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
+                # reject the transaction when there is no wealth exchange
+                result = False
+            elif amount <= 0 and all(quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
                 # check if the agent has the money to cover amount and tx fee (the agent is the buyer).
                 transfer_amount = -amount - tx_message.tx_counterparty_fee
                 result = result and (transfer_amount >= 0)
@@ -151,7 +154,7 @@ class OwnershipState:
 
     def apply_transactions(self, transactions: List[TransactionMessage]) -> 'OwnershipState':
         """
-        Apply a list of transactions to the current state.
+        Apply a list of transactions to (a copy of) the current state.
 
         :param transactions: the sequence of transaction messages.
         :return: the final state.
