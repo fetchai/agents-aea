@@ -20,7 +20,6 @@
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
 
-from eth_account.messages import encode_defunct
 from web3 import Web3
 from eth_account import Account
 from eth_keys import keys
@@ -91,17 +90,6 @@ class EthereumCrypto(Crypto):
             return account
         except IOError as e:        # pragma: no cover
             logger.exception(str(e))
-
-    def sign_message(self, message: str) -> bytes:
-        """
-        Sing a transaction to send it to the ledger.
-
-        :param message:
-        :return: Signed message in bytes
-        """
-        m_message = encode_defunct(text=message)
-        signature = self._account.sign_message(m_message)
-        return signature
 
     def sign_transaction(self, tx_hash: bytes) -> bytes:
         """
