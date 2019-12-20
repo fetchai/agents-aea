@@ -24,7 +24,7 @@ from click import ClickException
 from yaml import YAMLError
 
 from aea.cli.registry.utils import (
-    fetch_package, request_api, split_public_id, _download_file, _extract,
+    fetch_package, request_api, split_public_id, download_file, extract,
     _init_config_folder, write_cli_config, read_cli_config
 )
 from aea.cli.registry.settings import REGISTRY_API_URL
@@ -39,17 +39,17 @@ from aea.cli.registry.settings import REGISTRY_API_URL
     return_value={'file': 'url'}
 )
 @mock.patch(
-    'aea.cli.registry.utils._download_file',
+    'aea.cli.registry.utils.download_file',
     return_value='filepath'
 )
-@mock.patch('aea.cli.registry.utils._extract')
+@mock.patch('aea.cli.registry.utils.extract')
 class FetchPackageTestCase(TestCase):
     """Test case for fetch_package method."""
 
     def test_fetch_package_positive(
         self,
-        _extract_mock,
-        _download_file_mock,
+        extract_mock,
+        download_file_mock,
         request_api_mock,
         split_public_id_mock
     ):
@@ -63,8 +63,8 @@ class FetchPackageTestCase(TestCase):
         request_api_mock.assert_called_with(
             'GET', '/connections/owner/name/version'
         )
-        _download_file_mock.assert_called_once_with('url', 'cwd')
-        _extract_mock.assert_called_once_with('filepath', 'cwd/connections')
+        download_file_mock.assert_called_once_with('url', 'cwd')
+        extract_mock.assert_called_once_with('filepath', 'cwd/connections')
 
 
 @mock.patch('aea.cli.registry.utils.requests.request')
@@ -138,11 +138,11 @@ class SplitPublicIDTestCase(TestCase):
 
 @mock.patch('aea.cli.registry.utils.requests.get')
 class DownloadFileTestCase(TestCase):
-    """Test case for _download_file method."""
+    """Test case for download_file method."""
 
     @mock.patch('builtins.open', mock.mock_open())
     def test_download_file_positive(self, get_mock):
-        """Test for _download_file method positive result."""
+        """Test for download_file method positive result."""
         filename = 'filename.tar.gz'
         url = 'url/{}'.format(filename)
         cwd = 'cwd'
@@ -156,28 +156,28 @@ class DownloadFileTestCase(TestCase):
         resp_mock.status_code = 200
         get_mock.return_value = resp_mock
 
-        result = _download_file(url, cwd)
+        result = download_file(url, cwd)
         expected_result = filepath
         self.assertEqual(result, expected_result)
         get_mock.assert_called_once_with(url, stream=True)
 
     def test_download_file_wrong_response(self, get_mock):
-        """Test for _download_file method wrong response from file server."""
+        """Test for download_file method wrong response from file server."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 404
         get_mock.return_value = resp_mock
 
         with self.assertRaises(ClickException):
-            _download_file('url', 'cwd')
+            download_file('url', 'cwd')
 
 
 class ExtractTestCase(TestCase):
-    """Test case for _extract method."""
+    """Test case for extract method."""
 
     @mock.patch('aea.cli.registry.utils.os.remove')
     @mock.patch('aea.cli.registry.utils.tarfile.open')
     def test_extract_positive(self, tarfile_open_mock, os_remove_mock):
-        """Test for _extract method positive result."""
+        """Test for extract method positive result."""
         source = 'file.tar.gz'
         target = 'target-folder'
 
@@ -186,16 +186,16 @@ class ExtractTestCase(TestCase):
         tar_mock.close = lambda: None
         tarfile_open_mock.return_value = tar_mock
 
-        _extract(source, target)
+        extract(source, target)
         tarfile_open_mock.assert_called_once_with(source, 'r:gz')
         os_remove_mock.assert_called_once_with(source)
 
     def test_extract_wrong_file_type(self):
-        """Test for _extract method wrong file type."""
+        """Test for extract method wrong file type."""
         source = 'file.wrong'
         target = 'target-folder'
         with self.assertRaises(Exception):
-            _extract(source, target)
+            extract(source, target)
 
 
 @mock.patch('aea.cli.registry.utils.os.path.dirname', return_value='dir-name')
