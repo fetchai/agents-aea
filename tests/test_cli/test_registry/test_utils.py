@@ -161,7 +161,7 @@ class DownloadFileTestCase(TestCase):
         self.assertEqual(result, expected_result)
         get_mock.assert_called_once_with(url, stream=True)
 
-    def testdownload_file_wrong_response(self, get_mock):
+    def test_download_file_wrong_response(self, get_mock):
         """Test for download_file method wrong response from file server."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 404
