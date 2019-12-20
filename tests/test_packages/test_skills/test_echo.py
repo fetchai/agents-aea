@@ -84,9 +84,7 @@ class TestEchoSkill:
             sys.executable,
             '-m',
             'aea.cli',
-            "run",
-            "--connections",
-            "stub"
+            "run"
         ],
             stdout=subprocess.PIPE,
             env=os.environ.copy())

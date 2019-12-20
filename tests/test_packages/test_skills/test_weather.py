@@ -84,7 +84,9 @@ class TestWeatherSkills:
             sys.executable,
             '-m',
             'aea.cli',
-            "run"
+            "run",
+            '--connections',
+            'oef'
         ],
             stdout=subprocess.PIPE,
             env=os.environ.copy())
@@ -108,7 +110,9 @@ class TestWeatherSkills:
             sys.executable,
             '-m',
             'aea.cli',
-            "run"
+            "run",
+            '--connections',
+            'oef'
         ],
             stdout=subprocess.PIPE,
             env=os.environ.copy())

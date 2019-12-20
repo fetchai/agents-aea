@@ -959,7 +959,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection class '{}' not found.".format("StubConnection")
+        s = "Connection class '{}' not found.".format("OEFLocalConnection")
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

@@ -126,7 +126,9 @@ class TestCarPark:
             sys.executable,
             '-m',
             'aea.cli',
-            "run"
+            "run",
+            '--connections',
+            'oef'
         ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -183,7 +185,9 @@ class TestCarPark:
             sys.executable,
             '-m',
             'aea.cli',
-            "run"
+            "run",
+            '--connections',
+            'oef'
         ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
