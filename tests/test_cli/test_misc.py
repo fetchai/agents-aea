@@ -58,6 +58,7 @@ Commands:
   config        Read or modify a configuration.
   create        Create an agent.
   delete        Delete an agent.
+  fetch         Fetch Agent from Registry.
   freeze        Get the dependencies.
   generate-key  Generate private keys.
   gui           Run the CLI GUI.
