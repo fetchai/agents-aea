@@ -57,19 +57,12 @@
         }
       }
     },
-    "ledger_apis": {
-      "type": "array",
-      "additionalProperties": false,
+     "ledger_apis": {
+      "type": "object",
       "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "required": [
-          "ledger_api"
-        ],
-        "properties": {
-          "ledger_api": {
-            "$ref": "#/definitions/ledger_api"
-          }
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/ledger_api"
         }
       }
     },
@@ -125,19 +118,14 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "ledger",
-        "addr",
-        "port"
+        "ledger_name"
       ],
       "properties": {
-        "ledger": {
+        "ledger_name": {
           "type": "string"
         },
-        "addr": {
-          "type": "string"
-        },
-        "port": {
-          "type": "number"
+        "args": {
+          "type": "object"
         }
       }
     },
