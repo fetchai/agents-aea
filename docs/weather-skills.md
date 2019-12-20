@@ -230,6 +230,11 @@ In the weather station skill config (`my_weather_station/skills/weather_station_
 currency_id: 'ETH'
 ledger_id: 'ethereum'
 ```
+An other way to update the skill config is via the `aea config get/set` command.
+``` bash
+aea config set skills.weather_station_ledger.shared_classes.strategy.args.currency_id ETH
+aea config set skills.weather_station_ledger.shared_classes.strategy.args.ledger_id ethereum
+```
 Amend `ledgers` to the following.
 ``` bash
 ledgers: ['ethereum']
