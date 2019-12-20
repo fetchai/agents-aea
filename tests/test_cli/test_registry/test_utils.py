@@ -141,7 +141,7 @@ class DownloadFileTestCase(TestCase):
     """Test case for download_file method."""
 
     @mock.patch('builtins.open', mock.mock_open())
-    def testdownload_file_positive(self, get_mock):
+    def test_download_file_positive(self, get_mock):
         """Test for download_file method positive result."""
         filename = 'filename.tar.gz'
         url = 'url/{}'.format(filename)
@@ -176,7 +176,7 @@ class ExtractTestCase(TestCase):
 
     @mock.patch('aea.cli.registry.utils.os.remove')
     @mock.patch('aea.cli.registry.utils.tarfile.open')
-    def testextract_positive(self, tarfile_open_mock, os_remove_mock):
+    def test_extract_positive(self, tarfile_open_mock, os_remove_mock):
         """Test for extract method positive result."""
         source = 'file.tar.gz'
         target = 'target-folder'
@@ -190,7 +190,7 @@ class ExtractTestCase(TestCase):
         tarfile_open_mock.assert_called_once_with(source, 'r:gz')
         os_remove_mock.assert_called_once_with(source)
 
-    def testextract_wrong_file_type(self):
+    def test_extract_wrong_file_type(self):
         """Test for extract method wrong file type."""
         source = 'file.wrong'
         target = 'target-folder'
