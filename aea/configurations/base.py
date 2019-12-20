@@ -150,25 +150,21 @@ class PrivateKeyPathConfig(Configuration):
 class LedgerAPIConfig(Configuration):
     """Handle a ledger api configuration."""
 
-    def __init__(self, ledger_name: str = "", **args):
+    def __init__(self, **args):
         """Initialize a ledger class configuration."""
-        self.ledger_name = ledger_name
         self.args = args
 
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         return {
-            "ledger_name": self.ledger_name,
             "args": self.args
         }
 
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        class_name = cast(str, obj.get("ledger_name"))
-        return SharedClassConfig(
-            class_name=class_name,
+        return LedgerAPIConfig(
             **obj.get("args", {})
         )
 

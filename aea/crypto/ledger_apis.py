@@ -23,7 +23,7 @@
 import logging
 import sys
 import time
-from typing import Any, Dict, Optional, Tuple, cast
+from typing import Any, Dict, Optional, Tuple, cast, List, Union
 
 import web3
 import web3.exceptions
@@ -51,14 +51,14 @@ ERROR = "ERROR"
 class LedgerApis(object):
     """Store all the ledger apis we initialise."""
 
-    def __init__(self, ledger_api_configs: Dict[str, Tuple[str, int]]):
+    def __init__(self, ledger_api_configs: Dict[str, List[Union[str, int]]]):
         """
         Instantiate a wallet object.
 
         :param ledger_api_configs: the ledger api configs
         """
         apis = {}  # type: Dict[str, Any]
-        configs = {}  # type: Dict[str, Tuple[str, int]]
+        configs = {}  # type: Dict[str, List[Union[str, int]]]
         self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
@@ -77,7 +77,7 @@ class LedgerApis(object):
         self._configs = configs
 
     @property
-    def configs(self) -> Dict[str, Tuple[str, int]]:
+    def configs(self) -> Dict[str, List[Union[str, int]]]:
         """Get the configs."""
         return self._configs
 

@@ -117,13 +117,7 @@
     "ledger_api": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "ledger_name"
-      ],
       "properties": {
-        "ledger_name": {
-          "type": "string"
-        },
         "args": {
           "type": "object"
         }
