@@ -241,6 +241,12 @@ max_buyer_tx_fee: 20000
 currency_id: 'ETH'
 ledger_id: 'ethereum'
 ```
+An other way to update the skill config is via the `aea config get/set` command.
+``` bash
+aea config set skills.weather_client_ledger.shared_classes.strategy.args.max_buyer.tx_fee 10000
+aea config set skills.weather_client_ledger.shared_classes.strategy.args.currency_id ETH
+aea config set skills.weather_client_ledger.shared_classes.strategy.args.ledger_id ethereum
+```
 Amend `ledgers` to the following.
 ``` basgh
 ledgers: ['ethereum']
