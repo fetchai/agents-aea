@@ -31,7 +31,6 @@ import click
 import jsonschema  # type: ignore
 from dotenv import load_dotenv
 
-import aea
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
     DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies
@@ -40,7 +39,7 @@ from aea.configurations.loader import ConfigLoader
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
-DEFAULT_REGISTRY_PATH = str(Path(aea.AEA_DIR, "..", "packages").resolve())
+DEFAULT_REGISTRY_PATH = str(Path("..", "packages"))
 DEFAULT_CONNECTION = "stub"
 DEFAULT_SKILL = "error"
 

@@ -18,15 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea search' subcommand."""
+import os
 from pathlib import Path
 from typing import cast, List, Dict
+
 import click
-import os
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, ConfigLoader, format_items, format_skills
-from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, ConfigLoader, \
+    format_items, format_skills
 from aea.cli.registry.utils import request_api
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
+    DEFAULT_PROTOCOL_CONFIG_FILE
 
 
 @click.group()
@@ -42,14 +45,7 @@ def search(ctx: Context, registry):
     if registry:
         ctx.set_config("is_registry", True)
     else:
-        # if the search is executed from an agent directory:
-        if hasattr(ctx, "agent_config"):
-            # take the path defined by the user, and distinguish between absolute and relative path.
-            path = Path(ctx.agent_config.registry_path)
-            registry = path if path.is_absolute() else Path(ctx.cwd) / path
-        else:
-            # use the default registry path. This works only for source installations.
-            registry = DEFAULT_REGISTRY_PATH
+        registry = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
         ctx.set_config("registry", registry)
         logger.debug("Using registry {}".format(registry))
 
