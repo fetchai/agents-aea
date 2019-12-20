@@ -26,6 +26,8 @@ shared_classes:
       data_price_fet: 200000000
       db_is_rel_to_cwd: true
       db_rel_dir: ../temp_files
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
   dialogues:
     class_name: Dialogues
     args: {}

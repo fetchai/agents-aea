@@ -22,7 +22,7 @@ import logging
 
 import pytest
 
-from aea.protocols.oef.models import DataModel, Attribute, Constraint, Query, ConstraintType, Description
+from aea.helpers.search.models import DataModel, Attribute, Constraint, Query, ConstraintType, Description
 from packages.protocols.ml_trade.message import MLTradeMessage
 from packages.protocols.ml_trade.serialization import MLTradeSerializer
 

@@ -9,7 +9,7 @@ cd my_aea/
 
 We highly recommend using a virtual environment to ensure consistency across dependencies.
 
-Check you have [`pipenv`](https://github.com/pypa/pipenv).
+Check that you have [`pipenv`](https://github.com/pypa/pipenv).
 
 ``` bash
 which pipenv
@@ -53,14 +53,14 @@ pip install aea
 ```
 -->
 
-The following installs the entire AEA package which includes the cli too.
+The following installs the entire AEA package which also includes a command-line interface (CLI).
 
 ``` bash
 pip install aea[all]
 
 ```
 
-However, you can run this demo by installing the base AEA, including the CLI (Command Line Interface) extension, alone.
+However, you can run this demo by installing the base AEA, including the CLI extension, alone.
 
 ``` bash
 pip install aea[cli]
@@ -100,7 +100,7 @@ cd my_first_agent
 aea add skill echo
 ```
 
-This copies the echo application code for the behaviours, handlers, and tasks into the skill, ready to run.
+This copies the echo application code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run.
 
 ### Add a stub connection
 
@@ -110,9 +110,9 @@ AEAs use messages for communication. We will add a stub connection to send messa
 aea add connection stub
 ```
 
-A stub connection provides an I/O reader/writer. 
+A stub connection provides an I/O reader and writer. 
 
-It uses two files for communication: one for the incoming messages and the other for the outgoing messages. Each line contains an encoded envelope.
+It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.
 
 The AEA waits for new messages posted to the file `my_first_agent/input_file`, and adds a response to the file `my_first_agent/output_file`.
 
@@ -173,7 +173,7 @@ Stop the agent by pressing `CTRL C`
 
 ### Delete the agent
 
-Delete the agent from the parent directory via `cd ..`.
+Delete the agent from the parent directory (`cd ..` to go to the parent directory).
 
 ``` bash
 aea delete my_first_agent

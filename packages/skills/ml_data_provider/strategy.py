@@ -22,7 +22,7 @@
 import numpy as np
 from tensorflow import keras
 
-from aea.protocols.oef.models import Attribute, DataModel, Description, Query
+from aea.helpers.search.models import Attribute, DataModel, Description, Query
 from aea.skills.base import SharedClass
 
 DEFAULT_PRICE_PER_DATA_BATCH = 10

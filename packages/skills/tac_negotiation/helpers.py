@@ -24,9 +24,9 @@ import collections
 from typing import Dict, List, Union, cast
 from web3 import Web3
 
-from aea.mail.base import Address
-from aea.protocols.oef.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
+from aea.helpers.search.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
     ConstraintExpr
+from aea.mail.base import Address
 
 SUPPLY_DATAMODEL_NAME = 'supply'
 DEMAND_DATAMODEL_NAME = 'demand'

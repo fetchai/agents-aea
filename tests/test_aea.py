@@ -29,17 +29,17 @@ import yaml
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ProtocolConfig
-from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from aea.protocols.fipa.message import FIPAMessage
-from aea.protocols.fipa.serialization import FIPASerializer
 from aea.registries.base import Resources
 from aea.skills.base import Skill
+from packages.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.protocols.fipa.message import FIPAMessage
+from packages.protocols.fipa.serialization import FIPASerializer
 from .conftest import CUR_PATH
 
 

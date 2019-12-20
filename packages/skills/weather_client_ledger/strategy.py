@@ -21,7 +21,7 @@
 
 from typing import cast
 
-from aea.protocols.oef.models import Description, Query, Constraint, ConstraintType
+from aea.helpers.search.models import Description, Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
 
 DEFAULT_COUNTRY = 'UK'

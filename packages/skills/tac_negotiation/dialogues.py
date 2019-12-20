@@ -24,8 +24,15 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from aea.protocols.fipa.dialogues import FIPADialogues
+import sys
+from typing import TYPE_CHECKING
+
 from aea.skills.base import SharedClass
+
+if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.fipa.dialogues import FIPADialogues
+else:
+    from fipa_protocol.dialogues import FIPADialogues
 
 
 class Dialogues(SharedClass, FIPADialogues):

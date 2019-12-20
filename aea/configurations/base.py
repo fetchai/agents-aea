@@ -188,6 +188,7 @@ class ConnectionConfig(Configuration):
                  license: str = "",
                  url: str = "",
                  class_name: str = "",
+                 protocols: List[str] = None,
                  restricted_to_protocols: Optional[Set[str]] = None,
                  excluded_protocols: Optional[Set[str]] = None,
                  dependencies: Optional[Dependencies] = None,
@@ -201,6 +202,7 @@ class ConnectionConfig(Configuration):
         self.fingerprint = ""
         self.url = url
         self.class_name = class_name
+        self.protocols = protocols
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
         self.excluded_protocols = excluded_protocols if excluded_protocols is not None else set()
         self.dependencies = dependencies if dependencies is not None else {}
@@ -218,6 +220,7 @@ class ConnectionConfig(Configuration):
             "fingerprint": self.fingerprint,
             "url": self.url,
             "class_name": self.class_name,
+            "protocols": self.protocols,
             "restricted_to_protocols": self.restricted_to_protocols,
             "excluded_protocols": self.excluded_protocols,
             "dependencies": self.dependencies,
@@ -233,6 +236,7 @@ class ConnectionConfig(Configuration):
         excluded_protocols = obj.get("excluded_protocols")
         excluded_protocols = excluded_protocols if excluded_protocols is not None else set()
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
+        protocols = cast(List[str], obj.get("protocols", []))
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -240,6 +244,7 @@ class ConnectionConfig(Configuration):
             license=cast(str, obj.get("license")),
             url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
+            protocols=protocols,
             restricted_to_protocols=cast(Set[str], restricted_to_protocols),
             excluded_protocols=cast(Set[str], excluded_protocols),
             dependencies=dependencies,

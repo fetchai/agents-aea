@@ -24,18 +24,19 @@ from typing import cast, TYPE_CHECKING, Optional, List
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.search.models import Description
 from aea.protocols.base import Message
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description
 from aea.skills.base import Handler
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
     from packages.protocols.ml_trade.message import MLTradeMessage
     from packages.protocols.ml_trade.serialization import MLTradeSerializer
     from packages.skills.ml_train.strategy import Strategy
     from packages.skills.ml_train.tasks import MLTrainTask
     # from packages.skills.ml_train.tasks import MLTask
 else:
+    from oef_protocol.message import OEFMessage
     from ml_trade_protocol.message import MLTradeMessage
     from ml_trade_protocol.serialization import MLTradeSerializer
     from ml_train_skill.strategy import Strategy
@@ -101,7 +102,7 @@ class TrainHandler(Handler):
                                         tx_id=strategy.get_next_transition_id(),
                                         tx_sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
                                         tx_counterparty_addr=terms.values["address"],
-                                        tx_amount_by_currency_id={terms.values['currency_id']: terms.values["price"]},
+                                        tx_amount_by_currency_id={terms.values['currency_id']: - terms.values["price"]},
                                         tx_sender_fee=terms.values["buyer_tx_fee"],
                                         tx_counterparty_fee=terms.values["seller_tx_fee"],
                                         tx_quantities_by_good_id={},
@@ -226,12 +227,12 @@ class MyTransactionHandler(Handler):
             ml_accept = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT,
                                        tx_digest=tx_msg_response.tx_digest,
                                        terms=terms)
-            self.context.outbox.put_message(to=message.counterparty,
+            self.context.outbox.put_message(to=tx_msg_response.tx_counterparty_addr,
                                             sender=self.context.agent_address,
                                             protocol_id=MLTradeMessage.protocol_id,
                                             message=MLTradeSerializer().encode(ml_accept))
             logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."
-                        .format(self.context.agent_name, message.counterparty[-5:], tx_msg_response.tx_digest, terms.values))
+                        .format(self.context.agent_name, tx_msg_response.tx_counterparty_addr[-5:], tx_msg_response.tx_digest, terms.values))
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 

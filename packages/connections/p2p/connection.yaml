@@ -1,0 +1,15 @@
+name: p2p
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+url: ""
+description: "The p2p connection provides a connection with the fetch.ai mail provider."
+class_name: PeerToPeerConnection
+protocols: []
+restricted_to_protocols: []
+excluded_protocols: ["gym"]
+config:
+  addr: ${addr:127.0.0.1}
+  port: ${port:8000}
+

@@ -58,7 +58,7 @@ class MLTradeHandler(Handler):
         :return: None
         """
         ml_msg = cast(MLTradeMessage, message)
-        if ml_msg.Performative == MLTradeMessage.Performative.CFT:
+        if ml_msg.performative == MLTradeMessage.Performative.CFT:
             self._handle_cft(ml_msg)
         elif ml_msg.performative == MLTradeMessage.Performative.ACCEPT:
             self._handle_accept(ml_msg)

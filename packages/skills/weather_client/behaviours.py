@@ -22,13 +22,15 @@ import logging
 import sys
 from typing import cast, TYPE_CHECKING
 
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
+    from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
     from packages.skills.weather_client.strategy import Strategy
 else:
+    from oef_protocol.message import OEFMessage
+    from oef_protocol.serialization import DEFAULT_OEF, OEFSerializer
     from weather_client_skill.strategy import Strategy
 
 logger = logging.getLogger("aea.weather_client_skill")

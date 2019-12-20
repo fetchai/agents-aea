@@ -25,15 +25,17 @@ import subprocess
 import sys
 from typing import Optional, cast, TYPE_CHECKING
 
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
+    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
     from packages.skills.carpark_detection.strategy import Strategy
 else:
+    from oef_protocol.message import OEFMessage
+    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
     from carpark_detection_skill.strategy import Strategy
 
 logger = logging.getLogger("aea.carpark_detection_skill")

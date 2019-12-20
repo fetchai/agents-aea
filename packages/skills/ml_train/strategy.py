@@ -21,13 +21,13 @@
 import datetime
 from typing import cast
 
-from aea.protocols.oef.models import Attribute, DataModel, Query, Constraint, ConstraintType, Description
+from aea.helpers.search.models import Attribute, DataModel, Query, Constraint, ConstraintType, Description
 from aea.skills.base import SharedClass
 
 DEFAULT_DATASET_ID = 'UK'
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
-DEFAULT_CURRENCY_PBK = 'FET'
+DEFAULT_CURRENCY_ID = 'FET'
 DEFAULT_LEDGER_ID = 'None'
 
 
@@ -39,7 +39,7 @@ class Strategy(SharedClass):
         self._dataset_id = kwargs.pop('dataset_id', DEFAULT_DATASET_ID)
         self._max_unit_price = kwargs.pop('max_unit_price', DEFAULT_MAX_ROW_PRICE)
         self._max_buyer_tx_fee = kwargs.pop('max_buyer_tx_fee', DEFAULT_MAX_TX_FEE)
-        self._currency_id = kwargs.pop('currency_id', DEFAULT_CURRENCY_PBK)
+        self._currency_id = kwargs.pop('currency_id', DEFAULT_CURRENCY_ID)
         self._ledger_id = kwargs.pop('ledger_id', DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop('is_ledger_tx', False)
         super().__init__(**kwargs)

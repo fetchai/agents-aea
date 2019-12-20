@@ -110,7 +110,7 @@ aea config set skills.ml_train.shared_classes.strategy.args.is_ledger_tx True
 
 ### Run both AEAs
 
-From their respective repos, run both AEAs
+From their respective directories, run both AEAs
 ``` bash
 aea run
 ```
