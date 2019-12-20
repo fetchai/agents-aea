@@ -21,5 +21,3 @@
 from typing import List
 
 default_dependencies = []  # type: List[str]
-fipa_dependencies = ["protobuf"]  # type: List[str]
-oef_dependencies = ["colorlog", "oef"]  # type: List[str]

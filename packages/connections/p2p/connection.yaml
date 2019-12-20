@@ -12,4 +12,6 @@ excluded_protocols: ["gym"]
 config:
   addr: ${addr:127.0.0.1}
   port: ${port:8000}
-
+dependencies:
+  fetch:
+    git: "https://github.com/fetchai/peer-to-peer-api.git"

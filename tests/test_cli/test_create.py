@@ -105,15 +105,15 @@ class TestCreate:
         agent_config_instance = self._load_config_file()
         assert agent_config_instance["author"] == ""
 
-    def test_connections_contains_only_oef(self):
-        """Check that the 'connections' list contains only the 'oef' connection."""
+    def test_connections_contains_only_stub(self):
+        """Check that the 'connections' list contains only the 'stub' connection."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["connections"] == ["oef"]
+        assert agent_config_instance["connections"] == ["stub"]
 
-    def test_default_connection_field_is_oef(self):
-        """Check that the 'default_connection' is the 'oef' connection."""
+    def test_default_connection_field_is_stub(self):
+        """Check that the 'default_connection' is the 'stub' connection."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["default_connection"] == "oef"
+        assert agent_config_instance["default_connection"] == "stub"
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""
@@ -128,7 +128,7 @@ class TestCreate:
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["protocols"] == ["default", "fipa", "oef"]
+        assert agent_config_instance["protocols"] == ["default"]
 
     def test_skills_field_is_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
@@ -151,16 +151,16 @@ class TestCreate:
         assert connections_dirpath.exists()
         assert connections_dirpath.is_dir()
 
-    def test_connections_contains_oef_connection(self):
-        """Check that the connections directory contains the oef directory."""
-        oef_connection_dirpath = Path(self.agent_name, "connections", "oef")
+    def test_connections_contains_stub_connection(self):
+        """Check that the connections directory contains the stub directory."""
+        oef_connection_dirpath = Path(self.agent_name, "connections", "stub")
         assert oef_connection_dirpath.exists()
         assert oef_connection_dirpath.is_dir()
 
-    def test_oef_connection_directory_is_equal_to_library_oef_connection(self):
-        """Check that the oef connection directory is equal to the package's one (aea.connections.oef)."""
-        oef_connection_dirpath = Path(self.agent_name, "connections", "oef")
-        comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "packages", "connections", "oef")))
+    def test_oef_connection_directory_is_equal_to_library_stub_connection(self):
+        """Check that the stub connection directory is equal to the package's one (aea.connections.stub)."""
+        oef_connection_dirpath = Path(self.agent_name, "connections", "stub")
+        comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "stub")))
         assert comparison.diff_files == []
 
     @classmethod

@@ -78,8 +78,6 @@ class TestEchoSkill:
         # add skills
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "echo"], standalone_mode=False)
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "stub"], standalone_mode=False)
-        assert result.exit_code == 0
 
         # run the agent
         process = subprocess.Popen([

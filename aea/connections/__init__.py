@@ -19,8 +19,5 @@
 
 """This module contains the channel modules."""
 from typing import List
-import aea.protocols
 
-local_dependencies = [*aea.protocols.oef_dependencies]  # type: List[str]
-oef_dependencies = ["colorlog", "oef", *aea.protocols.oef_dependencies]  # type: List[str]
 stub_dependencies = ["watchdog"]  # type: List[str]

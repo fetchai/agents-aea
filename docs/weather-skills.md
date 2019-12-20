@@ -28,16 +28,18 @@ aea create my_weather_station
 ```
 
 
-### Add the weather station skill 
+### Add the oef connection and the weather station skill 
 ``` bash
 cd my_weather_station
+aea add connection oef
 aea add skill weather_station
+aea install
 ```
 
 
 ### Run the weather station AEA
 ``` bash
-aea run
+aea run --connections oef
 ```
 
 
@@ -48,16 +50,18 @@ aea create my_weather_client
 ```
 
 
-### Add the weather client skill 
+### Add the oef connection and the weather client skill 
 ``` bash
 cd my_weather_client
+aea add connection oef
 aea add skill weather_client
+aea install
 ```
 
 
 ### Run the weather client AEA
 ``` bash
-aea run
+aea run --connections oef
 ```
 
 
@@ -120,7 +124,9 @@ Create the AEA that will provide weather measurements.
 ``` bash
 aea create my_weather_station
 cd my_weather_station
+aea add connection oef
 aea add skill weather_station_ledger
+aea install
 ```
 
 ### Create the weather client (ledger version)
@@ -130,7 +136,9 @@ In another terminal, create the AEA that will query the weather station.
 ``` bash
 aea create my_weather_client
 cd my_weather_client
+aea add connection oef
 aea add skill weather_client_ledger
+aea install
 ```
 
 Additionally, create the private key for the weather client AEA.
@@ -165,7 +173,7 @@ cd my_weather_client
 
 Run both AEAs from their respective terminals.
 ``` bash
-aea run
+aea run --connections oef
 ```
 
 You will see that the AEAs negotiate and then transact using the Fetch.ai `testnet`.
@@ -191,7 +199,9 @@ Create the AEA that will provide weather measurements.
 ``` bash
 aea create my_weather_station
 cd my_weather_station
+aea add connection oef
 aea add skill weather_station_ledger
+aea install
 ```
 
 ### Create the weather client (ledger version)
@@ -201,7 +211,9 @@ In another terminal, create the AEA that will query the weather station.
 ``` bash
 aea create my_weather_client
 cd my_weather_client
+aea add connection oef
 aea add skill weather_client_ledger
+aea install
 ```
 
 Additionally, create the private key for the weather client AEA.
@@ -256,7 +268,7 @@ Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a
 
 Run both AEAs, from their respective terminals.
 ``` bash
-aea run
+aea run --connections oef
 ```
 You will see that the AEAs negotiate and then transact using the Ethereum `testnet`.
 

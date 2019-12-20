@@ -90,7 +90,13 @@ class TestMLSkills:
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "oef"], standalone_mode=False)
+        assert result.exit_code == 0
+
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "ml_data_provider"], standalone_mode=False)
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
         assert result.exit_code == 0
 
         process_one = subprocess.Popen([
@@ -109,7 +115,13 @@ class TestMLSkills:
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
         os.chdir(agent_two_dir_path)
 
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "oef"], standalone_mode=False)
+        assert result.exit_code == 0
+
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "ml_train"], standalone_mode=False)
+        assert result.exit_code == 0
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
         assert result.exit_code == 0
 
         # # Load the agent yaml file and manually insert the things we need

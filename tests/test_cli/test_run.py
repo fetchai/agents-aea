@@ -110,8 +110,9 @@ def test_run_multiple_connections(pytestconfig, connection_names):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
     assert result.exit_code == 0
 
+    # stub is the default connection, so it should fail
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "stub"])
-    assert result.exit_code == 0
+    assert result.exit_code == 1
 
     process = subprocess.Popen([
         sys.executable,
@@ -888,7 +889,7 @@ class TestRunFailsWhenConnectionNotComplete:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_name = "stub"
+        cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
@@ -934,7 +935,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_name = "stub"
+        cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()

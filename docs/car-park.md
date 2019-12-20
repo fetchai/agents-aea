@@ -10,6 +10,7 @@ First, create the carpark detection agent:
 ```
 aea create car_detector
 cd car_detector
+aea add connection oef
 aea add skill carpark_detection
 aea install
 ```
@@ -18,6 +19,7 @@ Then, create the carpark client agent:
 ```
 aea create car_data_buyer
 cd car_data_buyer
+aea add connection oef
 aea add skill carpark_client
 aea install
 aea generate-key fetchai

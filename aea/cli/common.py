@@ -41,7 +41,7 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_REGISTRY_PATH = str(Path(aea.AEA_DIR, "..", "packages").resolve())
-DEFAULT_CONNECTION = "oef"
+DEFAULT_CONNECTION = "stub"
 DEFAULT_SKILL = "error"
 
 
