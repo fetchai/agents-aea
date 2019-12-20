@@ -32,7 +32,7 @@ from aea.crypto.fetchai import FETCHAI, FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG, \
     _try_to_instantiate_fetchai_ledger_api, \
     _try_to_instantiate_ethereum_ledger_api
-from tests.conftest import CUR_PATH
+from ..conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 

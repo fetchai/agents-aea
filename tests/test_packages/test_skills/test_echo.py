@@ -38,7 +38,7 @@ from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from tests.conftest import CLI_LOG_OPTION
+from ...conftest import CLI_LOG_OPTION
 
 
 class TestEchoSkill:

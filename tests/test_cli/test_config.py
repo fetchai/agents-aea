@@ -26,7 +26,7 @@ from pathlib import Path
 
 import aea.cli.common
 from aea.cli import cli
-from tests.conftest import CLI_LOG_OPTION, CUR_PATH
+from ..conftest import CLI_LOG_OPTION, CUR_PATH
 from ..common.click_testing import CliRunner
 
 

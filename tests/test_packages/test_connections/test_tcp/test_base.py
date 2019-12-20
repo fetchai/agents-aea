@@ -29,7 +29,7 @@ import unittest.mock
 from aea.mail.base import Envelope
 from packages.connections.tcp.tcp_client import TCPClientConnection
 from packages.connections.tcp.tcp_server import TCPServerConnection
-from tests.conftest import get_unused_tcp_port
+from ....conftest import get_unused_tcp_port
 
 
 @pytest.mark.asyncio

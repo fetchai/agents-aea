@@ -32,7 +32,7 @@ import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from tests.conftest import CLI_LOG_OPTION
+from ...conftest import CLI_LOG_OPTION, CUR_PATH
 
 
 class TestRemoveConnection:
@@ -45,6 +45,8 @@ class TestRemoveConnection:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -133,6 +135,8 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
