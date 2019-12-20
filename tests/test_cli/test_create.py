@@ -153,14 +153,14 @@ class TestCreate:
 
     def test_connections_contains_stub_connection(self):
         """Check that the connections directory contains the stub directory."""
-        oef_connection_dirpath = Path(self.agent_name, "connections", "stub")
-        assert oef_connection_dirpath.exists()
-        assert oef_connection_dirpath.is_dir()
+        stub_connection_dirpath = Path(self.agent_name, "connections", "stub")
+        assert stub_connection_dirpath.exists()
+        assert stub_connection_dirpath.is_dir()
 
-    def test_oef_connection_directory_is_equal_to_library_stub_connection(self):
+    def test_stub_connection_directory_is_equal_to_library_stub_connection(self):
         """Check that the stub connection directory is equal to the package's one (aea.connections.stub)."""
-        oef_connection_dirpath = Path(self.agent_name, "connections", "stub")
-        comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "stub")))
+        stub_connection_dirpath = Path(self.agent_name, "connections", "stub")
+        comparison = filecmp.dircmp(str(stub_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "stub")))
         assert comparison.diff_files == []
 
     @classmethod
