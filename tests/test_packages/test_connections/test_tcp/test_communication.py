@@ -31,7 +31,7 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from packages.connections.tcp.tcp_client import TCPClientConnection
 from packages.connections.tcp.tcp_server import TCPServerConnection
-from tests.conftest import get_unused_tcp_port
+from ....conftest import get_unused_tcp_port
 
 
 class TestTCPCommunication:

@@ -32,7 +32,7 @@ from ...common.click_testing import CliRunner
 
 from aea.cli import cli
 
-from tests.conftest import CLI_LOG_OPTION
+from ...conftest import CLI_LOG_OPTION
 
 
 class TestWeatherSkills:

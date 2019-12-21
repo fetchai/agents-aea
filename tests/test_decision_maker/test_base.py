@@ -35,7 +35,7 @@ from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import OutBox, Multiplexer  # , Envelope
 from aea.protocols.default.message import DefaultMessage
-from tests.conftest import CUR_PATH, DummyConnection
+from ..conftest import CUR_PATH, DummyConnection
 
 MAX_REACTIONS = 10
 

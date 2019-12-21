@@ -19,12 +19,15 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
+import shutil
 import sys
 import time
 
 import unittest.mock
+from pathlib import Path
 
 from .test_base import create_app, TempCWD
+from ..conftest import CUR_PATH
 
 
 def test_create_agent():
@@ -78,8 +81,11 @@ def test_create_agent_fail():
 def test_real_create():
     """Really create an agent (have to test the call_aea at some point)."""
     # Set up a temporary current working directory to make agents in
-    with TempCWD():
+    with TempCWD() as temp_cwd:
         app = create_app()
+
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(temp_cwd.temp_dir, "packages"))
 
         agent_id = "test_agent_id"
         response_create = app.post(

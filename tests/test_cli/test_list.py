@@ -28,7 +28,7 @@ from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
-from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 

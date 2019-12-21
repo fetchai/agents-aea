@@ -36,7 +36,7 @@ import aea.cli.common
 from aea.cli import cli
 
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE
-from tests.conftest import CLI_LOG_OPTION, CUR_PATH
+from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
 
 def test_run(pytestconfig):
@@ -48,6 +48,9 @@ def test_run(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -101,6 +104,9 @@ def test_run_multiple_connections(pytestconfig, connection_names):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -153,6 +159,9 @@ def test_run_unknown_private_key(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -210,6 +219,9 @@ def test_run_unknown_ledger(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -265,6 +277,9 @@ def test_run_default_private_key_config(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -318,6 +333,9 @@ def test_run_fet_private_key_config(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -371,6 +389,9 @@ def test_run_ethereum_private_key_config(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -424,6 +445,9 @@ def test_run_ledger_apis(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -498,6 +522,9 @@ def test_run_fet_ledger_apis(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -568,6 +595,9 @@ def test_run_with_install_deps(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -615,6 +645,9 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -668,6 +701,9 @@ class TestRunFailsWhenExceptionOccursInSkill:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -714,6 +750,9 @@ class TestRunFailsWhenConfigurationFileNotFound:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -758,6 +797,9 @@ class TestRunFailsWhenConfigurationFileInvalid:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -804,6 +846,9 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -848,6 +893,9 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -894,6 +942,9 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -940,6 +991,9 @@ class TestRunFailsWhenConnectionClassNotPresent:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -986,6 +1040,9 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -1031,6 +1088,9 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0

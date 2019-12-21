@@ -36,7 +36,7 @@ import aea.cli.common
 import aea.configurations.base
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
 from aea.cli import cli
-from tests.conftest import CLI_LOG_OPTION, SKILL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
+from ...conftest import CLI_LOG_OPTION, SKILL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
 
 
 class TestScaffoldSkill:
