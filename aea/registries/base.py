@@ -227,7 +227,7 @@ class HandlerRegistry(Registry):
         for handler in handlers:
             protocol_id = cast(str, handler.SUPPORTED_PROTOCOL)
             if protocol_id in self._handlers.keys():
-                logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
+                logger.debug("More than one handler registered against protocol with id '{}'".format(protocol_id))
             self._handlers.setdefault(protocol_id, {})[skill_id] = handler
 
     def unregister(self, skill_id: SkillId) -> None:

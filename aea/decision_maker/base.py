@@ -26,6 +26,7 @@ import logging
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
+from aea.crypto.fetchai import FETCHAI
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.decision_maker.messages.transaction import TransactionMessage, OFF_CHAIN
@@ -412,7 +413,7 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        if tx_message.ledger_id not in SUPPORTED_LEDGER_APIS:
+        if tx_message.ledger_id not in SUPPORTED_LEDGER_APIS + [OFF_CHAIN]:
             logger.error("[{}]: ledger_id={} is not supported".format(self._agent_name, tx_message.ledger_id))
             return
 
@@ -559,24 +560,24 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        is_valid_ledger_id = self._is_valid_ledger_id(tx_message)
+        # is_valid_ledger_id = self._is_valid_ledger_id(tx_message)
         is_valid_tx_hash = self._is_valid_tx_hash(tx_message)
         is_utility_enhancing = self._is_utility_enhancing(tx_message)
         is_affordable = self._is_affordable(tx_message)
-        return is_valid_ledger_id and is_valid_tx_hash and is_utility_enhancing and is_affordable
+        return is_valid_tx_hash and is_utility_enhancing and is_affordable
 
-    def _is_valid_ledger_id(self, tx_message: TransactionMessage) -> bool:
-        """
-        Check if the ledger id is valid for signing.
+    # def _is_valid_ledger_id(self, tx_message: TransactionMessage) -> bool:
+    #     """
+    #     Check if the ledger id is valid for signing.
 
-        :param tx_message: the transaction message
-        :return: whether the transaction has a valid ledger id
-        """
-        valid = True
-        if tx_message.ledger_id == OFF_CHAIN:
-            logger.error("[{}]: ledger_id='off_chain' is not valid for signing!")
-            valid = False
-        return valid
+    #     :param tx_message: the transaction message
+    #     :return: whether the transaction has a valid ledger id
+    #     """
+    #     valid = True
+    #     if tx_message.ledger_id == OFF_CHAIN:
+    #         logger.error("[{}]: ledger_id='off_chain' is not valid for signing!".format(self._agent_name))
+    #         valid = False
+    #     return valid
 
     def _is_valid_tx_hash(self, tx_message: TransactionMessage) -> bool:
         """
@@ -597,7 +598,10 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: the signature of the signing payload
         """
-        crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+        if tx_message.ledger_id == OFF_CHAIN:
+            crypto_object = self._wallet.crypto_objects.get(FETCHAI)
+        else:
+            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
         tx_hash = tx_message.signing_payload.get('tx_hash')
         tx_signature = crypto_object.sign_transaction(tx_hash)
         return tx_signature

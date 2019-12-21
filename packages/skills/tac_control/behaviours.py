@@ -81,8 +81,8 @@ class TACBehaviour(Behaviour):
             logger.info("[{}]: TAC open for registration until: {}".format(self.context.agent_name, parameters.start_time))
         elif game.phase.value == Phase.GAME_REGISTRATION.value and now > parameters.start_time and now < parameters.end_time:
             if game.registration.nb_agents < parameters.min_nb_agents:
-                game.phase = Phase.POST_GAME
                 self._cancel_tac()
+                game.phase = Phase.POST_GAME
                 self._unregister_tac()
             else:
                 game.phase = Phase.GAME_SETUP
@@ -90,8 +90,8 @@ class TACBehaviour(Behaviour):
                 self._unregister_tac()
                 game.phase = Phase.GAME
         elif game.phase.value == Phase.GAME.value and now > parameters.end_time:
-            game.phase = Phase.POST_GAME
             self._cancel_tac()
+            game.phase = Phase.POST_GAME
 
     def teardown(self) -> None:
         """
@@ -145,10 +145,10 @@ class TACBehaviour(Behaviour):
         game.create()
         logger.info("[{}]: Started competition:\n{}".format(self.context.agent_name, game.holdings_summary))
         logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))
-        for agent_address in game.configuration.agent_addresses:
+        for agent_address in game.configuration.agent_addr_to_name.keys():
             agent_state = game.current_agent_states[agent_address]
             tac_msg = TACMessage(type=TACMessage.Type.GAME_DATA,
-                                 amount_by_currency_id=agent_state.balance_by_currency_id,
+                                 amount_by_currency_id=agent_state.amount_by_currency_id,
                                  exchange_params_by_currency_id=agent_state.exchange_params_by_currency_id,
                                  quantities_by_good_id=agent_state.quantities_by_good_id,
                                  utility_params_by_good_id=agent_state.utility_params_by_good_id,
@@ -173,5 +173,6 @@ class TACBehaviour(Behaviour):
                                             sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
                                             message=TACSerializer().encode(tac_msg))
-        logger.info("[{}]: Finished competition:\n{}".format(self.context.agent_name, game.holdings_summary))
-        logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))
+        if game.phase == Phase.GAME:
+            logger.info("[{}]: Finished competition:\n{}".format(self.context.agent_name, game.holdings_summary))
+            logger.info("[{}]: Computed equilibrium:\n{}".format(self.context.agent_name, game.equilibrium_summary))

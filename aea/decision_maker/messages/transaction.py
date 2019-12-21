@@ -192,7 +192,6 @@ class TransactionMessage(InternalMessage):
             assert isinstance(self.tx_counterparty_fee, int), "Tx_counterparty_fee must be of type int."
             assert self.tx_counterparty_fee >= 0, "Tx_counterparty_fee must be greater or equal to zero."
             assert isinstance(self.tx_quantities_by_good_id, dict) and all((isinstance(key, str) and isinstance(value, int)) for key, value in self.tx_quantities_by_good_id.items()), "Tx_quantities_by_good_id must be of type Dict[str, int]."
-            assert len(self.tx_quantities_by_good_id.keys()) == len(set(self.tx_quantities_by_good_id.keys())), "Good ids must be unique in tx_quantities_by_good_id."
             assert isinstance(self.ledger_id, str) and self.ledger_id in SUPPORTED_LEDGER_IDS, "Ledger_id must be str and " \
                                                                                                "must in the supported ledger ids."
             assert isinstance(self.info, dict) and all(isinstance(key, str) for key in self.info.keys()), "Info must be of type Dict[str, Any]."
@@ -206,7 +205,7 @@ class TransactionMessage(InternalMessage):
                 assert len(self.body) == 12
             elif self.performative == self.Performative.SUCCESSFUL_SIGNING:
                 assert isinstance(self.signing_payload, dict) and all(isinstance(key, str) for key in self.signing_payload.keys()), "Signing_payload must be of type Dict[str, Any]"
-                assert isinstance(self.tx_signature, str), "Tx_signature must be of type str"
+                assert isinstance(self.tx_signature, bytes), "Tx_signature must be of type bytes"
                 assert len(self.body) == 13
             else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")

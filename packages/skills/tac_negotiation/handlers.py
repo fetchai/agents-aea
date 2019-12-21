@@ -189,7 +189,7 @@ class FIPANegotiationHandler(Handler):
         for num, proposal_description in enumerate(proposals):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.generate_transaction_message(TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT, proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
+            transaction_msg = transactions.generate_transaction_message(TransactionMessage.Performative.PROPOSE_FOR_SIGNING, proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
 
             if strategy.is_profitable_transaction(transaction_msg, is_seller=dialogue.is_seller):
                 logger.info("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))
