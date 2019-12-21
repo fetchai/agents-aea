@@ -6,7 +6,7 @@
   "required": [
     "aea_version",
     "agent_name",
-    "authors",
+    "author",
     "version",
     "license",
     "url",
@@ -23,13 +23,16 @@
     "agent_name": {
       "type": "string"
     },
-    "authors": {
+    "author": {
       "type": "string"
     },
     "version": {
       "type": "string"
     },
     "license": {
+      "type": "string"
+    },
+     "fingerprint": {
       "type": "string"
     },
     "url": {
@@ -60,9 +63,11 @@
       "uniqueItems": true,
       "items": {
         "type": "object",
-        "required": ["ledger_api"],
+        "required": [
+          "ledger_api"
+        ],
         "properties": {
-          "ledger_api": { 
+          "ledger_api": {
             "$ref": "#/definitions/ledger_api"
           }
         }
@@ -135,10 +140,6 @@
           "type": "number"
         }
       }
-    },
-    "requirement": {
-      "type": "string",
-      "pattern": "([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9])( *(~=|==|>=|<=|!=|<|>) *v?(?:(?:(?P<epoch>[0-9]+)!)?(?P<release>[0-9]+(?:\\.[0-9]+)*)(?P<pre>[-_\\.]?(?P<pre_l>(a|b|c|rc|alpha|beta|pre|preview))[-_\\.]?(?P<pre_n>[0-9]+)?)?(?P<post>(?:-(?P<post_n1>[0-9]+))|(?:[-_\\.]?(?P<post_l>post|rev|r)[-_\\.]?(?P<post_n2>[0-9]+)?))?(?P<dev>[-_\\.]?(?P<dev_l>dev)[-_\\.]?(?P<dev_n>[0-9]+)?)?)(?:\\+(?P<local>[a-z0-9]+(?:[-_\\.][a-z0-9]+)*))?)?$"
     },
     "resource_name": {
       "type": "string",

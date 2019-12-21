@@ -13,6 +13,7 @@ In the root directory, create the gym agent.
 aea create my_gym_agent
 ```
 
+
 ### Add the gym skill 
 ``` bash
 cd my_gym_agent
@@ -50,7 +51,7 @@ aea install
 ### Run the agent with the gym connection
 
 ``` bash
-aea run --connection gym
+aea run --connections gym
 ```
 
 You will see the gym training logs.

@@ -32,7 +32,7 @@ from aea.crypto.fetchai import FETCHAI, FetchAICrypto
 from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG, \
     _try_to_instantiate_fetchai_ledger_api, \
     _try_to_instantiate_ethereum_ledger_api
-from tests.conftest import CUR_PATH
+from ..conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ class TestLedgerApis:
         with mock.patch.object(ledger_apis.apis.get(FETCHAI).tokens, 'transfer',
                                return_value="97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"):
             with mock.patch.object(ledger_apis.apis.get(FETCHAI), 'sync'):
-                tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
+                tx_digest = ledger_apis.transfer(fet_obj, fet_address, amount=10, tx_fee=10)
                 assert tx_digest is not None
                 assert ledger_apis.last_tx_statuses[FETCHAI] == 'OK'
 
@@ -122,7 +122,7 @@ class TestLedgerApis:
         with mock.patch.object(ledger_apis.apis.get(FETCHAI).tokens, 'transfer',
                                return_value="97fcacaaf94b62318c4e4bbf53fd2608c15062f17a6d1bffee0ba7af9b710e35"):
             with mock.patch.object(ledger_apis.apis.get(FETCHAI), 'sync', side_effect=Exception):
-                tx_digest = ledger_apis.transfer(FETCHAI, fet_obj, fet_address, amount=10, tx_fee=10)
+                tx_digest = ledger_apis.transfer(fet_obj, fet_address, amount=10, tx_fee=10)
                 assert tx_digest is None
                 assert ledger_apis.last_tx_statuses[FETCHAI] == 'ERROR'
 
@@ -140,7 +140,7 @@ class TestLedgerApis:
                                        return_value=result):
                     with mock.patch.object(ledger_apis.apis.get(ETHEREUM).eth, "getTransactionReceipt",
                                            return_value=b'0xa13f2f926233bc4638a20deeb8aaa7e8d6a96e487392fa55823f925220f6efed'):
-                        tx_digest = ledger_apis.transfer(ETHEREUM, eth_obj, eth_address, amount=10, tx_fee=200000)
+                        tx_digest = ledger_apis.transfer(eth_obj, eth_address, amount=10, tx_fee=200000)
                         assert tx_digest is not None
                         assert ledger_apis.last_tx_statuses[ETHEREUM] == 'OK'
 
@@ -151,7 +151,7 @@ class TestLedgerApis:
         ledger_apis = LedgerApis({ETHEREUM: DEFAULT_ETHEREUM_CONFIG,
                                   FETCHAI: DEFAULT_FETCHAI_CONFIG})
         with mock.patch.object(ledger_apis.apis.get(ETHEREUM).eth, 'getTransactionCount', return_value=5, side_effect=Exception):
-            tx_digest = ledger_apis.transfer(ETHEREUM, eth_obj, eth_address, amount=10, tx_fee=200000)
+            tx_digest = ledger_apis.transfer(eth_obj, eth_address, amount=10, tx_fee=200000)
             assert tx_digest is None
             assert ledger_apis.last_tx_statuses[ETHEREUM] == 'ERROR'
 

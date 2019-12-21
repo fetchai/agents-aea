@@ -19,21 +19,23 @@
 
 """This package contains a scaffold of a behaviour."""
 
-import datetime
 import logging
 import os
 import subprocess
 import sys
 from typing import Optional, cast, TYPE_CHECKING
 
+from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Description
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from aea.skills.behaviours import TickerBehaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
+    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
     from packages.skills.carpark_detection.strategy import Strategy
 else:
+    from oef_protocol.message import OEFMessage
+    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
     from carpark_detection_skill.strategy import Strategy
 
 logger = logging.getLogger("aea.carpark_detection_skill")
@@ -118,15 +120,13 @@ class CarParkDetectionAndGUIBehaviour(Behaviour):
         self.process_id.wait()
 
 
-class ServiceRegistrationBehaviour(Behaviour):
+class ServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
     def __init__(self, **kwargs):
         """Initialise the behaviour."""
-        self._services_interval = kwargs.pop('services_interval', 30)  # type: int
         super().__init__(**kwargs)
         self._last_connection_status = self.context.connection_status.is_connected
-        self._last_update_time = datetime.datetime.now()  # type: datetime.datetime
         self._registered_service_description = None  # type: Optional[Description]
         self._oef_msf_id = 0
 
@@ -150,9 +150,8 @@ class ServiceRegistrationBehaviour(Behaviour):
         :return: None
         """
         self._update_connection_status()
-        if self._is_time_to_update_services():
-            self._unregister_service()
-            self._register_service()
+        self._unregister_service()
+        self._register_service()
 
     def _register_service(self) -> None:
         """
@@ -165,12 +164,12 @@ class ServiceRegistrationBehaviour(Behaviour):
             desc = strategy.get_service_description()
             self._registered_service_description = desc
             self._oef_msf_id += 1
-            msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
+            msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE,
                              id=self._oef_msf_id,
                              service_description=desc,
                              service_id=SERVICE_ID)
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(msg))
             logger.info("[{}]: updating car park detection services on OEF.".format(self.context.agent_name))
@@ -183,29 +182,16 @@ class ServiceRegistrationBehaviour(Behaviour):
         """
         if self._registered_service_description is not None:
             self._oef_msf_id += 1
-            msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE,
+            msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_SERVICE,
                              id=self._oef_msf_id,
                              service_description=self._registered_service_description,
                              service_id=SERVICE_ID)
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(msg))
             logger.info("[{}]: unregistering car park detection services from OEF.".format(self.context.agent_name))
             self._registered_service_description = None
-
-    def _is_time_to_update_services(self) -> bool:
-        """
-        Check if the agent should update the service directory.
-
-        :return: bool indicating the action
-        """
-        now = datetime.datetime.now()
-        diff = now - self._last_update_time
-        result = diff.total_seconds() > self._services_interval
-        if result:
-            self._last_update_time = now
-        return result
 
     def _update_connection_status(self) -> None:
         """

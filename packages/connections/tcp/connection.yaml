@@ -1,0 +1,13 @@
+name: tcp
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+url: ""
+class_name: TCPClientConnection  # this can be eitehr TCPClientConnection or TCPServerConnection
+protocols: []
+restricted_to_protocols: []
+excluded_protocols: []
+config:
+  address: 127.0.0.1
+  port: 8082

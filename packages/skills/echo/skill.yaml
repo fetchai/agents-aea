@@ -1,26 +1,27 @@
 name: echo
-authors: Fetch.AI Limited
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
+fingerprint: ""
 description: "The echo skill implements simple echo functionality."
 url: ""
 behaviours:
-  - behaviour:
-      class_name: EchoBehaviour
-      args:
-        foo: bar
+  echo:
+    class_name: EchoBehaviour
+    args:
+      foo: bar
 handlers:
-  - handler:
-      class_name: EchoHandler
-      args:
-        foo: bar
-        bar: foo
+  echo:
+    class_name: EchoHandler
+    args:
+      foo: bar
+      bar: foo
 tasks:
-  - task:
-      class_name: EchoTask
-      args:
-        foo: bar
-        bar: foo
-shared_classes: []
+  echo:
+    class_name: EchoTask
+    args:
+      foo: bar
+      bar: foo
+shared_classes: {}
 protocols: ["default"]
-dependencies: []
+dependencies: {}

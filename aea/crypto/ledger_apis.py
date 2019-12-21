@@ -131,11 +131,10 @@ class LedgerApis(object):
             raise Exception("Ledger id is not known")
         return balance
 
-    def transfer(self, identifier: str, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
+    def transfer(self, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
         """
         Transfer from self to destination.
 
-        :param identifier: the crypto code
         :param crypto_object: the crypto object that contains the fucntions for signing transactions.
         :param destination_address: the address of the receive
         :param amount: the amount
@@ -143,24 +142,24 @@ class LedgerApis(object):
 
         :return: tx digest if successful, otherwise None
         """
-        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        api = self.apis[identifier]
+        assert crypto_object.identifier in self.apis.keys(), "Unsupported ledger identifier."
+        api = self.apis[crypto_object.identifier]
         logger.info("Waiting for the validation of the transaction ...")
-        if identifier == FETCHAI:
+        if crypto_object.identifier == FETCHAI:
             try:
                 tx_digest = api.tokens.transfer(crypto_object.entity, destination_address, amount, tx_fee)
                 api.sync(tx_digest)
                 logger.info("Transaction validated ...")
-                self._last_tx_statuses[identifier] = OK
+                self._last_tx_statuses[crypto_object.identifier] = OK
             except Exception:
                 logger.warning("An error occurred while attempting the transfer.")
                 tx_digest = None
-                self._last_tx_statuses[identifier] = ERROR
-        elif identifier == ETHEREUM:
+                self._last_tx_statuses[crypto_object.identifier] = ERROR
+        elif crypto_object.identifier == ETHEREUM:
             try:
                 nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
                 # TODO : handle misconfiguration
-                chain_id = self.configs.get(identifier)[1]  # type: ignore
+                chain_id = self.configs.get(crypto_object.identifier)[1]  # type: ignore
                 transaction = {
                     'nonce': nonce,
                     'chainId': chain_id,
@@ -177,17 +176,17 @@ class LedgerApis(object):
                         api.eth.getTransactionReceipt(hex_value)
                         logger.info("transaction validated - exiting")
                         tx_digest = hex_value.hex()
-                        self._last_tx_statuses[identifier] = OK
+                        self._last_tx_statuses[crypto_object.identifier] = OK
                         break
                     except web3.exceptions.TransactionNotFound:     # pragma: no cover
                         logger.info("transaction not found - sleeping for 3.0 seconds")
-                        self._last_tx_statuses[identifier] = ERROR
+                        self._last_tx_statuses[crypto_object.identifier] = ERROR
                         time.sleep(3.0)
                 return tx_digest
             except Exception:
                 logger.warning("An error occurred while attempting the transfer.")
                 tx_digest = None
-                self._last_tx_statuses[identifier] = ERROR
+                self._last_tx_statuses[crypto_object.identifier] = ERROR
         else:  # pragma: no cover
             raise Exception("Ledger id is not known")
         return tx_digest

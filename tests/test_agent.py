@@ -23,9 +23,9 @@ import time
 from threading import Thread
 
 from aea.agent import Agent, AgentState
-from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.crypto.wallet import Wallet
 from aea.mail.base import InBox, OutBox
+from packages.connections.local.connection import LocalNode, OEFLocalConnection
 from .conftest import CUR_PATH
 
 

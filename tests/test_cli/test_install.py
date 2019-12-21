@@ -29,7 +29,7 @@ from ..common.click_testing import CliRunner
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
-from tests.conftest import CLI_LOG_OPTION, CUR_PATH
+from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
 
 class TestInstall:
@@ -49,7 +49,7 @@ class TestInstall:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
@@ -71,11 +71,11 @@ class TestInstallFromRequirementFile:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
-class TestInstallFails:
+class TestInstallFailsWhenDependencyDoesNotExist:
     """Test that the command 'aea install' fails when a dependency is not found."""
 
     @classmethod
@@ -98,7 +98,18 @@ class TestInstallFails:
 
         config_path = Path("protocols", "my_protocol", DEFAULT_PROTOCOL_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
-        config.setdefault("dependencies", []).append("this_dependency_does_not_exist")
+        config.setdefault("dependencies", {}).update(
+            {
+                "this_is_a_test_dependency": {
+                    "version": "==0.1.0",
+                    "index": "https://test.pypi.org/simple"
+                },
+                "this_is_a_test_dependency_on_git": {
+                    "git": "https://github.com/an_user/a_repo.git",
+                    "ref": "master"
+                }
+            }
+        )
         yaml.safe_dump(config, open(config_path, "w"))
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
 
@@ -108,5 +119,27 @@ class TestInstallFails:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+
+
+class TestInstallWithRequirementFailsWhenFileIsBad:
+    """Test that the command 'aea install -r REQ_FILE' fails if the requirement file is not good."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.cwd = os.getcwd()
+        os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
+
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install", "-r", "bad_requirements.txt"], standalone_mode=False)
+
+    def test_exit_code_equal_to_zero(self):
+        """Assert that the exit code is equal to zero (i.e. success)."""
+        assert self.result.exit_code == 1
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
         os.chdir(cls.cwd)

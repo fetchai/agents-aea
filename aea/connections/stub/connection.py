@@ -29,7 +29,7 @@ from watchdog.observers import Observer
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, Address
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +138,11 @@ class StubConnection(Connection):
         line = self.input_file.readline()
         logger.debug("read line: {!r}".format(line))
         while len(line) > 0:
-            self._process_line(line[:-1])
+            # If the line is the last line of the file, then it doesn't have a \n on the end
+            if line[-1:] == b"\n":
+                self._process_line(line[:-1])
+            else:
+                self._process_line(line)  # pragma: no cover
             line = self.input_file.readline()
 
     def _process_line(self, line) -> None:
@@ -215,11 +219,11 @@ class StubConnection(Connection):
         self.output_file.flush()
 
     @classmethod
-    def from_config(cls, public_key: str, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
         """
         Get the OEF connection from the connection configuration.
 
-        :param public_key: the public key of the agent.
+        :param address: the address of the agent.
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """

@@ -1,7 +1,7 @@
 
 """This package contains the dataModel for the carpark detection agent."""
 
-from aea.protocols.oef.models import DataModel, Attribute
+from aea.helpers.search.models import DataModel, Attribute
 
 
 class CarParkDataModel (DataModel):

@@ -29,7 +29,7 @@ from ..common.click_testing import CliRunner
 import aea
 import aea.cli.common
 from aea.cli import cli
-from tests.conftest import CLI_LOG_OPTION
+from ..conftest import CLI_LOG_OPTION
 
 
 class TestDelete:
@@ -58,7 +58,7 @@ class TestDelete:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -87,7 +87,7 @@ class TestDeleteFailsWhenDirectoryDoesNotExist:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -131,7 +131,7 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         cls.mocked_logger_error.__exit__()
         try:
@@ -173,7 +173,7 @@ class TestDeleteFailsWhenDirectoryIsNotAnAEAProject:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:

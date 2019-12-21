@@ -30,7 +30,7 @@ import jsonschema
 import pytest
 from jsonschema import Draft4Validator
 
-from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
 
 
 class TestGui:
@@ -59,7 +59,7 @@ class TestGui:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.proc.terminate()
         cls.proc.wait(2.0)
         os.chdir(cls.cwd)

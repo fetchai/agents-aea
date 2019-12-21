@@ -36,7 +36,7 @@ import aea.cli.common
 import aea.configurations.base
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
 from aea.cli import cli
-from tests.conftest import CLI_LOG_OPTION, SKILL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
+from ...conftest import CLI_LOG_OPTION, SKILL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
 
 
 class TestScaffoldSkill:
@@ -100,7 +100,7 @@ class TestScaffoldSkill:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -151,7 +151,7 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -204,7 +204,7 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -257,7 +257,7 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -301,7 +301,7 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:

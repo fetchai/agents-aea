@@ -20,7 +20,7 @@
 """This test module contains the tests for the `aea search` sub-command."""
 import json
 import os
-from unittest import mock
+from unittest import mock, TestCase
 from pathlib import Path
 
 import jsonschema
@@ -29,7 +29,8 @@ from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
-from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 
 class TestSearchProtocols:
@@ -45,80 +46,16 @@ class TestSearchProtocols:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    def _generated_expected_output(self):
-        return """Available protocols:
-------------------------------
-Name: default
-Description: The default protocol allows for any bytes message.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: fipa
-Description: The fipa protocol implements the FIPA ACL.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: gym
-Description: The gym protocol implements the messages an agent needs to engage with a gym connection.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: oef
-Description: The oef protocol implements the OEF specific messages.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: tac
-Description: The tac protocol implements the messages an AEA needs to participate in the TAC.
-Version: 0.1.0
-------------------------------
-
-"""
-
-    def test_correct_output_default_registry(self):
+    @mock.patch('aea.cli.search.format_items', return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
+    def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "protocols"], standalone_mode=False)
-
-        assert self.result.output == self._generated_expected_output()
-
-    def test_correct_output_registry_api(self):
-        """Test that the command has printed the correct output when using Registry API."""
-        resp = [
-            {
-                "name": "protocol-1",
-                "description": "Protocol 1",
-                "version": "1",
-            }
-        ]
-        with mock.patch('aea.cli.search.request_api', return_value=resp):
-            self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"], standalone_mode=False
-            )
-        expected_output = (
-            'Searching for "some"...\n'
-            'Protocols found:\n\n'
-            '------------------------------\n'
-            'Name: protocol-1\n'
-            'Description: Protocol 1\n'
-            'Version: 1\n'
-            '------------------------------\n\n'
-        )
-        assert self.result.output == expected_output
-
-        with mock.patch('aea.cli.search.request_api', return_value=[]):
-            self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "protocols", "--query=some"], standalone_mode=False
-            )
-        expected_output = (
-            'Searching for "some"...\n'
-            'No protocols found.\n'
-        )
-        assert self.result.output == expected_output
+        assert self.result.output == "Available protocols:\n{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
@@ -135,85 +72,21 @@ class TestSearchConnections:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    def _generated_expected_output(self):
-        return """Available connections:
-------------------------------
-Name: gym
-Description: The gym connection wraps an OpenAI gym.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: local
-Description: The local connection provides a stub for an OEF node.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: oef
-Description: The oef connection provides a wrapper around the OEF sdk.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: p2p
-Description: The p2p connection provides a connection with the fetch.ai mail provider.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: stub
-Description: The stub connection implements a connection stub which reads/writes messages from/to file.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: tcp
-Description: None
-Version: 0.1.0
-------------------------------
-
-"""
-
-    def test_correct_output_default_registry(self):
+    @mock.patch(
+        'aea.cli.search.format_items',
+        return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+    )
+    def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "connections"], standalone_mode=False)
-        assert self.result.output == self._generated_expected_output()
-
-    def test_correct_output_registry_api(self):
-        """Test that the command has printed the correct output when using Registry API."""
-        resp = [
-            {
-                "name": "connection-1",
-                "description": "Connection 1",
-                "version": "1",
-            }
-        ]
-        with mock.patch('aea.cli.search.request_api', return_value=resp):
-            self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"], standalone_mode=False
-            )
-
-        expected_output = (
-            'Searching for "some"...\n'
-            'Connections found:\n\n'
-            '------------------------------\n'
-            'Name: connection-1\n'
-            'Description: Connection 1\n'
-            'Version: 1\n'
-            '------------------------------\n\n'
+        assert self.result.output == "Available connections:\n{}\n".format(
+            FORMAT_ITEMS_SAMPLE_OUTPUT
         )
-        assert self.result.output == expected_output
-
-        with mock.patch('aea.cli.search.request_api', return_value=[]):
-            self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "connections", "--query=some"], standalone_mode=False
-            )
-        expected_output = (
-            'Searching for "some"...\n'
-            'No connections found.\n'
-        )
-        assert self.result.output == expected_output
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
 
 
@@ -230,115 +103,116 @@ class TestSearchSkills:
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
-    def _generated_expected_output(self):
-        return """Available skills:
-------------------------------
-Name: carpark_client
-Description: None
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: carpark_detection
-Description: None
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: echo
-Description: The echo skill implements simple echo functionality.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: error
-Description: The error skill implements basic error handling required by all AEAs.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: gym
-Description: The gym skill wraps an RL agent.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: tac_control
-Description: The tac control skill implements the logic for an AEA to control an instance of the TAC.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: tac_negotiation
-Description: The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: tac_participation
-Description: The tac participation skill implements the logic for an AEA to participate in the TAC.
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: weather_client
-Description: None
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: weather_client_ledger
-Description: None
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: weather_station
-Description: None
-Version: 0.1.0
-------------------------------
-------------------------------
-Name: weather_station_ledger
-Description: None
-Version: 0.1.0
-------------------------------
-
-"""
-
-    def test_correct_output_default_registry(self):
+    @mock.patch(
+        'aea.cli.search.format_items',
+        return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+    )
+    def test_correct_output_default_registry(self, _):
         """Test that the command has printed the correct output when using the default registry."""
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False)
-        assert self.result.output == self._generated_expected_output()
-
-    def test_correct_output_registry_api(self):
-        """Test that the command has printed the correct output when using Registry API."""
-        resp = [
-            {
-                "name": "skill-1",
-                "description": "Skill 1",
-                "version": "1",
-                "protocol_names": ['p1', 'p2'],
-            }
-        ]
-        with mock.patch('aea.cli.search.request_api', return_value=resp):
-            self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"], standalone_mode=False
-            )
-            expected_output = (
-                'Searching for "some"...\n'
-                'Skills found:\n\n'
-                '------------------------------\n'
-                'Name: skill-1\n'
-                'Description: Skill 1\n'
-                'Protocols: p1 | p2 | \n'
-                'Version: 1\n'
-                '------------------------------\n\n'
-            )
-
-            assert self.result.output == expected_output
-
-        with mock.patch('aea.cli.search.request_api', return_value=[]):
-            self.result = self.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "search", "--registry", "skills", "--query=some"], standalone_mode=False
-            )
-        expected_output = (
-            'Searching for "some"...\n'
-            'No skills found.\n'
-        )
-        assert self.result.output == expected_output
+        assert self.result.output == "Available skills:\n{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
+
+
+@mock.patch(
+    'aea.cli.search.request_api',
+    return_value=['correct', 'results']
+)
+@mock.patch(
+    'aea.cli.search.format_items',
+    return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+)
+class RegistrySearchTestCase(TestCase):
+    """Test case for search --registry CLI command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_search_connections_positive(
+        self, format_items_mock, request_api_mock
+    ):
+        """Test for CLI search --registry connections positive result."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "search",
+                "--registry",
+                "connections",
+                "--query=some"
+            ],
+            standalone_mode=False
+        )
+        expected_output = (
+            'Searching for "some"...\n'
+            'Connections found:\n\n'
+            '{}\n'.format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
+        self.assertEqual(result.output, expected_output)
+        request_api_mock.assert_called_once_with(
+            'GET', '/connections', params={'search': 'some'}
+        )
+        format_items_mock.assert_called_once_with(['correct', 'results'])
+
+    def test_search_protocols_positive(
+        self, format_items_mock, request_api_mock
+    ):
+        """Test for CLI search --registry protocols positive result."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "search",
+                "--registry",
+                "protocols",
+                "--query=some"
+            ],
+            standalone_mode=False
+        )
+        expected_output = (
+            'Searching for "some"...\n'
+            'Protocols found:\n\n'
+            '{}\n'.format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
+        self.assertEqual(result.output, expected_output)
+        request_api_mock.assert_called_once_with(
+            'GET', '/protocols', params={'search': 'some'}
+        )
+        format_items_mock.assert_called_once_with(['correct', 'results'])
+
+    @mock.patch(
+        'aea.cli.search.format_skills',
+        return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+    )
+    def test_search_skills_positive(
+        self, format_skills_mock, format_items_mock, request_api_mock
+    ):
+        """Test for CLI search --registry skills positive result."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "search",
+                "--registry",
+                "skills",
+                "--query=some"
+            ],
+            standalone_mode=False
+        )
+        expected_output = (
+            'Searching for "some"...\n'
+            'Skills found:\n\n'
+            '{}\n'.format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
+        self.assertEqual(result.output, expected_output)
+        request_api_mock.assert_called_once_with(
+            'GET', '/skills', params={'search': 'some'}
+        )
+        format_skills_mock.assert_called_once_with(['correct', 'results'])
+        format_items_mock.assert_not_called()

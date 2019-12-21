@@ -9,7 +9,7 @@ cd my_aea/
 
 We highly recommend using a virtual environment to ensure consistency across dependencies.
 
-Check you have [`pipenv`](https://github.com/pypa/pipenv).
+Check that you have [`pipenv`](https://github.com/pypa/pipenv).
 
 ``` bash
 which pipenv
@@ -53,14 +53,14 @@ pip install aea
 ```
 -->
 
-The following installs the entire AEA package which includes the cli too.
+The following installs the entire AEA package which also includes a command-line interface (CLI).
 
 ``` bash
 pip install aea[all]
 
 ```
 
-However, you can run this demo by installing the base AEA, including the CLI (Command Line Interface) extension, alone.
+However, you can run this demo by installing the base AEA, including the CLI extension, alone.
 
 ``` bash
 pip install aea[cli]
@@ -70,7 +70,7 @@ pip install aea[cli]
 
 ### Known issues
 
-If the installation steps fail, it might a dependency issue. 
+If the installation steps fail, it might be a dependency issue. 
 
 The following hints can help:
 
@@ -100,19 +100,17 @@ cd my_first_agent
 aea add skill echo
 ```
 
-This copies the echo application code for the behaviours, handlers, and tasks into the skill, ready to run.
+This copies the echo application code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run.
 
 ### Add a stub connection
 
-AEAs use messages for communication. We will add a stub connection to send messages to and receive messages from the AEA.
+AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.
 
-``` bash
-aea add connection stub
-```
+The stub conection is already added to the agent by default.
 
-A stub connection provides an I/O reader/writer. 
+A stub connection provides an I/O reader and writer. 
 
-It uses two files for communication: one for the incoming messages and the other for the outgoing messages. Each line contains an encoded envelope.
+It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.
 
 The AEA waits for new messages posted to the file `my_first_agent/input_file`, and adds a response to the file `my_first_agent/output_file`.
 
@@ -133,7 +131,7 @@ recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
 Run the agent with the `stub` connection.
 
 ``` bash
-aea run --connection stub
+aea run
 ```
 
 You will see the echo task running in the terminal window.
@@ -173,7 +171,7 @@ Stop the agent by pressing `CTRL C`
 
 ### Delete the agent
 
-Delete the agent from the parent directory via `cd ..`.
+Delete the agent from the parent directory (`cd ..` to go to the parent directory).
 
 ``` bash
 aea delete my_first_agent

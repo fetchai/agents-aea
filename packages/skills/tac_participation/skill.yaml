@@ -1,29 +1,33 @@
 name: tac_participation
-authors: Fetch.AI Limited
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
+fingerprint: ""
 url: ""
 description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
 behaviours:
-  - behaviour:
-      class_name: TACBehaviour
-      args: {}
+  tac:
+    class_name: TACBehaviour
+    args: {}
 handlers:
-  - handler:
-      class_name: OEFHandler
-      args: {}
-  - handler:
-      class_name: TACHandler
-      args: {}
-tasks: []
+  oef:
+    class_name: OEFHandler
+    args: {}
+  tac:
+    class_name: TACHandler
+    args: {}
+  transaction:
+    class_name: TransactionHandler
+    args: {}
+tasks: {}
 shared_classes:
-  - shared_class:
-      class_name: Search
-      args:
-        search_interval: 5
-  - shared_class:
-      class_name: Game
-      args:
-        expected_version_id: v1
-        # expected_controller_pbk: '' # optionally, provide a key for the controller you expect!
+  search:
+    class_name: Search
+    args:
+      search_interval: 5
+  game:
+    class_name: Game
+    args:
+      expected_version_id: v1
+      # expected_controller_addr: '' # optionally, provide an address for the controller you expect!
 protocols: ['oef', 'tac']

@@ -39,7 +39,7 @@ import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
-from tests.conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
 
 
 class TestCreate:
@@ -103,17 +103,17 @@ class TestCreate:
     def test_authors_field_is_empty_string(self):
         """Check that the 'authors' field in the config file is the empty string."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["authors"] == ""
+        assert agent_config_instance["author"] == ""
 
-    def test_connections_contains_only_oef(self):
-        """Check that the 'connections' list contains only the 'oef' connection."""
+    def test_connections_contains_only_stub(self):
+        """Check that the 'connections' list contains only the 'stub' connection."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["connections"] == ["oef"]
+        assert agent_config_instance["connections"] == ["stub"]
 
-    def test_default_connection_field_is_oef(self):
-        """Check that the 'default_connection' is the 'oef' connection."""
+    def test_default_connection_field_is_stub(self):
+        """Check that the 'default_connection' is the 'stub' connection."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["default_connection"] == "oef"
+        assert agent_config_instance["default_connection"] == "stub"
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""
@@ -151,21 +151,21 @@ class TestCreate:
         assert connections_dirpath.exists()
         assert connections_dirpath.is_dir()
 
-    def test_connections_contains_oef_connection(self):
-        """Check that the connections directory contains the oef directory."""
-        oef_connection_dirpath = Path(self.agent_name, "connections", "oef")
-        assert oef_connection_dirpath.exists()
-        assert oef_connection_dirpath.is_dir()
+    def test_connections_contains_stub_connection(self):
+        """Check that the connections directory contains the stub directory."""
+        stub_connection_dirpath = Path(self.agent_name, "connections", "stub")
+        assert stub_connection_dirpath.exists()
+        assert stub_connection_dirpath.is_dir()
 
-    def test_oef_connection_directory_is_equal_to_library_oef_connection(self):
-        """Check that the oef connection directory is equal to the package's one (aea.connections.oef)."""
-        oef_connection_dirpath = Path(self.agent_name, "connections", "oef")
-        comparison = filecmp.dircmp(str(oef_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "oef")))
+    def test_stub_connection_directory_is_equal_to_library_stub_connection(self):
+        """Check that the stub connection directory is equal to the package's one (aea.connections.stub)."""
+        stub_connection_dirpath = Path(self.agent_name, "connections", "stub")
+        comparison = filecmp.dircmp(str(stub_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "stub")))
         assert comparison.diff_files == []
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -207,7 +207,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -245,7 +245,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -283,8 +283,55 @@ class TestCreateFailsWhenExceptionOccurs:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestCreateFailsWhenAlreadyInAEAProject:
+    """Test that 'aea create' sub-command fails when it is called within an AEA project."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert cls.result.exit_code == 0
+
+        # calling 'aea create myagent' again within an AEA project - recursively.
+        os.chdir(cls.agent_name)
+        os.mkdir("another_subdir")
+        os.chdir("another_subdir")
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    def test_log_error_message(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: "The current folder is already an AEA project. Please move to the parent folder.".
+        """
+        s = "The current folder is already an AEA project. Please move to the parent folder."
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        cls.mocked_logger_error = cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)

@@ -127,7 +127,6 @@ setup(
         "base58",
         *all_extras.get("crypto", []),
         *all_extras.get("cli", []),
-        *all_extras.get("oef_connection", []),
     ],
     tests_require=["tox"],
     extras_require=all_extras,

@@ -36,7 +36,7 @@ import aea.cli.common
 import aea.configurations.base
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.cli import cli
-from tests.conftest import CLI_LOG_OPTION, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
+from ...conftest import CLI_LOG_OPTION, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
 
 
 class TestScaffoldProtocol:
@@ -88,7 +88,7 @@ class TestScaffoldProtocol:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -139,7 +139,7 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -192,7 +192,7 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -245,7 +245,7 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -289,7 +289,7 @@ class TestScaffoldProtocolFailsWhenExceptionOccurs:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:

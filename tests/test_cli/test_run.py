@@ -36,7 +36,7 @@ import aea.cli.common
 from aea.cli import cli
 
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE
-from tests.conftest import CLI_LOG_OPTION, CUR_PATH
+from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
 
 def test_run(pytestconfig):
@@ -48,6 +48,9 @@ def test_run(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -101,6 +104,9 @@ def test_run_multiple_connections(pytestconfig, connection_names):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -110,8 +116,9 @@ def test_run_multiple_connections(pytestconfig, connection_names):
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
     assert result.exit_code == 0
 
+    # stub is the default connection, so it should fail
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "stub"])
-    assert result.exit_code == 0
+    assert result.exit_code == 1
 
     process = subprocess.Popen([
         sys.executable,
@@ -152,6 +159,9 @@ def test_run_unknown_private_key(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -209,6 +219,9 @@ def test_run_unknown_ledger(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -264,6 +277,9 @@ def test_run_default_private_key_config(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -317,6 +333,9 @@ def test_run_fet_private_key_config(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -370,6 +389,9 @@ def test_run_ethereum_private_key_config(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -423,6 +445,9 @@ def test_run_ledger_apis(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -497,6 +522,9 @@ def test_run_fet_ledger_apis(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -567,6 +595,9 @@ def test_run_with_install_deps(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -614,6 +645,9 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
     agent_name = "myagent"
     cwd = os.getcwd()
     t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
     os.chdir(t)
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
     assert result.exit_code == 0
@@ -667,6 +701,9 @@ class TestRunFailsWhenExceptionOccursInSkill:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -693,7 +730,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         os.chdir(cls.cwd)
         try:
             shutil.rmtree(cls.t)
@@ -713,6 +750,9 @@ class TestRunFailsWhenConfigurationFileNotFound:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -736,7 +776,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -757,6 +797,9 @@ class TestRunFailsWhenConfigurationFileInvalid:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -781,7 +824,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -803,6 +846,9 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -825,7 +871,7 @@ class TestRunFailsWhenConnectionNotDeclared:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -847,6 +893,9 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -871,7 +920,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -888,11 +937,14 @@ class TestRunFailsWhenConnectionNotComplete:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_name = "stub"
+        cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -917,7 +969,7 @@ class TestRunFailsWhenConnectionNotComplete:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -934,11 +986,14 @@ class TestRunFailsWhenConnectionClassNotPresent:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_name = "stub"
+        cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -958,12 +1013,12 @@ class TestRunFailsWhenConnectionClassNotPresent:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection class '{}' not found.".format("StubConnection")
+        s = "Connection class '{}' not found.".format("OEFLocalConnection")
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -985,6 +1040,9 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -1008,7 +1066,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:
@@ -1030,6 +1088,9 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
         os.chdir(cls.t)
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
@@ -1053,7 +1114,7 @@ class TestRunFailsWhenProtocolNotComplete:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
         cls.patch.__exit__()
         os.chdir(cls.cwd)
         try:

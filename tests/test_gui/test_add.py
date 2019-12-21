@@ -20,7 +20,6 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
-
 import unittest.mock
 
 from .test_base import create_app

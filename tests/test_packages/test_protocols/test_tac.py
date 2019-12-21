@@ -23,104 +23,106 @@ from unittest import mock
 import pytest
 
 from packages.protocols.tac.message import TACMessage
-from packages.protocols.tac.serialization import TACSerializer
+from packages.protocols.tac.serialization import TACSerializer, _from_dict_to_pairs
 
 
 def test_tac_message_instantiation():
     """Test instantiation of the tac message."""
-    assert TACMessage(tac_type=TACMessage.Type.REGISTER,
+    assert TACMessage(type=TACMessage.Type.REGISTER,
                       agent_name='some_name')
-    assert TACMessage(tac_type=TACMessage.Type.UNREGISTER)
-    assert TACMessage(tac_type=TACMessage.Type.TRANSACTION,
-                      transaction_id='some_id',
-                      counterparty='some_address',
-                      amount_by_currency={'FET': 10},
-                      sender_tx_fee=10,
-                      counterparty_tx_fee=10,
-                      quantities_by_good_pbk={'good_1': 0, 'good_2': 10})
-    assert TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
-    assert TACMessage(tac_type=TACMessage.Type.CANCELLED)
-    assert TACMessage(tac_type=TACMessage.Type.GAME_DATA,
-                      amount_by_currency={'FET': 10},
-                      exchange_params_by_currency={'FET': 10.0},
-                      quantities_by_good_pbk={'good_1': 20, 'good_2': 15},
-                      utility_params_by_good_pbk={'good_1': 30.0, 'good_2': 50.0},
+    assert TACMessage(type=TACMessage.Type.UNREGISTER)
+    assert TACMessage(type=TACMessage.Type.TRANSACTION,
+                      tx_id='some_id',
+                      tx_sender_addr='some_address',
+                      tx_counterparty_addr='some_other_address',
+                      amount_by_currency_id={'FET': 10},
+                      tx_sender_fee=10,
+                      tx_counterparty_fee=10,
+                      quantities_by_good_id={'good_1': 0, 'good_2': 10},
+                      tx_nonce=1,
+                      tx_sender_signature=b'some_signature',
+                      tx_counterparty_signature=b'some_other_signature')
+    assert TACMessage(type=TACMessage.Type.GET_STATE_UPDATE)
+    assert TACMessage(type=TACMessage.Type.CANCELLED)
+    assert TACMessage(type=TACMessage.Type.GAME_DATA,
+                      amount_by_currency_id={'FET': 10},
+                      exchange_params_by_currency_id={'FET': 10.0},
+                      quantities_by_good_id={'good_1': 20, 'good_2': 15},
+                      utility_params_by_good_id={'good_1': 30.0, 'good_2': 50.0},
                       tx_fee=20,
-                      agent_pbk_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
-                      good_pbk_to_name={'good_1': 'First good', 'good_2': 'Second good'},
+                      agent_addr_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
+                      good_id_to_name={'good_1': 'First good', 'good_2': 'Second good'},
                       version_id='game_version_1')
-    assert TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
-                      transaction_id='some_id',
-                      amount_by_currency={'FET': 10},
-                      quantities_by_good_pbk={'good_1': 20, 'good_2': 15})
-    assert TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
+    assert TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+                      tx_id='some_id',
+                      amount_by_currency_id={'FET': 10},
+                      quantities_by_good_id={'good_1': 20, 'good_2': 15})
+    assert TACMessage(type=TACMessage.Type.TAC_ERROR,
                       error_code=TACMessage.ErrorCode.GENERIC_ERROR)
     assert str(TACMessage.Type.REGISTER) == 'register'
-
-    msg = TACMessage(tac_type=TACMessage.Type.REGISTER, agent_name='some_name')
-    with mock.patch('packages.protocols.tac.message.TACMessage.Type') as mocked_type:
-        mocked_type.REGISTER.value = "unknown"
-        assert not msg.check_consistency(), \
-            "Expect the consistency to return False"
 
 
 def test_tac_serialization():
     """Test that the serialization for the tac message works."""
-    msg = TACMessage(tac_type=TACMessage.Type.REGISTER,
+    msg = TACMessage(type=TACMessage.Type.REGISTER,
                      agent_name='some_name')
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.UNREGISTER)
+    msg = TACMessage(type=TACMessage.Type.UNREGISTER)
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION,
-                     transaction_id='some_id',
-                     counterparty='some_address',
-                     amount_by_currency={'FET': 10},
-                     sender_tx_fee=10,
-                     counterparty_tx_fee=10,
-                     quantities_by_good_pbk={'good_1': 0, 'good_2': 10})
+    msg = TACMessage(type=TACMessage.Type.TRANSACTION,
+                     tx_id='some_id',
+                     tx_sender_addr='some_address',
+                     tx_counterparty_addr='some_other_address',
+                     amount_by_currency_id={'FET': -10},
+                     tx_sender_fee=10,
+                     tx_counterparty_fee=10,
+                     quantities_by_good_id={'good_1': 0, 'good_2': 10},
+                     tx_nonce=1,
+                     tx_sender_signature=b'some_signature',
+                     tx_counterparty_signature=b'some_other_signature')
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.GET_STATE_UPDATE)
+    msg = TACMessage(type=TACMessage.Type.GET_STATE_UPDATE)
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.CANCELLED)
+    msg = TACMessage(type=TACMessage.Type.CANCELLED)
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.GAME_DATA,
-                     amount_by_currency={'FET': 10},
-                     exchange_params_by_currency={'FET': 10.0},
-                     quantities_by_good_pbk={'good_1': 20, 'good_2': 15},
-                     utility_params_by_good_pbk={'good_1': 30.0, 'good_2': 50.0},
+    msg = TACMessage(type=TACMessage.Type.GAME_DATA,
+                     amount_by_currency_id={'FET': 10},
+                     exchange_params_by_currency_id={'FET': 10.0},
+                     quantities_by_good_id={'good_1': 20, 'good_2': 15},
+                     utility_params_by_good_id={'good_1': 30.0, 'good_2': 50.0},
                      tx_fee=20,
-                     agent_pbk_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
-                     good_pbk_to_name={'good_1': 'First good', 'good_2': 'Second good'},
+                     agent_addr_to_name={'agent_1': 'Agent one', 'agent_2': 'Agent two'},
+                     good_id_to_name={'good_1': 'First good', 'good_2': 'Second good'},
                      version_id='game_version_1')
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
 
-    msg = TACMessage(tac_type=TACMessage.Type.TRANSACTION_CONFIRMATION,
-                     transaction_id='some_id',
-                     amount_by_currency={'FET': 10},
-                     quantities_by_good_pbk={'good_1': 20, 'good_2': 15})
+    msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
+                     tx_id='some_id',
+                     amount_by_currency_id={'FET': 10},
+                     quantities_by_good_id={'good_1': 20, 'good_2': 15})
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
@@ -131,9 +133,17 @@ def test_tac_serialization():
             mocked_type.TRANSACTION_CONFIRMATION.value = "unknown"
             TACSerializer().encode(msg)
 
-    msg = TACMessage(tac_type=TACMessage.Type.TAC_ERROR,
-                     error_code=TACMessage.ErrorCode.GENERIC_ERROR)
+    msg = TACMessage(type=TACMessage.Type.TAC_ERROR,
+                     error_code=TACMessage.ErrorCode.GENERIC_ERROR,
+                     info={'msg': "This is info msg."})
     msg_bytes = TACSerializer().encode(msg)
     actual_msg = TACSerializer().decode(msg_bytes)
     expected_msg = msg
     assert expected_msg == actual_msg
+
+
+def test_from_dict_to_pairs():
+    """Test the helper function _from_dict_to_pairs."""
+    with pytest.raises(ValueError):
+        test_items_dict = {"Test": b'UnsupportedType'}
+        _from_dict_to_pairs(test_items_dict)

@@ -54,6 +54,7 @@ _Put an `x` in the boxes that apply._
 - [ ] I built the documentation and updated it with the latest changes
 - [ ] I've added an item in `HISTORY.rst` for this release
 - [ ] I bumped the version number in the `aea/__version__.py` file.
+- [ ] I bumped the version number in the `docs/version.md` file
 - [ ] I bumped the version number in every Docker image of the repo and published it. Also, I built and published them with tag `latest`  
       (check the READMEs of [`aea-develop`](../develop-image/README.md#publish) 
       and [`aea-deploy`](../deploy-image/README.md#publish))

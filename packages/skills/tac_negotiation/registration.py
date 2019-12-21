@@ -22,7 +22,7 @@
 import datetime
 from typing import Optional
 
-from aea.protocols.oef.models import Description
+from aea.helpers.search.models import Description
 from aea.skills.base import SharedClass
 
 

@@ -1,37 +1,38 @@
 name: dummy
-authors: Fetch.AI Limited
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
+fingerprint: ""
 url: ""
 behaviours:
-  - behaviour:
-      class_name: DummyBehaviour
-      args:
-        behaviour_arg_1: 1
-        behaviour_arg_2: "2"
+  dummy:
+    class_name: DummyBehaviour
+    args:
+      behaviour_arg_1: 1
+      behaviour_arg_2: "2"
 handlers:
-  - handler:
-      class_name: DummyHandler
-      args:
-        handler_arg_1: 1
-        handler_arg_2: "2"
-  - handler:
-      class_name: DummyInternalHandler
-      args:
-        handler_arg_1: 1
-        handler_arg_2: "2"
+  dummy:
+    class_name: DummyHandler
+    args:
+      handler_arg_1: 1
+      handler_arg_2: "2"
+  dummy_internal:
+    class_name: DummyInternalHandler
+    args:
+      handler_arg_1: 1
+      handler_arg_2: "2"
 tasks:
-  - task:
-      class_name: DummyTask
-      args:
-        task_arg_1: 1
-        task_arg_2: "2"
+  dummy:
+    class_name: DummyTask
+    args:
+      task_arg_1: 1
+      task_arg_2: "2"
 shared_classes:
-  - shared_class:
-      class_name: DummySharedClass
-      args:
-        shared_class_arg_1: 1
-        shared_class_arg_2: "2"
+  dummy:
+    class_name: DummySharedClass
+    args:
+      shared_class_arg_1: 1
+      shared_class_arg_2: "2"
 protocols: ["default"]
-dependencies: []
+dependencies: {}
 description: "a dummy_skill for testing purposes."

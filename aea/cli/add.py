@@ -31,9 +31,9 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.cli.registry.utils import fetch_package, split_public_id
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE
-from aea.cli.registry.utils import fetch_package, split_public_id
 
 
 @click.group()
@@ -46,7 +46,7 @@ def add(ctx: Context, registry):
     _try_to_load_agent_config(ctx)
 
 
-def _find_connection_locally(ctx, connection_name):
+def _find_connection_locally(ctx, connection_name, click_context):
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
     # first check in aea dir
     registry_path = ctx.agent_config.registry_path
@@ -62,7 +62,8 @@ def _find_connection_locally(ctx, connection_name):
     # try to load the connection configuration file
     try:
         connection_configuration = ctx.connection_loader.load(open(str(connection_configuration_filepath)))
-        logger.info("Connection '{}' supports the following protocols: {}".format(connection_name, connection_configuration.restricted_to_protocols))
+        if connection_configuration.restricted_to_protocols != []:
+            logger.info("Connection '{}' is restricted to the following protocols: {}".format(connection_name, connection_configuration.restricted_to_protocols))
     except ValidationError as e:
         logger.error("Connection configuration file not valid: {}".format(str(e)))
         sys.exit(1)
@@ -76,6 +77,12 @@ def _find_connection_locally(ctx, connection_name):
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
+
+    # check for protocol dependencies not yet added, and add it.
+    for protocol_name in connection_configuration.protocols:
+        if protocol_name not in ctx.agent_config.protocols:
+            logger.debug("Adding protocol '{}' to the agent...".format(protocol_name))
+            click_context.invoke(protocol, protocol_name=protocol_name)
 
 
 @add.command()
@@ -106,7 +113,7 @@ def connection(click_context, connection_name):
         # fetch from Registry
         fetch_package('connection', public_id=public_id, cwd=ctx.cwd)
     else:
-        _find_connection_locally(ctx, connection_name)
+        _find_connection_locally(ctx, connection_name, click_context)
 
     # make the 'connections' folder a Python package.
     connections_init_module = os.path.join(ctx.cwd, "connections", "__init__.py")
@@ -221,7 +228,7 @@ def _find_skill_locally(ctx, skill_name, click_context):
         logger.error(str(e))
         sys.exit(1)
 
-    # check for not supported protocol, and add it.
+    # check for protocol dependencies not yet added, and add it.
     for protocol_name in skill_configuration.protocols:
         if protocol_name not in ctx.agent_config.protocols:
             logger.debug("Adding protocol '{}' to the agent...".format(protocol_name))

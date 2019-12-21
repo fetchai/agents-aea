@@ -23,14 +23,13 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from ..common.click_testing import CliRunner
-
 from aea.cli import cli
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE
-from tests.conftest import CLI_LOG_OPTION
+from ..conftest import CLI_LOG_OPTION
+from ..common.click_testing import CliRunner
 
 
 class TestGenerateKey:
@@ -90,6 +89,46 @@ class TestGenerateKey:
 
     @classmethod
     def teardown_class(cls):
-        """Teardowm the test."""
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        shutil.rmtree(cls.t)
+
+
+class TestGenerateKeyWhenAlreadyExists:
+    """Test that the command 'aea generate-key' asks for confirmation when a key already exists."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+    def test_default(self):
+        """Test that the default private key is overwritten or not dependending on the user input."""
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "default"])
+        assert result.exit_code == 0
+        assert Path(DEFAULT_PRIVATE_KEY_FILE).exists()
+
+        # This tests if the file has been created and its content is correct.
+        DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)
+        content = Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes()
+
+        # Saying 'no' leave the files as it is.
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="n")
+        assert result.exit_code == 0
+        assert Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes() == content
+
+        # Saying 'yes' overwrites the file.
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="y")
+        assert result.exit_code == 0
+        assert Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes() != content
+        DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
         os.chdir(cls.cwd)
         shutil.rmtree(cls.t)

@@ -23,14 +23,16 @@ import sys
 from typing import cast, TYPE_CHECKING
 
 from aea.skills.base import Behaviour
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
+    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
     from packages.skills.tac_negotiation.registration import Registration
     from packages.skills.tac_negotiation.search import Search
     from packages.skills.tac_negotiation.strategy import Strategy
 else:
+    from oef_protocol.message import OEFMessage
+    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
     from tac_negotiation_skill.registration import Registration
     from tac_negotiation_skill.search import Search
     from tac_negotiation_skill.strategy import Strategy
@@ -83,23 +85,23 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
         registration = cast(Registration, self.context.registration)
 
         if registration.registered_goods_demanded_description is not None:
-            oef_msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE,
+            oef_msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_SERVICE,
                                  id=registration.get_next_id(),
                                  service_description=registration.registered_goods_demanded_description,
                                  service_id="")
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
             registration.registered_goods_demanded_description = None
 
         if registration.registered_goods_supplied_description is not None:
-            oef_msg = OEFMessage(oef_type=OEFMessage.Type.UNREGISTER_SERVICE,
+            oef_msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_SERVICE,
                                  id=registration.get_next_id(),
                                  service_description=registration.registered_goods_supplied_description,
                                  service_id="")
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
             registration.registered_goods_supplied_description = None
@@ -122,12 +124,12 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             logger.debug("[{}]: Updating service directory as seller with goods supplied.".format(self.context.agent_name))
             goods_supplied_description = strategy.get_own_service_description(is_supply=True)
             registration.registered_goods_supplied_description = goods_supplied_description
-            oef_msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
+            oef_msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE,
                                  id=registration.get_next_id(),
                                  service_description=goods_supplied_description,
                                  service_id="")
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
 
@@ -135,12 +137,12 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             logger.debug("[{}]: Updating service directory as buyer with goods demanded.".format(self.context.agent_name))
             goods_demanded_description = strategy.get_own_service_description(is_supply=False)
             registration.registered_goods_demanded_description = goods_demanded_description
-            oef_msg = OEFMessage(oef_type=OEFMessage.Type.REGISTER_SERVICE,
+            oef_msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE,
                                  id=registration.get_next_id(),
                                  service_description=goods_demanded_description,
                                  service_id="")
             self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_public_key,
+                                            sender=self.context.agent_address,
                                             protocol_id=OEFMessage.protocol_id,
                                             message=OEFSerializer().encode(oef_msg))
 
@@ -166,11 +168,11 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             else:
                 search_id = search.get_next_id(is_searching_for_sellers=True)
                 logger.info("[{}]: Searching for sellers which match the demand of the agent, search_id={}.".format(self.context.agent_name, search_id))
-                oef_msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
+                oef_msg = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
                                      id=search_id,
                                      query=query)
                 self.context.outbox.put_message(to=DEFAULT_OEF,
-                                                sender=self.context.agent_public_key,
+                                                sender=self.context.agent_address,
                                                 protocol_id=OEFMessage.protocol_id,
                                                 message=OEFSerializer().encode(oef_msg))
 
@@ -182,10 +184,10 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
             else:
                 search_id = search.get_next_id(is_searching_for_sellers=False)
                 logger.info("[{}]: Searching for buyers which match the supply of the agent, search_id={}.".format(self.context.agent_name, search_id))
-                oef_msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
+                oef_msg = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
                                      id=search_id,
                                      query=query)
                 self.context.outbox.put_message(to=DEFAULT_OEF,
-                                                sender=self.context.agent_public_key,
+                                                sender=self.context.agent_address,
                                                 protocol_id=OEFMessage.protocol_id,
                                                 message=OEFSerializer().encode(oef_msg))

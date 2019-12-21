@@ -20,16 +20,14 @@
 """This module contains the tests of the gym connection module."""
 import logging
 
+import gym
 import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
 from packages.connections.gym.connection import GymConnection
-import gym
-
 from packages.protocols.gym.message import GymMessage
 from packages.protocols.gym.serialization import GymSerializer
-
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +39,7 @@ class TestGymConnection:
     def setup_class(cls):
         """Initialise the class."""
         cls.env = gym.GoalEnv()
-        cls.gym_con = GymConnection(public_key="my_key", gym_env=cls.env)
+        cls.gym_con = GymConnection(address="my_key", gym_env=cls.env)
 
     def test_gym_connection_initialization(self):
         """Test the connection None return value after connect()."""
@@ -73,9 +71,10 @@ class TestGymConnection:
         with pytest.raises(ConnectionError):
             await self.gym_con.receive()
 
-    def test_gym_from_config(self):
-        """Test the Connection from config File."""
-        conf = ConnectionConfig()
-        conf.config['env'] = "tests.conftest.DUMMY_ENV"
-        con = GymConnection.from_config(public_key="pk", connection_configuration=conf)
-        assert con is not None
+
+def test_gym_from_config():
+    """Test the Connection from config File."""
+    conf = ConnectionConfig()
+    conf.config['env'] = "tests.conftest.DUMMY_ENV"
+    con = GymConnection.from_config(address="pk", connection_configuration=conf)
+    assert con is not None

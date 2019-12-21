@@ -125,3 +125,22 @@ Release History
 - Adds support to run multiple connections from CLI
 - Updates the docs and adds uml diagrams
 - Multiple additional minor fixes and changes
+
+0.1.15 (2019-12-19)
+-------------------
+
+- Moves non-default packages from aea to packages directory
+- Supports get & set on package configs
+- Changes skill configuration resource types from lists to dictionaries
+- Adds additional features to decision maker
+- Refactors most protocols and improves their API
+- Removes multiple unintended side-effects of the CLI
+- Improves dependency referencing in config files
+- Adds push and publish functionality to CLI
+- Introduces simple and composite behaviours and applies them in skills
+- Adds URI to envelopes
+- Adds guide for programmatic assembly of an AEA
+- Adds guide on agent-oriented development
+- Multiple minor doc updates
+- Adds additional tests
+- Multiple additional minor fixes and changes

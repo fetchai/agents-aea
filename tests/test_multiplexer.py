@@ -30,11 +30,11 @@ from unittest import mock
 import pytest
 
 import aea
-from aea.connections.local.connection import LocalNode, OEFLocalConnection
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Multiplexer, AEAConnectionError, Envelope, EnvelopeContext
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+from packages.connections.local.connection import LocalNode, OEFLocalConnection
 from .conftest import DummyConnection
 
 
@@ -117,7 +117,7 @@ def test_multiplexer_connect_one_raises_error_many_connections():
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
 
-    connection_1 = OEFLocalConnection("my_pbk", node)
+    connection_1 = OEFLocalConnection("my_addr", node)
     connection_2 = StubConnection(input_file_path, output_file_path)
     connection_3 = DummyConnection()
     multiplexer = Multiplexer([connection_1, connection_2, connection_3])
@@ -172,7 +172,7 @@ def test_multiplexer_disconnect_one_raises_error_many_connections():
         input_file_path = d / "input_file.csv"
         output_file_path = d / "input_file.csv"
 
-        connection_1 = OEFLocalConnection("my_pbk", node)
+        connection_1 = OEFLocalConnection("my_addr", node)
         connection_2 = StubConnection(input_file_path, output_file_path)
         connection_3 = DummyConnection()
         multiplexer = Multiplexer([connection_1, connection_2, connection_3])
@@ -284,13 +284,13 @@ def test_get_from_multiplexer_when_empty():
 def test_multiple_connection():
     """Test that we can send a message with two different connections."""
     with LocalNode() as node:
-        public_key_1 = "public_key_1"
-        public_key_2 = "public_key_2"
+        address_1 = "address_1"
+        address_2 = "address_2"
         connection_1_id = "local_1"
         connection_2_id = "local_2"
 
-        connection_1 = OEFLocalConnection(public_key_1, node, connection_id=connection_1_id)
-        connection_2 = OEFLocalConnection(public_key_2, node, connection_id=connection_2_id)
+        connection_1 = OEFLocalConnection(address_1, node, connection_id=connection_1_id)
+        connection_2 = OEFLocalConnection(address_2, node, connection_id=connection_2_id)
         multiplexer = Multiplexer([connection_1, connection_2])
 
         assert not connection_1.connection_status.is_connected
@@ -302,7 +302,7 @@ def test_multiple_connection():
         assert connection_2.connection_status.is_connected
 
         message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        envelope_from_1_to_2 = Envelope(to=public_key_2, sender=public_key_1, protocol_id=DefaultMessage.protocol_id,
+        envelope_from_1_to_2 = Envelope(to=address_2, sender=address_1, protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(message),
                                         context=EnvelopeContext(connection_id=connection_1_id))
         multiplexer.put(envelope_from_1_to_2)
@@ -310,7 +310,7 @@ def test_multiple_connection():
         actual_envelope = multiplexer.get(block=True, timeout=2.0)
         assert envelope_from_1_to_2 == actual_envelope
 
-        envelope_from_2_to_1 = Envelope(to=public_key_1, sender=public_key_2, protocol_id=DefaultMessage.protocol_id,
+        envelope_from_2_to_1 = Envelope(to=address_1, sender=address_2, protocol_id=DefaultMessage.protocol_id,
                                         message=DefaultSerializer().encode(message),
                                         context=EnvelopeContext(connection_id=connection_2_id))
         multiplexer.put(envelope_from_2_to_1)
@@ -324,17 +324,18 @@ def test_multiple_connection():
 def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
-        public_key_1 = "public_key_1"
+        address_1 = "address_1"
         connection_1_id = "local_1"
-        connection_1 = OEFLocalConnection(public_key_1, node, connection_id=connection_1_id,
-                                          restricted_to_protocols={"my_private_protocol"})
+        connection_1 = OEFLocalConnection(address_1, node, connection_id=connection_1_id,
+                                          restricted_to_protocols={"my_private_protocol"},
+                                          excluded_protocols={"my_other_protocol"})
         multiplexer = Multiplexer([connection_1])
 
         multiplexer.connect()
 
         with mock.patch.object(aea.mail.base.logger, "warning") as mock_logger_warning:
             protocol_id = "this_is_a_non_existing_protocol_id"
-            envelope = Envelope(to=public_key_1, sender=public_key_1,
+            envelope = Envelope(to=address_1, sender=address_1,
                                 protocol_id=protocol_id,
                                 message=b"some bytes")
             multiplexer.put(envelope)

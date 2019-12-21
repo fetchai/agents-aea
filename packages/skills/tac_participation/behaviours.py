@@ -23,14 +23,16 @@ import logging
 import sys
 from typing import cast, TYPE_CHECKING
 
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from aea.skills.base import Behaviour
 
 if TYPE_CHECKING or "pytest" in sys.modules:
+    from packages.protocols.oef.message import OEFMessage
+    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
     from packages.skills.tac_participation.game import Game, Phase
     from packages.skills.tac_participation.search import Search
 else:
+    from oef_protocol.message import OEFMessage
+    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
     from tac_participation_skill.game import Game, Phase
     from tac_participation_skill.search import Search
 
@@ -82,10 +84,10 @@ class TACBehaviour(Behaviour):
         search_id = search.get_next_id()
         search.ids_for_tac.add(search_id)
         logger.info("[{}]: Searching for TAC, search_id={}".format(self.context.agent_name, search_id))
-        oef_msg = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
+        oef_msg = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
                              id=search_id,
                              query=query)
         self.context.outbox.put_message(to=DEFAULT_OEF,
-                                        sender=self.context.agent_public_key,
+                                        sender=self.context.agent_address,
                                         protocol_id=OEFMessage.protocol_id,
                                         message=OEFSerializer().encode(oef_msg))

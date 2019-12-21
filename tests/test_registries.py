@@ -210,22 +210,26 @@ class TestResources:
     def test_skill_loading(self):
         """Test that the skills have been loaded correctly."""
         dummy_skill = self.resources.get_skill("dummy")
-        error_skill_context = dummy_skill.skill_context
+        skill_context = dummy_skill.skill_context
 
         handlers = dummy_skill.handlers
         behaviours = dummy_skill.behaviours
         tasks = dummy_skill.tasks
         shared_classes = dummy_skill.shared_classes
 
-        assert handlers == error_skill_context.handlers
-        assert behaviours == error_skill_context.behaviours
-        assert tasks == error_skill_context.tasks
-        assert getattr(error_skill_context, "agent_name") == self.agent_name
+        assert len(handlers) == len(skill_context.handlers.__dict__)
+        assert len(behaviours) == len(skill_context.behaviours.__dict__)
+        assert len(tasks) == len(skill_context.tasks.__dict__)
 
-        assert handlers[0].context == dummy_skill.skill_context
-        assert behaviours[0].context == dummy_skill.skill_context
-        assert tasks[0].context == dummy_skill.skill_context
-        assert shared_classes[0].context == dummy_skill.skill_context
+        assert handlers["dummy"] == skill_context.handlers.dummy
+        assert behaviours["dummy"] == skill_context.behaviours.dummy
+        assert tasks["dummy"] == skill_context.tasks.dummy
+        assert shared_classes["dummy"] == skill_context.dummy
+
+        assert handlers["dummy"].context == dummy_skill.skill_context
+        assert behaviours["dummy"].context == dummy_skill.skill_context
+        assert tasks["dummy"].context == dummy_skill.skill_context
+        assert shared_classes["dummy"].context == dummy_skill.skill_context
 
     def test_handler_configuration_loading(self):
         """Test that the handler configurations are loaded correctly."""
@@ -265,7 +269,7 @@ class TestResources:
         """Test that the shared class configurations are loaded correctly."""
         dummy_skill = self.resources.get_skill("dummy")
         assert len(dummy_skill.shared_classes) == 1
-        dummy_shared_class = dummy_skill.shared_classes[0]
+        dummy_shared_class = dummy_skill.shared_classes["dummy"]
 
         assert dummy_shared_class.config == {
             "shared_class_arg_1": 1,
@@ -303,22 +307,24 @@ class TestFilter:
     def test_handle_internal_messages(self):
         """Test that the internal messages are handled."""
         self.aea.setup()
-        t = TransactionMessage(performative=TransactionMessage.Performative.ACCEPT,
-                               skill_id="dummy",
-                               transaction_id="transaction0",
-                               sender="pk1",
-                               counterparty="pk2",
-                               is_sender_buyer=True,
-                               currency_pbk="Unknown",
-                               amount=2,
-                               sender_tx_fee=0,
-                               counterparty_tx_fee=0,
-                               quantities_by_good_pbk={"Unknown": 10})
+        t = TransactionMessage(performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+                               tx_id="transaction0",
+                               skill_callback_ids=["internal", "dummy"],
+                               tx_sender_addr="pk1",
+                               tx_counterparty_addr="pk2",
+                               tx_amount_by_currency_id={"FET": 2},
+                               tx_sender_fee=0,
+                               tx_counterparty_fee=0,
+                               tx_quantities_by_good_id={"Unknown": 10},
+                               ledger_id="fetchai",
+                               info={},
+                               tx_digest='some_tx_digest')
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()
 
         internal_handler = self.aea.resources.handler_registry.fetch_by_skill("internal", "dummy")
         assert len(internal_handler.handled_internal_messages) == 1
+        self.aea.teardown()
 
     @classmethod
     def teardown_class(cls):

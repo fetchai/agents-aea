@@ -1,0 +1,10 @@
+name: 'oef'
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+url: ""
+dependencies:
+  colorlog: {}
+  oef: {}
+description: "The oef protocol implements the OEF specific messages."

@@ -99,11 +99,10 @@ class ProxyEnv(gym.Env):
         # Wait (blocking!) for the response envelope from the environment
         gym_msg = self._queue.get(block=True, timeout=None)  # type: GymMessage
 
-        gym_msg_step_id = gym_msg.get("step_id")
-        if gym_msg_step_id == step_id:
+        if gym_msg.step_id == step_id:
             observation, reward, done, info = self._message_to_percept(gym_msg)
         else:
-            raise ValueError("Unexpected step id! expected={}, actual={}".format(step_id, gym_msg_step_id))
+            raise ValueError("Unexpected step id! expected={}, actual={}".format(step_id, gym_msg.step_id))
 
         return observation, reward, done, info
 
@@ -125,7 +124,7 @@ class ProxyEnv(gym.Env):
         self._is_rl_agent_trained = False
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_address, protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         self._skill_context.outbox.put(envelope)
 
@@ -138,7 +137,7 @@ class ProxyEnv(gym.Env):
         self._is_rl_agent_trained = True
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_address, protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         self._skill_context.outbox.put(envelope)
 
@@ -152,7 +151,7 @@ class ProxyEnv(gym.Env):
         """
         gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_public_key, protocol_id=GymMessage.protocol_id,
+        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_address, protocol_id=GymMessage.protocol_id,
                             message=gym_bytes)
         return envelope
 
@@ -163,10 +162,11 @@ class ProxyEnv(gym.Env):
         :param: the message received as a response to the action performed in apply_action.
         :return: the standard feedback (observation, reward, done, info) of a gym environment.
         """
-        observation = cast(Any, message.get("observation"))
-        reward = cast(float, message.get("reward"))
-        done = cast(bool, message.get("done"))
-        info = cast(dict, message.get("info"))
+        msg = cast(GymMessage, message)
+        observation = msg.observation
+        reward = msg.reward
+        done = msg.done
+        info = msg.info
 
         return observation, reward, done, info
 

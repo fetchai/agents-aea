@@ -19,7 +19,9 @@ nav:
 
   - Autonomous Economic Agent Framework:
     - Welcome: 'index.md'
+    - Agent-oriented development: 'agent-oriented-development.md'
     - AEA quick start: 'quickstart.md'
+    - Version: 'version.md'
     - The AEA universe:
       - "Vision": 'vision.md'
       - "Application areas": 'app-areas.md'
@@ -27,13 +29,13 @@ nav:
       - "Trust issues": 'trust.md'
       # - "Two-layered machine learning": 'two-layer.md'
     - Demos:
+      - "Car park agent": 'car-park.md'
       - "Gym demo": 'gym-plugin.md'
       - "Gym skill": 'gym-skill.md'
-      - "Weather skills": 'weather-skills.md'
+      - "ML skills": 'ml-skills.md'
       - "TAC skills": 'tac-skills.md'
       - "TAC external app": 'tac.md'
-      # - "FIPA skill": 'fipa-skill.md'
-      - "Car park agent": 'car-park.md'
+      - "Weather skills": 'weather-skills.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
       - "Architectural diagram": 'diagram.md'
@@ -51,7 +53,7 @@ nav:
          - "CLI tool": 'cli-how-to.md'
          - "Commands": 'cli-commands.md'
          - "GUI": 'cli-gui.md'
-      - "Code an agent directly": 'hacking-an-agent.md'
+      - "Build an AEA using code API": 'hacking-an-agent.md'
       - "Integrate with third parties": 'integration.md'
 
 

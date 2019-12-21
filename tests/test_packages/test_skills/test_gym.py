@@ -36,7 +36,7 @@ from ...common.click_testing import CliRunner
 
 from aea.cli import cli
 
-from tests.conftest import CLI_LOG_OPTION
+from ...conftest import CLI_LOG_OPTION
 
 
 class TestGymSkill:
@@ -87,7 +87,7 @@ class TestGymSkill:
         # change number of training steps
         skill_config_path = Path(self.t, self.agent_name, "skills", "gym", "skill.yaml")
         skill_config = SkillConfig.from_json(yaml.safe_load(open(skill_config_path)))
-        skill_config.tasks.read("GymTask").args["nb_steps"] = 100
+        skill_config.tasks.read("gym").args["nb_steps"] = 100
         yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
 
         process = subprocess.Popen([

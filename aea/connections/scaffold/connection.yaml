@@ -1,10 +1,13 @@
-name: scaffold_connection
-authors: Fetch.AI Limited
+name: scaffold
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
+fingerprint: ""
 url: ""
 description: "The scaffold connection provides a scaffold for a connection to be implemented by the developer."
 class_name: MyScaffoldConnection
+protocols: []
 restricted_to_protocols: []
+excluded_protocols: []
 config:
   foo: bar

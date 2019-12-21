@@ -96,14 +96,14 @@ class FetchAICrypto(Crypto):
         entity = Entity()
         return entity
 
-    def sign_transaction(self, message: bytes) -> bytes:
+    def sign_transaction(self, tx_hash: bytes) -> bytes:
         """
-        Sing a transaction to send it to the ledger.
+        Sing a transaction hash.
 
-        :param message:
+        :param tx_hash: the transaction hash
         :return: Signed message in bytes
         """
-        signature = self._entity.sign(message)
+        signature = self.entity.sign(tx_hash)
         return signature
 
     @classmethod
