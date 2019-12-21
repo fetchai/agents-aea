@@ -79,39 +79,21 @@ class FIPANegotiationHandler(Handler):
         """
         fipa_msg = cast(FIPAMessage, message)
 
-        logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
-        dialogues = cast(Dialogues, self.context.dialogues)
-        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_address):
-            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address))
-            dialogue.incoming_extend(fipa_msg)
-        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            query = cast(Query, fipa_msg.query)
-            assert query.model is not None, "Query has no data model."
-            is_seller = query.model.name == DEMAND_DATAMODEL_NAME
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(message.counterparty, fipa_msg.dialogue_reference, is_seller))
-            dialogue.incoming_extend(fipa_msg)
-        else:
-            logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
-            default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES,
-                                         content=b'This message belongs to an unidentified dialogue.')
-            self.context.outbox.put_message(to=fipa_msg.counterparty,
-                                            sender=self.context.agent_address,
-                                            protocol_id=DefaultMessage.protocol_id,
-                                            message=DefaultSerializer().encode(default_msg))
+        dialogue = self._try_to_recover_dialogue(fipa_msg)
+        if dialogue is None:
             return
 
-        fipa_msg_performative = fipa_msg.performative
         logger.debug("[{}]: Handling FIPAMessage of performative={}".format(self.context.agent_name,
-                                                                            fipa_msg_performative))
-        if fipa_msg_performative == FIPAMessage.Performative.CFP:
+                                                                            fipa_msg.performative))
+        if fipa_msg.performative == FIPAMessage.Performative.CFP:
             self._on_cfp(fipa_msg, dialogue)
-        elif fipa_msg_performative == FIPAMessage.Performative.PROPOSE:
+        elif fipa_msg.performative == FIPAMessage.Performative.PROPOSE:
             self._on_propose(fipa_msg, dialogue)
-        elif fipa_msg_performative == FIPAMessage.Performative.DECLINE:
+        elif fipa_msg.performative == FIPAMessage.Performative.DECLINE:
             self._on_decline(fipa_msg, dialogue)
-        elif fipa_msg_performative == FIPAMessage.Performative.ACCEPT:
+        elif fipa_msg.performative == FIPAMessage.Performative.ACCEPT:
             self._on_accept(fipa_msg, dialogue)
-        elif fipa_msg_performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
+        elif fipa_msg.performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._on_match_accept(fipa_msg, dialogue)
 
     def teardown(self) -> None:
@@ -121,6 +103,39 @@ class FIPANegotiationHandler(Handler):
         :return: None
         """
         pass
+
+    def _try_to_recover_dialogue(self, fipa_msg: FIPAMessage) -> Optional[Dialogue]:
+        """
+        Try to recover the dialogue based on the fipa message.
+
+        :param fipa_msg: the fipa message
+        :return: the dialogue or None
+        """
+        logger.debug("[{}]: Identifying dialogue of FIPAMessage={}".format(self.context.agent_name, fipa_msg))
+        dialogues = cast(Dialogues, self.context.dialogues)
+        if dialogues.is_belonging_to_registered_dialogue(fipa_msg, self.context.agent_address):
+            dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address))
+            dialogue.incoming_extend(fipa_msg)
+            return dialogue
+        elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
+            query = cast(Query, fipa_msg.query)
+            if query.model is not None:
+                is_seller = query.model.name == DEMAND_DATAMODEL_NAME
+                dialogue = cast(Dialogue, dialogues.create_opponent_initiated(fipa_msg.counterparty, fipa_msg.dialogue_reference, is_seller))
+                dialogue.incoming_extend(fipa_msg)
+                return dialogue
+            else:
+                logger.warning("[{}]: Query has no data model, ignoring CFP!".format(self.context.agent_name))
+                return None
+        else:
+            logger.debug("[{}]: Unidentified dialogue.".format(self.context.agent_name))
+            default_msg = DefaultMessage(type=DefaultMessage.Type.BYTES,
+                                         content=b'This message belongs to an unidentified dialogue.')
+            self.context.outbox.put_message(to=fipa_msg.counterparty,
+                                            sender=self.context.agent_address,
+                                            protocol_id=DefaultMessage.protocol_id,
+                                            message=DefaultSerializer().encode(default_msg))
+            return None
 
     def _on_cfp(self, cfp: FIPAMessage, dialogue: Dialogue) -> None:
         """
@@ -281,10 +296,14 @@ class FIPANegotiationHandler(Handler):
         """
         logger.debug("[{}]: on_match_accept: msg_id={}, dialogue_reference={}, origin={}, target={}"
                      .format(self.context.agent_name, match_accept.message_id, match_accept.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_addr, match_accept.target))
-        transactions = cast(Transactions, self.context.transactions)
-        transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, match_accept.target)
-        transaction_msg.info['tx_counterparty_signature'] = match_accept.info.get('tx_signature')
-        self.context.decision_maker_message_queue.put(transaction_msg)
+        if match_accept.info.get('tx_signature') is not None:
+            transactions = cast(Transactions, self.context.transactions)
+            transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, match_accept.target)
+            transaction_msg.set('skill_callback_ids', ['tac_participation'])
+            transaction_msg.set('info', {**transaction_msg.info, **{'tx_counterparty_signature': match_accept.info.get('tx_signature')}})
+            self.context.decision_maker_message_queue.put(transaction_msg)
+        else:
+            logger.warning("[{}]: match_accept did not contain tx_signature!".format(self.context.agent_name))
 
 
 class TransactionHandler(Handler):

@@ -369,7 +369,7 @@ class TransactionHandler(Handler):
         :return: None
         """
         tx_message = cast(TransactionMessage, message)
-        if tx_message.performative == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT:
+        if tx_message.performative == TransactionMessage.Performative.SUCCESSFUL_SIGNING:
             logger.info("[{}]: transaction confirmed by decision maker, sending to controller.".format(self.context.agent_name))
             game = cast(Game, self.context.game)
             tx_counterparty_signature = cast(bytes, tx_message.info.get('tx_counterparty_signature'))
@@ -383,7 +383,8 @@ class TransactionHandler(Handler):
                              tx_counterparty_fee=tx_message.tx_counterparty_fee,
                              quantities_by_good_id=tx_message.tx_quantities_by_good_id,
                              tx_sender_signature=tx_message.tx_signature,
-                             tx_counterparty_signature=tx_message.info.get('tx_counterparty_signature'))
+                             tx_counterparty_signature=tx_message.info.get('tx_counterparty_signature'),
+                             tx_nonce=tx_message.info.get('tx_nonce'))
             self.context.outbox.put_message(to=game.configuration.controller_addr,
                                             sender=self.context.agent_address,
                                             protocol_id=TACMessage.protocol_id,
