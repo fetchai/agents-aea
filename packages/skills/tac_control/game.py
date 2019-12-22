@@ -553,7 +553,11 @@ class Transactions:
         """
         now = datetime.datetime.now()
         self._confirmed[now] = transaction
+        if self._confirmed_per_agent.get(transaction.sender_addr) is None:
+            self._confirmed_per_agent[transaction.sender_addr] = {}
         self._confirmed_per_agent[transaction.sender_addr][now] = transaction
+        if self._confirmed_per_agent.get(transaction.counterparty_addr) is None:
+            self._confirmed_per_agent[transaction.counterparty_addr] = {}
         self._confirmed_per_agent[transaction.counterparty_addr][now] = transaction
 
 

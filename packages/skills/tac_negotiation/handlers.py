@@ -300,7 +300,7 @@ class FIPANegotiationHandler(Handler):
             transactions = cast(Transactions, self.context.transactions)
             transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, match_accept.target)
             transaction_msg.set('skill_callback_ids', ['tac_participation'])
-            transaction_msg.set('info', {**transaction_msg.info, **{'tx_counterparty_signature': match_accept.info.get('tx_signature'), 'tx_counterpary_id': match_accept.info.get('tx_id')}})
+            transaction_msg.set('info', {**transaction_msg.info, **{'tx_counterparty_signature': match_accept.info.get('tx_signature'), 'tx_counterparty_id': match_accept.info.get('tx_id')}})
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
             logger.warning("[{}]: match_accept did not contain tx_signature and tx_id!".format(self.context.agent_name))
