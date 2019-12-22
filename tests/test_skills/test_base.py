@@ -32,7 +32,7 @@ from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
 from aea.skills.base import SkillContext, Skill
-from tests.conftest import CUR_PATH, DummyConnection
+from ..conftest import CUR_PATH, DummyConnection
 
 
 def test_agent_context_ledger_apis():

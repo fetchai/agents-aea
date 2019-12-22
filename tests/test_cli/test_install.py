@@ -29,7 +29,7 @@ from ..common.click_testing import CliRunner
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
-from tests.conftest import CLI_LOG_OPTION, CUR_PATH
+from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
 
 class TestInstall:

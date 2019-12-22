@@ -38,7 +38,7 @@ from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
-from tests.conftest import CLI_LOG_OPTION
+from ...conftest import CLI_LOG_OPTION
 
 
 class TestEchoSkill:
@@ -78,17 +78,13 @@ class TestEchoSkill:
         # add skills
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "echo"], standalone_mode=False)
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "stub"], standalone_mode=False)
-        assert result.exit_code == 0
 
         # run the agent
         process = subprocess.Popen([
             sys.executable,
             '-m',
             'aea.cli',
-            "run",
-            "--connections",
-            "stub"
+            "run"
         ],
             stdout=subprocess.PIPE,
             env=os.environ.copy())

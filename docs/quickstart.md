@@ -104,11 +104,9 @@ This copies the echo application code containing the "behaviours", "handlers", a
 
 ### Add a stub connection
 
-AEAs use messages for communication. We will add a stub connection to send messages to and receive messages from the AEA.
+AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.
 
-``` bash
-aea add connection stub
-```
+The stub conection is already added to the agent by default.
 
 A stub connection provides an I/O reader and writer. 
 
@@ -133,7 +131,7 @@ recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
 Run the agent with the `stub` connection.
 
 ``` bash
-aea run --connections stub
+aea run
 ```
 
 You will see the echo task running in the terminal window.

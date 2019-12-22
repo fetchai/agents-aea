@@ -36,7 +36,7 @@ import aea.cli.common
 import aea.configurations.base
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.cli import cli
-from tests.conftest import CLI_LOG_OPTION, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
+from ...conftest import CLI_LOG_OPTION, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
 
 
 class TestScaffoldProtocol:

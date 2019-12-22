@@ -17,7 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the channel modules."""
-from typing import List
+"""Implementation of the 'aea fetch' subcommand."""
+import click
 
-stub_dependencies = ["watchdog"]  # type: List[str]
+from aea.cli.registry.fetch import fetch_agent
+
+
+@click.command(name='fetch')
+@click.argument('public-id', type=str, required=True)
+def fetch(public_id):
+    """Fetch Agent from Registry."""
+    fetch_agent(public_id)

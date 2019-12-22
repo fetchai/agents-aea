@@ -30,7 +30,7 @@ import jsonschema
 import pytest
 from jsonschema import Draft4Validator
 
-from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
 
 
 class TestGui:

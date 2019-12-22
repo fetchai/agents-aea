@@ -30,6 +30,7 @@ aea create ml_data_provider
 ### Add the `ml_data_provider` skill
 ``` bash
 cd ml_data_provider
+aea add connection oef
 aea add skill ml_data_provider
 ```
 
@@ -41,7 +42,7 @@ aea install
 
 ### Run the data provider AEA
 ``` bash
-aea run
+aea run --connections oef
 ```
 
 ### Create the model trainer AEA
@@ -53,6 +54,7 @@ aea create ml_model_trainer
 ### Add the `ml_train` skill to the model trainer AEA
 ``` bash
 cd ml_model_trainer
+aea add connection oef
 aea add skill ml_train
 ```
 
@@ -64,7 +66,7 @@ aea install
 
 ### Run the model trainer AEA
 ``` bash
-aea run
+aea run --connections oef
 ```
 
 After some time, you should see the AEAs transact and the model trainer train its model.
@@ -112,7 +114,7 @@ aea config set skills.ml_train.shared_classes.strategy.args.is_ledger_tx True
 
 From their respective directories, run both AEAs
 ``` bash
-aea run
+aea run --connections oef
 ```
 
 

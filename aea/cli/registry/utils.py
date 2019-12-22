@@ -107,7 +107,7 @@ def split_public_id(public_id: str) -> List[str]:
     return public_id.split('/')
 
 
-def _download_file(url: str, cwd: str) -> str:
+def download_file(url: str, cwd: str) -> str:
     """
     Download file from URL and save it in CWD (current working directory).
 
@@ -130,7 +130,7 @@ def _download_file(url: str, cwd: str) -> str:
     return filepath
 
 
-def _extract(source: str, target: str) -> None:
+def extract(source: str, target: str) -> None:
     """
     Extract tarball and remove source file.
 
@@ -175,14 +175,14 @@ def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
         public_id=public_id,
         obj_type=obj_type
     ))
-    filepath = _download_file(file_url, cwd)
+    filepath = download_file(file_url, cwd)
     target_folder = os.path.join(cwd, plural_obj_type)
 
     click.echo('Extracting {obj_type} {public_id}...'.format(
         public_id=public_id,
         obj_type=obj_type
     ))
-    _extract(filepath, target_folder)
+    extract(filepath, target_folder)
     click.echo('Successfully fetched {obj_type}: {public_id}.'.format(
         public_id=public_id,
         obj_type=obj_type

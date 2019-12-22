@@ -16,8 +16,34 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Methods for CLI fetch functionality."""
 
-"""This module contains the channel modules."""
-from typing import List
+import click
+import os
 
-stub_dependencies = ["watchdog"]  # type: List[str]
+from aea.cli.registry.utils import (
+    request_api, download_file, extract, split_public_id
+)
+
+
+def fetch_agent(public_id: str) -> None:
+    """
+    Fetch Agent from Registry.
+
+    :param public_id: str public ID of desirable Agent.
+
+    :return: None
+    """
+    owner, name, version = split_public_id(public_id)
+    api_path = '/agents/{}/{}/{}'.format(owner, name, version)
+    resp = request_api('GET', api_path)
+    file_url = resp['file']
+
+    cwd = os.getcwd()
+    filepath = download_file(file_url, cwd)
+    target_folder = os.path.join(cwd, name)
+    extract(filepath, target_folder)
+    click.echo(
+        'Agent {} successfully fetched to {}.'
+        .format(name, target_folder)
+    )

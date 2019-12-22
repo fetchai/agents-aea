@@ -28,7 +28,7 @@ from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE
-from tests.conftest import CLI_LOG_OPTION
+from ..conftest import CLI_LOG_OPTION
 from ..common.click_testing import CliRunner
 
 

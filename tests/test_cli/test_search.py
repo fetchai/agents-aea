@@ -29,7 +29,7 @@ from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
-from tests.conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 

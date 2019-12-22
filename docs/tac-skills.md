@@ -30,7 +30,9 @@ aea create tac_controller
 ### Add the tac control skill
 ``` bash
 cd tac_controller
+aea add connection oef
 aea add skill tac_control
+aea install
 ```
 
 ### Update the game parameters
@@ -47,7 +49,7 @@ You must set the start time to a point in the future `start_time: Nov 10 2019  1
 
 ### Run the TAC controller AEA
 ``` bash
-aea run
+aea run --connections oef
 ```
 
 ### Create the TAC participants AEA
@@ -60,20 +62,24 @@ aea create tac_participant_two
 ### Add the tac participation skill to participant one
 ``` bash
 cd tac_participant_one
+aea add connection oef
 aea add skill tac_participation
 aea add skill tac_negotiation
+aea install
 ```
 
 ### Add the tac participation skill to participant two
 ``` bash
 cd tac_participant_two
+aea add connection oef
 aea add skill tac_participation
 aea add skill tac_negotiation
+aea install
 ```
 
 ### Run both the TAC participant AEAs
 ``` bash
-aea run
+aea run --connections oef
 ```
 
 !!!	Note

@@ -20,8 +20,6 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
-import sys
-
 import unittest.mock
 
 from .test_base import create_app
@@ -38,12 +36,10 @@ def test_add_item():
     connection_name = "test_connection"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "add"
-        assert param_list[4] == "connection"
-        assert param_list[5] == connection_name
+        assert param_list[0] == "aea"
+        assert param_list[1] == "add"
+        assert param_list[2] == "connection"
+        assert param_list[3] == connection_name
         assert agent_name in dir
         return 0
 
@@ -69,12 +65,10 @@ def test_delete_agent_fail():
     connection_name = "test_connection"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == sys.executable
-        assert param_list[1] == "-m"
-        assert param_list[2] == "aea.cli"
-        assert param_list[3] == "add"
-        assert param_list[4] == "connection"
-        assert param_list[5] == connection_name
+        assert param_list[0] == "aea"
+        assert param_list[1] == "add"
+        assert param_list[2] == "connection"
+        assert param_list[3] == connection_name
         assert agent_name in dir
         return 1
 
