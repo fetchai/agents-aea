@@ -79,6 +79,7 @@ class CRUDCollection(Generic[T]):
     def create(self, item_id: str, item: T) -> None:
         """
         Add an item.
+
         :param item_id: the item id.
         :param item: the item to be added.
         :return: None
@@ -92,6 +93,7 @@ class CRUDCollection(Generic[T]):
     def read(self, item_id: str) -> Optional[T]:
         """
         Get an item by its name.
+
         :param item_id: the item id.
         :return: the associated item, or None if the item id is not present.
         """
@@ -100,6 +102,7 @@ class CRUDCollection(Generic[T]):
     def update(self, item_id: str, item: T) -> None:
         """
         Update an existing item.
+
         :param item_id: the item id.
         :param item: the item to be added.
         :return: None
@@ -547,6 +550,7 @@ class AgentConfig(Configuration):
     def default_connection(self, connection_name: str):
         """
         Set the default connection.
+
         :param connection_name: the name of the default connection.
         :return: None
         """
