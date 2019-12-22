@@ -373,22 +373,26 @@ class TransactionHandler(Handler):
             logger.info("[{}]: transaction confirmed by decision maker, sending to controller.".format(self.context.agent_name))
             game = cast(Game, self.context.game)
             tx_counterparty_signature = cast(bytes, tx_message.info.get('tx_counterparty_signature'))
-            assert tx_counterparty_signature is not None
-            msg = TACMessage(type=TACMessage.Type.TRANSACTION,
-                             tx_id=tx_message.tx_id,
-                             tx_sender_addr=tx_message.tx_sender_addr,
-                             tx_counterparty_addr=tx_message.tx_counterparty_addr,
-                             amount_by_currency_id=tx_message.tx_amount_by_currency_id,
-                             tx_sender_fee=tx_message.tx_sender_fee,
-                             tx_counterparty_fee=tx_message.tx_counterparty_fee,
-                             quantities_by_good_id=tx_message.tx_quantities_by_good_id,
-                             tx_sender_signature=tx_message.tx_signature,
-                             tx_counterparty_signature=tx_message.info.get('tx_counterparty_signature'),
-                             tx_nonce=tx_message.info.get('tx_nonce'))
-            self.context.outbox.put_message(to=game.configuration.controller_addr,
-                                            sender=self.context.agent_address,
-                                            protocol_id=TACMessage.protocol_id,
-                                            message=TACSerializer().encode(msg))
+            tx_counterparty_id = cast(str, tx_message.info.get('tx_counterparty_id'))
+            if (tx_counterparty_signature is not None) and (tx_counterparty_id is not None):
+                tx_id = tx_message.tx_id + "_" + tx_counterparty_id
+                msg = TACMessage(type=TACMessage.Type.TRANSACTION,
+                                 tx_id=tx_id,
+                                 tx_sender_addr=tx_message.tx_sender_addr,
+                                 tx_counterparty_addr=tx_message.tx_counterparty_addr,
+                                 amount_by_currency_id=tx_message.tx_amount_by_currency_id,
+                                 tx_sender_fee=tx_message.tx_sender_fee,
+                                 tx_counterparty_fee=tx_message.tx_counterparty_fee,
+                                 quantities_by_good_id=tx_message.tx_quantities_by_good_id,
+                                 tx_sender_signature=tx_message.tx_signature,
+                                 tx_counterparty_signature=tx_message.info.get('tx_counterparty_signature'),
+                                 tx_nonce=tx_message.info.get('tx_nonce'))
+                self.context.outbox.put_message(to=game.configuration.controller_addr,
+                                                sender=self.context.agent_address,
+                                                protocol_id=TACMessage.protocol_id,
+                                                message=TACSerializer().encode(msg))
+            else:
+                logger.warning("[{}]: transaction has no counterparty id or signature!".format(self.context.agent_name))
         else:
             logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
 

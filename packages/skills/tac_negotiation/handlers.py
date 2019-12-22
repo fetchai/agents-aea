@@ -167,7 +167,7 @@ class FIPANegotiationHandler(Handler):
             dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_CFP, dialogue.is_self_initiated)
         else:
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.generate_transaction_message(TransactionMessage.Performative.PROPOSE_FOR_SIGNING, proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
+            transaction_msg = transactions.generate_transaction_message(TransactionMessage.Performative.PROPOSE_FOR_SIGNING, proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_address)
             transactions.add_pending_proposal(dialogue.dialogue_label, new_msg_id, transaction_msg)
             logger.info("[{}]: sending to {} a Propose{}".format(self.context.agent_name, dialogue.dialogue_label.dialogue_opponent_addr[-5:],
                                                                  pprint.pformat({
@@ -204,7 +204,7 @@ class FIPANegotiationHandler(Handler):
         for num, proposal_description in enumerate(proposals):
             if num > 0: continue  # TODO: allow for dialogue branching with multiple proposals
             transactions = cast(Transactions, self.context.transactions)
-            transaction_msg = transactions.generate_transaction_message(TransactionMessage.Performative.PROPOSE_FOR_SIGNING, proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_public_key)
+            transaction_msg = transactions.generate_transaction_message(TransactionMessage.Performative.PROPOSE_FOR_SIGNING, proposal_description, dialogue.dialogue_label, dialogue.is_seller, self.context.agent_address)
 
             if strategy.is_profitable_transaction(transaction_msg, is_seller=dialogue.is_seller):
                 logger.info("[{}]: Accepting propose (as {}).".format(self.context.agent_name, dialogue.role))
@@ -296,14 +296,14 @@ class FIPANegotiationHandler(Handler):
         """
         logger.debug("[{}]: on_match_accept: msg_id={}, dialogue_reference={}, origin={}, target={}"
                      .format(self.context.agent_name, match_accept.message_id, match_accept.dialogue_reference, dialogue.dialogue_label.dialogue_opponent_addr, match_accept.target))
-        if match_accept.info.get('tx_signature') is not None:
+        if (match_accept.info.get('tx_signature') is not None) and (match_accept.info.get('tx_id') is not None):
             transactions = cast(Transactions, self.context.transactions)
             transaction_msg = transactions.pop_pending_initial_acceptance(dialogue.dialogue_label, match_accept.target)
             transaction_msg.set('skill_callback_ids', ['tac_participation'])
-            transaction_msg.set('info', {**transaction_msg.info, **{'tx_counterparty_signature': match_accept.info.get('tx_signature')}})
+            transaction_msg.set('info', {**transaction_msg.info, **{'tx_counterparty_signature': match_accept.info.get('tx_signature'), 'tx_counterpary_id': match_accept.info.get('tx_id')}})
             self.context.decision_maker_message_queue.put(transaction_msg)
         else:
-            logger.warning("[{}]: match_accept did not contain tx_signature!".format(self.context.agent_name))
+            logger.warning("[{}]: match_accept did not contain tx_signature and tx_id!".format(self.context.agent_name))
 
 
 class TransactionHandler(Handler):
@@ -340,7 +340,7 @@ class TransactionHandler(Handler):
                                        message_id=fipa_message.message_id + 1,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=fipa_message.message_id,
-                                       info={"tx_signature": tx_message.tx_signature})
+                                       info={"tx_signature": tx_message.tx_signature, "tx_id": tx_message.tx_id})
                 dialogue.outgoing_extend(fipa_msg)
                 self.context.outbox.put_message(to=dialogue.dialogue_label.dialogue_opponent_addr,
                                                 sender=self.context.agent_address,

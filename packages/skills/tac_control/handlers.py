@@ -178,16 +178,16 @@ class TACHandler(Handler):
         """
         game = cast(Game, self.context.game)
         logger.info("[{}]: Handling valid transaction: {}".format(self.context.agent_name, transaction.id[-10:]))
-        game.transactions.add_confirmed(transaction)
         game.settle_transaction(transaction)
 
+        tx_sender_id, tx_counterparty_id = transaction.id.split('_')
         # send the transaction confirmation.
         sender_tac_msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
-                                    transaction_id=transaction.id,
+                                    tx_id=tx_sender_id,
                                     amount_by_currency_id=transaction.amount_by_currency_id,
                                     quantities_by_good_id=transaction.quantities_by_good_id)
         counterparty_tac_msg = TACMessage(type=TACMessage.Type.TRANSACTION_CONFIRMATION,
-                                          transaction_id=transaction.id,
+                                          tx_id=tx_counterparty_id,
                                           amount_by_currency_id=transaction.amount_by_currency_id,
                                           quantities_by_good_id=transaction.quantities_by_good_id)
         self.context.outbox.put_message(to=transaction.sender_addr,
