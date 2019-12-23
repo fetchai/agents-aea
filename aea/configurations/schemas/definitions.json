@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Definitions",
   "type": "object",
   "additionalProperties": false,
   "definitions": {
@@ -34,6 +35,42 @@
     "resource_name": {
       "type": "string",
       "pattern": "[a-zA-Z_][a-zA-Z0-9_]*"
+    },
+    "private_key_path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ledger",
+        "path"
+      ],
+      "properties": {
+        "ledger": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "ledger_api": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ledger",
+        "addr",
+        "port"
+      ],
+      "properties": {
+        "ledger": {
+          "type": "string"
+        },
+        "addr": {
+          "type": "string"
+        },
+        "port": {
+          "type": "number"
+        }
+      }
     }
   }
 }

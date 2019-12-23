@@ -32,7 +32,7 @@
     "license": {
       "type": "string"
     },
-     "fingerprint": {
+    "fingerprint": {
       "type": "string"
     },
     "url": {
@@ -52,7 +52,7 @@
         ],
         "properties": {
           "private_key_path": {
-            "$ref": "#/definitions/private_key_path"
+            "$ref": "definitions.json#/definitions/private_key_path"
           }
         }
       }
@@ -68,7 +68,7 @@
         ],
         "properties": {
           "ledger_api": {
-            "$ref": "#/definitions/ledger_api"
+            "$ref": "definitions.json#/definitions/ledger_api"
           }
         }
       }
@@ -77,7 +77,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "$ref": "#/definitions/resource_name"
+        "$ref": "definitions.json#/definitions/resource_name"
       }
     },
     "default_connection": {
@@ -87,7 +87,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "$ref": "#/definitions/resource_name"
+        "$ref": "definitions.json#/definitions/resource_name"
       }
     },
     "skills": {
@@ -102,48 +102,6 @@
     },
     "description": {
       "type": "string"
-    }
-  },
-  "definitions": {
-    "private_key_path": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "ledger",
-        "path"
-      ],
-      "properties": {
-        "ledger": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        }
-      }
-    },
-    "ledger_api": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "ledger",
-        "addr",
-        "port"
-      ],
-      "properties": {
-        "ledger": {
-          "type": "string"
-        },
-        "addr": {
-          "type": "string"
-        },
-        "port": {
-          "type": "number"
-        }
-      }
-    },
-    "resource_name": {
-      "type": "string",
-      "pattern": "[a-zA-Z_][a-zA-Z0-9_]*"
     }
   }
 }
