@@ -232,7 +232,7 @@ ledger_apis:
   ethereum:
         args:
             address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-            netcode: 3
+            chain_id: 3
 ```
 
 ### Update the skill configs
