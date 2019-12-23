@@ -105,6 +105,10 @@ We tell the ml model trainer skill to use the ledger, by updating the following 
 ``` bash
 is_ledger_tx: True
 ```
+or by using the following command:
+``` bash
+aea config set skills.ml_train.shared_classes.strategy.args.is_ledger_tx True
+```
 
 ### Run both AEAs
 

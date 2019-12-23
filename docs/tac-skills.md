@@ -38,7 +38,14 @@ aea install
 ### Update the game parameters
 You can change the game parameters in `tac_controller/skills/tac_control/skill.yaml` under `Parameters`.
 
+or use the following comand:
+``` bash
+aea config set skills.tac_control.shared_classes.parameters.args.start_time 'Nov 10 2019 10:40AM'
+```
+
 You must set the start time to a point in the future `start_time: Nov 10 2019  10:40AM`.
+
+
 
 ### Run the TAC controller AEA
 ``` bash
