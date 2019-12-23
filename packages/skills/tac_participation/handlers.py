@@ -302,6 +302,9 @@ class TACHandler(Handler):
                                               amount_by_currency_id=message.amount_by_currency_id,
                                               quantities_by_good_id=message.quantities_by_good_id)
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
+        if 'confirmed_tx_ids' not in self.context.shared_state.keys():
+            self.context.shared_state['confirmed_tx_ids'] = []
+        self.context.shared_state['confirmed_tx_ids'].append(message.tx_id)
 
     # def _on_state_update(self, tac_message: TACMessage, controller_addr: Address) -> None:
     #     """

@@ -39,7 +39,7 @@ if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.fipa.serialization import FIPASerializer
     from packages.protocols.oef.message import OEFMessage
     from packages.skills.tac_negotiation.dialogues import Dialogues
-    from packages.skills.tac_negotiation.helpers import DEMAND_DATAMODEL_NAME
+    from packages.skills.tac_negotiation.helpers import SUPPLY_DATAMODEL_NAME
     from packages.skills.tac_negotiation.search import Search
     from packages.skills.tac_negotiation.strategy import Strategy
     from packages.skills.tac_negotiation.transactions import Transactions
@@ -49,7 +49,7 @@ else:
     from fipa_protocol.serialization import FIPASerializer
     from oef_protocol.message import OEFMessage
     from tac_negotiation_skill.dialogues import Dialogues
-    from tac_negotiation_skill.helpers import DEMAND_DATAMODEL_NAME
+    from tac_negotiation_skill.helpers import SUPPLY_DATAMODEL_NAME
     from tac_negotiation_skill.search import Search
     from tac_negotiation_skill.strategy import Strategy
     from tac_negotiation_skill.transactions import Transactions
@@ -120,7 +120,7 @@ class FIPANegotiationHandler(Handler):
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
             query = cast(Query, fipa_msg.query)
             if query.model is not None:
-                is_seller = query.model.name == DEMAND_DATAMODEL_NAME
+                is_seller = query.model.name == SUPPLY_DATAMODEL_NAME  # the counterparty is querying for supply
                 dialogue = cast(Dialogue, dialogues.create_opponent_initiated(fipa_msg.counterparty, fipa_msg.dialogue_reference, is_seller))
                 dialogue.incoming_extend(fipa_msg)
                 return dialogue

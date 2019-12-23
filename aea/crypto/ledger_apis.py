@@ -51,11 +51,12 @@ ERROR = "ERROR"
 class LedgerApis(object):
     """Store all the ledger apis we initialise."""
 
-    def __init__(self, ledger_api_configs: Dict[str, Tuple[str, int]]):
+    def __init__(self, ledger_api_configs: Dict[str, Tuple[str, int]], default_ledger_id: str):
         """
         Instantiate a wallet object.
 
         :param ledger_api_configs: the ledger api configs
+        :param default_ledger: the default ledger
         """
         apis = {}  # type: Dict[str, Any]
         configs = {}  # type: Dict[str, Tuple[str, int]]
@@ -75,6 +76,7 @@ class LedgerApis(object):
 
         self._apis = apis
         self._configs = configs
+        self._default_ledger_id = default_ledger_id
 
     @property
     def configs(self) -> Dict[str, Tuple[str, int]]:
@@ -100,6 +102,11 @@ class LedgerApis(object):
     def last_tx_statuses(self) -> Dict[str, str]:
         """Get the statuses for the last transaction."""
         return self._last_tx_statuses
+
+    @property
+    def default_ledger_id(self) -> str:
+        """Get the default ledger id."""
+        return self._default_ledger_id
 
     def token_balance(self, identifier: str, address: str) -> int:
         """

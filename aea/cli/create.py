@@ -30,7 +30,7 @@ from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import connection, skill
-from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL
+from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL, DEFAULT_LEDGER
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 
@@ -77,6 +77,7 @@ def create(click_context, agent_name):
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
         agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, author="", version="v1", license="", fingerprint="", url="", registry_path=DEFAULT_REGISTRY_PATH, description="")
         agent_config.default_connection = DEFAULT_CONNECTION
+        agent_config.default_ledger = DEFAULT_LEDGER
         ctx.agent_loader.dump(agent_config, config_file)
 
         # next commands must be done from the agent's directory -> overwrite ctx.cwd

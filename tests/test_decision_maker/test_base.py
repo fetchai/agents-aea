@@ -278,7 +278,7 @@ class TestDecisionMaker:
         cls.outbox = OutBox(cls.multiplexer)
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet({FETCHAI: private_key_pem_path})
-        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG})
+        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
         cls.agent_name = "test"
         cls.ownership_state = OwnershipState()
         cls.preferences = Preferences()

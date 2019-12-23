@@ -25,8 +25,6 @@ from typing import Any, Dict
 from aea.connections.base import ConnectionStatus
 from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
 from aea.mail.base import OutBox
-from aea.crypto.default import DEFAULT
-from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 
 
@@ -94,12 +92,12 @@ class AgentContext:
     @property
     def address(self) -> str:
         """Get the defualt address."""
-        return self._addresses[FETCHAI] if FETCHAI in self._addresses.keys() else self._addresses[DEFAULT]
+        return self._addresses[self.ledger_apis.default_ledger_id]
 
     @property
     def public_key(self) -> str:
         """Get the default public key."""
-        return self._public_keys[FETCHAI] if FETCHAI in self._public_keys.keys() else self._public_keys[DEFAULT]
+        return self._public_keys[self.ledger_apis.default_ledger_id]
 
     @property
     def connection_status(self) -> ConnectionStatus:

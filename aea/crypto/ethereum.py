@@ -93,13 +93,24 @@ class EthereumCrypto(Crypto):
 
     def sign_transaction(self, tx_hash: bytes) -> bytes:
         """
-        Sing a transaction hash.
+        Sign a transaction hash.
 
         :param tx_hash: the transaction hash
         :return: Signed message in bytes
         """
         signature = self.entity.signHash(tx_hash)
-        return signature
+        return signature['signature']
+
+    # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
+    #     """
+    #     Recover the address from the hash.
+
+    #     :param tx_hash: the transaction hash
+    #     :param signature: the transaction signature
+    #     :return: the recovered address
+    #     """
+    #     address = self.entity.recoverHash(tx_hash, signature=signature)
+    #     return address
 
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""

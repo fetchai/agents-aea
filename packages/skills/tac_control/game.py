@@ -27,18 +27,20 @@ import pprint
 import sys
 from typing import cast, Dict, List, Optional, TYPE_CHECKING
 
+from aea.crypto.ethereum import ETHEREUM
+from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
 from aea.mail.base import Address
 from aea.skills.base import SharedClass
 
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac.message import TACMessage
     from packages.skills.tac_control.helpers import generate_good_id_to_name, determine_scaling_factor, \
-        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings
+        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings, tx_hash_from_values
     from packages.skills.tac_control.parameters import Parameters
 else:
     from tac_protocol.message import TACMessage
     from tac_control_skill.helpers import generate_good_id_to_name, determine_scaling_factor, \
-        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings
+        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings, tx_hash_from_values
     from tac_control_skill.parameters import Parameters
 
 GoodId = str
@@ -308,6 +310,24 @@ class Transaction:
         """Get the buyer address."""
         return self._sender_addr if self.is_sender_buyer else self._counterparty_addr
 
+    @property
+    def sender_hash(self) -> bytes:
+        """Get the sender hash."""
+        return tx_hash_from_values(tx_sender_addr=self.sender_addr,
+                                   tx_counterparty_addr=self.counterparty_addr,
+                                   tx_quantities_by_good_id=self.quantities_by_good_id,
+                                   tx_amount_by_currency_id=self.amount_by_currency_id,
+                                   tx_nonce=self.nonce)
+
+    @property
+    def counterparty_hash(self) -> bytes:
+        """Get the sender hash."""
+        return tx_hash_from_values(tx_sender_addr=self.counterparty_addr,
+                                   tx_counterparty_addr=self.sender_addr,
+                                   tx_quantities_by_good_id={good_id: -quantity for good_id, quantity in self.quantities_by_good_id.items()},
+                                   tx_amount_by_currency_id={currency_id: -amount for currency_id, amount in self.amount_by_currency_id.items()},
+                                   tx_nonce=self.nonce)
+
     def _check_consistency(self) -> None:
         """
         Check the consistency of the transaction parameters.
@@ -324,14 +344,15 @@ class Transaction:
             (all(amount <= 0 for amount in self.amount_by_currency_id.values()) and all(quantity >= 0 for quantity in self.quantities_by_good_id.values()))
         assert isinstance(self.sender_signature, bytes) and isinstance(self.counterparty_signature, bytes)
 
-    def verify_matching_signatures(self) -> bool:
+    def verify_matching_signatures(self, api) -> bool:
         """
         Check that the signatures match the terms of trade.
 
         :return: True if the transaction has been signed by both parties
         """
-        # TODO: add signature verification logic
-        return True
+        result = api.eth.account.recoverHash(self.sender_hash, signature=self.sender_signature) == self.sender_addr
+        result = result and api.eth.account.recoverHash(self.counterparty_hash, signature=self.counterparty_signature) == self.counterparty_addr
+        return result
 
     @classmethod
     def from_message(cls, message: TACMessage) -> 'Transaction':
@@ -417,6 +438,31 @@ class AgentState:
     def utility_params_by_good_id(self) -> Dict[GoodId, Parameter]:
         """Get utility parameter for each good."""
         return copy.copy(self._utility_params_by_good_id)
+
+    def get_score(self) -> float:
+        """
+        Compute the score of the current state.
+
+        The score is computed as the sum of all the utilities for the good holdings
+        with positive quantity plus the money left.
+        :return: the score.
+        """
+        goods_score = logarithmic_utility(self.utility_params_by_good_id, self.quantities_by_good_id)
+        money_score = linear_utility(self.exchange_params_by_currency_id, self.amount_by_currency_id)
+        score = goods_score + money_score
+        return score
+
+    # def get_score_diff_from_transaction(self, tx: Transaction) -> float:
+    #     """
+    #     Simulate a transaction and get the resulting score (taking into account the fee).
+
+    #     :param tx: a transaction object.
+    #     :return: the score.
+    #     """
+    #     current_score = self.get_score()
+    #     new_state = self.apply([tx])
+    #     new_score = new_state.get_score()
+    #     return new_score - current_score
 
     def check_transaction_is_consistent(self, tx: Transaction) -> bool:
         """
@@ -700,11 +746,14 @@ class Game(SharedClass):
     @property
     def holdings_summary(self) -> str:
         """Get holdings summary (a string representing the holdings for every agent)."""
-        result = "\n" + "Current good allocation: \n"
+        result = "\n" + "Current good & money allocation & score: \n"
         for agent_addr, agent_state in self.current_agent_states.items():
             result = result + "- " + self.configuration.agent_addr_to_name[agent_addr] + ":" + "\n"
             for good_id, quantity in agent_state.quantities_by_good_id.items():
                 result += "    " + good_id + ": " + str(quantity) + "\n"
+            for currency_id, amount in agent_state.amount_by_currency_id.items():
+                result += "    " + currency_id + ": " + str(amount) + "\n"
+            result += "    score: " + str(round(agent_state.get_score(), 2)) + "\n"
         result = result + "\n"
         return result
 
@@ -737,7 +786,7 @@ class Game(SharedClass):
         """
         sender_state = self.current_agent_states[tx.sender_addr]
         counterparty_state = self.current_agent_states[tx.counterparty_addr]
-        result = tx.verify_matching_signatures()
+        result = tx.verify_matching_signatures(self.context.ledger_apis.apis.get(ETHEREUM))
         result = result and sender_state.check_transaction_is_consistent(tx)
         result = result and counterparty_state.check_transaction_is_consistent(tx)
         return result

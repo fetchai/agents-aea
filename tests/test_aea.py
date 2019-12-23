@@ -50,7 +50,7 @@ def test_initialise_AEA():
     connections1 = [OEFLocalConnection(address_1, node)]
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    ledger_apis = LedgerApis({})
+    ledger_apis = LedgerApis({}, 'default')
     my_AEA = AEA("Agent0", connections1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
     assert not my_AEA.context.connection_status.is_connected, "AEA should not be connected."
@@ -69,7 +69,7 @@ def test_act():
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
-        ledger_apis = LedgerApis({})
+        ledger_apis = LedgerApis({}, 'default')
         address = wallet.addresses['default']
         connections = [OEFLocalConnection(address, node)]
 
@@ -97,7 +97,7 @@ def test_react():
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
-        ledger_apis = LedgerApis({})
+        ledger_apis = LedgerApis({}, 'default')
         address = wallet.addresses['default']
         connection = OEFLocalConnection(address, node)
         connections = [connection]
@@ -141,7 +141,7 @@ async def test_handle():
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
-        ledger_apis = LedgerApis({})
+        ledger_apis = LedgerApis({}, 'default')
         address = wallet.addresses['default']
         connection = OEFLocalConnection(address, node)
         connections = [connection]
@@ -218,7 +218,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.agent_name = "MyAgent"
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({})
+        cls.ledger_apis = LedgerApis({}, 'default')
         cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
         cls.connections = [cls.connection]
 
@@ -270,7 +270,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.agent_name = "MyAgent"
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({})
+        cls.ledger_apis = LedgerApis({}, 'default')
         cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
         cls.connections = [cls.connection]
 

@@ -26,7 +26,7 @@ import logging
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
-from aea.crypto.fetchai import FETCHAI
+from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.decision_maker.messages.transaction import TransactionMessage, OFF_CHAIN
@@ -122,14 +122,12 @@ class OwnershipState:
                 # reject the transaction when there is no wealth exchange
                 result = False
             elif amount <= 0 and all(quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
-                # check if the agent has the money to cover amount and tx fee (the agent is the buyer).
-                transfer_amount = -amount - tx_message.tx_counterparty_fee
-                result = result and (transfer_amount >= 0)
+                # check if the agent has the money to cover amount and tx fee (the agent=sender is the buyer and pays all fees).
                 max_tx_fee = tx_message.tx_sender_fee + tx_message.tx_counterparty_fee
-                max_payable = transfer_amount + max_tx_fee
+                max_payable = -amount + max_tx_fee
                 result = result and (self.amount_by_currency_id[currency_id] >= max_payable)
             elif amount >= 0 and all(quantity <= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
-                # check if the agent has the goods (the agent is the seller).
+                # check if the agent has the goods (the agent=sender is the seller).
                 result = result and all(self.quantities_by_good_id[good_id] >= -quantity for good_id, quantity in tx_message.tx_quantities_by_good_id.items())
             else:
                 result = False
@@ -176,7 +174,11 @@ class OwnershipState:
         assert self.check_transaction_is_consistent(tx_message), "Inconsistent transaction."
         for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
             # we apply the worst case where all the tx_sender_fee is used up in the transaction
-            diff = amount - tx_message.tx_sender_fee
+            if amount < 0:
+                # buyer pays all fees
+                diff = amount - tx_message.tx_sender_fee - tx_message.tx_counterparty_fee
+            else:
+                diff = amount
             self._amount_by_currency_id[currency_id] += diff
 
             for good_id, quantity_delta in tx_message.tx_quantities_by_good_id.items():
@@ -599,7 +601,8 @@ class DecisionMaker:
         :return: the signature of the signing payload
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self._wallet.crypto_objects.get(FETCHAI)
+            crypto_object = self._wallet.crypto_objects.get(ETHEREUM)
+            # TODO: replace with FETCHAI when recover_hash function is available
         else:
             crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
         tx_hash = tx_message.signing_payload.get('tx_hash')
