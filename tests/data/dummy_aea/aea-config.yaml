@@ -15,7 +15,7 @@ ledger_apis:
    ethereum:
      args:
        address: example.ethereum.com
-       netcode: 8080
+       chain_id: 8080
 logging_config:
   disable_existing_loggers: false
   version: 1
