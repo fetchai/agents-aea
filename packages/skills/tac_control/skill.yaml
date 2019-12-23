@@ -37,6 +37,6 @@ shared_classes:
   game:
     class_name: Game
     args: {}
-protocols: ['oef', 'tac']
+protocols: ['fetchai/oef:0.1.0', 'fetchai/tac:0.1.0']
 dependencies:
   numpy: {}

@@ -13,4 +13,4 @@ handlers:
       foo: bar
 tasks: {}
 shared_classes: {}
-protocols: ['default']
+protocols: ['fetchai/default:0.1.0']

@@ -30,7 +30,7 @@ from click import pass_context
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, PublicIdParameter
 from aea.cli.registry.utils import fetch_package, split_public_id
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE
@@ -87,7 +87,7 @@ def _find_connection_locally(ctx, connection_name, click_context):
 
 @add.command()
 @click.argument(
-    'connection_name', type=str, required=True
+    'connection_name', type=PublicIdParameter(), required=True
 )
 @pass_context
 def connection(click_context, connection_name):
@@ -160,7 +160,7 @@ def _find_protocol_locally(ctx, protocol_name):
 
 @add.command()
 @click.argument(
-    'protocol_name', type=str, required=True
+    'protocol_name', type=PublicIdParameter(), required=True
 )
 @pass_context
 def protocol(click_context, protocol_name):
@@ -236,7 +236,7 @@ def _find_skill_locally(ctx, skill_name, click_context):
 
 
 @add.command()
-@click.argument('skill_name', type=str, required=True)
+@click.argument('skill_name', type=PublicIdParameter(), required=True)
 @pass_context
 def skill(click_context, skill_name):
     """Add a skill to the agent."""

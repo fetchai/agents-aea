@@ -17,6 +17,6 @@ tasks:
     args:
       nb_steps: 4000
 shared_classes: {}
-protocols: ["gym"]
+protocols: ["fetchai/gym:0.1.0"]
 dependencies:
   gym: {}
