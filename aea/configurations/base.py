@@ -46,7 +46,6 @@ Dependency = dict
 A dictionary from package name to dependency data structure (see above).
 The package name must satisfy the constraints on Python packages names.
 For details, see https://www.python.org/dev/peps/pep-0426/#name.
-
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
@@ -499,6 +498,7 @@ class AgentConfig(Configuration):
                  registry_path: str = "",
                  description: str = "",
                  private_key_paths: Dict[str, str] = None,
+                 ledger_apis: Dict[str, Tuple[str, int]] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
@@ -516,6 +516,10 @@ class AgentConfig(Configuration):
         private_key_paths = private_key_paths if private_key_paths is not None else {}
         for ledger, path in private_key_paths.items():
             self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
+
+        ledger_apis = ledger_apis if ledger_apis is not None else {}
+        for ledger, (addr, port) in ledger_apis.items():
+            self.ledger_apis.create(ledger, LedgerAPIConfig(ledger, addr, port))
 
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_connection = None  # type: Optional[str]
@@ -557,7 +561,7 @@ class AgentConfig(Configuration):
             "registry_path": self.registry_path,
             "description": self.description,
             "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
-            "ledger_apis": {key: l.json for key, l in self.ledger_apis.read_all()},
+            "ledger_apis": [{"ledger_api": t.json} for l, t in self.ledger_apis.read_all()],
             "logging_config": self.logging_config,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
@@ -573,6 +577,11 @@ class AgentConfig(Configuration):
             private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
             private_key_paths[private_key_path.ledger] = private_key_path.path
 
+        ledger_apis = {}
+        for l in obj.get("ledger_apis", []):  # type: ignore
+            ledger_api = LedgerAPIConfig.from_json(l["ledger_api"])
+            ledger_apis[ledger_api.ledger] = (ledger_api.addr, ledger_api.port)
+
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
@@ -584,11 +593,8 @@ class AgentConfig(Configuration):
             description=cast(str, obj.get("description", "")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
             private_key_paths=cast(Dict, private_key_paths),
+            ledger_apis=cast(Dict, ledger_apis)
         )
-
-        for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
-            ledger_config = LedgerAPIConfig.from_json(ledger_data)
-            agent_config.ledger_apis.create(ledger_id, ledger_config)
 
         agent_config.connections = set(cast(List[str], obj.get("connections")))
         agent_config.protocols = set(cast(List[str], obj.get("protocols")))
