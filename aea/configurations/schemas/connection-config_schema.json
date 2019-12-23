@@ -21,7 +21,7 @@
       "$ref": "definitions.json#/definitions/author"
     },
     "version": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/version"
     },
     "license": {
       "type": "string"
