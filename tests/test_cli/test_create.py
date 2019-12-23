@@ -140,10 +140,10 @@ class TestCreate:
         agent_config_instance = self._load_config_file()
         assert agent_config_instance["url"] == ""
 
-    def test_version_field_is_equal_to_v1(self):
-        """Check that the 'version' field is equal to the string 'v1'."""
+    def test_version_field_is_equal_to_1_0_0(self):
+        """Check that the 'version' field is equal to the string '1.0.0'."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["version"] == "v1"
+        assert agent_config_instance["version"] == "1.0.0"
 
     def test_connections_directory_exists(self):
         """Check that the connections directory exists."""
