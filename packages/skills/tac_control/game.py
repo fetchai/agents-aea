@@ -473,7 +473,7 @@ class AgentState:
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
         result = self.agent_address in [tx.sender_addr, tx.counterparty_addr]
-        result = len(tx.amount_by_currency_id) == 1
+        result = result and len(tx.amount_by_currency_id) == 1
         for currency_id, amount in tx.amount_by_currency_id.items():
             if amount == 0 and all(quantity == 0 for quantity in tx.quantities_by_good_id.values()):
                 # reject the transaction when there is no wealth exchange
@@ -482,7 +482,9 @@ class AgentState:
                 # sender is buyer, counterparty is seller
                 if self.agent_address == tx.sender_addr:
                     # check this sender state has enough money
-                    result = result and (self.amount_by_currency_id[currency_id] >= -amount + tx.sender_fee + tx.counterparty_fee)
+                    transfer_amount = -amount - tx.counterparty_fee
+                    tx_fees = tx.sender_fee + tx.counterparty_fee
+                    result = result and (transfer_amount >= 0) and (self.amount_by_currency_id[currency_id] >= transfer_amount + tx_fees)
                 elif self.agent_address == tx.counterparty_addr:
                     # check this counterparty state has enough goods
                     result = result and all(self.quantities_by_good_id[good_id] >= quantity for good_id, quantity in tx.quantities_by_good_id.items())
@@ -494,7 +496,9 @@ class AgentState:
                     result = result and all(self.quantities_by_good_id[good_id] >= -quantity for good_id, quantity in tx.quantities_by_good_id.items())
                 elif self.agent_address == tx.counterparty_addr:
                     # check this counterparty state has enough money
-                    result = result and (self.amount_by_currency_id[currency_id] >= amount + tx.sender_fee + tx.counterparty_fee)
+                    transfer_amount = amount - tx.sender_fee
+                    tx_fees = tx.sender_fee + tx.counterparty_fee
+                    result = result and (transfer_amount >= 0) and (self.amount_by_currency_id[currency_id] >= transfer_amount + tx_fees)
             else:
                 result = False
         return result
@@ -525,14 +529,24 @@ class AgentState:
         for currency_id, amount in tx.amount_by_currency_id.items():
             if self.agent_address == tx.sender_addr:
                 # settling the transaction for the sender
-                new_amount_by_currency_id[currency_id] += amount
-                # if the amount is negative, then the sender == buyer and counterparty == seller else sender == seller and counterparty == buyer
+                if amount > 0:
+                    # sender == seller and counterparty == buyer
+                    added_amount = amount - tx.sender_fee
+                    new_amount_by_currency_id[currency_id] += added_amount
+                else:
+                    # sender == buyer and counterparty == seller
+                    removed_amount = -amount + tx.sender_fee
+                    new_amount_by_currency_id[currency_id] -= removed_amount
             elif self.agent_address == tx.counterparty_addr:
                 # settling the transaction for the counterparty
-                new_amount_by_currency_id[currency_id] -= amount
-            if self.agent_address == tx.buyer_addr:
-                # note, on a ledger, the sender pays all tx fees > here the buyer pays
-                new_amount_by_currency_id[currency_id] -= tx.sender_fee + tx.counterparty_fee
+                if amount > 0:
+                    # counterparty == buyer and sender == seller
+                    removed_amount = amount + tx.counterparty_fee
+                    new_amount_by_currency_id[currency_id] -= removed_amount
+                else:
+                    # counterparty == seller and sender == buyer
+                    added_amount = -amount - tx.counterparty_fee
+                    new_amount_by_currency_id[currency_id] += added_amount
 
         self._amount_by_currency_id = new_amount_by_currency_id
 
