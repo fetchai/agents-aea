@@ -235,7 +235,7 @@ class LedgerApis(object):
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
     """
-    Tro to instantiate the fetchai ledger api.
+    Try to instantiate the fetchai ledger api.
 
     :param addr: the address
     :param port: the port
@@ -250,10 +250,10 @@ def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
 
 def _try_to_instantiate_ethereum_ledger_api(addr: str, chain_id: int) -> None:
     """
-    Tro to instantiate the fetchai ledger api.
+    Try to instantiate the ethereum ledger api.
 
     :param addr: the address
-    :param chain_id: the port
+    :param chain_id: the id for the chain.
     """
     try:
         from web3 import Web3, HTTPProvider
