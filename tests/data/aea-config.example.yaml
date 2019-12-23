@@ -27,9 +27,9 @@ registry_path: ../../packages
 ledger_apis:
    fetchai:
      args:
-       addr: example.fetch-ai.com
+       address: example.fetch-ai.com
        port: 8080
    ethereum:
      args:
-       addr: example.ethereum.com
-       port: 8080
+       address: example.ethereum.com
+       netcode: 8080

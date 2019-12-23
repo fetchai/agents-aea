@@ -37,5 +37,5 @@ ledger_apis:
        port: 8080
    ethereum:
      args:
-       addr: example.ethereum.com
-       port: 8080
+       address: example.ethereum.com
+       netcode: 8080

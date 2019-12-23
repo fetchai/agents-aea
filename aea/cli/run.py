@@ -133,7 +133,7 @@ def _verify_ledger_apis_access() -> None:
     else:
         ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
         _try_to_instantiate_ethereum_ledger_api(cast(str, ethereum_ledger_config.args.get('address')),
-                                                cast(int, ethereum_ledger_config.args.get('port')))
+                                                cast(int, ethereum_ledger_config.args.get('chain_id')))
 
 
 def _setup_connection(connection_name: str, address: str, ctx: Context) -> Connection:

@@ -232,7 +232,7 @@ ledger_apis:
   ethereum:
         args:
             address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-            port: 3
+            netcode: 3
 ```
 
 ### Update the skill configs
@@ -247,10 +247,7 @@ An other way to update the skill config is via the `aea config get/set` command.
 aea config set skills.weather_station_ledger.shared_classes.strategy.args.currency_id ETH
 aea config set skills.weather_station_ledger.shared_classes.strategy.args.ledger_id ethereum
 ```
-Amend `ledgers` to the following.
-``` bash
-ledgers: ['ethereum']
-```
+
 
 In the weather client skill config (`my_weather_client/skills/weather_client_ledger/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 ``` bash
@@ -263,10 +260,6 @@ An other way to update the skill config is via the `aea config get/set` command.
 aea config set skills.weather_client_ledger.shared_classes.strategy.args.max_buyer.tx_fee 10000
 aea config set skills.weather_client_ledger.shared_classes.strategy.args.currency_id ETH
 aea config set skills.weather_client_ledger.shared_classes.strategy.args.ledger_id ethereum
-```
-Amend `ledgers` to the following.
-``` basgh
-ledgers: ['ethereum']
 ```
 
 ### Fund the weather client AEA
