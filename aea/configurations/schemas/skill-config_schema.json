@@ -16,7 +16,7 @@
       "$ref": "definitions.json#/definitions/resource_name"
     },
     "author": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/author"
     },
     "version": {
       "type": "string"

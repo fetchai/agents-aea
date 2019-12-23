@@ -24,7 +24,7 @@
       "type": "string"
     },
     "author": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/author"
     },
     "version": {
       "type": "string"
