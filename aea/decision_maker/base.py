@@ -108,7 +108,7 @@ class OwnershipState:
         assert self._quantities_by_good_id is not None, "GoodHoldings not set!"
         return copy.copy(self._quantities_by_good_id)
 
-    def check_transaction_is_consistent(self, tx_message: TransactionMessage) -> bool:
+    def check_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is consistent.
 
@@ -116,22 +116,45 @@ class OwnershipState:
         Note, the agent is the sender of the transaction message by design.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        result = len(tx_message.tx_amount_by_currency_id) == 1
-        for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
-            if amount == 0 and all(quantity == 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
-                # reject the transaction when there is no wealth exchange
-                result = False
-            elif amount <= 0 and all(quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
-                # check if the agent has the money to cover amount and tx fee (the agent=sender is the buyer and pays all fees).
-                max_tx_fee = tx_message.tx_sender_fee + tx_message.tx_counterparty_fee
-                max_payable = -amount + max_tx_fee
-                result = result and (self.amount_by_currency_id[currency_id] >= max_payable)
-            elif amount >= 0 and all(quantity <= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
-                # check if the agent has the goods (the agent=sender is the seller).
-                result = result and all(self.quantities_by_good_id[good_id] >= -quantity for good_id, quantity in tx_message.tx_quantities_by_good_id.items())
-            else:
-                result = False
+        if tx_message.amount == 0 and all(quantity == 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
+            # reject the transaction when there is no wealth exchange
+            result = False
+        elif tx_message.amount <= 0 and all(quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
+            # check if the agent has the money to cover the sender_amount (the agent=sender is the buyer)
+            result = self.amount_by_currency_id[tx_message.currency_id] >= tx_message.sender_amount
+        elif tx_message.amount >= 0 and all(quantity <= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
+            # check if the agent has the goods (the agent=sender is the seller).
+            result = all(self.quantities_by_good_id[good_id] >= -quantity for good_id, quantity in tx_message.tx_quantities_by_good_id.items())
+        else:
+            result = False
         return result
+
+    def _update(self, tx_message: TransactionMessage) -> None:
+        """
+        Update the agent state from a transaction.
+
+        :param tx_message:
+        :return: None
+        """
+        assert self.check_transaction_is_affordable(tx_message), "Inconsistent transaction."
+
+        self._amount_by_currency_id[tx_message.currency_id] += tx_message.sender_amount
+
+        for good_id, quantity_delta in tx_message.tx_quantities_by_good_id.items():
+            self._quantities_by_good_id[good_id] += quantity_delta
+
+    def apply_transactions(self, transactions: List[TransactionMessage]) -> 'OwnershipState':
+        """
+        Apply a list of transactions to (a copy of) the current state.
+
+        :param transactions: the sequence of transaction messages.
+        :return: the final state.
+        """
+        new_state = copy.copy(self)
+        for tx_message in transactions:
+            new_state._update(tx_message)
+
+        return new_state
 
     def apply_state_update(self, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int]) -> 'OwnershipState':
         """
@@ -151,39 +174,6 @@ class OwnershipState:
 
         return new_state
 
-    def apply_transactions(self, transactions: List[TransactionMessage]) -> 'OwnershipState':
-        """
-        Apply a list of transactions to (a copy of) the current state.
-
-        :param transactions: the sequence of transaction messages.
-        :return: the final state.
-        """
-        new_state = copy.copy(self)
-        for tx_message in transactions:
-            new_state.update(tx_message)
-
-        return new_state
-
-    def update(self, tx_message: TransactionMessage) -> None:
-        """
-        Update the agent state from a transaction.
-
-        :param tx_message:
-        :return: None
-        """
-        assert self.check_transaction_is_consistent(tx_message), "Inconsistent transaction."
-        for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
-            # we apply the worst case where all the tx_sender_fee is used up in the transaction
-            if amount < 0:
-                # buyer pays all fees
-                diff = amount - tx_message.tx_sender_fee - tx_message.tx_counterparty_fee
-            else:
-                diff = amount
-            self._amount_by_currency_id[currency_id] += diff
-
-            for good_id, quantity_delta in tx_message.tx_quantities_by_good_id.items():
-                self._quantities_by_good_id[good_id] += quantity_delta
-
     def __copy__(self):
         """Copy the object."""
         state = OwnershipState()
@@ -191,6 +181,39 @@ class OwnershipState:
             state._amount_by_currency_id = self.amount_by_currency_id
             state._quantities_by_good_id = self.quantities_by_good_id
         return state
+
+
+class LedgerStateProxy():
+    """Class to represent a proxy to a ledger state."""
+
+    def __init__(self, ledger_apis: LedgerApis):
+        """Instantiate a ledger state proxy."""
+        self._ledger_apis = ledger_apis
+
+    @property
+    def ledger_apis(self) -> LedgerApis:
+        """Get the ledger_apis."""
+        return self._ledger_apis
+
+    @property
+    def is_initialized(self) -> bool:
+        """Get the initialization status."""
+        return self._ledger_apis.has_default_ledger
+
+    def check_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
+        """
+        Check if the transaction is affordable on the ledger.
+
+        :param tx_message: the transaction message
+        :return: whether the transaction is affordable on the ledger
+        """
+        if tx_message.sender_amount <= 0:
+            # check if the agent has the money to cover counterparty amount and tx fees
+            available_balance = self.ledger_apis.token_balance(tx_message.ledger_id, tx_message.tx_sender_addr)
+            is_affordable = tx_message.counterparty_amount + tx_message.fees <= available_balance
+        else:
+            is_affordable = True
+        return is_affordable
 
 
 class Preferences:
@@ -344,6 +367,7 @@ class DecisionMaker:
         self._message_in_queue = Queue()  # type: Queue
         self._message_out_queue = Queue()  # type: Queue
         self._ownership_state = OwnershipState()
+        self._ledger_state_proxy = LedgerStateProxy(ledger_apis)
         self._preferences = Preferences()
         self._goal_pursuit_readiness = GoalPursuitReadiness()
 
@@ -371,6 +395,11 @@ class DecisionMaker:
     def ownership_state(self) -> OwnershipState:
         """Get ownership state."""
         return self._ownership_state
+
+    @property
+    def ledger_state_proxy(self) -> LedgerStateProxy:
+        """Get ledger state proxy."""
+        return self._ledger_state_proxy
 
     @property
     def preferences(self) -> Preferences:
@@ -458,10 +487,8 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        is_valid_tx_amount = self._is_valid_tx_amount(tx_message)
-        is_utility_enhancing = self._is_utility_enhancing(tx_message)
-        is_affordable = self._is_affordable(tx_message)
-        return is_valid_tx_amount and is_utility_enhancing and is_affordable
+        result = self._is_valid_tx_amount(tx_message) and self._is_utility_enhancing(tx_message) and self._is_affordable(tx_message)
+        return result
 
     def _is_valid_tx_amount(self, tx_message: TransactionMessage) -> bool:
         """
@@ -469,9 +496,7 @@ class DecisionMaker:
 
         If the transaction amount is positive, then the agent is the seller, so abort.
         """
-        result = len(tx_message.tx_amount_by_currency_id) == 1
-        for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
-            result = result and amount <= 0
+        result = tx_message.sender_amount <= 0
         return result
 
     def _is_utility_enhancing(self, tx_message: TransactionMessage) -> bool:
@@ -495,26 +520,17 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: whether the transaction is affordable or not
         """
-        if tx_message.get("ledger_id") == 'off_chain':
+        if self.ownership_state.is_initialized:
+            is_affordable = self.ownership_state.check_transaction_is_affordable(tx_message)
+        if self.ledger_state_proxy.is_initialized and (tx_message.ledger_id != OFF_CHAIN):
+            if tx_message.ledger_id in self.ledger_apis.apis.keys():
+                is_affordable = is_affordable and self.ledger_state_proxy.check_transaction_is_affordable(tx_message)
+            else:
+                logger.error("[{}]: Ledger api not available for ledger_id={}!".format(self._agent_name, tx_message.ledger_id))
+                is_affordable = False
+        if not self.ownership_state.is_initialized and not (self.ledger_state_proxy.is_initialized and (tx_message.ledger_id != OFF_CHAIN)):
             logger.warning("[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(self._agent_name))
             is_affordable = True
-        else:
-            # TODO check currency
-            assert len(tx_message.tx_amount_by_currency_id) == 1
-            for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
-                if amount <= 0 and all(quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
-                    # check if the agent has the money to cover amount and tx fee (the agent is the buyer).
-                    transfer_amount = -amount - tx_message.tx_counterparty_fee
-                    max_tx_fee = tx_message.tx_sender_fee + tx_message.tx_counterparty_fee
-                    max_payable = transfer_amount + max_tx_fee
-                    crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
-                    balance = self.ledger_apis.token_balance(crypto_object.identifier, crypto_object.address)
-                    is_affordable = (max_payable <= balance) and (transfer_amount >= 0)
-                elif amount >= 0 and all(quantity <= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
-                    # check if the agent has the goods to cover the transaction
-                    is_affordable = all(self.ownership_state.quantities_by_good_id[good_id] >= -quantity for good_id, quantity in tx_message.tx_quantities_by_good_id.items())
-                else:
-                    is_affordable = False
         return is_affordable
 
     def _settle_tx(self, tx_message: TransactionMessage) -> Optional[str]:
@@ -529,13 +545,8 @@ class DecisionMaker:
             tx_digest = OFF_CHAIN_SETTLEMENT_DIGEST
         else:
             logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
-            assert len(tx_message.tx_amount_by_currency_id) == 1
-            for currency_id, amount in tx_message.tx_amount_by_currency_id.items():
-                # adjust payment amount to reflect transaction fee split
-                payable = -amount - tx_message.tx_counterparty_fee
-                max_tx_fee = tx_message.tx_counterparty_fee + tx_message.tx_sender_fee
-                crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
-                tx_digest = self.ledger_apis.transfer(crypto_object, tx_message.tx_counterparty_addr, payable, max_tx_fee)
+            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+            tx_digest = self.ledger_apis.transfer(crypto_object, tx_message.tx_counterparty_addr, tx_message.counterparty_amount, tx_message.fees)
         return tx_digest
 
     def _handle_tx_message_for_signing(self, tx_message: TransactionMessage) -> None:
@@ -562,24 +573,8 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        # is_valid_ledger_id = self._is_valid_ledger_id(tx_message)
-        is_valid_tx_hash = self._is_valid_tx_hash(tx_message)
-        is_utility_enhancing = self._is_utility_enhancing(tx_message)
-        is_affordable = self._is_affordable(tx_message)
-        return is_valid_tx_hash and is_utility_enhancing and is_affordable
-
-    # def _is_valid_ledger_id(self, tx_message: TransactionMessage) -> bool:
-    #     """
-    #     Check if the ledger id is valid for signing.
-
-    #     :param tx_message: the transaction message
-    #     :return: whether the transaction has a valid ledger id
-    #     """
-    #     valid = True
-    #     if tx_message.ledger_id == OFF_CHAIN:
-    #         logger.error("[{}]: ledger_id='off_chain' is not valid for signing!".format(self._agent_name))
-    #         valid = False
-    #     return valid
+        result = self._is_valid_tx_hash(tx_message) and self._is_utility_enhancing(tx_message) and self._is_affordable(tx_message)
+        return result
 
     def _is_valid_tx_hash(self, tx_message: TransactionMessage) -> bool:
         """
@@ -590,8 +585,8 @@ class DecisionMaker:
         """
         # TODO check the hash matches the terms of the transaction, this means dm requires knowledge of how the hash is composed
         tx_hash = tx_message.signing_payload.get('tx_hash')
-        valid = isinstance(tx_hash, bytes)
-        return valid
+        is_valid = isinstance(tx_hash, bytes)
+        return is_valid
 
     def _sign_tx(self, tx_message: TransactionMessage) -> str:
         """
@@ -602,7 +597,7 @@ class DecisionMaker:
         """
         if tx_message.ledger_id == OFF_CHAIN:
             crypto_object = self._wallet.crypto_objects.get(ETHEREUM)
-            # TODO: replace with FETCHAI when recover_hash function is available
+            # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
         else:
             crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
         tx_hash = tx_message.signing_payload.get('tx_hash')

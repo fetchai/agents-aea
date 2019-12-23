@@ -38,6 +38,7 @@ from aea.crypto.fetchai import FETCHAI
 DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
 SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
+SUPPORTED_CURRENCIES = {ETHEREUM: 'ETH', FETCHAI: 'FET'}
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,11 @@ class LedgerApis(object):
     def has_ethereum(self) -> bool:
         """Check if it has the ethereum API."""
         return ETHEREUM in self.apis.keys()
+
+    @property
+    def has_default_ledger(self) -> bool:
+        """Check if it has the default ledger API."""
+        return self.default_ledger_id in self.apis.keys()
 
     @property
     def last_tx_statuses(self) -> Dict[str, str]:

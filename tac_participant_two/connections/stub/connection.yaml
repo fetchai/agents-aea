@@ -1,0 +1,16 @@
+name: stub
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+url: ""
+description: "The stub connection implements a connection stub which reads/writes messages from/to file."
+class_name: StubConnection
+protocols: []
+restricted_to_protocols: []
+excluded_protocols: []
+config:
+  input_file: "./input_file"
+  output_file: "./output_file"
+dependencies:
+  watchdog: {}

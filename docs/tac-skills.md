@@ -46,7 +46,7 @@ ledger_apis:
 
 Set the default ledger to ethereum:
 ``` bash
-aea config set set agent.default_ledger ethereum
+aea config set agent.default_ledger ethereum
 ```
 
 ### Update the game parameters
@@ -84,7 +84,7 @@ aea install
 
 Set the default ledger to ethereum:
 ``` bash
-aea config set set agent.default_ledger ethereum
+aea config set agent.default_ledger ethereum
 ```
 
 ### Add the tac participation skill to participant two

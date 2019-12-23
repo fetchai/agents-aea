@@ -1,0 +1,33 @@
+name: tac_participation
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+url: ""
+description: "The tac participation skill implements the logic for an AEA to participate in the TAC."
+behaviours:
+  tac:
+    class_name: TACBehaviour
+    args: {}
+handlers:
+  oef:
+    class_name: OEFHandler
+    args: {}
+  tac:
+    class_name: TACHandler
+    args: {}
+  transaction:
+    class_name: TransactionHandler
+    args: {}
+tasks: {}
+shared_classes:
+  search:
+    class_name: Search
+    args:
+      search_interval: 5
+  game:
+    class_name: Game
+    args:
+      expected_version_id: v1
+      # expected_controller_addr: '' # optionally, provide an address for the controller you expect!
+protocols: ['oef', 'tac']
