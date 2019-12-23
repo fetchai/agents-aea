@@ -4,6 +4,15 @@ author: fetchai
 version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
+ledger_apis:
+  fetchai:
+    args:
+      addr: example.fetch-ai.com
+      port: 8080
+  ethereum:
+    args:
+      addr: example.ethereum.com
+      port: 8080
 url: ""
 connections:
 - default-oef
@@ -24,12 +33,4 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../../packages
-ledger_apis:
-- ledger_api:
-    ledger: fetchai
-    addr: example.fetch-ai.com
-    port: 8080
-- ledger_api:
-    ledger: ethereum
-    addr: example.ethereum.com
-    port: 8080
+

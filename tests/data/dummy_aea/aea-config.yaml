@@ -7,6 +7,15 @@ default_connection: local
 description: dummy_aea agent description [Fill in]
 license: Apache 2.0
 fingerprint: ""
+ledger_apis:
+  fetchai:
+    args:
+      addr: example.fetch-ai.com
+      port: 8080
+  ethereum:
+    args:
+      addr: example.ethereum.com
+      port: 8080
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -29,3 +38,4 @@ skills:
 - error
 url: ''
 version: v1
+

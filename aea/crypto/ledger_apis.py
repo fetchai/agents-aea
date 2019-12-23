@@ -23,7 +23,7 @@
 import logging
 import sys
 import time
-from typing import Any, Dict, Optional, Tuple, cast, List, Union
+from typing import Any, Dict, Optional, cast, List, Union
 
 import web3
 import web3.exceptions
