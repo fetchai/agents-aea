@@ -154,10 +154,10 @@ Both in `my_weather_station/aea-config.yaml` and
 
 ``` yaml
 ledger_apis:
-  - ledger_api:
-      ledger: fetchai
-      addr: alpha.fetch-ai.com
-      port: 80
+    fetchai:
+        args:
+            address: alpha.fetch-ai.com
+            port: 80
 ```
 
 ### Fund the weather client AEA
@@ -229,10 +229,10 @@ Both in `my_weather_station/aea-config.yaml` and
 
 ``` yaml
 ledger_apis:
-  - ledger_api:
-      addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-      ledger: ethereum
-      port: 3
+  ethereum:
+        args:
+            address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+            port: 3
 ```
 
 ### Update the skill configs
