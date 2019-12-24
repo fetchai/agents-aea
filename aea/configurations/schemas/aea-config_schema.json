@@ -24,15 +24,15 @@
       "type": "string"
     },
     "author": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/author"
     },
     "version": {
-      "type": "string"
+      "$ref": "definitions.json#/definitions/version"
     },
     "license": {
       "type": "string"
     },
-     "fingerprint": {
+    "fingerprint": {
       "type": "string"
     },
     "url": {
@@ -52,7 +52,7 @@
         ],
         "properties": {
           "private_key_path": {
-            "$ref": "#/definitions/private_key_path"
+            "$ref": "definitions.json#/definitions/private_key_path"
           }
         }
       }
@@ -70,7 +70,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "$ref": "#/definitions/resource_name"
+        "$ref": "definitions.json#/definitions/resource_name"
       }
     },
     "default_connection": {
@@ -80,7 +80,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "$ref": "#/definitions/resource_name"
+        "$ref": "definitions.json#/definitions/resource_name"
       }
     },
     "skills": {

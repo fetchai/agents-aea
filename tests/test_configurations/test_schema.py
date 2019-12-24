@@ -33,22 +33,34 @@ from ..conftest import CUR_PATH, ROOT_DIR, AGENT_CONFIGURATION_SCHEMA, SKILL_CON
     CONNECTION_CONFIGURATION_SCHEMA, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
 
 
-def test_agent_configuration_schema_is_valid_wrt_draft_07():
-    """Test that the JSON schema for the agent configuration file is compliant with the specification Draft 07."""
+def test_agent_configuration_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the agent configuration file is compliant with the specification Draft 04."""
     agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "aea-config_schema.json")))
     Draft4Validator.check_schema(agent_config_schema)
 
 
-def test_skill_configuration_schema_is_valid_wrt_draft_07():
-    """Test that the JSON schema for the skill configuration file is compliant with the specification Draft 07."""
+def test_skill_configuration_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the skill configuration file is compliant with the specification Draft 04."""
     skill_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "skill-config_schema.json")))
     Draft4Validator.check_schema(skill_config_schema)
 
 
-def test_connection_configuration_schema_is_valid_wrt_draft_07():
-    """Test that the JSON schema for the connection configuration file is compliant with the specification Draft 07."""
+def test_connection_configuration_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the connection configuration file is compliant with the specification Draft 04."""
     connection_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "connection-config_schema.json")))
     Draft4Validator.check_schema(connection_config_schema)
+
+
+def test_protocol_configuration_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the protocol configuration file is compliant with the specification Draft 04."""
+    protocol_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "protocol-config_schema.json")))
+    Draft4Validator.check_schema(protocol_config_schema)
+
+
+def test_definitions_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the definitions is compliant with the specification Draft 04."""
+    definitions_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "definitions.json")))
+    Draft4Validator.check_schema(definitions_config_schema)
 
 
 def test_validate_agent_config():
