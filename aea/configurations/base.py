@@ -46,6 +46,7 @@ Dependency = dict
 A dictionary from package name to dependency data structure (see above).
 The package name must satisfy the constraints on Python packages names.
 For details, see https://www.python.org/dev/peps/pep-0426/#name.
+
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
@@ -253,31 +254,22 @@ class PrivateKeyPathConfig(Configuration):
 class LedgerAPIConfig(Configuration):
     """Handle a ledger api configuration."""
 
-    def __init__(self, ledger: str = "", addr: str = "", port: int = 1000):
-        """Initialize a handler configuration."""
-        self.ledger = ledger
-        self.addr = addr
-        self.port = port
+    def __init__(self, **args):
+        """Initialize a ledger class configuration."""
+        self.args = args
 
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         return {
-            "ledger": self.ledger,
-            "addr": self.addr,
-            "port": self.port
+            "args": self.args
         }
 
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        ledger = cast(str, obj.get("ledger"))
-        addr = cast(str, obj.get("addr"))
-        port = cast(int, obj.get("port"))
         return LedgerAPIConfig(
-            ledger=ledger,
-            addr=addr,
-            port=port
+            **obj.get("args", {})
         )
 
 
@@ -605,7 +597,6 @@ class AgentConfig(Configuration):
                  registry_path: str = "",
                  description: str = "",
                  private_key_paths: Dict[str, str] = None,
-                 ledger_apis: Dict[str, Tuple[str, int]] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
         self.agent_name = agent_name
@@ -624,11 +615,8 @@ class AgentConfig(Configuration):
         for ledger, path in private_key_paths.items():
             self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
 
-        ledger_apis = ledger_apis if ledger_apis is not None else {}
-        for ledger, (addr, port) in ledger_apis.items():
-            self.ledger_apis.create(ledger, LedgerAPIConfig(ledger, addr, port))
-
         self.logging_config = logging_config if logging_config is not None else {}
+        self._default_ledger = None  # type: Optional[str]
         self._default_connection = None  # type: Optional[PublicId]
         self.connections = set()  # type: Set[PublicId]
         self.protocols = set()  # type: Set[PublicId]
@@ -658,6 +646,22 @@ class AgentConfig(Configuration):
             self._default_connection = None
 
     @property
+    def default_ledger(self) -> str:
+        """Get the default ledger."""
+        assert self._default_ledger is not None, "Default ledger not set yet."
+        return self._default_ledger
+
+    @default_ledger.setter
+    def default_ledger(self, ledger_id: str):
+        """
+        Set the default ledger.
+
+        :param ledger_id: the id of the default ledger.
+        :return: None
+        """
+        self._default_ledger = ledger_id
+
+    @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         return {
@@ -671,8 +675,9 @@ class AgentConfig(Configuration):
             "registry_path": self.registry_path,
             "description": self.description,
             "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
-            "ledger_apis": [{"ledger_api": t.json} for l, t in self.ledger_apis.read_all()],
+            "ledger_apis": {key: l.json for key, l in self.ledger_apis.read_all()},
             "logging_config": self.logging_config,
+            "default_ledger": self.default_ledger,
             "default_connection": self.default_connection,
             "connections": sorted(map(str, self.connections)),
             "protocols": sorted(map(str, self.protocols)),
@@ -687,11 +692,6 @@ class AgentConfig(Configuration):
             private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
             private_key_paths[private_key_path.ledger] = private_key_path.path
 
-        ledger_apis = {}
-        for l in obj.get("ledger_apis", []):  # type: ignore
-            ledger_api = LedgerAPIConfig.from_json(l["ledger_api"])
-            ledger_apis[ledger_api.ledger] = (ledger_api.addr, ledger_api.port)
-
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
@@ -703,8 +703,11 @@ class AgentConfig(Configuration):
             description=cast(str, obj.get("description", "")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
             private_key_paths=cast(Dict, private_key_paths),
-            ledger_apis=cast(Dict, ledger_apis)
         )
+
+        for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
+            ledger_config = LedgerAPIConfig.from_json(ledger_data)
+            agent_config.ledger_apis.create(ledger_id, ledger_config)
 
         # parse connection public ids
         connections = set(map(lambda x: PublicId.from_string(x), obj.get("connections", [])))
@@ -721,5 +724,7 @@ class AgentConfig(Configuration):
         # set default connection
         default_connection_name = obj.get("default_connection", None)
         agent_config.default_connection = default_connection_name
+        default_ledger_id = obj.get("default_ledger", None)
+        agent_config.default_ledger = default_ledger_id
 
         return agent_config

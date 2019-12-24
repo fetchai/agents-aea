@@ -8,6 +8,7 @@ url: ""
 connections:
 - fetchai/oef:0.1.0
 default_connection: fetchai/oef:0.1.0
+default_ledger: fetchai
 private_key_paths:
 - private_key_path:
     ledger: default
@@ -31,11 +32,11 @@ logging_config:
   version: 1
 registry_path: ../../packages
 ledger_apis:
-- ledger_api:
-    ledger: fetchai
-    addr: example.fetch-ai.com
-    port: 8080
-- ledger_api:
-    ledger: ethereum
-    addr: example.ethereum.com
-    port: 8080
+   fetchai:
+     args:
+       addr: example.fetch-ai.com
+       port: 8080
+   ethereum:
+     args:
+       address: example.ethereum.com
+       chain_id: 8080

@@ -23,7 +23,7 @@
 import logging
 import sys
 import time
-from typing import Any, Dict, Optional, Tuple, cast
+from typing import Any, Dict, Optional, cast, List, Union
 
 import web3
 import web3.exceptions
@@ -38,6 +38,7 @@ from aea.crypto.fetchai import FETCHAI
 DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
 SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
+SUPPORTED_CURRENCIES = {ETHEREUM: 'ETH', FETCHAI: 'FET'}
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +52,15 @@ ERROR = "ERROR"
 class LedgerApis(object):
     """Store all the ledger apis we initialise."""
 
-    def __init__(self, ledger_api_configs: Dict[str, Tuple[str, int]]):
+    def __init__(self, ledger_api_configs: Dict[str, List[Union[str, int]]], default_ledger_id: str):
         """
         Instantiate a wallet object.
 
         :param ledger_api_configs: the ledger api configs
+        :param default_ledger: the default ledger
         """
         apis = {}  # type: Dict[str, Any]
-        configs = {}  # type: Dict[str, Tuple[str, int]]
+        configs = {}  # type: Dict[str, List[Union[str, int]]]
         self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
@@ -75,9 +77,10 @@ class LedgerApis(object):
 
         self._apis = apis
         self._configs = configs
+        self._default_ledger_id = default_ledger_id
 
     @property
-    def configs(self) -> Dict[str, Tuple[str, int]]:
+    def configs(self) -> Dict[str, List[Union[str, int]]]:
         """Get the configs."""
         return self._configs
 
@@ -97,9 +100,19 @@ class LedgerApis(object):
         return ETHEREUM in self.apis.keys()
 
     @property
+    def has_default_ledger(self) -> bool:
+        """Check if it has the default ledger API."""
+        return self.default_ledger_id in self.apis.keys()
+
+    @property
     def last_tx_statuses(self) -> Dict[str, str]:
         """Get the statuses for the last transaction."""
         return self._last_tx_statuses
+
+    @property
+    def default_ledger_id(self) -> str:
+        """Get the default ledger id."""
+        return self._default_ledger_id
 
     def token_balance(self, identifier: str, address: str) -> int:
         """
@@ -235,7 +248,7 @@ class LedgerApis(object):
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
     """
-    Tro to instantiate the fetchai ledger api.
+    Try to instantiate the fetchai ledger api.
 
     :param addr: the address
     :param port: the port
@@ -248,12 +261,12 @@ def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
         sys.exit(1)
 
 
-def _try_to_instantiate_ethereum_ledger_api(addr: str, port: int) -> None:
+def _try_to_instantiate_ethereum_ledger_api(addr: str, chain_id: int) -> None:
     """
-    Tro to instantiate the fetchai ledger api.
+    Try to instantiate the ethereum ledger api.
 
     :param addr: the address
-    :param port: the port
+    :param chain_id: the id for the chain.
     """
     try:
         from web3 import Web3, HTTPProvider

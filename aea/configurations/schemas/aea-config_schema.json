@@ -11,6 +11,7 @@
     "license",
     "url",
     "private_key_paths",
+    "default_ledger",
     "connections",
     "default_connection",
     "protocols",
@@ -57,21 +58,17 @@
         }
       }
     },
-    "ledger_apis": {
-      "type": "array",
-      "additionalProperties": false,
+     "ledger_apis": {
+      "type": "object",
       "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "required": [
-          "ledger_api"
-        ],
-        "properties": {
-          "ledger_api": {
-            "$ref": "definitions.json#/definitions/ledger_api"
-          }
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/ledger_api"
         }
       }
+    },
+    "default_ledger": {
+      "type": "string"
     },
     "connections": {
       "type": "array",
@@ -102,6 +99,37 @@
     },
     "description": {
       "type": "string"
+    }
+  },
+  "definitions": {
+    "private_key_path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ledger",
+        "path"
+      ],
+      "properties": {
+        "ledger": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "ledger_api": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "type": "object"
+        }
+      }
+    },
+    "resource_name": {
+      "type": "string",
+      "pattern": "[a-zA-Z_][a-zA-Z0-9_]*"
     }
   }
 }

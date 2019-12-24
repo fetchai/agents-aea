@@ -238,12 +238,12 @@ def test_run_unknown_ledger(pytestconfig):
     whole_file = file.read()
 
     # add in the ledger address
-    find_text = "ledger_apis: []"
+    find_text = "ledger_apis: {}"
     replace_text = """ledger_apis:
-        - ledger_api:
-            addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-            ledger: ethereum-not
-            port: 3"""
+    unknown:
+        args:
+            address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+            chain_id: 3"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -464,15 +464,15 @@ def test_run_ledger_apis(pytestconfig):
     whole_file = file.read()
 
     # add in the ledger address
-    find_text = "ledger_apis: []"
+    find_text = "ledger_apis: {}"
     replace_text = """ledger_apis:
-        - ledger_api:
-            addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-            ledger: ethereum
-            port: 3
-        - ledger_api:
-            addr: alpha.fetch-ai.com
-            ledger: fetchai
+    ethereum:
+        args:
+            address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+            chain_id: 3
+    fetchai:
+        args:
+            address: alpha.fetch-ai.com
             port: 80"""
 
     whole_file = whole_file.replace(find_text, replace_text)
@@ -542,12 +542,12 @@ def test_run_fet_ledger_apis(pytestconfig):
 
     # add in the ledger address
 
-    find_text = "ledger_apis: []"
+    find_text = "ledger_apis: {}"
     replace_text = """ledger_apis:
-    - ledger_api:
-        addr: alpha.fetch-ai.com
-        ledger: fetchai
-        port: 80"""
+    fetchai:
+        args:
+            address: alpha.fetch-ai.com
+            port: 80"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 

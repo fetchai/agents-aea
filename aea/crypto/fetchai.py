@@ -106,6 +106,17 @@ class FetchAICrypto(Crypto):
         signature = self.entity.sign(tx_hash)
         return signature
 
+    # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
+    #     """
+    #     Recover the address from the hash.
+
+    #     :param tx_hash: the transaction hash
+    #     :param signature: the transaction signature
+    #     :return: the recovered address
+    #     """
+    #     address = 'STUB'
+    #     return address
+
     @classmethod
     def get_address_from_public_key(cls, public_key: str) -> Address:
         """
