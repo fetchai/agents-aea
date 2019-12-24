@@ -29,9 +29,9 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.configurations.base import PublicId, DEFAULT_AEA_CONFIG_FILE
 # these variables are being used dynamically
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, PublicId  # noqa: F401
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE  # noqa: F401
 
 
 @click.group()
