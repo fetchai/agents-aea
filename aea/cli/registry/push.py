@@ -23,6 +23,8 @@ import os
 import tarfile
 import shutil
 
+from distutils.dir_util import copy_tree
+
 from aea.cli.common import logger
 from aea.cli.registry.utils import request_api, load_yaml, clean_tarfiles
 
@@ -92,4 +94,50 @@ def push_item(item_type: str, item_name: str) -> None:
         'Successfully pushed {} {} to the Registry. Public ID: {}'.format(
             item_type, item_name, resp['public_id']
         )
+    )
+
+
+def get_packages_path() -> str:
+    """
+    Get path to packages folder.
+    Should not be called from outside the project dir.
+
+    :return: str path to packages dir.
+    """
+    project_parent_dir = os.path.abspath('__file__').split(
+        '{0}agents-aea{0}'.format(os.path.sep)
+    )[0]
+    return os.path.join(project_parent_dir, 'agents-aea', 'packages')
+
+
+def save_item_locally(item_type: str, item_name: str) -> None:
+    """
+    Save item to local packages.
+
+    :param item_type: str type of item (connection/protocol/skill).
+    :param item_name: str item name.
+
+    :return: None
+    """
+    item_type_plural = item_type + 's'
+    cwd = os.getcwd()
+
+    source_path = os.path.join(cwd, item_type_plural, item_name)
+    if not os.path.exists(source_path):
+        raise click.ClickException(
+            '{} "{}" not found in {}.'
+            .format(item_type.title(), item_name, cwd)
+        )
+
+    packages_path = get_packages_path()
+    target_path = os.path.join(packages_path, item_type_plural, item_name)
+    if os.path.exists(target_path):
+        raise click.ClickException(
+            '{} "{}" already exists in packages folder.'
+            .format(item_type.title(), item_name)
+        )
+    copy_tree(source_path, target_path)
+    click.echo(
+        '{} "{}" successfully saved in packages folder.'
+        .format(item_type.title(), item_name)
     )

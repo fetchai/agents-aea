@@ -61,7 +61,7 @@ def request_api(
     if filepath:
         files = {'file': open(filepath, 'rb')}
 
-    resp = requests.request(
+    request_kwargs = dict(
         method=method,
         url='{}{}'.format(REGISTRY_API_URL, path),
         params=params,
@@ -69,6 +69,11 @@ def request_api(
         data=data,
         headers=headers,
     )
+    try:
+        resp = requests.request(**request_kwargs)
+    except requests.exceptions.ConnectionError:
+        raise click.ClickException('Registry server is not responding.')
+
     resp_json = resp.json()
 
     if resp.status_code == 200:
