@@ -19,6 +19,7 @@
 
 """This module contains the tests of the ml_messages module."""
 import logging
+from typing import cast
 
 import pytest
 
@@ -81,3 +82,4 @@ def test_ml_message_creation():
     with pytest.raises(ValueError):
         recovered_msg = MLTradeSerializer().decode(msg_bytes)
         assert recovered_msg == msg
+    assert np.array_equal(recovered_msg.data, msg.data)
