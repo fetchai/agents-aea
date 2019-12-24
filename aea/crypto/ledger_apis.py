@@ -23,7 +23,7 @@
 import logging
 import sys
 import time
-from typing import Any, Dict, Optional, Tuple, cast
+from typing import Any, Dict, Optional, cast, List, Union
 
 import web3
 import web3.exceptions
@@ -52,7 +52,7 @@ ERROR = "ERROR"
 class LedgerApis(object):
     """Store all the ledger apis we initialise."""
 
-    def __init__(self, ledger_api_configs: Dict[str, Tuple[str, int]], default_ledger_id: str):
+    def __init__(self, ledger_api_configs: Dict[str, List[Union[str, int]]], default_ledger_id: str):
         """
         Instantiate a wallet object.
 
@@ -60,7 +60,7 @@ class LedgerApis(object):
         :param default_ledger: the default ledger
         """
         apis = {}  # type: Dict[str, Any]
-        configs = {}  # type: Dict[str, Tuple[str, int]]
+        configs = {}  # type: Dict[str, List[Union[str, int]]]
         self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
@@ -80,7 +80,7 @@ class LedgerApis(object):
         self._default_ledger_id = default_ledger_id
 
     @property
-    def configs(self) -> Dict[str, Tuple[str, int]]:
+    def configs(self) -> Dict[str, List[Union[str, int]]]:
         """Get the configs."""
         return self._configs
 
@@ -248,7 +248,7 @@ class LedgerApis(object):
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
     """
-    Tro to instantiate the fetchai ledger api.
+    Try to instantiate the fetchai ledger api.
 
     :param addr: the address
     :param port: the port
@@ -261,12 +261,12 @@ def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
         sys.exit(1)
 
 
-def _try_to_instantiate_ethereum_ledger_api(addr: str, port: int) -> None:
+def _try_to_instantiate_ethereum_ledger_api(addr: str, chain_id: int) -> None:
     """
-    Tro to instantiate the fetchai ledger api.
+    Try to instantiate the ethereum ledger api.
 
     :param addr: the address
-    :param port: the port
+    :param chain_id: the id for the chain.
     """
     try:
         from web3 import Web3, HTTPProvider

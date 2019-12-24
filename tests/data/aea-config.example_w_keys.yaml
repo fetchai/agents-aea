@@ -32,11 +32,11 @@ logging_config:
   version: 1
 registry_path: ../../packages
 ledger_apis:
-- ledger_api:
-    ledger: fetchai
-    addr: example.fetch-ai.com
-    port: 8080
-- ledger_api:
-    ledger: ethereum
-    addr: example.ethereum.com
-    port: 8080
+   fetchai:
+     args:
+       addr: example.fetch-ai.com
+       port: 8080
+   ethereum:
+     args:
+       address: example.ethereum.com
+       chain_id: 8080

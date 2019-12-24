@@ -29,10 +29,10 @@ aea add-key fetchai fet_private_key.txt
 Add the ledger info to both aea configs:
 ``` bash
 ledger_apis:
-  - ledger_api:
-      ledger: fetchai
-      addr: alpha.fetch-ai.com
-      port: 80
+  fetchai:
+      args:
+         address: alpha.fetch-ai.com
+         port: 80
 ```
 
 Fund the carpark client agent:

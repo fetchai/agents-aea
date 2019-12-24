@@ -105,14 +105,6 @@ class TestCarPark:
         # read all lines at once
         whole_file = file.read()
 
-        # add in the ledger address
-        find_text = "ledger_apis: []"
-        replace_text = """ledger_apis:
-            - ledger_api:
-                addr: alpha.fetch-ai.com
-                ledger: fetchai
-                port: 80"""
-
         whole_file = whole_file.replace("db_is_rel_to_cwd: true", "# db_is_rel_to_cwd: true")
         whole_file = whole_file.replace("db_rel_dir: ../temp_files", "# db_rel_dir: ../temp_files")
 
@@ -156,11 +148,11 @@ class TestCarPark:
         whole_file = file.read()
 
         # add in the ledger address
-        find_text = "ledger_apis: []"
+        find_text = "ledger_apis: {}"
         replace_text = """ledger_apis:
-            - ledger_api:
-                addr: alpha.fetch-ai.com
-                ledger: fetchai
+        fetchai:
+            args:
+                address: alpha.fetch-ai.com
                 port: 80"""
 
         whole_file = whole_file.replace(find_text, replace_text)

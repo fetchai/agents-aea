@@ -24,7 +24,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import cast, List
+from typing import cast, List, Union
 
 import click
 from click import pass_context
@@ -124,14 +124,16 @@ def _verify_ledger_apis_access() -> None:
         logger.debug("No fetchai ledger api config specified.")
     else:
         fetchai_ledger_api_config = cast(LedgerAPIConfig, fetchai_ledger_api_config)
-        _try_to_instantiate_fetchai_ledger_api(fetchai_ledger_api_config.addr, fetchai_ledger_api_config.port)
+        _try_to_instantiate_fetchai_ledger_api(cast(str, fetchai_ledger_api_config.args.get('address')),
+                                               cast(int, fetchai_ledger_api_config.args.get('port')))
 
     ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
     if ethereum_ledger_config is None:
         logger.debug("No ethereum ledger api config specified.")
     else:
         ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
-        _try_to_instantiate_ethereum_ledger_api(ethereum_ledger_config.addr, ethereum_ledger_config.port)
+        _try_to_instantiate_ethereum_ledger_api(cast(str, ethereum_ledger_config.args.get('address')),
+                                                cast(int, ethereum_ledger_config.args.get('chain_id')))
 
 
 def _setup_connection(connection_name: str, address: str, ctx: Context) -> Connection:
@@ -192,7 +194,7 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
     _verify_or_create_private_keys(ctx)
     _verify_ledger_apis_access()
     private_key_paths = dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()])
-    ledger_api_configs = dict([(identifier, (config.addr, config.port)) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
+    ledger_api_configs = dict([(identifier, cast(List[Union[str, int]], list(config.args.values()))) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
 
     wallet = Wallet(private_key_paths)
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
