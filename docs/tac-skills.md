@@ -98,7 +98,7 @@ aea install
 
 Set the default ledger to ethereum:
 ``` bash
-aea config set set agent.default_ledger ethereum
+aea config set agent.default_ledger ethereum
 ```
 
 ### Run both the TAC participant AEAs

@@ -175,7 +175,7 @@ class Initialization:
         return self._agent_addr_to_utility_params
 
     @property
-    def good_id_to_eq_prices(self) -> Dict[Address, float]:
+    def good_id_to_eq_prices(self) -> Dict[GoodId, float]:
         """Get theoretical equilibrium prices (a benchmark)."""
         return self._good_id_to_eq_prices
 

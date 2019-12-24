@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
-# import json
 import pickle
 import sys
 from typing import cast, TYPE_CHECKING

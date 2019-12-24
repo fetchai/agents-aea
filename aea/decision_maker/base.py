@@ -110,7 +110,7 @@ class OwnershipState:
 
     def check_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
         """
-        Check if the transaction is consistent.
+        Check if the transaction is affordable (and consistent).
 
         E.g. check that the agent state has enough money if it is a buyer or enough holdings if it is a seller.
         Note, the agent is the sender of the transaction message by design.
