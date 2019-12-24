@@ -17,16 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 """Methods for CLI fetch functionality."""
+from typing import Union
 
 import click
 import os
 
 from aea.cli.registry.utils import (
-    request_api, download_file, extract, split_public_id
+    request_api, download_file, extract
 )
+from aea.configurations.base import PublicId
 
 
-def fetch_agent(public_id: str) -> None:
+def fetch_agent(public_id: Union[PublicId, str]) -> None:
     """
     Fetch Agent from Registry.
 
@@ -34,7 +36,9 @@ def fetch_agent(public_id: str) -> None:
 
     :return: None
     """
-    owner, name, version = split_public_id(public_id)
+    if isinstance(public_id, str):
+        public_id = PublicId.from_string(public_id)
+    owner, name, version = public_id.owner, public_id.name, public_id.version
     api_path = '/agents/{}/{}/{}'.format(owner, name, version)
     resp = request_api('GET', api_path)
     file_url = resp['file']

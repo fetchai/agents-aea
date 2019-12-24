@@ -426,7 +426,7 @@ class OEFConnection(Connection):
         :param oef_port: the OEF port.
         :param connection_id: the identifier of the connection object.
         :param restricted_to_protocols: the only supported protocols for this connection.
-        :param excluded_protocols: the excluded protocols for this conenction.
+        :param excluded_protocols: the excluded protocols for this connection.
         """
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
                          excluded_protocols=excluded_protocols)
@@ -552,7 +552,9 @@ class OEFConnection(Connection):
         """
         oef_addr = cast(str, connection_configuration.config.get("addr"))
         oef_port = cast(int, connection_configuration.config.get("port"))
+        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
+        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
         return OEFConnection(address, oef_addr, oef_port,
                              connection_id=connection_configuration.name,
-                             restricted_to_protocols=set(connection_configuration.restricted_to_protocols),
-                             excluded_protocols=set(connection_configuration.excluded_protocols))
+                             restricted_to_protocols=restricted_to_protocols_names,
+                             excluded_protocols=excluded_protocols_names)

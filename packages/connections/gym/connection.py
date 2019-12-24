@@ -221,6 +221,9 @@ class GymConnection(Connection):
         """
         gym_env_package = cast(str, connection_configuration.config.get('env'))
         gym_env = locate(gym_env_package)
+        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
+        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
         return GymConnection(address, gym_env(),
                              connection_id=connection_configuration.name,
-                             restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
+                             restricted_to_protocols=restricted_to_protocols_names,
+                             excluded_protocols=excluded_protocols_names)

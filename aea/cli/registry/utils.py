@@ -19,13 +19,13 @@
 """Utils used for operating Registry with CLI."""
 
 
-import click
 import os
-import requests
 import tarfile
-import yaml
+from typing import Dict
 
-from typing import List, Dict
+import click
+import requests
+import yaml
 
 from aea.cli.common import logger
 from aea.cli.registry.settings import (
@@ -33,6 +33,7 @@ from aea.cli.registry.settings import (
     CLI_CONFIG_PATH,
     AUTH_TOKEN_KEY
 )
+from aea.configurations.base import PublicId
 
 
 def request_api(
@@ -95,18 +96,6 @@ def request_api(
     return resp_json
 
 
-def split_public_id(public_id: str) -> List[str]:
-    """
-    Split public ID to ownwer, name, version.
-
-    :param public_id: public ID of item from Registry.
-
-    :return: list of str [owner, name, version]
-    """
-    public_id = public_id.replace(':', '/')
-    return public_id.split('/')
-
-
 def download_file(url: str, cwd: str) -> str:
     """
     Download file from URL and save it in CWD (current working directory).
@@ -149,7 +138,7 @@ def extract(source: str, target: str) -> None:
     os.remove(source)
 
 
-def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
+def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
     """
     Fetch connection/protocol/skill from Registry.
 
@@ -164,7 +153,7 @@ def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
         public_id=public_id,
         obj_type=obj_type
     ))
-    owner, name, version = split_public_id(public_id)
+    owner, name, version = public_id.owner, public_id.name, public_id.version
     plural_obj_type = obj_type + 's'  # used for API and folder paths
 
     api_path = '/{}/{}/{}/{}'.format(plural_obj_type, owner, name, version)

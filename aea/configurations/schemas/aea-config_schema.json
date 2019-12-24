@@ -74,7 +74,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "$ref": "definitions.json#/definitions/resource_name"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "default_connection": {
@@ -84,14 +84,14 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "$ref": "definitions.json#/definitions/resource_name"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "skills": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "type": "string"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "logging_config": {

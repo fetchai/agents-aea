@@ -24,13 +24,13 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from ...common.click_testing import CliRunner
 from jsonschema import ValidationError
 
 import aea
 import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION, CUR_PATH
 
 
@@ -44,6 +44,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -56,29 +57,24 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add connection first time
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
         assert result.exit_code == 0
         # add connection again
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
 
-    @unittest.mock.patch(
-        'aea.cli.add.split_public_id',
-        return_value=['owner', 'name', 'version']
-    )
     @unittest.mock.patch('aea.cli.add.fetch_package')
     def test_add_connection_from_registry_positive(
-        self, fetch_package_mock, split_public_id_mock
+        self, fetch_package_mock
     ):
         """Test add from registry positive result."""
-        public_id = "owner/name:version"
+        public_id = aea.configurations.base.PublicId("owner", "name", "0.1.0")
         obj_type = 'connection'
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--registry", obj_type, public_id],
+            [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
             standalone_mode=False
         )
         assert result.exit_code == 0
-        split_public_id_mock.assert_called_once_with(public_id)
         fetch_package_mock.assert_called_once_with(
             obj_type, public_id=public_id, cwd='.'
         )
@@ -115,6 +111,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.connection_id = "owner/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -126,7 +123,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -160,6 +157,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.connection_id = "owner/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -177,7 +175,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -211,6 +209,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -224,7 +223,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.agent_name)
         Path("connections", cls.connection_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

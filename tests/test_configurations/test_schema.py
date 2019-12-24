@@ -84,7 +84,8 @@ class TestAgentSchema:
     @pytest.mark.parametrize("agent_path",
                              [
                                  os.path.join(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE),
-                                 os.path.join(CUR_PATH, "data", "aea-config.example.yaml")
+                                 os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
+                                 os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml")
                              ])
     def test_validate_agent_config(self, agent_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""

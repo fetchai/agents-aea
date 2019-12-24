@@ -40,21 +40,21 @@
       "additionalProperties": false,
       "uniqueItems": true,
       "items": {
-        "type": "string"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "restricted_to_protocols": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "type": "string"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "excluded_protocols": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "type": "string"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "config": {

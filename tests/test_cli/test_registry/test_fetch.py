@@ -18,15 +18,11 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry fetch methods."""
 
-from unittest import TestCase, mock
+from unittest import mock
 
 from aea.cli.registry.fetch import fetch_agent
 
 
-@mock.patch(
-    'aea.cli.registry.fetch.split_public_id',
-    return_value=['owner', 'name', 'version']
-)
 @mock.patch(
     'aea.cli.registry.fetch.request_api',
     return_value={'file': 'url'}
@@ -37,7 +33,7 @@ from aea.cli.registry.fetch import fetch_agent
 )
 @mock.patch('aea.cli.registry.fetch.extract')
 @mock.patch('aea.cli.registry.fetch.os.getcwd', return_value='cwd')
-class FetchAgentTestCase(TestCase):
+class TestFetchAgent:
     """Test case for fetch_package method."""
 
     def test_fetch_agent_positive(
@@ -46,15 +42,13 @@ class FetchAgentTestCase(TestCase):
         extract_mock,
         download_file_mock,
         request_api_mock,
-        split_public_id_mock
     ):
         """Test for fetch_agent method positive result."""
-        public_id = 'owner/name:version'
+        public_id = 'owner/name:0.1.0'
 
         fetch_agent(public_id)
-        split_public_id_mock.assert_called_with(public_id)
         request_api_mock.assert_called_with(
-            'GET', '/agents/owner/name/version'
+            'GET', '/agents/owner/name/0.1.0'
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/name')

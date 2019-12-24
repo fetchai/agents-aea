@@ -6,20 +6,20 @@ license: Apache 2.0
 fingerprint: ""
 url: ""
 connections:
-- default-oef
-default_connection: default-oef
+- fetchai/oef:0.1.0
+default_connection: fetchai/oef:0.1.0
 default_ledger: fetchai
 private_key_paths:
 - private_key_path:
     ledger: default
     path: ''
 protocols:
-- oef
-- default
-- tac
-- fipa
+- fetchai/oef:0.1.0
+- fetchai/default:0.1.0
+- fetchai/tac:0.1.0
+- fetchai/fipa:0.1.0
 skills:
-- echo_skill
+- fetchai/echo:0.1.0
 description: "An example of agent configuration file for testing purposes."
 logging_config:
   disable_existing_loggers: false

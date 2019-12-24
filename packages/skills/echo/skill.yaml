@@ -23,5 +23,5 @@ tasks:
       foo: bar
       bar: foo
 shared_classes: {}
-protocols: ["default"]
+protocols: ["fetchai/default:0.1.0"]
 dependencies: {}

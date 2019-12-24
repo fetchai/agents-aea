@@ -45,4 +45,4 @@ shared_classes:
     class_name: Transactions
     args:
       pending_transaction_timeout: 30
-protocols: ['oef', 'fipa']
+protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']

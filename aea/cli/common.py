@@ -33,7 +33,7 @@ from dotenv import load_dotenv
 
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies, PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
 
@@ -41,8 +41,8 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_REGISTRY_PATH = str(Path("..", "packages"))
-DEFAULT_CONNECTION = "stub"
-DEFAULT_SKILL = "error"
+DEFAULT_CONNECTION = PublicId.from_string("fetchai/stub:0.1.0")  # type: PublicId
+DEFAULT_SKILL = PublicId.from_string("fetchai/error:0.1.0")  # type: PublicId
 DEFAULT_LEDGER = FETCHAI
 
 
@@ -78,19 +78,19 @@ class Context(object):
         """
         dependencies = {}  # type: Dependencies
         for protocol_id in self.agent_config.protocols:
-            path = str(Path("protocols", protocol_id, DEFAULT_PROTOCOL_CONFIG_FILE))
+            path = str(Path("protocols", protocol_id.name, DEFAULT_PROTOCOL_CONFIG_FILE))
             protocol_config = self.protocol_loader.load(open(path))
             deps = cast(Dependencies, protocol_config.dependencies)
             dependencies.update(deps)
 
         for connection_id in self.agent_config.connections:
-            path = str(Path("connections", connection_id, DEFAULT_CONNECTION_CONFIG_FILE))
+            path = str(Path("connections", connection_id.name, DEFAULT_CONNECTION_CONFIG_FILE))
             connection_config = self.connection_loader.load(open(path))
             deps = cast(Dependencies, connection_config.dependencies)
             dependencies.update(deps)
 
         for skill_id in self.agent_config.skills:
-            path = str(Path("skills", skill_id, DEFAULT_SKILL_CONFIG_FILE))
+            path = str(Path("skills", skill_id.name, DEFAULT_SKILL_CONFIG_FILE))
             skill_config = self.skill_loader.load(open(path))
             deps = cast(Dependencies, skill_config.dependencies)
             dependencies.update(deps)
@@ -116,8 +116,9 @@ def _try_to_load_agent_config(ctx: Context):
 
 
 def _try_to_load_protocols(ctx: Context):
-    for protocol_name in ctx.agent_config.protocols:
-        logger.debug("Processing protocol {}".format(protocol_name))
+    for protocol_public_id in ctx.agent_config.protocols:
+        protocol_name = protocol_public_id.name
+        logger.debug("Processing protocol {}".format(protocol_public_id))
         try:
             ctx.protocol_loader.load(open(os.path.join("protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
         except FileNotFoundError:
@@ -130,7 +131,7 @@ def _try_to_load_protocols(ctx: Context):
             protocol_spec.loader.exec_module(protocol_module)  # type: ignore
             sys.modules[protocol_spec.name + "_protocol"] = protocol_module
         except Exception:
-            logger.error("A problem occurred while processing protocol {}.".format(protocol_name))
+            logger.error("A problem occurred while processing protocol {}.".format(protocol_public_id))
             sys.exit(1)
 
 
@@ -223,4 +224,27 @@ class ConnectionsOption(click.Option):
             connection_names = set(arg_strip(s) for s in value.split(",") if arg_strip(s) != "")
             return list(connection_names)
         except Exception:  # pragma: no cover
+            raise click.BadParameter(value)
+
+
+class PublicIdParameter(click.ParamType):
+    """Define a public id parameter for Click applications."""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the Public Id parameter.
+
+        Just forwards arguments to parent constructor.
+        """
+        super().__init__(*args, **kwargs)
+
+    def get_metavar(self, param):
+        """Return the metavar default for this param if it provides one."""
+        return "PUBLIC_ID"
+
+    def convert(self, value, param, ctx):
+        """Convert the value. This is not invoked for values that are `None` (the missing value)."""
+        try:
+            return PublicId.from_string(value)
+        except ValueError:
             raise click.BadParameter(value)

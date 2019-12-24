@@ -8,7 +8,7 @@ description: "The p2p connection provides a connection with the fetch.ai mail pr
 class_name: PeerToPeerConnection
 protocols: []
 restricted_to_protocols: []
-excluded_protocols: ["gym"]
+excluded_protocols: ["fetchai/gym:0.1.0"]
 config:
   addr: ${addr:127.0.0.1}
   port: ${port:8000}
