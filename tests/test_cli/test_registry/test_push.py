@@ -166,7 +166,9 @@ class GetItemSourcePathTestCase(TestCase):
     @mock.patch('aea.cli.registry.push.os.path.exists', return_value=True)
     def test__get_item_source_path_positive(self, exists_mock, join_mock):
         """Test for _get_item_source_path positive result."""
-        _get_item_source_path('cwd', 'skills', 'skill-name')
+        result = _get_item_source_path('cwd', 'skills', 'skill-name')
+        expected_result = 'some-path'
+        self.assertEqual(result, expected_result)
         join_mock.assert_called_once_with('cwd', 'skills', 'skill-name')
         exists_mock.assert_called_once_with('some-path')
 
@@ -187,7 +189,9 @@ class GetItemTargetPathTestCase(TestCase):
         self, exists_mock, join_mock, get_packages_path_mock
     ):
         """Test for _get_item_source_path positive result."""
-        _get_item_target_path('skills', 'skill-name')
+        result = _get_item_target_path('skills', 'skill-name')
+        expected_result = 'some-path'
+        self.assertEqual(result, expected_result)
         join_mock.assert_called_once_with('packages', 'skills', 'skill-name')
         exists_mock.assert_called_once_with('some-path')
 
