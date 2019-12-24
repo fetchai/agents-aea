@@ -35,6 +35,7 @@ from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
     DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies
 from aea.configurations.loader import ConfigLoader
+from aea.crypto.fetchai import FETCHAI
 
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
@@ -42,6 +43,7 @@ logger = default_logging_config(logger)
 DEFAULT_REGISTRY_PATH = str(Path("..", "packages"))
 DEFAULT_CONNECTION = "stub"
 DEFAULT_SKILL = "error"
+DEFAULT_LEDGER = FETCHAI
 
 
 class Context(object):

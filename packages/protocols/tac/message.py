@@ -257,6 +257,8 @@ class TACMessage(Message):
                 assert isinstance(self.tx_fee, int)
                 assert type(self.agent_addr_to_name) in [dict, defaultdict]
                 assert type(self.good_id_to_name) in [dict, defaultdict]
+                for good_id, name in self.good_id_to_name.items():
+                    assert isinstance(good_id, str) and isinstance(name, str)
                 assert isinstance(self.version_id, str)
                 assert len(self.body) == 9
             elif self.type == TACMessage.Type.TRANSACTION_CONFIRMATION:

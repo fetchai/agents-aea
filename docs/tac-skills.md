@@ -9,7 +9,6 @@ There are two types of agents:
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-
 ## Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
@@ -20,6 +19,7 @@ Keep it running for all the following demos.
 
 ## Demo 1: no ledger transactions
 
+This demo uses another agent - a controller agent - to take the role of running the competition and validating the transactions negotiated by the agents. 
 
 ### Create the TAC controller AEA
 In the root directory, create the tac controller AEA.
@@ -35,17 +35,31 @@ aea add skill tac_control
 aea install
 ```
 
+Add the following configs to the aea config:
+``` yaml
+ledger_apis:
+  - ledger_api:
+      addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+      ledger: ethereum
+      port: 3
+```
+
+Set the default ledger to ethereum:
+``` bash
+aea config set agent.default_ledger ethereum
+```
+
 ### Update the game parameters
 You can change the game parameters in `tac_controller/skills/tac_control/skill.yaml` under `Parameters`.
 
-or use the following comand:
+You must set the start time to a point in the future `start_time: 12 11 2019  15:01`.
+
+Alternatively, use the command line to get and set the start time:
+
 ``` bash
-aea config set skills.tac_control.shared_classes.parameters.args.start_time 'Nov 10 2019 10:40AM'
+aea config get skills.tac_control.shared_classes.parameters.args.start_time
+aea config set skills.tac_control.shared_classes.parameters.args.start_time '21 12 2019  07:14'
 ```
-
-You must set the start time to a point in the future `start_time: Nov 10 2019  10:40AM`.
-
-
 
 ### Run the TAC controller AEA
 ``` bash
@@ -68,6 +82,11 @@ aea add skill tac_negotiation
 aea install
 ```
 
+Set the default ledger to ethereum:
+``` bash
+aea config set agent.default_ledger ethereum
+```
+
 ### Add the tac participation skill to participant two
 ``` bash
 cd tac_participant_two
@@ -77,13 +96,15 @@ aea add skill tac_negotiation
 aea install
 ```
 
+Set the default ledger to ethereum:
+``` bash
+aea config set agent.default_ledger ethereum
+```
+
 ### Run both the TAC participant AEAs
 ``` bash
 aea run --connections oef
 ```
-
-!!!	Note
-	Currently, the agents cannot settle their trades. Updates coming soon!
 	
 ### Registration communication
 This diagram shows the communication between the various entities during the registration phase. 

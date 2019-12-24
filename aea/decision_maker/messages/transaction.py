@@ -23,7 +23,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, cast
 
-from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS
+from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS, SUPPORTED_CURRENCIES
 from aea.decision_maker.messages.base import InternalMessage
 from aea.mail.base import Address
 
@@ -172,6 +172,31 @@ class TransactionMessage(InternalMessage):
         assert self.is_set("tx_signature"), "Tx_signature is not set."
         return cast(str, self.get("tx_signature"))
 
+    @property
+    def amount(self) -> int:
+        """Get the amount."""
+        return list(self.tx_amount_by_currency_id.values())[0]
+
+    @property
+    def currency_id(self) -> str:
+        """Get the currency id."""
+        return list(self.tx_amount_by_currency_id.keys())[0]
+
+    @property
+    def sender_amount(self) -> int:
+        """Get the amount which the sender gets/pays as part of the tx."""
+        return self.amount - self.tx_sender_fee
+
+    @property
+    def counterparty_amount(self) -> int:
+        """Get the amount which the counterparty gets/pays as part of the tx."""
+        return -self.amount - self.tx_counterparty_fee
+
+    @property
+    def fees(self) -> int:
+        """Get the tx fees."""
+        return self.tx_sender_fee + self.tx_counterparty_fee
+
     def check_consistency(self) -> bool:
         """
         Check that the data is consistent.
@@ -192,10 +217,16 @@ class TransactionMessage(InternalMessage):
             assert isinstance(self.tx_counterparty_fee, int), "Tx_counterparty_fee must be of type int."
             assert self.tx_counterparty_fee >= 0, "Tx_counterparty_fee must be greater or equal to zero."
             assert isinstance(self.tx_quantities_by_good_id, dict) and all((isinstance(key, str) and isinstance(value, int)) for key, value in self.tx_quantities_by_good_id.items()), "Tx_quantities_by_good_id must be of type Dict[str, int]."
-            assert len(self.tx_quantities_by_good_id.keys()) == len(set(self.tx_quantities_by_good_id.keys())), "Good ids must be unique in tx_quantities_by_good_id."
             assert isinstance(self.ledger_id, str) and self.ledger_id in SUPPORTED_LEDGER_IDS, "Ledger_id must be str and " \
                                                                                                "must in the supported ledger ids."
             assert isinstance(self.info, dict) and all(isinstance(key, str) for key in self.info.keys()), "Info must be of type Dict[str, Any]."
+            if not self.ledger_id == OFF_CHAIN:
+                assert self.currency_id == SUPPORTED_CURRENCIES[self.ledger_id], "Inconsistent currency_id given ledger_id."
+            if self.amount >= 0:
+                assert self.sender_amount >= 0, "Sender_amount must be positive when the sender is the payment receiver."
+            else:
+                assert self.counterparty_amount >= 0, "Counterparty_amount must be positive when the counterpary is the payment receiver."
+
             if self.performative in {self.Performative.PROPOSE_FOR_SETTLEMENT, self.Performative.REJECTED_SETTLEMENT, self.Performative.FAILED_SETTLEMENT}:
                 assert len(self.body) == 11
             elif self.performative == self.Performative.SUCCESSFUL_SETTLEMENT:
@@ -206,7 +237,7 @@ class TransactionMessage(InternalMessage):
                 assert len(self.body) == 12
             elif self.performative == self.Performative.SUCCESSFUL_SIGNING:
                 assert isinstance(self.signing_payload, dict) and all(isinstance(key, str) for key in self.signing_payload.keys()), "Signing_payload must be of type Dict[str, Any]"
-                assert isinstance(self.tx_signature, str), "Tx_signature must be of type str"
+                assert isinstance(self.tx_signature, bytes), "Tx_signature must be of type bytes"
                 assert len(self.body) == 13
             else:  # pragma: no cover
                 raise ValueError("Performative not recognized.")

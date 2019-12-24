@@ -23,6 +23,7 @@ from pathlib import Path
 from threading import Thread
 
 from aea.aea import AEA
+from aea.crypto.default import DEFAULT
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.mail.base import Envelope
@@ -49,7 +50,7 @@ class TestSkillError:
         cls.node = LocalNode()
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': private_key_pem_path})
-        cls.ledger_apis = LedgerApis({})
+        cls.ledger_apis = LedgerApis({}, DEFAULT)
         cls.agent_name = "Agent0"
         cls.address = cls.wallet.addresses['default']
 

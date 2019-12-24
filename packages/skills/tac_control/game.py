@@ -21,11 +21,13 @@
 
 from collections import defaultdict
 import copy
+import datetime
 from enum import Enum
 import pprint
 import sys
 from typing import cast, Dict, List, Optional, TYPE_CHECKING
 
+from aea.crypto.ethereum import ETHEREUM
 from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
 from aea.mail.base import Address
 from aea.skills.base import SharedClass
@@ -33,17 +35,24 @@ from aea.skills.base import SharedClass
 if TYPE_CHECKING or "pytest" in sys.modules:
     from packages.protocols.tac.message import TACMessage
     from packages.skills.tac_control.helpers import generate_good_id_to_name, determine_scaling_factor, \
-        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings
+        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings, tx_hash_from_values
     from packages.skills.tac_control.parameters import Parameters
 else:
     from tac_protocol.message import TACMessage
     from tac_control_skill.helpers import generate_good_id_to_name, determine_scaling_factor, \
-        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings
+        generate_money_endowments, generate_good_endowments, generate_utility_params, generate_equilibrium_prices_and_holdings, tx_hash_from_values
     from tac_control_skill.parameters import Parameters
 
+GoodId = str
+CurrencyId = str
+Amount = int
+Quantity = int
+EquilibriumQuantity = float
+Parameter = float
 TransactionId = str
-Endowment = List[int]  # an element e_j is the endowment of good j.
-UtilityParams = List[float]  # an element u_j is the utility value of good j.
+Endowment = Dict[GoodId, Quantity]
+UtilityParams = Dict[GoodId, Parameter]
+EquilibriumHoldings = Dict[GoodId, EquilibriumQuantity]
 
 DEFAULT_CURRENCY = 'FET'
 DEFAULT_CURRENCY_EXCHANGE_RATE = 1.0
@@ -64,27 +73,21 @@ class Configuration:
 
     def __init__(self,
                  version_id: str,
-                 nb_agents: int,
-                 nb_goods: int,
                  tx_fee: int,
                  agent_addr_to_name: Dict[Address, str],
-                 good_id_to_name: Dict[str, str]):
+                 nb_goods: int):
         """
         Instantiate a game configuration.
 
         :param version_id: the version of the game.
-        :param nb_agents: the number of agents.
-        :param nb_goods: the number of goods.
         :param tx_fee: the fee for a transaction.
         :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
-        :param good_id_to_name: a dictionary mapping good ids to good names (as strings).
+        :param nb_goods: the number of goods.
         """
         self._version_id = version_id
-        self._nb_agents = nb_agents
-        self._nb_goods = nb_goods
         self._tx_fee = tx_fee
         self._agent_addr_to_name = agent_addr_to_name
-        self._good_id_to_name = good_id_to_name
+        self._good_id_to_name = generate_good_id_to_name(nb_goods)
 
         self._check_consistency()
 
@@ -92,16 +95,6 @@ class Configuration:
     def version_id(self) -> str:
         """Agent number of a TAC instance."""
         return self._version_id
-
-    @property
-    def nb_agents(self) -> int:
-        """Agent number of a TAC instance."""
-        return self._nb_agents
-
-    @property
-    def nb_goods(self) -> int:
-        """Good number of a TAC instance."""
-        return self._nb_goods
 
     @property
     def tx_fee(self) -> int:
@@ -118,26 +111,6 @@ class Configuration:
         """Map good ids to names."""
         return self._good_id_to_name
 
-    @property
-    def agent_addresses(self) -> List[Address]:
-        """List of agent addresses."""
-        return list(self._agent_addr_to_name.keys())
-
-    @property
-    def agent_names(self):
-        """List of agent names."""
-        return list(self._agent_addr_to_name.values())
-
-    @property
-    def good_ids(self) -> List[Address]:
-        """List of good ids."""
-        return list(self._good_id_to_name.keys())
-
-    @property
-    def good_names(self) -> List[str]:
-        """List of good names."""
-        return list(self._good_id_to_name.values())
-
     def _check_consistency(self):
         """
         Check the consistency of the game configuration.
@@ -147,78 +120,74 @@ class Configuration:
         """
         assert self.version_id is not None, "A version id must be set."
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
-        assert self.nb_agents > 1, "Must have at least two agents."
-        assert self.nb_goods > 1, "Must have at least two goods."
-        assert len(self.agent_addresses) == self.nb_agents, "There must be one address for each agent."
-        assert len(set(self.agent_names)) == self.nb_agents, "Agents' names must be unique."
-        assert len(self.good_ids) == self.nb_goods, "There must be one id for each good."
-        assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
+        assert len(self.agent_addr_to_name) > 1, "Must have at least two agents."
+        assert len(self.agent_addr_to_name) > 1, "Must have at least two goods."
 
 
 class Initialization:
     """Class containing the initialization of the game."""
 
     def __init__(self,
-                 initial_money_amounts: List[int],
-                 endowments: List[Endowment],
-                 utility_params: List[UtilityParams],
-                 eq_prices: List[float],
-                 eq_good_holdings: List[List[float]],
-                 eq_money_holdings: List[float]):
+                 agent_addr_to_initial_money_amounts: Dict[Address, Amount],
+                 agent_addr_to_endowments: Dict[Address, Endowment],
+                 agent_addr_to_utility_params: Dict[Address, UtilityParams],
+                 good_id_to_eq_prices: Dict[GoodId, float],
+                 agent_addr_to_eq_good_holdings: Dict[Address, EquilibriumHoldings],
+                 agent_addr_to_eq_money_holdings: Dict[Address, float]):
         """
         Instantiate a game initialization.
 
-        :param initial_money_amounts: the initial amount of money of every agent.
-        :param endowments: the endowments of the agents. A matrix where the first index is the agent id
+        :param agent_addr_to_initial_money_amounts: the initial amount of money of every agent.
+        :param agent_addr_to_endowments: the endowments of the agents. A matrix where the first index is the agent id
                             and the second index is the good id. A generic element e_ij at row i and column j is
                             an integer that denotes the endowment of good j for agent i.
-        :param utility_params: the utility params representing the preferences of the agents. A matrix where the first
+        :param agent_addr_to_utility_params: the utility params representing the preferences of the agents. A matrix where the first
                             index is the agent id and the second index is the good id. A generic element e_ij
                             at row i and column j is an integer that denotes the utility of good j for agent i.
-        :param eq_prices: the competitive equilibrium prices of the goods. A list.
-        :param eq_good_holdings: the competitive equilibrium good holdings of the agents. A matrix where the first index is the agent id
+        :param good_id_to_eq_prices: the competitive equilibrium prices of the goods. A list.
+        :param agent_addr_to_eq_good_holdings: the competitive equilibrium good holdings of the agents. A matrix where the first index is the agent id
                             and the second index is the good id. A generic element g_ij at row i and column j is
                             a float that denotes the (divisible) amount of good j for agent i.
-        :param eq_money_holdings: the competitive equilibrium money holdings of the agents. A list.
+        :param agent_addr_to_eq_money_holdings: the competitive equilibrium money holdings of the agents. A list.
         """
-        self._initial_money_amounts = initial_money_amounts
-        self._endowments = endowments
-        self._utility_params = utility_params
-        self._eq_prices = eq_prices
-        self._eq_good_holdings = eq_good_holdings
-        self._eq_money_holdings = eq_money_holdings
+        self._agent_addr_to_initial_money_amounts = agent_addr_to_initial_money_amounts
+        self._agent_addr_to_endowments = agent_addr_to_endowments
+        self._agent_addr_to_utility_params = agent_addr_to_utility_params
+        self._good_id_to_eq_prices = good_id_to_eq_prices
+        self._agent_addr_to_eq_good_holdings = agent_addr_to_eq_good_holdings
+        self._agent_addr_to_eq_money_holdings = agent_addr_to_eq_money_holdings
 
         self._check_consistency()
 
     @property
-    def initial_money_amounts(self) -> List[int]:
+    def agent_addr_to_initial_money_amounts(self) -> Dict[Address, Amount]:
         """Get list of the initial amount of money of every agent."""
-        return self._initial_money_amounts
+        return self._agent_addr_to_initial_money_amounts
 
     @property
-    def endowments(self) -> List[Endowment]:
+    def agent_addr_to_endowments(self) -> Dict[Address, Endowment]:
         """Get endowments of the agents."""
-        return self._endowments
+        return self._agent_addr_to_endowments
 
     @property
-    def utility_params(self) -> List[UtilityParams]:
+    def agent_addr_to_utility_params(self) -> Dict[Address, UtilityParams]:
         """Get utility parameter list of the agents."""
-        return self._utility_params
+        return self._agent_addr_to_utility_params
 
     @property
-    def eq_prices(self) -> List[float]:
+    def good_id_to_eq_prices(self) -> Dict[GoodId, float]:
         """Get theoretical equilibrium prices (a benchmark)."""
-        return self._eq_prices
+        return self._good_id_to_eq_prices
 
     @property
-    def eq_good_holdings(self) -> List[List[float]]:
+    def agent_addr_to_eq_good_holdings(self) -> Dict[Address, EquilibriumHoldings]:
         """Get theoretical equilibrium good holdings (a benchmark)."""
-        return self._eq_good_holdings
+        return self._agent_addr_to_eq_good_holdings
 
     @property
-    def eq_money_holdings(self) -> List[float]:
+    def agent_addr_to_eq_money_holdings(self) -> Dict[Address, float]:
         """Get theoretical equilibrium money holdings (a benchmark)."""
-        return self._eq_money_holdings
+        return self._agent_addr_to_eq_money_holdings
 
     def _check_consistency(self):
         """
@@ -227,41 +196,17 @@ class Initialization:
         :return: None
         :raises: AssertionError: if some constraint is not satisfied.
         """
-        assert all(money >= 0 for money in self.initial_money_amounts), "Money must be non-negative."
-        assert all(e > 0 for row in self.endowments for e in row), "Endowments must be strictly positive."
-        assert all(e > 0 for row in self.utility_params for e in row), "UtilityParams must be strictly positive."
+        assert all(initial_money_amount >= 0 for initial_money_amount in self.agent_addr_to_initial_money_amounts.values()), "Initial money amount must be non-negative."
+        assert all(e > 0 for endowments in self.agent_addr_to_endowments.values() for e in endowments.values()), "Endowments must be strictly positive."
+        assert all(p > 0 for params in self.agent_addr_to_utility_params.values() for p in params.values()), "UtilityParams must be strictly positive."
 
-        assert len(self.endowments) == len(self.initial_money_amounts), "Length of endowments and initial_money_amounts must be the same."
-        assert len(self.endowments) == len(self.utility_params), "Length of endowments and utility_params must be the same."
+        assert len(self.agent_addr_to_endowments.values()) == len(self.agent_addr_to_initial_money_amounts.values()), "Length of endowments and initial_money_amounts must be the same."
+        assert len(self.agent_addr_to_endowments.values()) == len(self.agent_addr_to_utility_params.values()), "Length of endowments and utility_params must be the same."
 
-        assert len(self.eq_prices) == len(self.eq_good_holdings[0]), "Length of eq_prices and an element of eq_good_holdings must be the same."
-        assert len(self.eq_good_holdings) == len(self.eq_money_holdings), "Length of eq_good_holdings and eq_good_holdings must be the same."
+        assert all(len(self.good_id_to_eq_prices.values()) == len(eq_good_holdings) for eq_good_holdings in self.agent_addr_to_eq_good_holdings.values()), "Length of eq_prices and an element of eq_good_holdings must be the same."
+        assert len(self.agent_addr_to_eq_good_holdings.values()) == len(self.agent_addr_to_eq_money_holdings.values()), "Length of eq_good_holdings and eq_money_holdings must be the same."
 
-        assert all(len(row_e) == len(row_u) for row_e, row_u in zip(self.endowments, self.utility_params)), "Dimensions for utility_params and endowments rows must be the same."
-
-
-class GoodState:
-    """Represent the state of a good during the game."""
-
-    def __init__(self, price: float = 0.0) -> None:
-        """
-        Instantiate an agent state object.
-
-        :param price: price of the good in this state.
-        :return: None
-        """
-        self.price = price
-
-        self._check_consistency()
-
-    def _check_consistency(self) -> None:
-        """
-        Check the consistency of the good state.
-
-        :return: None
-        :raises: AssertionError: if some constraint is not satisfied.
-        """
-        assert self.price >= 0.0, "The price must be non-negative."
+        assert all(len(self.agent_addr_to_utility_params[agent_addr]) == len(endowments) for agent_addr, endowments in self.agent_addr_to_endowments.items()), "Dimensions for utility_params and endowments rows must be the same."
 
 
 class Transaction:
@@ -293,54 +238,115 @@ class Transaction:
         :param counterparty_signature: the signature of the transaction counterparty
         :return: None
         """
-        self.id = id
-        self.sender_addr = sender_addr
-        self.counterparty_addr = counterparty_addr
-        self.amount_by_currency_id = amount_by_currency_id
-        self.sender_fee = sender_fee
-        self.counterparty_fee = counterparty_fee
-        self.quantities_by_good_id = quantities_by_good_id
-        self.nonce = nonce
-        self.sender_signature = sender_signature
-        self.counterparty_signature = counterparty_signature
+        self._id = id
+        self._sender_addr = sender_addr
+        self._counterparty_addr = counterparty_addr
+        self._amount_by_currency_id = amount_by_currency_id
+        self._sender_fee = sender_fee
+        self._counterparty_fee = counterparty_fee
+        self._quantities_by_good_id = quantities_by_good_id
+        self._nonce = nonce
+        self._sender_signature = sender_signature
+        self._counterparty_signature = counterparty_signature
         self._check_consistency()
-        self.is_sender_buyer = all(value <= 0 for value in amount_by_currency_id.values())
+
+    @property
+    def id(self) -> str:
+        """Get the transaction id."""
+        return self._id
+
+    @property
+    def sender_addr(self) -> Address:
+        """Get the sender address."""
+        return self._sender_addr
+
+    @property
+    def counterparty_addr(self) -> Address:
+        """Get the counterparty address."""
+        return self._counterparty_addr
+
+    @property
+    def amount_by_currency_id(self) -> Dict[CurrencyId, Amount]:
+        """Get the amount for each currency."""
+        return copy.copy(self._amount_by_currency_id)
+
+    @property
+    def sender_fee(self) -> int:
+        """Get the sender fee."""
+        return self._sender_fee
+
+    @property
+    def counterparty_fee(self) -> int:
+        """Get the counterparty fee."""
+        return self._counterparty_fee
+
+    @property
+    def quantities_by_good_id(self) -> Dict[GoodId, Quantity]:
+        """Get the quantities by good_id."""
+        return copy.copy(self._quantities_by_good_id)
+
+    @property
+    def nonce(self) -> int:
+        """Get the nonce of the transaction."""
+        return self._nonce
+
+    @property
+    def sender_signature(self) -> bytes:
+        """Get the sender signature."""
+        return self._sender_signature
+
+    @property
+    def counterparty_signature(self) -> bytes:
+        """Get the counterparty signature."""
+        return self._counterparty_signature
+
+    @property
+    def is_sender_buyer(self) -> bool:
+        """Get the sender is buyer status."""
+        return all(value <= 0 for value in self.amount_by_currency_id.values())
 
     @property
     def buyer_addr(self) -> Address:
-        """Get the address of the buyer."""
-        result = self.sender_addr if self.is_sender_buyer else self.counterparty_addr
-        return result
+        """Get the buyer address."""
+        return self._sender_addr if self.is_sender_buyer else self._counterparty_addr
 
     @property
-    def seller_addr(self) -> Address:
-        """Get the address of the seller."""
-        result = self.counterparty_addr if self.is_sender_buyer else self.sender_addr
-        return result
+    def sender_hash(self) -> bytes:
+        """Get the sender hash."""
+        return tx_hash_from_values(tx_sender_addr=self.sender_addr,
+                                   tx_counterparty_addr=self.counterparty_addr,
+                                   tx_quantities_by_good_id=self.quantities_by_good_id,
+                                   tx_amount_by_currency_id=self.amount_by_currency_id,
+                                   tx_nonce=self.nonce)
 
     @property
-    def buyer_tx_fee(self) -> int:
-        """Get the tx fee of the buyer."""
-        result = self.sender_fee if self.is_sender_buyer else self.counterparty_fee
-        return result
-
-    @property
-    def seller_tx_fee(self) -> int:
-        """Get the tx fee of the seller."""
-        result = self.counterparty_fee if self.is_sender_buyer else self.sender_fee
-        return result
+    def counterparty_hash(self) -> bytes:
+        """Get the sender hash."""
+        return tx_hash_from_values(tx_sender_addr=self.counterparty_addr,
+                                   tx_counterparty_addr=self.sender_addr,
+                                   tx_quantities_by_good_id={good_id: -quantity for good_id, quantity in self.quantities_by_good_id.items()},
+                                   tx_amount_by_currency_id={currency_id: -amount for currency_id, amount in self.amount_by_currency_id.items()},
+                                   tx_nonce=self.nonce)
 
     @property
     def amount(self) -> int:
         """Get the amount."""
-        assert len(self.amount_by_currency_id) == 1
         return list(self.amount_by_currency_id.values())[0]
 
     @property
     def currency_id(self) -> str:
-        """Get the currency."""
-        assert len(self.amount_by_currency_id) == 1
+        """Get the currency id."""
         return list(self.amount_by_currency_id.keys())[0]
+
+    @property
+    def sender_amount(self) -> int:
+        """Get the amount the sender gets/pays."""
+        return self.amount - self.sender_fee
+
+    @property
+    def counterparty_amount(self) -> int:
+        """Get the amount the counterparty gets/pays."""
+        return -self.amount - self.counterparty_fee
 
     def _check_consistency(self) -> None:
         """
@@ -353,9 +359,23 @@ class Transaction:
         assert len(self.amount_by_currency_id.keys()) == 1  # For now we restrict to one currency per transaction.
         assert self.sender_fee >= 0
         assert self.counterparty_fee >= 0
-        assert len(self.quantities_by_good_id.keys()) == len(set(self.quantities_by_good_id.keys()))
-        assert (all(amount >= 0 for amount in self.amount_by_currency_id.values()) and all(quantity <= 0 for quantity in self.quantities_by_good_id.values())) or \
-            (all(amount <= 0 for amount in self.amount_by_currency_id.values()) and all(quantity >= 0 for quantity in self.quantities_by_good_id.values()))
+        assert (self.amount >= 0 and all(quantity <= 0 for quantity in self.quantities_by_good_id.values())) or \
+            (self.amount <= 0 and all(quantity >= 0 for quantity in self.quantities_by_good_id.values()))
+        assert isinstance(self.sender_signature, bytes) and isinstance(self.counterparty_signature, bytes)
+        if self.amount >= 0:
+            assert self.sender_amount >= 0, "Sender_amount must be positive when the sender is the payment receiver."
+        else:
+            assert self.counterparty_amount >= 0, "Counterparty_amount must be positive when the counterpary is the payment receiver."
+
+    def verify_matching_signatures(self, api) -> bool:
+        """
+        Check that the signatures match the terms of trade.
+
+        :return: True if the transaction has been signed by both parties
+        """
+        result = api.eth.account.recoverHash(self.sender_hash, signature=self.sender_signature) == self.sender_addr
+        result = result and api.eth.account.recoverHash(self.counterparty_hash, signature=self.counterparty_signature) == self.counterparty_addr
+        return result
 
     @classmethod
     def from_message(cls, message: TACMessage) -> 'Transaction':
@@ -387,6 +407,7 @@ class Transaction:
             and self.sender_fee == other.sender_fee \
             and self.counterparty_fee == other.counterparty_fee \
             and self.quantities_by_good_id == other.quantities_by_good_id \
+            and self.nonce == other.nonce \
             and self.sender_signature == other.sender_signature \
             and self.counterparty_signature == other.counterparty_signature
 
@@ -394,13 +415,15 @@ class Transaction:
 class AgentState:
     """Represent the state of an agent during the game."""
 
-    def __init__(self, amount_by_currency_id: Dict[str, int],
-                 exchange_params_by_currency_id: Dict[str, float],
-                 quantities_by_good_id: Dict[str, int],
-                 utility_params_by_good_id: Dict[str, float]):
+    def __init__(self, agent_address: Address,
+                 amount_by_currency_id: Dict[CurrencyId, Amount],
+                 exchange_params_by_currency_id: Dict[CurrencyId, Parameter],
+                 quantities_by_good_id: Dict[GoodId, Quantity],
+                 utility_params_by_good_id: Dict[GoodId, Parameter]):
         """
         Instantiate an agent state object.
 
+        :param agent_address: the agent address
         :param amount_by_currency_id: the amount for each currency
         :param exchange_params_by_currency_id: the exchange parameters of the different currencies
         :param quantities_by_good_id: the quantities for each good.
@@ -408,28 +431,34 @@ class AgentState:
         """
         assert len(amount_by_currency_id.keys()) == len(exchange_params_by_currency_id.keys())
         assert len(quantities_by_good_id.keys()) == len(utility_params_by_good_id.keys())
-        self._balance_by_currency_id = copy.copy(amount_by_currency_id)
+        self._agent_address = agent_address
+        self._amount_by_currency_id = copy.copy(amount_by_currency_id)
         self._exchange_params_by_currency_id = copy.copy(exchange_params_by_currency_id)
         self._quantities_by_good_id = quantities_by_good_id
         self._utility_params_by_good_id = copy.copy(utility_params_by_good_id)
 
     @property
-    def balance_by_currency_id(self) -> Dict[str, int]:
-        """Get the balance for each currency."""
-        return copy.copy(self._balance_by_currency_id)
+    def agent_address(self) -> str:
+        """Get address of the agent which state that is."""
+        return self._agent_address
 
     @property
-    def exchange_params_by_currency_id(self) -> Dict[str, float]:
+    def amount_by_currency_id(self) -> Dict[CurrencyId, Amount]:
+        """Get the amount for each currency."""
+        return copy.copy(self._amount_by_currency_id)
+
+    @property
+    def exchange_params_by_currency_id(self) -> Dict[CurrencyId, Parameter]:
         """Get the exchange parameters for each currency."""
         return copy.copy(self._exchange_params_by_currency_id)
 
     @property
-    def quantities_by_good_id(self) -> Dict[str, int]:
+    def quantities_by_good_id(self) -> Dict[GoodId, Quantity]:
         """Get holding of each good."""
         return copy.copy(self._quantities_by_good_id)
 
     @property
-    def utility_params_by_good_id(self) -> Dict[str, float]:
+    def utility_params_by_good_id(self) -> Dict[GoodId, Parameter]:
         """Get utility parameter for each good."""
         return copy.copy(self._utility_params_by_good_id)
 
@@ -442,21 +471,21 @@ class AgentState:
         :return: the score.
         """
         goods_score = logarithmic_utility(self.utility_params_by_good_id, self.quantities_by_good_id)
-        money_score = linear_utility(self.exchange_params_by_currency_id, self.balance_by_currency_id)
+        money_score = linear_utility(self.exchange_params_by_currency_id, self.amount_by_currency_id)
         score = goods_score + money_score
         return score
 
-    def get_score_diff_from_transaction(self, tx: Transaction) -> float:
-        """
-        Simulate a transaction and get the resulting score (taking into account the fee).
+    # def get_score_diff_from_transaction(self, tx: Transaction) -> float:
+    #     """
+    #     Simulate a transaction and get the resulting score (taking into account the fee).
 
-        :param tx: a transaction object.
-        :return: the score.
-        """
-        current_score = self.get_score()
-        new_state = self.apply([tx])
-        new_score = new_state.get_score()
-        return new_score - current_score
+    #     :param tx: a transaction object.
+    #     :return: the score.
+    #     """
+    #     current_score = self.get_score()
+    #     new_state = self.apply([tx])
+    #     new_score = new_state.get_score()
+    #     return new_score - current_score
 
     def check_transaction_is_consistent(self, tx: Transaction) -> bool:
         """
@@ -466,14 +495,29 @@ class AgentState:
         or enough holdings if it is a seller.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        if tx.is_sender_buyer:
-            # check if we have the money as the buyer.
-            result = self.balance_by_currency_id[tx.currency_id] >= tx.amount + tx.buyer_tx_fee
+        result = self.agent_address in [tx.sender_addr, tx.counterparty_addr]
+        if tx.amount == 0 and all(quantity == 0 for quantity in tx.quantities_by_good_id.values()):
+            # reject the transaction when there is no wealth exchange
+            result = False
+        elif tx.amount <= 0 and all(quantity >= 0 for quantity in tx.quantities_by_good_id.values()):
+            # sender is buyer, counterparty is seller
+            if self.agent_address == tx.sender_addr:
+                # check this sender state has enough money
+                result = result and (self.amount_by_currency_id[tx.currency_id] >= tx.sender_amount)
+            elif self.agent_address == tx.counterparty_addr:
+                # check this counterparty state has enough goods
+                result = result and all(self.quantities_by_good_id[good_id] >= quantity for good_id, quantity in tx.quantities_by_good_id.items())
+        elif tx.amount >= 0 and all(quantity <= 0 for quantity in tx.quantities_by_good_id.values()):
+            # sender is seller, counterparty is buyer
+            # Note, on a ledger, this atomic swap would only be possible for amount == 0!
+            if self.agent_address == tx.sender_addr:
+                # check this sender state has enough goods
+                result = result and all(self.quantities_by_good_id[good_id] >= -quantity for good_id, quantity in tx.quantities_by_good_id.items())
+            elif self.agent_address == tx.counterparty_addr:
+                # check this counterparty state has enough money
+                result = result and (self.amount_by_currency_id[tx.currency_id] >= tx.counterparty_amount)
         else:
-            # check if we have the diff and the goods as the seller.
-            result = self.balance_by_currency_id[tx.currency_id] + tx.amount >= tx.seller_tx_fee
-            for good_id, quantity in tx.quantities_by_good_id.items():
-                result = result and (self.quantities_by_good_id[good_id] >= quantity)
+            result = False
         return result
 
     def apply(self, transactions: List[Transaction]) -> 'AgentState':
@@ -496,24 +540,30 @@ class AgentState:
         :param tx: the transaction.
         :return: None
         """
-        new_balance_by_currency_id = self.balance_by_currency_id
-        if tx.is_sender_buyer:
-            total = tx.amount + tx.buyer_tx_fee
-            new_balance_by_currency_id[tx.currency_id] -= total
-        else:
-            diff = tx.amount - tx.seller_tx_fee
-            new_balance_by_currency_id[tx.currency_id] += diff
-        self._balance_by_currency_id = new_balance_by_currency_id
+        assert self.check_transaction_is_consistent(tx), "Inconsistent transaction."
+
+        new_amount_by_currency_id = self.amount_by_currency_id
+        if self.agent_address == tx.sender_addr:
+            # settling the transaction for the sender
+            new_amount_by_currency_id[tx.currency_id] += tx.sender_amount
+        elif self.agent_address == tx.counterparty_addr:
+            # settling the transaction for the counterparty
+            new_amount_by_currency_id[tx.currency_id] += tx.counterparty_amount
+
+        self._amount_by_currency_id = new_amount_by_currency_id
 
         new_quantities_by_good_id = self.quantities_by_good_id
         for good_id, quantity in tx.quantities_by_good_id.items():
-            quantity_delta = quantity if tx.is_sender_buyer else -quantity
-            new_quantities_by_good_id[good_id] += quantity_delta
+            if self.agent_address == tx.sender_addr:
+                new_quantities_by_good_id[good_id] += quantity
+            elif self.agent_address == tx.counterparty_addr:
+                new_quantities_by_good_id[good_id] -= quantity
         self._quantities_by_good_id = new_quantities_by_good_id
 
     def __copy__(self):
         """Copy the object."""
-        return AgentState(self.balance_by_currency_id,
+        return AgentState(self.agent_address,
+                          self.amount_by_currency_id,
                           self.exchange_params_by_currency_id,
                           self.quantities_by_good_id,
                           self.utility_params_by_good_id)
@@ -521,7 +571,8 @@ class AgentState:
     def __str__(self):
         """From object to string."""
         return "AgentState{}".format(pprint.pformat({
-            "balance_by_currency_id": self.balance_by_currency_id,
+            "agent_address": self.agent_address,
+            "amount_by_currency_id": self.amount_by_currency_id,
             "exchange_params_by_currency_id": self.exchange_params_by_currency_id,
             "quantities_by_good_id": self.quantities_by_good_id,
             "utility_params_by_good_id": self.utility_params_by_good_id
@@ -530,7 +581,8 @@ class AgentState:
     def __eq__(self, other) -> bool:
         """Compare equality of two instances of the class."""
         return isinstance(other, AgentState) and \
-            self.balance_by_currency_id == other.balance_by_currency_id and \
+            self.agent_address == other.agent_address and \
+            self.amount_by_currency_id == other.amount_by_currency_id and \
             self.exchange_params_by_currency_id == other.exchange_params_by_currency_id and \
             self.quantities_by_good_id == other.quantities_by_good_id and \
             self.utility_params_by_good_id == other.utility_params_by_good_id
@@ -541,53 +593,34 @@ class Transactions:
 
     def __init__(self):
         """Instantiate the transaction class."""
-        self._pending = defaultdict(lambda: [])  # type: Dict[TransactionId, Transaction]
-        self._confirmed = []  # type: List[Transaction]
-        self._confirmed_per_agent = defaultdict(lambda: [])  # type: Dict[Address, List[Transaction]]
+        self._confirmed = {}  # type: Dict[datetime.datetime, Transaction]
+        self._confirmed_per_agent = {}  # type: Dict[Address, Dict[datetime.datetime, Transaction]]
 
     @property
-    def pending(self) -> Dict[TransactionId, Transaction]:
-        """Get the pending transactions."""
-        return self._pending
-
-    @property
-    def confirmed(self) -> List[Transaction]:
+    def confirmed(self) -> Dict[datetime.datetime, Transaction]:
         """Get the confirmed transactions."""
         return self._confirmed
 
     @property
-    def confirmed_per_agent(self) -> Dict[Address, List[Transaction]]:
+    def confirmed_per_agent(self) -> Dict[Address, Dict[datetime.datetime, Transaction]]:
         """Get the confirmed transactions by agent."""
         return self._confirmed_per_agent
 
-    def add_pending(self, transaction: Transaction) -> None:
-        """
-        Add a pending transaction.
-
-        :param transaction: the transaction
-        :return: None
-        """
-        self._pending[transaction.id] = transaction
-
-    def pop_pending(self, transaction_id: TransactionId) -> Transaction:
-        """
-        Pop a pending transaction.
-
-        :param transaction_id: the transaction id
-        :return: None
-        """
-        return self._pending.pop(transaction_id)
-
-    def add_confirmed(self, transaction: Transaction) -> None:
+    def add(self, transaction: Transaction) -> None:
         """
         Add a confirmed transaction.
 
         :param transaction: the transaction
         :return: None
         """
-        self._confirmed.append(transaction)
-        self._confirmed_per_agent[transaction.sender_addr].append(transaction)
-        self._confirmed_per_agent[transaction.counterparty_addr].append(transaction)
+        now = datetime.datetime.now()
+        self._confirmed[now] = transaction
+        if self._confirmed_per_agent.get(transaction.sender_addr) is None:
+            self._confirmed_per_agent[transaction.sender_addr] = {}
+        self._confirmed_per_agent[transaction.sender_addr][now] = transaction
+        if self._confirmed_per_agent.get(transaction.counterparty_addr) is None:
+            self._confirmed_per_agent[transaction.counterparty_addr] = {}
+        self._confirmed_per_agent[transaction.counterparty_addr][now] = transaction
 
 
 class Registration:
@@ -639,7 +672,6 @@ class Game(SharedClass):
         self._initialization = None  # type: Optional[Initialization]
         self._initial_agent_states = None  # type: Optional[Dict[str, AgentState]]
         self._current_agent_states = None  # type: Optional[Dict[str, AgentState]]
-        self._current_good_states = None  # type: Optional[Dict[str, GoodState]]
         self._transactions = Transactions()
 
     @property
@@ -682,12 +714,6 @@ class Game(SharedClass):
         return self._current_agent_states
 
     @property
-    def current_good_states(self) -> Dict[str, GoodState]:
-        """Get current state of each good."""
-        assert self._current_good_states is not None, "Call create before calling current_good_states."
-        return self._current_good_states
-
-    @property
     def transactions(self) -> Transactions:
         """Get the transactions."""
         return self._transactions
@@ -702,122 +728,83 @@ class Game(SharedClass):
         """Generate a TAC game."""
         parameters = cast(Parameters, self.context.parameters)
 
-        good_id_to_name = generate_good_id_to_name(parameters.nb_goods)
-        self._configuration = Configuration(parameters.version_id, self.registration.nb_agents, parameters.nb_goods, parameters.tx_fee, self.registration.agent_addr_to_name, good_id_to_name)
+        self._configuration = Configuration(parameters.version_id, parameters.tx_fee, self.registration.agent_addr_to_name, parameters.nb_goods)
 
         scaling_factor = determine_scaling_factor(parameters.money_endowment)
-        money_endowments = generate_money_endowments(self.registration.nb_agents, parameters.money_endowment)
-        good_endowments = generate_good_endowments(parameters.nb_goods, self.registration.nb_agents, parameters.base_good_endowment, parameters.lower_bound_factor, parameters.upper_bound_factor)
-        utility_params = generate_utility_params(self.registration.nb_agents, parameters.nb_goods, scaling_factor)
-        eq_prices, eq_good_holdings, eq_money_holdings = generate_equilibrium_prices_and_holdings(good_endowments, utility_params, money_endowments, scaling_factor)
-        self._initialization = Initialization(money_endowments, good_endowments, utility_params, eq_prices, eq_good_holdings, eq_money_holdings)
+        agent_addr_to_money_endowments = generate_money_endowments(list(self.configuration.agent_addr_to_name.keys()), parameters.money_endowment)
+        agent_addr_to_good_endowments = generate_good_endowments(list(self.configuration.agent_addr_to_name.keys()), list(self.configuration.good_id_to_name.keys()), parameters.base_good_endowment, parameters.lower_bound_factor, parameters.upper_bound_factor)
+        agent_addr_to_utility_params = generate_utility_params(list(self.configuration.agent_addr_to_name.keys()), list(self.configuration.good_id_to_name.keys()), scaling_factor)
+        good_id_to_eq_prices, agent_addr_to_eq_good_holdings, agent_addr_to_eq_money_holdings = generate_equilibrium_prices_and_holdings(agent_addr_to_good_endowments, agent_addr_to_utility_params, agent_addr_to_money_endowments, scaling_factor)
+        self._initialization = Initialization(agent_addr_to_money_endowments, agent_addr_to_good_endowments, agent_addr_to_utility_params, good_id_to_eq_prices, agent_addr_to_eq_good_holdings, agent_addr_to_eq_money_holdings)
 
         self._initial_agent_states = dict(
             (agent_addr,
                 AgentState(
-                    {DEFAULT_CURRENCY: self.initialization.initial_money_amounts[i]},
+                    agent_addr,
+                    {DEFAULT_CURRENCY: self.initialization.agent_addr_to_initial_money_amounts[agent_addr]},
                     {DEFAULT_CURRENCY: DEFAULT_CURRENCY_EXCHANGE_RATE},
-                    {good_id: endowment for good_id, endowment in zip(list(good_id_to_name.keys()), self.initialization.endowments[i])},
-                    {good_id: utility_param for good_id, utility_param in zip(list(good_id_to_name.keys()), self.initialization.utility_params[i])}
+                    self.initialization.agent_addr_to_endowments[agent_addr],
+                    self.initialization.agent_addr_to_utility_params[agent_addr]
                 ))
-            for agent_addr, i in zip(self.configuration.agent_addresses, range(self.configuration.nb_agents)))
+            for agent_addr in self.configuration.agent_addr_to_name.keys())
 
         self._current_agent_states = dict(
             (agent_addr,
                 AgentState(
-                    {DEFAULT_CURRENCY: self.initialization.initial_money_amounts[i]},
+                    agent_addr,
+                    {DEFAULT_CURRENCY: self.initialization.agent_addr_to_initial_money_amounts[agent_addr]},
                     {DEFAULT_CURRENCY: DEFAULT_CURRENCY_EXCHANGE_RATE},
-                    {good_id: endowment for good_id, endowment in zip(list(good_id_to_name.keys()), self.initialization.endowments[i])},
-                    {good_id: utility_param for good_id, utility_param in zip(list(good_id_to_name.keys()), self.initialization.utility_params[i])}
+                    self.initialization.agent_addr_to_endowments[agent_addr],
+                    self.initialization.agent_addr_to_utility_params[agent_addr]
                 ))
-            for agent_addr, i in zip(self.configuration.agent_addresses, range(self.configuration.nb_agents)))
-
-        self._current_good_states = dict(
-            (good_id,
-                GoodState())
-            for good_id in self.configuration.good_ids)
-
-    def reset(self) -> None:
-        """Reset the game."""
-        self._phase = Phase.PRE_GAME
-        self._registration = Registration()
-        self._configuration = None
-        self._initialization = None
-        self._initial_agent_states = None
-        self._current_agent_states = None
-        self._current_good_states = None
-        self._transactions = Transactions()
-
-    @property
-    def initial_agent_scores(self) -> Dict[str, float]:
-        """Get the initial scores for every agent."""
-        return {agent_addr: agent_state.get_score() for agent_addr, agent_state in self.initial_agent_states.items()}
-
-    @property
-    def current_agent_scores(self) -> Dict[str, float]:
-        """Get the current scores for every agent."""
-        return {agent_addr: agent_state.get_score() for agent_addr, agent_state in self.current_agent_states.items()}
-
-    @property
-    def holdings_matrix(self) -> List[Endowment]:
-        """
-        Get the holdings matrix of shape (nb_agents, nb_goods).
-
-        :return: the holdings matrix.
-        """
-        result = list(map(lambda state: list(state.quantities_by_good_id.values()), self.current_agent_states.values()))
-        return result
-
-    @property
-    def agent_balances(self) -> Dict[str, int]:
-        """Get the current agent balances."""
-        result = {agent_addr: agent_state.balance_by_currency_id[DEFAULT_CURRENCY] for agent_addr, agent_state in self.current_agent_states.items()}
-        return result
-
-    @property
-    def good_prices(self) -> List[float]:
-        """Get the current good prices."""
-        result = list(map(lambda state: state.price, self.current_good_states.values()))
-        return result
+            for agent_addr in self.configuration.agent_addr_to_name.keys())
 
     @property
     def holdings_summary(self) -> str:
         """Get holdings summary (a string representing the holdings for every agent)."""
-        result = "Current good allocation: \n"
+        result = "\n" + "Current good & money allocation & score: \n"
         for agent_addr, agent_state in self.current_agent_states.items():
-            result = result + self.configuration.agent_addr_to_name[agent_addr] + ":" + "\n"
+            result = result + "- " + self.configuration.agent_addr_to_name[agent_addr] + ":" + "\n"
             for good_id, quantity in agent_state.quantities_by_good_id.items():
                 result += "    " + good_id + ": " + str(quantity) + "\n"
+            for currency_id, amount in agent_state.amount_by_currency_id.items():
+                result += "    " + currency_id + ": " + str(amount) + "\n"
+            result += "    score: " + str(round(agent_state.get_score(), 2)) + "\n"
+        result = result + "\n"
         return result
 
     @property
     def equilibrium_summary(self) -> str:
         """Get equilibrium summary."""
-        result = "Equilibrium prices: \n"
-        for good_id, eq_price in zip(self.configuration.good_ids, self.initialization.eq_prices):
+        result = "\n" + "Equilibrium prices: \n"
+        for good_id, eq_price in self.initialization.good_id_to_eq_prices.items():
             result = result + good_id + " " + str(eq_price) + "\n"
         result = result + "\n"
         result = result + "Equilibrium good allocation: \n"
-        for agent_name, eq_allocations in zip(self.configuration.agent_names, self.initialization.eq_good_holdings):
-            result = result + agent_name + " " + str(eq_allocations) + "\n"
+        for agent_addr, eq_allocations in self.initialization.agent_addr_to_eq_good_holdings.items():
+            result = result + "- " + self.configuration.agent_addr_to_name[agent_addr] + ":\n"
+            for good_id, quantity in eq_allocations.items():
+                result = result + "    " + good_id + ": " + str(quantity) + "\n"
         result = result + "\n"
         result = result + "Equilibrium money allocation: \n"
-        for agent_name, eq_allocation in zip(self.configuration.agent_names, self.initialization.eq_money_holdings):
-            result = result + agent_name + " " + str(eq_allocation) + "\n"
+        for agent_addr, eq_allocation in self.initialization.agent_addr_to_eq_money_holdings.items():
+            result = result + self.configuration.agent_addr_to_name[agent_addr] + " " + str(eq_allocation) + "\n"
+        result = result + "\n"
         return result
 
     def is_transaction_valid(self, tx: Transaction) -> bool:
         """
-        Check whether the transaction is valid given the state of the game.
+        Check whether the transaction is signed correctly and valid given the state of the game.
 
         :param tx: the transaction.
         :return: True if the transaction is valid, False otherwise.
         :raises: AssertionError: if the data in the transaction are not allowed (e.g. negative amount).
         """
-        buyer_state = self.current_agent_states[tx.buyer_addr]
-        seller_state = self.current_agent_states[tx.seller_addr]
-        result = buyer_state.check_transaction_is_consistent(tx) and \
-            seller_state.check_transaction_is_consistent(tx)
+        sender_state = self.current_agent_states[tx.sender_addr]
+        counterparty_state = self.current_agent_states[tx.counterparty_addr]
+        result = tx.verify_matching_signatures(self.context.ledger_apis.apis.get(ETHEREUM))
+        result = result and sender_state.check_transaction_is_consistent(tx)
+        result = result and counterparty_state.check_transaction_is_consistent(tx)
         return result
 
     def settle_transaction(self, tx: Transaction) -> None:
@@ -828,14 +815,14 @@ class Game(SharedClass):
         :return: None
         :raises: AssertionError if the transaction is not valid.
         """
-        # assert self.is_transaction_valid(tx)
-        # self._transactions.append(tx)
         assert self._current_agent_states is not None, "Call create before calling current_agent_states."
-        buyer_state = self.current_agent_states[tx.buyer_addr]
-        seller_state = self.current_agent_states[tx.seller_addr]
+        assert self.is_transaction_valid(tx), "Transaction is not valid."
+        sender_state = self.current_agent_states[tx.sender_addr]
+        counterparty_state = self.current_agent_states[tx.counterparty_addr]
 
-        buyer_state.update(tx)
-        seller_state.update(tx)
+        new_sender_state = sender_state.apply([tx])
+        new_counterparty_state = counterparty_state.apply([tx])
 
-        self._current_agent_states.update({tx.buyer_addr: buyer_state})
-        self._current_agent_states.update({tx.seller_addr: seller_state})
+        self.transactions.add(tx)
+        self._current_agent_states.update({tx.sender_addr: new_sender_state})
+        self._current_agent_states.update({tx.counterparty_addr: new_counterparty_state})
