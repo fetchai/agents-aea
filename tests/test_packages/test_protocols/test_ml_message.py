@@ -19,7 +19,6 @@
 
 """This module contains the tests of the ml_messages module."""
 import logging
-from typing import cast
 
 import pytest
 
