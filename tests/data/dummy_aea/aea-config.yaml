@@ -4,6 +4,7 @@ author: fetchai
 connections:
 - local
 default_connection: local
+default_ledger: fetchai
 description: dummy_aea agent description [Fill in]
 license: Apache 2.0
 fingerprint: ""

@@ -20,6 +20,7 @@
 
 """This module contains the abstract class defining an agent's strategy for the TAC."""
 
+import copy
 from enum import Enum
 import logging
 import random
@@ -199,14 +200,14 @@ class Strategy(SharedClass):
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=is_seller)
         good_id_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_id) if is_seller else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
-        nil_proposal_dict = {good_id: 0 for good_id, quantity in good_id_to_quantities.items()}  # type: Dict[str, int]
+        nil_proposal_dict = {good_id: 0 for good_id in good_id_to_quantities.keys()}  # type: Dict[str, int]
         proposals = []
         seller_tx_fee = self.context.agent_preferences.transaction_fees['seller_tx_fee']
         buyer_tx_fee = self.context.agent_preferences.transaction_fees['buyer_tx_fee']
         currency_id = list(self.context.agent_ownership_state.amount_by_currency_id.keys())[0]
         for good_id, quantity in good_id_to_quantities.items():
             if is_seller and quantity == 0: continue
-            proposal_dict = nil_proposal_dict
+            proposal_dict = copy.copy(nil_proposal_dict)
             proposal_dict[good_id] = 1
             proposal = build_goods_description(good_id_to_quantities=proposal_dict, currency_id=currency_id, is_supply=is_seller)
             if is_seller:
@@ -244,7 +245,7 @@ class Strategy(SharedClass):
         """
         transactions = cast(Transactions, self.context.transactions)
         ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller)
-        if not ownership_state_after_locks.check_transaction_is_consistent(transaction_msg):
+        if not ownership_state_after_locks.check_transaction_is_affordable(transaction_msg):
             return False
         proposal_delta_score = self.context.agent_preferences.get_score_diff_from_transaction(ownership_state_after_locks, transaction_msg)
         if proposal_delta_score >= 0:

@@ -96,10 +96,16 @@ class Transactions(SharedClass):
         counterparty_tx_fee = proposal_description.values['buyer_tx_fee'] if is_seller else proposal_description.values['seller_tx_fee']
         goods_component = copy.copy(proposal_description.values)
         [goods_component.pop(key) for key in ['seller_tx_fee', 'buyer_tx_fee', 'price', 'currency_id', 'tx_nonce']]
+        # switch signs based on whether seller or buyer role
+        amount = proposal_description.values['price'] if is_seller else -proposal_description.values['price']
+        if is_seller:
+            for good_id in goods_component.keys():
+                goods_component[good_id] = goods_component[good_id] * (-1)
+        # need to hash positive.negative side separately
         tx_hash = tx_hash_from_values(tx_sender_addr=agent_addr,
                                       tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
                                       tx_quantities_by_good_id=goods_component,
-                                      tx_amount_by_currency_id={proposal_description.values['currency_id']: proposal_description.values['price']},
+                                      tx_amount_by_currency_id={proposal_description.values['currency_id']: amount},
                                       tx_nonce=proposal_description.values['tx_nonce'])
         skill_callback_ids = ['tac_participation'] if performative == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT else ['tac_negotiation']
         transaction_msg = TransactionMessage(performative=performative,
@@ -107,7 +113,7 @@ class Transactions(SharedClass):
                                              tx_id=self.get_internal_tx_id(),
                                              tx_sender_addr=agent_addr,
                                              tx_counterparty_addr=dialogue_label.dialogue_opponent_addr,
-                                             tx_amount_by_currency_id={proposal_description.values['currency_id']: proposal_description.values['price']},
+                                             tx_amount_by_currency_id={proposal_description.values['currency_id']: amount},
                                              tx_sender_fee=sender_tx_fee,
                                              tx_counterparty_fee=counterparty_tx_fee,
                                              tx_quantities_by_good_id=goods_component,

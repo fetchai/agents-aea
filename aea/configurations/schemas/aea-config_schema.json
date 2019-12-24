@@ -11,6 +11,7 @@
     "license",
     "url",
     "private_key_paths",
+    "default_ledger",
     "connections",
     "default_connection",
     "protocols",
@@ -65,6 +66,9 @@
           "$ref": "#/definitions/ledger_api"
         }
       }
+    },
+    "default_ledger": {
+      "type": "string"
     },
     "connections": {
       "type": "array",

@@ -518,6 +518,7 @@ class AgentConfig(Configuration):
             self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
 
         self.logging_config = logging_config if logging_config is not None else {}
+        self._default_ledger = None  # type: Optional[str]
         self._default_connection = None  # type: Optional[str]
         self.connections = set()  # type: Set[str]
         self.protocols = set()  # type: Set[str]
@@ -544,6 +545,22 @@ class AgentConfig(Configuration):
         self._default_connection = connection_name
 
     @property
+    def default_ledger(self) -> str:
+        """Get the default ledger."""
+        assert self._default_ledger is not None, "Default ledger not set yet."
+        return self._default_ledger
+
+    @default_ledger.setter
+    def default_ledger(self, ledger_id: str):
+        """
+        Set the default ledger.
+
+        :param ledger_id: the id of the default ledger.
+        :return: None
+        """
+        self._default_ledger = ledger_id
+
+    @property
     def json(self) -> Dict:
         """Return the JSON representation."""
         return {
@@ -559,6 +576,7 @@ class AgentConfig(Configuration):
             "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
             "ledger_apis": {key: l.json for key, l in self.ledger_apis.read_all()},
             "logging_config": self.logging_config,
+            "default_ledger": self.default_ledger,
             "default_connection": self.default_connection,
             "connections": sorted(self.connections),
             "protocols": sorted(self.protocols),
@@ -597,5 +615,7 @@ class AgentConfig(Configuration):
         # set default configuration
         default_connection_name = obj.get("default_connection", None)
         agent_config.default_connection = default_connection_name
+        default_ledger_id = obj.get("default_ledger", None)
+        agent_config.default_ledger = default_ledger_id
 
         return agent_config

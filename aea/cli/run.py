@@ -197,14 +197,14 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
     ledger_api_configs = dict([(identifier, cast(List[Union[str, int]], list(config.args.values()))) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
 
     wallet = Wallet(private_key_paths)
-    ledger_apis = LedgerApis(ledger_api_configs)
+    ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
     connection_names = [ctx.agent_config.default_connection] if connection_names is None else connection_names
     connections = []
     _try_to_load_protocols(ctx)
     try:
         for connection_name in connection_names:
-            connection = _setup_connection(connection_name, wallet.addresses[FETCHAI], ctx)
+            connection = _setup_connection(connection_name, wallet.addresses[ctx.agent_config.default_ledger], ctx)
             connections.append(connection)
     except AEAConfigException as e:
         logger.error(str(e))

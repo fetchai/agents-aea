@@ -140,6 +140,17 @@ def _get_hash(tx_sender_addr: Address,
     return Web3.keccak(b''.join(m_list))
 
 
+def _recover_uid(good_id) -> int:
+    """
+    Get the uid part of the good id.
+
+    :param int good_id: the good id
+    :return: the uid
+    """
+    uid = int(good_id.split('_')[-2])
+    return uid
+
+
 def tx_hash_from_values(tx_sender_addr: str,
                         tx_counterparty_addr: str,
                         tx_quantities_by_good_id: Dict[str, int],
@@ -151,24 +162,25 @@ def tx_hash_from_values(tx_sender_addr: str,
     :param tx_message: the transaction message
     :return: the hash
     """
-    converted = {int(good_id): quantity for good_id, quantity in tx_quantities_by_good_id.items()}
+    converted = {_recover_uid(good_id): quantity for good_id, quantity in tx_quantities_by_good_id.items()}
     ordered = collections.OrderedDict(sorted(converted.items()))
-    good_ids = []  # type: List[int]
+    good_uids = []  # type: List[int]
     sender_supplied_quantities = []  # type: List[int]
     counterparty_supplied_quantities = []  # type: List[int]
-    for good_id, quantity in ordered.items():
-        good_ids.append(good_id)
+    for good_uid, quantity in ordered.items():
+        good_uids.append(good_uid)
         if quantity >= 0:
             sender_supplied_quantities.append(quantity)
             counterparty_supplied_quantities.append(0)
         else:
             sender_supplied_quantities.append(0)
-            counterparty_supplied_quantities.append(quantity)
+            counterparty_supplied_quantities.append(-quantity)
     assert len(tx_amount_by_currency_id) == 1
-    tx_amount = list(tx_amount_by_currency_id.values())[0]
+    for currency_id, amount in tx_amount_by_currency_id.items():
+        tx_amount = amount if amount >= 0 else 0
     tx_hash = _get_hash(tx_sender_addr=tx_sender_addr,
                         tx_counterparty_addr=tx_counterparty_addr,
-                        good_ids=good_ids,
+                        good_ids=good_uids,
                         sender_supplied_quantities=sender_supplied_quantities,
                         counterparty_supplied_quantities=counterparty_supplied_quantities,
                         tx_amount=tx_amount,

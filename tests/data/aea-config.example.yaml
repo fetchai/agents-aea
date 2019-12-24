@@ -8,6 +8,7 @@ url: ""
 connections:
 - default-oef
 default_connection: default-oef
+default_ledger: fetchai
 private_key_paths:
 - private_key_path:
     ledger: default
