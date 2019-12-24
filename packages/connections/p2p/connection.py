@@ -149,7 +149,8 @@ class PeerToPeerConnection(Connection):
 
         :param address: the address used in the protocols.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
+                         excluded_protocols=excluded_protocols)
         self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=excluded_protocols)  # type: ignore
         self.address = address
 
@@ -215,5 +216,8 @@ class PeerToPeerConnection(Connection):
         """
         addr = cast(str, connection_configuration.config.get("addr"))
         port = cast(int, connection_configuration.config.get("port"))
+        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
+        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
         return PeerToPeerConnection(address, addr, port,
-                                    restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
+                                    restricted_to_protocols=restricted_to_protocols_names,
+                                    excluded_protocols=excluded_protocols_names)

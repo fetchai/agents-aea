@@ -112,6 +112,9 @@ class TCPClientConnection(TCPConnection):
         """
         server_address = cast(str, connection_configuration.config.get("address"))
         server_port = cast(int, connection_configuration.config.get("port"))
+        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
+        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
         return TCPClientConnection(address, server_address, server_port,
                                    connection_id=connection_configuration.name,
-                                   restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
+                                   restricted_to_protocols=restricted_to_protocols_names,
+                                   excluded_protocols=excluded_protocols_names)

@@ -85,10 +85,10 @@ def create(click_context, agent_name):
         ctx.cwd = agent_config.agent_name
 
         logger.info("Default connections:")
-        click_context.invoke(connection, connection_name=DEFAULT_CONNECTION)
+        click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)
 
         logger.info("Default skills:")
-        click_context.invoke(skill, skill_name=DEFAULT_SKILL)
+        click_context.invoke(skill, skill_public_id=DEFAULT_SKILL)
 
     except OSError:
         logger.error("Directory already exist. Aborting...")

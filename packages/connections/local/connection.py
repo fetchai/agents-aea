@@ -337,6 +337,8 @@ class OEFLocalConnection(Connection):
 
         :param address: the address used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
+        :param restricted_to_protocols: the only supported protocols for this connection.
+        :param excluded_protocols: the excluded protocols for this connection.
         """
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
                          excluded_protocols=excluded_protocols)
@@ -401,7 +403,9 @@ class OEFLocalConnection(Connection):
         :return: the connection object
         """
         local_node = LocalNode()
+        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
+        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
         return OEFLocalConnection(address, local_node,
                                   connection_id=connection_configuration.name,
-                                  restricted_to_protocols=set(connection_configuration.restricted_to_protocols),
-                                  excluded_protocols=set(connection_configuration.excluded_protocols))
+                                  restricted_to_protocols=restricted_to_protocols_names,
+                                  excluded_protocols=excluded_protocols_names)

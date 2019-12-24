@@ -33,7 +33,8 @@ from aea.aea import AEA
 from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
     AEAConfigException, _load_env_file, ConnectionsOption
 from aea.cli.install import install
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig, \
+    PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.crypto.ethereum import ETHEREUM
@@ -147,7 +148,8 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
     :raises AEAConfigException: if the connection name provided as argument is not declared in the configuration file,
                               | or if the connection type is not supported by the framework.
     """
-    if connection_name not in ctx.agent_config.connections:
+    supported_connection_names = set(map(lambda x: x.name, ctx.agent_config.connections))
+    if connection_name not in supported_connection_names:
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
     try:
@@ -199,7 +201,8 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
     wallet = Wallet(private_key_paths)
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
-    connection_names = [ctx.agent_config.default_connection] if connection_names is None else connection_names
+    default_connection_name = PublicId.from_string(ctx.agent_config.default_connection).name
+    connection_names = [default_connection_name] if connection_names is None else connection_names
     connections = []
     _try_to_load_protocols(ctx)
     try:

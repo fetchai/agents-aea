@@ -29,7 +29,9 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE  # noqa: F401
+# these variables are being used dynamically
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, PublicId  # noqa: F401
 
 
 @click.group()
@@ -41,7 +43,9 @@ def scaffold(ctx: Context):
 
 def _scaffold_item(ctx: Context, item_type, item_name):
     """Add an item scaffolding to the configuration file and agent."""
-    existing_item_list = getattr(ctx.agent_config, "{}s".format(item_type))
+    existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
+    existing_item_list = [public_id.name for public_id in existing_id_list]
+
     loader = getattr(ctx, "{}_loader".format(item_type))
     default_config_filename = globals()["DEFAULT_{}_CONFIG_FILE".format(item_type.upper())]
 
@@ -70,7 +74,7 @@ def _scaffold_item(ctx: Context, item_type, item_name):
 
         # add the connection to the configurations.
         logger.debug("Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
-        existing_item_list.add(item_name)
+        existing_id_list.add(PublicId("fetchai", item_name, "0.1.0"))
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
         # ensure the name in the yaml and the name of the folder are the same

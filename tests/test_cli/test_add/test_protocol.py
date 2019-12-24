@@ -44,7 +44,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_name = "gym"
+        cls.protocol_id = "fetchai/gym:0.1.0"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
@@ -55,9 +55,9 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
         assert result.exit_code == 0
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -68,27 +68,22 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
 
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
-        s = "A protocol with name '{}' already exists. Aborting...".format(self.protocol_name)
+        s = "A protocol with name '{}' already exists. Aborting...".format("gym")
         self.mocked_logger_error.assert_called_once_with(s)
 
-    @unittest.mock.patch(
-        'aea.cli.add.split_public_id',
-        return_value=['owner', 'name', 'version']
-    )
     @unittest.mock.patch('aea.cli.add.fetch_package')
     def test_add_protocol_from_registry_positive(
-        self, fetch_package_mock, split_public_id_mock
+        self, fetch_package_mock
     ):
         """Test add from registry positive result."""
-        public_id = "owner/name:version"
+        public_id = aea.configurations.base.PublicId("owner", "name", "0.1.0")
         obj_type = 'protocol'
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--registry", obj_type, public_id],
+            [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
             standalone_mode=False
         )
         assert result.exit_code == 0
-        split_public_id_mock.assert_called_once_with(public_id)
         fetch_package_mock.assert_called_once_with(
             obj_type, public_id=public_id, cwd='.'
         )
@@ -113,7 +108,7 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_name = "unknown_protocol"
+        cls.protocol_id = "user/unknown_protocol:0.1.0"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
@@ -124,7 +119,7 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -135,7 +130,7 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}''
         """
-        s = "Cannot find protocol: '{}'.".format(self.protocol_name)
+        s = "Cannot find protocol: '{}'.".format("unknown_protocol")
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -158,7 +153,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_name = "gym"
+        cls.protocol_id = "fetchai/gym:0.1.0"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
@@ -175,7 +170,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -209,6 +204,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.protocol_id = "fetchai/gym:0.1.0"
         cls.protocol_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -222,7 +218,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.agent_name)
         Path("protocols", cls.protocol_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

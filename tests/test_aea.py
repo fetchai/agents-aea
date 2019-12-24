@@ -121,9 +121,9 @@ def test_react():
         t = Thread(target=agent.start)
         try:
             t.start()
-            time.sleep(0.1)
+            time.sleep(1.0)
             agent.outbox.put(envelope)
-            time.sleep(0.5)
+            time.sleep(2.0)
             handler = agent.resources.handler_registry.fetch_by_skill('default', "dummy")
             assert handler is not None, "Handler is not set."
             assert msg in handler.handled_messages, "The message is not inside the handled_messages."

@@ -24,16 +24,13 @@ from click import ClickException
 from yaml import YAMLError
 
 from aea.cli.registry.utils import (
-    fetch_package, request_api, split_public_id, download_file, extract,
+    fetch_package, request_api, download_file, extract,
     _init_config_folder, write_cli_config, read_cli_config
 )
 from aea.cli.registry.settings import REGISTRY_API_URL
+from aea.configurations.base import PublicId
 
 
-@mock.patch(
-    'aea.cli.registry.utils.split_public_id',
-    return_value=['owner', 'name', 'version']
-)
 @mock.patch(
     'aea.cli.registry.utils.request_api',
     return_value={'file': 'url'}
@@ -43,25 +40,23 @@ from aea.cli.registry.settings import REGISTRY_API_URL
     return_value='filepath'
 )
 @mock.patch('aea.cli.registry.utils.extract')
-class FetchPackageTestCase(TestCase):
+class TestFetchPackage:
     """Test case for fetch_package method."""
 
     def test_fetch_package_positive(
         self,
         extract_mock,
         download_file_mock,
-        request_api_mock,
-        split_public_id_mock
+        request_api_mock
     ):
         """Test for fetch_package method positive result."""
         obj_type = 'connection'
-        public_id = 'owner/name:version'
+        public_id = PublicId.from_string('owner/name:0.1.0')
         cwd = 'cwd'
 
         fetch_package(obj_type, public_id, cwd)
-        split_public_id_mock.assert_called_with(public_id)
         request_api_mock.assert_called_with(
-            'GET', '/connections/owner/name/version'
+            'GET', '/connections/owner/name/0.1.0'
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/connections')
@@ -123,17 +118,6 @@ class RequestAPITestCase(TestCase):
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api('GET', '/path')
-
-
-class SplitPublicIDTestCase(TestCase):
-    """Test case for request_api method."""
-
-    def test_split_public_id_positive(self):
-        """Test for split_public_id method positive result."""
-        public_id = 'owner/name:version'
-        expected_result = ['owner', 'name', 'version']
-        result = split_public_id(public_id)
-        self.assertEqual(result, expected_result)
 
 
 @mock.patch('aea.cli.registry.utils.requests.get')

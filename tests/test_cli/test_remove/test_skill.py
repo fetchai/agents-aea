@@ -45,6 +45,7 @@ class TestRemoveSkill:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.skill_id = "fetchai/gym:0.1.0"
         cls.skill_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -59,7 +60,7 @@ class TestRemoveSkill:
         config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_name], standalone_mode=False)
 
@@ -139,6 +140,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.skill_id = "fetchai/gym:0.1.0"
         cls.skill_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -153,7 +155,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
         assert result.exit_code == 0
 
         cls.patch = unittest.mock.patch("shutil.rmtree", side_effect=BaseException("an exception"))

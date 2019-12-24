@@ -165,7 +165,7 @@ def delete_agent(agent_id: str):
 def add_item(agent_id: str, item_type: str, item_id: str):
     """Add a protocol, skill or connection to the register to a local agent."""
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
-    if _call_aea(["aea", "add", item_type, item_id], agent_dir) == 0:
+    if _call_aea([sys.executable, "-m", "aea.cli", "add", item_type, item_id], agent_dir) == 0:
         return agent_id, 201  # 200 (OK)
     else:
         return {"detail": "Failed to add {} {} to agent {}".format(item_type, item_id, agent_id)}, 400  # 400 Bad request
@@ -204,7 +204,6 @@ def _call_aea(param_list: List[str], dir_arg: str) -> int:
         old_cwd = os.getcwd()
         os.chdir(dir_arg)
         ret = subprocess.call(param_list)
-        subprocess.Popen(param_list, stderr=subprocess.PIPE, stdout=subprocess.PIPE).communicate()
         os.chdir(old_cwd)
     return ret
 

@@ -40,7 +40,8 @@ class TCPConnection(Connection, ABC):
                  host: str,
                  port: int,
                  connection_id: str,
-                 restricted_to_protocols: Optional[Set[str]] = None):
+                 restricted_to_protocols: Optional[Set[str]] = None,
+                 excluded_protocols: Optional[Set[str]] = None):
         """
         Initialize the TCP connection.
 
@@ -49,8 +50,10 @@ class TCPConnection(Connection, ABC):
         :param port: the port to connect to.
         :param connection_id: the identifier of the connection object.
         :param restricted_to_protocols: the only supported protocols for this connection.
+        :param excluded_protocols: the excluded protocols for this connection.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
+        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
+                         excluded_protocols=excluded_protocols)
         self.address = address
 
         self.host = host

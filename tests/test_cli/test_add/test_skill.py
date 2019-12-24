@@ -45,6 +45,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.skill_id = "fetchai/error:0.1.0"
         cls.skill_name = "error"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -59,7 +60,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         os.chdir(cls.agent_name)
 
         # add the error skill again
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -73,24 +74,19 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         s = "A skill with name '{}' already exists. Aborting...".format(self.skill_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
-    @unittest.mock.patch(
-        'aea.cli.add.split_public_id',
-        return_value=['owner', 'name', 'version']
-    )
     @unittest.mock.patch('aea.cli.add.fetch_package')
     def test_add_skill_from_registry_positive(
-        self, fetch_package_mock, split_public_id_mock
+        self, fetch_package_mock
     ):
         """Test add from registry positive result."""
-        public_id = "owner/name:version"
+        public_id = aea.configurations.base.PublicId("owner", "name", "0.1.0")
         obj_type = 'skill'
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--registry", obj_type, public_id],
+            [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
             standalone_mode=False
         )
         assert result.exit_code == 0
-        split_public_id_mock.assert_called_once_with(public_id)
         fetch_package_mock.assert_called_once_with(
             obj_type, public_id=public_id, cwd='.'
         )
@@ -115,6 +111,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.skill_id = "owner/unknown_skill:0.1.0"
         cls.skill_name = "unknown_skill"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -126,7 +123,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -160,6 +157,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.skill_id = "fetchai/echo:0.1.0"
         cls.skill_name = "echo"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -182,7 +180,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
                                                side_effect=ValidationError("test error message"))
         cls.patch.__enter__()
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -216,6 +214,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.skill_id = "fetchai/echo:0.1.0"
         cls.skill_name = "echo"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -234,7 +233,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         Path("skills", cls.skill_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

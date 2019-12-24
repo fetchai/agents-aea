@@ -20,7 +20,8 @@
 """Classes to handle AEA configurations."""
 import re
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
+from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast, Union
+
 # from aea.helpers.base import generate_fingerprint
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
@@ -124,43 +125,43 @@ class PublicId(object):
     """This class implement a public identifier.
 
     A public identifier is composed of three elements:
-    - username
-    - package name
+    - owner
+    - name
     - version
 
     The concatenation of those three elements gives the public identifier:
 
-        username/package_name:version
+        owner/name:version
 
-    >>> public_id = PublicId("username", "my_package", "0.1.0")
-    >>> assert public_id.username == "username"
-    >>> assert public_id.package_name == "my_package"
+    >>> public_id = PublicId("owner", "my_package", "0.1.0")
+    >>> assert public_id.owner == "owner"
+    >>> assert public_id.name == "my_package"
     >>> assert public_id.version == "0.1.0"
-    >>> another_public_id = PublicId("username", "my_package", "0.1.0")
+    >>> another_public_id = PublicId("owner", "my_package", "0.1.0")
     >>> assert hash(public_id) == hash(another_public_id)
     >>> assert public_id == another_public_id
     """
 
-    AUTHOR_REGEX = r"[a-zA-Z0-9_]*"
+    OWNER_REGEX = r"[a-zA-Z0-9_]*"
     PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     VERSION_REGEX = r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
-    PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX)
+    PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(OWNER_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX)
 
-    def __init__(self, username: str, package_name: str, version: str):
-        """Initialize the public identifier"""
-        self._username = username
-        self._package_name = package_name
+    def __init__(self, owner: str, name: str, version: str):
+        """Initialize the public identifier."""
+        self._owner = owner
+        self._name = name
         self._version = version
 
     @property
-    def username(self):
-        """Get the username."""
-        return self._username
+    def owner(self):
+        """Get the owner."""
+        return self._owner
 
     @property
-    def package_name(self):
-        """Get the package_name."""
-        return self._package_name
+    def name(self):
+        """Get the name."""
+        return self._name
 
     @property
     def version(self):
@@ -172,8 +173,8 @@ class PublicId(object):
         """
         Initialize the public id from the string.
 
-        >>> str(PublicId.from_string("username/package_name:0.1.0"))
-        'username/package_name:0.1.0'
+        >>> str(PublicId.from_string("owner/package_name:0.1.0"))
+        'owner/package_name:0.1.0'
 
         A bad formatted input raises value error:
         >>> PublicId.from_string("bad/formatted:input")
@@ -193,17 +194,21 @@ class PublicId(object):
 
     def __hash__(self):
         """Get the hash."""
-        return hash((self.username, self.package_name, self.version))
+        return hash((self.owner, self.name, self.version))
 
     def __str__(self):
         """Get the string representation."""
-        return "{username}/{package_name}:{version}"\
-            .format(username=self.username, package_name=self.package_name, version=self.version)
+        return "{owner}/{name}:{version}"\
+            .format(owner=self.owner, name=self.name, version=self.version)
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, PublicId) and self.username == other.username and self.package_name == other.package_name \
+        return isinstance(other, PublicId) and self.owner == other.owner and self.name == other.name \
             and self.version == other.version
+
+    def __lt__(self, other):
+        """Compare two public ids."""
+        return str(self) < str(other)
 
 
 class PackageConfiguration(Configuration, ABC):
@@ -633,17 +638,19 @@ class AgentConfig(Configuration):
         return str(self._default_connection)
 
     @default_connection.setter
-    def default_connection(self, connection_name: Optional[str]):
+    def default_connection(self, connection_id: Optional[Union[str, PublicId]]):
         """
         Set the default connection.
 
-        :param connection_name: the name of the default connection.
+        :param connection_id: the name of the default connection.
         :return: None
         """
-        if connection_name is not None:
-            self._default_connection = PublicId.from_string(connection_name)
-        else:
+        if connection_id is None:
             self._default_connection = None
+        elif isinstance(connection_id, str):
+            self._default_connection = PublicId.from_string(connection_id)
+        else:
+            self._default_connection = connection_id
 
     @property
     def default_ledger(self) -> str:

@@ -108,12 +108,12 @@ class TestCreate:
     def test_connections_contains_only_stub(self):
         """Check that the 'connections' list contains only the 'stub' connection."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["connections"] == ["stub"]
+        assert agent_config_instance["connections"] == ["fetchai/stub:0.1.0"]
 
     def test_default_connection_field_is_stub(self):
         """Check that the 'default_connection' is the 'stub' connection."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["default_connection"] == "stub"
+        assert agent_config_instance["default_connection"] == "fetchai/stub:0.1.0"
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""
@@ -128,12 +128,12 @@ class TestCreate:
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["protocols"] == ["default"]
+        assert agent_config_instance["protocols"] == ["fetchai/default:0.1.0"]
 
-    def test_skills_field_is_empty_list(self):
+    def test_skills_field_is_not_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
         agent_config_instance = self._load_config_file()
-        assert agent_config_instance["skills"] == ["error"]
+        assert agent_config_instance["skills"] == ["fetchai/error:0.1.0"]
 
     def test_url_field_is_empty_string(self):
         """Check that the 'url' field is the empty string."""

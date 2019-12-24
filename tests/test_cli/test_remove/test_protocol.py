@@ -47,6 +47,7 @@ class TestRemoveProtocol:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        cls.protocol_id = "fetchai/gym:0.1.0"
         cls.protocol_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -55,7 +56,7 @@ class TestRemoveProtocol:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "protocol", cls.protocol_name], standalone_mode=False)
 
@@ -112,7 +113,7 @@ class TestRemoveProtocolFailsWhenProtocolDoesNotExist:
 
         The expected message is: 'Protocol '{protocol_name}' not found.'
         """
-        s = "Protocol '{}' not found.".format(self.protocol_name)
+        s = "The protocol '{}' is not supported.".format(self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -137,6 +138,7 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        cls.protocol_id = "fetchai/gym:0.1.0"
         cls.protocol_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -145,7 +147,7 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
         assert result.exit_code == 0
 
         cls.patch = unittest.mock.patch("shutil.rmtree", side_effect=BaseException("an exception"))

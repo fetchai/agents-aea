@@ -41,8 +41,9 @@ def connections(ctx: Context):
     """List all the installed connections."""
     result = []
     for connection_id in sorted(ctx.agent_config.connections):
-        connection_configuration_filepath = os.path.join("connections", connection_id, DEFAULT_CONNECTION_CONFIG_FILE)
-        details = retrieve_details(connection_id, ctx.connection_loader, connection_configuration_filepath)
+        connection_name = connection_id.name
+        connection_configuration_filepath = os.path.join("connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE)
+        details = retrieve_details(connection_name, ctx.connection_loader, connection_configuration_filepath)
         result.append(details)
 
     print(format_items(sorted(result, key=lambda k: k['name'])))
@@ -54,8 +55,9 @@ def protocols(ctx: Context):
     """List all the installed protocols."""
     result = []
     for protocol_id in sorted(ctx.agent_config.protocols):
-        protocol_configuration_filepath = os.path.join("protocols", protocol_id, DEFAULT_PROTOCOL_CONFIG_FILE)
-        details = retrieve_details(protocol_id, ctx.protocol_loader, protocol_configuration_filepath)
+        protocol_name = protocol_id.name
+        protocol_configuration_filepath = os.path.join("protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)
+        details = retrieve_details(protocol_name, ctx.protocol_loader, protocol_configuration_filepath)
         result.append(details)
 
     print(format_items(sorted(result, key=lambda k: k['name'])))
@@ -67,8 +69,9 @@ def skills(ctx: Context):
     """List all the installed skills."""
     result = []
     for skill_id in sorted(ctx.agent_config.skills):
-        skill_configuration_filepath = os.path.join("skills", skill_id, DEFAULT_SKILL_CONFIG_FILE)
-        details = retrieve_details(skill_id, ctx.skill_loader, skill_configuration_filepath)
+        skill_name = skill_id.name
+        skill_configuration_filepath = os.path.join("skills", skill_name, DEFAULT_SKILL_CONFIG_FILE)
+        details = retrieve_details(skill_name, ctx.skill_loader, skill_configuration_filepath)
         result.append(details)
 
     print(format_items(sorted(result, key=lambda k: k['name'])))

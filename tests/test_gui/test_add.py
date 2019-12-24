@@ -20,6 +20,7 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
+import sys
 import unittest.mock
 
 from .test_base import create_app
@@ -33,13 +34,15 @@ def test_add_item():
     app = create_app()
 
     agent_name = "test_agent_id"
-    connection_name = "test_connection"
+    connection_id = "owner/test_connection:0.1.0"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "add"
-        assert param_list[2] == "connection"
-        assert param_list[3] == connection_name
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "add"
+        assert param_list[4] == "connection"
+        assert param_list[5] == connection_id
         assert agent_name in dir
         return 0
 
@@ -48,7 +51,7 @@ def test_add_item():
         response_remove = app.post(
             'api/agent/' + agent_name + "/connection",
             content_type='application/json',
-            data=json.dumps(connection_name))
+            data=json.dumps(connection_id))
     assert response_remove.status_code == 201
     data = json.loads(response_remove.get_data(as_text=True))
     assert data == agent_name
@@ -62,13 +65,15 @@ def test_delete_agent_fail():
     app = create_app()
 
     agent_name = "test_agent_id"
-    connection_name = "test_connection"
+    connection_id = "owner/test_connection:0.1.0"
 
     def _dummy_call_aea(param_list, dir):
-        assert param_list[0] == "aea"
-        assert param_list[1] == "add"
-        assert param_list[2] == "connection"
-        assert param_list[3] == connection_name
+        assert param_list[0] == sys.executable
+        assert param_list[1] == "-m"
+        assert param_list[2] == "aea.cli"
+        assert param_list[3] == "add"
+        assert param_list[4] == "connection"
+        assert param_list[5] == connection_id
         assert agent_name in dir
         return 1
 
@@ -77,7 +82,7 @@ def test_delete_agent_fail():
         response_remove = app.post(
             'api/agent/' + agent_name + "/connection",
             content_type='application/json',
-            data=json.dumps(connection_name))
+            data=json.dumps(connection_id))
     assert response_remove.status_code == 400
     data = json.loads(response_remove.get_data(as_text=True))
-    assert data["detail"] == "Failed to add connection {} to agent {}".format(connection_name, agent_name)
+    assert data["detail"] == "Failed to add connection {} to agent {}".format(connection_id, agent_name)
