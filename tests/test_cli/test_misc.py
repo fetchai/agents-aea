@@ -66,7 +66,7 @@ Commands:
   list          List the installed resources.
   login         Login to Registry account
   publish       Publish Agent to Registry.
-  push          Push item to Registry.
+  push          Push item to Registry or save it in local packages.
   remove        Remove a resource from the agent.
   run           Run the agent.
   scaffold      Scaffold a resource for the agent.

@@ -23,7 +23,9 @@ import os
 import tarfile
 import shutil
 
-from aea.cli.common import logger
+from distutils.dir_util import copy_tree
+
+from aea.cli.common import logger, DEFAULT_REGISTRY_PATH
 from aea.cli.registry.utils import request_api, load_yaml, clean_tarfiles
 
 
@@ -92,4 +94,46 @@ def push_item(item_type: str, item_name: str) -> None:
         'Successfully pushed {} {} to the Registry. Public ID: {}'.format(
             item_type, item_name, resp['public_id']
         )
+    )
+
+
+def _get_item_source_path(
+    cwd: str, item_type_plural: str, item_name: str
+) -> str:
+    source_path = os.path.join(cwd, item_type_plural, item_name)
+    if not os.path.exists(source_path):
+        raise click.ClickException(
+            'Item "{}" not found in {}.'.format(item_name, cwd)
+        )
+    return source_path
+
+
+def _get_item_target_path(item_type_plural: str, item_name: str) -> str:
+    packages_path = DEFAULT_REGISTRY_PATH
+    target_path = os.path.join(packages_path, item_type_plural, item_name)
+    if os.path.exists(target_path):
+        raise click.ClickException(
+            'Item "{}" already exists in packages folder.'.format(item_name)
+        )
+    return target_path
+
+
+def save_item_locally(item_type: str, item_name: str) -> None:
+    """
+    Save item to local packages.
+
+    :param item_type: str type of item (connection/protocol/skill).
+    :param item_name: str item name.
+
+    :return: None
+    """
+    item_type_plural = item_type + 's'
+    cwd = os.getcwd()
+
+    source_path = _get_item_source_path(cwd, item_type_plural, item_name)
+    target_path = _get_item_target_path(item_type_plural, item_name)
+    copy_tree(source_path, target_path)
+    click.echo(
+        '{} "{}" successfully saved in packages folder.'
+        .format(item_type.title(), item_name)
     )

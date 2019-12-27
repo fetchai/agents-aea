@@ -22,6 +22,7 @@ import os
 from unittest import TestCase, mock
 from click import ClickException
 from yaml import YAMLError
+from requests.exceptions import ConnectionError
 
 from aea.cli.registry.utils import (
     fetch_package, request_api, download_file, extract,
@@ -60,6 +61,10 @@ class TestFetchPackage:
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/connections')
+
+
+def _raise_connection_error(*args):
+    raise ConnectionError()
 
 
 @mock.patch('aea.cli.registry.utils.requests.request')
@@ -116,6 +121,14 @@ class RequestAPITestCase(TestCase):
         resp_mock = mock.Mock()
         resp_mock.status_code = 500
         request_mock.return_value = resp_mock
+        with self.assertRaises(ClickException):
+            request_api('GET', '/path')
+
+    @mock.patch(
+        'aea.cli.registry.utils.requests.request', _raise_connection_error
+    )
+    def test_request_api_server_not_responding(self, request_mock):
+        """Test for fetch_package method no server response."""
         with self.assertRaises(ClickException):
             request_api('GET', '/path')
 
