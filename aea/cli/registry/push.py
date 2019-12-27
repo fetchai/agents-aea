@@ -25,7 +25,7 @@ import shutil
 
 from distutils.dir_util import copy_tree
 
-from aea.cli.common import logger
+from aea.cli.common import logger, DEFAULT_REGISTRY_PATH
 from aea.cli.registry.utils import request_api, load_yaml, clean_tarfiles
 
 
@@ -97,20 +97,6 @@ def push_item(item_type: str, item_name: str) -> None:
     )
 
 
-def get_packages_path() -> str:
-    """
-    Get path to packages folder.
-
-    Should not be called from outside the project dir.
-
-    :return: str path to packages dir.
-    """
-    project_parent_dir = os.path.abspath('__file__').split(
-        '{0}agents-aea{0}'.format(os.path.sep)
-    )[0]
-    return os.path.join(project_parent_dir, 'agents-aea', 'packages')
-
-
 def _get_item_source_path(
     cwd: str, item_type_plural: str, item_name: str
 ) -> str:
@@ -123,7 +109,7 @@ def _get_item_source_path(
 
 
 def _get_item_target_path(item_type_plural: str, item_name: str) -> str:
-    packages_path = get_packages_path()
+    packages_path = DEFAULT_REGISTRY_PATH
     target_path = os.path.join(packages_path, item_type_plural, item_name)
     if os.path.exists(target_path):
         raise click.ClickException(
