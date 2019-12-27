@@ -28,8 +28,6 @@ from aea.cli.registry.push import (
     push_item,
     _remove_pycache,
     save_item_locally,
-    _get_item_source_path,
-    _get_item_target_path
 )
 
 
@@ -115,15 +113,15 @@ class SaveItemLocallyTestCase(TestCase):
     """Test case for save_item_locally method."""
 
     @mock.patch(
-        'aea.cli.registry.push._get_item_target_path', return_value='target'
+        'aea.cli.registry.push.get_item_target_path', return_value='target'
     )
     @mock.patch(
-        'aea.cli.registry.push._get_item_source_path', return_value='source'
+        'aea.cli.registry.push.get_item_source_path', return_value='source'
     )
     def test_save_item_locally_positive(
         self,
-        _get_item_source_path_mock,
-        _get_item_target_path_mock,
+        get_item_source_path_mock,
+        get_item_target_path_mock,
         getcwd_mock,
         copy_tree_mock
     ):
@@ -131,50 +129,9 @@ class SaveItemLocallyTestCase(TestCase):
         item_type = 'skill'
         item_name = 'skill-name'
         save_item_locally(item_type, item_name)
-        _get_item_source_path_mock.assert_called_once_with(
+        get_item_source_path_mock.assert_called_once_with(
             'cwd', 'skills', item_name
         )
-        _get_item_target_path_mock.assert_called_once_with('skills', item_name)
+        get_item_target_path_mock.assert_called_once_with('skills', item_name)
         getcwd_mock.assert_called_once()
         copy_tree_mock.assert_called_once_with('source', 'target')
-
-
-@mock.patch('aea.cli.registry.push.os.path.join', return_value='some-path')
-class GetItemSourcePathTestCase(TestCase):
-    """Test case for _get_item_source_path method."""
-
-    @mock.patch('aea.cli.registry.push.os.path.exists', return_value=True)
-    def test__get_item_source_path_positive(self, exists_mock, join_mock):
-        """Test for _get_item_source_path positive result."""
-        result = _get_item_source_path('cwd', 'skills', 'skill-name')
-        expected_result = 'some-path'
-        self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with('cwd', 'skills', 'skill-name')
-        exists_mock.assert_called_once_with('some-path')
-
-    @mock.patch('aea.cli.registry.push.os.path.exists', return_value=False)
-    def test__get_item_source_path_not_exists(self, exists_mock, join_mock):
-        """Test for _get_item_source_path item already exists."""
-        with self.assertRaises(ClickException):
-            _get_item_source_path('cwd', 'skills', 'skill-name')
-
-
-@mock.patch('aea.cli.registry.push.DEFAULT_REGISTRY_PATH', 'packages')
-@mock.patch('aea.cli.registry.push.os.path.join', return_value='some-path')
-class GetItemTargetPathTestCase(TestCase):
-    """Test case for _get_item_target_path method."""
-
-    @mock.patch('aea.cli.registry.push.os.path.exists', return_value=False)
-    def test__get_item_target_path_positive(self, exists_mock, join_mock):
-        """Test for _get_item_source_path positive result."""
-        result = _get_item_target_path('skills', 'skill-name')
-        expected_result = 'some-path'
-        self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with('packages', 'skills', 'skill-name')
-        exists_mock.assert_called_once_with('some-path')
-
-    @mock.patch('aea.cli.registry.push.os.path.exists', return_value=True)
-    def test__get_item_target_path_already_exists(self, exists_mock, join_mock):
-        """Test for _get_item_target_path item already exists."""
-        with self.assertRaises(ClickException):
-            _get_item_target_path('skills', 'skill-name')

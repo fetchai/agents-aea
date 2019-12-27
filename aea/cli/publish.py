@@ -20,10 +20,14 @@
 """Implementation of the 'aea publish' subcommand."""
 import click
 
-from aea.cli.registry.publish import publish_agent
+from aea.cli.registry.publish import publish_agent, save_agent_locally
 
 
 @click.command(name='publish')
-def publish():
+@click.option('--local', is_flag=True, help="For saving agent locally.")
+def publish(local):
     """Publish Agent to Registry."""
-    publish_agent()
+    if local:
+        save_agent_locally()
+    else:
+        publish_agent()
