@@ -22,6 +22,9 @@ from typing import Union
 import click
 import os
 
+from distutils.dir_util import copy_tree
+
+from aea.cli.common import DEFAULT_REGISTRY_PATH
 from aea.cli.registry.utils import (
     request_api, download_file, extract
 )
@@ -50,4 +53,36 @@ def fetch_agent(public_id: Union[PublicId, str]) -> None:
     click.echo(
         'Agent {} successfully fetched to {}.'
         .format(name, target_folder)
+    )
+
+
+def _get_agent_source_path(item_name: str) -> str:
+    packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
+    target_path = os.path.join(packages_path, 'agents', item_name)
+    if not os.path.exists(target_path):
+        raise click.ClickException(
+            'Agent "{}" not found in packages folder.'.format(item_name)
+        )
+    return target_path
+
+
+def fetch_agent_locally(public_id: Union[PublicId, str]) -> None:
+    """
+    Fetch Agent from local packages.
+
+    :param public_id: str public ID of desirable Agent.
+
+    :return: None
+    """
+    if isinstance(public_id, str):
+        public_id = PublicId.from_string(public_id)
+
+    name = public_id.name
+    source_dir = _get_agent_source_path(name)
+    cwd = os.getcwd()
+    target_dir = os.path.join(cwd, name)
+    copy_tree(source_dir, target_dir)
+    click.echo(
+        'Agent {} successfully saved in {}.'
+        .format(name, cwd)
     )
