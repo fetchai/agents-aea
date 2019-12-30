@@ -19,19 +19,23 @@
 # ------------------------------------------------------------------------------
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
+import time
 
-from web3 import Web3
+import web3
+from web3 import Web3, HTTPProvider
 from eth_account import Account
 from eth_keys import keys
 import logging
 from pathlib import Path
 from typing import Optional, BinaryIO
 
-from aea.crypto.base import Crypto
+from aea.crypto.base import Crypto, LedgerApi, AddressLike
 
 logger = logging.getLogger(__name__)
 
 ETHEREUM = "ethereum"
+GAS_PRICE = '50'
+GAS_ID = 'gwei'
 
 
 class EthereumCrypto(Crypto):
@@ -145,3 +149,64 @@ class EthereumCrypto(Crypto):
         :return: None
         """
         fp.write(self._account.privateKey.hex().encode("utf-8"))
+
+
+class EthereumAIApi(LedgerApi):
+    """Class to interact with the Ethereum Web3 APIs."""
+
+    def __init__(self, endpoint_uri: str, chain_id: int):
+        """
+        Initialize the Ethereum ledger APIs.
+
+        :param endpoint_uri: the endpoint for Web3 APIs.
+        :param chain_id: the id of the Ethereum chain.
+        # TODO setting chain_id in the constructor might seem limiting.
+               It means the chain id in the transactions is fixed.
+               This might not be the desired behaviour.
+               `send_transaction` could support optional **kwargs for that case.
+        """
+        self._api = Web3(HTTPProvider(endpoint_uri=endpoint_uri))
+        self._chain_id = chain_id
+
+    @property
+    def chain_id(self):
+        """Get the chain id."""
+        return self._chain_id
+
+    def get_balance(self, address: AddressLike) -> int:
+        """Get the balance of a given account."""
+        return self._api.eth.getBalance(address)
+
+    def send_transaction(self, crypto_object: Crypto, destination_address: AddressLike, amount: int, tx_fee: int) -> Optional[str]:
+        """Submit a transaction to the ledger."""
+        nonce = self._api.eth.getTransactionCount(self._api.toChecksumAddress(crypto_object.address))
+        # TODO : handle misconfiguration
+        transaction = {
+            'nonce': nonce,
+            'chainId': self.chain_id,  # TODO see todo in the constructor.
+            'to': destination_address,
+            'value': amount,
+            'gas': tx_fee,
+            'gasPrice': self._api.toWei(GAS_PRICE, GAS_ID)
+        }
+        signed = self._api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
+        hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
+        logger.info("TX Hash: {}".format(str(hex_value.hex())))
+        while True:
+            try:
+                self._api.eth.getTransactionReceipt(hex_value)
+                logger.info("transaction validated - exiting")
+                tx_digest = hex_value.hex()
+                break
+            except web3.exceptions.TransactionNotFound:  # pragma: no cover
+                logger.info("transaction not found - sleeping for 3.0 seconds")
+                time.sleep(3.0)
+        return tx_digest
+
+    def is_transaction_settled(self, tx_digest: str) -> bool:
+        """Check whether a transaction is settled or not."""
+        tx_status = self._api.eth.getTransactionReceipt(tx_digest)
+        is_successful = False
+        if tx_status is not None:
+            is_successful = True
+        return is_successful
