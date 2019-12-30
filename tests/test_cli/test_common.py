@@ -33,6 +33,7 @@ class FormatItemsTestCase(TestCase):
                 'public_id': 'owner/name:version',
                 'name': 'obj-name',
                 'description': 'Some description',
+                'author': 'owner',
                 'version': '1.0'
             }
         ]
@@ -42,6 +43,7 @@ class FormatItemsTestCase(TestCase):
             'Public ID: owner/name:version\n'
             'Name: obj-name\n'
             'Description: Some description\n'
+            'Author: owner\n'
             'Version: 1.0\n'
             '------------------------------\n'
         )

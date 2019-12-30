@@ -22,8 +22,13 @@ import os
 import click
 import tarfile
 
+from shutil import copyfile
+from typing import Dict
+
 from aea.cli.common import logger
-from aea.cli.registry.utils import clean_tarfiles, load_yaml, request_api
+from aea.cli.registry.utils import (
+    clean_tarfiles, load_yaml, request_api, get_item_target_path
+)
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
 
@@ -34,17 +39,21 @@ def _compress(output_filename: str, *filepaths):
             f.add(filepath, arcname=os.path.basename(filepath))
 
 
+def _load_agent_config(agent_config_path: str) -> Dict:
+    if not os.path.exists(agent_config_path):
+        raise click.ClickException(
+            'Agent config not found. Make sure you run push command '
+            'from a correct folder.'
+        )
+    return load_yaml(agent_config_path)
+
+
 @clean_tarfiles
 def publish_agent():
     """Publish an agent."""
     cwd = os.getcwd()
     agent_config_path = os.path.join(cwd, DEFAULT_AEA_CONFIG_FILE)
-    if not os.path.exists(agent_config_path):
-        raise click.ClickException(
-            'Agent config not found in {}. Make sure you run push command '
-            'from a correct folder.'.format(cwd)
-        )
-    agent_config = load_yaml(agent_config_path)
+    agent_config = _load_agent_config(agent_config_path)
     name = agent_config['agent_name']
     output_tar = os.path.join(cwd, '{}.tar.gz'.format(name))
     _compress(output_tar, agent_config_path)
@@ -63,4 +72,30 @@ def publish_agent():
         'Successfully published agent {} to the Registry. Public ID: {}'.format(
             name, resp['public_id']
         )
+    )
+
+
+def save_agent_locally() -> None:
+    """
+    Save agent to local packages.
+
+    :return: None
+    """
+    item_type_plural = 'agents'
+    cwd = os.getcwd()
+
+    agent_config_path = os.path.join(cwd, DEFAULT_AEA_CONFIG_FILE)
+    agent_config = _load_agent_config(agent_config_path)
+    name = agent_config['agent_name']
+
+    target_dir = get_item_target_path(item_type_plural, name)
+    # TODO: now - copy only config file. Change to copy whole agent.
+    source_path = os.path.join(cwd, DEFAULT_AEA_CONFIG_FILE)
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir, exist_ok=True)
+
+    target_file = os.path.join(target_dir, DEFAULT_AEA_CONFIG_FILE)
+    copyfile(source_path, target_file)
+    click.echo(
+        'Agent "{}" successfully saved in packages folder.'.format(name)
     )

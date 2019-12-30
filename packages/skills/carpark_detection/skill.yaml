@@ -4,6 +4,7 @@ version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
 url: ""
+description: "The carpark detection skill implements the detection and trading functionality for a carpark agent."
 behaviours:
   service_registration:
     class_name: ServiceRegistrationBehaviour
