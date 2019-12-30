@@ -157,4 +157,4 @@ def test_real_search():
     assert data[i]['description'] == 'The stub connection implements a connection stub which reads/writes messages from/to file.'
     i += 1
     assert data[i]['id'] == 'tcp'
-    assert data[i]['description'] == ''
+    assert data[i]['description'] == 'The tcp connection implements a tcp server and client.'
