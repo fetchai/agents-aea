@@ -20,6 +20,8 @@
 """This test module contains the tests for the `aea search` sub-command."""
 import json
 import os
+import shutil
+import tempfile
 from unittest import mock, TestCase
 from pathlib import Path
 
@@ -112,6 +114,46 @@ class TestSearchSkills:
         os.chdir(AEA_DIR)
         self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False)
         assert self.result.output == "Available skills:\n{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+
+
+class TestSearchWithCustomLocalRegistry:
+    """Test that the command 'aea search --local-registry-path' works as expected."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        cls.cwd = os.getcwd()
+        cls.runner = CliRunner()
+
+        # copy packages into another folder.
+        cls.t = tempfile.mkdtemp()
+        shutil.copytree("packages/", Path(cls.t, "new_packages"))
+
+    @mock.patch(
+        'aea.cli.search.format_items',
+        return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
+    )
+    def test_correct_output_default_registry(self, _):
+        """Test that the command has printed the correct output when using the default registry."""
+        os.chdir(AEA_DIR)
+        result = self.runner.invoke(cli,
+                                    [
+                                        *CLI_LOG_OPTION,
+                                        "search",
+                                        "--local-registry-dir",
+                                        os.path.join(self.t, "new_packages"),
+                                        "skills"],
+                                    standalone_mode=False)
+        assert result.output == "Available skills:\n{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
 
     @classmethod
     def teardown_class(cls):

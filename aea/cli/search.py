@@ -29,25 +29,46 @@ from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, ret
     format_items, format_skills
 from aea.cli.registry.utils import request_api
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
-    DEFAULT_PROTOCOL_CONFIG_FILE
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
 
 
 @click.group()
+@click.option('--local-registry-dir',
+              type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True, resolve_path=True),
+              default=None, help="Path to the local registry directory.")
 @click.option('--registry', is_flag=True, help="For Registry search.")
 @pass_ctx
-def search(ctx: Context, registry):
+def search(ctx: Context, registry, local_registry_dir):
     """Search for components in the registry.
+
+    if '--registry' is provided, '--lcoal-registry-dir' will be ignored.
 
     E.g.
 
-        aea search --registry packages/ skills
+        aea search connections
+        aea search --local-registry-dir packages/ connections
+        aea search --registry skills
     """
     if registry:
         ctx.set_config("is_registry", True)
     else:
-        registry = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
-        ctx.set_config("registry", registry)
-        logger.debug("Using registry {}".format(registry))
+        # if registry is False, we have to use the local registry.
+        # if the user provided the local registry path, use it.
+        # otherwise, if we are in an agent directory, try to load the configuration file.
+        # otherwise, use the default path.
+        if local_registry_dir is not None:
+            registry_directory = local_registry_dir
+        else:
+            try:
+                path = Path(DEFAULT_AEA_CONFIG_FILE)
+                fp = open(str(path), mode="r", encoding="utf-8")
+                agent_config = ctx.agent_loader.load(fp)
+                registry_directory = agent_config.registry_path
+            except Exception:
+                registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
+
+        ctx.set_config("registry", registry_directory)
+        logger.debug("Using registry {}".format(registry_directory))
 
 
 def _is_invalid_item(name, dir_path, config_path):
