@@ -160,6 +160,31 @@ class RegistrySearchTestCase(TestCase):
         )
         format_items_mock.assert_called_once_with(['correct', 'results'])
 
+    def test_search_agents_positive(
+        self, format_items_mock, request_api_mock
+    ):
+        """Test for CLI search --registry agents positive result."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "search",
+                "--registry",
+                "agents",
+                "--query=some"
+            ],
+            standalone_mode=False
+        )
+        expected_output = (
+            'Agents found:\n\n'
+            '{}\n'.format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
+        self.assertEqual(result.output, expected_output)
+        request_api_mock.assert_called_once_with(
+            'GET', '/agents', params={'search': 'some'}
+        )
+        format_items_mock.assert_called_once_with(['correct', 'results'])
+
     def test_search_protocols_positive(
         self, format_items_mock, request_api_mock
     ):

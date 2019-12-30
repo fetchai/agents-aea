@@ -146,3 +146,23 @@ def skills(ctx: Context, query):
 
     print("Available skills:")
     print(format_items(sorted(result, key=lambda k: k['name'])))
+
+
+@search.command()
+@click.option('--query', default='',
+              help='Query string to search Skills by name.')
+@pass_ctx
+def agents(ctx: Context, query):
+    if ctx.config.get("is_registry"):
+        resp = request_api(
+            'GET', '/agents', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No agents found.')  # pragma: no cover
+        else:
+            click.echo('Agents found:\n')
+            click.echo(format_items(resp))
+        return
+    else:
+        # TODO: implement search for Agents locally
+        raise NotImplementedError()
