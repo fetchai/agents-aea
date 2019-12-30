@@ -153,6 +153,7 @@ def skills(ctx: Context, query):
               help='Query string to search Agents by name.')
 @pass_ctx
 def agents(ctx: Context, query):
+    """Search for Agents."""
     if ctx.config.get("is_registry"):
         resp = request_api(
             'GET', '/agents', params={'search': query}

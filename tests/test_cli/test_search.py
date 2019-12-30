@@ -22,17 +22,17 @@ import json
 import os
 import shutil
 import tempfile
-from unittest import mock, TestCase
 from pathlib import Path
+from unittest import mock, TestCase
 
 import jsonschema
-from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, ROOT_DIR
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
+from ..common.click_testing import CliRunner
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
 
 
 class TestSearchProtocols:
@@ -146,16 +146,14 @@ class TestSearchAgents:
 
     def test_correct_output_default_registry(self):
         """Test that the command has printed the correct output when using the default registry."""
-        assert self.result.output == """Available agents:
-------------------------------
-Public ID: /myagent:0.1.0
-Name: myagent
-Description: 
-Author: 
-Version: 0.1.0
-------------------------------
-
-"""
+        assert self.result.output == "Available agents:\n" \
+                                     "------------------------------\n" \
+                                     "Public ID: /myagent:0.1.0\n" \
+                                     "Name: myagent\n" \
+                                     "Description: \n" \
+                                     "Author: \n" \
+                                     "Version: 0.1.0\n" \
+                                     "------------------------------\n\n"
 
     @classmethod
     def teardown_class(cls):
