@@ -274,9 +274,15 @@ def clean_tarfiles(func):
     return wrapper
 
 
-def get_item_source_path(
-    cwd: str, item_type_plural: str, item_name: str
-) -> str:
+def get_item_source_path(cwd: str, item_type_plural: str, item_name: str) -> str:
+    """
+    Get the item source path.
+
+    :param cwd: the current working directory
+    :param item_type_plural: the item type (plural)
+    :param item_name: the item name
+    :return: the item source path
+    """
     source_path = os.path.join(cwd, item_type_plural, item_name)
     if not os.path.exists(source_path):
         raise click.ClickException(
@@ -286,6 +292,13 @@ def get_item_source_path(
 
 
 def get_item_target_path(item_type_plural: str, item_name: str) -> str:
+    """
+    Get the item target path.
+
+    :param item_type_plural: the item type (plural)
+    :param item_name: the item name
+    :return: the item target path
+    """
     packages_path = DEFAULT_REGISTRY_PATH
     target_path = os.path.join(packages_path, item_type_plural, item_name)
     if os.path.exists(target_path):

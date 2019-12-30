@@ -154,12 +154,13 @@ def format_items(items):
             'Public ID: {public_id}\n'
             'Name: {name}\n'
             'Description: {description}\n'
+            'Author: {author}\n'
             'Version: {version}\n'
             '{line}\n'.format(
                 name=item['name'],
-                # TODO: switch to unsafe get public_id when every obj has it
-                public_id=item.get('public_id'),
+                public_id=item['public_id'],
                 description=item['description'],
+                author=item['author'],
                 version=item['version'],
                 line='-' * 30
             ))
@@ -195,7 +196,7 @@ def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
     """Return description of a protocol, skill or connection."""
     config = loader.load(open(str(config_filepath)))
     assert config.name == name
-    return {"name": config.name, "description": config.description, "version": config.version}
+    return {"public_id": str(config.public_id), "name": config.name, "author": config.author, "description": config.description, "version": config.version}
 
 
 class AEAConfigException(Exception):
