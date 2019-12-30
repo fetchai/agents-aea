@@ -75,7 +75,11 @@ def _remove_item(ctx: Context, item_type, item_name):
 @click.argument('connection_name', type=str, required=True)
 @pass_ctx
 def connection(ctx: Context, connection_name):
-    """Remove a connection from the agent."""
+    """
+    Remove a connection from the agent.
+
+    It expects the name or public id of the connection to remove from the local registry.
+    """
     _remove_item(ctx, "connection", connection_name)
 
 
@@ -83,7 +87,11 @@ def connection(ctx: Context, connection_name):
 @click.argument('protocol_name', type=str, required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_name):
-    """Remove a protocol from the agent."""
+    """
+    Remove a protocol from the agent.
+
+    It expects the name or public id of the protocol to remove from the local registry.
+    """
     _remove_item(ctx, "protocol", protocol_name)
 
 
@@ -91,5 +99,9 @@ def protocol(ctx: Context, protocol_name):
 @click.argument('skill_name', type=str, required=True)
 @pass_ctx
 def skill(ctx: Context, skill_name):
-    """Remove a skill from the agent."""
+    """
+    Remove a skill from the agent.
+
+    It expects the name or public id of the skill to remove from the local registry.
+    """
     _remove_item(ctx, "skill", skill_name)
