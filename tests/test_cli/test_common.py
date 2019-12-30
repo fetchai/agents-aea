@@ -43,7 +43,7 @@ class FormatItemsTestCase(TestCase):
             'Public ID: owner/name:version\n'
             'Name: obj-name\n'
             'Description: Some description\n'
-            'Author: owner\n',
+            'Author: owner\n'
             'Version: 1.0\n'
             '------------------------------\n'
         )
