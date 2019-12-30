@@ -22,15 +22,17 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, BinaryIO
+from typing import Optional, BinaryIO, Dict, cast
 
 from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
+from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 
-from aea.crypto.base import Crypto
+from aea.crypto.base import Crypto, LedgerApi, AddressLike
 
 logger = logging.getLogger(__name__)
 
 FETCHAI = "fetchai"
+SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
 
 
 class FetchAICrypto(Crypto):
@@ -146,3 +148,47 @@ class FetchAICrypto(Crypto):
         :return: None
         """
         fp.write(self.entity.private_key_hex.encode("utf-8"))
+
+
+class FetchAIApi(LedgerApi):
+    """Class to interact with the Fetch ledger APIs."""
+
+    def __init__(self, host: str, port: int):
+        """
+        Initialize the Fetch.AI ledger APIs.
+
+        :param host: URL to the server.
+        :param port: the listening port.
+        """
+        self._api = FetchaiLedgerApi(host, port)
+
+    @property
+    def host(self):
+        """The URL to the server."""
+        return self._api.tokens.host
+
+    @property
+    def port(self):
+        """The listening port."""
+        return self._api.tokens.port
+
+    def get_balance(self, address: AddressLike) -> int:
+        """Get the balance of a given account."""
+        return self._api.tokens.balance(address)
+
+    def send_transaction(self, crypto_object: Crypto, destination_address: AddressLike, amount: int, tx_fee: int) -> Optional[str]:
+        """Submit a transaction to the ledger."""
+        tx_digest = self._api.tokens.transfer(crypto_object.entity, destination_address, amount, tx_fee)
+        self._api.sync(tx_digest)
+        return tx_digest
+
+    def is_transaction_settled(self, tx_digest: str) -> bool:
+        """Check whether a transaction is settled or not."""
+        tx_status = cast(str, self._api.tx.status(tx_digest))
+        is_successful = False
+        if tx_status in SUCCESSFUL_TERMINAL_STATES:
+            # tx_contents = cast(TxContents, api.tx.contents(tx_digest))
+            # tx_contents.transfers_to()
+            # TODO: check the amount of the transaction is correct
+            is_successful = True
+        return is_successful

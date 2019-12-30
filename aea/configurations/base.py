@@ -256,6 +256,7 @@ class PrivateKeyPathConfig(Configuration):
         )
 
 
+# TODO this class appears to be of little utility.
 class LedgerAPIConfig(Configuration):
     """Handle a ledger api configuration."""
 

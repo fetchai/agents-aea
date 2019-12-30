@@ -88,7 +88,7 @@ class Crypto(ABC):
 
 
 class LedgerApi(ABC):
-    """Abstract class for generic ledger APIs."""
+    """Interface for ledger APIs."""
 
     identifier = None  # type: Optional[str]
 
@@ -120,11 +120,14 @@ class LedgerApi(ABC):
         :return: the transaction digest, or None.
         """
 
+    # TODO?
+    # def get_transaction_receipt(self, tx_digest: str) -> Dict:
+
     @abstractmethod
-    def get_transaction_receipt(self, tx_digest: str) -> Dict:
+    def is_transaction_settled(self, tx_digest: str) -> bool:
         """
-        Get the status of a transaction.
+        Check whether a transaction is settled or not.
 
         :param tx_digest: the digest associated to the transaction.
-        :return: the status of the transaction.
+        :return: True if the transaction has been settled, False o/w.
         """
