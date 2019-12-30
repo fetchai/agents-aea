@@ -18,21 +18,17 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea search` sub-command."""
-import json
 import os
 import shutil
 import tempfile
 from pathlib import Path
 from unittest import mock, TestCase
 
-import jsonschema
-from jsonschema import Draft4Validator
-
 from aea import AEA_DIR
 from aea.cli import cli
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 from ..common.click_testing import CliRunner
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, ROOT_DIR
+from ..conftest import CLI_LOG_OPTION, ROOT_DIR
 
 
 class TestSearchProtocols:

@@ -35,7 +35,7 @@ from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKIL
 @click.group()
 @click.option('--registry', is_flag=True, help="For Registry search.")
 @pass_ctx
-def search(ctx: Context, registry,):
+def search(ctx: Context, registry):
     """Search for components in the registry.
 
     If called from an agent directory, it will check
