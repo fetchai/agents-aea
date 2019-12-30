@@ -20,7 +20,7 @@
 """Implementation of the 'aea push' subcommand."""
 import click
 
-from aea.cli.common import pass_ctx, Context
+from aea.cli.common import pass_ctx, Context, PublicIdParameter
 from aea.cli.registry.push import push_item, save_item_locally
 
 
@@ -33,33 +33,33 @@ def push(ctx: Context, local):
 
 
 @push.command(name='connection')
-@click.argument('connection-name', type=str, required=True)
+@click.argument('connection-id', type=PublicIdParameter(), required=True)
 @pass_ctx
-def connection(ctx: Context, connection_name):
+def connection(ctx: Context, connection_id):
     """Push connection to Registry or save it in local packages."""
     if ctx.config.get("local"):
-        save_item_locally('connection', connection_name)
+        save_item_locally('connection', connection_id)
     else:
-        push_item('connection', connection_name)
+        push_item('connection', connection_id.name)
 
 
 @push.command(name='protocol')
-@click.argument('protocol-name', type=str, required=True)
+@click.argument('protocol-id', type=PublicIdParameter(), required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_name):
+def protocol(ctx: Context, protocol_id):
     """Push protocol to Registry or save it in local packages."""
     if ctx.config.get("local"):
-        save_item_locally('protocol', protocol_name)
+        save_item_locally('protocol', protocol_id)
     else:
-        push_item('protocol', protocol_name)
+        push_item('protocol', protocol_id.name)
 
 
 @push.command(name='skill')
-@click.argument('skill-name', type=str, required=True)
+@click.argument('skill-id', type=PublicIdParameter(), required=True)
 @pass_ctx
-def skill(ctx: Context, skill_name):
+def skill(ctx: Context, skill_id):
     """Push skill to Registry or save it in local packages."""
     if ctx.config.get("local"):
-        save_item_locally('skill', skill_name)
+        save_item_locally('skill', skill_id)
     else:
-        push_item('skill', skill_name)
+        push_item('skill', skill_id.name)
