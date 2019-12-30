@@ -36,22 +36,27 @@ def remove(ctx: Context):
     _try_to_load_agent_config(ctx)
 
 
-def _remove_item(ctx: Context, item_type, item_name):
-    """Remove an item from the configuration file and agent."""
-    # try to parse the item_name as public id
+def _remove_item(ctx: Context, item_type, item):
+    """
+    Remove an item from the configuration file and agent.
+
+    The parameter 'item' can be either the public id (e.g. 'fetchai/default:0.1.0') or
+    the name of the package (e.g. 'default').
+    """
     try:
-        item_id = PublicId.from_string(item_name)
+        item_id = PublicId.from_string(item)
         item_name = item_id.name
     except ValueError:
-        item_id = item_name
+        item_id = item
+        item_name = item
 
     item_type_plural = "{}s".format(item_type)
     existing_item_ids = getattr(ctx.agent_config, item_type_plural)
     existing_items_name_to_ids = {public_id.name: public_id for public_id in existing_item_ids}
 
     agent_name = ctx.agent_config.agent_name
-    logger.info("Removing {item_type} '{item_id}' from the agent '{agent_name}'..."
-                .format(agent_name=agent_name, item_type=item_type, item_id=item_id))
+    logger.info("Removing {item_type} '{item_name}' from the agent '{agent_name}'..."
+                .format(agent_name=agent_name, item_type=item_type, item_name=item_name))
 
     if item_id not in existing_items_name_to_ids.keys() and item_id not in existing_item_ids:
         logger.error("The {} '{}' is not supported.".format(item_type, item_id))
