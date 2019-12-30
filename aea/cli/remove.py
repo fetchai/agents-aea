@@ -26,7 +26,7 @@ import sys
 import click
 
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
 @click.group()
@@ -38,16 +38,23 @@ def remove(ctx: Context):
 
 def _remove_item(ctx: Context, item_type, item_name):
     """Remove an item from the configuration file and agent."""
+    # try to parse the item_name as public id
+    try:
+        item_id = PublicId.from_string(item_name)
+        item_name = item_id.name
+    except ValueError:
+        item_id = item_name
+
     item_type_plural = "{}s".format(item_type)
     existing_item_ids = getattr(ctx.agent_config, item_type_plural)
     existing_items_name_to_ids = {public_id.name: public_id for public_id in existing_item_ids}
 
     agent_name = ctx.agent_config.agent_name
-    logger.info("Removing {item_type} '{item_name}' from the agent '{agent_name}'..."
-                .format(agent_name=agent_name, item_type=item_type, item_name=item_name))
+    logger.info("Removing {item_type} '{item_id}' from the agent '{agent_name}'..."
+                .format(agent_name=agent_name, item_type=item_type, item_id=item_id))
 
-    if item_name not in existing_items_name_to_ids.keys():
-        logger.error("The {} '{}' is not supported.".format(item_type, item_name))
+    if item_id not in existing_items_name_to_ids.keys() and item_id not in existing_item_ids:
+        logger.error("The {} '{}' is not supported.".format(item_type, item_id))
         sys.exit(1)
 
     item_folder = os.path.join(item_type_plural, item_name)
