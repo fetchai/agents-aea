@@ -20,6 +20,8 @@
 """This test module contains the tests for the `aea search` sub-command."""
 import json
 import os
+import shutil
+import tempfile
 from unittest import mock, TestCase
 from pathlib import Path
 
@@ -29,7 +31,7 @@ from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, ROOT_DIR
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 
@@ -117,6 +119,52 @@ class TestSearchSkills:
     def teardown_class(cls):
         """Tear the test down."""
         os.chdir(cls.cwd)
+
+
+class TestSearchAgents:
+    """Test that the command 'aea search agents' works as expected."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        cls.cwd = os.getcwd()
+        cls.runner = CliRunner()
+
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", "myagent"], standalone_mode=False)
+        assert result.exit_code == 0
+
+        Path(cls.t, "packages", "agents").mkdir(parents=True)
+        shutil.copytree(Path(cls.t, "myagent"), Path(cls.t, "packages", "agents", "myagent"))
+        os.chdir(Path(cls.t, "myagent"))
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "agents"], standalone_mode=False)
+
+    def test_correct_output_default_registry(self):
+        """Test that the command has printed the correct output when using the default registry."""
+        assert self.result.output == """Available agents:
+------------------------------
+Public ID: /myagent:0.1.0
+Name: myagent
+Description: 
+Author: 
+Version: 0.1.0
+------------------------------
+
+"""
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
 @mock.patch(

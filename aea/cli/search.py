@@ -29,7 +29,7 @@ from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, ret
     format_items, format_skills
 from aea.cli.registry.utils import request_api
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
-    DEFAULT_PROTOCOL_CONFIG_FILE
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
 
 
 @click.group()
@@ -86,7 +86,7 @@ def connections(ctx: Context, query):
         return
 
     registry = cast(str, ctx.config.get("registry"))
-    result: List[Dict] = []
+    result = []  # type: List[Dict]
     _get_details_from_dir(ctx.connection_loader, AEA_DIR, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
     _get_details_from_dir(ctx.connection_loader, registry, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
 
@@ -113,7 +113,7 @@ def protocols(ctx: Context, query):
         return
 
     registry = cast(str, ctx.config.get("registry"))
-    result: List[Dict] = []
+    result = []  # type: List[Dict]
     _get_details_from_dir(ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
     _get_details_from_dir(ctx.protocol_loader, registry, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
 
@@ -164,5 +164,9 @@ def agents(ctx: Context, query):
             click.echo(format_items(resp))
         return
     else:
-        # TODO: implement search for Agents locally
-        raise NotImplementedError()
+        registry = cast(str, ctx.config.get("registry"))
+        result = []  # type: List[Dict]
+        _get_details_from_dir(ctx.agent_loader, registry, "agents", DEFAULT_AEA_CONFIG_FILE, result)
+
+        print("Available agents:")
+        print(format_items(sorted(result, key=lambda k: k['name'])))
