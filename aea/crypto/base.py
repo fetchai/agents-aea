@@ -20,7 +20,9 @@
 
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Union, Optional, Dict
+
+AddressLike = Union[str, bytes]
 
 
 class Crypto(ABC):
@@ -82,4 +84,47 @@ class Crypto(ABC):
 
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
+        """
+
+
+class LedgerApi(ABC):
+    """Abstract class for generic ledger APIs."""
+
+    identifier = None  # type: Optional[str]
+
+    @abstractmethod
+    def get_balance(self, address: AddressLike) -> int:
+        """
+        Get the balance of a given account.
+
+        This usually takes the form of a web request to be waited synchronously.
+
+        :param address: the address.
+        :return: the balance.
+        """
+
+    @abstractmethod
+    def send_transaction(self,
+                         crypto_object: Crypto,
+                         destination_address: AddressLike,
+                         amount: int,
+                         tx_fee: int
+                         ) -> Optional[str]:
+        """
+        Submit a transaction to the ledger.
+
+        :param crypto_object: the crypto object associated to the payer.
+        :param destination_address: the destination address of the payee.
+        :param amount: the amount of wealth to be transferred.
+        :param tx_fee: the transaction fee.
+        :return: the transaction digest, or None.
+        """
+
+    @abstractmethod
+    def get_transaction_receipt(self, tx_digest: str) -> Dict:
+        """
+        Get the status of a transaction.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: the status of the transaction.
         """

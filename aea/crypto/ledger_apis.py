@@ -56,8 +56,8 @@ class LedgerApis(object):
         """
         Instantiate a wallet object.
 
-        :param ledger_api_configs: the ledger api configs
-        :param default_ledger: the default ledger
+        :param ledger_api_configs: the ledger api configs.
+        :param default_ledger_id: the default ledger id.
         """
         apis = {}  # type: Dict[str, Any]
         configs = {}  # type: Dict[str, List[Union[str, int]]]
