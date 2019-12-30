@@ -69,9 +69,9 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
     def test_error_message_skill_already_existing(self):
         """Test that the log error message is fixed.
 
-        The expected message is: 'A skill with name '{skill_name}' already exists. Aborting...'
+        The expected message is: 'A skill with id '{skill_id}' already exists. Aborting...'
         """
-        s = "A skill with name '{}' already exists. Aborting...".format(self.skill_name)
+        s = "A skill with id '{}' already exists. Aborting...".format(self.skill_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @unittest.mock.patch('aea.cli.add.fetch_package')
@@ -135,6 +135,49 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
         s = "Cannot find skill: '{}'.".format(self.skill_name)
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestAddProtocolFailsWhenDifferentPublicId:
+    """Test that the command 'aea add skill' fails when the skill has not the same public id."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.skill_id = "different_owner/error:0.1.0"
+        cls.skill_name = "unknown_skill"
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    def test_error_message_protocol_wrong_public_id(self):
+        """Test that the log error message is fixed."""
+        s = "Cannot find skill with owner and version specified."
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
