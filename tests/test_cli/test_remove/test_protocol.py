@@ -61,7 +61,7 @@ class TestRemoveProtocol:
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "protocol", cls.protocol_name], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
-        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        """Test that the exit code is equal to 0 (i.e. success)."""
         assert self.result.exit_code == 0
 
     def test_directory_does_not_exist(self):
