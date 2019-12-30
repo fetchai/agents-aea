@@ -150,7 +150,7 @@ def skills(ctx: Context, query):
 
 @search.command()
 @click.option('--query', default='',
-              help='Query string to search Skills by name.')
+              help='Query string to search Agents by name.')
 @pass_ctx
 def agents(ctx: Context, query):
     if ctx.config.get("is_registry"):
