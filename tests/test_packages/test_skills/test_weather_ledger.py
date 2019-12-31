@@ -135,9 +135,8 @@ class TestWeatherSkillsFetchaiLedger:
         find_text = "ledger_apis: {}"
         replace_text = """ledger_apis:
         fetchai:
-            args:
-                address: alpha.fetch-ai.com
-                port: 80"""
+            address: alpha.fetch-ai.com
+            port: 80"""
 
         whole_file = whole_file.replace(find_text, replace_text)
 

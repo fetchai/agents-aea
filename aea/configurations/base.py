@@ -256,29 +256,6 @@ class PrivateKeyPathConfig(Configuration):
         )
 
 
-# TODO this class appears to be of little utility.
-class LedgerAPIConfig(Configuration):
-    """Handle a ledger api configuration."""
-
-    def __init__(self, **args):
-        """Initialize a ledger class configuration."""
-        self.args = args
-
-    @property
-    def json(self) -> Dict:
-        """Return the JSON representation."""
-        return {
-            "args": self.args
-        }
-
-    @classmethod
-    def from_json(cls, obj: Dict):
-        """Initialize from a JSON object."""
-        return LedgerAPIConfig(
-            **obj.get("args", {})
-        )
-
-
 class ConnectionConfig(PackageConfiguration):
     """Handle connection configuration."""
 
@@ -615,7 +592,7 @@ class AgentConfig(Configuration):
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
-        self.ledger_apis = CRUDCollection[LedgerAPIConfig]()
+        self.ledger_apis = CRUDCollection[Dict]()
 
         private_key_paths = private_key_paths if private_key_paths is not None else {}
         for ledger, path in private_key_paths.items():
@@ -683,7 +660,7 @@ class AgentConfig(Configuration):
             "registry_path": self.registry_path,
             "description": self.description,
             "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
-            "ledger_apis": {key: l.json for key, l in self.ledger_apis.read_all()},
+            "ledger_apis": {key: config for key, config in self.ledger_apis.read_all()},
             "logging_config": self.logging_config,
             "default_ledger": self.default_ledger,
             "default_connection": self.default_connection,
@@ -714,8 +691,7 @@ class AgentConfig(Configuration):
         )
 
         for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
-            ledger_config = LedgerAPIConfig.from_json(ledger_data)
-            agent_config.ledger_apis.create(ledger_id, ledger_config)
+            agent_config.ledger_apis.create(ledger_id, ledger_data)
 
         # parse connection public ids
         connections = set(map(lambda x: PublicId.from_string(x), obj.get("connections", [])))

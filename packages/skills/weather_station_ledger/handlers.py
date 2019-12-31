@@ -231,6 +231,7 @@ class FIPAHandler(Handler):
             proposal = cast(Description, dialogue.proposal)
             ledger_id = cast(str, proposal.values.get("ledger_id"))
             is_settled = self.context.ledger_apis.is_tx_settled(ledger_id, tx_digest)
+            # TODO: check the tx_digest references a transaction with the correct terms
             if is_settled:
                 token_balance = self.context.ledger_apis.token_balance(ledger_id,
                                                                        cast(str, self.context.agent_addresses.get(ledger_id)))

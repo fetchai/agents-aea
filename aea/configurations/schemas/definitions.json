@@ -53,24 +53,7 @@
       }
     },
     "ledger_api": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "ledger",
-        "addr",
-        "port"
-      ],
-      "properties": {
-        "ledger": {
-          "type": "string"
-        },
-        "addr": {
-          "type": "string"
-        },
-        "port": {
-          "type": "number"
-        }
-      }
+      "type": "object"
     },
     "author": {
       "type": "string",

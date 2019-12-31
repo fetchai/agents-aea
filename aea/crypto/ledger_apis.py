@@ -188,12 +188,11 @@ def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
         sys.exit(1)
 
 
-def _try_to_instantiate_ethereum_ledger_api(addr: str, chain_id: int) -> None:
+def _try_to_instantiate_ethereum_ledger_api(addr: str) -> None:
     """
     Try to instantiate the ethereum ledger api.
 
     :param addr: the address
-    :param chain_id: the id for the chain.
     """
     try:
         from web3 import Web3, HTTPProvider
