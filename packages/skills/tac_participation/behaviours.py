@@ -20,21 +20,13 @@
 """This package contains a tac participation behaviour."""
 
 import logging
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.skills.base import Behaviour
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.oef.message import OEFMessage
-    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-    from packages.skills.tac_participation.game import Game, Phase
-    from packages.skills.tac_participation.search import Search
-else:
-    from oef_protocol.message import OEFMessage
-    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
-    from tac_participation_skill.game import Game, Phase
-    from tac_participation_skill.search import Search
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.skills.tac_participation.game import Game, Phase
+from packages.skills.tac_participation.search import Search
 
 logger = logging.getLogger("aea.tac_participation_skill")
 

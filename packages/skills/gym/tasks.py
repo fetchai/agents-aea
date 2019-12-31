@@ -27,12 +27,8 @@ from typing import TYPE_CHECKING
 
 from aea.skills.base import Task
 
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.gym.helpers import ProxyEnv
-    from packages.skills.gym.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
-else:
-    from gym_skill.helpers import ProxyEnv
-    from gym_skill.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
+from packages.skills.gym.helpers import ProxyEnv
+from packages.skills.gym.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
 
 logger = logging.getLogger("aea.gym_skill")
 

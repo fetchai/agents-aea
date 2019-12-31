@@ -24,8 +24,7 @@ import copy
 import datetime
 import logging
 from collections import defaultdict, deque
-import sys
-from typing import Dict, Tuple, Deque, TYPE_CHECKING
+from typing import Dict, Tuple, Deque
 
 from aea.decision_maker.base import OwnershipState
 from aea.decision_maker.messages.transaction import TransactionMessage, TransactionId, OFF_CHAIN
@@ -33,11 +32,7 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.mail.base import Address
 from aea.skills.base import SharedClass
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.tac_negotiation.helpers import tx_hash_from_values
-else:
-    from tac_negotiation_skill.helpers import tx_hash_from_values
+from packages.skills.tac_negotiation.helpers import tx_hash_from_values
 
 logger = logging.getLogger("aea.tac_negotiation_skill")
 

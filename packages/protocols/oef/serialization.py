@@ -19,21 +19,15 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
-from typing import cast, TYPE_CHECKING
-
 import base64
 import copy
 import json
 import pickle
-import sys
+from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.oef.message import OEFMessage
-else:
-    from oef_protocol.message import OEFMessage  # pragma: no cover
+from packages.protocols.oef.message import OEFMessage
 
 """default 'to' field for OEF envelopes."""
 DEFAULT_OEF = "oef"

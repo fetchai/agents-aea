@@ -20,6 +20,8 @@
 """Miscellaneous helpers."""
 
 import builtins
+import sys
+from pathlib import Path
 from typing import Optional
 
 import importlib.util
@@ -70,6 +72,28 @@ def locate(path):
         except AttributeError:
             return None
     return object
+
+
+def load_module(name: str, filepath: os.PathLike):
+    """
+    Load a module.
+
+    :param name: the name of the package/module.
+    :param filepath: the file to the package/module.
+    :return: None
+    :raises ValueError: if the filepath provided is not a module.
+    :raises Exception: if the execution of the module raises exception.
+    """
+    spec = importlib.util.spec_from_file_location(name, filepath)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)  # type: ignore
+    return module
+
+
+def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, module_obj):
+    item_type_plural = item_type + "s"
+    dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
+    sys.modules[dotted_path] = module_obj
 
 
 def generate_fingerprint(author: str, package_name: str, version: str, nonce: Optional[int] = None) -> str:

@@ -21,18 +21,13 @@
 import asyncio
 import logging
 import struct
-import sys
 from asyncio import StreamWriter, StreamReader, CancelledError
-from typing import Optional, cast, TYPE_CHECKING
+from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Envelope, Address
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.connections.tcp.base import TCPConnection
-else:
-    from tcp_connection.base import TCPConnection
+from packages.connections.tcp.base import TCPConnection
 
 logger = logging.getLogger(__name__)
 

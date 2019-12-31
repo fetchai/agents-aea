@@ -32,18 +32,11 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.fipa.message import FIPAMessage
-    from packages.protocols.fipa.serialization import FIPASerializer
-    from packages.protocols.oef.message import OEFMessage
-    from packages.skills.carpark_client.dialogues import Dialogue, Dialogues
-    from packages.skills.carpark_client.strategy import Strategy
-else:
-    from fipa_protocol.message import FIPAMessage
-    from fipa_protocol.serialization import FIPASerializer
-    from oef_protocol.message import OEFMessage
-    from carpark_client_skill.dialogues import Dialogue, Dialogues
-    from carpark_client_skill.strategy import Strategy
+from packages.protocols.fipa.message import FIPAMessage
+from packages.protocols.fipa.serialization import FIPASerializer
+from packages.protocols.oef.message import OEFMessage
+from packages.skills.carpark_client.dialogues import Dialogue, Dialogues
+from packages.skills.carpark_client.strategy import Strategy
 
 logger = logging.getLogger("aea.carpark_client_skill")
 

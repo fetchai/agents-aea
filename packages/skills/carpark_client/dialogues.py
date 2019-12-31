@@ -32,10 +32,7 @@ from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.skills.base import SharedClass
 
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.fipa.dialogues import FIPADialogues, FIPADialogue
-else:
-    from fipa_protocol.dialogues import FIPADialogues, FIPADialogue
+from packages.protocols.fipa.dialogues import FIPADialogues, FIPADialogue
 
 
 class Dialogue(FIPADialogue):

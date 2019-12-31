@@ -19,18 +19,12 @@
 
 """This module contains the handler for the 'gym' skill."""
 import logging
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.gym.message import GymMessage
-    from packages.skills.gym.tasks import GymTask
-else:
-    from gym_protocol.message import GymMessage
-    from gym_skill.tasks import GymTask
+from packages.protocols.gym.message import GymMessage
+from packages.skills.gym.tasks import GymTask
 
 logger = logging.getLogger("aea.gym_skill")
 

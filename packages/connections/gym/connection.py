@@ -21,10 +21,9 @@
 """Gym connector and gym channel."""
 import asyncio
 import logging
-import sys
 import threading
 from asyncio import CancelledError
-from typing import Dict, Optional, cast, TYPE_CHECKING
+from typing import Dict, Optional, cast
 
 import gym
 
@@ -32,13 +31,8 @@ from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Envelope, Address
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.gym.message import GymMessage
-    from packages.protocols.gym.serialization import GymSerializer
-else:
-    from gym_protocol.message import GymMessage
-    from gym_protocol.serialization import GymSerializer
+from packages.protocols.gym.message import GymMessage
+from packages.protocols.gym.serialization import GymSerializer
 
 logger = logging.getLogger(__name__)
 
