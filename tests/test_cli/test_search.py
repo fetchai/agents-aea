@@ -23,12 +23,14 @@ import shutil
 import tempfile
 from pathlib import Path
 from unittest import mock, TestCase
+import jsonschema
+from jsonschema import Draft4Validator
 
 from aea import AEA_DIR
 from aea.cli import cli
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 from ..common.click_testing import CliRunner
-from ..conftest import CLI_LOG_OPTION, ROOT_DIR
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, ROOT_DIR
 
 
 class TestSearchProtocols:
@@ -105,6 +107,50 @@ class TestSearchSkills:
         os.chdir(cls.cwd)
 
 
+class TestSearchAgents:
+    """Test that the command 'aea search agents' works as expected."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        cls.cwd = os.getcwd()
+        cls.runner = CliRunner()
+
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", "myagent"], standalone_mode=False)
+        assert result.exit_code == 0
+
+        Path(cls.t, "packages", "agents").mkdir(parents=True)
+        shutil.copytree(Path(cls.t, "myagent"), Path(cls.t, "packages", "agents", "myagent"))
+        os.chdir(Path(cls.t, "myagent"))
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "agents"], standalone_mode=False)
+
+    def test_correct_output_default_registry(self):
+        """Test that the command has printed the correct output when using the default registry."""
+        assert self.result.output == "Available agents:\n" \
+                                     "------------------------------\n" \
+                                     "Public ID: /myagent:0.1.0\n" \
+                                     "Name: myagent\n" \
+                                     "Description: \n" \
+                                     "Author: \n" \
+                                     "Version: 0.1.0\n" \
+                                     "------------------------------\n\n"
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
 @mock.patch(
     'aea.cli.search.request_api',
     return_value=['correct', 'results']
@@ -143,6 +189,31 @@ class RegistrySearchTestCase(TestCase):
         self.assertEqual(result.output, expected_output)
         request_api_mock.assert_called_once_with(
             'GET', '/connections', params={'search': 'some'}
+        )
+        format_items_mock.assert_called_once_with(['correct', 'results'])
+
+    def test_search_agents_positive(
+        self, format_items_mock, request_api_mock
+    ):
+        """Test for CLI search --registry agents positive result."""
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "search",
+                "--registry",
+                "agents",
+                "--query=some"
+            ],
+            standalone_mode=False
+        )
+        expected_output = (
+            'Agents found:\n\n'
+            '{}\n'.format(FORMAT_ITEMS_SAMPLE_OUTPUT)
+        )
+        self.assertEqual(result.output, expected_output)
+        request_api_mock.assert_called_once_with(
+            'GET', '/agents', params={'search': 'some'}
         )
         format_items_mock.assert_called_once_with(['correct', 'results'])
 

@@ -98,7 +98,7 @@ def connections(ctx: Context, query):
         return
 
     registry = cast(str, ctx.config.get("registry"))
-    result: List[Dict] = []
+    result = []  # type: List[Dict]
     _get_details_from_dir(ctx.connection_loader, AEA_DIR, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
     _get_details_from_dir(ctx.connection_loader, registry, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
 
@@ -125,7 +125,7 @@ def protocols(ctx: Context, query):
         return
 
     registry = cast(str, ctx.config.get("registry"))
-    result: List[Dict] = []
+    result = []  # type: List[Dict]
     _get_details_from_dir(ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
     _get_details_from_dir(ctx.protocol_loader, registry, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
 
@@ -158,3 +158,28 @@ def skills(ctx: Context, query):
 
     print("Available skills:")
     print(format_items(sorted(result, key=lambda k: k['name'])))
+
+
+@search.command()
+@click.option('--query', default='',
+              help='Query string to search Agents by name.')
+@pass_ctx
+def agents(ctx: Context, query):
+    """Search for Agents."""
+    if ctx.config.get("is_registry"):
+        resp = request_api(
+            'GET', '/agents', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No agents found.')  # pragma: no cover
+        else:
+            click.echo('Agents found:\n')
+            click.echo(format_items(resp))
+        return
+    else:
+        registry = cast(str, ctx.config.get("registry"))
+        result = []  # type: List[Dict]
+        _get_details_from_dir(ctx.agent_loader, registry, "agents", DEFAULT_AEA_CONFIG_FILE, result)
+
+        print("Available agents:")
+        print(format_items(sorted(result, key=lambda k: k['name'])))
