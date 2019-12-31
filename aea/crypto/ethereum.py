@@ -151,8 +151,10 @@ class EthereumCrypto(Crypto):
         fp.write(self._account.privateKey.hex().encode("utf-8"))
 
 
-class EthereumAIApi(LedgerApi):
+class EthereumApi(LedgerApi):
     """Class to interact with the Ethereum Web3 APIs."""
+
+    identifier = ETHEREUM
 
     def __init__(self, endpoint_uri: str):
         """
@@ -172,7 +174,7 @@ class EthereumAIApi(LedgerApi):
         return self._api.eth.getBalance(address)
 
     def send_transaction(self,
-                         crypto_object: Crypto,
+                         crypto: Crypto,
                          destination_address: AddressLike,
                          amount: int,
                          tx_fee: int,
@@ -180,14 +182,14 @@ class EthereumAIApi(LedgerApi):
         """
         Submit a transaction to the ledger.
 
-        :param crypto_object: the crypto object associated to the payer.
+        :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
         :return: the transaction digest, or None if not available.
         """
-        nonce = self._api.eth.getTransactionCount(self._api.toChecksumAddress(crypto_object.address))
+        nonce = self._api.eth.getTransactionCount(self._api.toChecksumAddress(crypto.address))
         # TODO : handle misconfiguration
         transaction = {
             'nonce': nonce,
@@ -197,7 +199,7 @@ class EthereumAIApi(LedgerApi):
             'gas': tx_fee,
             'gasPrice': self._api.toWei(GAS_PRICE, GAS_ID)
         }
-        signed = self._api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
+        signed = self._api.eth.account.signTransaction(transaction, crypto.entity.privateKey)
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
         logger.info("TX Hash: {}".format(str(hex_value.hex())))
         while True:

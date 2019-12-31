@@ -22,7 +22,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, BinaryIO, cast, Any
+from typing import Optional, BinaryIO, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 FETCHAI = "fetchai"
 SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
+DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
 
 
 class FetchAICrypto(Crypto):
@@ -153,6 +154,8 @@ class FetchAICrypto(Crypto):
 class FetchAIApi(LedgerApi):
     """Class to interact with the Fetch ledger APIs."""
 
+    identifier = FETCHAI
+
     def __init__(self, host: str, port: int):
         """
         Initialize the Fetch.AI ledger APIs.
@@ -171,9 +174,14 @@ class FetchAIApi(LedgerApi):
         """Get the balance of a given account."""
         return self._api.tokens.balance(address)
 
-    def send_transaction(self, crypto_object: Crypto, destination_address: AddressLike, amount: int, tx_fee: int) -> Optional[str]:
+    def send_transaction(self,
+                         crypto: Crypto,
+                         destination_address: AddressLike,
+                         amount: int,
+                         tx_fee: int,
+                         **kwargs) -> Optional[str]:
         """Submit a transaction to the ledger."""
-        tx_digest = self._api.tokens.transfer(crypto_object.entity, destination_address, amount, tx_fee)
+        tx_digest = self._api.tokens.transfer(crypto.entity, destination_address, amount, tx_fee)
         self._api.sync(tx_digest)
         return tx_digest
 

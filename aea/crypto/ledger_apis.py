@@ -22,20 +22,12 @@
 
 import logging
 import sys
-import time
-from typing import Any, Dict, Optional, cast, List, Union
+from typing import Any, Dict, Optional, List, Union
 
-import web3
-import web3.exceptions
-from fetchai.ledger.api import LedgerApi as FetchLedgerApi
-# from fetchai.ledger.api.tx import TxStatus
-from web3 import Web3, HTTPProvider
+from aea.crypto.base import Crypto, LedgerApi
+from aea.crypto.ethereum import ETHEREUM, EthereumApi
+from aea.crypto.fetchai import FETCHAI, FetchAIApi
 
-from aea.crypto.base import Crypto
-from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.fetchai import FETCHAI
-
-DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
 SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
 SUPPORTED_CURRENCIES = {ETHEREUM: 'ETH', FETCHAI: 'FET'}
@@ -65,11 +57,11 @@ class LedgerApis(object):
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
             if identifier == FETCHAI:
-                api = FetchLedgerApi(config[0], config[1])
+                api = FetchAIApi(config[0], config[1])
                 apis[identifier] = api
                 configs[identifier] = config
             elif identifier == ETHEREUM:
-                api = Web3(HTTPProvider(config[0]))
+                api = EthereumApi(config[0])
                 apis[identifier] = api
                 configs[identifier] = config
             else:
@@ -85,7 +77,7 @@ class LedgerApis(object):
         return self._configs
 
     @property
-    def apis(self) -> Dict[str, Any]:
+    def apis(self) -> Dict[str, LedgerApi]:
         """Get the apis."""
         return self._apis
 
@@ -124,27 +116,16 @@ class LedgerApis(object):
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         api = self.apis[identifier]
-        if identifier == FETCHAI:
-            try:
-                balance = api.tokens.balance(address)
-                self._last_tx_statuses[identifier] = OK
-            except Exception:
-                logger.warning("An error occurred while attempting to get the current balance.")
-                balance = 0
-                self._last_tx_statuses[identifier] = ERROR
-        elif identifier == ETHEREUM:
-            try:
-                balance = api.eth.getBalance(address)
-                self._last_tx_statuses[identifier] = OK
-            except Exception:
-                logger.warning("An error occurred while attempting to get the current balance.")
-                balance = 0
-                self._last_tx_statuses[identifier] = ERROR
-        else:       # pragma: no cover
-            raise Exception("Ledger id is not known")
+        try:
+            balance = api.get_balance(address)
+            self._last_tx_statuses[identifier] = OK
+        except Exception:
+            self._last_tx_statuses[identifier] = ERROR
+            # TODO raise exception instead of returning zero.
+            balance = 0
         return balance
 
-    def transfer(self, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int) -> Optional[str]:
+    def transfer(self, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int, **kwargs) -> Optional[str]:
         """
         Transfer from self to destination.
 
@@ -158,53 +139,15 @@ class LedgerApis(object):
         assert crypto_object.identifier in self.apis.keys(), "Unsupported ledger identifier."
         api = self.apis[crypto_object.identifier]
         logger.info("Waiting for the validation of the transaction ...")
-        if crypto_object.identifier == FETCHAI:
-            try:
-                tx_digest = api.tokens.transfer(crypto_object.entity, destination_address, amount, tx_fee)
-                api.sync(tx_digest)
-                logger.info("Transaction validated ...")
-                self._last_tx_statuses[crypto_object.identifier] = OK
-            except Exception:
-                logger.warning("An error occurred while attempting the transfer.")
-                tx_digest = None
-                self._last_tx_statuses[crypto_object.identifier] = ERROR
-        elif crypto_object.identifier == ETHEREUM:
-            try:
-                nonce = api.eth.getTransactionCount(api.toChecksumAddress(crypto_object.address))
-                # TODO : handle misconfiguration
-                chain_id = self.configs.get(crypto_object.identifier)[1]  # type: ignore
-                transaction = {
-                    'nonce': nonce,
-                    'chainId': chain_id,
-                    'to': destination_address,
-                    'value': amount,
-                    'gas': tx_fee,
-                    'gasPrice': api.toWei(GAS_PRICE, GAS_ID)
-                }
-                signed = api.eth.account.signTransaction(transaction, crypto_object.entity.privateKey)
-                hex_value = api.eth.sendRawTransaction(signed.rawTransaction)
-                logger.info("TX Hash: {}".format(str(hex_value.hex())))
-                while True:
-                    try:
-                        api.eth.getTransactionReceipt(hex_value)
-                        logger.info("transaction validated - exiting")
-                        tx_digest = hex_value.hex()
-                        self._last_tx_statuses[crypto_object.identifier] = OK
-                        break
-                    except web3.exceptions.TransactionNotFound:     # pragma: no cover
-                        logger.info("transaction not found - sleeping for 3.0 seconds")
-                        self._last_tx_statuses[crypto_object.identifier] = ERROR
-                        time.sleep(3.0)
-                return tx_digest
-            except Exception:
-                logger.warning("An error occurred while attempting the transfer.")
-                tx_digest = None
-                self._last_tx_statuses[crypto_object.identifier] = ERROR
-        else:  # pragma: no cover
-            raise Exception("Ledger id is not known")
+        try:
+            tx_digest = api.send_transaction(crypto_object, destination_address, amount, tx_fee, **kwargs)
+            self._last_tx_statuses[crypto_object.identifier] = OK
+        except Exception:
+            tx_digest = None
+            self._last_tx_statuses[crypto_object.identifier] = ERROR
         return tx_digest
 
-    def is_tx_settled(self, identifier: str, tx_digest: str, amount: int) -> bool:
+    def is_tx_settled(self, identifier: str, tx_digest: str) -> bool:
         """
         Check whether the transaction is settled and correct.
 
@@ -213,36 +156,13 @@ class LedgerApis(object):
         :return: True if correctly settled, False otherwise
         """
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        is_successful = False
         api = self.apis[identifier]
-        if identifier == FETCHAI:
-            try:
-                logger.info("Checking the transaction ...")
-                # tx_status = cast(TxStatus, api.tx.status(tx_digest))
-                tx_status = cast(str, api.tx.status(tx_digest))
-                # if tx_status.successful:
-                if tx_status in SUCCESSFUL_TERMINAL_STATES:
-                    # tx_contents = cast(TxContents, api.tx.contents(tx_digest))
-                    # tx_contents.transfers_to()
-                    # TODO: check the amount of the transaction is correct
-                    is_successful = True
-                logger.info("Transaction validated ...")
-                self._last_tx_statuses[identifier] = OK
-            except Exception:
-                logger.warning("An error occurred while attempting to check the transaction.")
-                self._last_tx_statuses[identifier] = ERROR
-        elif identifier == ETHEREUM:
-            try:
-                logger.info("Checking the transaction ...")
-                tx_status = api.eth.getTransactionReceipt(tx_digest)
-                if tx_status is not None:
-                    is_successful = True
-                logger.info("Transaction validated ...")
-                self._last_tx_statuses[identifier] = OK
-            except Exception:
-                logger.warning("An error occured while attempting to check the transaction!")
-                self._last_tx_statuses[identifier] = ERROR
-
+        try:
+            is_successful = api.is_transaction_settled(tx_digest)
+            self._last_tx_statuses[identifier] = OK
+        except Exception:
+            is_successful = False
+            self._last_tx_statuses[identifier] = ERROR
         return is_successful
 
 

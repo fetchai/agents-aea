@@ -238,7 +238,7 @@ class FIPAHandler(Handler):
                                                                                              tx_digest))
             proposal = cast(Description, dialogue.proposal)
             total_price = cast(int, proposal.values.get("price"))
-            is_settled = self.context.ledger_apis.is_tx_settled('fetchai', tx_digest, total_price)
+            is_settled = self.context.ledger_apis.is_tx_settled('fetchai', tx_digest)
             if is_settled:
                 token_balance = self.context.ledger_apis.token_balance(
                     'fetchai',

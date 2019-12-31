@@ -92,8 +92,8 @@ class LedgerApi(ABC):
 
     identifier = "base"  # type: str
 
-    @abstractmethod
     @property
+    @abstractmethod
     def api(self) -> Optional[Any]:
         """
         Get the underlying API object.
@@ -115,7 +115,7 @@ class LedgerApi(ABC):
 
     @abstractmethod
     def send_transaction(self,
-                         crypto_object: Crypto,
+                         crypto: Crypto,
                          destination_address: AddressLike,
                          amount: int,
                          tx_fee: int,
@@ -126,11 +126,11 @@ class LedgerApi(ABC):
         If the mandatory arguments are not enough for specifying a transaction
         in the concrete ledger API, use keyword arguments for the additional parameters.
 
-        :param crypto_object: the crypto object associated to the payer.
+        :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
-        :return: the transaction digest, or None.
+        :return: tx digest if successful, otherwise None
         """
 
     @abstractmethod

@@ -71,10 +71,10 @@ class TestWeatherSkills:
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "oef"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "weather_station"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_station:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
@@ -97,10 +97,10 @@ class TestWeatherSkills:
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
         os.chdir(agent_two_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "oef"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "weather_client"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_client:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)

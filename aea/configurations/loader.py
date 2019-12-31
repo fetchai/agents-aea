@@ -74,7 +74,10 @@ class ConfigLoader(Generic[T]):
         :raises
         """
         configuration_file_json = yaml.safe_load(fp)
-        self.validator.validate(instance=configuration_file_json)
+        try:
+            self.validator.validate(instance=configuration_file_json)
+        except Exception:
+            raise
         return self.configuration_type.from_json(configuration_file_json)
 
     def dump(self, configuration: T, fp: TextIO) -> None:
