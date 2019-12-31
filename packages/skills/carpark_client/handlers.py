@@ -20,8 +20,7 @@
 """This package contains a scaffold of a handler."""
 import logging
 import pprint
-import sys
-from typing import Dict, List, Optional, cast, TYPE_CHECKING
+from typing import Dict, List, Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -31,7 +30,6 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
-
 from packages.protocols.fipa.message import FIPAMessage
 from packages.protocols.fipa.serialization import FIPASerializer
 from packages.protocols.oef.message import OEFMessage

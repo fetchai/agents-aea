@@ -19,7 +19,6 @@
 
 """Implementation of the common utils of the aea cli."""
 
-import importlib.util
 import logging
 import logging.config
 import os

@@ -19,12 +19,10 @@
 
 """This module contains the handler for the 'ml_data_provider' skill."""
 import logging
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-
 from packages.protocols.ml_trade.message import MLTradeMessage
 from packages.protocols.ml_trade.serialization import MLTradeSerializer
 from packages.skills.ml_data_provider.strategy import Strategy

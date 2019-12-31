@@ -20,15 +20,14 @@
 """This module contains the helpers for the 'gym' skill."""
 
 from abc import ABC, abstractmethod
-import gym
 from queue import Queue
-import sys
-from typing import Any, Tuple, cast, TYPE_CHECKING
+from typing import Any, Tuple, cast
+
+import gym
 
 from aea.mail.base import Envelope
-from aea.skills.base import SkillContext
 from aea.protocols.base import Message
-
+from aea.skills.base import SkillContext
 from packages.protocols.gym.message import GymMessage
 from packages.protocols.gym.serialization import GymSerializer
 

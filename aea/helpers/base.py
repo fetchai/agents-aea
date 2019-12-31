@@ -20,13 +20,11 @@
 """Miscellaneous helpers."""
 
 import builtins
-import sys
-from pathlib import Path
-from typing import Optional
-
 import importlib.util
 import logging
 import os
+import sys
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +89,7 @@ def load_module(name: str, filepath: os.PathLike):
 
 
 def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, module_obj):
+    """Add an agent component module to sys.modules."""
     item_type_plural = item_type + "s"
     dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
     sys.modules[dotted_path] = module_obj

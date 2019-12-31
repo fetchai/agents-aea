@@ -22,7 +22,6 @@ import inspect
 import logging
 import os
 import re
-import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
@@ -222,9 +221,7 @@ class Behaviour(ABC):
         :return: a list of Behaviour.
         """
         behaviours = {}
-        behaviours_spec = importlib.util.spec_from_file_location("behaviours", location=path)
-        behaviour_module = importlib.util.module_from_spec(behaviours_spec)
-        behaviours_spec.loader.exec_module(behaviour_module)  # type: ignore
+        behaviour_module = load_module("behaviours", Path(path))
         classes = inspect.getmembers(behaviour_module, inspect.isclass)
         behaviours_classes = list(filter(lambda x: re.match("\\w+Behaviour", x[0]), classes))
 
@@ -390,9 +387,7 @@ class Task(ABC):
         :return: a list of Tasks.
         """
         tasks = {}
-        tasks_spec = importlib.util.spec_from_file_location("tasks", location=path)
-        task_module = importlib.util.module_from_spec(tasks_spec)
-        tasks_spec.loader.exec_module(task_module)  # type: ignore
+        task_module = load_module("tasks", Path(path))
         classes = inspect.getmembers(task_module, inspect.isclass)
         tasks_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
 
@@ -460,9 +455,7 @@ class SharedClass(ABC):
         for module_path in module_paths:
             logger.debug("Trying to load module {}".format(module_path))
             module_name = module_path.replace(".py", "")
-            shared_class_spec = importlib.util.spec_from_file_location(module_name, location=module_path)
-            shared_class_module = importlib.util.module_from_spec(shared_class_spec)
-            shared_class_spec.loader.exec_module(shared_class_module)  # type: ignore
+            shared_class_module = load_module(module_name, Path(module_path))
             classes = inspect.getmembers(shared_class_module, inspect.isclass)
             filtered_classes = list(
                 filter(

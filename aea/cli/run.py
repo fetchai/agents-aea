@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea run' subcommand."""
-import importlib.util
 import inspect
 import os
 import re

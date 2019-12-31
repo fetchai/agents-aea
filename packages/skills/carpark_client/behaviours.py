@@ -19,11 +19,9 @@
 
 """This package contains a scaffold of a behaviour."""
 import logging
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
-
 from packages.protocols.oef.message import OEFMessage
 from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.skills.carpark_client.strategy import Strategy

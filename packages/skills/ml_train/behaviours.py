@@ -20,13 +20,11 @@
 """This package contains a the behaviours."""
 
 import logging
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
-
 from packages.protocols.oef.message import OEFMessage
 from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from packages.skills.ml_train.strategy import Strategy
