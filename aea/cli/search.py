@@ -29,7 +29,7 @@ from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, ret
     format_items, format_skills
 from aea.cli.registry.utils import request_api
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
-    DEFAULT_PROTOCOL_CONFIG_FILE
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
 
 
 @click.group()
@@ -38,16 +38,28 @@ from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKIL
 def search(ctx: Context, registry):
     """Search for components in the registry.
 
+    If called from an agent directory, it will check
+
     E.g.
 
-        aea search --registry packages/ skills
+        aea search connections
+        aea search --registry skills
     """
     if registry:
         ctx.set_config("is_registry", True)
     else:
-        registry = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
-        ctx.set_config("registry", registry)
-        logger.debug("Using registry {}".format(registry))
+        # if we are in an agent directory, try to load the configuration file.
+        # otherwise, use the default path (i.e. 'packages/' in the current directory.)
+        try:
+            path = Path(DEFAULT_AEA_CONFIG_FILE)
+            fp = open(str(path), mode="r", encoding="utf-8")
+            agent_config = ctx.agent_loader.load(fp)
+            registry_directory = agent_config.registry_path
+        except Exception:
+            registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
+
+        ctx.set_config("registry", registry_directory)
+        logger.debug("Using registry {}".format(registry_directory))
 
 
 def _is_invalid_item(name, dir_path, config_path):
