@@ -20,7 +20,7 @@
 
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Union, Optional, Dict
+from typing import Any, BinaryIO, Union, Optional
 
 AddressLike = Union[str, bytes]
 
