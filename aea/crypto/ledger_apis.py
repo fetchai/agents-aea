@@ -22,7 +22,7 @@
 
 import logging
 import sys
-from typing import Any, Dict, Optional, List, Union
+from typing import Any, Dict, Optional, List, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
@@ -51,17 +51,20 @@ class LedgerApis(object):
         :param ledger_api_configs: the ledger api configs.
         :param default_ledger_id: the default ledger id.
         """
-        apis = {}  # type: Dict[str, Any]
+        apis = {}  # type: Dict[str, LedgerApi]
         configs = {}  # type: Dict[str, List[Union[str, int]]]
         self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
             if identifier == FETCHAI:
-                api = FetchAIApi(config[0], config[1])
+                addr = cast(str, config[0])
+                port = cast(int, config[1])
+                api = FetchAIApi(addr, port)  # type: LedgerApi
                 apis[identifier] = api
                 configs[identifier] = config
             elif identifier == ETHEREUM:
-                api = EthereumApi(config[0])
+                address = cast(str, config[0])
+                api = EthereumApi(address)
                 apis[identifier] = api
                 configs[identifier] = config
             else:
@@ -120,6 +123,7 @@ class LedgerApis(object):
             balance = api.get_balance(address)
             self._last_tx_statuses[identifier] = OK
         except Exception:
+            logger.warning("An error occurred while attempting to get the current balance.")
             self._last_tx_statuses[identifier] = ERROR
             # TODO raise exception instead of returning zero.
             balance = 0
@@ -141,8 +145,10 @@ class LedgerApis(object):
         logger.info("Waiting for the validation of the transaction ...")
         try:
             tx_digest = api.send_transaction(crypto_object, destination_address, amount, tx_fee, **kwargs)
+            logger.info("transaction validated. TX digest: {}".format(tx_digest))
             self._last_tx_statuses[crypto_object.identifier] = OK
         except Exception:
+            logger.warning("An error occurred while attempting the transfer.")
             tx_digest = None
             self._last_tx_statuses[crypto_object.identifier] = ERROR
         return tx_digest
@@ -161,6 +167,7 @@ class LedgerApis(object):
             is_successful = api.is_transaction_settled(tx_digest)
             self._last_tx_statuses[identifier] = OK
         except Exception:
+            logger.warning("An error occured while attempting to check the transaction!")
             is_successful = False
             self._last_tx_statuses[identifier] = ERROR
         return is_successful

@@ -156,13 +156,13 @@ class EthereumApi(LedgerApi):
 
     identifier = ETHEREUM
 
-    def __init__(self, endpoint_uri: str):
+    def __init__(self, address: str):
         """
         Initialize the Ethereum ledger APIs.
 
-        :param endpoint_uri: the endpoint for Web3 APIs.
+        :param address: the endpoint for Web3 APIs.
         """
-        self._api = Web3(HTTPProvider(endpoint_uri=endpoint_uri))
+        self._api = Web3(HTTPProvider(endpoint_uri=address))
 
     @property
     def api(self) -> Web3:
@@ -178,7 +178,8 @@ class EthereumApi(LedgerApi):
                          destination_address: AddressLike,
                          amount: int,
                          tx_fee: int,
-                         chain_id: int = 1) -> Optional[str]:
+                         chain_id: int = 1,
+                         **kwargs) -> Optional[str]:
         """
         Submit a transaction to the ledger.
 
