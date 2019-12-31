@@ -90,7 +90,17 @@ class Crypto(ABC):
 class LedgerApi(ABC):
     """Interface for ledger APIs."""
 
-    identifier = None  # type: Optional[str]
+    identifier = "base"  # type: str
+
+    @abstractmethod
+    @property
+    def api(self) -> Optional[Any]:
+        """
+        Get the underlying API object.
+
+        This can be used for low-level operations with the concrete ledger APIs.
+        If there is no such object, return None.
+        """
 
     @abstractmethod
     def get_balance(self, address: AddressLike) -> int:
@@ -108,10 +118,13 @@ class LedgerApi(ABC):
                          crypto_object: Crypto,
                          destination_address: AddressLike,
                          amount: int,
-                         tx_fee: int
-                         ) -> Optional[str]:
+                         tx_fee: int,
+                         **kwargs) -> Optional[str]:
         """
         Submit a transaction to the ledger.
+
+        If the mandatory arguments are not enough for specifying a transaction
+        in the concrete ledger API, use keyword arguments for the additional parameters.
 
         :param crypto_object: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
@@ -119,9 +132,6 @@ class LedgerApi(ABC):
         :param tx_fee: the transaction fee.
         :return: the transaction digest, or None.
         """
-
-    # TODO?
-    # def get_transaction_receipt(self, tx_digest: str) -> Dict:
 
     @abstractmethod
     def is_transaction_settled(self, tx_digest: str) -> bool:

@@ -22,7 +22,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, BinaryIO, cast
+from typing import Optional, BinaryIO, cast, Any
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
@@ -163,14 +163,9 @@ class FetchAIApi(LedgerApi):
         self._api = FetchaiLedgerApi(host, port)
 
     @property
-    def host(self):
-        """Get the URL to the server."""
-        return self._api.tokens.host
-
-    @property
-    def port(self):
-        """Get the listening port."""
-        return self._api.tokens.port
+    def api(self) -> FetchaiLedgerApi:
+        """Get the underlying API object."""
+        return self._api
 
     def get_balance(self, address: AddressLike) -> int:
         """Get the balance of a given account."""

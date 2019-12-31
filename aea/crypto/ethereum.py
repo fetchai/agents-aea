@@ -154,36 +154,44 @@ class EthereumCrypto(Crypto):
 class EthereumAIApi(LedgerApi):
     """Class to interact with the Ethereum Web3 APIs."""
 
-    def __init__(self, endpoint_uri: str, chain_id: int):
+    def __init__(self, endpoint_uri: str):
         """
         Initialize the Ethereum ledger APIs.
 
         :param endpoint_uri: the endpoint for Web3 APIs.
-        :param chain_id: the id of the Ethereum chain.
-        # TODO setting chain_id in the constructor might seem limiting.
-               It means the chain id in the transactions is fixed.
-               This might not be the desired behaviour.
-               `send_transaction` could support optional **kwargs for that case.
         """
         self._api = Web3(HTTPProvider(endpoint_uri=endpoint_uri))
-        self._chain_id = chain_id
 
     @property
-    def chain_id(self):
-        """Get the chain id."""
-        return self._chain_id
+    def api(self) -> Web3:
+        """Get the underlying API object."""
+        return self._api
 
     def get_balance(self, address: AddressLike) -> int:
         """Get the balance of a given account."""
         return self._api.eth.getBalance(address)
 
-    def send_transaction(self, crypto_object: Crypto, destination_address: AddressLike, amount: int, tx_fee: int) -> Optional[str]:
-        """Submit a transaction to the ledger."""
+    def send_transaction(self,
+                         crypto_object: Crypto,
+                         destination_address: AddressLike,
+                         amount: int,
+                         tx_fee: int,
+                         chain_id: int = 1) -> Optional[str]:
+        """
+        Submit a transaction to the ledger.
+
+        :param crypto_object: the crypto object associated to the payer.
+        :param destination_address: the destination address of the payee.
+        :param amount: the amount of wealth to be transferred.
+        :param tx_fee: the transaction fee.
+        :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
+        :return: the transaction digest, or None if not available.
+        """
         nonce = self._api.eth.getTransactionCount(self._api.toChecksumAddress(crypto_object.address))
         # TODO : handle misconfiguration
         transaction = {
             'nonce': nonce,
-            'chainId': self.chain_id,  # TODO see todo in the constructor.
+            'chainId': chain_id,
             'to': destination_address,
             'value': amount,
             'gas': tx_fee,
