@@ -199,8 +199,8 @@ class TestLedgerApis:
 
     def test__try_to_instantiate_ethereum_ledger_api(self):
         """Test the instantiation of the ethereum ledger api."""
-        _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1", chain_id=80)
+        _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1")
         from web3 import Web3
         with mock.patch.object(Web3, "__init__", side_effect=Exception):
             with pytest.raises(SystemExit):
-                _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1", chain_id=80)
+                _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1")
