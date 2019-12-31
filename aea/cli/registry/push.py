@@ -18,12 +18,12 @@
 # ------------------------------------------------------------------------------
 """Methods for CLI push functionality."""
 
-import click
 import os
-import tarfile
 import shutil
+import tarfile
+from shutil import copytree
 
-from distutils.dir_util import copy_tree
+import click
 
 from aea.cli.common import logger
 from aea.cli.registry.utils import (
@@ -33,6 +33,7 @@ from aea.cli.registry.utils import (
     get_item_source_path,
     get_item_target_path
 )
+from aea.configurations.base import PublicId
 
 
 def _remove_pycache(source_dir: str):
@@ -103,22 +104,35 @@ def push_item(item_type: str, item_name: str) -> None:
     )
 
 
-def save_item_locally(item_type: str, item_name: str) -> None:
+def _check_package_public_id(source_path, item_type, item_id):
+    config = load_yaml(os.path.join(source_path, item_type + ".yaml"))
+    item_author = config.get("author", "")
+    item_name = config.get("name", "")
+    item_version = config.get("version", "")
+    if item_id.name != item_name or item_id.owner != item_author or item_id.version != item_version:
+        raise click.ClickException(
+            "Version or author do not match. Expected '{}', found '{}'"
+            .format(item_id, item_author + "/" + item_name + ":" + item_version)
+        )
+
+
+def save_item_locally(item_type: str, item_id: PublicId) -> None:
     """
     Save item to local packages.
 
     :param item_type: str type of item (connection/protocol/skill).
-    :param item_name: str item name.
+    :param item_id: the public id of the item.
 
     :return: None
     """
     item_type_plural = item_type + 's'
     cwd = os.getcwd()
 
-    source_path = get_item_source_path(cwd, item_type_plural, item_name)
-    target_path = get_item_target_path(item_type_plural, item_name)
-    copy_tree(source_path, target_path)
+    source_path = get_item_source_path(cwd, item_type_plural, item_id.name)
+    target_path = get_item_target_path(item_type_plural, item_id.name)
+    _check_package_public_id(source_path, item_type, item_id)
+    copytree(source_path, target_path)
     click.echo(
         '{} "{}" successfully saved in packages folder.'
-        .format(item_type.title(), item_name)
+        .format(item_type.title(), item_id)
     )
