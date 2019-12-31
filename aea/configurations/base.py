@@ -566,7 +566,7 @@ class SkillConfig(PackageConfiguration):
         return skill_config
 
 
-class AgentConfig(Configuration):
+class AgentConfig(PackageConfiguration):
     """Class to represent the agent configuration file."""
 
     def __init__(self,
@@ -582,10 +582,9 @@ class AgentConfig(Configuration):
                  private_key_paths: Dict[str, str] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
+        super().__init__(agent_name, author, version)
         self.agent_name = agent_name
         self.aea_version = aea_version
-        self.author = author
-        self.version = version
         self.license = license
         self.fingerprint = fingerprint
         self.url = url

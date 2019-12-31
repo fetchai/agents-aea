@@ -193,10 +193,11 @@ def format_skills(items):
 
 
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
-    """Return description of a protocol, skill or connection."""
+    """Return description of a protocol, skill, connection."""
     config = loader.load(open(str(config_filepath)))
-    assert config.name == name
-    return {"public_id": str(config.public_id), "name": config.name, "author": config.author, "description": config.description, "version": config.version}
+    item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
+    assert item_name == name
+    return {"public_id": str(config.public_id), "name": item_name, "author": config.author, "description": config.description, "version": config.version}
 
 
 class AEAConfigException(Exception):
