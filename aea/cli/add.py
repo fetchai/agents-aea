@@ -46,9 +46,10 @@ def add(ctx: Context, registry):
     _try_to_load_agent_config(ctx)
 
 
-def _find_connection_locally(ctx, connection_name, click_context):
+def _find_connection_locally(ctx, connection_public_id, click_context):
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
     # first check in aea dir
+    connection_name = connection_public_id.name
     registry_path = ctx.agent_config.registry_path
     connection_configuration_filepath = Path(os.path.join(registry_path, "connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE))
     if not connection_configuration_filepath.exists():
@@ -66,6 +67,12 @@ def _find_connection_locally(ctx, connection_name, click_context):
             logger.info("Connection '{}' is restricted to the following protocols: {}".format(connection_name, connection_configuration.restricted_to_protocols))
     except ValidationError as e:
         logger.error("Connection configuration file not valid: {}".format(str(e)))
+        sys.exit(1)
+
+    version = connection_configuration.version
+    owner = connection_configuration.author
+    if connection_public_id.owner != owner or connection_public_id.version != version:
+        logger.error("Cannot find connection with owner and version specified.")
         sys.exit(1)
 
     # copy the connection package into the agent's supported connections.
@@ -86,24 +93,21 @@ def _find_connection_locally(ctx, connection_name, click_context):
 
 
 @add.command()
-@click.argument(
-    'connection_public_id', type=PublicIdParameter(), required=True
-)
+@click.argument('connection_public_id', type=PublicIdParameter(), required=True)
 @pass_context
 def connection(click_context, connection_public_id: PublicId):
     """Add a connection to the configuration file."""
     ctx = cast(Context, click_context.obj)
     agent_name = ctx.agent_config.agent_name
-    connection_name = connection_public_id.name
 
     is_registry = ctx.config.get("is_registry")
 
-    logger.info("Adding connection '{}' to the agent '{}'...".format(connection_name, agent_name))
+    logger.info("Adding connection '{}' to the agent '{}'...".format(connection_public_id, agent_name))
 
     # check if we already have a connection with the same name
     logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
-    if connection_name in {c.name for c in ctx.agent_config.connections}:
-        logger.error("A connection with name '{}' already exists. Aborting...".format(connection_name))
+    if connection_public_id in ctx.agent_config.connections:
+        logger.error("A connection with id '{}' already exists. Aborting...".format(connection_public_id))
         sys.exit(1)
 
     # find and add connection
@@ -111,7 +115,7 @@ def connection(click_context, connection_public_id: PublicId):
         # fetch from Registry
         fetch_package('connection', public_id=connection_public_id, cwd=ctx.cwd)
     else:
-        _find_connection_locally(ctx, connection_name, click_context)
+        _find_connection_locally(ctx, connection_public_id, click_context)
 
     # make the 'connections' folder a Python package.
     connections_init_module = os.path.join(ctx.cwd, "connections", "__init__.py")
@@ -124,9 +128,10 @@ def connection(click_context, connection_public_id: PublicId):
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
-def _find_protocol_locally(ctx, protocol_name):
+def _find_protocol_locally(ctx, protocol_public_id):
     # check that the provided path points to a proper protocol directory -> look for protocol.yaml file.
     # first check in aea dir
+    protocol_name = protocol_public_id.name
     registry_path = ctx.agent_config.registry_path
     protocol_configuration_filepath = Path(os.path.join(registry_path, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE))
     if not protocol_configuration_filepath.exists():
@@ -145,6 +150,12 @@ def _find_protocol_locally(ctx, protocol_name):
         logger.error("Protocol configuration file not valid: {}".format(str(e)))
         sys.exit(1)
 
+    version = protocol_configuration.version
+    owner = protocol_configuration.author
+    if protocol_public_id.owner != owner or protocol_public_id.version != version:
+        logger.error("Cannot find protocol with owner and version specified.")
+        sys.exit(1)
+
     # copy the protocol package into the agent's supported connections.
     src = str(Path(os.path.join(registry_path, "protocols", protocol_name)).absolute())
     dest = os.path.join(ctx.cwd, "protocols", protocol_name)
@@ -157,24 +168,21 @@ def _find_protocol_locally(ctx, protocol_name):
 
 
 @add.command()
-@click.argument(
-    'protocol_public_id', type=PublicIdParameter(), required=True
-)
+@click.argument('protocol_public_id', type=PublicIdParameter(), required=True)
 @pass_context
 def protocol(click_context, protocol_public_id):
     """Add a protocol to the agent."""
     ctx = cast(Context, click_context.obj)
     agent_name = cast(str, ctx.agent_config.agent_name)
-    protocol_name = protocol_public_id.name
 
     is_registry = ctx.config.get("is_registry")
 
-    logger.info("Adding protocol '{}' to the agent '{}'...".format(protocol_name, agent_name))
+    logger.info("Adding protocol '{}' to the agent '{}'...".format(protocol_public_id, agent_name))
 
     # check if we already have a protocol with the same name
     logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
-    if protocol_name in {p.name for p in ctx.agent_config.protocols}:
-        logger.error("A protocol with name '{}' already exists. Aborting...".format(protocol_name))
+    if protocol_public_id in ctx.agent_config.protocols:
+        logger.error("A protocol with id '{}' already exists. Aborting...".format(protocol_public_id))
         sys.exit(1)
 
     # find and add protocol
@@ -182,7 +190,7 @@ def protocol(click_context, protocol_public_id):
         # fetch from Registry
         fetch_package('protocol', public_id=protocol_public_id, cwd=ctx.cwd)
     else:
-        _find_protocol_locally(ctx, protocol_name)
+        _find_protocol_locally(ctx, protocol_public_id)
 
     # make the 'protocols' folder a Python package.
     logger.debug("Creating {}".format(os.path.join(agent_name, "protocols", "__init__.py")))
@@ -194,9 +202,10 @@ def protocol(click_context, protocol_public_id):
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
 
-def _find_skill_locally(ctx, skill_name, click_context):
+def _find_skill_locally(ctx, skill_public_id, click_context):
     # check that the provided path points to a proper skill directory -> look for skill.yaml file.
     # first check in aea dir
+    skill_name = skill_public_id.name
     registry_path = ctx.agent_config.registry_path
     skill_configuration_filepath = Path(os.path.join(registry_path, "skills", skill_name, DEFAULT_SKILL_CONFIG_FILE))
     if not skill_configuration_filepath.exists():
@@ -212,6 +221,12 @@ def _find_skill_locally(ctx, skill_name, click_context):
         skill_configuration = ctx.skill_loader.load(open(str(skill_configuration_filepath)))
     except ValidationError as e:
         logger.error("Skill configuration file not valid: {}".format(str(e)))
+        sys.exit(1)
+
+    version = skill_configuration.version
+    owner = skill_configuration.author
+    if skill_public_id.owner != owner or skill_public_id.version != version:
+        logger.error("Cannot find skill with owner and version specified.")
         sys.exit(1)
 
     # copy the skill package into the agent's supported skills.
@@ -238,7 +253,6 @@ def skill(click_context, skill_public_id: PublicId):
     """Add a skill to the agent."""
     ctx = cast(Context, click_context.obj)
     agent_name = ctx.agent_config.agent_name
-    skill_name = skill_public_id.name
 
     is_registry = ctx.config.get("is_registry")
 
@@ -246,8 +260,8 @@ def skill(click_context, skill_public_id: PublicId):
 
     # check if we already have a skill with the same name
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
-    if skill_name in {s.name for s in ctx.agent_config.skills}:
-        logger.error("A skill with name '{}' already exists. Aborting...".format(skill_name))
+    if skill_public_id in ctx.agent_config.skills:
+        logger.error("A skill with id '{}' already exists. Aborting...".format(skill_public_id))
         sys.exit(1)
 
     # find and add protocol
@@ -255,7 +269,7 @@ def skill(click_context, skill_public_id: PublicId):
         # fetch from Registry
         fetch_package('skill', public_id=skill_public_id, cwd=ctx.cwd)
     else:
-        _find_skill_locally(ctx, skill_name, click_context)
+        _find_skill_locally(ctx, skill_public_id, click_context)
 
     # make the 'skills' folder a Python package.
     skills_init_module = os.path.join(ctx.cwd, "skills", "__init__.py")

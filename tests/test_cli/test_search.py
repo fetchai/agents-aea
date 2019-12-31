@@ -18,13 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea search` sub-command."""
-import json
 import os
 import shutil
 import tempfile
 from pathlib import Path
 from unittest import mock, TestCase
-
 import jsonschema
 from jsonschema import Draft4Validator
 
@@ -32,7 +30,7 @@ from aea import AEA_DIR
 from aea.cli import cli
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 from ..common.click_testing import CliRunner
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, ROOT_DIR
 
 
 class TestSearchProtocols:
@@ -41,10 +39,6 @@ class TestSearchProtocols:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
@@ -67,10 +61,6 @@ class TestSearchConnections:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
@@ -98,10 +88,6 @@ class TestSearchSkills:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
-
         cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
@@ -287,3 +273,110 @@ class RegistrySearchTestCase(TestCase):
         )
         format_skills_mock.assert_called_once_with(['correct', 'results'])
         format_items_mock.assert_not_called()
+
+
+class TestSearchWithRegistryInSubfolder:
+    """Test the search when the registry directory is a subfolder of the current path."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.cwd = os.getcwd()
+        cls.runner = CliRunner()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        # copy the packages directory in the temporary test directory.
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
+
+        # remove all the skills except the echo skill (to make testing easier).
+        [shutil.rmtree(p) for p in Path(cls.t, "packages", "skills").iterdir() if p.name != "echo" and p.is_dir()]
+
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False)
+
+    def test_exit_code_equal_to_zero(self):
+        """Test that the exit code is equal to 0 (i.e. success)."""
+        assert self.result.exit_code == 0
+
+    def test_correct_output(self,):
+        """Test that the command has printed the correct output.."""
+        assert self.result.output == "Available skills:\n" \
+                                     "------------------------------\n" \
+                                     "Public ID: fetchai/echo:0.1.0\n" \
+                                     "Name: echo\n" \
+                                     "Description: The echo skill implements simple echo functionality.\n" \
+                                     "Author: fetchai\n" \
+                                     "Version: 0.1.0\n" \
+                                     "------------------------------\n" \
+                                     "------------------------------\n" \
+                                     "Public ID: fetchai/error:0.1.0\n" \
+                                     "Name: error\n" \
+                                     "Description: The error skill implements basic error handling required by all AEAs.\n" \
+                                     "Author: fetchai\n" \
+                                     "Version: 0.1.0\n" \
+                                     "------------------------------\n\n"
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestSearchInAgentDirectory:
+    """Test the search when we are in the agent directory."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.cwd = os.getcwd()
+        cls.runner = CliRunner()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        # copy the packages directory in the temporary test directory.
+        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
+
+        # remove all the skills except the echo skill (to make testing easier).
+        [shutil.rmtree(p) for p in Path(cls.t, "packages", "skills").iterdir() if p.name != "echo" and p.is_dir()]
+
+        # create an AEA proejct and enter into it.
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", "myagent"], standalone_mode=False)
+        assert result.exit_code == 0
+        os.chdir(Path(cls.t, "myagent"))
+
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False)
+
+    def test_exit_code_equal_to_zero(self):
+        """Test that the exit code is equal to 0 (i.e. success)."""
+        assert self.result.exit_code == 0
+
+    def test_correct_output(self,):
+        """Test that the command has printed the correct output.."""
+        assert self.result.output == "Available skills:\n" \
+                                     "------------------------------\n" \
+                                     "Public ID: fetchai/echo:0.1.0\n" \
+                                     "Name: echo\n" \
+                                     "Description: The echo skill implements simple echo functionality.\n" \
+                                     "Author: fetchai\n" \
+                                     "Version: 0.1.0\n" \
+                                     "------------------------------\n" \
+                                     "------------------------------\n" \
+                                     "Public ID: fetchai/error:0.1.0\n" \
+                                     "Name: error\n" \
+                                     "Description: The error skill implements basic error handling required by all AEAs.\n" \
+                                     "Author: fetchai\n" \
+                                     "Version: 0.1.0\n" \
+                                     "------------------------------\n\n"
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

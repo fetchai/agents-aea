@@ -40,7 +40,7 @@ from aea.crypto.fetchai import FETCHAI
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
-DEFAULT_REGISTRY_PATH = str(Path("..", "packages"))
+DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_CONNECTION = PublicId.from_string("fetchai/stub:0.1.0")  # type: PublicId
 DEFAULT_SKILL = PublicId.from_string("fetchai/error:0.1.0")  # type: PublicId
 DEFAULT_LEDGER = FETCHAI

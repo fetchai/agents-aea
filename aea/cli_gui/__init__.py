@@ -132,7 +132,7 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
 def get_registered_items(item_type: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
-    pid = _call_aea_async(["aea", "search", item_type + "s"], os.path.join(app_context.agents_dir, "aea"))
+    pid = _call_aea_async([sys.executable, "-m", "aea.cli", "search", item_type + "s"], app_context.agents_dir)
     return _sync_extract_items_from_tty(pid)
 
 
