@@ -19,7 +19,6 @@
 
 """Implementation of the common utils of the aea cli."""
 
-import importlib.util
 import logging
 import logging.config
 import os
@@ -36,6 +35,7 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillC
     DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies, PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
+from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules
 
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
@@ -126,10 +126,8 @@ def _try_to_load_protocols(ctx: Context):
             sys.exit(1)
 
         try:
-            protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join("protocols", protocol_name, "__init__.py"))
-            protocol_module = importlib.util.module_from_spec(protocol_spec)
-            protocol_spec.loader.exec_module(protocol_module)  # type: ignore
-            sys.modules[protocol_spec.name + "_protocol"] = protocol_module
+            protocol_package = load_module(protocol_name, Path("protocols", protocol_name, "__init__.py"))
+            add_agent_component_module_to_sys_modules("protocol", protocol_name, protocol_package)
         except Exception:
             logger.error("A problem occurred while processing protocol {}.".format(protocol_public_id))
             sys.exit(1)

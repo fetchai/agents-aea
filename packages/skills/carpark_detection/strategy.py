@@ -21,20 +21,13 @@
 
 import logging
 import os
-import sys
-from typing import Any, Dict, List, Tuple, TYPE_CHECKING, cast
+from typing import Any, Dict, List, Tuple, cast
 import time
 
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.carpark_detection.detection_database import DetectionDatabase
-    from packages.skills.carpark_detection.carpark_detection_data_model import CarParkDataModel
-
-else:
-    from carpark_detection_skill.detection_database import DetectionDatabase
-    from carpark_detection_skill.carpark_detection_data_model import CarParkDataModel
+from packages.skills.carpark_detection.detection_database import DetectionDatabase
+from packages.skills.carpark_detection.carpark_detection_data_model import CarParkDataModel
 
 DEFAULT_PRICE = 2000
 DEFAULT_DB_IS_REL_TO_CWD = False

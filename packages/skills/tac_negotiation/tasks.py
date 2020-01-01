@@ -19,15 +19,10 @@
 
 """This package contains a scaffold of a task."""
 
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.skills.base import Task
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.tac_negotiation.transactions import Transactions
-else:
-    from tac_negotiation_skill.transactions import Transactions
+from packages.skills.tac_negotiation.transactions import Transactions
 
 
 class TransactionCleanUpTask(Task):

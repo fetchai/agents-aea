@@ -20,22 +20,15 @@
 """This package contains a scaffold of a behaviour."""
 
 import logging
-import sys
-from typing import cast, Optional, TYPE_CHECKING
+from typing import cast, Optional
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.oef.message import OEFMessage
-    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-    from packages.skills.weather_station_ledger.strategy import Strategy
-else:
-    from weather_station_ledger_skill.strategy import Strategy
-    from oef_protocol.message import OEFMessage
-    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.skills.weather_station_ledger.strategy import Strategy
 
 logger = logging.getLogger("aea.weather_station_ledger_skill")
 

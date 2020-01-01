@@ -18,19 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a class representing the game."""
-from enum import Enum
 import logging
-import sys
-from typing import Dict, List, Optional, TYPE_CHECKING
+from enum import Enum
+from typing import Dict, List, Optional
 
 from aea.helpers.search.models import Query, Constraint, ConstraintType
-from aea.skills.base import SharedClass
 from aea.mail.base import Address
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.tac.message import TACMessage
-else:
-    from tac_protocol.message import TACMessage
+from aea.skills.base import SharedClass
+from packages.protocols.tac.message import TACMessage
 
 logger = logging.getLogger("aea.tac_participation_skill")
 

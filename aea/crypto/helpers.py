@@ -132,4 +132,4 @@ def _create_ethereum_private_key() -> None:
     """
     account = Account.create()
     with open(ETHEREUM_PRIVATE_KEY_FILE, "w+") as file:
-        file.write(account.privateKey.hex())
+        file.write(account.key.hex())

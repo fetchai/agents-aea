@@ -50,7 +50,7 @@ class EthereumCrypto(Crypto):
         :param private_key_path: the private key path of the agent
         """
         self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        bytes_representation = Web3.toBytes(hexstr=self._account.privateKey.hex())
+        bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
 
     @property
@@ -148,7 +148,7 @@ class EthereumCrypto(Crypto):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self._account.privateKey.hex().encode("utf-8"))
+        fp.write(self._account.key.hex().encode("utf-8"))
 
 
 class EthereumApi(LedgerApi):
@@ -200,7 +200,7 @@ class EthereumApi(LedgerApi):
             'gas': tx_fee,
             'gasPrice': self._api.toWei(GAS_PRICE, GAS_ID)
         }
-        signed = self._api.eth.account.signTransaction(transaction, crypto.entity.privateKey)
+        signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
         logger.info("TX Hash: {}".format(str(hex_value.hex())))
         while True:

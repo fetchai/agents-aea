@@ -19,28 +19,18 @@
 
 """This module contains the handler for the 'ml_train' skill."""
 import logging
-import sys
-from typing import cast, TYPE_CHECKING, Optional, List
+from typing import cast, Optional, List
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.oef.message import OEFMessage
-    from packages.protocols.ml_trade.message import MLTradeMessage
-    from packages.protocols.ml_trade.serialization import MLTradeSerializer
-    from packages.skills.ml_train.strategy import Strategy
-    from packages.skills.ml_train.tasks import MLTrainTask
-    # from packages.skills.ml_train.tasks import MLTask
-else:
-    from oef_protocol.message import OEFMessage
-    from ml_trade_protocol.message import MLTradeMessage
-    from ml_trade_protocol.serialization import MLTradeSerializer
-    from ml_train_skill.strategy import Strategy
-    from ml_train_skill.tasks import MLTrainTask
+from packages.protocols.ml_trade.message import MLTradeMessage
+from packages.protocols.ml_trade.serialization import MLTradeSerializer
+from packages.protocols.oef.message import OEFMessage
+from packages.skills.ml_train.strategy import Strategy
+from packages.skills.ml_train.tasks import MLTrainTask
 
 logger = logging.getLogger("aea.ml_train_skill")
 

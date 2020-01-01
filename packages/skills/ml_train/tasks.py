@@ -23,6 +23,7 @@ from typing import Tuple
 
 import numpy as np
 from tensorflow import keras
+
 from aea.skills.base import Task
 
 logger = logging.getLogger("aea.gym_skill")
