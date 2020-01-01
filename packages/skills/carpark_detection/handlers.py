@@ -20,8 +20,7 @@
 """This package contains a scaffold of a handler."""
 
 import logging
-import sys
-from typing import Optional, cast, TYPE_CHECKING
+from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.helpers.search.models import Description, Query
@@ -29,17 +28,10 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.fipa.message import FIPAMessage
-    from packages.protocols.fipa.serialization import FIPASerializer
-    from packages.skills.carpark_detection.dialogues import Dialogue, Dialogues
-    from packages.skills.carpark_detection.strategy import Strategy
-else:
-    from fipa_protocol.message import FIPAMessage
-    from fipa_protocol.serialization import FIPASerializer
-    from carpark_detection_skill.dialogues import Dialogue, Dialogues
-    from carpark_detection_skill.strategy import Strategy
+from packages.protocols.fipa.message import FIPAMessage
+from packages.protocols.fipa.serialization import FIPASerializer
+from packages.skills.carpark_detection.dialogues import Dialogue, Dialogues
+from packages.skills.carpark_detection.strategy import Strategy
 
 logger = logging.getLogger("aea.carpark_detection_skill")
 

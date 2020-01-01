@@ -19,23 +19,14 @@
 
 """This package contains a scaffold of a behaviour."""
 import logging
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.skills.base import Behaviour
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.oef.message import OEFMessage
-    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-    from packages.skills.tac_negotiation.registration import Registration
-    from packages.skills.tac_negotiation.search import Search
-    from packages.skills.tac_negotiation.strategy import Strategy
-else:
-    from oef_protocol.message import OEFMessage
-    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
-    from tac_negotiation_skill.registration import Registration
-    from tac_negotiation_skill.search import Search
-    from tac_negotiation_skill.strategy import Strategy
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.skills.tac_negotiation.registration import Registration
+from packages.skills.tac_negotiation.search import Search
+from packages.skills.tac_negotiation.strategy import Strategy
 
 logger = logging.getLogger("aea.tac_negotiation_skill")
 
