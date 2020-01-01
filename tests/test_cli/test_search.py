@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea search` sub-command."""
+import json
 import os
 import shutil
 import tempfile
 from pathlib import Path
 from unittest import mock, TestCase
+
 import jsonschema
 from jsonschema import Draft4Validator
 

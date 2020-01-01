@@ -36,7 +36,7 @@ from ...common.click_testing import CliRunner
 
 from aea.cli import cli
 
-from ...conftest import CLI_LOG_OPTION
+from ...conftest import CLI_LOG_OPTION, ROOT_DIR
 
 
 class TestGymSkill:
@@ -67,9 +67,9 @@ class TestGymSkill:
         os.chdir(agent_dir_path)
 
         # add packages and install dependencies
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "gym"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/gym:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "gym"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/gym:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
         assert result.exit_code == 0
@@ -80,7 +80,7 @@ class TestGymSkill:
         shutil.copytree(gyms_src, gyms_dst)
 
         # change config file of gym connection
-        file_src = os.path.join(self.cwd, 'tests', 'test_packages', 'test_skills', 'data', 'connection.yaml')
+        file_src = os.path.join(ROOT_DIR, 'tests', 'data', 'gym-connection.yaml')
         file_dst = os.path.join(self.t, self.agent_name, 'connections', 'gym', 'connection.yaml')
         shutil.copyfile(file_src, file_dst)
 

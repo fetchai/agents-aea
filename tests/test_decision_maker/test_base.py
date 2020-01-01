@@ -27,7 +27,8 @@ import pytest
 
 import aea
 import aea.decision_maker.base
-from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG
+from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet, FETCHAI
 from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
 from aea.decision_maker.messages.base import InternalMessage

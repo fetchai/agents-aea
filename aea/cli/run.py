@@ -33,7 +33,7 @@ from aea.aea import AEA
 from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
     AEAConfigException, _load_env_file, ConnectionsOption
 from aea.cli.install import install
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig, \
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, \
     PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
@@ -124,17 +124,14 @@ def _verify_ledger_apis_access() -> None:
     if fetchai_ledger_api_config is None:
         logger.debug("No fetchai ledger api config specified.")
     else:
-        fetchai_ledger_api_config = cast(LedgerAPIConfig, fetchai_ledger_api_config)
-        _try_to_instantiate_fetchai_ledger_api(cast(str, fetchai_ledger_api_config.args.get('address')),
-                                               cast(int, fetchai_ledger_api_config.args.get('port')))
+        _try_to_instantiate_fetchai_ledger_api(cast(str, fetchai_ledger_api_config.get('addr')),
+                                               cast(int, fetchai_ledger_api_config.get('port')))
 
     ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
     if ethereum_ledger_config is None:
         logger.debug("No ethereum ledger api config specified.")
     else:
-        ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
-        _try_to_instantiate_ethereum_ledger_api(cast(str, ethereum_ledger_config.args.get('address')),
-                                                cast(int, ethereum_ledger_config.args.get('chain_id')))
+        _try_to_instantiate_ethereum_ledger_api(cast(str, ethereum_ledger_config.get('addr')))
 
 
 def _setup_connection(connection_name: str, address: str, ctx: Context) -> Connection:
@@ -196,7 +193,7 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
     _verify_or_create_private_keys(ctx)
     _verify_ledger_apis_access()
     private_key_paths = dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()])
-    ledger_api_configs = dict([(identifier, cast(List[Union[str, int]], list(config.args.values()))) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
+    ledger_api_configs = dict([(identifier, cast(List[Union[str, int]], list(config.values()))) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
 
     wallet = Wallet(private_key_paths)
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)

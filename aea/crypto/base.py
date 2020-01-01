@@ -20,7 +20,9 @@
 
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Union, Optional
+
+AddressLike = Union[str, bytes]
 
 
 class Crypto(ABC):
@@ -82,4 +84,60 @@ class Crypto(ABC):
 
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
+        """
+
+
+class LedgerApi(ABC):
+    """Interface for ledger APIs."""
+
+    identifier = "base"  # type: str
+
+    @property
+    @abstractmethod
+    def api(self) -> Optional[Any]:
+        """
+        Get the underlying API object.
+
+        This can be used for low-level operations with the concrete ledger APIs.
+        If there is no such object, return None.
+        """
+
+    @abstractmethod
+    def get_balance(self, address: AddressLike) -> int:
+        """
+        Get the balance of a given account.
+
+        This usually takes the form of a web request to be waited synchronously.
+
+        :param address: the address.
+        :return: the balance.
+        """
+
+    @abstractmethod
+    def send_transaction(self,
+                         crypto: Crypto,
+                         destination_address: AddressLike,
+                         amount: int,
+                         tx_fee: int,
+                         **kwargs) -> Optional[str]:
+        """
+        Submit a transaction to the ledger.
+
+        If the mandatory arguments are not enough for specifying a transaction
+        in the concrete ledger API, use keyword arguments for the additional parameters.
+
+        :param crypto: the crypto object associated to the payer.
+        :param destination_address: the destination address of the payee.
+        :param amount: the amount of wealth to be transferred.
+        :param tx_fee: the transaction fee.
+        :return: tx digest if successful, otherwise None
+        """
+
+    @abstractmethod
+    def is_transaction_settled(self, tx_digest: str) -> bool:
+        """
+        Check whether a transaction is settled or not.
+
+        :param tx_digest: the digest associated to the transaction.
+        :return: True if the transaction has been settled, False o/w.
         """

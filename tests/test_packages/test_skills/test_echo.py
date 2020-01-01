@@ -76,7 +76,7 @@ class TestEchoSkill:
         yaml.safe_dump(aea_config.json, open(aea_config_path, "w"))
 
         # add skills
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "echo"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/echo:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
         # run the agent

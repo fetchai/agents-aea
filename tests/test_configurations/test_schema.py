@@ -131,15 +131,16 @@ class TestConnectionsSchema:
 
     @pytest.mark.parametrize("connection_path",
                              [
-                                 os.path.join(ROOT_DIR, "packages", "connections", "local"),
-                                 os.path.join(ROOT_DIR, "packages", "connections", "oef"),
-                                 os.path.join(ROOT_DIR, "aea", "connections", "scaffold"),
-                                 os.path.join(ROOT_DIR, "packages", "connections", "gym"),
-                                 os.path.join(CUR_PATH, "data", "dummy_connection")
+                                 os.path.join(ROOT_DIR, "packages", "connections", "local", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(ROOT_DIR, "packages", "connections", "oef", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(ROOT_DIR, "aea", "connections", "scaffold", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(ROOT_DIR, "packages", "connections", "gym", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(CUR_PATH, "data", "dummy_connection", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(CUR_PATH, "data", "gym-connection.yaml")
                              ])
     def test_validate_connection_config(self, connection_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        connection_config_file = yaml.safe_load(open(os.path.join(connection_path, DEFAULT_CONNECTION_CONFIG_FILE)))
+        connection_config_file = yaml.safe_load(open(connection_path))
         self.validator.validate(instance=connection_config_file)
 
 
