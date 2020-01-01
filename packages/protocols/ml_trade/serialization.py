@@ -22,16 +22,11 @@
 import base64
 import json
 import pickle
-import sys
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.ml_trade.message import MLTradeMessage
-else:
-    from ml_trade_protocol.message import MLTradeMessage  # pragma: no cover
+from packages.protocols.ml_trade.message import MLTradeMessage
 
 
 class MLTradeSerializer(Serializer):

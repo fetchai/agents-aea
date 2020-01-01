@@ -20,21 +20,14 @@
 """This package contains a the behaviours."""
 
 import logging
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.oef.message import OEFMessage
-    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-    from packages.skills.ml_train.strategy import Strategy
-else:
-    from oef_protocol.message import OEFMessage
-    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
-    from ml_train_skill.strategy import Strategy
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.skills.ml_train.strategy import Strategy
 
 logger = logging.getLogger("aea.ml_train_skill")
 

@@ -21,22 +21,16 @@
 """This module contains the abstract class defining an agent's strategy for the TAC."""
 
 import copy
-from enum import Enum
 import logging
 import random
-import sys
-from typing import Dict, Optional, cast, TYPE_CHECKING
+from enum import Enum
+from typing import Dict, Optional, cast
 
-from aea.helpers.search.models import Query, Description
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.helpers.search.models import Query, Description
 from aea.skills.base import SharedClass
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
-    from packages.skills.tac_negotiation.transactions import Transactions
-else:
-    from tac_negotiation_skill.helpers import build_goods_description, build_goods_query
-    from tac_negotiation_skill.transactions import Transactions
+from packages.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
+from packages.skills.tac_negotiation.transactions import Transactions
 
 logger = logging.getLogger("aea.tac_negotiation_skill")
 

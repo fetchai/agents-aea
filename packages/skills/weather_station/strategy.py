@@ -19,18 +19,12 @@
 
 """This module contains the strategy class."""
 import time
-import sys
-from typing import Any, Dict, List, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Tuple
 
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.weather_station.db_communication import DBCommunication
-    from packages.skills.weather_station.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
-else:
-    from weather_station_skill.db_communication import DBCommunication
-    from weather_station_skill.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
+from packages.skills.weather_station.db_communication import DBCommunication
+from packages.skills.weather_station.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
 DEFAULT_PRICE_PER_ROW = 2
 DEFAULT_SELLER_TX_FEE = 0

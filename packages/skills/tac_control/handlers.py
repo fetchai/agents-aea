@@ -20,25 +20,15 @@
 """This package contains the handlers."""
 
 import logging
-import sys
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.oef.message import OEFMessage
-    from packages.protocols.tac.message import TACMessage
-    from packages.protocols.tac.serialization import TACSerializer
-    from packages.skills.tac_control.game import Game, Phase, Transaction
-    from packages.skills.tac_control.parameters import Parameters
-else:
-    from oef_protocol.message import OEFMessage
-    from tac_protocol.message import TACMessage
-    from tac_protocol.serialization import TACSerializer
-    from tac_control_skill.game import Game, Phase, Transaction
-    from tac_control_skill.parameters import Parameters
-
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.tac.message import TACMessage
+from packages.protocols.tac.serialization import TACSerializer
+from packages.skills.tac_control.game import Game, Phase, Transaction
+from packages.skills.tac_control.parameters import Parameters
 
 logger = logging.getLogger("aea.tac_control_skill")
 

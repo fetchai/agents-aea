@@ -23,16 +23,11 @@ import base64
 import copy
 import json
 import pickle
-import sys
-from typing import Any, TYPE_CHECKING, cast
+from typing import Any, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.gym.message import GymMessage
-else:
-    from gym_protocol.message import GymMessage  # pragma: no cover
+from packages.protocols.gym.message import GymMessage
 
 
 class GymSerializer(Serializer):

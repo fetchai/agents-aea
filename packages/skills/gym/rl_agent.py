@@ -20,16 +20,12 @@
 """This contains the rl agent class."""
 
 import logging
-import numpy as np
 import random
-import sys
-from typing import Any, Dict, TYPE_CHECKING
+from typing import Any, Dict
 
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.skills.gym.helpers import RLAgent, ProxyEnv
-else:
-    from gym_skill.helpers import RLAgent, ProxyEnv
+import numpy as np
 
+from packages.skills.gym.helpers import RLAgent, ProxyEnv
 
 DEFAULT_NB_STEPS = 4000
 NB_GOODS = 10

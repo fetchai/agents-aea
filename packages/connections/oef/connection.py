@@ -24,9 +24,8 @@ import logging
 import pickle
 import time
 from asyncio import AbstractEventLoop, CancelledError
-import sys
 from threading import Thread
-from typing import List, Optional, cast, Set, TYPE_CHECKING
+from typing import List, Optional, cast, Set
 
 import oef
 from oef.agents import OEFAgent
@@ -44,20 +43,14 @@ from oef.schema import Description as OEFDescription, DataModel as OEFDataModel,
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.helpers.search.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, Constraint, \
+from aea.helpers.search.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, \
+    Constraint, \
     ConstraintType, ConstraintTypes
 from aea.mail.base import Envelope, Address
-
-if TYPE_CHECKING or "pytest" in sys.modules:
-    from packages.protocols.fipa.message import FIPAMessage
-    from packages.protocols.fipa.serialization import FIPASerializer
-    from packages.protocols.oef.message import OEFMessage
-    from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-else:
-    from fipa_protocol.message import FIPAMessage
-    from fipa_protocol.serialization import FIPASerializer
-    from oef_protocol.message import OEFMessage
-    from oef_protocol.serialization import OEFSerializer, DEFAULT_OEF
+from packages.protocols.fipa.message import FIPAMessage
+from packages.protocols.fipa.serialization import FIPASerializer
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
 
