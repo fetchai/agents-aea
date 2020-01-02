@@ -25,11 +25,13 @@ from aea.cli.registry.push import push_item, save_item_locally
 
 
 @click.group()
-@click.option('--local', is_flag=True, help="For saving item locally.")
+@click.option(
+    '--registry', is_flag=True, help="For pushing items to Registry."
+)
 @pass_ctx
-def push(ctx: Context, local):
+def push(ctx: Context, registry):
     """Push item to Registry or save it in local packages."""
-    ctx.set_config("local", local)
+    ctx.set_config("registry", registry)
 
 
 @push.command(name='connection')
@@ -37,7 +39,7 @@ def push(ctx: Context, local):
 @pass_ctx
 def connection(ctx: Context, connection_id):
     """Push connection to Registry or save it in local packages."""
-    if ctx.config.get("local"):
+    if not ctx.config.get("registry"):
         save_item_locally('connection', connection_id)
     else:
         push_item('connection', connection_id.name)
@@ -48,7 +50,7 @@ def connection(ctx: Context, connection_id):
 @pass_ctx
 def protocol(ctx: Context, protocol_id):
     """Push protocol to Registry or save it in local packages."""
-    if ctx.config.get("local"):
+    if not ctx.config.get("registry"):
         save_item_locally('protocol', protocol_id)
     else:
         push_item('protocol', protocol_id.name)
@@ -59,7 +61,7 @@ def protocol(ctx: Context, protocol_id):
 @pass_ctx
 def skill(ctx: Context, skill_id):
     """Push skill to Registry or save it in local packages."""
-    if ctx.config.get("local"):
+    if not ctx.config.get("registry"):
         save_item_locally('skill', skill_id)
     else:
         push_item('skill', skill_id.name)

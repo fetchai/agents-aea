@@ -24,10 +24,12 @@ from aea.cli.registry.publish import publish_agent, save_agent_locally
 
 
 @click.command(name='publish')
-@click.option('--local', is_flag=True, help="For saving agent locally.")
-def publish(local):
+@click.option(
+    '--registry', is_flag=True, help="For publishing agent to Registry."
+)
+def publish(registry):
     """Publish Agent to Registry."""
-    if local:
+    if not registry:
         save_agent_locally()
     else:
         publish_agent()

@@ -323,7 +323,7 @@ def get_item_target_path(item_type_plural: str, item_name: str) -> str:
     return target_path
 
 
-def create_public_id(string: str) -> Union[PublicId, str]:
+def create_public_id(string: str) -> PublicId:
     """
     Create public ID from string.
 
