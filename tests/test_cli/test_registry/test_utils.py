@@ -19,15 +19,17 @@
 """This test module contains the tests for CLI Registry utils."""
 import os
 
+from builtins import FileNotFoundError
 from unittest import TestCase, mock
 from click import ClickException
 from yaml import YAMLError
 from requests.exceptions import ConnectionError
 
+from aea.cli.common import AEAConfigException
 from aea.cli.registry.utils import (
     fetch_package, request_api, download_file, extract, _init_config_folder,
     write_cli_config, read_cli_config, get_item_source_path,
-    get_item_target_path
+    get_item_target_path, create_public_id
 )
 from aea.cli.registry.settings import REGISTRY_API_URL
 from aea.configurations.base import PublicId
@@ -66,6 +68,10 @@ class TestFetchPackage:
 
 def _raise_connection_error(*args):
     raise ConnectionError()
+
+
+def _raise_config_exception(*args):
+    raise AEAConfigException()
 
 
 @mock.patch('aea.cli.registry.utils.requests.request')
@@ -129,6 +135,14 @@ class RequestAPITestCase(TestCase):
         'aea.cli.registry.utils.requests.request', _raise_connection_error
     )
     def test_request_api_server_not_responding(self, request_mock):
+        """Test for fetch_package method no server response."""
+        with self.assertRaises(ClickException):
+            request_api('GET', '/path')
+
+    @mock.patch(
+        'aea.cli.registry.utils.read_cli_config', _raise_config_exception
+    )
+    def test_request_api_no_auth_data(self, request_mock):
         """Test for fetch_package method no server response."""
         with self.assertRaises(ClickException):
             request_api('GET', '/path')
@@ -229,6 +243,10 @@ def _raise_yamlerror(*args):
     raise YAMLError()
 
 
+def _raise_file_not_found_error(*args):
+    raise FileNotFoundError()
+
+
 @mock.patch('builtins.open', mock.mock_open())
 class ReadCLIConfigTestCase(TestCase):
     """Test case for read_cli_config method."""
@@ -251,6 +269,15 @@ class ReadCLIConfigTestCase(TestCase):
     def test_read_cli_config_bad_yaml(self):
         """Test for read_cli_config method bad yaml behavior."""
         with self.assertRaises(ClickException):
+            read_cli_config()
+
+    @mock.patch(
+        'aea.cli.registry.utils.yaml.safe_load',
+        _raise_file_not_found_error
+    )
+    def test_read_cli_config_file_not_found(self):
+        """Test for read_cli_config method bad yaml behavior."""
+        with self.assertRaises(AEAConfigException):
             read_cli_config()
 
 
@@ -293,3 +320,27 @@ class GetItemTargetPathTestCase(TestCase):
         """Test for get_item_target_path item already exists."""
         with self.assertRaises(ClickException):
             get_item_target_path('skills', 'skill-name')
+
+
+def _raise_value_error(*args):
+    raise ValueError()
+
+
+class CreatePublicIDTestCase(TestCase):
+    """Test case for create_public_id method."""
+
+    @mock.patch(
+        'aea.cli.registry.utils.PublicId.from_string',
+        return_value='public_id_object'
+    )
+    def test_create_public_id_positive(self, from_string_mock):
+        result = create_public_id('owner/name:version')
+        expected_result = 'public_id_object'
+        self.assertEqual(result, expected_result)
+
+    @mock.patch(
+        'aea.cli.registry.utils.PublicId.from_string', _raise_value_error
+    )
+    def test_create_public_id_bad_str(self):
+        with self.assertRaises(ClickException):
+            create_public_id('bad-str')

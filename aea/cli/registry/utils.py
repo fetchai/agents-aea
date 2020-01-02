@@ -21,13 +21,13 @@
 
 import os
 import tarfile
-from typing import Dict
+from typing import Dict, Union
 
 import click
 import requests
 import yaml
 
-from aea.cli.common import logger, DEFAULT_REGISTRY_PATH
+from aea.cli.common import logger, DEFAULT_REGISTRY_PATH, AEAConfigException
 from aea.cli.registry.settings import (
     REGISTRY_API_URL,
     CLI_CONFIG_PATH,
@@ -53,10 +53,17 @@ def request_api(
     """
     headers = {}
     if auth:
-        token = read_cli_config()[AUTH_TOKEN_KEY]
-        headers.update({
-            'Authorization': 'Token {}'.format(token)
-        })
+        try:
+            token = read_cli_config()[AUTH_TOKEN_KEY]
+        except AEAConfigException:
+            raise click.ClickException(
+                'Unable to read authentication config. '
+                'Please sign in with "aea login" command.'
+            )
+        else:
+            headers.update({
+                'Authorization': 'Token {}'.format(token)
+            })
 
     files = None
     if filepath:
@@ -248,7 +255,13 @@ def read_cli_config() -> Dict:
 
     :return: dict CLI config.
     """
-    return load_yaml(CLI_CONFIG_PATH)
+    try:
+        return load_yaml(CLI_CONFIG_PATH)
+    except FileNotFoundError:
+        raise AEAConfigException(
+            'Unable to read config from {} - file not found.'
+            .format(CLI_CONFIG_PATH)
+        )
 
 
 def _rm_tarfiles():
@@ -274,7 +287,9 @@ def clean_tarfiles(func):
     return wrapper
 
 
-def get_item_source_path(cwd: str, item_type_plural: str, item_name: str) -> str:
+def get_item_source_path(
+    cwd: str, item_type_plural: str, item_name: str
+) -> str:
     """
     Get the item source path.
 
@@ -306,3 +321,16 @@ def get_item_target_path(item_type_plural: str, item_name: str) -> str:
             'Item "{}" already exists in packages folder.'.format(item_name)
         )
     return target_path
+
+
+def create_public_id(string: str) -> Union[PublicId, str]:
+    """
+    Create public ID from string.
+
+    :param string: str public ID.
+    :return: Public ID object.
+    """
+    try:
+        return PublicId.from_string(string)
+    except ValueError:
+        raise click.ClickException('Bad public ID. Please check your input.')

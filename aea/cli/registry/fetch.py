@@ -26,7 +26,7 @@ from distutils.dir_util import copy_tree
 
 from aea.cli.common import DEFAULT_REGISTRY_PATH
 from aea.cli.registry.utils import (
-    request_api, download_file, extract
+    request_api, download_file, extract, create_public_id
 )
 from aea.configurations.base import PublicId
 
@@ -40,7 +40,7 @@ def fetch_agent(public_id: Union[PublicId, str]) -> None:
     :return: None
     """
     if isinstance(public_id, str):
-        public_id = PublicId.from_string(public_id)
+        public_id = create_public_id(public_id)
     owner, name, version = public_id.owner, public_id.name, public_id.version
     api_path = '/agents/{}/{}/{}'.format(owner, name, version)
     resp = request_api('GET', api_path)
@@ -75,7 +75,7 @@ def fetch_agent_locally(public_id: Union[PublicId, str]) -> None:
     :return: None
     """
     if isinstance(public_id, str):
-        public_id = PublicId.from_string(public_id)
+        public_id = create_public_id(public_id)
 
     name = public_id.name
     source_dir = _get_agent_source_path(name)
