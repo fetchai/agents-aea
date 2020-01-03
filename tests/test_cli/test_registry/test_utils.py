@@ -29,7 +29,7 @@ from aea.cli.common import AEAConfigException
 from aea.cli.registry.utils import (
     fetch_package, request_api, download_file, extract, _init_config_folder,
     write_cli_config, read_cli_config, get_item_source_path,
-    get_item_target_path, create_public_id
+    get_item_target_path
 )
 from aea.cli.registry.settings import REGISTRY_API_URL
 from aea.configurations.base import PublicId
@@ -320,27 +320,3 @@ class GetItemTargetPathTestCase(TestCase):
         """Test for get_item_target_path item already exists."""
         with self.assertRaises(ClickException):
             get_item_target_path('skills', 'skill-name')
-
-
-def _raise_value_error(*args):
-    raise ValueError()
-
-
-class CreatePublicIDTestCase(TestCase):
-    """Test case for create_public_id method."""
-
-    @mock.patch(
-        'aea.cli.registry.utils.PublicId.from_string',
-        return_value='public_id_object'
-    )
-    def test_create_public_id_positive(self, from_string_mock):
-        result = create_public_id('owner/name:version')
-        expected_result = 'public_id_object'
-        self.assertEqual(result, expected_result)
-
-    @mock.patch(
-        'aea.cli.registry.utils.PublicId.from_string', _raise_value_error
-    )
-    def test_create_public_id_bad_str(self):
-        with self.assertRaises(ClickException):
-            create_public_id('bad-str')

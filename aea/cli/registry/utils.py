@@ -21,7 +21,7 @@
 
 import os
 import tarfile
-from typing import Dict, Union
+from typing import Dict
 
 import click
 import requests
@@ -321,16 +321,3 @@ def get_item_target_path(item_type_plural: str, item_name: str) -> str:
             'Item "{}" already exists in packages folder.'.format(item_name)
         )
     return target_path
-
-
-def create_public_id(string: str) -> PublicId:
-    """
-    Create public ID from string.
-
-    :param string: str public ID.
-    :return: Public ID object.
-    """
-    try:
-        return PublicId.from_string(string)
-    except ValueError:
-        raise click.ClickException('Bad public ID. Please check your input.')
