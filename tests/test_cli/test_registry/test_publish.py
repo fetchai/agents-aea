@@ -35,7 +35,10 @@ from aea.cli.registry.publish import (
     return_value={
         'agent_name': 'agent-name',
         'description': 'some-description',
-        'version': 'some-version'
+        'version': 'some-version',
+        'connections': [],
+        'protocols': [],
+        'skills': []
     }
 )
 @mock.patch(
@@ -62,6 +65,9 @@ class PublishAgentTestCase(TestCase):
                 'name': 'agent-name',
                 'description': 'some-description',
                 'version': 'some-version',
+                'connections': [],
+                'protocols': [],
+                'skills': []
 
             },
             auth=True,
