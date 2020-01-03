@@ -1,3 +1,18 @@
+## Multiplexer
+
+The `Multiplexer` is responsible for maintaining potentially multiple connections.
+
+### Connection
+
+Connections wrap an external SDK or API and manage messaging. As such, they allow the agent to connect to an external service with an exposed Python SDK/API.
+
+The module `connections/base.py` contains the abstract class which define a `Connection`. A `Connection` acts as a bridge to the SDK or API to be wrapped, and is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service.
+
+The framework provides a number of default connections.
+
+* `local`: implements a local node.
+* `oef`: wraps the OEF SDK.
+
 ### InBox and OutBox
 
 The `InBox` and `OutBox` are, respectively, queues for incoming and outgoing `Envelopes`.
@@ -29,18 +44,6 @@ A number of protocols come packaged up with the AEA framework.
 * `oef`: this protocol provides the AEA protocol implementation for communication with the OEF including an `OEFMessage` class for hooking up to OEF services and search agents. Utility classes are available in the `models.py` module which provides OEF specific requirements, such as classes, needed to perform querying on the OEF, such as `Description`, `Query`, and `Constraint`, to name a few.
 * `fipa`: this protocol provides classes and functions necessary for communication between AEAs via the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language. For example, the `FIPAMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
-
-### Connection
-
-Connections wrap an external SDK or API and manage messaging. As such, they allow the agent to connect to an external service with an exposed Python SDK/API.
-
-The module `connections/base.py` contains the abstract class which define a `Connection`. A `Connection` acts as a bridge to the SDK or API to be wrapped, and is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service.
-
-The framework provides a number of default connections.
-
-* `local`: implements a local node.
-* `oef`: wraps the OEF SDK.
-
 ### Skill
 
 Skills are a result of the framework's extensibility. They are atomic capabilities that agents can dynamically take on board, 
@@ -56,6 +59,8 @@ A skill encapsulates implementations of the abstract base classes `Handler`, `Be
 * `Handler`: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement agents' reactive behaviour. If the agent understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages.
 * `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the agent. Behaviours implement agents' proactiveness.
 * `Task`: none, one or more `Tasks` encapsulate background work internal to the agent.
+
+Skills further allow for `SharedClasses`.
 
 
 ## Agent 
@@ -75,6 +80,17 @@ The `DecisionMaker` component manages global agent state updates proposed by the
 
 It is responsible for the agent's crypto-economic security and goal management, and it contains the preference and ownership representation of the agent.
 
+### TransactionMessage and StateUpdateMessage
+
+Skills communicate with the decision maker via `InternalMessages`. There exist two types of these: `TransactionMessage` and `StateUpdateMessage`.
+
+The `StateUpdateMessage` is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place off chain.
+
+The `TransactionMessage` is used by a skill to propose a transaction to the decision maker. The performative `TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT` is used by a skill to propose a transaction which the decision maker is supposed to settle on chain. The performative `TransactionMessage.Performative.PROPOSE_FOR_SIGNING` is used by the skill to propose a transaction which the decision maker is supposed to sign and which will be settled later.
+
+The decision maker processes messages and can accept or reject them.
+
+For examples how to use these concepts have a look at the `tac_` skills. These functionalities are experimental and subject to change.
 
 ## Filter
 

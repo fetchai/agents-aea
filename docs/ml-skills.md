@@ -30,8 +30,8 @@ aea create ml_data_provider
 ### Add the `ml_data_provider` skill
 ``` bash
 cd ml_data_provider
-aea add connection oef
-aea add skill ml_data_provider
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/ml_data_provider:0.1.0
 ```
 
 ### Install the dependencies
@@ -54,8 +54,8 @@ aea create ml_model_trainer
 ### Add the `ml_train` skill to the model trainer AEA
 ``` bash
 cd ml_model_trainer
-aea add connection oef
-aea add skill ml_train
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/ml_train:0.1.0
 ```
 
 ### Install the dependencies
@@ -80,14 +80,13 @@ We will now run the same demo but with a real ledger transaction on test net.
 ### Update the AEA configs
 
 Both in `ml_model_trainer/aea-config.yaml` and
-`ml_data_provider/aea-config.yaml`, replace `ledger_apis: []` with the following.
+`ml_data_provider/aea-config.yaml`, replace `ledger_apis: {}` with the following.
 
 ``` yaml
 ledger_apis:
-  - ledger_api:
-      ledger: fetchai
-      addr: alpha.fetch-ai.com
-      port: 80
+  fetchai:
+    addr: alpha.fetch-ai.com
+    port: 80
 ```
 
 ### Fund the ml model trainer AEA
@@ -101,11 +100,7 @@ cd ml_model_trainer
 
 ### Update the ml model trainer AEA skills config
 
-We tell the ml model trainer skill to use the ledger, by updating the following field in `ml_model_trainer/skills/ml_train/skill.yaml`:
-``` bash
-is_ledger_tx: True
-```
-or by using the following command:
+We tell the ml model trainer skill to use the ledger, by using the following command:
 ``` bash
 aea config set skills.ml_train.shared_classes.strategy.args.is_ledger_tx True
 ```
@@ -117,14 +112,12 @@ From their respective directories, run both AEAs
 aea run --connections oef
 ```
 
-
 ### Clean up
 ``` bash
 cd ..
 aea delete ml_data_provider
 aea delete ml_model_trainer
 ```
-
 
 ### Communication
 This diagram shows the communication between the two agents.

@@ -30,18 +30,17 @@ aea create tac_controller
 ### Add the tac control skill
 ``` bash
 cd tac_controller
-aea add connection oef
-aea add skill tac_control
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/tac_control:0.1.0
 aea install
 ```
 
 Add the following configs to the aea config:
 ``` yaml
 ledger_apis:
-  - ledger_api:
-      addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-      ledger: ethereum
-      port: 3
+  ethereum:
+    addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    chain_id: 3
 ```
 
 Set the default ledger to ethereum:
@@ -77,8 +76,8 @@ aea create tac_participant_two
 ``` bash
 cd tac_participant_one
 aea add connection oef
-aea add skill tac_participation
-aea add skill tac_negotiation
+aea add skill fetchai/tac_participation:0.1.0
+aea add skill fetchai/tac_negotiation:0.1.0
 aea install
 ```
 
@@ -91,8 +90,8 @@ aea config set agent.default_ledger ethereum
 ``` bash
 cd tac_participant_two
 aea add connection oef
-aea add skill tac_participation
-aea add skill tac_negotiation
+aea add skill fetchai/tac_participation:0.1.0
+aea add skill fetchai/tac_negotiation:0.1.0
 aea install
 ```
 
