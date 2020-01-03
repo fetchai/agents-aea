@@ -6,6 +6,8 @@ The Fetch.ai car park agent demo is documented in its own repo [here](https://gi
 ## To test the AEA functionality (without the detection)
 
 
+### Create carpark detection agent
+
 First, create the carpark detection agent:
 ``` bash
 aea create car_detector
@@ -15,6 +17,14 @@ aea add skill fetchai/carpark_detection:0.1.0
 aea install
 ```
 
+Alternatively, simply run
+``` bash
+aea fetch fetchai/car_detector:0.1.0
+aea install
+```
+
+### Create carpark client agent
+
 Then, create the carpark client agent:
 ``` bash
 aea create car_data_buyer
@@ -22,9 +32,29 @@ cd car_data_buyer
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/carpark_client:0.1.0
 aea install
+```
+
+Alternatively, simply run
+``` bash
+aea fetch fetchai/car_data_buyer:0.1.0
+aea install
+```
+
+### Generate wealth for the client agent
+
+Add a private key to the carpark client agent:
+``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
+
+And, fund the carpark client agent:
+``` bash
+cd ..
+python scripts/fetchai_wealth_generation.py --private-key car_data_buyer/fet_private_key.txt --amount 10000000000 --addr alpha.fetch-ai.com --port 80
+```
+
+### Update agent configurations
 
 Add the ledger info to both aea configs:
 ``` bash
@@ -34,21 +64,19 @@ ledger_apis:
     port: 80
 ```
 
-Fund the carpark client agent:
-``` bash
-cd ..
-python scripts/fetchai_wealth_generation.py --private-key car_data_buyer/fet_private_key.txt --amount 10000000000 --addr alpha.fetch-ai.com --port 80
-```
-
 Then, in the detection agent we disable the detection logic:
 ``` bash
 aea config set skills.carpark_detection.shared_classes.strategy.args.db_is_rel_to_cwd false
 ```
 
+### Launch the OEF
+
 Then, launch an OEF node instance:
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 ```
+
+### Run both agents
 
 Finally, run both agents from their respective directories:
 ``` bash
@@ -56,6 +84,8 @@ aea run --connections oef
 ```
 
 You can see that the agents find each other, negotiate and eventually trade.
+
+### Cleaning up
 
 When you're finished, delete your agents:
 ``` bash
