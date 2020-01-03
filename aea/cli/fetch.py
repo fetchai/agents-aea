@@ -24,7 +24,6 @@ from aea.cli.common import PublicIdParameter
 from aea.cli.registry.fetch import fetch_agent, fetch_agent_locally
 
 
-
 @click.command(name='fetch')
 @click.option(
     '--registry', is_flag=True, help="For fetching agent from Registry."
