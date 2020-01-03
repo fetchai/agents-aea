@@ -86,10 +86,9 @@ def create(click_context, agent_name):
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
 
-        logger.info("Default connections:")
+        logger.info("Adding default packages ...")
         click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)
 
-        logger.info("Default skills:")
         click_context.invoke(skill, skill_public_id=DEFAULT_SKILL)
 
     except OSError:

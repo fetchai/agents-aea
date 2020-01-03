@@ -97,10 +97,10 @@ cd my_first_agent
 ### Add the echo skill 
 
 ``` bash
-aea add skill echo
+aea add skill fetchai/echo:0.1.0
 ```
 
-This copies the echo application code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run.
+This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The full identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.
 
 ### Add a stub connection
 

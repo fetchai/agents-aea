@@ -31,8 +31,8 @@ aea create my_weather_station
 ### Add the oef connection and the weather station skill 
 ``` bash
 cd my_weather_station
-aea add connection oef
-aea add skill weather_station
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/weather_station:0.1.0
 aea install
 ```
 
@@ -53,8 +53,8 @@ aea create my_weather_client
 ### Add the oef connection and the weather client skill 
 ``` bash
 cd my_weather_client
-aea add connection oef
-aea add skill weather_client
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/weather_client:0.1.0
 aea install
 ```
 
@@ -124,8 +124,8 @@ Create the AEA that will provide weather measurements.
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection oef
-aea add skill weather_station_ledger
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/weather_station_ledger:0.1.0
 aea install
 ```
 
@@ -136,8 +136,8 @@ In another terminal, create the AEA that will query the weather station.
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection oef
-aea add skill weather_client_ledger
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/weather_client_ledger:0.1.0
 aea install
 ```
 
@@ -150,14 +150,13 @@ aea add-key fetchai fet_private_key.txt
 ### Update the AEA configs
 
 Both in `my_weather_station/aea-config.yaml` and
-`my_weather_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
+`my_weather_client/aea-config.yaml`, replace `ledger_apis: {}` with the following.
 
 ``` yaml
 ledger_apis:
-    fetchai:
-        args:
-            address: alpha.fetch-ai.com
-            port: 80
+  fetchai:
+    address: alpha.fetch-ai.com
+    port: 80
 ```
 
 ### Fund the weather client AEA
@@ -199,8 +198,8 @@ Create the AEA that will provide weather measurements.
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection oef
-aea add skill weather_station_ledger
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/weather_station_ledger:0.1.0
 aea install
 ```
 
@@ -211,8 +210,8 @@ In another terminal, create the AEA that will query the weather station.
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection oef
-aea add skill weather_client_ledger
+aea add connection fetchai/oef:0.1.0
+aea add skill fetchai/weather_client_ledger:0.1.0
 aea install
 ```
 
@@ -230,9 +229,8 @@ Both in `my_weather_station/aea-config.yaml` and
 ``` yaml
 ledger_apis:
   ethereum:
-        args:
-            address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-            chain_id: 3
+    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    chain_id: 3
 ```
 
 ### Update the skill configs

@@ -17,7 +17,7 @@ aea create my_gym_agent
 ### Add the gym skill 
 ``` bash
 cd my_gym_agent
-aea add skill gym
+aea add skill fetchai/gym:0.1.0
 ```
 
 
@@ -30,14 +30,13 @@ cp -a ../examples/gym_ex/gyms/. gyms/
 
 ### Add a gym connection
 ``` bash
-aea add connection gym
+aea add connection fetchai/gym:0.1.0
 ```
 
 
 ### Update the connection config
 ``` bash
-nano connections/gym/connection.yaml
-env: gyms.env.BanditNArmedRandom
+aea config set connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```
 
 ### Install the skill dependencies
@@ -46,7 +45,6 @@ To install the `gym` package, a dependency of the gym skill, from Pypi run
 ``` bash
 aea install
 ```
-
 
 ### Run the agent with the gym connection
 
