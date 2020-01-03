@@ -23,10 +23,12 @@ import click
 import os
 
 from distutils.dir_util import copy_tree
+from shutil import rmtree
 
 from aea.cli.common import DEFAULT_REGISTRY_PATH
 from aea.cli.registry.utils import (
-    request_api, download_file, extract, create_public_id
+    request_api, download_file, extract, create_public_id, fetch_package,
+    clean_tarfiles
 )
 from aea.configurations.base import PublicId
 
@@ -47,8 +49,21 @@ def fetch_agent(public_id: Union[PublicId, str]) -> None:
     file_url = resp['file']
 
     cwd = os.getcwd()
-    filepath = download_file(file_url, cwd)
     target_folder = os.path.join(cwd, name)
+
+    for item_type in ('connection', 'skill', 'protocol'):
+        item_type_plural = item_type + 's'
+        for item_public_id in resp[item_type_plural]:
+            try:
+                fetch_package(item_type, item_public_id, target_folder)
+            except Exception as e:
+                rmtree(target_folder)
+                raise click.ClickException(
+                    'Unable to fetch dependency for agent "{}", aborting. {}'
+                    .format(name, e)
+                )
+
+    filepath = download_file(file_url, cwd)
     extract(filepath, target_folder)
     click.echo(
         'Agent {} successfully fetched to {}.'
