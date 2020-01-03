@@ -63,6 +63,9 @@ def publish_agent():
         'description': agent_config['description'],
         'version': agent_config['version']
     }
+    for key in ('connections', 'protocols', 'skills'):
+        data[key] = agent_config[key]
+
     path = '/agents/create'
     logger.debug('Publishing agent {} to Registry ...'.format(name))
     resp = request_api(
