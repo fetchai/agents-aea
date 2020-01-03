@@ -125,38 +125,38 @@ class PublicId(object):
     """This class implement a public identifier.
 
     A public identifier is composed of three elements:
-    - owner
+    - author
     - name
     - version
 
     The concatenation of those three elements gives the public identifier:
 
-        owner/name:version
+        author/name:version
 
-    >>> public_id = PublicId("owner", "my_package", "0.1.0")
-    >>> assert public_id.owner == "owner"
+    >>> public_id = PublicId("author", "my_package", "0.1.0")
+    >>> assert public_id.author == "author"
     >>> assert public_id.name == "my_package"
     >>> assert public_id.version == "0.1.0"
-    >>> another_public_id = PublicId("owner", "my_package", "0.1.0")
+    >>> another_public_id = PublicId("author", "my_package", "0.1.0")
     >>> assert hash(public_id) == hash(another_public_id)
     >>> assert public_id == another_public_id
     """
 
-    OWNER_REGEX = r"[a-zA-Z0-9_]*"
+    AUTHOR_REGEX = r"[a-zA-Z0-9_]*"
     PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     VERSION_REGEX = r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
-    PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(OWNER_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX)
+    PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX)
 
-    def __init__(self, owner: str, name: str, version: str):
+    def __init__(self, author: str, name: str, version: str):
         """Initialize the public identifier."""
-        self._owner = owner
+        self._author = author
         self._name = name
         self._version = version
 
     @property
-    def owner(self):
-        """Get the owner."""
-        return self._owner
+    def author(self):
+        """Get the author."""
+        return self._author
 
     @property
     def name(self):
@@ -173,8 +173,8 @@ class PublicId(object):
         """
         Initialize the public id from the string.
 
-        >>> str(PublicId.from_string("owner/package_name:0.1.0"))
-        'owner/package_name:0.1.0'
+        >>> str(PublicId.from_string("author/package_name:0.1.0"))
+        'author/package_name:0.1.0'
 
         A bad formatted input raises value error:
         >>> PublicId.from_string("bad/formatted:input")
@@ -194,16 +194,16 @@ class PublicId(object):
 
     def __hash__(self):
         """Get the hash."""
-        return hash((self.owner, self.name, self.version))
+        return hash((self.author, self.name, self.version))
 
     def __str__(self):
         """Get the string representation."""
-        return "{owner}/{name}:{version}"\
-            .format(owner=self.owner, name=self.name, version=self.version)
+        return "{author}/{name}:{version}"\
+            .format(author=self.author, name=self.name, version=self.version)
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, PublicId) and self.owner == other.owner and self.name == other.name \
+        return isinstance(other, PublicId) and self.author == other.author and self.name == other.name \
             and self.version == other.version
 
     def __lt__(self, other):

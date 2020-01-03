@@ -34,7 +34,7 @@ def test_add_item():
     app = create_app()
 
     agent_name = "test_agent_id"
-    connection_id = "owner/test_connection:0.1.0"
+    connection_id = "author/test_connection:0.1.0"
 
     def _dummy_call_aea(param_list, dir):
         assert param_list[0] == sys.executable
@@ -65,7 +65,7 @@ def test_delete_agent_fail():
     app = create_app()
 
     agent_name = "test_agent_id"
-    connection_id = "owner/test_connection:0.1.0"
+    connection_id = "author/test_connection:0.1.0"
 
     def _dummy_call_aea(param_list, dir):
         assert param_list[0] == sys.executable

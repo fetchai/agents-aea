@@ -56,11 +56,11 @@ class TestFetchAgent(TestCase):
         download_file_mock,
     ):
         """Test for fetch_agent method positive result."""
-        public_id = 'owner/name:0.1.0'
+        public_id = 'author/name:0.1.0'
 
         fetch_agent(public_id)
         request_api_mock.assert_called_with(
-            'GET', '/agents/owner/name/0.1.0'
+            'GET', '/agents/author/name/0.1.0'
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/name')
@@ -84,11 +84,11 @@ class TestFetchAgent(TestCase):
         download_file_mock,
     ):
         """Test for fetch_agent method with dependencies positive result."""
-        public_id = 'owner/name:0.1.0'
+        public_id = 'author/name:0.1.0'
 
         fetch_agent(public_id)
         request_api_mock.assert_called_with(
-            'GET', '/agents/owner/name/0.1.0'
+            'GET', '/agents/author/name/0.1.0'
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/name')
@@ -114,13 +114,13 @@ class TestFetchAgent(TestCase):
         extract_mock,
     ):
         """Test for fetch_agent method positive result."""
-        public_id = 'owner/name:0.1.0'
+        public_id = 'author/name:0.1.0'
 
         with self.assertRaises(ClickException):
             fetch_agent(public_id)
 
         request_api_mock.assert_called_with(
-            'GET', '/agents/owner/name/0.1.0'
+            'GET', '/agents/author/name/0.1.0'
         )
         extract_mock.assert_not_called()
         fetch_package_mock.assert_called_once()
@@ -162,5 +162,5 @@ class FetchAgentLocallyTestCase(TestCase):
         copy_tree
     ):
         """Test for fetch_agent_locally method positive result."""
-        fetch_agent_locally('owner/name:1.0.0')
+        fetch_agent_locally('author/name:1.0.0')
         copy_tree.assert_called_once_with('path', 'joined-path')

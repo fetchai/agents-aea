@@ -67,7 +67,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         self, fetch_package_mock
     ):
         """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId("owner", "name", "0.1.0")
+        public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
         obj_type = 'connection'
         result = self.runner.invoke(
             cli,
@@ -111,7 +111,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "owner/unknown_connection:0.1.0"
+        cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -157,7 +157,7 @@ class TestAddConnectionFailsWhenDifferentPublicId:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "different_owner/local:0.1.0"
+        cls.connection_id = "different_author/local:0.1.0"
         cls.connection_name = "unknown_connection"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -177,7 +177,7 @@ class TestAddConnectionFailsWhenDifferentPublicId:
 
     def test_error_message_connection_wrong_public_id(self):
         """Test that the log error message is fixed."""
-        s = "Cannot find connection with owner and version specified."
+        s = "Cannot find connection with author and version specified."
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -200,7 +200,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "owner/local:0.1.0"
+        cls.connection_id = "author/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()

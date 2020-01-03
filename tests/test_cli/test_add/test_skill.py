@@ -79,7 +79,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         self, fetch_package_mock
     ):
         """Test add from registry positive result."""
-        public_id = aea.configurations.base.PublicId("owner", "name", "0.1.0")
+        public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
         obj_type = 'skill'
         result = self.runner.invoke(
             cli,
@@ -111,7 +111,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "owner/unknown_skill:0.1.0"
+        cls.skill_id = "author/unknown_skill:0.1.0"
         cls.skill_name = "unknown_skill"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -157,7 +157,7 @@ class TestAddProtocolFailsWhenDifferentPublicId:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.skill_id = "different_owner/error:0.1.0"
+        cls.skill_id = "different_author/error:0.1.0"
         cls.skill_name = "unknown_skill"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -177,7 +177,7 @@ class TestAddProtocolFailsWhenDifferentPublicId:
 
     def test_error_message_protocol_wrong_public_id(self):
         """Test that the log error message is fixed."""
-        s = "Cannot find skill with owner and version specified."
+        s = "Cannot find skill with author and version specified."
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
