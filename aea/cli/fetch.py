@@ -20,15 +20,18 @@
 """Implementation of the 'aea fetch' subcommand."""
 import click
 
+from aea.cli.common import PublicIdParameter
 from aea.cli.registry.fetch import fetch_agent, fetch_agent_locally
 
 
 @click.command(name='fetch')
-@click.option('--local', is_flag=True, help="For fetching agent locally.")
-@click.argument('public-id', type=str, required=True)
-def fetch(public_id, local):
+@click.option(
+    '--registry', is_flag=True, help="For fetching agent from Registry."
+)
+@click.argument('public-id', type=PublicIdParameter(), required=True)
+def fetch(public_id, registry):
     """Fetch Agent from Registry."""
-    if local:
+    if not registry:
         fetch_agent_locally(public_id)
     else:
         fetch_agent(public_id)
