@@ -42,8 +42,8 @@ def fetch_agent(public_id: Union[PublicId, str]) -> None:
     """
     if isinstance(public_id, str):
         public_id = PublicId.from_string(public_id)
-    owner, name, version = public_id.owner, public_id.name, public_id.version
-    api_path = '/agents/{}/{}/{}'.format(owner, name, version)
+    author, name, version = public_id.author, public_id.name, public_id.version
+    api_path = '/agents/{}/{}/{}'.format(author, name, version)
     resp = request_api('GET', api_path)
     file_url = resp['file']
 

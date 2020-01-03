@@ -74,7 +74,7 @@ def test_create_and_run_agent():
         response_run = app.post(
             'api/agent/' + agent_id + "/run",
             content_type='application/json',
-            data=json.dumps("owner/non-existent-connection:0.1.0")
+            data=json.dumps("author/non-existent-connection:0.1.0")
         )
         assert response_run.status_code == 400
 

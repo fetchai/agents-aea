@@ -30,20 +30,20 @@ class FormatItemsTestCase(TestCase):
         """Test format_items positive result."""
         items = [
             {
-                'public_id': 'owner/name:version',
+                'public_id': 'author/name:version',
                 'name': 'obj-name',
                 'description': 'Some description',
-                'author': 'owner',
+                'author': 'author',
                 'version': '1.0'
             }
         ]
         result = format_items(items)
         expected_result = (
             '------------------------------\n'
-            'Public ID: owner/name:version\n'
+            'Public ID: author/name:version\n'
             'Name: obj-name\n'
             'Description: Some description\n'
-            'Author: owner\n'
+            'Author: author\n'
             'Version: 1.0\n'
             '------------------------------\n'
         )
@@ -57,7 +57,7 @@ class FormatSkillsTestCase(TestCase):
         """Test format_skills positive result."""
         items = [
             {
-                'public_id': 'owner/name:version',
+                'public_id': 'author/name:version',
                 'name': 'obj-name',
                 'description': 'Some description',
                 'version': '1.0',
@@ -67,7 +67,7 @@ class FormatSkillsTestCase(TestCase):
         result = format_skills(items)
         expected_result = (
             '------------------------------\n'
-            'Public ID: owner/name:version\n'
+            'Public ID: author/name:version\n'
             'Name: obj-name\n'
             'Description: Some description\n'
             'Protocols: p1 | p2 | p3 | \n'

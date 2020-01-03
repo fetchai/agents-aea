@@ -55,12 +55,12 @@ class TestFetchPackage:
     ):
         """Test for fetch_package method positive result."""
         obj_type = 'connection'
-        public_id = PublicId.from_string('owner/name:0.1.0')
+        public_id = PublicId.from_string('author/name:0.1.0')
         cwd = 'cwd'
 
         fetch_package(obj_type, public_id, cwd)
         request_api_mock.assert_called_with(
-            'GET', '/connections/owner/name/0.1.0'
+            'GET', '/connections/author/name/0.1.0'
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/connections')

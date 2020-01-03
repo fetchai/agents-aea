@@ -70,9 +70,9 @@ def _find_connection_locally(ctx, connection_public_id, click_context):
         sys.exit(1)
 
     version = connection_configuration.version
-    owner = connection_configuration.author
-    if connection_public_id.owner != owner or connection_public_id.version != version:
-        logger.error("Cannot find connection with owner and version specified.")
+    author = connection_configuration.author
+    if connection_public_id.author != author or connection_public_id.version != version:
+        logger.error("Cannot find connection with author and version specified.")
         sys.exit(1)
 
     # copy the connection package into the agent's supported connections.
@@ -151,9 +151,9 @@ def _find_protocol_locally(ctx, protocol_public_id):
         sys.exit(1)
 
     version = protocol_configuration.version
-    owner = protocol_configuration.author
-    if protocol_public_id.owner != owner or protocol_public_id.version != version:
-        logger.error("Cannot find protocol with owner and version specified.")
+    author = protocol_configuration.author
+    if protocol_public_id.author != author or protocol_public_id.version != version:
+        logger.error("Cannot find protocol with author and version specified.")
         sys.exit(1)
 
     # copy the protocol package into the agent's supported connections.
@@ -224,9 +224,9 @@ def _find_skill_locally(ctx, skill_public_id, click_context):
         sys.exit(1)
 
     version = skill_configuration.version
-    owner = skill_configuration.author
-    if skill_public_id.owner != owner or skill_public_id.version != version:
-        logger.error("Cannot find skill with owner and version specified.")
+    author = skill_configuration.author
+    if skill_public_id.author != author or skill_public_id.version != version:
+        logger.error("Cannot find skill with author and version specified.")
         sys.exit(1)
 
     # copy the skill package into the agent's supported skills.

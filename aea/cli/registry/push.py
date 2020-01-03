@@ -109,7 +109,7 @@ def _check_package_public_id(source_path, item_type, item_id):
     item_author = config.get("author", "")
     item_name = config.get("name", "")
     item_version = config.get("version", "")
-    if item_id.name != item_name or item_id.owner != item_author or item_id.version != item_version:
+    if item_id.name != item_name or item_id.author != item_author or item_id.version != item_version:
         raise click.ClickException(
             "Version or author do not match. Expected '{}', found '{}'"
             .format(item_id, item_author + "/" + item_name + ":" + item_version)

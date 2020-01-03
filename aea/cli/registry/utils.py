@@ -165,10 +165,10 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
         public_id=public_id,
         obj_type=obj_type
     ))
-    owner, name, version = public_id.owner, public_id.name, public_id.version
+    author, name, version = public_id.author, public_id.name, public_id.version
     plural_obj_type = obj_type + 's'  # used for API and folder paths
 
-    api_path = '/{}/{}/{}/{}'.format(plural_obj_type, owner, name, version)
+    api_path = '/{}/{}/{}/{}'.format(plural_obj_type, author, name, version)
     resp = request_api('GET', api_path)
     file_url = resp['file']
 
