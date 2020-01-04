@@ -1,17 +1,13 @@
 aea_version: 0.1.15
-agent_name: car_detector
+agent_name: my_first_agent
 author: fetchai
 connections:
-- fetchai/oef:0.1.0
 - fetchai/stub:0.1.0
 default_connection: fetchai/stub:0.1.0
 default_ledger: fetchai
-description: 'An agent which sells car park data to instances of `car_data_buyer` agents.'
+description: 'A simple agent to demo the echo skill.'
 fingerprint: ''
-ledger_apis:
-  fetchai:
-    address: alpha.fetch-ai.com
-    port: 80
+ledger_apis: {}
 license: ''
 logging_config:
   disable_existing_loggers: false
@@ -19,11 +15,9 @@ logging_config:
 private_key_paths: []
 protocols:
 - fetchai/default:0.1.0
-- fetchai/fipa:0.1.0
-- fetchai/oef:0.1.0
 registry_path: ../packages
 skills:
-- fetchai/carpark_detection:0.1.0
+- fetchai/echo:0.1.0
 - fetchai/error:0.1.0
 url: ''
 version: 0.1.0

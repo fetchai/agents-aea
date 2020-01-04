@@ -17,9 +17,18 @@ aea add skill fetchai/carpark_detection:0.1.0
 aea install
 ```
 
-Alternatively, simply run
+Second, add the ledger info to the aea config:
+``` bash
+ledger_apis:
+  fetchai:
+    address: alpha.fetch-ai.com
+    port: 80
+```
+
+Alternatively to the previous two steps, simply run:
 ``` bash
 aea fetch fetchai/car_detector:0.1.0
+cd car_detector
 aea install
 ```
 
@@ -34,9 +43,18 @@ aea add skill fetchai/carpark_client:0.1.0
 aea install
 ```
 
-Alternatively, simply run
+Second, add the ledger info to the aea config:
+``` bash
+ledger_apis:
+  fetchai:
+    address: alpha.fetch-ai.com
+    port: 80
+```
+
+Alternatively to the previous two steps, simply run:
 ``` bash
 aea fetch fetchai/car_data_buyer:0.1.0
+cd car_data_buyer
 aea install
 ```
 
@@ -54,15 +72,7 @@ cd ..
 python scripts/fetchai_wealth_generation.py --private-key car_data_buyer/fet_private_key.txt --amount 10000000000 --addr alpha.fetch-ai.com --port 80
 ```
 
-### Update agent configurations
-
-Add the ledger info to both aea configs:
-``` bash
-ledger_apis:
-  fetchai:
-    address: alpha.fetch-ai.com
-    port: 80
-```
+### Update skill configurations
 
 Then, in the detection agent we disable the detection logic:
 ``` bash
