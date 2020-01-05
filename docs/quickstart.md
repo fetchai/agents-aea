@@ -126,6 +126,14 @@ For example:
 recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
 ```
 
+### Alternatively, fetch the agent
+
+The preceding three steps can be executed at once with the command
+``` bash
+aea fetch fetchai/my_first_agent:0.1.0
+cd my_first_agent
+```
+
 ### Run the agent
 
 Run the agent with the `stub` connection.

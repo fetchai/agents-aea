@@ -29,7 +29,7 @@ nav:
       - "Trust issues": 'trust.md'
       # - "Two-layered machine learning": 'two-layer.md'
     - Demos:
-      - "Car park agent": 'car-park.md'
+      - "Car park agent": 'car-park-skills.md'
       - "Gym demo": 'gym-plugin.md'
       - "Gym skill": 'gym-skill.md'
       - "ML skills": 'ml-skills.md'
