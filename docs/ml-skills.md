@@ -34,6 +34,11 @@ aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/ml_data_provider:0.1.0
 ```
 
+### Alternatively, install the agent directly
+``` bash
+aea fetch fetchai/ml_data_provider:0.1.0
+```
+
 ### Install the dependencies
 The ml data provider uses `tensorflow` and `numpy`.
 ``` bash
@@ -56,6 +61,11 @@ aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/ml_train:0.1.0
+```
+
+### Alternatively, install the agent directly
+``` bash
+aea fetch fetchai/ml_model_trainer:0.1.0
 ```
 
 ### Install the dependencies
