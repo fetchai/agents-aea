@@ -96,24 +96,25 @@ def add_module_to_sys_modules(dotted_path: str, module_obj) -> None:
     :param dotted_path: the dotted path to be used in the imports.
     :param module_obj: the module object. It is assumed it has been already executed.
     :return: None
-    :raises ValueError: if the dotted path is already used.
+    :raises ValueError: if the dotted path is already used. # TODO this cannot be done atm.
     """
-    if dotted_path in sys.modules:
-        raise ValueError("The dotted path {} is already used.".format(dotted_path))
+    # if dotted_path in sys.modules:
+    #     raise ValueError("The dotted path {} is already used.".format(dotted_path))
     sys.modules[dotted_path] = module_obj
 
 
-def load_agent_component_package(item_type: str, item_name: str):
+def load_agent_component_package(item_type: str, item_name: str, directory: os.PathLike):
     """
     Load a Python package associated to .
 
     :param item_type: the type of the item. One of "protocol", "connection", "skill"
     :param item_name: the name of the item to load
+    :param directory: the component directory.
     :return: the module associated to the Python package of the component.
     """
     item_type_plural = item_type + "s"
     dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
-    filepath = Path(item_type_plural, item_name, "__init__.py")
+    filepath = Path(directory) / "__init__.py"
     return load_module(dotted_path, filepath)
 
 

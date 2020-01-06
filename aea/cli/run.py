@@ -154,13 +154,13 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
     except FileNotFoundError:
         raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
 
+    connection_package = load_agent_component_package("connection", connection_name, Path("connections", connection_name))
+    add_agent_component_module_to_sys_modules("connection", connection_name, connection_package)
     try:
-        connection_package = load_agent_component_package("connection", connection_name)
-        add_agent_component_module_to_sys_modules("connection", connection_name, connection_package)
+        connection_module = load_module("connection_module", Path("connections", connection_name, "connection.py"))
     except FileNotFoundError:
         raise AEAConfigException("Connection '{}' not found.".format(connection_name))
 
-    connection_module = load_module("connection_module", Path("connections", connection_name, "connection.py"))
     classes = inspect.getmembers(connection_module, inspect.isclass)
     connection_classes = list(filter(lambda x: re.match("\\w+Connection", x[0]), classes))
     name_to_class = dict(connection_classes)
