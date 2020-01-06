@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the 'aea scaffold' subcommand."""
+"""Implementation of the 'aea generate' subcommand."""
 
 import os
 import shutil
@@ -26,23 +26,26 @@ from pathlib import Path
 
 import click
 from jsonschema import ValidationError
+import yaml
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.configurations.base import PublicId, DEFAULT_AEA_CONFIG_FILE
+from aea.protocols.generator import ProtocolTemplate, ProtocolGenerator, ProtocolSpecificationParseError
+
 # these variables are being used dynamically
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE  # noqa: F401
 
 
 @click.group()
 @pass_ctx
-def scaffold(ctx: Context):
-    """Scaffold a resource for the agent."""
+def generate(ctx: Context):
+    """Generate a resource for the agent."""
     _try_to_load_agent_config(ctx)
 
 
-def _scaffold_item(ctx: Context, item_type, item_name):
-    """Add an item scaffolding to the configuration file and agent."""
+def _generate_item(ctx: Context, item_type, item_name, specification_path):
+    """Generate an item based on a specification and add it to the configuration file and agent."""
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
     existing_item_list = [public_id.name for public_id in existing_id_list]
 
@@ -51,37 +54,53 @@ def _scaffold_item(ctx: Context, item_type, item_name):
 
     item_type_plural = item_type + "s"
 
+    protocol_template = ProtocolTemplate(specification_path)
+
+    try:
+        protocol_template.load()
+    except (yaml.YAMLError, ProtocolSpecificationParseError) as e:
+        print(str(e))
+        print("Load error, exiting now!")
+        exit(1)
+
     # check if we already have an item with the same name
     logger.debug("{} already supported by the agent: {}".format(item_type_plural, existing_item_list))
-    if item_name in existing_item_list:
-        logger.error("A {} with name '{}' already exists. Aborting...".format(item_type, item_name))
+    protocol_name = protocol_template.name
+    if protocol_name in existing_item_list:
+        logger.error("A {} with name '{}' already exists. Aborting...".format(item_type, protocol_name))
         sys.exit(1)
+
+    # import pdb; pdb.set_trace()
 
     try:
         agent_name = ctx.agent_config.agent_name
-        logger.info("Adding {} scaffold '{}' to the agent '{}'...".format(item_type, item_name, agent_name))
+        logger.info("Generating {} '{}' and adding it to the agent '{}'...".format(item_type, protocol_name, agent_name))
+
+        output_path = Path(os.path.join(ctx.cwd, item_type_plural))
+        protocol_generator = ProtocolGenerator(protocol_template, output_path)
+        protocol_generator.generate()
 
         Path(item_type_plural).mkdir(exist_ok=True)
-
-        # create the connection folder
-        dest = Path(os.path.join(item_type_plural, item_name))
-
-        # copy the skill package into the agent's supported skills.
-        src = Path(os.path.join(AEA_DIR, item_type_plural, "scaffold"))
-        logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
-
-        shutil.copytree(src, dest)
+        #
+        # # create the connection folder
+        # dest = Path(os.path.join(item_type_plural, item_name))
+        #
+        # # copy the skill package into the agent's supported skills.
+        # src = Path(os.path.join(AEA_DIR, item_type_plural, "scaffold"))
+        # logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
+        #
+        # shutil.copytree(src, dest)
 
         # add the connection to the configurations.
         logger.debug("Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
-        existing_id_list.add(PublicId("fetchai", item_name, "0.1.0"))
+        existing_id_list.add(PublicId("fetchai", protocol_name, "0.1.0"))
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
         # ensure the name in the yaml and the name of the folder are the same
-        config_filepath = os.path.join(ctx.cwd, item_type_plural, item_name, default_config_filename)
-        config = loader.load(open(str(config_filepath)))
-        config.name = item_name
-        loader.dump(config, open(config_filepath, "w"))
+        # config_filepath = os.path.join(ctx.cwd, item_type_plural, item_name, default_config_filename)
+        # config = loader.load(open(str(config_filepath)))
+        # config.name = item_name
+        # loader.dump(config, open(config_filepath, "w"))
 
     except FileExistsError:
         logger.error("A {} with this name already exists. Please choose a different name and try again.".format(item_type))
@@ -96,25 +115,9 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         sys.exit(1)
 
 
-@scaffold.command()
-@click.argument('connection_name', type=str, required=True)
+@generate.command()
+@click.argument('protocol_specification_path', type=str, required=True)
 @pass_ctx
-def connection(ctx: Context, connection_name: str) -> None:
-    """Add a connection scaffolding to the configuration file and agent."""
-    _scaffold_item(ctx, "connection", connection_name)
-
-
-@scaffold.command()
-@click.argument('protocol_name', type=str, required=True)
-@pass_ctx
-def protocol(ctx: Context, protocol_name: str):
-    """Add a protocol scaffolding to the configuration file and agent."""
-    _scaffold_item(ctx, "protocol", protocol_name)
-
-
-@scaffold.command()
-@click.argument('skill_name', type=str, required=True)
-@pass_ctx
-def skill(ctx: Context, skill_name: str):
-    """Add a skill scaffolding to the configuration file and agent."""
-    _scaffold_item(ctx, "skill", skill_name)
+def protocol(ctx: Context, protocol_specification_path: str):
+    """Generate a protocol based on a specification and add it to the configuration file and agent."""
+    _generate_item(ctx, "protocol", None, protocol_specification_path)

@@ -33,6 +33,7 @@ from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
+from aea.cli.generate import generate
 from aea.cli.install import install
 from aea.cli.list import list as _list
 from aea.cli.loggers import simple_verbosity_option
@@ -170,3 +171,4 @@ cli.add_command(run)
 cli.add_command(push)
 cli.add_command(publish)
 cli.add_command(fetch)
+cli.add_command(generate)
