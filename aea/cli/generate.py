@@ -28,7 +28,7 @@ import click
 from jsonschema import ValidationError
 import yaml
 
-from aea import AEA_DIR
+# from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.configurations.base import PublicId, DEFAULT_AEA_CONFIG_FILE
 from aea.protocols.generator import ProtocolTemplate, ProtocolGenerator, ProtocolSpecificationParseError
@@ -49,8 +49,8 @@ def _generate_item(ctx: Context, item_type, item_name, specification_path):
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
     existing_item_list = [public_id.name for public_id in existing_id_list]
 
-    loader = getattr(ctx, "{}_loader".format(item_type))
-    default_config_filename = globals()["DEFAULT_{}_CONFIG_FILE".format(item_type.upper())]
+    # loader = getattr(ctx, "{}_loader".format(item_type))
+    # default_config_filename = globals()["DEFAULT_{}_CONFIG_FILE".format(item_type.upper())]
 
     item_type_plural = item_type + "s"
 
@@ -76,7 +76,8 @@ def _generate_item(ctx: Context, item_type, item_name, specification_path):
         agent_name = ctx.agent_config.agent_name
         logger.info("Generating {} '{}' and adding it to the agent '{}'...".format(item_type, protocol_name, agent_name))
 
-        output_path = Path(os.path.join(ctx.cwd, item_type_plural))
+        # output_path = Path(os.path.join(ctx.cwd, item_type_plural))
+        output_path = os.path.join(ctx.cwd, item_type_plural)
         protocol_generator = ProtocolGenerator(protocol_template, output_path)
         protocol_generator.generate()
 

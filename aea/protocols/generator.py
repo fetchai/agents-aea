@@ -19,7 +19,7 @@
 """This module contains the protocol generator."""
 
 import argparse
-import inspect
+# import inspect
 import os
 import re
 from os import path
