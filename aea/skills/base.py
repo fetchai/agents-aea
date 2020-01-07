@@ -35,7 +35,7 @@ from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
-from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules
+from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules, load_agent_component_package
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
 
@@ -513,7 +513,7 @@ class Skill:
         """
         Load a skill from a directory.
 
-        :param directory: the skill
+        :param directory: the skill directory.
         :param agent_context: the agent's context
         :return: the Skill object.
         :raises Exception: if the parsing failed.
@@ -521,7 +521,7 @@ class Skill:
         # check if there is the config file. If not, then return None.
         skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         skill_config = skill_loader.load(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
-        skill_module = load_module(skill_config.name, Path(os.path.join(directory, "__init__.py")))
+        skill_module = load_agent_component_package("skill", skill_config.name, Path(directory))
         add_agent_component_module_to_sys_modules("skill", skill_config.name, skill_module)
         loader_contents = [path.name for path in Path(directory).iterdir()]
         skills_packages = list(filter(lambda x: not x.startswith("__"), loader_contents))  # type: ignore

@@ -24,6 +24,7 @@ import importlib.util
 import logging
 import os
 import sys
+from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -72,27 +73,60 @@ def locate(path):
     return object
 
 
-def load_module(name: str, filepath: os.PathLike):
+def load_module(dotted_path: str, filepath: os.PathLike):
     """
     Load a module.
 
-    :param name: the name of the package/module.
+    :param dotted_path: the dotted path of the package/module.
     :param filepath: the file to the package/module.
     :return: None
     :raises ValueError: if the filepath provided is not a module.
     :raises Exception: if the execution of the module raises exception.
     """
-    spec = importlib.util.spec_from_file_location(name, filepath)
+    spec = importlib.util.spec_from_file_location(dotted_path, filepath)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore
     return module
 
 
-def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, module_obj):
-    """Add an agent component module to sys.modules."""
+def add_module_to_sys_modules(dotted_path: str, module_obj) -> None:
+    """
+    Add module to sys.modules.
+
+    :param dotted_path: the dotted path to be used in the imports.
+    :param module_obj: the module object. It is assumed it has been already executed.
+    :return: None
+    """
+    sys.modules[dotted_path] = module_obj
+
+
+def load_agent_component_package(item_type: str, item_name: str, directory: os.PathLike):
+    """
+    Load a Python package associated to .
+
+    :param item_type: the type of the item. One of "protocol", "connection", "skill"
+    :param item_name: the name of the item to load
+    :param directory: the component directory.
+    :return: the module associated to the Python package of the component.
+    """
     item_type_plural = item_type + "s"
     dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
-    sys.modules[dotted_path] = module_obj
+    filepath = Path(directory) / "__init__.py"
+    return load_module(dotted_path, filepath)
+
+
+def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, module_obj) -> None:
+    """
+    Add an agent component module to sys.modules.
+
+    :param item_type: the type of the item. One of "protocol", "connection", "skill"
+    :param item_name: the name of the item to load
+    :param module_obj: the module object. It is assumed it has been already executed.
+    :return:
+    """
+    item_type_plural = item_type + "s"
+    dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
+    add_module_to_sys_modules(dotted_path, module_obj)
 
 
 def generate_fingerprint(author: str, package_name: str, version: str, nonce: Optional[int] = None) -> str:
