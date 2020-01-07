@@ -96,10 +96,7 @@ def add_module_to_sys_modules(dotted_path: str, module_obj) -> None:
     :param dotted_path: the dotted path to be used in the imports.
     :param module_obj: the module object. It is assumed it has been already executed.
     :return: None
-    :raises ValueError: if the dotted path is already used. # TODO this cannot be done atm.
     """
-    # if dotted_path in sys.modules:
-    #     raise ValueError("The dotted path {} is already used.".format(dotted_path))
     sys.modules[dotted_path] = module_obj
 
 
