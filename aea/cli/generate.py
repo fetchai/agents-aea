@@ -22,15 +22,13 @@
 import os
 import shutil
 import sys
-from pathlib import Path
 
 import click
 from jsonschema import ValidationError
 import yaml
 
-# from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import PublicId, DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import PublicId, DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION
 from aea.protocols.generator import ProtocolTemplate, ProtocolGenerator, ProtocolSpecificationParseError
 
 # these variables are being used dynamically
@@ -49,18 +47,19 @@ def _generate_item(ctx: Context, item_type, item_name, specification_path):
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
     existing_item_list = [public_id.name for public_id in existing_id_list]
 
-    # loader = getattr(ctx, "{}_loader".format(item_type))
-    # default_config_filename = globals()["DEFAULT_{}_CONFIG_FILE".format(item_type.upper())]
-
     item_type_plural = item_type + "s"
 
-    protocol_template = ProtocolTemplate(specification_path)
+    try:
+        protocol_template = ProtocolTemplate(specification_path)
+    except Exception as e:
+        logger.exception(e)
+        sys.exit(1)
 
     try:
         protocol_template.load()
     except (yaml.YAMLError, ProtocolSpecificationParseError) as e:
-        print(str(e))
-        print("Load error, exiting now!")
+        logger.error(str(e))
+        logger.error("Load error. Aborting...")
         exit(1)
 
     # check if we already have an item with the same name
@@ -70,45 +69,21 @@ def _generate_item(ctx: Context, item_type, item_name, specification_path):
         logger.error("A {} with name '{}' already exists. Aborting...".format(item_type, protocol_name))
         sys.exit(1)
 
-    # import pdb; pdb.set_trace()
-
     try:
         agent_name = ctx.agent_config.agent_name
         logger.info("Generating {} '{}' and adding it to the agent '{}'...".format(item_type, protocol_name, agent_name))
 
-        # output_path = Path(os.path.join(ctx.cwd, item_type_plural))
         output_path = os.path.join(ctx.cwd, item_type_plural)
         protocol_generator = ProtocolGenerator(protocol_template, output_path)
         protocol_generator.generate()
 
-        Path(item_type_plural).mkdir(exist_ok=True)
-        #
-        # # create the connection folder
-        # dest = Path(os.path.join(item_type_plural, item_name))
-        #
-        # # copy the skill package into the agent's supported skills.
-        # src = Path(os.path.join(AEA_DIR, item_type_plural, "scaffold"))
-        # logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
-        #
-        # shutil.copytree(src, dest)
-
-        # add the connection to the configurations.
+        # add the item to the configurations.
         logger.debug("Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
-        existing_id_list.add(PublicId("fetchai", protocol_name, "0.1.0"))
+        existing_id_list.add(PublicId("fetchai", protocol_name, DEFAULT_VERSION))
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
-
-        # ensure the name in the yaml and the name of the folder are the same
-        # config_filepath = os.path.join(ctx.cwd, item_type_plural, item_name, default_config_filename)
-        # config = loader.load(open(str(config_filepath)))
-        # config.name = item_name
-        # loader.dump(config, open(config_filepath, "w"))
 
     except FileExistsError:
         logger.error("A {} with this name already exists. Please choose a different name and try again.".format(item_type))
-        sys.exit(1)
-    except ValidationError:
-        logger.error("Error when validating the skill configuration file.")
-        shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
         sys.exit(1)
     except Exception as e:
         logger.exception(e)

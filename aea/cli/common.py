@@ -32,7 +32,8 @@ from dotenv import load_dotenv
 
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies, PublicId
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies, PublicId, \
+    DEFAULT_VERSION
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
 from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules
@@ -41,8 +42,8 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
-DEFAULT_CONNECTION = PublicId.from_string("fetchai/stub:0.1.0")  # type: PublicId
-DEFAULT_SKILL = PublicId.from_string("fetchai/error:0.1.0")  # type: PublicId
+DEFAULT_CONNECTION = PublicId.from_string("fetchai/stub:" + DEFAULT_VERSION)  # type: PublicId
+DEFAULT_SKILL = PublicId.from_string("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
 DEFAULT_LEDGER = FETCHAI
 
 
@@ -108,10 +109,12 @@ def _try_to_load_agent_config(ctx: Context):
         ctx.agent_config = ctx.agent_loader.load(fp)
         logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
-        logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
+        logger.error(
+            "Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
         sys.exit(1)
     except jsonschema.exceptions.ValidationError:
-        logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
+        logger.error(
+            "Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
         sys.exit(1)
 
 
@@ -195,7 +198,8 @@ def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
     config = loader.load(open(str(config_filepath)))
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
     assert item_name == name
-    return {"public_id": str(config.public_id), "name": item_name, "author": config.author, "description": config.description, "version": config.version}
+    return {"public_id": str(config.public_id), "name": item_name, "author": config.author,
+            "description": config.description, "version": config.version}
 
 
 class AEAConfigException(Exception):

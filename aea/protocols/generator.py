@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------------------
 """This module contains the protocol generator."""
 
-import argparse
-# import inspect
 import os
 import re
 from os import path
@@ -27,15 +25,22 @@ from pathlib import Path
 import yaml
 from typing import Any, Dict, List, Set
 
-# CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
-# PWD = os.path.join(CUR_PATH, "..")
-PWD = ".."
 DEFAULT_TYPES = ["int", "float", "bool", "str", "bytes", "list", "dict", "tuple", "set"]
+
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 INIT_FILE_NAME = "__init__.py"
 MESSAGE_FILE_NAME = "message.py"
 SERIALIZATION_FILE_NAME = "serialization.py"
 PROTOCOL_FILE_NAME = "protocol.yaml"
+
+BASIC_FIELDS_AND_TYPES = {
+        "name": str,
+        "authors": str,
+        "version": str,
+        "license": str,
+        "url": str,
+        "description": str,
+    }
 
 
 def to_snake_case(text):
@@ -45,8 +50,7 @@ def to_snake_case(text):
 
 
 class ProtocolSpecificationParseError(Exception):
-    """Exception for parsing."""
-
+    """Exception for parsing a protocol specification file."""
     pass
 
 
@@ -73,7 +77,7 @@ class ProtocolTemplate:
         self.name = ""
         self.authors = ""
         self.version = ""
-        self.license_config = ""
+        self.license = ""
         self.url = ""
         self.description = ""
 
@@ -118,45 +122,20 @@ class ProtocolTemplate:
 
         :return: None
         """
-        if len(self.yaml_documents) >= 2 and self.yaml_documents[0] is not None and self.yaml_documents[1] is not None:
-            if "name" in self.yaml_documents[0]:
-                self.name = self.yaml_documents[0]["name"]
-                if type(self.name) is not str:
-                    raise ProtocolSpecificationParseError("Protocol's 'name' is not a string.")
-                if self.name == "":
-                    raise ProtocolSpecificationParseError("Protocol's 'name' is empty.")
-            else:
-                raise ProtocolSpecificationParseError("Protocol name could not be found.")
-            if "authors" in self.yaml_documents[0]:
-                self.authors = self.yaml_documents[0]["authors"]
-                if type(self.authors) is not str:
-                    raise ProtocolSpecificationParseError("Protocol's 'authors' is not a string.")
-                if self.authors == "":
-                    raise ProtocolSpecificationParseError("Protocol's 'authors' is empty.")
-            if "version" in self.yaml_documents[0]:
-                self.version = self.yaml_documents[0]["version"]
-                if type(self.version) is not str:
-                    raise ProtocolSpecificationParseError("Protocol's 'version' is not a string.")
-                if self.version == "":
-                    raise ProtocolSpecificationParseError("Protocol's 'version' is empty.")
-            if "license" in self.yaml_documents[0]:
-                self.license_config = self.yaml_documents[0]["license"]
-                if type(self.license_config) is not str:
-                    raise ProtocolSpecificationParseError("Protocol's 'license' is not a string.")
-                if self.license_config == "":
-                    raise ProtocolSpecificationParseError("Protocol's 'license' is empty.")
-            if "url" in self.yaml_documents[0]:
-                self.url = self.yaml_documents[0]["url"]
-                if type(self.url) is not str:
-                    raise ProtocolSpecificationParseError("Protocol's 'url' is not a string.")
-                if self.url == "":
-                    raise ProtocolSpecificationParseError("Protocol's 'url' is empty.")
-            if "description" in self.yaml_documents[0]:
-                self.description = self.yaml_documents[0]["description"]
-                if type(self.description) is not str:
-                    raise ProtocolSpecificationParseError("Protocol's 'description' is not a string.")
-                if self.description == "":
-                    raise ProtocolSpecificationParseError("Protocol's 'description' is empty.")
+        if len(self.yaml_documents) >= 2 \
+                and self.yaml_documents[0] is not None \
+                and self.yaml_documents[1] is not None:
+            for field, field_type in BASIC_FIELDS_AND_TYPES.items():
+                if field in self.yaml_documents[0]:
+                    document_field_value = self.yaml_documents[0][field]
+                    self.__setattr__(field, document_field_value)
+                    if type(document_field_value) is not field_type:
+                        raise ProtocolSpecificationParseError("Protocol's '{}' is not of type {}.".format(field, field_type))
+                    if document_field_value == "":
+                        raise ProtocolSpecificationParseError("Protocol's '{}' is empty.".format(field))
+                elif field == "name":
+                    raise ProtocolSpecificationParseError("Protocol name could not be found.")
+
             if "speech-acts" in self.yaml_documents[1]:
                 self.speech_acts = self.yaml_documents[1]["speech-acts"]
                 if type(self.speech_acts) is not dict:
@@ -237,7 +216,6 @@ class ProtocolGenerator:
             cls_str += '            return False\n\n'
             cls_str += '    def __ne__(self, other):\n'
             cls_str += '        return not self.__eq__(other)\n\n\n'
-            # cls_str += '    raise NotImplementedError\n\n\n'
 
         return cls_str
 
@@ -311,7 +289,7 @@ class ProtocolGenerator:
         cls_str += str.format('        self.name = \"{}\"\n', self.protocol_template.name)
         cls_str += str.format('        self.authors = \"{}\"\n', self.protocol_template.authors)
         cls_str += str.format('        self.version = \"{}\"\n', self.protocol_template.version)
-        cls_str += str.format('        self.license_config = \"{}\"\n', self.protocol_template.license_config)
+        cls_str += str.format('        self.license_config = \"{}\"\n', self.protocol_template.license)
         cls_str += str.format('        self.url = \"{}\"\n', self.protocol_template.url)
         cls_str += str.format('        self.description = \"{}\"\n\n', self.protocol_template.description)
         cls_str += str.format('        self.performatives = {}\n', self._performatives_set())
@@ -343,15 +321,18 @@ class ProtocolGenerator:
 
         cls_str += '            # Light Protocol 2\n'
         cls_str += '            # Check correct performative\n'
-        cls_str += '            assert performative in self.performatives, \"performative is not in the list of allowed performative\"\n\n'
+        cls_str += '            assert performative in self.performatives,' \
+                   ' \"performative is not in the list of allowed performative\"\n\n'
 
         cls_str += '            # Check correct contents\n'
         cls_str += '            content_sequence_definition = self.speech_acts[performative]  # type is List\n'
         cls_str += '            # Check number of contents\n'
-        cls_str += '            assert len(contents) == len(content_sequence_definition), \"incorrect number of contents\"\n'
+        cls_str += '            assert len(contents) == len(content_sequence_definition), ' \
+                   '\"incorrect number of contents\"\n'
         cls_str += '            # Check the content is of the correct type\n'
         cls_str += '            for x in range(len(content_sequence_definition)):\n'
-        cls_str += '                assert isinstance(contents[x], content_sequence_definition[x][1]), \"incorrect content type\"\n\n'
+        cls_str += '                assert isinstance(contents[x], content_sequence_definition[x][1]), ' \
+                   '\"incorrect content type\"\n\n'
 
         cls_str += '            # Light Protocol 3\n'
         cls_str += '            if message_id == 1:\n'
@@ -410,7 +391,6 @@ class ProtocolGenerator:
         cls_str += "        contents_list = msg.get(\"contents\")\n"
         cls_str += "        contents_list_bytes = base64.b64encode(pickle.dumps(contents_list)).decode(\"utf-8\")\n"
         cls_str += "        body[\"contents\"] = contents_list_bytes\n\n"
-        # cls_str += "        body[\"contents\"] = cast(List[bytes], msg.get(\"contents\"))\n\n"
         cls_str += "        bytes_msg = json.dumps(body).encode(\"utf-8\")\n"
         cls_str += "        return bytes_msg\n\n"
 
@@ -424,9 +404,8 @@ class ProtocolGenerator:
         cls_str += "        performative = json_body[\"performative\"]\n\n"
         cls_str += "        contents_list_bytes = base64.b64decode(json_body[\"contents\"])\n"
         cls_str += "        contents_list = pickle.loads(contents_list_bytes)\n\n"
-        cls_str += str.format(
-            "        return {}Message(message_id=message_id, target=target, performative=performative, contents=contents_list)\n",
-            self.protocol_template.name)
+        cls_str += str.format("        return {}Message(message_id=message_id, target=target, "
+                              "performative=performative, contents=contents_list)\n", self.protocol_template.name)
 
         return cls_str
 
@@ -466,11 +445,9 @@ class ProtocolGenerator:
             yamlfile.write(str.format('name: {}\n', self.protocol_template.name))
             yamlfile.write(str.format('authors: {}\n', self.protocol_template.authors))
             yamlfile.write(str.format('version: {}\n', self.protocol_template.version))
-            yamlfile.write(str.format('license: {}\n', self.protocol_template.license_config))
+            yamlfile.write(str.format('license: {}\n', self.protocol_template.license))
             yamlfile.write(str.format('url: {}\n', self.protocol_template.url))
             yamlfile.write(str.format('description: {}\n', self.protocol_template.description))
-        # except FileExistsError as exc:
-        # raise
 
     def generate(self) -> None:
         """
@@ -487,19 +464,3 @@ class ProtocolGenerator:
         self._generate_serialisation_class()
         self._generate_init_file()
         self._generate_protocol_yaml()
-
-
-parser = argparse.ArgumentParser("generator", description=__doc__)
-parser.add_argument("specification_path", type=str, help="Path from where to load the specification.")
-
-# if __name__ == '__main__':
-#     args = parser.parse_args()
-#     my_protocol_template = ProtocolTemplate(args.specification_path)
-#     try:
-#         my_protocol_template.load()
-#     except (yaml.YAMLError, ProtocolSpecificationParseError) as e:
-#         print(str(e))
-#         print("Load error, exiting now!")
-#         exit(1)
-#     my_protocol_generator = ProtocolGenerator(my_protocol_template)
-#     my_protocol_generator.generate()

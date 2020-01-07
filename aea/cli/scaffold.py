@@ -29,7 +29,7 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import PublicId, DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import PublicId, DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION
 # these variables are being used dynamically
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE  # noqa: F401
 
@@ -74,7 +74,7 @@ def _scaffold_item(ctx: Context, item_type, item_name):
 
         # add the connection to the configurations.
         logger.debug("Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
-        existing_id_list.add(PublicId("fetchai", item_name, "0.1.0"))
+        existing_id_list.add(PublicId("fetchai", item_name, DEFAULT_VERSION))
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
         # ensure the name in the yaml and the name of the folder are the same

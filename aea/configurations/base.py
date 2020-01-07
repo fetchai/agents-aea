@@ -29,6 +29,7 @@ DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = 'connection.yaml'
 DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
 DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
+DEFAULT_VERSION = '0.1.0'
 T = TypeVar('T')
 
 ProtocolId = str
@@ -133,11 +134,11 @@ class PublicId(object):
 
         author/name:version
 
-    >>> public_id = PublicId("author", "my_package", "0.1.0")
+    >>> public_id = PublicId("author", "my_package", DEFAULT_VERSION)
     >>> assert public_id.author == "author"
     >>> assert public_id.name == "my_package"
-    >>> assert public_id.version == "0.1.0"
-    >>> another_public_id = PublicId("author", "my_package", "0.1.0")
+    >>> assert public_id.version == DEFAULT_VERSION
+    >>> another_public_id = PublicId("author", "my_package", DEFAULT_VERSION)
     >>> assert hash(public_id) == hash(another_public_id)
     >>> assert public_id == another_public_id
     """
@@ -173,7 +174,7 @@ class PublicId(object):
         """
         Initialize the public id from the string.
 
-        >>> str(PublicId.from_string("author/package_name:0.1.0"))
+        >>> str(PublicId.from_string("author/package_name:" + DEFAULT_VERSION))
         'author/package_name:0.1.0'
 
         A bad formatted input raises value error:
