@@ -4,7 +4,6 @@ version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
 description: "The ml data provider skill implements a provider for Machine Learning datasets in order to monetize data."
-url: ""
 behaviours:
   service_registration:
     class_name: ServiceRegistrationBehaviour

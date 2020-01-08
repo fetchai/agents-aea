@@ -4,7 +4,6 @@ version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
 description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
-url: ""
 behaviours:
   tac_negotiation:
     class_name: GoodsRegisterAndSearchBehaviour

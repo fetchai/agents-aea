@@ -8,7 +8,6 @@
     "author",
     "version",
     "license",
-    "url",
     "class_name",
     "config",
     "protocols"
@@ -27,9 +26,6 @@
       "type": "string"
     },
     "fingerprint": {
-      "type": "string"
-    },
-    "url": {
       "type": "string"
     },
     "class_name": {

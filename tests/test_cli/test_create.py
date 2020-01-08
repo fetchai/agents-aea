@@ -135,11 +135,6 @@ class TestCreate:
         agent_config_instance = self._load_config_file()
         assert agent_config_instance["skills"] == ["fetchai/error:0.1.0"]
 
-    def test_url_field_is_empty_string(self):
-        """Check that the 'url' field is the empty string."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["url"] == ""
-
     def test_version_field_is_equal_to_0_1_0(self):
         """Check that the 'version' field is equal to the string '0.1.0'."""
         agent_config_instance = self._load_config_file()
