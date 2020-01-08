@@ -9,7 +9,7 @@ default_ledger: fetchai
 description: 'An agent buying data and training a model from it.'
 fingerprint: ''
 ledger_apis: {}
-license: ''
+license: Apache 2.0
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -23,5 +23,4 @@ registry_path: ../packages
 skills:
 - fetchai/error:0.1.0
 - fetchai/ml_train:0.1.0
-url: ''
 version: 0.1.0

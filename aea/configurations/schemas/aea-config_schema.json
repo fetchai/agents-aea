@@ -9,7 +9,6 @@
     "author",
     "version",
     "license",
-    "url",
     "private_key_paths",
     "default_ledger",
     "connections",
@@ -34,9 +33,6 @@
       "type": "string"
     },
     "fingerprint": {
-      "type": "string"
-    },
-    "url": {
       "type": "string"
     },
     "registry_path": {

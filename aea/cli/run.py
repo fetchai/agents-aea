@@ -44,7 +44,7 @@ from aea.crypto.helpers import _create_default_private_key, _create_fetchai_priv
 from aea.crypto.ledger_apis import LedgerApis, _try_to_instantiate_fetchai_ledger_api, \
     _try_to_instantiate_ethereum_ledger_api, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet, DEFAULT, SUPPORTED_CRYPTOS
-from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules
+from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules, load_agent_component_package
 from aea.registries.base import Resources
 
 
@@ -154,9 +154,10 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
     except FileNotFoundError:
         raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
 
+    connection_package = load_agent_component_package("connection", connection_name, Path("connections", connection_name))
+    add_agent_component_module_to_sys_modules("connection", connection_name, connection_package)
     try:
-        connection_module = load_module(connection_name, Path("connections", connection_name, "connection.py"))
-        add_agent_component_module_to_sys_modules("connection", connection_name, connection_module)
+        connection_module = load_module("connection_module", Path("connections", connection_name, "connection.py"))
     except FileNotFoundError:
         raise AEAConfigException("Connection '{}' not found.".format(connection_name))
 

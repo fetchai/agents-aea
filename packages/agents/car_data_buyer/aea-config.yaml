@@ -12,7 +12,7 @@ ledger_apis:
   fetchai:
     address: alpha.fetch-ai.com
     port: 80
-license: ''
+license: Apache 2.0
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -25,5 +25,4 @@ registry_path: ../packages
 skills:
 - fetchai/carpark_client:0.1.0
 - fetchai/error:0.1.0
-url: ''
 version: 0.1.0

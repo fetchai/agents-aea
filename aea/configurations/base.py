@@ -270,7 +270,6 @@ class ConnectionConfig(PackageConfiguration):
                  author: str = "",
                  version: str = "",
                  license: str = "",
-                 url: str = "",
                  class_name: str = "",
                  protocols: Optional[Set[PublicId]] = None,
                  restricted_to_protocols: Optional[Set[PublicId]] = None,
@@ -282,7 +281,6 @@ class ConnectionConfig(PackageConfiguration):
         super().__init__(name, author, version)
         self.license = license
         self.fingerprint = ""
-        self.url = url
         self.class_name = class_name
         self.protocols = protocols if protocols is not None else []
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -300,7 +298,6 @@ class ConnectionConfig(PackageConfiguration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
-            "url": self.url,
             "class_name": self.class_name,
             "protocols": list(map(str, self.protocols)),
             "restricted_to_protocols": list(map(str, self.restricted_to_protocols)),
@@ -324,7 +321,6 @@ class ConnectionConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[PublicId], protocols),
             restricted_to_protocols=cast(Set[PublicId], restricted_to_protocols),
@@ -343,14 +339,12 @@ class ProtocolConfig(PackageConfiguration):
                  author: str = "",
                  version: str = "",
                  license: str = "",
-                 url: str = "",
                  dependencies: Optional[Dependencies] = None,
                  description: str = ""):
         """Initialize a connection configuration object."""
         super().__init__(name, author, version)
         self.license = license
         self.fingerprint = ""
-        self.url = url
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
@@ -363,7 +357,6 @@ class ProtocolConfig(PackageConfiguration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
-            "url": self.url,
             "dependencies": self.dependencies,
             "description": self.description
         }
@@ -377,7 +370,6 @@ class ProtocolConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            url=cast(str, obj.get("url")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
@@ -495,7 +487,6 @@ class SkillConfig(PackageConfiguration):
                  author: str = "",
                  version: str = "",
                  license: str = "",
-                 url: str = "",
                  protocols: List[PublicId] = None,
                  dependencies: Optional[Dependencies] = None,
                  description: str = ""):
@@ -503,7 +494,6 @@ class SkillConfig(PackageConfiguration):
         super().__init__(name, author, version)
         self.license = license
         self.fingerprint = ""
-        self.url = url
         self.protocols = protocols if protocols is not None else []  # type: List[PublicId]
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -521,7 +511,6 @@ class SkillConfig(PackageConfiguration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
-            "url": self.url,
             "protocols": list(map(str, self.protocols)),
             "dependencies": self.dependencies,
             "handlers": {key: h.json for key, h in self.handlers.read_all()},
@@ -538,7 +527,6 @@ class SkillConfig(PackageConfiguration):
         author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
-        url = cast(str, obj.get("url"))
         protocols = cast(List[PublicId], [PublicId.from_string(id_) for id_ in obj.get("protocols", [])])
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
@@ -547,7 +535,6 @@ class SkillConfig(PackageConfiguration):
             author=author,
             version=version,
             license=license,
-            url=url,
             protocols=protocols,
             dependencies=dependencies,
             description=description
@@ -582,7 +569,6 @@ class AgentConfig(PackageConfiguration):
                  version: str = "",
                  license: str = "",
                  fingerprint: str = "",
-                 url: str = "",
                  registry_path: str = "",
                  description: str = "",
                  private_key_paths: Dict[str, str] = None,
@@ -593,7 +579,6 @@ class AgentConfig(PackageConfiguration):
         self.aea_version = aea_version
         self.license = license
         self.fingerprint = fingerprint
-        self.url = url
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
@@ -661,7 +646,6 @@ class AgentConfig(PackageConfiguration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
-            "url": self.url,
             "registry_path": self.registry_path,
             "description": self.description,
             "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
@@ -688,7 +672,6 @@ class AgentConfig(PackageConfiguration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             logging_config=cast(Dict, obj.get("logging_config", {})),

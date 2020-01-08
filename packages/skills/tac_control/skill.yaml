@@ -4,7 +4,6 @@ version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
 description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
-url: ""
 behaviours:
   tac:
     class_name: TACBehaviour

@@ -80,7 +80,10 @@ class TaskManager:
     def stop(self) -> None:
         """Stop the task manager."""
         with self.lock:
-            logger.debug("Start the task manager.")
+            if self.stopped is True:
+                return
+            logger.debug("Stop the task manager.")
             self.stopped = True
             self.task_queue.put(None)
             self.thread.join()
+            self.thread = Thread(target=self.dispatch)
