@@ -7,8 +7,7 @@
     "name",
     "author",
     "version",
-    "license",
-    "url"
+    "license"
   ],
   "properties": {
     "name": {
@@ -24,9 +23,6 @@
       "type": "string"
     },
     "fingerprint": {
-      "type": "string"
-    },
-    "url": {
       "type": "string"
     },
     "dependencies": {

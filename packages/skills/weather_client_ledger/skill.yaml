@@ -3,7 +3,6 @@ author: fetchai
 version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
-url: ""
 description: "The weather client skill implements the skill to purchase weather data."
 behaviours:
   search:

@@ -8,7 +8,6 @@
     "author",
     "version",
     "license",
-    "url",
     "protocols"
   ],
   "properties": {
@@ -25,9 +24,6 @@
       "type": "string"
     },
     "fingerprint": {
-      "type": "string"
-    },
-    "url": {
       "type": "string"
     },
     "protocols": {

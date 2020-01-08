@@ -37,5 +37,4 @@ registry_path: aea
 skills:
 - fetchai/dummy:0.1.0
 - fetchai/error:0.1.0
-url: ''
 version: 1.0.0
