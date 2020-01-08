@@ -24,6 +24,8 @@ from os import path
 from pathlib import Path
 import yaml
 from typing import Any, Dict, List, Set
+from aea.configurations.base import ProtocolConfig
+from aea.configurations.loader import ConfigLoader
 
 DEFAULT_TYPES = ["int", "float", "bool", "str", "bytes", "list", "dict", "tuple", "set"]
 
@@ -35,7 +37,7 @@ PROTOCOL_FILE_NAME = "protocol.yaml"
 
 BASIC_FIELDS_AND_TYPES = {
         "name": str,
-        "authors": str,
+        "author": str,
         "version": str,
         "license": str,
         "url": str,
@@ -74,12 +76,7 @@ class ProtocolTemplate:
         self.config_address = config_address
         self.yaml_documents = list()  # type: List[Any]
 
-        self.name = ""
-        self.authors = ""
-        self.version = ""
-        self.license = ""
-        self.url = ""
-        self.description = ""
+        self.protocol_config = ProtocolConfig(name="", author="", version="", license="", url="", description="")
 
         self.speech_acts = dict()  # type: Dict[str, List[Dict[str, str]]]
 
@@ -128,14 +125,13 @@ class ProtocolTemplate:
             for field, field_type in BASIC_FIELDS_AND_TYPES.items():
                 if field in self.yaml_documents[0]:
                     document_field_value = self.yaml_documents[0][field]
-                    self.__setattr__(field, document_field_value)
+                    self.protocol_config.__setattr__(field, document_field_value)
                     if type(document_field_value) is not field_type:
                         raise ProtocolSpecificationParseError("Protocol's '{}' is not of type {}.".format(field, field_type))
                     if document_field_value == "":
                         raise ProtocolSpecificationParseError("Protocol's '{}' is empty.".format(field))
                 elif field == "name":
                     raise ProtocolSpecificationParseError("Protocol name could not be found.")
-
             if "speech-acts" in self.yaml_documents[1]:
                 self.speech_acts = self.yaml_documents[1]["speech-acts"]
                 if type(self.speech_acts) is not dict:
@@ -183,7 +179,7 @@ class ProtocolGenerator:
         :return: None
         """
         self.protocol_template = protocol_template
-        self.output_folder_path = os.path.join(output_path, to_snake_case(protocol_template.name) + "_protocol")
+        self.output_folder_path = os.path.join(output_path, to_snake_case(protocol_template.protocol_config.name) + "_protocol")
 
     def _custom_types_classes_str(self) -> str:
         """
@@ -275,8 +271,8 @@ class ProtocolGenerator:
         cls_str += self._custom_types_classes_str()
 
         # Class Header
-        cls_str += str.format('class {}Message(Message):\n', self.protocol_template.name)
-        cls_str += str.format('    \"\"\"{}\"\"\"\n\n', self.protocol_template.description)
+        cls_str += str.format('class {}Message(Message):\n', self.protocol_template.protocol_config.name)
+        cls_str += str.format('    \"\"\"{}\"\"\"\n\n', self.protocol_template.protocol_config.description)
 
         # __init__
         cls_str += '    def __init__(self, message_id: int = None, target: int = None, performative: str = None, ' \
@@ -286,12 +282,12 @@ class ProtocolGenerator:
                    'contents=contents, **kwargs)\n\n'
 
         # variables
-        cls_str += str.format('        self.name = \"{}\"\n', self.protocol_template.name)
-        cls_str += str.format('        self.authors = \"{}\"\n', self.protocol_template.authors)
-        cls_str += str.format('        self.version = \"{}\"\n', self.protocol_template.version)
-        cls_str += str.format('        self.license_config = \"{}\"\n', self.protocol_template.license)
-        cls_str += str.format('        self.url = \"{}\"\n', self.protocol_template.url)
-        cls_str += str.format('        self.description = \"{}\"\n\n', self.protocol_template.description)
+        cls_str += str.format('        self.name = \"{}\"\n', self.protocol_template.protocol_config.name)
+        cls_str += str.format('        self.author = \"{}\"\n', self.protocol_template.protocol_config.author)
+        cls_str += str.format('        self.version = \"{}\"\n', self.protocol_template.protocol_config.version)
+        cls_str += str.format('        self.license = \"{}\"\n', self.protocol_template.protocol_config.license)
+        cls_str += str.format('        self.url = \"{}\"\n', self.protocol_template.protocol_config.url)
+        cls_str += str.format('        self.description = \"{}\"\n\n', self.protocol_template.protocol_config.description)
         cls_str += str.format('        self.performatives = {}\n', self._performatives_set())
         cls_str += str.format('        self.speech_acts = {}\n\n', self._speech_acts_str())
         cls_str += '#        assert self.check_consistency()\n\n'
@@ -299,7 +295,7 @@ class ProtocolGenerator:
         # check_consistency method
         cls_str += '    def check_consistency(self) -> bool:\n'
         cls_str += str.format('        \"\"\"Check that the message follows the {} protocol\"\"\"\n',
-                              self.protocol_template.name)
+                              self.protocol_template.protocol_config.name)
         cls_str += '        try:\n'
 
         cls_str += '            assert self.is_set(\"message_id\"), \"message_id is not set\"\n'
@@ -330,8 +326,8 @@ class ProtocolGenerator:
         cls_str += '            assert len(contents) == len(content_sequence_definition), ' \
                    '\"incorrect number of contents\"\n'
         cls_str += '            # Check the content is of the correct type\n'
-        cls_str += '            for x in range(len(content_sequence_definition)):\n'
-        cls_str += '                assert isinstance(contents[x], content_sequence_definition[x][1]), ' \
+        cls_str += '            for content in range(len(content_sequence_definition)):\n'
+        cls_str += '                assert isinstance(contents[content], content_sequence_definition[content][1]), ' \
                    '\"incorrect content type\"\n\n'
 
         cls_str += '            # Light Protocol 3\n'
@@ -369,21 +365,21 @@ class ProtocolGenerator:
         cls_str += "from aea.protocols.base import Message\n"
         cls_str += "from aea.protocols.base import Serializer\n"
         cls_str += str.format("from {}.message import {}Message\n\n", self.output_folder_path,
-                              self.protocol_template.name)
+                              self.protocol_template.protocol_config.name)
         cls_str += "import json\n"
         cls_str += "import base64\n"
         cls_str += "import pickle\n"
         cls_str += "from typing import cast, List\n\n\n"
 
         # Class Header
-        cls_str += str.format('class {}Serializer(Serializer):\n', self.protocol_template.name)
+        cls_str += str.format('class {}Serializer(Serializer):\n', self.protocol_template.protocol_config.name)
         cls_str += str.format('    \"\"\"Serialization for {} protocol\"\"\"\n\n',
-                              self.protocol_template.description.lower())
+                              self.protocol_template.protocol_config.description.lower())
 
         # encoder
         cls_str += str.format('    def encode(self, msg: Message) -> bytes:\n')
         cls_str += str.format('        \"\"\"Encode a \'{}\' message into bytes.\"\"\"\n',
-                              self.protocol_template.name)
+                              self.protocol_template.protocol_config.name)
         cls_str += "        body = {}  # Dict[str, Any]\n"
         cls_str += "        body[\"message_id\"] = msg.get(\"message_id\")\n"
         cls_str += "        body[\"target\"] = msg.get(\"target\")\n"
@@ -397,7 +393,7 @@ class ProtocolGenerator:
         # decoder
         cls_str += str.format('    def decode(self, obj: bytes) -> Message:\n')
         cls_str += str.format('        \"\"\"Decode bytes into a \'{}\' message.\"\"\"\n',
-                              self.protocol_template.name)
+                              self.protocol_template.protocol_config.name)
         cls_str += "        json_body = json.loads(obj.decode(\"utf-8\"))\n"
         cls_str += "        message_id = json_body[\"message_id\"]\n"
         cls_str += "        target = json_body[\"target\"]\n"
@@ -405,7 +401,7 @@ class ProtocolGenerator:
         cls_str += "        contents_list_bytes = base64.b64decode(json_body[\"contents\"])\n"
         cls_str += "        contents_list = pickle.loads(contents_list_bytes)\n\n"
         cls_str += str.format("        return {}Message(message_id=message_id, target=target, "
-                              "performative=performative, contents=contents_list)\n", self.protocol_template.name)
+                              "performative=performative, contents=contents_list)\n", self.protocol_template.protocol_config.name)
 
         return cls_str
 
@@ -431,7 +427,7 @@ class ProtocolGenerator:
 
         with open(pathname, 'w') as pyfile:
             pyfile.write(str.format('\"\"\"This module contains the support resources for the {} protocol.\"\"\"\n',
-                                    self.protocol_template.name))
+                                    self.protocol_template.protocol_config.name))
 
     def _generate_protocol_yaml(self) -> None:
         """
@@ -442,12 +438,16 @@ class ProtocolGenerator:
         pathname = path.join(self.output_folder_path, PROTOCOL_FILE_NAME)
 
         with open(pathname, 'w') as yamlfile:
-            yamlfile.write(str.format('name: {}\n', self.protocol_template.name))
-            yamlfile.write(str.format('authors: {}\n', self.protocol_template.authors))
-            yamlfile.write(str.format('version: {}\n', self.protocol_template.version))
-            yamlfile.write(str.format('license: {}\n', self.protocol_template.license))
-            yamlfile.write(str.format('url: {}\n', self.protocol_template.url))
-            yamlfile.write(str.format('description: {}\n', self.protocol_template.description))
+            yamlfile.write(str.format('name: {}\n', self.protocol_template.protocol_config.name))
+            yamlfile.write(str.format('author: {}\n', self.protocol_template.protocol_config.author))
+            yamlfile.write(str.format('version: {}\n', self.protocol_template.protocol_config.version))
+            yamlfile.write(str.format('license: {}\n', self.protocol_template.protocol_config.license))
+            yamlfile.write(str.format('url: {}\n', self.protocol_template.protocol_config.url))
+            yamlfile.write(str.format('description: {}\n', self.protocol_template.protocol_config.description))
+
+        # Can do this once protocol specification schema is created
+        # config_loader = ConfigLoader(PATH_TO_SPEC_SCHEMA, ProtocolConfig)
+        # config_loader.dump(self.protocol_template.protocol_config, open(pathname, "w"))
 
     def generate(self) -> None:
         """

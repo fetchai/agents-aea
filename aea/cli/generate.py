@@ -51,20 +51,18 @@ def _generate_item(ctx: Context, item_type, item_name, specification_path):
 
     try:
         protocol_template = ProtocolTemplate(specification_path)
-    except Exception as e:
-        logger.exception(e)
-        sys.exit(1)
-
-    try:
         protocol_template.load()
     except (yaml.YAMLError, ProtocolSpecificationParseError) as e:
         logger.error(str(e))
         logger.error("Load error. Aborting...")
         exit(1)
+    except Exception as e:
+        logger.exception(e)
+        sys.exit(1)
 
     # check if we already have an item with the same name
     logger.debug("{} already supported by the agent: {}".format(item_type_plural, existing_item_list))
-    protocol_name = protocol_template.name
+    protocol_name = protocol_template.protocol_config.name
     if protocol_name in existing_item_list:
         logger.error("A {} with name '{}' already exists. Aborting...".format(item_type, protocol_name))
         sys.exit(1)
@@ -87,7 +85,7 @@ def _generate_item(ctx: Context, item_type, item_name, specification_path):
         sys.exit(1)
     except Exception as e:
         logger.exception(e)
-        shutil.rmtree(os.path.join(item_type_plural, item_name), ignore_errors=True)
+        shutil.rmtree(os.path.join(item_type_plural, protocol_name), ignore_errors=True)
         sys.exit(1)
 
 

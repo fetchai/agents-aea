@@ -1,6 +1,6 @@
 ---
 name: 'TwoPartyNegotiation'
-authors: 'Fetch.ai'
+author: 'Fetch.ai'
 version: '0.1.0'
 license: 'Apache License, Version 2.0'
 url: 'www.fetch.ai'
