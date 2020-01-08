@@ -24,13 +24,12 @@ import shutil
 import sys
 
 import click
-import yaml
 
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.base import ProtocolSpecification
 from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
 from aea.configurations.base import PublicId, DEFAULT_AEA_CONFIG_FILE, DEFAULT_VERSION
-from aea.protocols.generator import ProtocolGenerator, ProtocolSpecificationParseError
+from aea.protocols.generator import ProtocolGenerator
 
 # these variables are being used dynamically
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE  # noqa: F401
@@ -55,22 +54,20 @@ def _generate_item(ctx: Context, item_type, specification_path):
     try:
         config_loader = ConfigLoader("protocol-specification_schema.json", ProtocolSpecification)
         protocol_spec = config_loader.load(open(specification_path))
-        protocol_spec.validate()
     except Exception as e:
         logger.exception(e)
         sys.exit(1)
 
     # Check if we already have an item with the same name
     logger.debug("{} already supported by the agent: {}".format(item_type_plural, existing_item_list))
-    protocol_name = protocol_spec.name
-    if protocol_name in existing_item_list:
-        logger.error("A {} with name '{}' already exists. Aborting...".format(item_type, protocol_name))
+    if protocol_spec.name in existing_item_list:
+        logger.error("A {} with name '{}' already exists. Aborting...".format(item_type, protocol_spec.name))
         sys.exit(1)
 
     try:
         # Generate the item
         agent_name = ctx.agent_config.agent_name
-        logger.info("Generating {} '{}' and adding it to the agent '{}'...".format(item_type, protocol_name, agent_name))
+        logger.info("Generating {} '{}' and adding it to the agent '{}'...".format(item_type, protocol_spec.name, agent_name))
 
         output_path = os.path.join(ctx.cwd, item_type_plural)
         protocol_generator = ProtocolGenerator(protocol_spec, output_path)
@@ -78,7 +75,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
 
         # Add the item to the configurations
         logger.debug("Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
-        existing_id_list.add(PublicId("fetchai", protocol_name, DEFAULT_VERSION))
+        existing_id_list.add(PublicId("fetchai", protocol_spec.name, DEFAULT_VERSION))
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
     except FileExistsError:
@@ -86,7 +83,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
         sys.exit(1)
     except Exception as e:
         logger.exception(e)
-        shutil.rmtree(os.path.join(item_type_plural, protocol_name), ignore_errors=True)
+        shutil.rmtree(os.path.join(item_type_plural, protocol_spec.name), ignore_errors=True)
         sys.exit(1)
 
 

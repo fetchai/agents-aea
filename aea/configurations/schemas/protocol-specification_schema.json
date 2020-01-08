@@ -42,9 +42,7 @@
   },
   "definitions": {
     "speech_act": {
-      "type": "object",
-      "additionalProperties": false,
-      "uniqueItems": true
+      "type": "object"
     }
   }
 }

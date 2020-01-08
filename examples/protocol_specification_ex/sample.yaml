@@ -1,8 +1,7 @@
----
-name: 'TwoPartyNegotiation'
-author: 'Fetch.ai'
-version: '0.1.0'
-license: 'Apache License, Version 2.0'
+name: two_party_negotiation
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
 description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
@@ -10,7 +9,6 @@ speech_acts:
   propose:
     query: DataModel
     price: float
-  accept:
-  decline:
-  match_accept:
-...
+  accept: {}
+  decline: {}
+  match_accept: {}

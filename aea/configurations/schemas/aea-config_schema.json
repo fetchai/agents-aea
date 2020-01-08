@@ -54,7 +54,7 @@
         }
       }
     },
-     "ledger_apis": {
+    "ledger_apis": {
       "type": "object",
       "uniqueItems": true,
       "patternProperties": {

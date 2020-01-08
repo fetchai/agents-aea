@@ -57,6 +57,7 @@ Dependencies = Dict[str, Dependency]
 
 class ProtocolSpecificationParseError(Exception):
     """Exception for parsing a protocol specification file."""
+
     pass
 
 
@@ -708,6 +709,16 @@ class SpeechActContentConfig(Configuration):
     def __init__(self, **args):
         """Initialize a speech_act content configuration."""
         self.args = args  # type: Dict[str, str]
+        self._check_consistency()
+
+    def _check_consistency(self):
+        """Check consistency of the args."""
+        for content_name, content_type in self.args.items():
+            if type(content_name) is not str or type(content_type) is not str:
+                raise ProtocolSpecificationParseError("Contents' names and types must be string.")
+            # Check each content definition key/value (i.e. content name/type) is not empty
+            if content_name == "" or content_type == "":
+                raise ProtocolSpecificationParseError("Contents' names and types cannot be empty.")
 
     @property
     def json(self) -> Dict:
@@ -720,6 +731,7 @@ class SpeechActContentConfig(Configuration):
         return SpeechActContentConfig(
             **obj
         )
+
 
 class ProtocolSpecification(ProtocolConfig):
     """Handle protocol specification."""
@@ -759,41 +771,16 @@ class ProtocolSpecification(ProtocolConfig):
         for speech_act, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
             speech_act_content_config = SpeechActContentConfig.from_json(speech_act_content)
             protocol_specification.speech_acts.create(speech_act, speech_act_content_config)
+        protocol_specification._check_consistency()
         return protocol_specification
 
-    def validate(self):
-        # Check speech_act's type is dict
-        if type(self.speech_acts) is not dict:
-            raise ProtocolSpecificationParseError("Protocol's 'speech_acts' is not a dictionary.")
-        # Check speech_act has at least 1 performative defined.
-        if len(self.speech_acts) < 1:  # potentially useless
+    def _check_consistency(self):
+        """Validate the correctness of the speech_acts."""
+        if len(self.speech_acts.read_all()) == 0:
             raise ProtocolSpecificationParseError(
-                "There should be at least one performative in the speech_act.")
-        for performative in self.speech_acts.keys():
-            # Check speech_act's keys (i.e. performatives) are str
+                "There should be at least one performative defined in the speech_acts.")
+        for performative, speech_act_content_config in self.speech_acts.read_all():
             if type(performative) is not str:
                 raise ProtocolSpecificationParseError("A 'performative' is not specified as a string.")
-            # Check speech_act's keys (i.e. performatives) are not empty
             if performative == "":
                 raise ProtocolSpecificationParseError("A 'performative' cannot be an empty string.")
-        for content_list in self.speech_acts.values():
-            # Check speech_act's values (i.e. content-sequences) are dicts
-            if type(content_list) is not dict and content_list is not None:
-                raise ProtocolSpecificationParseError(
-                    "The contents of performatives must be described as a list.")
-            if content_list is not None:
-                for content_dict in content_list:
-                    # Check each content definition is a dict
-                    if type(content_dict) is not dict:
-                        raise ProtocolSpecificationParseError(
-                            "Each content (i.e. name and type) must be specified as a dictionary ")
-                    # Check there is exactly 1 content dict per list element
-                    if len(content_dict) != 1:
-                        raise ProtocolSpecificationParseError("Only one content dictionary per list element.")
-                    for content_name, content_type in content_dict.items():
-                        # Check each content definition key/value (i.e. content name/type) is str
-                        if type(content_name) is not str or type(content_type) is not str:
-                            raise ProtocolSpecificationParseError("Contents' names and types must be string.")
-                        # Check each content definition key/value (i.e. content name/type) is not empty
-                        if content_name == "" or content_type == "":
-                            raise ProtocolSpecificationParseError("Contents' names and types cannot be empty.")
