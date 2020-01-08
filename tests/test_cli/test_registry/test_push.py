@@ -134,11 +134,13 @@ class SaveItemLocallyTestCase(TestCase):
         """Test for save_item_locally positive result."""
         item_type = 'skill'
         item_id = PublicId.from_string('fetchai/skill_name:0.1.0')
-        save_item_locally(item_type, item_id)
+        save_item_locally(item_type, item_id, 'packages_path')
         get_item_source_path_mock.assert_called_once_with(
             'cwd', 'skills', item_id.name
         )
-        get_item_target_path_mock.assert_called_once_with('skills', item_id.name)
+        get_item_target_path_mock.assert_called_once_with(
+            'skills', item_id.name, 'packages_path'
+        )
         getcwd_mock.assert_called_once()
         copy_tree_mock.assert_called_once_with('source', 'target')
 
@@ -169,7 +171,7 @@ class SaveItemLocallyFailsTestCase(TestCase):
         with self.assertRaises(ClickException):
             item_type = 'skill'
             item_id = PublicId.from_string('non_existing_author/skill_name:0.1.0')
-            save_item_locally(item_type, item_id)
+            save_item_locally(item_type, item_id, 'packages_path')
 
 
 class TestPushLocalFailsArgumentNotPublicId:

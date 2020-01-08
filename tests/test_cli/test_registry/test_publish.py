@@ -125,6 +125,6 @@ class SaveAgentLocallyTestCase(TestCase):
         copyfile_mock
     ):
         """Test for save_agent_locally positive result."""
-        save_agent_locally()
+        save_agent_locally('packages_path')
         makedirs_mock.assert_called_once_with('target-dir', exist_ok=True)
         copyfile_mock.assert_called_once_with('joined-path', 'joined-path')

@@ -116,12 +116,15 @@ def _check_package_public_id(source_path, item_type, item_id):
         )
 
 
-def save_item_locally(item_type: str, item_id: PublicId) -> None:
+def save_item_locally(
+    item_type: str, item_id: PublicId, packages_path
+) -> None:
     """
     Save item to local packages.
 
     :param item_type: str type of item (connection/protocol/skill).
     :param item_id: the public id of the item.
+    :param packages_path: path to packages dir
 
     :return: None
     """
@@ -129,7 +132,9 @@ def save_item_locally(item_type: str, item_id: PublicId) -> None:
     cwd = os.getcwd()
 
     source_path = get_item_source_path(cwd, item_type_plural, item_id.name)
-    target_path = get_item_target_path(item_type_plural, item_id.name)
+    target_path = get_item_target_path(
+        item_type_plural, item_id.name, packages_path
+    )
     _check_package_public_id(source_path, item_type, item_id)
     copytree(source_path, target_path)
     click.echo(
