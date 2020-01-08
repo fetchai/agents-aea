@@ -159,8 +159,8 @@ def test_multiplexer_disconnect_all_raises_error():
         with pytest.raises(AEAConnectionError, match="Failed to disconnect the multiplexer."):
             multiplexer.disconnect()
 
-    # TODO is this what we want?
-    assert multiplexer.connection_status.is_connected
+    # do the true disconnection - for clean the test up
+    multiplexer.disconnect()
 
 
 def test_multiplexer_disconnect_one_raises_error_many_connections():

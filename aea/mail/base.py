@@ -382,7 +382,6 @@ class Multiplexer:
             self._start_loop_threaded()
             try:
                 asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
-                assert self.is_connected
                 self._connection_status.is_connected = True
                 self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._receiving_loop(), loop=self._loop)
                 self._send_loop_task = asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
@@ -400,11 +399,9 @@ class Multiplexer:
             try:
                 logger.debug("Disconnecting the multiplexer...")
                 asyncio.run_coroutine_threadsafe(self._disconnect_all(), loop=self._loop).result()
-                self._stop()
-                assert not self.is_connected
                 self._connection_status.is_connected = False
-            except (CancelledError, Exception):
                 self._stop()
+            except (CancelledError, Exception):
                 raise AEAConnectionError("Failed to disconnect the multiplexer.")
 
     def _run_loop(self):
