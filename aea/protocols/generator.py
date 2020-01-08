@@ -24,8 +24,7 @@ from os import path
 from pathlib import Path
 import yaml
 from typing import Any, Dict, List, Set
-from aea.configurations.base import ProtocolConfig
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.base import ProtocolSpecification
 
 DEFAULT_TYPES = ["int", "float", "bool", "str", "bytes", "list", "dict", "tuple", "set"]
 
@@ -40,7 +39,6 @@ BASIC_FIELDS_AND_TYPES = {
         "author": str,
         "version": str,
         "license": str,
-        "url": str,
         "description": str,
     }
 
@@ -51,135 +49,139 @@ def to_snake_case(text):
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
-class ProtocolSpecificationParseError(Exception):
-    """Exception for parsing a protocol specification file."""
-    pass
-
-
-class ProtocolTemplate:
-    """
-    Extract protocol specification data from YAML configuration file.
-
-    This class:
-    a) reads a protocol specification YAML file,
-    b) extracts the protocol specification data into a protocol template object,
-    c) performs consistency checking.
-    """
-
-    def __init__(self, config_address: str) -> None:
-        """
-        Instantiate a protocol template object.
-
-        :param config_address: the address of the protocol specification yaml file
-        :return: None
-        """
-        self.config_address = config_address
-        self.yaml_documents = list()  # type: List[Any]
-
-        self.protocol_config = ProtocolConfig(name="", author="", version="", license="", url="", description="")
-
-        self.speech_acts = dict()  # type: Dict[str, List[Dict[str, str]]]
-
-    def load(self) -> bool:
-        """
-        Call the two methods that read and extract protocol specification Yaml file.
-
-        :return: None
-        """
-        try:
-            self._read_protocol_specification()
-            self._extract_specification()
-        except (yaml.YAMLError, ProtocolSpecificationParseError):
-            raise
-        return True
-
-    def _read_protocol_specification(self) -> None:
-        """
-        Read a protocol specification YAML file.
-
-        Open and read the specification YAML file, and extract the yaml documents.
-        Raise any exceptions caught during file handling and reading the yaml file.
-
-        :return: None
-        """
-        try:
-            with open(self.config_address, 'r') as stream:
-                yaml_data = yaml.safe_load_all(stream)
-                for document in yaml_data:
-                    self.yaml_documents.append(document)
-        except (OSError, IOError, yaml.MarkedYAMLError):
-            raise
-
-    def _extract_specification(self) -> None:
-        """
-        Extract protocol specification data.
-
-        Extract the protocol specification data form yaml document objects.
-        Raise protocol specification parsing exceptions if the specification's format is incorrect.
-
-        :return: None
-        """
-        if len(self.yaml_documents) >= 2 \
-                and self.yaml_documents[0] is not None \
-                and self.yaml_documents[1] is not None:
-            for field, field_type in BASIC_FIELDS_AND_TYPES.items():
-                if field in self.yaml_documents[0]:
-                    document_field_value = self.yaml_documents[0][field]
-                    self.protocol_config.__setattr__(field, document_field_value)
-                    if type(document_field_value) is not field_type:
-                        raise ProtocolSpecificationParseError("Protocol's '{}' is not of type {}.".format(field, field_type))
-                    if document_field_value == "":
-                        raise ProtocolSpecificationParseError("Protocol's '{}' is empty.".format(field))
-                elif field == "name":
-                    raise ProtocolSpecificationParseError("Protocol name could not be found.")
-            if "speech-acts" in self.yaml_documents[1]:
-                self.speech_acts = self.yaml_documents[1]["speech-acts"]
-                if type(self.speech_acts) is not dict:
-                    raise ProtocolSpecificationParseError("Protocol's 'speech-acts' is not a dictionary.")
-                if len(self.speech_acts) < 1:  # potentially useless
-                    raise ProtocolSpecificationParseError(
-                        "There should be at least one performative in the speech-act.")
-                for performative in self.speech_acts.keys():
-                    if type(performative) is not str:
-                        raise ProtocolSpecificationParseError("A 'performative' is not specified as a string.")
-                    if performative == "":
-                        raise ProtocolSpecificationParseError("A 'performative' cannot be an empty string.")
-                for content_list in self.speech_acts.values():
-                    if type(content_list) is not list and content_list is not None:
-                        raise ProtocolSpecificationParseError(
-                            "The contents of performatives must be described as a list.")
-                    if content_list is not None:
-                        for content_dict in content_list:
-                            if type(content_dict) is not dict:
-                                raise ProtocolSpecificationParseError(
-                                    "Each content (i.e. name and type) must be specified as a dictionary ")
-                            if len(content_dict) != 1:
-                                raise ProtocolSpecificationParseError("Only one content dictionary per list.")
-                            for content_name, content_type in content_dict.items():
-                                if type(content_name) is not str or type(content_type) is not str:
-                                    raise ProtocolSpecificationParseError("Contents' names and types must be string.")
-                                if content_name == "" or content_type == "":
-                                    raise ProtocolSpecificationParseError("Contents' names and types cannot be empty.")
-            else:
-                raise ProtocolSpecificationParseError(
-                    "Protocol's 'speech-acts' could not be found.")
-        else:
-            raise ProtocolSpecificationParseError(
-                "There must be at least two YAML documents in the protocol specification YAML file.")
+# class ProtocolTemplate:
+#     """
+#     Extract protocol specification data from YAML configuration file.
+#
+#     This class:
+#     a) reads a protocol specification YAML file,
+#     b) extracts the protocol specification data into a protocol template object,
+#     c) performs consistency checking.
+#     """
+#
+#     def __init__(self, config_address: str) -> None:
+#         """
+#         Instantiate a protocol template object.
+#
+#         :param config_address: the address of the protocol specification yaml file
+#         :return: None
+#         """
+#         self.config_address = config_address
+#         self.yaml_documents = list()  # type: List[Any]
+#
+#         self.protocol_config = ProtocolConfig(name="", author="", version="", license="", description="")
+#
+#         self.speech_acts = dict()  # type: Dict[str, List[Dict[str, str]]]
+#
+#     def load(self) -> bool:
+#         """
+#         Call the two methods that read and extract protocol specification Yaml file.
+#
+#         :return: None
+#         """
+#         try:
+#             self._read_protocol_specification()
+#             self._extract_specification()
+#         except (OSError, IOError, yaml.YAMLError, ProtocolSpecificationParseError):
+#             raise
+#         return True
+#
+#     def _read_protocol_specification(self) -> None:
+#         """
+#         Read a protocol specification YAML file.
+#
+#         Open and read the specification YAML file, and extract the yaml documents.
+#         Raise any exceptions caught during file handling and reading the yaml file.
+#
+#         :return: None
+#         """
+#         try:
+#             with open(self.config_address, 'r') as stream:
+#                 yaml_data = yaml.safe_load_all(stream)
+#                 for document in yaml_data:
+#                     self.yaml_documents.append(document)
+#         except (OSError, IOError, yaml.MarkedYAMLError):
+#             raise
+#
+#     def _extract_specification(self) -> None:
+#         """
+#         Extract protocol specification data.
+#
+#         Extract the protocol specification data form yaml document objects.
+#         Raise protocol specification parsing exceptions if the specification's format is incorrect.
+#
+#         :return: None
+#         """
+#         if len(self.yaml_documents) >= 2 \
+#                 and self.yaml_documents[0] is not None \
+#                 and self.yaml_documents[1] is not None:
+#             for field, field_type in BASIC_FIELDS_AND_TYPES.items():
+#                 if field in self.yaml_documents[0]:
+#                     document_field_value = self.yaml_documents[0][field]
+#                     self.protocol_config.__setattr__(field, document_field_value)
+#                     if type(document_field_value) is not field_type:
+#                         raise ProtocolSpecificationParseError("Protocol's '{}' is not of type {}.".format(field, field_type))
+#                     if document_field_value == "":
+#                         raise ProtocolSpecificationParseError("Protocol's '{}' is empty.".format(field))
+#                 else:
+#                     raise ProtocolSpecificationParseError("Protocol's {} could not be found.".format(field))
+#             if "speech-acts" in self.yaml_documents[1]:
+#                 self.speech_acts = self.yaml_documents[1]["speech-acts"]
+#                 # Check speech-act's type is dict
+#                 if type(self.speech_acts) is not dict:
+#                     raise ProtocolSpecificationParseError("Protocol's 'speech-acts' is not a dictionary.")
+#                 # Check speech-act has at least 1 performative defined.
+#                 if len(self.speech_acts) < 1:  # potentially useless
+#                     raise ProtocolSpecificationParseError(
+#                         "There should be at least one performative in the speech-act.")
+#                 for performative in self.speech_acts.keys():
+#                     # Check speech-act's keys (i.e. performatives) are str
+#                     if type(performative) is not str:
+#                         raise ProtocolSpecificationParseError("A 'performative' is not specified as a string.")
+#                     # Check speech-act's keys (i.e. performatives) are not empty
+#                     if performative == "":
+#                         raise ProtocolSpecificationParseError("A 'performative' cannot be an empty string.")
+#                 for content_list in self.speech_acts.values():
+#                     # Check speech-act's values (i.e. content-sequences) are lists
+#                     if type(content_list) is not list and content_list is not None:
+#                         raise ProtocolSpecificationParseError(
+#                             "The contents of performatives must be described as a list.")
+#                     if content_list is not None:
+#                         for content_dict in content_list:
+#                             # Check each content definition is a dict
+#                             if type(content_dict) is not dict:
+#                                 raise ProtocolSpecificationParseError(
+#                                     "Each content (i.e. name and type) must be specified as a dictionary ")
+#                             # Check there is exactly 1 content dict per list element
+#                             if len(content_dict) != 1:
+#                                 raise ProtocolSpecificationParseError("Only one content dictionary per list element.")
+#                             for content_name, content_type in content_dict.items():
+#                                 # Check each content definition key/value (i.e. content name/type) is str
+#                                 if type(content_name) is not str or type(content_type) is not str:
+#                                     raise ProtocolSpecificationParseError("Contents' names and types must be string.")
+#                                 # Check each content definition key/value (i.e. content name/type) is not empty
+#                                 if content_name == "" or content_type == "":
+#                                     raise ProtocolSpecificationParseError("Contents' names and types cannot be empty.")
+#             else:
+#                 raise ProtocolSpecificationParseError(
+#                     "Protocol's 'speech-acts' could not be found.")
+#         else:
+#             raise ProtocolSpecificationParseError(
+#                 "There must be at least two YAML documents in the protocol specification YAML file.")
 
 
 class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
-    def __init__(self, protocol_template: ProtocolTemplate, output_path: str = '.') -> None:
+    def __init__(self, protocol_specification: ProtocolSpecification, output_path: str = '.') -> None:
         """
         Instantiate a protocol generator.
 
-        :param protocol_template: the protocol template object that encapsulates the protocol specification
+        :param protocol_specification: the protocol template object that encapsulates the protocol specification
         :return: None
         """
-        self.protocol_template = protocol_template
-        self.output_folder_path = os.path.join(output_path, to_snake_case(protocol_template.protocol_config.name) + "_protocol")
+        self.protocol_template = protocol_specification
+        self.output_folder_path = os.path.join(output_path, to_snake_case(protocol_specification.name) + "_protocol")
 
     def _custom_types_classes_str(self) -> str:
         """
@@ -271,8 +273,8 @@ class ProtocolGenerator:
         cls_str += self._custom_types_classes_str()
 
         # Class Header
-        cls_str += str.format('class {}Message(Message):\n', self.protocol_template.protocol_config.name)
-        cls_str += str.format('    \"\"\"{}\"\"\"\n\n', self.protocol_template.protocol_config.description)
+        cls_str += str.format('class {}Message(Message):\n', self.protocol_template.name)
+        cls_str += str.format('    \"\"\"{}\"\"\"\n\n', self.protocol_template.description)
 
         # __init__
         cls_str += '    def __init__(self, message_id: int = None, target: int = None, performative: str = None, ' \
@@ -282,12 +284,11 @@ class ProtocolGenerator:
                    'contents=contents, **kwargs)\n\n'
 
         # variables
-        cls_str += str.format('        self.name = \"{}\"\n', self.protocol_template.protocol_config.name)
-        cls_str += str.format('        self.author = \"{}\"\n', self.protocol_template.protocol_config.author)
-        cls_str += str.format('        self.version = \"{}\"\n', self.protocol_template.protocol_config.version)
-        cls_str += str.format('        self.license = \"{}\"\n', self.protocol_template.protocol_config.license)
-        cls_str += str.format('        self.url = \"{}\"\n', self.protocol_template.protocol_config.url)
-        cls_str += str.format('        self.description = \"{}\"\n\n', self.protocol_template.protocol_config.description)
+        cls_str += str.format('        self.name = \"{}\"\n', self.protocol_template.name)
+        cls_str += str.format('        self.author = \"{}\"\n', self.protocol_template.author)
+        cls_str += str.format('        self.version = \"{}\"\n', self.protocol_template.version)
+        cls_str += str.format('        self.license = \"{}\"\n', self.protocol_template.license)
+        cls_str += str.format('        self.description = \"{}\"\n\n', self.protocol_template.description)
         cls_str += str.format('        self.performatives = {}\n', self._performatives_set())
         cls_str += str.format('        self.speech_acts = {}\n\n', self._speech_acts_str())
         cls_str += '#        assert self.check_consistency()\n\n'
@@ -295,7 +296,7 @@ class ProtocolGenerator:
         # check_consistency method
         cls_str += '    def check_consistency(self) -> bool:\n'
         cls_str += str.format('        \"\"\"Check that the message follows the {} protocol\"\"\"\n',
-                              self.protocol_template.protocol_config.name)
+                              self.protocol_template.name)
         cls_str += '        try:\n'
 
         cls_str += '            assert self.is_set(\"message_id\"), \"message_id is not set\"\n'
@@ -365,21 +366,21 @@ class ProtocolGenerator:
         cls_str += "from aea.protocols.base import Message\n"
         cls_str += "from aea.protocols.base import Serializer\n"
         cls_str += str.format("from {}.message import {}Message\n\n", self.output_folder_path,
-                              self.protocol_template.protocol_config.name)
+                              self.protocol_template.name)
         cls_str += "import json\n"
         cls_str += "import base64\n"
         cls_str += "import pickle\n"
         cls_str += "from typing import cast, List\n\n\n"
 
         # Class Header
-        cls_str += str.format('class {}Serializer(Serializer):\n', self.protocol_template.protocol_config.name)
+        cls_str += str.format('class {}Serializer(Serializer):\n', self.protocol_template.name)
         cls_str += str.format('    \"\"\"Serialization for {} protocol\"\"\"\n\n',
-                              self.protocol_template.protocol_config.description.lower())
+                              self.protocol_template.description.lower())
 
         # encoder
         cls_str += str.format('    def encode(self, msg: Message) -> bytes:\n')
         cls_str += str.format('        \"\"\"Encode a \'{}\' message into bytes.\"\"\"\n',
-                              self.protocol_template.protocol_config.name)
+                              self.protocol_template.name)
         cls_str += "        body = {}  # Dict[str, Any]\n"
         cls_str += "        body[\"message_id\"] = msg.get(\"message_id\")\n"
         cls_str += "        body[\"target\"] = msg.get(\"target\")\n"
@@ -393,7 +394,7 @@ class ProtocolGenerator:
         # decoder
         cls_str += str.format('    def decode(self, obj: bytes) -> Message:\n')
         cls_str += str.format('        \"\"\"Decode bytes into a \'{}\' message.\"\"\"\n',
-                              self.protocol_template.protocol_config.name)
+                              self.protocol_template.name)
         cls_str += "        json_body = json.loads(obj.decode(\"utf-8\"))\n"
         cls_str += "        message_id = json_body[\"message_id\"]\n"
         cls_str += "        target = json_body[\"target\"]\n"
@@ -401,7 +402,7 @@ class ProtocolGenerator:
         cls_str += "        contents_list_bytes = base64.b64decode(json_body[\"contents\"])\n"
         cls_str += "        contents_list = pickle.loads(contents_list_bytes)\n\n"
         cls_str += str.format("        return {}Message(message_id=message_id, target=target, "
-                              "performative=performative, contents=contents_list)\n", self.protocol_template.protocol_config.name)
+                              "performative=performative, contents=contents_list)\n", self.protocol_template.name)
 
         return cls_str
 
@@ -427,7 +428,7 @@ class ProtocolGenerator:
 
         with open(pathname, 'w') as pyfile:
             pyfile.write(str.format('\"\"\"This module contains the support resources for the {} protocol.\"\"\"\n',
-                                    self.protocol_template.protocol_config.name))
+                                    self.protocol_template.name))
 
     def _generate_protocol_yaml(self) -> None:
         """
@@ -438,12 +439,11 @@ class ProtocolGenerator:
         pathname = path.join(self.output_folder_path, PROTOCOL_FILE_NAME)
 
         with open(pathname, 'w') as yamlfile:
-            yamlfile.write(str.format('name: {}\n', self.protocol_template.protocol_config.name))
-            yamlfile.write(str.format('author: {}\n', self.protocol_template.protocol_config.author))
-            yamlfile.write(str.format('version: {}\n', self.protocol_template.protocol_config.version))
-            yamlfile.write(str.format('license: {}\n', self.protocol_template.protocol_config.license))
-            yamlfile.write(str.format('url: {}\n', self.protocol_template.protocol_config.url))
-            yamlfile.write(str.format('description: {}\n', self.protocol_template.protocol_config.description))
+            yamlfile.write(str.format('name: {}\n', self.protocol_template.name))
+            yamlfile.write(str.format('author: {}\n', self.protocol_template.author))
+            yamlfile.write(str.format('version: {}\n', self.protocol_template.version))
+            yamlfile.write(str.format('license: {}\n', self.protocol_template.license))
+            yamlfile.write(str.format('description: {}\n', self.protocol_template.description))
 
         # Can do this once protocol specification schema is created
         # config_loader = ConfigLoader(PATH_TO_SPEC_SCHEMA, ProtocolConfig)

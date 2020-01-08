@@ -55,6 +55,11 @@ We cannot have two items with the same package name since the keys of a YAML obj
 Dependencies = Dict[str, Dependency]
 
 
+class ProtocolSpecificationParseError(Exception):
+    """Exception for parsing a protocol specification file."""
+    pass
+
+
 class JSONSerializable(ABC):
     """Interface for JSON-serializable objects."""
 
@@ -712,3 +717,100 @@ class AgentConfig(PackageConfiguration):
         agent_config.default_ledger = default_ledger_id
 
         return agent_config
+
+
+class SpeechActContentConfig(Configuration):
+    """Handle a speech_act content configuration."""
+
+    def __init__(self, **args):
+        """Initialize a speech_act content configuration."""
+        self.args = args  # type: Dict[str, str]
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return self.args
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        return SpeechActContentConfig(
+            **obj
+        )
+
+class ProtocolSpecification(ProtocolConfig):
+    """Handle protocol specification."""
+
+    def __init__(self,
+                 name: str = "",
+                 author: str = "",
+                 version: str = "",
+                 license: str = "",
+                 description: str = ""):
+        """Initialize a protocol specification configuration object."""
+        super().__init__(name, author, version, license, description=description)
+        self.speech_acts = CRUDCollection[SpeechActContentConfig]()
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "name": self.name,
+            "author": self.author,
+            "version": self.version,
+            "license": self.license,
+            "description": self.description,
+            "speech_acts": {key: speech_act.json for key, speech_act in self.speech_acts.read_all()},
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        protocol_specification = ProtocolSpecification(
+            name=cast(str, obj.get("name")),
+            author=cast(str, obj.get("author")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            description=cast(str, obj.get("description", ""))
+        )
+        for speech_act, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
+            speech_act_content_config = SpeechActContentConfig.from_json(speech_act_content)
+            protocol_specification.speech_acts.create(speech_act, speech_act_content_config)
+        return protocol_specification
+
+    def validate(self):
+        # Check speech_act's type is dict
+        if type(self.speech_acts) is not dict:
+            raise ProtocolSpecificationParseError("Protocol's 'speech_acts' is not a dictionary.")
+        # Check speech_act has at least 1 performative defined.
+        if len(self.speech_acts) < 1:  # potentially useless
+            raise ProtocolSpecificationParseError(
+                "There should be at least one performative in the speech_act.")
+        for performative in self.speech_acts.keys():
+            # Check speech_act's keys (i.e. performatives) are str
+            if type(performative) is not str:
+                raise ProtocolSpecificationParseError("A 'performative' is not specified as a string.")
+            # Check speech_act's keys (i.e. performatives) are not empty
+            if performative == "":
+                raise ProtocolSpecificationParseError("A 'performative' cannot be an empty string.")
+        for content_list in self.speech_acts.values():
+            # Check speech_act's values (i.e. content-sequences) are dicts
+            if type(content_list) is not dict and content_list is not None:
+                raise ProtocolSpecificationParseError(
+                    "The contents of performatives must be described as a list.")
+            if content_list is not None:
+                for content_dict in content_list:
+                    # Check each content definition is a dict
+                    if type(content_dict) is not dict:
+                        raise ProtocolSpecificationParseError(
+                            "Each content (i.e. name and type) must be specified as a dictionary ")
+                    # Check there is exactly 1 content dict per list element
+                    if len(content_dict) != 1:
+                        raise ProtocolSpecificationParseError("Only one content dictionary per list element.")
+                    for content_name, content_type in content_dict.items():
+                        # Check each content definition key/value (i.e. content name/type) is str
+                        if type(content_name) is not str or type(content_type) is not str:
+                            raise ProtocolSpecificationParseError("Contents' names and types must be string.")
+                        # Check each content definition key/value (i.e. content name/type) is not empty
+                        if content_name == "" or content_type == "":
+                            raise ProtocolSpecificationParseError("Contents' names and types cannot be empty.")
