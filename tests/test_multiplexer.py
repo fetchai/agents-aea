@@ -163,7 +163,8 @@ def test_multiplexer_disconnect_all_raises_error():
     multiplexer.disconnect()
 
 
-def test_multiplexer_disconnect_one_raises_error_many_connections():
+@pytest.mark.asyncio
+async def test_multiplexer_disconnect_one_raises_error_many_connections():
     """Test the case when the multiplexer raises an exception while attempting the disconnection of one connection."""
     with LocalNode() as node:
         tmpdir = Path(tempfile.mktemp())
@@ -196,6 +197,9 @@ def test_multiplexer_disconnect_one_raises_error_many_connections():
         assert not connection_2.connection_status.is_connected
         assert connection_3.connection_status.is_connected
 
+        # clean the test up.
+        await connection_3.disconnect()
+        multiplexer.disconnect()
         shutil.rmtree(tmpdir)
 
 
