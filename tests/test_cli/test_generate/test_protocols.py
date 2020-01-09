@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the `aea scaffold protocol` sub-command."""
+"""This test module contains the tests for the `aea generate protocol` sub-command."""
 # import filecmp
 import json
 import os
@@ -40,7 +40,7 @@ from ...conftest import CLI_LOG_OPTION, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURA
 
 
 class TestGenerateProtocol:
-    """Test that the command 'aea scaffold protocol' works correctly in correct preconditions."""
+    """Test that the command 'aea generate protocol' works correctly in correct preconditions."""
 
     @classmethod
     def setup_class(cls):
@@ -62,7 +62,7 @@ class TestGenerateProtocol:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        # scaffold protocol
+        # generate protocol
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification], standalone_mode=False)
 
     def test_exit_code_equal_to_0(self):
@@ -70,7 +70,7 @@ class TestGenerateProtocol:
         assert self.result.exit_code == 0
 
     # def test_resource_folder_contains_module_message(self):
-    #     """Test that the resource folder contains scaffold message.py module."""
+    #     """Test that the protocol folder contains message.py module."""
     #     p = Path(self.t, self.agent_name, "protocols", "two_party_negotiation", "message.py")
     #     original = Path(AEA_DIR, "protocols", "two_party_negotiation", "message.py")
     #     assert filecmp.cmp(p, original)

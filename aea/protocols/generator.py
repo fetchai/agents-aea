@@ -27,6 +27,7 @@ from aea.configurations.base import ProtocolSpecification
 DEFAULT_TYPES = ["int", "float", "bool", "str", "bytes", "list", "dict", "tuple", "set"]
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
+PATH_TO_MESSAGE_CLASS = "packages.protocols"
 INIT_FILE_NAME = "__init__.py"
 MESSAGE_FILE_NAME = "message.py"
 SERIALIZATION_FILE_NAME = "serialization.py"
@@ -41,6 +42,11 @@ BASIC_FIELDS_AND_TYPES = {
 }
 
 
+def to_camel_case(text):
+    """Convert a text in snake_case format into the CamelCase format."""
+    return ''.join(word.title() for word in text.split('_'))
+
+
 class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
@@ -48,7 +54,8 @@ class ProtocolGenerator:
         """
         Instantiate a protocol generator.
 
-        :param protocol_specification: the protocol template object that encapsulates the protocol specification
+        :param protocol_specification: the protocol specification object
+        :param output_path: the path to the location in which the protocol module is to be generated.
         :return: None
         """
         self.protocol_specification = protocol_specification
@@ -65,8 +72,8 @@ class ProtocolGenerator:
         custom_types_set = set()
 
         # extract contents' types and separate custom types
-        for speech_act, speach_act_content_config in self.protocol_specification.speech_acts.read_all():
-            for content_type in speach_act_content_config.args.values():
+        for speech_act, speech_act_content_config in self.protocol_specification.speech_acts.read_all():
+            for content_type in speech_act_content_config.args.values():
                 type_set.add(content_type)
                 if content_type not in DEFAULT_TYPES:
                     custom_types_set.add(content_type)
@@ -80,7 +87,7 @@ class ProtocolGenerator:
             cls_str += '        if type(other) is type(self):\n'
             cls_str += '            raise NotImplementedError\n'
             cls_str += '        else:\n'
-            cls_str += '            return False\n\n'
+            cls_str += '            return False'
 
         return cls_str
 
@@ -91,7 +98,7 @@ class ProtocolGenerator:
         :return: the performatives set string
         """
         performatives_set = set()
-        for performative, speach_act_content_config in self.protocol_specification.speech_acts.read_all():
+        for performative, speech_act_content_config in self.protocol_specification.speech_acts.read_all():
             performatives_set.add(performative)
         return performatives_set
 
@@ -101,23 +108,25 @@ class ProtocolGenerator:
 
         :return: the speech-act dictionary string
         """
-        speech_act_str = "{"
-        for performative, speach_act_content_config in self.protocol_specification.speech_acts.read_all():
+        speech_act_str = "{\n"
+        for performative, speech_act_content_config in self.protocol_specification.speech_acts.read_all():
+            speech_act_str += "            "
             speech_act_str += "\'"
             speech_act_str += performative
-            speech_act_str += "\': ["
-            if len(speach_act_content_config.args.items()) > 0:
-                for key, value in speach_act_content_config.args.items():
-                    speech_act_str += "("
+            speech_act_str += "\': {"
+            if len(speech_act_content_config.args.items()) > 0:
+                speech_act_str += "\n"
+                for key, value in speech_act_content_config.args.items():
+                    speech_act_str += "                "
                     speech_act_str += "\'"
                     speech_act_str += key
                     speech_act_str += "\'"
                     speech_act_str += ", "
                     speech_act_str += value
-                    speech_act_str += "), "
-                speech_act_str = speech_act_str[:-2]
-            speech_act_str += "], "
-        speech_act_str = speech_act_str[:-2]
+                    speech_act_str += ", \n"
+                speech_act_str = speech_act_str[:-3]
+            speech_act_str += "}, \n"
+        speech_act_str = speech_act_str[:-3]
         speech_act_str += "}"
         return speech_act_str
 
@@ -136,17 +145,16 @@ class ProtocolGenerator:
 
         # Custom classes
         cls_str += self._custom_types_classes_str()
+        cls_str += '\n\n\n'
 
         # Class Header
-        cls_str += str.format('class {}Message(Message):\n', self.protocol_specification.name)
+        cls_str += str.format('class {}Message(Message):\n', to_camel_case(self.protocol_specification.name))
         cls_str += str.format('    \"\"\"{}\"\"\"\n\n', self.protocol_specification.description)
 
         # __init__
-        cls_str += '    def __init__(self, message_id: int, target: int, performative: str, ' \
-                   'contents: List, **kwargs):\n'
+        cls_str += '    def __init__(self, message_id: int, target: int, performative: str, contents: List, **kwargs):\n'
         cls_str += '        \"\"\"Initialise.\"\"\"\n'
-        cls_str += '        super().__init__(message_id=message_id, target=target, performative=performative, ' \
-                   'contents=contents, **kwargs)\n\n'
+        cls_str += '        super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)\n\n'
 
         # variables
         cls_str += str.format('        self.performatives = {}\n', self._performatives_set())
@@ -155,8 +163,7 @@ class ProtocolGenerator:
 
         # check_consistency method
         cls_str += '    def check_consistency(self) -> bool:\n'
-        cls_str += str.format('        \"\"\"Check that the message follows the {} protocol\"\"\"\n',
-                              self.protocol_specification.name)
+        cls_str += str.format('        \"\"\"Check that the message follows the {} protocol\"\"\"\n', self.protocol_specification.name)
         cls_str += '        try:\n'
 
         cls_str += '            assert self.is_set(\"message_id\"), \"message_id is not set\"\n'
@@ -178,18 +185,15 @@ class ProtocolGenerator:
 
         cls_str += '            # Light Protocol 2\n'
         cls_str += '            # Check correct performative\n'
-        cls_str += '            assert performative in self.performatives,' \
-                   ' \"performative is not in the list of allowed performative\"\n\n'
+        cls_str += '            assert performative in self.performatives, \"performative is not in the list of allowed performative\"\n\n'
 
         cls_str += '            # Check correct contents\n'
         cls_str += '            content_sequence_definition = self.speech_acts[performative]  # type is List\n'
         cls_str += '            # Check number of contents\n'
-        cls_str += '            assert len(contents) == len(content_sequence_definition), ' \
-                   '\"incorrect number of contents\"\n'
+        cls_str += '            assert len(contents) == len(content_sequence_definition), \"incorrect number of contents\"\n'
         cls_str += '            # Check the content is of the correct type\n'
         cls_str += '            for content in range(len(content_sequence_definition)):\n'
-        cls_str += '                assert isinstance(contents[content], content_sequence_definition[content][1]), ' \
-                   '\"incorrect content type\"\n\n'
+        cls_str += '                assert isinstance(contents[content], content_sequence_definition[content][1]), \"incorrect content type\"\n\n'
 
         cls_str += '            # Light Protocol 3\n'
         cls_str += '            if message_id == 1:\n'
@@ -225,22 +229,19 @@ class ProtocolGenerator:
         # Imports
         cls_str += "from aea.protocols.base import Message\n"
         cls_str += "from aea.protocols.base import Serializer\n"
-        cls_str += str.format("from {}.message import {}Message\n\n", self.output_folder_path,
-                              self.protocol_specification.name)
+        cls_str += str.format("from {}.{}.message import {}Message\n\n", PATH_TO_MESSAGE_CLASS, self.protocol_specification.name,
+                              to_camel_case(self.protocol_specification.name))
         cls_str += "import json\n"
         cls_str += "import base64\n"
-        cls_str += "import pickle\n"
-        cls_str += "from typing import cast, List\n\n\n"
+        cls_str += "import pickle\n\n\n"
 
         # Class Header
-        cls_str += str.format('class {}Serializer(Serializer):\n', self.protocol_specification.name)
-        cls_str += str.format('    \"\"\"Serialization for {} protocol\"\"\"\n\n',
-                              self.protocol_specification.description.lower())
+        cls_str += str.format('class {}Serializer(Serializer):\n', to_camel_case(self.protocol_specification.name))
+        cls_str += str.format('    \"\"\"Serialization for {} protocol\"\"\"\n\n', self.protocol_specification.description.lower())
 
         # encoder
         cls_str += str.format('    def encode(self, msg: Message) -> bytes:\n')
-        cls_str += str.format('        \"\"\"Encode a \'{}\' message into bytes.\"\"\"\n',
-                              self.protocol_specification.name)
+        cls_str += str.format('        \"\"\"Encode a \'{}\' message into bytes.\"\"\"\n', to_camel_case(self.protocol_specification.name))
         cls_str += "        body = {}  # Dict[str, Any]\n"
         cls_str += "        body[\"message_id\"] = msg.get(\"message_id\")\n"
         cls_str += "        body[\"target\"] = msg.get(\"target\")\n"
@@ -253,16 +254,15 @@ class ProtocolGenerator:
 
         # decoder
         cls_str += str.format('    def decode(self, obj: bytes) -> Message:\n')
-        cls_str += str.format('        \"\"\"Decode bytes into a \'{}\' message.\"\"\"\n',
-                              self.protocol_specification.name)
+        cls_str += str.format('        \"\"\"Decode bytes into a \'{}\' message.\"\"\"\n', to_camel_case(self.protocol_specification.name))
         cls_str += "        json_body = json.loads(obj.decode(\"utf-8\"))\n"
         cls_str += "        message_id = json_body[\"message_id\"]\n"
         cls_str += "        target = json_body[\"target\"]\n"
         cls_str += "        performative = json_body[\"performative\"]\n\n"
         cls_str += "        contents_list_bytes = base64.b64decode(json_body[\"contents\"])\n"
         cls_str += "        contents_list = pickle.loads(contents_list_bytes)\n\n"
-        cls_str += str.format("        return {}Message(message_id=message_id, target=target, "
-                              "performative=performative, contents=contents_list)\n", self.protocol_specification.name)
+        cls_str += str.format("        return {}Message(message_id=message_id, target=target, performative=performative, contents=contents_list)\n",
+                              to_camel_case(self.protocol_specification.name))
 
         return cls_str
 
@@ -287,8 +287,7 @@ class ProtocolGenerator:
         pathname = path.join(self.output_folder_path, INIT_FILE_NAME)
 
         with open(pathname, 'w') as pyfile:
-            pyfile.write(str.format('\"\"\"This module contains the support resources for the {} protocol.\"\"\"\n',
-                                    self.protocol_specification.name))
+            pyfile.write(str.format('\"\"\"This module contains the support resources for the {} protocol.\"\"\"\n', self.protocol_specification.name))
 
     def _generate_protocol_yaml(self) -> None:
         """
