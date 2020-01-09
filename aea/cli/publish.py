@@ -20,7 +20,7 @@
 """Implementation of the 'aea publish' subcommand."""
 import click
 
-from aea.cli.common import pass_ctx, Context, DEFAULT_AEA_CONFIG_FILE, Path
+from aea.cli.common import pass_ctx, Context
 from aea.cli.registry.publish import publish_agent, save_agent_locally
 from aea.cli.registry.utils import get_default_registry_path
 
