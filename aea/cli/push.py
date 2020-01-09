@@ -22,6 +22,7 @@ import click
 
 from aea.cli.common import pass_ctx, Context, PublicIdParameter
 from aea.cli.registry.push import push_item, save_item_locally
+from aea.cli.registry.utils import get_default_registry_path
 
 
 @click.group()
@@ -33,6 +34,9 @@ def push(ctx: Context, registry):
     """Push item to Registry or save it in local packages."""
     ctx.set_config("registry", registry)
 
+    packages_path = get_default_registry_path(ctx)
+    ctx.set_config("packages_path", packages_path)
+
 
 @push.command(name='connection')
 @click.argument('connection-id', type=PublicIdParameter(), required=True)
@@ -40,7 +44,9 @@ def push(ctx: Context, registry):
 def connection(ctx: Context, connection_id):
     """Push connection to Registry or save it in local packages."""
     if not ctx.config.get("registry"):
-        save_item_locally('connection', connection_id)
+        save_item_locally(
+            'connection', connection_id, ctx.config.get("packages_path")
+        )
     else:
         push_item('connection', connection_id.name)
 
@@ -51,7 +57,9 @@ def connection(ctx: Context, connection_id):
 def protocol(ctx: Context, protocol_id):
     """Push protocol to Registry or save it in local packages."""
     if not ctx.config.get("registry"):
-        save_item_locally('protocol', protocol_id)
+        save_item_locally(
+            'protocol', protocol_id, ctx.config.get("packages_path")
+        )
     else:
         push_item('protocol', protocol_id.name)
 
@@ -62,6 +70,8 @@ def protocol(ctx: Context, protocol_id):
 def skill(ctx: Context, skill_id):
     """Push skill to Registry or save it in local packages."""
     if not ctx.config.get("registry"):
-        save_item_locally('skill', skill_id)
+        save_item_locally(
+            'skill', skill_id, ctx.config.get("packages_path")
+        )
     else:
         push_item('skill', skill_id.name)

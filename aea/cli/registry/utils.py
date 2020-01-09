@@ -27,7 +27,10 @@ import click
 import requests
 import yaml
 
-from aea.cli.common import logger, DEFAULT_REGISTRY_PATH, AEAConfigException
+from aea.cli.common import (
+    logger, AEAConfigException, Context, DEFAULT_REGISTRY_PATH,
+    DEFAULT_AEA_CONFIG_FILE
+)
 from aea.cli.registry.settings import (
     REGISTRY_API_URL,
     CLI_CONFIG_PATH,
@@ -306,18 +309,39 @@ def get_item_source_path(
     return source_path
 
 
-def get_item_target_path(item_type_plural: str, item_name: str) -> str:
+def get_item_target_path(
+    item_type_plural: str, item_name: str, packages_path: str
+) -> str:
     """
     Get the item target path.
 
     :param item_type_plural: the item type (plural)
     :param item_name: the item name
+    :param packages_path: str path to packages dir
+
     :return: the item target path
     """
-    packages_path = DEFAULT_REGISTRY_PATH
     target_path = os.path.join(packages_path, item_type_plural, item_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in packages folder.'.format(item_name)
         )
     return target_path
+
+
+def get_default_registry_path(click_ctx: Context) -> str:
+    """
+    Get agent's default registry path (packages path).
+
+    :param click_ctx context object of click command.
+
+    :return: str agent's default registry path.
+    """
+    try:
+        with open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8") as f:
+            agent_config = click_ctx.agent_loader.load(f)
+            registry_path = agent_config.registry_path
+    except FileNotFoundError:
+        registry_path = os.path.join(click_ctx.cwd, DEFAULT_REGISTRY_PATH)
+
+    return registry_path

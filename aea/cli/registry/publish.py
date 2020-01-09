@@ -78,9 +78,11 @@ def publish_agent():
     )
 
 
-def save_agent_locally() -> None:
+def save_agent_locally(packages_path: str) -> None:
     """
     Save agent to local packages.
+
+    :param packages_path: str path to packages dir
 
     :return: None
     """
@@ -91,7 +93,7 @@ def save_agent_locally() -> None:
     agent_config = _load_agent_config(agent_config_path)
     name = agent_config['agent_name']
 
-    target_dir = get_item_target_path(item_type_plural, name)
+    target_dir = get_item_target_path(item_type_plural, name, packages_path)
     # TODO: now - copy only config file. Change to copy whole agent.
     source_path = os.path.join(cwd, DEFAULT_AEA_CONFIG_FILE)
     if not os.path.exists(target_dir):
