@@ -157,9 +157,16 @@ class ProtocolGenerator:
         cls_str += '        super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)\n\n'
 
         # variables
-        cls_str += str.format('        self.performatives = {}\n', self._performatives_set())
+        # cls_str += str.format('        self.performatives = {}\n', self._performatives_set())
         cls_str += str.format('        self.speech_acts = {}\n\n', self._speech_acts_str())
         cls_str += '        assert self.check_consistency()\n\n'
+
+        cls_str += '    @property\n'
+        cls_str += '    def performatives(self) -> set:\n'
+        cls_str += '        performatives_set = set()\n'
+        cls_str += '        for performative in self.speech_acts:\n'
+        cls_str += '            performatives_set.add(performative)\n'
+        cls_str += '        return performatives_set\n\n'
 
         # check_consistency method
         cls_str += '    def check_consistency(self) -> bool:\n'

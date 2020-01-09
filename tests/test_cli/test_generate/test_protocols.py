@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea generate protocol` sub-command."""
-# import filecmp
+import filecmp
 import json
 import os
 import shutil
@@ -27,14 +27,14 @@ import unittest.mock
 from pathlib import Path
 
 import jsonschema
-# import yaml
+import yaml
 from ...common.click_testing import CliRunner
 from jsonschema import Draft4Validator  # ValidationError
 
-# from aea import AEA_DIR
+from aea import AEA_DIR
 import aea.cli.common
 import aea.configurations.base
-# from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.cli import cli
 from ...conftest import CLI_LOG_OPTION, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CUR_PATH
 
@@ -69,23 +69,23 @@ class TestGenerateProtocol:
         """Test that the exit code is equal to 0."""
         assert self.result.exit_code == 0
 
-    # def test_resource_folder_contains_module_message(self):
-    #     """Test that the protocol folder contains message.py module."""
-    #     p = Path(self.t, self.agent_name, "protocols", "two_party_negotiation", "message.py")
-    #     original = Path(AEA_DIR, "protocols", "two_party_negotiation", "message.py")
-    #     assert filecmp.cmp(p, original)
+    def test_resource_folder_contains_module_message(self):
+        """Test that the protocol folder contains message.py module."""
+        p = Path(self.t, self.agent_name, "protocols", "two_party_negotiation", "message.py")
+        original = Path(CUR_PATH, "data", "generator", "two_party_negotiation", "message.py")
+        assert filecmp.cmp(p, original)
 
-    # def test_resource_folder_contains_module_protocol(self):
-    #     """Test that the resource folder contains scaffold protocol.py module."""
-    #     p = Path(self.t, self.agent_name, "protocols", "two_party_negotiation", "serialization.py")
-    #     original = Path(AEA_DIR, "protocols", "two_party_negotiation", "serialization.py")
-    #     assert filecmp.cmp(p, original)
+    def test_resource_folder_contains_module_protocol(self):
+        """Test that the protocol folder contains protocol.py module."""
+        p = Path(self.t, self.agent_name, "protocols", "two_party_negotiation", "serialization.py")
+        original = Path(CUR_PATH, "data", "generator", "two_party_negotiation", "serialization.py")
+        assert filecmp.cmp(p, original)
 
-    # def test_resource_folder_contains_configuration_file(self):
-    #     """Test that the resource folder contains a good configuration file."""
-    #     p = Path(self.t, self.agent_name, "protocols", "two_party_negotiation", DEFAULT_PROTOCOL_CONFIG_FILE)
-    #     config_file = yaml.safe_load(open(p))
-    #     self.validator.validate(instance=config_file)
+    def test_resource_folder_contains_configuration_file(self):
+        """Test that the protocol folder contains a structurally valid configuration file."""
+        p = Path(self.t, self.agent_name, "protocols", "two_party_negotiation", DEFAULT_PROTOCOL_CONFIG_FILE)
+        config_file = yaml.safe_load(open(p))
+        self.validator.validate(instance=config_file)
 
     @classmethod
     def teardown_class(cls):
@@ -95,7 +95,6 @@ class TestGenerateProtocol:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
 
 # class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
 #     """Test that the command 'aea generate protocol' fails when a folder with 'generate' name already."""
