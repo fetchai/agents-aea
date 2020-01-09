@@ -43,6 +43,7 @@ def _remove_item(ctx: Context, item_type, item):
     The parameter 'item' can be either the public id (e.g. 'fetchai/default:0.1.0') or
     the name of the package (e.g. 'default').
     """
+    # allow for removal with both item public id and item name
     try:
         item_id = PublicId.from_string(item)
         item_name = item_id.name

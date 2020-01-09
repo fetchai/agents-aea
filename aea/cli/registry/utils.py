@@ -28,8 +28,7 @@ import requests
 import yaml
 
 from aea.cli.common import (
-    logger, AEAConfigException, Context, DEFAULT_REGISTRY_PATH,
-    DEFAULT_AEA_CONFIG_FILE
+    logger, AEAConfigException
 )
 from aea.cli.registry.settings import (
     REGISTRY_API_URL,
@@ -288,60 +287,3 @@ def clean_tarfiles(func):
             return result
 
     return wrapper
-
-
-def get_item_source_path(
-    cwd: str, item_type_plural: str, item_name: str
-) -> str:
-    """
-    Get the item source path.
-
-    :param cwd: the current working directory
-    :param item_type_plural: the item type (plural)
-    :param item_name: the item name
-    :return: the item source path
-    """
-    source_path = os.path.join(cwd, item_type_plural, item_name)
-    if not os.path.exists(source_path):
-        raise click.ClickException(
-            'Item "{}" not found in {}.'.format(item_name, cwd)
-        )
-    return source_path
-
-
-def get_item_target_path(
-    item_type_plural: str, item_name: str, packages_path: str
-) -> str:
-    """
-    Get the item target path.
-
-    :param item_type_plural: the item type (plural)
-    :param item_name: the item name
-    :param packages_path: str path to packages dir
-
-    :return: the item target path
-    """
-    target_path = os.path.join(packages_path, item_type_plural, item_name)
-    if os.path.exists(target_path):
-        raise click.ClickException(
-            'Item "{}" already exists in packages folder.'.format(item_name)
-        )
-    return target_path
-
-
-def get_default_registry_path(click_ctx: Context) -> str:
-    """
-    Get agent's default registry path (packages path).
-
-    :param click_ctx context object of click command.
-
-    :return: str agent's default registry path.
-    """
-    try:
-        with open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8") as f:
-            agent_config = click_ctx.agent_loader.load(f)
-            registry_path = agent_config.registry_path
-    except FileNotFoundError:
-        registry_path = os.path.join(click_ctx.cwd, DEFAULT_REGISTRY_PATH)
-
-    return registry_path

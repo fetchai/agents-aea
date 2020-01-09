@@ -234,7 +234,7 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}'
         """
-        self.mocked_logger_error.assert_called_once_with("Error when validating the skill configuration file.")
+        self.mocked_logger_error.assert_called_once_with("Error when validating the protocol configuration file.")
 
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.

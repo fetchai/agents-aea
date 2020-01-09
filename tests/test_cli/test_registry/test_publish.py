@@ -23,7 +23,7 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli.registry.publish import (
-    publish_agent, _load_agent_config, save_agent_locally
+    publish_agent, _load_agent_config
 )
 
 
@@ -96,35 +96,3 @@ class LoadAgentConfigTestCase(TestCase):
             _load_agent_config('path')
 
         load_yaml_mock.assert_not_called()
-
-
-@mock.patch('aea.cli.registry.publish.copyfile')
-@mock.patch('aea.cli.registry.publish.os.makedirs')
-@mock.patch('aea.cli.registry.publish.os.path.exists', return_value=False)
-@mock.patch(
-    'aea.cli.registry.publish.get_item_target_path',
-    return_value='target-dir'
-)
-@mock.patch(
-    'aea.cli.registry.publish._load_agent_config',
-    return_value={'agent_name': 'agent-name'}
-)
-@mock.patch('aea.cli.registry.publish.os.path.join', return_value='joined-path')
-@mock.patch('aea.cli.registry.publish.os.getcwd', return_value='cwd')
-class SaveAgentLocallyTestCase(TestCase):
-    """Test case for save_agent_locally method."""
-
-    def test_save_agent_locally_positive(
-        self,
-        getcwd_mock,
-        path_join_mock,
-        _load_agent_config_mock,
-        get_item_target_path_mock,
-        path_exists_mock,
-        makedirs_mock,
-        copyfile_mock
-    ):
-        """Test for save_agent_locally positive result."""
-        save_agent_locally('packages_path')
-        makedirs_mock.assert_called_once_with('target-dir', exist_ok=True)
-        copyfile_mock.assert_called_once_with('joined-path', 'joined-path')
