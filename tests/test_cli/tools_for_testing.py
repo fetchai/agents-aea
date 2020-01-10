@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 """Tools used for CLI registry testing."""
 
+from typing import List
+
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 
 
@@ -27,9 +29,13 @@ class AgentConfigMock:
     registry_path = 'registry'
     name = 'name'
 
+    connections: List[str] = []
+    protocols: List[str] = []
+    skills: List[str] = []
+
 
 class ContextMock:
-    """An object to mock Click Context."""
+    """An object to mock Context."""
 
     cwd = 'cwd'
     agent_config = AgentConfigMock()

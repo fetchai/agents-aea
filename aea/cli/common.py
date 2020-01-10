@@ -112,7 +112,7 @@ def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
     :return None
     """
     try:
-        path = Path(DEFAULT_AEA_CONFIG_FILE)
+        path = Path(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE))
         with open(str(path), mode="r", encoding="utf-8") as fp:
             ctx.agent_config = ctx.agent_loader.load(fp)
             logging.config.dictConfig(ctx.agent_config.logging_config)
