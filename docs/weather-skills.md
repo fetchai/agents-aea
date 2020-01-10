@@ -3,13 +3,14 @@ The AEA weather skills demonstrate an interaction between two AEAs.
 * The provider of weather data (the weather station).
 * The seller of weather data (the weather client).
 
+## Preparation instructions
 
 ### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 
-## Launch an OEF node
+### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -17,7 +18,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for all the following demos.
 
-## Demo 1: no ledger payment
+## Demo instructions 1: no ledger payment
 
 The AEAs negotiate and then transfer the data. No payment takes place. This demo serves as a demonstration of the negotiation steps.
 
@@ -113,7 +114,7 @@ This diagram shows the communication between the various entities as data is suc
 </div>
 Note that the client informs the weather station that funds have been transfereed, but in this example no funds actually get transfered.
 
-## Demo 2: Fetch.ai ledger payment
+## Demo instructions 2: Fetch.ai ledger payment
 
 A demo to run the same scenario but with a true ledger transaction on Fetch.ai `testnet`. This demo assumes the weather client trusts the weather station to send the weather data upon successful payment.
 
@@ -125,7 +126,7 @@ Create the AEA that will provide weather measurements.
 aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/weather_station_ledger:0.1.0
+aea add skill fetchai/weather_station:0.1.0
 aea install
 ```
 
@@ -137,7 +138,7 @@ In another terminal, create the AEA that will query the weather station.
 aea create my_weather_client
 cd my_weather_client
 aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/weather_client_ledger:0.1.0
+aea add skill fetchai/weather_client:0.1.0
 aea install
 ```
 
@@ -187,7 +188,7 @@ aea delete my_weather_station
 aea delete my_weather_client
 ```
 
-## Demo 3: Ethereum ledger payment
+## Demo instructions 3: Ethereum ledger payment
 
 A demo to run the same scenario but with a true ledger transaction on the Ethereum Ropsten `testnet`. This demo assumes the weather client trusts the weather station to send the weather data upon successful payment.
 
@@ -199,7 +200,7 @@ Create the AEA that will provide weather measurements.
 aea create my_weather_station
 cd my_weather_station
 aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/weather_station_ledger:0.1.0
+aea add skill fetchai/weather_station:0.1.0
 aea install
 ```
 
@@ -211,7 +212,7 @@ In another terminal, create the AEA that will query the weather station.
 aea create my_weather_client
 cd my_weather_client
 aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/weather_client_ledger:0.1.0
+aea add skill fetchai/weather_client:0.1.0
 aea install
 ```
 
@@ -235,19 +236,19 @@ ledger_apis:
 
 ### Update the skill configs
 
-In the weather station skill config (`my_weather_station/skills/weather_station_ledger/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
+In the weather station skill config (`my_weather_station/skills/weather_station/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
 ``` bash
 currency_id: 'ETH'
 ledger_id: 'ethereum'
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set skills.weather_station_ledger.shared_classes.strategy.args.currency_id ETH
-aea config set skills.weather_station_ledger.shared_classes.strategy.args.ledger_id ethereum
+aea config set skills.weather_station.shared_classes.strategy.args.currency_id ETH
+aea config set skills.weather_station.shared_classes.strategy.args.ledger_id ethereum
 ```
 
 
-In the weather client skill config (`my_weather_client/skills/weather_client_ledger/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
+In the weather client skill config (`my_weather_client/skills/weather_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
 ``` bash
 max_buyer_tx_fee: 20000
 currency_id: 'ETH'
@@ -255,9 +256,9 @@ ledger_id: 'ethereum'
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set skills.weather_client_ledger.shared_classes.strategy.args.max_buyer.tx_fee 10000
-aea config set skills.weather_client_ledger.shared_classes.strategy.args.currency_id ETH
-aea config set skills.weather_client_ledger.shared_classes.strategy.args.ledger_id ethereum
+aea config set skills.weather_client.shared_classes.strategy.args.max_buyer.tx_fee 10000
+aea config set skills.weather_client.shared_classes.strategy.args.currency_id ETH
+aea config set skills.weather_client.shared_classes.strategy.args.ledger_id ethereum
 ```
 
 ### Fund the weather client AEA
@@ -284,7 +285,7 @@ aea delete my_weather_station
 aea delete my_weather_client
 ```
 
-### Communication
+## Communication
 This diagram shows the communication between the various entities as data is successfully sold by the weather station agent to the client. 
 
 <div class="mermaid">

@@ -520,6 +520,7 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: whether the transaction is affordable or not
         """
+        is_affordable = True
         if self.ownership_state.is_initialized:
             is_affordable = self.ownership_state.check_transaction_is_affordable(tx_message)
         if self.ledger_state_proxy.is_initialized and (tx_message.ledger_id != OFF_CHAIN):

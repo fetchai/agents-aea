@@ -1,4 +1,4 @@
-name: weather_station
+name: weather_station_ledger
 author: fetchai
 version: 0.1.0
 license: Apache 2.0
@@ -23,9 +23,9 @@ shared_classes:
       price_per_row: 1
       seller_tx_fee: 0
       currency_id: 'FET'
-      ledger_id: 'None'
+      ledger_id: 'fetchai'
   dialogues:
     class_name: Dialogues
     args: {}
 protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
-ledgers: []
+ledgers: ['fetchai']

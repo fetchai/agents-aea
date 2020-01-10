@@ -22,13 +22,15 @@
 import logging
 from typing import cast, Optional
 
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 from packages.protocols.oef.message import OEFMessage
 from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from packages.skills.weather_station.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_station_skill")
+logger = logging.getLogger("aea.weather_station_ledger_skill")
 
 SERVICE_ID = ''
 DEFAULT_SERVICES_INTERVAL = 30.0
@@ -49,6 +51,20 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
+        if self.context.ledger_apis.has_fetchai:
+            fet_balance = self.context.ledger_apis.token_balance(FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI)))
+            if fet_balance > 0:
+                logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, fet_balance))
+            else:
+                logger.warning("[{}]: you have no starting balance on fetchai ledger!".format(self.context.agent_name))
+
+        if self.context.ledger_apis.has_ethereum:
+            eth_balance = self.context.ledger_apis.token_balance(ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM)))
+            if eth_balance > 0:
+                logger.info("[{}]: starting balance on ethereum ledger={}.".format(self.context.agent_name, eth_balance))
+            else:
+                logger.warning("[{}]: you have no starting balance on ethereum ledger!".format(self.context.agent_name))
+
         self._register_service()
 
     def act(self) -> None:
@@ -66,6 +82,14 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
+        if self.context.ledger_apis.has_fetchai:
+            balance = self.context.ledger_apis.token_balance(FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI)))
+            logger.info("[{}]: ending balance on fetchai ledger={}.".format(self.context.agent_name, balance))
+
+        if self.context.ledger_apis.has_ethereum:
+            balance = self.context.ledger_apis.token_balance(ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM)))
+            logger.info("[{}]: ending balance on ethereum ledger={}.".format(self.context.agent_name, balance))
+
         self._unregister_service()
 
     def _register_service(self) -> None:

@@ -495,7 +495,6 @@ class OEFConnection(Connection):
         """
         assert self._connection_check_thread is not None, "Call connect before disconnect."
         assert self.in_queue is not None
-        # import pdb; pdb.set_trace()
         self.connection_status.is_connected = False
         self._connection_check_thread.join()
         self._connection_check_thread = None

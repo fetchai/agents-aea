@@ -1,11 +1,10 @@
-The `gym_ex` example demonstrates the AEA framework's flexibility with respect to Reinforcement Learning.
+The `gym` example demonstrates the AEA framework's flexibility with respect to Reinforcement Learning using OpenAI's `gym` framework.
 
 There is no immediate use case for this example as you can train an RL agent without the AEA proxy layer just fine (and faster). 
 
-However, the example decouples the RL agent from the `gym.Env` allowing them to run in separate environments, potentially owned by different entities.
+However, the example decouples the RL agent from the `gym.Env` allowing them to run in separate execution environments, potentially owned by different entities.
 
-
-## Quick start
+## Preparation instructions
 
 ### Dependencies
 
@@ -16,6 +15,8 @@ Install the `gym` and `numpy` library.
 ``` bash
 pip install numpy gym
 ```
+
+## Demo instructions
 
 ### Run the example
 

@@ -23,7 +23,7 @@ import logging
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.helpers.search.models import Query
+from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -33,7 +33,7 @@ from packages.protocols.fipa.serialization import FIPASerializer
 from packages.skills.weather_station.dialogues import Dialogue, Dialogues
 from packages.skills.weather_station.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_station_skill")
+logger = logging.getLogger("aea.weather_station_ledger_skill")
 
 
 class FIPAHandler(Handler):
@@ -62,8 +62,9 @@ class FIPAHandler(Handler):
             dialogue = cast(Dialogue, dialogues.get_dialogue(fipa_msg, self.context.agent_address))
             dialogue.incoming_extend(fipa_msg)
         elif dialogues.is_permitted_for_new_dialogue(fipa_msg):
-            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(fipa_msg.counterparty,
-                                                                          dialogue_reference, is_seller=True))
+            dialogue = cast(Dialogue, dialogues.create_opponent_initiated(message.counterparty,
+                                                                          dialogue_reference=dialogue_reference,
+                                                                          is_seller=True))
             dialogue.incoming_extend(fipa_msg)
         else:
             self._handle_unidentified_dialogue(fipa_msg)
@@ -94,13 +95,14 @@ class FIPAHandler(Handler):
         Respond to the sender with a default message containing the appropriate error information.
 
         :param msg: the message
+
         :return: None
         """
         logger.info("[{}]: unidentified dialogue.".format(self.context.agent_name))
         default_msg = DefaultMessage(type=DefaultMessage.Type.ERROR,
                                      error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
                                      error_msg="Invalid dialogue.",
-                                     error_data="fipa_message")  # FIPASerializer().encode(msg)
+                                     error_data="fipa_message")  # TODO: send FIPASerializer().encode(msg)
         self.context.outbox.put_message(to=msg.counterparty,
                                         sender=self.context.agent_address,
                                         protocol_id=DefaultMessage.protocol_id,
@@ -165,8 +167,8 @@ class FIPAHandler(Handler):
         """
         logger.info("[{}]: received DECLINE from sender={}".format(self.context.agent_name,
                                                                    msg.counterparty[-5:]))
-        # dialogues = cast(Dialogues, self.context.dialogues)
-        # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE)
+        dialogues = cast(Dialogues, self.context.dialogues)
+        dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.DECLINED_PROPOSE, dialogue.is_self_initiated)
 
     def _handle_accept(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """
@@ -184,13 +186,13 @@ class FIPAHandler(Handler):
                                                                   msg.counterparty[-5:]))
         logger.info("[{}]: sending MATCH_ACCEPT_W_INFORM to sender={}".format(self.context.agent_name,
                                                                               msg.counterparty[-5:]))
-        # proposal = cast(Description, dialogue.proposal)
-        # identifier = cast(str, proposal.values.get("ledger_id"))
+        proposal = cast(Description, dialogue.proposal)
+        identifier = cast(str, proposal.values.get("ledger_id"))
         match_accept_msg = FIPAMessage(message_id=new_message_id,
                                        dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                        target=new_target,
                                        performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
-                                       info={"address": "no_address"})
+                                       info={"address": self.context.agent_addresses[identifier]})
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(to=msg.counterparty,
                                         sender=self.context.agent_address,
@@ -213,8 +215,38 @@ class FIPAHandler(Handler):
         logger.info("[{}]: received INFORM from sender={}".format(self.context.agent_name,
                                                                   msg.counterparty[-5:]))
 
-        json_data = msg.info
-        if "Done" in json_data:
+        strategy = cast(Strategy, self.context.strategy)
+        if strategy.is_ledger_tx and "transaction_digest" in msg.info.keys():
+            tx_digest = msg.info['transaction_digest']
+            logger.info("[{}]: checking whether transaction={} has been received ...".format(self.context.agent_name,
+                                                                                             tx_digest))
+            proposal = cast(Description, dialogue.proposal)
+            ledger_id = cast(str, proposal.values.get("ledger_id"))
+            is_settled = self.context.ledger_apis.is_tx_settled(ledger_id, tx_digest)
+            # TODO: check the tx_digest references a transaction with the correct terms
+            if is_settled:
+                token_balance = self.context.ledger_apis.token_balance(ledger_id,
+                                                                       cast(str, self.context.agent_addresses.get(ledger_id)))
+                logger.info("[{}]: transaction={} settled, new balance={}. Sending data to sender={}".format(self.context.agent_name,
+                                                                                                             tx_digest,
+                                                                                                             token_balance,
+                                                                                                             msg.counterparty[-5:]))
+                inform_msg = FIPAMessage(message_id=new_message_id,
+                                         dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                                         target=new_target,
+                                         performative=FIPAMessage.Performative.INFORM,
+                                         info=dialogue.weather_data)
+                dialogue.outgoing_extend(inform_msg)
+                self.context.outbox.put_message(to=msg.counterparty,
+                                                sender=self.context.agent_address,
+                                                protocol_id=FIPAMessage.protocol_id,
+                                                message=FIPASerializer().encode(inform_msg))
+                dialogues = cast(Dialogues, self.context.dialogues)
+                dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated)
+            else:
+                logger.info("[{}]: transaction={} not settled, aborting".format(self.context.agent_name,
+                                                                                tx_digest))
+        elif "Done" in msg.info.keys():
             inform_msg = FIPAMessage(message_id=new_message_id,
                                      dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                                      target=new_target,
@@ -225,7 +257,8 @@ class FIPAHandler(Handler):
                                             sender=self.context.agent_address,
                                             protocol_id=FIPAMessage.protocol_id,
                                             message=FIPASerializer().encode(inform_msg))
-            # dialogues = cast(Dialogues, self.context.dialogues)
-            # dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL)
+            dialogues = cast(Dialogues, self.context.dialogues)
+            dialogues.dialogue_stats.add_dialogue_endstate(Dialogue.EndState.SUCCESSFUL, dialogue.is_self_initiated)
         else:
-            logger.warning("I didn't receive the transaction digest!")
+            logger.warning("[{}]: did not receive transaction digest from sender={}.".format(self.context.agent_name,
+                                                                                             msg.counterparty[-5:]))
