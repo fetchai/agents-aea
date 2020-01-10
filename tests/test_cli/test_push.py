@@ -26,72 +26,40 @@ from click.testing import CliRunner
 from aea.cli import cli
 from aea.cli.push import _save_item_locally
 from aea.configurations.base import PublicId
+
 from tests.conftest import CLI_LOG_OPTION
+from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
-@mock.patch('aea.cli.registry.push.copytree')
-@mock.patch('aea.cli.registry.push.os.getcwd', return_value='cwd')
+@mock.patch('aea.cli.push.copytree')
 class SaveItemLocallyTestCase(TestCase):
     """Test case for save_item_locally method."""
 
     @mock.patch(
-        'aea.cli.registry.push.get_item_target_path', return_value='target'
+        'aea.cli.push.try_get_item_target_path', return_value='target'
     )
     @mock.patch(
-        'aea.cli.registry.push.get_item_source_path', return_value='source'
-    )
-    @mock.patch(
-        'aea.cli.registry.push.load_yaml', return_value={"author": "fetchai", "version": "0.1.0", "name": "skill_name"}
+        'aea.cli.push.try_get_item_source_path', return_value='source'
     )
     def test_save_item_locally_positive(
         self,
-        load_yaml_mock,
-        get_item_source_path_mock,
-        get_item_target_path_mock,
-        getcwd_mock,
+        try_get_item_source_path_mock,
+        try_get_item_target_path_mock,
         copy_tree_mock,
     ):
         """Test for save_item_locally positive result."""
         item_type = 'skill'
-        item_id = PublicId.from_string('fetchai/skill_name:0.1.0')
-        _save_item_locally('packages_path', item_type, item_id)
-        get_item_source_path_mock.assert_called_once_with(
+        item_id = PublicIdMock()
+        _save_item_locally(ContextMock(), item_type, PublicIdMock())
+        try_get_item_source_path_mock.assert_called_once_with(
             'cwd', 'skills', item_id.name
         )
-        get_item_target_path_mock.assert_called_once_with(
-            'skills', item_id.name, 'packages_path'
+        try_get_item_target_path_mock.assert_called_once_with(
+            ContextMock.agent_config.registry_path,
+            item_type + 's',
+            item_id.name,
         )
-        getcwd_mock.assert_called_once()
         copy_tree_mock.assert_called_once_with('source', 'target')
-
-
-@mock.patch('aea.cli.registry.push.copytree')
-@mock.patch('aea.cli.registry.push.os.getcwd', return_value='cwd')
-class SaveItemLocallyFailsTestCase(TestCase):
-    """Test case for save_item_locally method."""
-
-    @mock.patch(
-        'aea.cli.registry.push.get_item_target_path', return_value='target'
-    )
-    @mock.patch(
-        'aea.cli.registry.push.get_item_source_path', return_value='source'
-    )
-    @mock.patch(
-        'aea.cli.registry.push.load_yaml', return_value={"author": "fetchai", "version": "0.1.0", "name": "skill_name"}
-    )
-    def test_save_item_locally_positive(
-        self,
-        load_yaml_mock,
-        get_item_source_path_mock,
-        get_item_target_path_mock,
-        getcwd_mock,
-        copy_tree_mock,
-    ):
-        """Test for save_item_locally  - item not found."""
-        with self.assertRaises(ClickException):
-            item_type = 'skill'
-            item_id = PublicId.from_string('non_existing_author/skill_name:0.1.0')
-            _save_item_locally('packages_path', item_type, item_id)
 
 
 class TestPushLocalFailsArgumentNotPublicId:

@@ -22,7 +22,7 @@ import click
 import os
 from shutil import copyfile
 
-from aea.cli.common import pass_ctx, Context, _try_to_load_agent_config, try_get_item_target_path, DEFAULT_AEA_CONFIG_FILE
+from aea.cli.common import pass_ctx, Context, try_to_load_agent_config, try_get_item_target_path, DEFAULT_AEA_CONFIG_FILE
 from aea.cli.registry.publish import publish_agent
 
 
@@ -33,7 +33,7 @@ from aea.cli.registry.publish import publish_agent
 @pass_ctx
 def publish(ctx: Context, registry):
     """Publish Agent to Registry."""
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
     if not registry:
         # TODO: check agent dependencies are available in local packages dir.
         _save_agent_locally(ctx)

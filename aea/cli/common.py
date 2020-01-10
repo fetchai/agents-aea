@@ -102,12 +102,20 @@ class Context(object):
 pass_ctx = click.make_pass_decorator(Context)
 
 
-def _try_to_load_agent_config(ctx: Context, exit_on_except: bool = True):
+def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
+    """
+    Load agent config to a click context object.
+
+    :param ctx: click command context object.
+    :param exit_on_except: bool option to exit on exception (default = True).
+
+    :return None
+    """
     try:
         path = Path(DEFAULT_AEA_CONFIG_FILE)
-        fp = open(str(path), mode="r", encoding="utf-8")
-        ctx.agent_config = ctx.agent_loader.load(fp)
-        logging.config.dictConfig(ctx.agent_config.logging_config)
+        with open(str(path), mode="r", encoding="utf-8") as fp:
+            ctx.agent_config = ctx.agent_loader.load(fp)
+            logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         if exit_on_except:
             logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))

@@ -26,7 +26,7 @@ import click
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, ConfigLoader, \
-    format_items, format_skills, _try_to_load_agent_config
+    format_items, format_skills, try_to_load_agent_config
 from aea.cli.registry.utils import request_api
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
@@ -51,7 +51,7 @@ def search(ctx: Context, registry):
         # if we are in an agent directory, try to load the configuration file.
         # otherwise, use the default path (i.e. 'packages/' in the current directory.)
         try:
-            _try_to_load_agent_config(ctx, exit_on_except=False)
+            try_to_load_agent_config(ctx, exit_on_except=False)
             # path = Path(DEFAULT_AEA_CONFIG_FILE)
             # fp = open(str(path), mode="r", encoding="utf-8")
             # agent_config = ctx.agent_loader.load(fp)

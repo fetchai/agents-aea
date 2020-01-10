@@ -28,6 +28,11 @@ from aea.cli.registry.push import (
     _remove_pycache,
 )
 
+from tests.test_cli.tools_for_testing import (
+    ContextMock,
+    PublicIdMock
+)
+
 
 @mock.patch('aea.cli.registry.utils._rm_tarfiles')
 @mock.patch('aea.cli.registry.push.os.getcwd', return_value='cwd')
@@ -53,17 +58,20 @@ class PushItemTestCase(TestCase):
         rm_tarfiles_mock
     ):
         """Test for push_item positive result."""
-        push_item('some-type', 'item-name')
+        public_id = PublicIdMock(
+            name='some-name', author='some-author', version='1.0.0'
+        )
+        push_item(ContextMock(), 'some-type', public_id)
         request_api_mock.assert_called_once_with(
             'POST',
             '/some-types/create',
             data={
-                'name': 'item-name',
+                'name': 'some-name',
                 'description': 'some-description',
-                'version': 'some-version',
+                'version': '1.0.0',
             },
             auth=True,
-            filepath='cwd/item-name.tar.gz'
+            filepath='cwd/some-name.tar.gz'
         )
 
     @mock.patch('aea.cli.registry.push.os.path.exists', return_value=False)
@@ -78,7 +86,7 @@ class PushItemTestCase(TestCase):
     ):
         """Test for push_item - item not found."""
         with self.assertRaises(ClickException):
-            push_item('some-type', 'item-name')
+            push_item(ContextMock(), 'some-type', PublicIdMock())
 
         request_api_mock.assert_not_called()
 

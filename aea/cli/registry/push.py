@@ -84,7 +84,7 @@ def push_item(ctx: Context, item_type: str, item_id: PublicIdParameter) -> None:
     data = {
         'name': item_id.name,
         'description': item_config['description'],
-        'version': item_config['version']
+        'version': item_id.version
     }
     path = '/{}/create'.format(item_type_plural)
     logger.debug('Pushing {} {} to Registry ...'.format(item_id.name, item_type))

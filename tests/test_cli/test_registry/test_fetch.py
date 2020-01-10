@@ -23,6 +23,11 @@ from click import ClickException
 
 from aea.cli.registry.fetch import fetch_agent
 
+from tests.test_cli.tools_for_testing import (
+    ContextMock,
+    PublicIdMock
+)
+
 
 def _raise_exception():
     raise Exception()
@@ -33,7 +38,6 @@ def _raise_exception():
     return_value='filepath'
 )
 @mock.patch('aea.cli.registry.fetch.extract')
-@mock.patch('aea.cli.registry.fetch.os.getcwd', return_value='cwd')
 class TestFetchAgent(TestCase):
     """Test case for fetch_package method."""
 
@@ -49,16 +53,13 @@ class TestFetchAgent(TestCase):
     def test_fetch_agent_positive(
         self,
         request_api_mock,
-        getcwd_mock,
         extract_mock,
         download_file_mock,
     ):
         """Test for fetch_agent method positive result."""
-        public_id = 'author/name:0.1.0'
-
-        fetch_agent(public_id)
+        fetch_agent(ContextMock(), PublicIdMock())
         request_api_mock.assert_called_with(
-            'GET', '/agents/author/name/0.1.0'
+            'GET', '/agents/author/name/1.0.0'
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/name')
@@ -77,16 +78,13 @@ class TestFetchAgent(TestCase):
         self,
         request_api_mock,
         fetch_package_mock,
-        getcwd_mock,
         extract_mock,
         download_file_mock,
     ):
         """Test for fetch_agent method with dependencies positive result."""
-        public_id = 'author/name:0.1.0'
-
-        fetch_agent(public_id)
+        fetch_agent(ContextMock(), PublicIdMock())
         request_api_mock.assert_called_with(
-            'GET', '/agents/author/name/0.1.0'
+            'GET', '/agents/author/name/1.0.0'
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/name')
@@ -103,23 +101,7 @@ class TestFetchAgent(TestCase):
         }
     )
     @mock.patch('aea.cli.registry.fetch.rmtree')
-    def test_fetch_agent_with_dependencies_unable_to_fetch(
-        self,
-        rmtree_mock,
-        request_api_mock,
-        fetch_package_mock,
-        getcwd_mock,
-        extract_mock,
-    ):
+    def test_fetch_agent_with_dependencies_unable_to_fetch(self, *mocks):
         """Test for fetch_agent method positive result."""
-        public_id = 'author/name:0.1.0'
-
         with self.assertRaises(ClickException):
-            fetch_agent(public_id)
-
-        request_api_mock.assert_called_with(
-            'GET', '/agents/author/name/0.1.0'
-        )
-        extract_mock.assert_not_called()
-        fetch_package_mock.assert_called_once()
-        rmtree_mock.assert_called_once()
+            fetch_agent(ContextMock(), PublicIdMock())

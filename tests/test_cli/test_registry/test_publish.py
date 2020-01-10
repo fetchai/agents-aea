@@ -26,6 +26,8 @@ from aea.cli.registry.publish import (
     publish_agent, _load_agent_config
 )
 
+from tests.test_cli.tools_for_testing import ContextMock
+
 
 @mock.patch('aea.cli.registry.utils._rm_tarfiles')
 @mock.patch('aea.cli.registry.publish.os.getcwd', return_value='cwd')
@@ -57,7 +59,7 @@ class PublishAgentTestCase(TestCase):
         _rm_tarfiles_mock
     ):
         """Test for publish_agent positive result."""
-        publish_agent()
+        publish_agent(ContextMock())
         request_api_mock.assert_called_once_with(
             'POST',
             '/agents/create',

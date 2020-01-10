@@ -25,7 +25,7 @@ import sys
 
 import click
 
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
@@ -33,7 +33,7 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 @pass_ctx
 def remove(ctx: Context):
     """Remove a resource from the agent."""
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
 
 
 def _remove_item(ctx: Context, item_type, item):
