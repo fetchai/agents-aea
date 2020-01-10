@@ -16,11 +16,34 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Constants used for CLI testing."""
+"""Tools used for CLI registry testing."""
 
-from aea.cli.common import DEFAULT_VERSION
+from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 
 
-FORMAT_ITEMS_SAMPLE_OUTPUT = 'Correct items'
+class AgentConfigMock:
+    """An object to mock Agent config."""
 
-DEFAULT_TESTING_VERSION = DEFAULT_VERSION
+    registry_path = 'registry'
+    name = 'name'
+
+
+class ContextMock:
+    """An object to mock Click Context."""
+
+    cwd = 'cwd'
+    agent_config = AgentConfigMock()
+
+
+class PublicIdMock:
+    """An object to mock PublicId."""
+
+    DEFAULT_VERSION = DEFAULT_TESTING_VERSION
+
+    def __init__(
+        self, name='name', author='author', version=DEFAULT_TESTING_VERSION
+    ):
+        """Init the Public ID mock object."""
+        self.name = name
+        self.author = author
+        self.version = version

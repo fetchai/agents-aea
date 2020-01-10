@@ -30,7 +30,7 @@ from click import pass_context
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config, PublicIdParameter
+from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config, PublicIdParameter
 from aea.cli.registry.utils import fetch_package
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
@@ -43,7 +43,7 @@ def add(ctx: Context, registry):
     """Add a resource to the agent."""
     if registry:
         ctx.set_config("is_registry", True)
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
 
 
 def _find_connection_locally(ctx, connection_public_id, click_context):

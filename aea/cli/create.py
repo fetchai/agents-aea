@@ -30,7 +30,7 @@ from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import connection, skill
-from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL, DEFAULT_LEDGER
+from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL, DEFAULT_LEDGER, DEFAULT_VERSION
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 
@@ -76,7 +76,7 @@ def create(click_context, agent_name):
         logger.info("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
         agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__,
-                                   author="", version="0.1.0", license="", fingerprint="",
+                                   author="", version=DEFAULT_VERSION, license="", fingerprint="",
                                    registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH), description="")
         agent_config.default_connection = DEFAULT_CONNECTION
         agent_config.default_ledger = DEFAULT_LEDGER

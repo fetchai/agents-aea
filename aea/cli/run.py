@@ -29,7 +29,7 @@ import click
 from click import pass_context
 
 from aea.aea import AEA
-from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
+from aea.cli.common import Context, logger, try_to_load_agent_config, _try_to_load_protocols, \
     AEAConfigException, _load_env_file, ConnectionsOption
 from aea.cli.install import install
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, \
@@ -185,7 +185,7 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
 def run(click_context, connection_names: List[str], env_file: str, install_deps: bool):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
 

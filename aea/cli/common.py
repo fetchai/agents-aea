@@ -40,6 +40,7 @@ from aea.helpers.base import add_agent_component_module_to_sys_modules, load_age
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
+DEFAULT_VERSION = "0.1.0"
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_CONNECTION = PublicId.from_string("fetchai/stub:0.1.0")  # type: PublicId
 DEFAULT_SKILL = PublicId.from_string("fetchai/error:0.1.0")  # type: PublicId
@@ -101,18 +102,28 @@ class Context(object):
 pass_ctx = click.make_pass_decorator(Context)
 
 
-def _try_to_load_agent_config(ctx: Context):
+def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
+    """
+    Load agent config to a click context object.
+
+    :param ctx: click command context object.
+    :param exit_on_except: bool option to exit on exception (default = True).
+
+    :return None
+    """
     try:
         path = Path(DEFAULT_AEA_CONFIG_FILE)
-        fp = open(str(path), mode="r", encoding="utf-8")
-        ctx.agent_config = ctx.agent_loader.load(fp)
-        logging.config.dictConfig(ctx.agent_config.logging_config)
+        with open(str(path), mode="r", encoding="utf-8") as fp:
+            ctx.agent_config = ctx.agent_loader.load(fp)
+            logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
-        logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
-        sys.exit(1)
+        if exit_on_except:
+            logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
+            sys.exit(1)
     except jsonschema.exceptions.ValidationError:
-        logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
-        sys.exit(1)
+        if exit_on_except:
+            logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
+            sys.exit(1)
 
 
 def _try_to_load_protocols(ctx: Context):
@@ -248,3 +259,39 @@ class PublicIdParameter(click.ParamType):
             return PublicId.from_string(value)
         except ValueError:
             raise click.BadParameter(value)
+
+
+def try_get_item_source_path(path: str, item_type_plural: str, item_name: str) -> str:
+    """
+    Get the item source path.
+
+    :param path: the source path root
+    :param item_type_plural: the item type (plural)
+    :param item_name: the item name
+
+    :return: the item source path
+    """
+    source_path = os.path.join(path, item_type_plural, item_name)
+    if not os.path.exists(source_path):
+        raise click.ClickException(
+            'Item "{}" not found in source folder.'.format(item_name)
+        )
+    return source_path
+
+
+def try_get_item_target_path(path: str, item_type_plural: str, item_name: str) -> str:
+    """
+    Get the item target path.
+
+    :param path: the target path root
+    :param item_type_plural: the item type (plural)
+    :param item_name: the item name
+
+    :return: the item target path
+    """
+    target_path = os.path.join(path, item_type_plural, item_name)
+    if os.path.exists(target_path):
+        raise click.ClickException(
+            'Item "{}" already exists in target folder.'.format(item_name)
+        )
+    return target_path

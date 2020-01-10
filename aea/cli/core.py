@@ -29,7 +29,7 @@ import click
 
 import aea
 from aea.cli.add import add
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
@@ -67,13 +67,13 @@ def delete(ctx: Context, agent_name):
     """Delete an agent."""
     path = Path(agent_name)
 
-    # check that the target folder is an AEA project.
     cwd = os.getcwd()
     try:
+        # check that the target folder is an AEA project.
         os.chdir(agent_name)
         fp = open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8")
         ctx.agent_config = ctx.agent_loader.load(fp)
-        _try_to_load_agent_config(ctx)
+        try_to_load_agent_config(ctx)
     except Exception:
         logger.error("The name provided is not an AEA project.")
         sys.exit(1)
@@ -94,7 +94,7 @@ def delete(ctx: Context, agent_name):
 @pass_ctx
 def freeze(ctx: Context):
     """Get the dependencies."""
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
     for dependency_name, dependency_data in sorted(ctx.get_dependencies().items(), key=lambda x: x[0]):
         print(dependency_name + dependency_data.get("version", ""))
 
@@ -148,7 +148,7 @@ def generate_key(ctx: Context, type_):
 @pass_ctx
 def add_key(ctx: Context, type_, file):
     """Add a private key to the wallet."""
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
     _validate_private_key_path(file, type_)
     try:
         ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
