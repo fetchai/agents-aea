@@ -1,3 +1,5 @@
+"""Serialization for two_party_negotiation protocol."""
+
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 from packages.protocols.two_party_negotiation.message import TwoPartyNegotiationMessage
@@ -8,7 +10,7 @@ import pickle
 
 
 class TwoPartyNegotiationSerializer(Serializer):
-    """Serialization for a protocol for negotiation over a fixed set of resources involving two parties. protocol"""
+    """Serialization for two_party_negotiation protocol."""
 
     def encode(self, msg: Message) -> bytes:
         """Encode a 'TwoPartyNegotiation' message into bytes."""

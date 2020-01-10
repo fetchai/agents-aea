@@ -70,7 +70,6 @@ def _generate_item(ctx: Context, item_type, specification_path):
         logger.error("A directory with name '{}' already exists. Aborting...".format(protocol_spec.name))
         sys.exit(1)
 
-
     try:
         agent_name = ctx.agent_config.agent_name
         logger.info("Generating {} '{}' and adding it to the agent '{}'...".format(item_type, protocol_spec.name, agent_name))

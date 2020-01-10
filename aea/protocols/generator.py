@@ -81,9 +81,12 @@ class ProtocolGenerator:
         # class code per custom type
         for custom_type in custom_types_set:
             cls_str += str.format('class {}:\n', custom_type)
+            cls_str += str.format('    \"\"\"This class represents a {}.\"\"\"\n\n', custom_type)
             cls_str += '    def __init__(self):\n'
+            cls_str += str.format('        \"\"\"Initialise a {}.\"\"\"\n', custom_type)
             cls_str += '        raise NotImplementedError\n\n'
             cls_str += '    def __eq__(self, other):\n'
+            cls_str += str.format('        \"\"\"Compare two instances of this class.\"\"\"\n', custom_type)
             cls_str += '        if type(other) is type(self):\n'
             cls_str += '            raise NotImplementedError\n'
             cls_str += '        else:\n'
@@ -123,10 +126,10 @@ class ProtocolGenerator:
                     speech_act_str += "\'"
                     speech_act_str += ", "
                     speech_act_str += value
-                    speech_act_str += ", \n"
-                speech_act_str = speech_act_str[:-3]
-            speech_act_str += "}, \n"
-        speech_act_str = speech_act_str[:-3]
+                    speech_act_str += ",\n"
+                speech_act_str = speech_act_str[:-2]
+            speech_act_str += "},\n"
+        speech_act_str = speech_act_str[:-2]
         speech_act_str += "}"
         return speech_act_str
 
@@ -137,6 +140,7 @@ class ProtocolGenerator:
         :return: the message class string
         """
         cls_str = ""
+        cls_str = str.format('\"\"\"This module contains {}\'s message definition.\"\"\"\n\n'.format(self.protocol_specification.name))
 
         # Imports
         cls_str += 'from typing import cast, List\n\n'
@@ -163,6 +167,7 @@ class ProtocolGenerator:
 
         cls_str += '    @property\n'
         cls_str += '    def performatives(self) -> set:\n'
+        cls_str += '        \"\"\"Get allowed performatives.\"\"\"\n'
         cls_str += '        performatives_set = set()\n'
         cls_str += '        for performative in self.speech_acts:\n'
         cls_str += '            performatives_set.add(performative)\n'
@@ -170,7 +175,7 @@ class ProtocolGenerator:
 
         # check_consistency method
         cls_str += '    def check_consistency(self) -> bool:\n'
-        cls_str += str.format('        \"\"\"Check that the message follows the {} protocol\"\"\"\n', self.protocol_specification.name)
+        cls_str += str.format('        \"\"\"Check that the message follows the {} protocol.\"\"\"\n', self.protocol_specification.name)
         cls_str += '        try:\n'
 
         cls_str += '            assert self.is_set(\"message_id\"), \"message_id is not set\"\n'
@@ -233,6 +238,8 @@ class ProtocolGenerator:
         :return: the serialization class string
         """
         cls_str = ""
+        cls_str = str.format('\"\"\"Serialization for {} protocol.\"\"\"\n\n'.format(self.protocol_specification.name))
+
         # Imports
         cls_str += "from aea.protocols.base import Message\n"
         cls_str += "from aea.protocols.base import Serializer\n"
@@ -244,7 +251,7 @@ class ProtocolGenerator:
 
         # Class Header
         cls_str += str.format('class {}Serializer(Serializer):\n', to_camel_case(self.protocol_specification.name))
-        cls_str += str.format('    \"\"\"Serialization for {} protocol\"\"\"\n\n', self.protocol_specification.description.lower())
+        cls_str += str.format('    \"\"\"Serialization for {} protocol.\"\"\"\n\n', self.protocol_specification.name)
 
         # encoder
         cls_str += str.format('    def encode(self, msg: Message) -> bytes:\n')

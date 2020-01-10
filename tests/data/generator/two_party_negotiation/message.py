@@ -1,13 +1,19 @@
+"""This module contains two_party_negotiation's message definition."""
+
 from typing import cast, List
 
 from aea.protocols.base import Message
 
 
 class DataModel:
+    """This class represents a DataModel."""
+
     def __init__(self):
+        """Initialise a DataModel."""
         raise NotImplementedError
 
     def __eq__(self, other):
+        """Compare two instances of this class."""
         if type(other) is type(self):
             raise NotImplementedError
         else:
@@ -23,25 +29,26 @@ class TwoPartyNegotiationMessage(Message):
 
         self.speech_acts = {
             'cfp': {
-                'query', DataModel}, 
+                'query', DataModel},
             'propose': {
-                'query', DataModel, 
-                'price', float}, 
-            'accept': {}, 
-            'decline': {}, 
+                'query', DataModel,
+                'price', float},
+            'accept': {},
+            'decline': {},
             'match_accept': {}}
 
         assert self.check_consistency()
 
     @property
     def performatives(self) -> set:
+        """Get allowed performatives."""
         performatives_set = set()
         for performative in self.speech_acts:
             performatives_set.add(performative)
         return performatives_set
 
     def check_consistency(self) -> bool:
-        """Check that the message follows the two_party_negotiation protocol"""
+        """Check that the message follows the two_party_negotiation protocol."""
         try:
             assert self.is_set("message_id"), "message_id is not set"
             message_id = self.get("message_id")
