@@ -30,7 +30,7 @@ from typing import Optional
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.skills.base import SharedClass
-from packages.protocols.fipa.dialogues import FIPADialogues, FIPADialogue
+from packages.fetchai.protocols.fipa import FIPADialogues, FIPADialogue
 
 
 class Dialogue(FIPADialogue):

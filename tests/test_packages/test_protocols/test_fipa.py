@@ -24,9 +24,9 @@ import pytest
 
 from aea.helpers.search.models import Description, Query, Constraint, ConstraintType
 from aea.mail.base import Envelope
-from packages.protocols.fipa.dialogues import FIPADialogues, FIPADialogue
-from packages.protocols.fipa.message import FIPAMessage
-from packages.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.dialogues import FIPADialogues, FIPADialogue
+from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 
 
 def test_fipa_cfp_serialization():

@@ -130,7 +130,7 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}''
         """
-        s = "Cannot find protocol: '{}'.".format("unknown_protocol")
+        s = "Cannot find protocol: '{}'.".format(self.protocol_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

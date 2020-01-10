@@ -48,16 +48,18 @@ def add(ctx: Context, registry):
 
 def _find_connection_locally(ctx, connection_public_id, click_context):
     # check that the provided path points to a proper connection directory -> look for connection.yaml file.
-    # first check in aea dir
+    # first check in registry
     connection_name = connection_public_id.name
     registry_path = ctx.agent_config.registry_path
-    connection_configuration_filepath = Path(os.path.join(registry_path, "connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE))
+    package_path = Path(registry_path, connection_public_id.author, "connections", connection_name)
+    connection_configuration_filepath = package_path / DEFAULT_CONNECTION_CONFIG_FILE
     if not connection_configuration_filepath.exists():
-        # then check in registry
+        # then check in aea dir
         registry_path = AEA_DIR
-        connection_configuration_filepath = Path(os.path.join(registry_path, "connections", connection_name, DEFAULT_CONNECTION_CONFIG_FILE))
+        package_path = Path(registry_path, "connections", connection_name)
+        connection_configuration_filepath = package_path / DEFAULT_CONNECTION_CONFIG_FILE
         if not connection_configuration_filepath.exists():
-            logger.error("Cannot find connection: '{}'.".format(connection_name))
+            logger.error("Cannot find connection: '{}'.".format(connection_public_id))
             sys.exit(1)
 
     # try to load the connection configuration file
@@ -76,7 +78,7 @@ def _find_connection_locally(ctx, connection_public_id, click_context):
         sys.exit(1)
 
     # copy the connection package into the agent's supported connections.
-    src = str(Path(os.path.join(registry_path, "connections", connection_name)).absolute())
+    src = str(package_path.absolute())
     dest = os.path.join(ctx.cwd, "connections", connection_name)
     logger.debug("Copying connection modules. src={} dst={}".format(src, dest))
     try:
@@ -130,16 +132,18 @@ def connection(click_context, connection_public_id: PublicId):
 
 def _find_protocol_locally(ctx, protocol_public_id):
     # check that the provided path points to a proper protocol directory -> look for protocol.yaml file.
-    # first check in aea dir
+    # first check in registry
     protocol_name = protocol_public_id.name
     registry_path = ctx.agent_config.registry_path
-    protocol_configuration_filepath = Path(os.path.join(registry_path, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE))
+    package_path = Path(registry_path, protocol_public_id.author, "protocols", protocol_name)
+    protocol_configuration_filepath = package_path / DEFAULT_PROTOCOL_CONFIG_FILE
     if not protocol_configuration_filepath.exists():
-        # then check in registry
+        # then check in aea dir
         registry_path = AEA_DIR
-        protocol_configuration_filepath = Path(os.path.join(registry_path, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE))
+        package_path = Path(registry_path, "protocols", protocol_name)
+        protocol_configuration_filepath = package_path / DEFAULT_PROTOCOL_CONFIG_FILE
         if not protocol_configuration_filepath.exists():
-            logger.error("Cannot find protocol: '{}'.".format(protocol_name))
+            logger.error("Cannot find protocol: '{}'.".format(protocol_public_id))
             sys.exit(1)
 
     # try to load the protocol configuration file
@@ -157,7 +161,7 @@ def _find_protocol_locally(ctx, protocol_public_id):
         sys.exit(1)
 
     # copy the protocol package into the agent's supported connections.
-    src = str(Path(os.path.join(registry_path, "protocols", protocol_name)).absolute())
+    src = str(package_path.absolute())
     dest = os.path.join(ctx.cwd, "protocols", protocol_name)
     logger.debug("Copying protocol modules. src={} dst={}".format(src, dest))
     try:
@@ -204,16 +208,18 @@ def protocol(click_context, protocol_public_id):
 
 def _find_skill_locally(ctx, skill_public_id, click_context):
     # check that the provided path points to a proper skill directory -> look for skill.yaml file.
-    # first check in aea dir
+    # first check in registry
     skill_name = skill_public_id.name
     registry_path = ctx.agent_config.registry_path
-    skill_configuration_filepath = Path(os.path.join(registry_path, "skills", skill_name, DEFAULT_SKILL_CONFIG_FILE))
+    package_path = Path(registry_path, skill_public_id.author, "skills", skill_name)
+    skill_configuration_filepath = package_path / DEFAULT_SKILL_CONFIG_FILE
     if not skill_configuration_filepath.exists():
-        # then check in registry
+        # then check in aea
         registry_path = AEA_DIR
-        skill_configuration_filepath = Path(os.path.join(registry_path, "skills", skill_name, DEFAULT_SKILL_CONFIG_FILE))
+        package_path = Path(registry_path, "skills", skill_name)
+        skill_configuration_filepath = package_path / DEFAULT_SKILL_CONFIG_FILE
         if not skill_configuration_filepath.exists():
-            logger.error("Cannot find skill: '{}'.".format(skill_name))
+            logger.error("Cannot find skill: '{}'.".format(skill_public_id))
             sys.exit(1)
 
     # try to load the skill configuration file
@@ -230,7 +236,7 @@ def _find_skill_locally(ctx, skill_public_id, click_context):
         sys.exit(1)
 
     # copy the skill package into the agent's supported skills.
-    src = str(Path(os.path.join(registry_path, "skills", skill_name)).absolute())
+    src = str(package_path.absolute())
     dest = os.path.join(ctx.cwd, "skills", skill_name)
     logger.debug("Copying skill modules. src={} dst={}".format(src, dest))
     try:

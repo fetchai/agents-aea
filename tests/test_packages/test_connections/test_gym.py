@@ -25,9 +25,9 @@ import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
-from packages.connections.gym.connection import GymConnection
-from packages.protocols.gym.message import GymMessage
-from packages.protocols.gym.serialization import GymSerializer
+from packages.fetchai.connections.gym.connection import GymConnection
+from packages.fetchai.protocols.gym.message import GymMessage
+from packages.fetchai.protocols.gym.serialization import GymSerializer
 
 logger = logging.getLogger(__name__)
 

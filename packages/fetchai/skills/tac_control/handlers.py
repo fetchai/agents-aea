@@ -24,11 +24,11 @@ from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.tac.message import TACMessage
-from packages.protocols.tac.serialization import TACSerializer
-from packages.skills.tac_control.game import Game, Phase, Transaction
-from packages.skills.tac_control.parameters import Parameters
+from packages.fetchai.protocols.oef import OEFMessage
+from packages.fetchai.protocols.tac import TACMessage
+from packages.fetchai.protocols.tac import TACSerializer
+from packages.fetchai.skills import Game, Phase, Transaction
+from packages.fetchai.skills import Parameters
 
 logger = logging.getLogger("aea.tac_control_skill")
 

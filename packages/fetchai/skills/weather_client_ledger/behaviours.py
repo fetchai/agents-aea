@@ -25,8 +25,8 @@ from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from packages.skills.weather_client_ledger.strategy import Strategy
+from packages.fetchai.protocols.oef import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.skills import Strategy
 
 logger = logging.getLogger("aea.weather_client_ledger_skill")
 

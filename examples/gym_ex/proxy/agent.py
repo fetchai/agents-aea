@@ -32,7 +32,7 @@ from aea.helpers.base import locate
 from aea.mail.base import Envelope
 
 sys.modules["packages.connections.gym"] = locate("packages.connections.gym")
-from packages.connections.gym.connection import GymConnection  # noqa: E402
+from packages.fetchai.connections.gym.connection import GymConnection  # noqa: E402
 
 
 class ProxyAgent(Agent):

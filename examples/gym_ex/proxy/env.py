@@ -36,8 +36,8 @@ from aea.protocols.base import Message
 
 sys.modules["packages.connections.gym"] = locate("packages.connections.gym")
 sys.modules["packages.protocols.gym"] = locate("packages.protocols.gym")
-from packages.protocols.gym.message import GymMessage  # noqa: E402
-from packages.protocols.gym.serialization import GymSerializer  # noqa: E402
+from packages.fetchai.protocols.gym.message import GymMessage  # noqa: E402
+from packages.fetchai.protocols.gym import GymSerializer  # noqa: E402
 
 from .agent import ProxyAgent  # noqa: E402
 

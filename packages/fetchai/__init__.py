@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -17,17 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the tests for the OEF serializer."""
-
-from aea.helpers.search.models import Attribute, DataModel, Description
-from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import OEFSerializer
-
-
-def test_oef_serialization():
-    """Testing the serialization of the OEF."""
-    foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
-    desc = Description({"bar": 1}, data_model=foo_datamodel)
-    msg = OEFMessage(type=OEFMessage.Type.REGISTER_SERVICE, id=1, service_description=desc, service_id="")
-    msg_bytes = OEFSerializer().encode(msg)
-    assert len(msg_bytes) > 0
+"""Package autored by 'fetchai'."""

@@ -34,10 +34,10 @@ from aea.skills.base import SkillContext
 from aea.skills.error.behaviours import ErrorBehaviour
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.error.tasks import ErrorTask
-from packages.connections.local.connection import LocalNode
-from packages.protocols.fipa.message import FIPAMessage
-from packages.protocols.fipa.serialization import FIPASerializer
-from packages.protocols.oef.message import OEFMessage
+from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.oef.message import OEFMessage
 from ..conftest import CUR_PATH, DummyConnection
 
 

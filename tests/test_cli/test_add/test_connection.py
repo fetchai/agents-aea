@@ -134,7 +134,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        s = "Cannot find connection: '{}'.".format(self.connection_name)
+        s = "Cannot find connection: '{}'.".format(self.connection_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -177,7 +177,7 @@ class TestAddConnectionFailsWhenDifferentPublicId:
 
     def test_error_message_connection_wrong_public_id(self):
         """Test that the log error message is fixed."""
-        s = "Cannot find connection with author and version specified."
+        s = "Cannot find connection: '{}'.".format(self.connection_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -200,7 +200,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "author/local:0.1.0"
+        cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()

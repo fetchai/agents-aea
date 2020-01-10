@@ -134,7 +134,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
 
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
-        s = "Cannot find skill: '{}'.".format(self.skill_name)
+        s = "Cannot find skill: '{}'.".format(self.skill_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
