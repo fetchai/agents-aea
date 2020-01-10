@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 """Tools used for CLI registry testing."""
 
+from tests.test_cli.constants import DEFAULT_TESTING_VERSION
+
 
 class AgentConfigMock:
     """An object to mock Agent config."""
@@ -36,7 +38,11 @@ class ContextMock:
 class PublicIdMock:
     """An object to mock PublicId."""
 
-    def __init__(self, name='name', author='author', version='1.0.0'):
+    DEFAULT_VERSION = DEFAULT_TESTING_VERSION
+
+    def __init__(
+        self, name='name', author='author', version=DEFAULT_TESTING_VERSION
+    ):
         self.name = name
         self.author = author
         self.version = version

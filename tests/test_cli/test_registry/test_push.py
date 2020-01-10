@@ -59,7 +59,7 @@ class PushItemTestCase(TestCase):
     ):
         """Test for push_item positive result."""
         public_id = PublicIdMock(
-            name='some-name', author='some-author', version='1.0.0'
+            name='some-name', author='some-author', version='{}'.format(PublicIdMock.DEFAULT_VERSION)
         )
         push_item(ContextMock(), 'some-type', public_id)
         request_api_mock.assert_called_once_with(
