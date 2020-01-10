@@ -94,7 +94,7 @@ class LedgerApi(ABC):
 
     @property
     @abstractmethod
-    def api(self) -> Optional[Any]:
+    def api(self) -> Any:
         """
         Get the underlying API object.
 

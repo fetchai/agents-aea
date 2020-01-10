@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+from typing import cast
+
 from aea.helpers.search.models import Description, Query, Constraint, ConstraintType
 from aea.skills.base import SharedClass
 
@@ -27,7 +29,8 @@ SEARCH_TERM = 'country'
 DEFAULT_MAX_ROW_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_CURRENCY_PBK = 'FET'
-DEFAULT_LEDGER_ID = 'None'
+DEFAULT_LEDGER_ID = 'fetchai'
+DEFAULT_IS_LEDGER_TX = False
 
 
 class Strategy(SharedClass):
@@ -39,11 +42,12 @@ class Strategy(SharedClass):
 
         :return: None
         """
-        self._country = kwargs.pop('country') if 'country' in kwargs.keys() else DEFAULT_COUNTRY
-        self._max_row_price = kwargs.pop('max_row_price') if 'max_row_price' in kwargs.keys() else DEFAULT_MAX_ROW_PRICE
-        self.max_buyer_tx_fee = kwargs.pop('max_tx_fee') if 'max_tx_fee' in kwargs.keys() else DEFAULT_MAX_TX_FEE
-        self._currency_id = kwargs.pop('currency_id') if 'currency_id' in kwargs.keys() else DEFAULT_CURRENCY_PBK
-        self._ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
+        self._country = kwargs.pop('country', DEFAULT_COUNTRY)
+        self._max_row_price = kwargs.pop('max_row_price', DEFAULT_MAX_ROW_PRICE)
+        self.max_buyer_tx_fee = kwargs.pop('max_tx_fee', DEFAULT_MAX_TX_FEE)
+        self._currency_id = kwargs.pop('currency_id', DEFAULT_CURRENCY_PBK)
+        self._ledger_id = kwargs.pop('ledger_id', DEFAULT_LEDGER_ID)
+        self.is_ledger_tx = kwargs.pop('is_ledger_tx', DEFAULT_IS_LEDGER_TX)
         super().__init__(**kwargs)
         self._search_id = 0
         self.is_searching = True
@@ -76,4 +80,20 @@ class Strategy(SharedClass):
             (proposal.values['price'] <= self._max_row_price * proposal.values['rows']) and \
             (proposal.values['currency_id'] == self._currency_id) and \
             (proposal.values['ledger_id'] == self._ledger_id)
+        return result
+
+    def is_affordable_proposal(self, proposal: Description) -> bool:
+        """
+        Check whether it is an affordable proposal.
+
+        :return: whether it is affordable
+        """
+        if self.is_ledger_tx:
+            payable = proposal.values['price'] + self.max_buyer_tx_fee
+            ledger_id = proposal.values['ledger_id']
+            address = cast(str, self.context.agent_addresses.get(ledger_id))
+            balance = self.context.ledger_apis.token_balance(ledger_id, address)
+            result = balance >= payable
+        else:
+            result = True
         return result

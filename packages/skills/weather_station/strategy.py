@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
+
 import time
 from typing import Any, Dict, List, Tuple
 
@@ -32,6 +33,7 @@ DEFAULT_CURRENCY_PBK = 'FET'
 DEFAULT_LEDGER_ID = 'fetchai'
 DEFAULT_DATE_ONE = "3/10/2019"
 DEFAULT_DATE_TWO = "15/10/2019"
+DEFAULT_IS_LEDGER_TX = False
 
 
 class Strategy(SharedClass):
@@ -46,12 +48,13 @@ class Strategy(SharedClass):
 
         :return: None
         """
-        self._price_per_row = kwargs.pop('price_per_row') if 'price_per_row' in kwargs.keys() else DEFAULT_PRICE_PER_ROW
-        self._seller_tx_fee = kwargs.pop('seller_tx_fee') if 'seller_tx_fee' in kwargs.keys() else DEFAULT_SELLER_TX_FEE
-        self._currency_id = kwargs.pop('currency_id') if 'currency_id' in kwargs.keys() else DEFAULT_CURRENCY_PBK
-        self._ledger_id = kwargs.pop('ledger_id') if 'ledger_id' in kwargs.keys() else DEFAULT_LEDGER_ID
-        self._date_one = kwargs.pop('date_one') if 'date_one' in kwargs.keys() else DEFAULT_DATE_ONE
-        self._date_two = kwargs.pop('date_two') if 'date_two' in kwargs.keys() else DEFAULT_DATE_TWO
+        self._price_per_row = kwargs.pop('price_per_row', DEFAULT_PRICE_PER_ROW)
+        self._seller_tx_fee = kwargs.pop('seller_tx_fee', DEFAULT_SELLER_TX_FEE)
+        self._currency_id = kwargs.pop('currency_id', DEFAULT_CURRENCY_PBK)
+        self._ledger_id = kwargs.pop('ledger_id', DEFAULT_LEDGER_ID)
+        self._date_one = kwargs.pop('date_one', DEFAULT_DATE_ONE)
+        self._date_two = kwargs.pop('date_two', DEFAULT_DATE_TWO)
+        self.is_ledger_tx = kwargs.pop('is_ledger_tx', DEFAULT_IS_LEDGER_TX)
         super().__init__(**kwargs)
         self.db = DBCommunication()
         self._oef_msg_id = 0
