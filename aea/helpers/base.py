@@ -108,32 +108,34 @@ def import_module(dotted_path: str, module_obj) -> None:
     sys.modules[dotted_path] = module_obj
 
 
-def load_agent_component_package(item_type: str, item_name: str, directory: os.PathLike):
+def load_agent_component_package(item_type: str, item_name: str, author_name: str, directory: os.PathLike):
     """
     Load a Python package associated to .
 
-    :param item_type: the type of the item. One of "protocol", "connection", "skill"
-    :param item_name: the name of the item to load
+    :param item_type: the type of the item. One of "protocol", "connection", "skill".
+    :param item_name: the name of the item to load.
+    :param author_name: the name of the author of the item to load.
     :param directory: the component directory.
     :return: the module associated to the Python package of the component.
     """
     item_type_plural = item_type + "s"
-    dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
+    dotted_path = "packages.{}.{}.{}".format(author_name, item_type_plural, item_name)
     filepath = Path(directory) / "__init__.py"
     return load_module(dotted_path, filepath)
 
 
-def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, module_obj) -> None:
+def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, author_name: str, module_obj) -> None:
     """
     Add an agent component module to sys.modules.
 
     :param item_type: the type of the item. One of "protocol", "connection", "skill"
     :param item_name: the name of the item to load
+    :param author_name: the name of the author of the item to load.
     :param module_obj: the module object. It is assumed it has been already executed.
     :return:
     """
     item_type_plural = item_type + "s"
-    dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
+    dotted_path = "packages.{}.{}.{}".format(author_name, item_type_plural, item_name)
     import_module(dotted_path, module_obj)
 
 

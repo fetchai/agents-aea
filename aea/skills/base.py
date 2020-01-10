@@ -521,8 +521,8 @@ class Skill:
         # check if there is the config file. If not, then return None.
         skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         skill_config = skill_loader.load(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
-        skill_module = load_agent_component_package("skill", skill_config.name, Path(directory))
-        add_agent_component_module_to_sys_modules("skill", skill_config.name, skill_module)
+        skill_module = load_agent_component_package("skill", skill_config.name, skill_config.author, Path(directory))
+        add_agent_component_module_to_sys_modules("skill", skill_config.name, skill_config.author, skill_module)
         loader_contents = [path.name for path in Path(directory).iterdir()]
         skills_packages = list(filter(lambda x: not x.startswith("__"), loader_contents))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))
