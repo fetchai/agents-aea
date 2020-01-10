@@ -29,7 +29,7 @@ from pathlib import Path
 import jsonschema
 import yaml
 from ...common.click_testing import CliRunner
-from jsonschema import Draft4Validator  # ValidationError
+from jsonschema import Draft4Validator, ValidationError
 
 from aea import AEA_DIR
 import aea.cli.common
@@ -96,203 +96,210 @@ class TestGenerateProtocol:
         except (OSError, IOError):
             pass
 
-# class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
-#     """Test that the command 'aea generate protocol' fails when a folder with 'generate' name already."""
 
-#     @classmethod
-#     def setup_class(cls):
-#         """Set the test up."""
-#         cls.runner = CliRunner()
-#         cls.agent_name = "myagent"
-#         cls.resource_name = "myresource"
-#         cls.cwd = os.getcwd()
-#         cls.t = tempfile.mkdtemp()
-#         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
-#         cls.mocked_logger_error = cls.patch.__enter__()
+class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
+    """Test that the command 'aea generate protocol' fails when a directory with the same name as the name of the protocol being generated already exists."""
 
-#         os.chdir(cls.t)
-#         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
-#         assert result.exit_code == 0
-#         os.chdir(cls.agent_name)
-#         # create a dummy 'myresource' folder
-#         Path(cls.t, cls.agent_name, "protocols", cls.resource_name).mkdir(exist_ok=False, parents=True)
-#         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.resource_name], standalone_mode=False)
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.protocol_name = "two_party_negotiation"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        shutil.copyfile(Path(CUR_PATH, "data", "sample_specification.yaml"), Path(cls.t, "sample_specification.yaml"))
+        cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
 
-#     def test_exit_code_equal_to_1(self):
-#         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
-#         assert self.result.exit_code == 1
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+        # create a dummy 'myprotocol' folder
+        Path(cls.t, cls.agent_name, "protocols", cls.protocol_name).mkdir(exist_ok=False, parents=True)
+        # import pdb; pdb.set_trace()
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification], standalone_mode=False)
 
-#     def test_error_message_protocol_already_existing(self):
-#         """Test that the log error message is fixed.
+    def test_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
 
-#         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
-#         """
-#         s = "A protocol with this name already exists. Please choose a different name and try again."
-#         self.mocked_logger_error.assert_called_once_with(s)
+    def test_error_message_protocol_already_existing(self):
+        """Test that the log error message is fixed.
 
-#     def test_resource_directory_exists(self):
-#         """Test that the resource directory still exists.
+        The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
+        """
+        s = "A directory with name '{}' already exists. Aborting...".format(self.protocol_name)
+        self.mocked_logger_error.assert_called_once_with(s)
 
-#         This means that after every failure, we make sure we restore the previous state.
-#         """
-#         assert Path(self.t, self.agent_name, "protocols", self.resource_name).exists()
+    def test_resource_directory_exists(self):
+        """Test that the resource directory still exists.
 
-#     @classmethod
-#     def teardown_class(cls):
-#         """Tear the test down."""
-#         os.chdir(cls.cwd)
-#         try:
-#             shutil.rmtree(cls.t)
-#         except (OSError, IOError):
-#             pass
+        This means that after every failure, we make sure we restore the previous state.
+        """
+        assert Path(self.t, self.agent_name, "protocols", self.protocol_name).exists()
 
-
-# class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
-#     """Test that the command 'aea add protocol' fails when the protocol already exists."""
-
-#     @classmethod
-#     def setup_class(cls):
-#         """Set the test up."""
-#         cls.runner = CliRunner()
-#         cls.agent_name = "myagent"
-#         cls.resource_name = "myresource"
-#         cls.cwd = os.getcwd()
-#         cls.t = tempfile.mkdtemp()
-#         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
-#         cls.mocked_logger_error = cls.patch.__enter__()
-
-#         os.chdir(cls.t)
-#         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
-#         assert result.exit_code == 0
-#         os.chdir(cls.agent_name)
-#         # add protocol first time
-#         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.resource_name], standalone_mode=False)
-#         assert result.exit_code == 0
-#         # generate protocol with the same protocol name
-#         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.resource_name], standalone_mode=False)
-
-#     def test_exit_code_equal_to_1(self):
-#         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
-#         assert self.result.exit_code == 1
-
-#     def test_error_message_protocol_already_existing(self):
-#         """Test that the log error message is fixed.
-
-#         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
-#         """
-#         s = "A protocol with name '{}' already exists. Aborting...".format(self.resource_name)
-#         self.mocked_logger_error.assert_called_once_with(s)
-
-#     def test_resource_directory_exists(self):
-#         """Test that the resource directory still exists.
-
-#         This means that after every failure, we make sure we restore the previous state.
-#         """
-#         assert Path(self.t, self.agent_name, "protocols", self.resource_name).exists()
-
-#     @classmethod
-#     def teardown_class(cls):
-#         """Tear the test down."""
-#         os.chdir(cls.cwd)
-#         try:
-#             shutil.rmtree(cls.t)
-#         except (OSError, IOError):
-#             pass
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
-# class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
-#     """Test that the command 'aea generate protocol' fails when the configuration file is not compliant with the schema."""
+class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
+    """Test that the command 'aea add protocol' fails when the protocol already exists."""
 
-#     @classmethod
-#     def setup_class(cls):
-#         """Set the test up."""
-#         cls.runner = CliRunner()
-#         cls.agent_name = "myagent"
-#         cls.resource_name = "myresource"
-#         cls.cwd = os.getcwd()
-#         cls.t = tempfile.mkdtemp()
-#         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
-#         cls.mocked_logger_error = cls.patch.__enter__()
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        shutil.copyfile(Path(CUR_PATH, "data", "sample_specification.yaml"), Path(cls.t, "sample_specification.yaml"))
+        cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
 
-#         os.chdir(cls.t)
-#         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
-#         assert result.exit_code == 0
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+        # add protocol first time
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification], standalone_mode=False)
+        assert result.exit_code == 0
+        # generate protocol with the same protocol name
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification], standalone_mode=False)
 
-#         # change the dumping of yaml module to raise an exception.
-#         cls.patch = unittest.mock.patch("yaml.safe_dump", side_effect=ValidationError("test error message"))
-#         cls.patch.__enter__()
+    def test_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
 
-#         os.chdir(cls.agent_name)
-#         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.resource_name], standalone_mode=False)
+    def test_error_message_protocol_already_existing(self):
+        """Test that the log error message is fixed.
 
-#     def test_exit_code_equal_to_1(self):
-#         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
-#         assert self.result.exit_code == 1
+        The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
+        """
+        s = "A protocol with name 'two_party_negotiation' already exists. Aborting..."
+        self.mocked_logger_error.assert_called_once_with(s)
 
-#     def test_configuration_file_not_valid(self):
-#         """Test that the log error message is fixed.
+    def test_resource_directory_exists(self):
+        """Test that the resource directory still exists.
 
-#         The expected message is: 'Cannot find protocol: '{protocol_name}'
-#         """
-#         self.mocked_logger_error.assert_called_once_with("Error when validating the skill configuration file.")
+        This means that after every failure, we make sure we restore the previous state.
+        """
+        assert Path(self.t, self.agent_name, "protocols", "two_party_negotiation").exists()
 
-#     def test_resource_directory_does_not_exists(self):
-#         """Test that the resource directory does not exist.
-
-#         This means that after every failure, we make sure we restore the previous state.
-#         """
-#         assert not Path(self.t, self.agent_name, "protocols", self.resource_name).exists()
-
-#     @classmethod
-#     def teardown_class(cls):
-#         """Tear the test down."""
-#         cls.patch.__exit__()
-#         os.chdir(cls.cwd)
-#         try:
-#             shutil.rmtree(cls.t)
-#         except (OSError, IOError):
-#             pass
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
 
 
-# class TestGenerateProtocolFailsWhenExceptionOccurs:
-#     """Test that the command 'aea generate protocol' fails when the configuration file is not compliant with the schema."""
+class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
+    """Test that the command 'aea generate protocol' fails when the configuration file is not compliant with the schema."""
 
-#     @classmethod
-#     def setup_class(cls):
-#         """Set the test up."""
-#         cls.runner = CliRunner()
-#         cls.agent_name = "myagent"
-#         cls.resource_name = "myresource"
-#         cls.cwd = os.getcwd()
-#         cls.t = tempfile.mkdtemp()
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        shutil.copyfile(Path(CUR_PATH, "data", "sample_specification.yaml"), Path(cls.t, "sample_specification.yaml"))
+        cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
 
-#         os.chdir(cls.t)
-#         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
-#         assert result.exit_code == 0
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
 
-#         cls.patch = unittest.mock.patch("shutil.copytree", side_effect=Exception("unknwon exception"))
-#         cls.patch.__enter__()
+        # change the dumping of yaml module to raise an exception.
+        cls.patch = unittest.mock.patch("yaml.safe_dump", side_effect=ValidationError("test error message"))
+        cls.patch.__enter__()
 
-#         os.chdir(cls.agent_name)
-#         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.resource_name], standalone_mode=False)
+        os.chdir(cls.agent_name)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification], standalone_mode=False)
 
-#     def test_exit_code_equal_to_1(self):
-#         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
-#         assert self.result.exit_code == 1
+    def test_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
 
-#     def test_resource_directory_does_not_exists(self):
-#         """Test that the resource directory does not exist.
+    # def test_configuration_file_not_valid(self):
+    #     """Test that the log error message is fixed.
+    #
+    #     The expected message is: 'Cannot find protocol: '{protocol_name}'
+    #     """
+    #     self.mocked_logger_error.assert_called_once_with("test error message")
 
-#         This means that after every failure, we make sure we restore the previous state.
-#         """
-#         assert not Path(self.t, self.agent_name, "protocols", self.resource_name).exists()
+    def test_resource_directory_does_not_exists(self):
+        """Test that the resource directory does not exist.
 
-#     @classmethod
-#     def teardown_class(cls):
-#         """Tear the test down."""
-#         cls.patch.__exit__()
-#         os.chdir(cls.cwd)
-#         try:
-#             shutil.rmtree(cls.t)
-#         except (OSError, IOError):
-#             pass
+        This means that after every failure, we make sure we restore the previous state.
+        """
+        assert not Path(self.t, self.agent_name, "protocols", "two_party_negotiation").exists()
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestGenerateProtocolFailsWhenExceptionOccurs:
+    """Test that the command 'aea generate protocol' fails when the configuration file is not compliant with the schema."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # shutil.copyfile(Path(CUR_PATH, "data", "sample_specification.yaml"), Path(cls.t, "sample_specification.yaml"))
+        cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+
+        cls.patch = unittest.mock.patch("shutil.copytree", side_effect=Exception("unknwon exception"))
+        cls.patch.__enter__()
+
+        os.chdir(cls.agent_name)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification], standalone_mode=False)
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    def test_resource_directory_does_not_exists(self):
+        """Test that the resource directory does not exist.
+
+        This means that after every failure, we make sure we restore the previous state.
+        """
+        assert not Path(self.t, self.agent_name, "protocols", "two_party_negotiation").exists()
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        cls.patch.__exit__()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
