@@ -47,10 +47,10 @@ from aea.helpers.search.models import Description, Attribute, DataModel, Query, 
     Constraint, \
     ConstraintType, ConstraintTypes
 from aea.mail.base import Envelope, Address
-from packages.protocols.fipa.message import FIPAMessage
-from packages.protocols.fipa.serialization import FIPASerializer
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
 

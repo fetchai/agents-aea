@@ -25,12 +25,12 @@ from typing import cast, Optional
 
 from aea.helpers.search.models import Description, DataModel, Attribute
 from aea.skills.base import Behaviour
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-from packages.protocols.tac.message import TACMessage
-from packages.protocols.tac.serialization import TACSerializer
-from packages.skills.tac_control.game import Game, Phase
-from packages.skills.tac_control.parameters import Parameters
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.tac.message import TACMessage
+from packages.fetchai.protocols.tac.serialization import TACSerializer
+from packages.fetchai.skills.tac_control.game import Game, Phase
+from packages.fetchai.skills.tac_control.parameters import Parameters
 
 CONTROLLER_DATAMODEL = DataModel("tac", [
     Attribute("version", str, True, "Version number of the TAC Controller Agent."),

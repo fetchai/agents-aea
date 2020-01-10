@@ -27,7 +27,7 @@ from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from packages.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.message import OEFMessage
 
 """default 'to' field for OEF envelopes."""
 DEFAULT_OEF = "oef"

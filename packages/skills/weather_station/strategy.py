@@ -23,8 +23,8 @@ from typing import Any, Dict, List, Tuple
 
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
-from packages.skills.weather_station.db_communication import DBCommunication
-from packages.skills.weather_station.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
+from packages.fetchai.skills.weather_station.db_communication import DBCommunication
+from packages.fetchai.skills.weather_station.weather_station_data_model import WEATHER_STATION_DATAMODEL, SCHEME
 
 DEFAULT_PRICE_PER_ROW = 2
 DEFAULT_SELLER_TX_FEE = 0

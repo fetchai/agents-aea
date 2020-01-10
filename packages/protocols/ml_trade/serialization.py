@@ -26,7 +26,7 @@ from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from packages.protocols.ml_trade.message import MLTradeMessage
+from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
 
 
 class MLTradeSerializer(Serializer):

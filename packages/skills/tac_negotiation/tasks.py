@@ -22,7 +22,7 @@
 from typing import cast
 
 from aea.skills.base import Task
-from packages.skills.tac_negotiation.transactions import Transactions
+from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 
 class TransactionCleanUpTask(Task):

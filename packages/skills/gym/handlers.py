@@ -23,8 +23,8 @@ from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-from packages.protocols.gym.message import GymMessage
-from packages.skills.gym.tasks import GymTask
+from packages.fetchai.protocols.gym.message import GymMessage
+from packages.fetchai.skills.gym.tasks import GymTask
 
 logger = logging.getLogger("aea.gym_skill")
 

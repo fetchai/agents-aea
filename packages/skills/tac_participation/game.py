@@ -25,7 +25,7 @@ from typing import Dict, List, Optional
 from aea.helpers.search.models import Query, Constraint, ConstraintType
 from aea.mail.base import Address
 from aea.skills.base import SharedClass
-from packages.protocols.tac.message import TACMessage
+from packages.fetchai.protocols.tac.message import TACMessage
 
 logger = logging.getLogger("aea.tac_participation_skill")
 

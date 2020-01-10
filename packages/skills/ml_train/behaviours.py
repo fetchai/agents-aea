@@ -25,9 +25,9 @@ from typing import cast
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-from packages.skills.ml_train.strategy import Strategy
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.skills.ml_train.strategy import Strategy
 
 logger = logging.getLogger("aea.ml_train_skill")
 

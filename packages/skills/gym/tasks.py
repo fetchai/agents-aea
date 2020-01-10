@@ -23,8 +23,8 @@ from queue import Queue
 from threading import Thread
 
 from aea.skills.base import Task
-from packages.skills.gym.helpers import ProxyEnv
-from packages.skills.gym.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
+from packages.fetchai.skills.gym.helpers import ProxyEnv
+from packages.fetchai.skills.gym.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
 
 logger = logging.getLogger("aea.gym_skill")
 

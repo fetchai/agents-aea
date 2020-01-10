@@ -22,9 +22,9 @@ import logging
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from packages.skills.carpark_client.strategy import Strategy
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.skills.carpark_client.strategy import Strategy
 
 logger = logging.getLogger("aea.carpark_client_skill")
 

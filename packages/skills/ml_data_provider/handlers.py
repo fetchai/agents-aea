@@ -23,9 +23,9 @@ from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-from packages.protocols.ml_trade.message import MLTradeMessage
-from packages.protocols.ml_trade.serialization import MLTradeSerializer
-from packages.skills.ml_data_provider.strategy import Strategy
+from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
+from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
+from packages.fetchai.skills.ml_data_provider.strategy import Strategy
 
 logger = logging.getLogger("aea.ml_data_provider")
 

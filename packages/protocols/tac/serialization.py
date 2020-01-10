@@ -23,8 +23,8 @@
 from typing import Any, Dict, cast
 
 from aea.protocols.base import Message, Serializer
-from packages.protocols.tac import tac_pb2
-from packages.protocols.tac.message import TACMessage
+from packages.fetchai.protocols.tac import tac_pb2
+from packages.fetchai.protocols.tac.message import TACMessage
 
 
 def _from_dict_to_pairs(d):

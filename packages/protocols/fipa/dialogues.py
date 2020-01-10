@@ -32,7 +32,7 @@ from typing import Dict, Tuple, cast
 from aea.helpers.dialogue.base import DialogueLabel, Dialogue, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
-from packages.protocols.fipa.message import FIPAMessage, VALID_PREVIOUS_PERFORMATIVES
+from packages.fetchai.protocols.fipa.message import FIPAMessage, VALID_PREVIOUS_PERFORMATIVES
 
 
 class FIPADialogue(Dialogue):

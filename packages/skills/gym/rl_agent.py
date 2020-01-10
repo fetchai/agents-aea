@@ -25,7 +25,7 @@ from typing import Any, Dict
 
 import numpy as np
 
-from packages.skills.gym.helpers import RLAgent, ProxyEnv
+from packages.fetchai.skills.gym.helpers import RLAgent, ProxyEnv
 
 DEFAULT_NB_STEPS = 4000
 NB_GOODS = 10

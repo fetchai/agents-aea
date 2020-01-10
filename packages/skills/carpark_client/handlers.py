@@ -30,8 +30,8 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
-from packages.protocols.fipa.message import FIPAMessage
-from packages.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.protocols.oef.message import OEFMessage
 from packages.skills.carpark_client.dialogues import Dialogue, Dialogues
 from packages.skills.carpark_client.strategy import Strategy

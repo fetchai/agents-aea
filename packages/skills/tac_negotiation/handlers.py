@@ -31,15 +31,15 @@ from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
-from packages.protocols.fipa.dialogues import FIPADialogue as Dialogue
-from packages.protocols.fipa.message import FIPAMessage
-from packages.protocols.fipa.serialization import FIPASerializer
-from packages.protocols.oef.message import OEFMessage
-from packages.skills.tac_negotiation.dialogues import Dialogues
-from packages.skills.tac_negotiation.helpers import SUPPLY_DATAMODEL_NAME
-from packages.skills.tac_negotiation.search import Search
-from packages.skills.tac_negotiation.strategy import Strategy
-from packages.skills.tac_negotiation.transactions import Transactions
+from packages.fetchai.protocols.fipa.dialogues import FIPADialogue as Dialogue
+from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.skills.tac_negotiation.dialogues import Dialogues
+from packages.fetchai.skills.tac_negotiation.helpers import SUPPLY_DATAMODEL_NAME
+from packages.fetchai.skills.tac_negotiation.search import Search
+from packages.fetchai.skills.tac_negotiation.strategy import Strategy
+from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 logger = logging.getLogger("aea.tac_negotiation_skill")
 

@@ -26,8 +26,8 @@ import time
 
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
-from packages.skills.carpark_detection.detection_database import DetectionDatabase
-from packages.skills.carpark_detection.carpark_detection_data_model import CarParkDataModel
+from packages.fetchai.skills.carpark_detection.detection_database import DetectionDatabase
+from packages.fetchai.skills.carpark_detection.carpark_detection_data_model import CarParkDataModel
 
 DEFAULT_PRICE = 2000
 DEFAULT_DB_IS_REL_TO_CWD = False

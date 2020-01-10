@@ -29,8 +29,8 @@ from typing import Dict, Optional, cast
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Query, Description
 from aea.skills.base import SharedClass
-from packages.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
-from packages.skills.tac_negotiation.transactions import Transactions
+from packages.fetchai.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
+from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 logger = logging.getLogger("aea.tac_negotiation_skill")
 

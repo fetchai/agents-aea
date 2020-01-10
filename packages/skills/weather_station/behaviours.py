@@ -24,9 +24,9 @@ from typing import cast, Optional
 
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-from packages.skills.weather_station.strategy import Strategy
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.skills.weather_station.strategy import Strategy
 
 logger = logging.getLogger("aea.weather_station_skill")
 

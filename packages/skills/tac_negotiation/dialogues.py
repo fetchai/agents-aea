@@ -26,7 +26,7 @@ This module contains the classes required for dialogue management.
 
 from aea.skills.base import SharedClass
 
-from packages.protocols.fipa.dialogues import FIPADialogues
+from packages.fetchai.protocols.fipa.dialogues import FIPADialogues
 
 
 class Dialogues(SharedClass, FIPADialogues):

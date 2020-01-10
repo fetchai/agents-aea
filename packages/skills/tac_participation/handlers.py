@@ -28,11 +28,11 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.skills.base import Handler
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.tac.message import TACMessage
-from packages.protocols.tac.serialization import TACSerializer
-from packages.skills.tac_participation.game import Game, Phase
-from packages.skills.tac_participation.search import Search
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.tac.message import TACMessage
+from packages.fetchai.protocols.tac.serialization import TACSerializer
+from packages.fetchai.skills.tac_participation.game import Game, Phase
+from packages.fetchai.skills.tac_participation.search import Search
 
 logger = logging.getLogger("aea.tac_participation_skill")
 

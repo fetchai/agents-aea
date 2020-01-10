@@ -27,7 +27,7 @@ from typing import Optional, cast
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Envelope, Address
-from packages.connections.tcp.base import TCPConnection
+from packages.fetchai.connections.tcp.base import TCPConnection
 
 logger = logging.getLogger(__name__)
 

@@ -27,9 +27,9 @@ from typing import Optional, cast
 from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
-from packages.skills.carpark_detection.strategy import Strategy
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.skills.carpark_detection.strategy import Strategy
 
 logger = logging.getLogger("aea.carpark_detection_skill")
 

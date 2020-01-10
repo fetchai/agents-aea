@@ -31,8 +31,8 @@ from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Envelope, Address
-from packages.protocols.gym.message import GymMessage
-from packages.protocols.gym.serialization import GymSerializer
+from packages.fetchai.protocols.gym.message import GymMessage
+from packages.fetchai.protocols.gym.serialization import GymSerializer
 
 logger = logging.getLogger(__name__)
 
