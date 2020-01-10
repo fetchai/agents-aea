@@ -8,18 +8,17 @@ Connections wrap an external SDK or API and manage messaging. As such, they allo
 
 The module `connections/base.py` contains the abstract class which define a `Connection`. A `Connection` acts as a bridge to the SDK or API to be wrapped, and is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service.
 
-The framework provides a number of default connections.
+The framework provides one default connections.
 
-* `local`: implements a local node.
-* `oef`: wraps the OEF SDK.
+* `stub`: implements an I/O reader and writer to send messages to the agent from a local file.
 
 ### InBox and OutBox
 
-The `InBox` and `OutBox` are, respectively, queues for incoming and outgoing `Envelopes`.
+The `InBox` and `OutBox` are, respectively, queues for incoming and outgoing `Envelopes`. They are needed to separate the thread which runs the `Multiplexer` from the thread which runs the main agent loop.
 
 ### Envelope
 
-An `Envelope` is the core object with which agents communicate. It travels from `OutBox` to another agent. `Envelope` objects sent from other agents arrive in the `InBox` via a connection. An `Envelope` is a vehicle for messages with four attribute parameters:
+An `Envelope` is the core object with which agents communicate. It travels from `OutBox` to another agent. `Envelope` objects sent from other agents arrive in the `InBox` via a connection. An `Envelope` is a vehicle for messages with five attribute parameters:
 
 * `to`: defines the destination address.
 
@@ -28,6 +27,8 @@ An `Envelope` is the core object with which agents communicate. It travels from 
 * `protocol_id`: defines the id of the protocol.
 
 * `message`: is a bytes field which holds the message in serialized form.
+
+* `Optional[context]`: an optional field to specify routing information in a URI.
 
 
 ### Protocol
@@ -38,21 +39,25 @@ For instance, a protocol may contain messages of type `START` and `FINISH`. From
 
 The `Message` class in the `protocols/base.py` module provides an abstract class with all the functionality a derived `Protocol` message class requires for a custom protocol, such as basic message generating and management functions and serialisation details.
 
-A number of protocols come packaged up with the AEA framework.
+The framework provides one default protocol:
 
 * `default`: this protocol provides a bare bones implementation for an AEA protocol which includes a `DefaultMessage` class and a `DefaultSerialization` class with functions for managing serialisation. Use this protocol as a starting point for building custom protocols.
+
+
+Additional protocols can be added as packages, including:
+
 * `oef`: this protocol provides the AEA protocol implementation for communication with the OEF including an `OEFMessage` class for hooking up to OEF services and search agents. Utility classes are available in the `models.py` module which provides OEF specific requirements, such as classes, needed to perform querying on the OEF, such as `Description`, `Query`, and `Constraint`, to name a few.
 * `fipa`: this protocol provides classes and functions necessary for communication between AEAs via the [FIPA](http://www.fipa.org/repository/aclspecs.html) Agent Communication Language. For example, the `FIPAMessage` class provides negotiation terms such as `cfp`, `propose`, `decline`, `accept` and `match_accept`.
 
 ### Skill
 
-Skills are a result of the framework's extensibility. They are atomic capabilities that agents can dynamically take on board, 
+Skills are a result of the framework's extensibility. They are self-contained capabilities that agents can dynamically take on board, 
 in order to expand their effectiveness in different situations. 
 A skill can be given permission to read the internal state of the the agent, and suggest action(s) to the agent according to its specific logic. 
 As such, more than one skill could exist per protocol, competing with each other in suggesting to the agent the best course of actions to take. 
 
-For instance, an agent who is playing chess, could subscribe to more than one skill, where each skill corresponds to a specific strategy for playing chess. 
-The skills could then read the internal state of the agent, including the agent's observation of the game's state, and suggest a next move to the agent.   
+For instance, an agent who is trading goods, could subscribe to more than one skill, where each skill corresponds to a different trading strategy. 
+The skills could then read the internal state of the agent, and independently suggest profitable transactions. 
 
 A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`:
 

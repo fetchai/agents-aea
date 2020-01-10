@@ -23,7 +23,7 @@ import os
 import click
 
 
-from aea.cli.common import Context, pass_ctx, _try_to_load_agent_config, retrieve_details, format_items
+from aea.cli.common import Context, pass_ctx, try_to_load_agent_config, retrieve_details, format_items
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
     DEFAULT_PROTOCOL_CONFIG_FILE
 
@@ -32,7 +32,7 @@ from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKIL
 @pass_ctx
 def list(ctx: Context):
     """List the installed resources."""
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
 
 
 @list.command()

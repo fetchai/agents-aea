@@ -1,5 +1,3 @@
-The <a href="../scaffolding/">scaffolding tool</a> allows you to create the folder structure required for a skill.
-
 <div class="admonition note">
   <p class="admonition-title">Note</p>
   <p>Before developing your first skill, please read the <a href="../skill/">skill guide</a>.</p>
@@ -28,17 +26,16 @@ In this example, we implement a simple search behaviour. Each time, `act()` gets
 
 ```python
 import logging
-import time
 
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.models import Query, Constraint, ConstraintType
-from aea.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from aea.skills.base import Behaviour
+from aea.helpers.search.models import Query, Constraint, ConstraintType
+from aea.skills.behaviours import TickerBehaviour
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
 logger = logging.getLogger("aea.my_search_skill")
 
 
-class MySearchBehaviour(Behaviour):
+class MySearchBehaviour(TickerBehaviour):
     """This class provides a simple search behaviour."""
 
     def __init__(self, **kwargs):
@@ -60,12 +57,11 @@ class MySearchBehaviour(Behaviour):
 
         :return: None
         """
-        time.sleep(1)  # to slow down the agent
         self.sent_search_count += 1
         search_constraints = [Constraint("country",
-        	                  ConstraintType("==", "UK"))]
+                              ConstraintType("==", "UK"))]
         search_query_w_empty_model = Query(search_constraints, model=None)
-        search_request = OEFMessage(oef_type=OEFMessage.Type.SEARCH_SERVICES,
+        search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
                                     id=self.sent_search_count,
                                     query=search_query_w_empty_model)
         logger.info("[{}]: sending search request to OEF, search_count={}".format(self.context.agent_name, self.sent_search_count))
@@ -83,7 +79,7 @@ class MySearchBehaviour(Behaviour):
         logger.info("[{}]: tearing down MySearchBehaviour".format(self.context.agent_name))
 ```
 
-Searches are proactive and, as such, well placed in a `Behaviour`.
+Searches are proactive and, as such, well placed in a `Behaviour`. Specifically, we subclass the `TickerBehaviour` as it allows us to repeatedly search at a defined tick interval.
 
 We place this code in `my_agent/skills/my_search/behaviours.py`.
 
@@ -96,9 +92,9 @@ Let us now implement a handler to deal with the incoming search responses.
 ```python
 import logging
 
-from aea.protocols.oef.message import OEFMessage
-from aea.protocols.oef.serialization import OEFSerializer
 from aea.skills.base import Handler
+from packages.protocols.oef.message import OEFMessage
+from packages.protocols.oef.serialization import OEFSerializer
 
 logger = logging.getLogger("aea.my_search_skill")
 
@@ -117,12 +113,11 @@ class MySearchHandler(Handler):
         """Set up the handler."""
         logger.info("[{}]: setting up MySearchHandler".format(self.context.agent_name))
 
-    def handle(self, message: OEFMessage, sender: str) -> None:
+    def handle(self, message: OEFMessage) -> None:
         """
         Handle the message.
 
         :param message: the message.
-        :param sender: the sender.
         :return: None
         """
         msg_type = OEFMessage.Type(message.get("type"))
@@ -153,6 +148,7 @@ We have implemented a behaviour and a handler. We conclude by implementing a tas
 
 ```python
 import logging
+import time
 
 from aea.skills.base import Task
 
@@ -176,11 +172,10 @@ class MySearchTask(Task):
 
         :return: None
         """
-        my_search_behaviour = self.context.behaviours[0]
-        my_search_handler = self.context.handlers[0]
+        time.sleep(1)  # to slow down the agent
         logger.info("[{}]: number of search requests sent={} vs. number of search responses received={}".format(self.context.agent_name,
-                                my_search_behaviour.sent_search_count,
-                                my_search_handler.received_search_count)
+                                self.context.behaviours.my_search_behaviour.sent_search_count,
+                                self.context.handlers.my_search_handler.received_search_count)
         )
 
     def teardown(self) -> None:
@@ -202,36 +197,44 @@ Based on our skill components above, we create the following config file.
 
 ```yaml
 name: my_search
-authors: Fetch.ai Limited
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
-url: ''
 description: 'A simple search skill utilising the OEF.'
 behaviours:
-  - behaviour:
-      class_name: MySearchBehaviour
-      args: {}
+  my_search_behaviour:
+    class_name: MySearchBehaviour
+    args:
+      tick_interval: 5
 handlers:
-  - handler:
-      class_name: MySearchHandler
-      args: {}
+  my_search_handler:
+    class_name: MySearchHandler
+    args: {}
 tasks:
-  - task:
-      class_name: MySearchTask
-      args: {}
-shared_classes: []
-protocols: ['oef']
-dependencies: []
+  my_search_task:
+    class_name: MySearchTask
+    args: {}
+shared_classes: {}
+protocols: ['fetchai/oef:0.1.0']
+dependencies: {}
 ```
+
+Importantly, the keys `my_search_behaviour` and `my_search_handler` are used in the above task to access these skill components at runtime. We also set the `tick_interval` of the `TickerBehaviour` to `5` seconds.
 
 We place this code in `my_agent/skills/my_search/skill.yaml`.
 
-## Step 6: Add the oef protocol
+## Step 6: Add the oef protocol and connection
 
 Our agent does not have the oef protocol yet so let's add it.
-
 ```bash
-aea add protocol oef
+aea add protocol fetchai/oef:0.1.0
+```
+
+This adds the protocol to our agent and makes it available on the path `packages.protocols...`.
+
+We also need to add the oef connection:
+```bash
+aea add connection fetchai/oef:0.1.0
 ```
 
 ## Step 7: Run the agent
@@ -245,7 +248,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 We can then launch our agent.
 
 ```bash
-aea run
+aea run --connections oef
 ```
 
 We can see that the agent sends search requests to the OEF and receives search responses from the OEF. Since our agent is only searching on the OEF - and not registered on the OEF - the search response returns an empty list of agents.

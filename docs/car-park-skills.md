@@ -1,10 +1,27 @@
-# Car Park Agent Application
+The full Fetch.ai car park agent demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
 
-The Fetch.ai car park agent demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
+This demo allows you to test the AEA functionality of the car park agent demo without the detection logic.
+
+It demonstrates how the agents trade car park information.
 
 
-## To test the AEA functionality (without the detection)
+## Preparation instructions
 
+### Dependencies
+
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+
+### Launch the OEF
+
+In a separate terminal, launch a local OEF node (for search and discovery).
+``` bash
+python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+```
+
+Keep it running for all the following.
+
+
+## Demo instructions
 
 ### Create carpark detection agent
 
@@ -76,14 +93,7 @@ python scripts/fetchai_wealth_generation.py --private-key car_data_buyer/fet_pri
 
 Then, in the detection agent we disable the detection logic:
 ``` bash
-aea config set skills.carpark_detection.shared_classes.strategy.args.db_is_rel_to_cwd false
-```
-
-### Launch the OEF
-
-Then, launch an OEF node instance:
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
+aea config set skills.carpark_detection.shared_classes.strategy.args.db_is_rel_to_cwd False
 ```
 
 ### Run both agents

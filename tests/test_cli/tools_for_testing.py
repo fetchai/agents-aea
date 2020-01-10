@@ -16,5 +16,40 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Tools used for CLI registry testing."""
 
-"""This module contains the implementation of the default skill."""
+from typing import List
+
+from tests.test_cli.constants import DEFAULT_TESTING_VERSION
+
+
+class AgentConfigMock:
+    """An object to mock Agent config."""
+
+    registry_path = 'registry'
+    name = 'name'
+
+    connections: List[str] = []
+    protocols: List[str] = []
+    skills: List[str] = []
+
+
+class ContextMock:
+    """An object to mock Context."""
+
+    cwd = 'cwd'
+    agent_config = AgentConfigMock()
+
+
+class PublicIdMock:
+    """An object to mock PublicId."""
+
+    DEFAULT_VERSION = DEFAULT_TESTING_VERSION
+
+    def __init__(
+        self, name='name', author='author', version=DEFAULT_TESTING_VERSION
+    ):
+        """Init the Public ID mock object."""
+        self.name = name
+        self.author = author
+        self.version = version

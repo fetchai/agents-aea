@@ -27,7 +27,9 @@ import click
 import requests
 import yaml
 
-from aea.cli.common import logger, DEFAULT_REGISTRY_PATH, AEAConfigException
+from aea.cli.common import (
+    logger, AEAConfigException
+)
 from aea.cli.registry.settings import (
     REGISTRY_API_URL,
     CLI_CONFIG_PATH,
@@ -285,39 +287,3 @@ def clean_tarfiles(func):
             return result
 
     return wrapper
-
-
-def get_item_source_path(
-    cwd: str, item_type_plural: str, item_name: str
-) -> str:
-    """
-    Get the item source path.
-
-    :param cwd: the current working directory
-    :param item_type_plural: the item type (plural)
-    :param item_name: the item name
-    :return: the item source path
-    """
-    source_path = os.path.join(cwd, item_type_plural, item_name)
-    if not os.path.exists(source_path):
-        raise click.ClickException(
-            'Item "{}" not found in {}.'.format(item_name, cwd)
-        )
-    return source_path
-
-
-def get_item_target_path(item_type_plural: str, item_name: str) -> str:
-    """
-    Get the item target path.
-
-    :param item_type_plural: the item type (plural)
-    :param item_name: the item name
-    :return: the item target path
-    """
-    packages_path = DEFAULT_REGISTRY_PATH
-    target_path = os.path.join(packages_path, item_type_plural, item_name)
-    if os.path.exists(target_path):
-        raise click.ClickException(
-            'Item "{}" already exists in packages folder.'.format(item_name)
-        )
-    return target_path

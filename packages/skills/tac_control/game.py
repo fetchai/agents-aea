@@ -26,6 +26,7 @@ from collections import defaultdict
 from enum import Enum
 from typing import cast, Dict, List, Optional
 
+from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM
 from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
 from aea.mail.base import Address
@@ -360,14 +361,14 @@ class Transaction:
         else:
             assert self.counterparty_amount >= 0, "Counterparty_amount must be positive when the counterpary is the payment receiver."
 
-    def verify_matching_signatures(self, api) -> bool:
+    def verify_matching_signatures(self, api: LedgerApi) -> bool:
         """
         Check that the signatures match the terms of trade.
 
         :return: True if the transaction has been signed by both parties
         """
-        result = api.eth.account.recoverHash(self.sender_hash, signature=self.sender_signature) == self.sender_addr
-        result = result and api.eth.account.recoverHash(self.counterparty_hash, signature=self.counterparty_signature) == self.counterparty_addr
+        result = api.api.eth.account.recoverHash(self.sender_hash, signature=self.sender_signature) == self.sender_addr
+        result = result and api.api.eth.account.recoverHash(self.counterparty_hash, signature=self.counterparty_signature) == self.counterparty_addr
         return result
 
     @classmethod
@@ -486,7 +487,7 @@ class AgentState:
 
         E.g. check that the agent state has enough money if it is a buyer
         or enough holdings if it is a seller.
-        :return: True if the transaction is legal wrt the current state, false otherwise.
+        :return: True if the transaction is legal wrt the current state, False otherwise.
         """
         result = self.agent_address in [tx.sender_addr, tx.counterparty_addr]
         if tx.amount == 0 and all(quantity == 0 for quantity in tx.quantities_by_good_id.values()):
@@ -795,7 +796,7 @@ class Game(SharedClass):
         """
         sender_state = self.current_agent_states[tx.sender_addr]
         counterparty_state = self.current_agent_states[tx.counterparty_addr]
-        result = tx.verify_matching_signatures(self.context.ledger_apis.apis.get(ETHEREUM))
+        result = tx.verify_matching_signatures(self.context.ledger_apis.apis[ETHEREUM])
         result = result and sender_state.check_transaction_is_consistent(tx)
         result = result and counterparty_state.check_transaction_is_consistent(tx)
         return result

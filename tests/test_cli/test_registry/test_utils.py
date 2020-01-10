@@ -28,8 +28,7 @@ from requests.exceptions import ConnectionError
 from aea.cli.common import AEAConfigException
 from aea.cli.registry.utils import (
     fetch_package, request_api, download_file, extract, _init_config_folder,
-    write_cli_config, read_cli_config, get_item_source_path,
-    get_item_target_path
+    write_cli_config, read_cli_config
 )
 from aea.cli.registry.settings import REGISTRY_API_URL
 from aea.configurations.base import PublicId
@@ -279,44 +278,3 @@ class ReadCLIConfigTestCase(TestCase):
         """Test for read_cli_config method bad yaml behavior."""
         with self.assertRaises(AEAConfigException):
             read_cli_config()
-
-
-@mock.patch('aea.cli.registry.utils.os.path.join', return_value='some-path')
-class GetItemSourcePathTestCase(TestCase):
-    """Test case for get_item_source_path method."""
-
-    @mock.patch('aea.cli.registry.utils.os.path.exists', return_value=True)
-    def test_get_item_source_path_positive(self, exists_mock, join_mock):
-        """Test for get_item_source_path positive result."""
-        result = get_item_source_path('cwd', 'skills', 'skill-name')
-        expected_result = 'some-path'
-        self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with('cwd', 'skills', 'skill-name')
-        exists_mock.assert_called_once_with('some-path')
-
-    @mock.patch('aea.cli.registry.utils.os.path.exists', return_value=False)
-    def test_get_item_source_path_not_exists(self, exists_mock, join_mock):
-        """Test for get_item_source_path item already exists."""
-        with self.assertRaises(ClickException):
-            get_item_source_path('cwd', 'skills', 'skill-name')
-
-
-@mock.patch('aea.cli.registry.utils.DEFAULT_REGISTRY_PATH', 'packages')
-@mock.patch('aea.cli.registry.utils.os.path.join', return_value='some-path')
-class GetItemTargetPathTestCase(TestCase):
-    """Test case for get_item_target_path method."""
-
-    @mock.patch('aea.cli.registry.utils.os.path.exists', return_value=False)
-    def test_get_item_target_path_positive(self, exists_mock, join_mock):
-        """Test for get_item_source_path positive result."""
-        result = get_item_target_path('skills', 'skill-name')
-        expected_result = 'some-path'
-        self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with('packages', 'skills', 'skill-name')
-        exists_mock.assert_called_once_with('some-path')
-
-    @mock.patch('aea.cli.registry.utils.os.path.exists', return_value=True)
-    def test_get_item_target_path_already_exists(self, exists_mock, join_mock):
-        """Test for get_item_target_path item already exists."""
-        with self.assertRaises(ClickException):
-            get_item_target_path('skills', 'skill-name')
