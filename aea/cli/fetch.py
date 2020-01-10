@@ -19,10 +19,24 @@
 
 """Implementation of the 'aea fetch' subcommand."""
 import click
-from distutils.dir_util import copy_tree
 import os
 
-from aea.cli.common import Context, pass_ctx, PublicIdParameter, DEFAULT_REGISTRY_PATH, try_get_item_source_path
+from distutils.dir_util import copy_tree
+from typing import cast
+
+from aea.cli.add import (
+    connection as add_connection_command,
+    protocol as add_protocol_command,
+    skill as add_skill_command
+)
+from aea.cli.common import (
+    Context,
+    PublicIdParameter,
+    DEFAULT_REGISTRY_PATH,
+    try_get_item_source_path,
+    try_to_load_agent_config,
+    logger
+)
 from aea.cli.registry.fetch import fetch_agent
 from aea.configurations.base import PublicId
 
@@ -32,16 +46,17 @@ from aea.configurations.base import PublicId
     '--registry', is_flag=True, help="For fetching agent from Registry."
 )
 @click.argument('public-id', type=PublicIdParameter(), required=True)
-@pass_ctx
-def fetch(ctx: Context, public_id, registry):
+@click.pass_context
+def fetch(click_context, public_id, registry):
     """Fetch Agent from Registry."""
+    ctx = cast(Context, click_context.obj)
     if not registry:
-        _fetch_agent_locally(ctx, public_id)
+        _fetch_agent_locally(ctx, public_id, click_context)
     else:
         fetch_agent(ctx, public_id)
 
 
-def _fetch_agent_locally(ctx: Context, public_id: PublicId) -> None:
+def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> None:
     """
     Fetch Agent from local packages.
 
@@ -51,12 +66,39 @@ def _fetch_agent_locally(ctx: Context, public_id: PublicId) -> None:
     :return: None
     """
     packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
-    source_path = try_get_item_source_path(packages_path, 'agents', public_id.name)
+    source_path = try_get_item_source_path(
+        packages_path, 'agents', public_id.name
+    )
     target_path = os.path.join(ctx.cwd, public_id.name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(public_id.name)
         )
     copy_tree(source_path, target_path)
+
+    # add dependencies
+    ctx.cwd = target_path
+    try_to_load_agent_config(ctx)
+
+    for item_type_plural in ('skills', 'connections', 'protocols'):
+        required_items = getattr(ctx.agent_config, item_type_plural)
+        for public_id in required_items:
+            try:
+                if item_type_plural == 'connections':
+                    click_context.invoke(
+                        add_connection_command, connection_public_id=public_id
+                    )
+                elif item_type_plural == 'protocols':
+                    click_context.invoke(
+                        add_protocol_command, protocol_public_id=public_id
+                    )
+                elif item_type_plural == 'skills':
+                    click_context.invoke(
+                        add_skill_command, skill_public_id=public_id
+                    )
+                else:
+                    logger.debug('Wrong item type {}'.format(item_type_plural))
+            except SystemExit:
+                continue
+
     click.echo('Agent {} successfully fetched.'.format(public_id.name))
-    # TODO: install all dependencies recursively

@@ -30,15 +30,17 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 @mock.patch(
     'aea.cli.fetch.try_get_item_source_path', return_value='path'
 )
+@mock.patch('aea.cli.fetch.try_to_load_agent_config')
 class FetchAgentLocallyTestCase(TestCase):
     """Test case for fetch_agent_locally method."""
 
     def test_fetch_agent_locally_positive(
         self,
+        try_to_load_agent_config_mock,
         try_get_item_source_path_mock,
         join_mock,
         copy_tree
     ):
         """Test for fetch_agent_locally method positive result."""
-        _fetch_agent_locally(ContextMock(), PublicIdMock())
+        _fetch_agent_locally(ContextMock(), PublicIdMock(), ContextMock())
         copy_tree.assert_called_once_with('path', 'joined-path')

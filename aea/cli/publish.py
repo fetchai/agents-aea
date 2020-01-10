@@ -38,7 +38,7 @@ def publish(ctx: Context, registry):
         # TODO: check agent dependencies are available in local packages dir.
         _save_agent_locally(ctx)
     else:
-        publish_agent()
+        publish_agent(ctx)
 
 
 def _save_agent_locally(ctx: Context) -> None:

@@ -27,9 +27,13 @@ class AgentConfigMock:
     registry_path = 'registry'
     name = 'name'
 
+    connections = []
+    protocols = []
+    skills = []
+
 
 class ContextMock:
-    """An object to mock Click Context."""
+    """An object to mock Context."""
 
     cwd = 'cwd'
     agent_config = AgentConfigMock()

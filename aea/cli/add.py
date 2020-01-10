@@ -106,7 +106,7 @@ def connection(click_context, connection_public_id: PublicId):
 
     # check if we already have a connection with the same name
     logger.debug("Connections already supported by the agent: {}".format(ctx.agent_config.connections))
-    if connection_public_id in ctx.agent_config.connections:
+    if _is_item_present('connection', connection_public_id, ctx):
         logger.error("A connection with id '{}' already exists. Aborting...".format(connection_public_id))
         sys.exit(1)
 
@@ -181,7 +181,7 @@ def protocol(click_context, protocol_public_id):
 
     # check if we already have a protocol with the same name
     logger.debug("Protocols already supported by the agent: {}".format(ctx.agent_config.protocols))
-    if protocol_public_id in ctx.agent_config.protocols:
+    if _is_item_present('protocol', protocol_public_id, ctx):
         logger.error("A protocol with id '{}' already exists. Aborting...".format(protocol_public_id))
         sys.exit(1)
 
@@ -260,7 +260,7 @@ def skill(click_context, skill_public_id: PublicId):
 
     # check if we already have a skill with the same name
     logger.debug("Skills already supported by the agent: {}".format(ctx.agent_config.skills))
-    if skill_public_id in ctx.agent_config.skills:
+    if _is_item_present('skill', skill_public_id, ctx):
         logger.error("A skill with id '{}' already exists. Aborting...".format(skill_public_id))
         sys.exit(1)
 
@@ -280,3 +280,10 @@ def skill(click_context, skill_public_id: PublicId):
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.skills.add(skill_public_id)
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
+
+
+def _is_item_present(item_type, item_public_id, ctx):
+    item_type_plural = item_type + 's'
+    dest_path = os.path.join(ctx.cwd, item_type_plural, item_public_id.name)
+    items_in_config = getattr(ctx.agent_config, item_type_plural)
+    return item_public_id in items_in_config and os.path.exists(dest_path)
