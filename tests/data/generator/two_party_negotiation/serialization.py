@@ -19,9 +19,9 @@ class TwoPartyNegotiationSerializer(Serializer):
         body["target"] = msg.get("target")
         body["performative"] = msg.get("performative")
 
-        contents_list = msg.get("contents")
-        contents_list_bytes = base64.b64encode(pickle.dumps(contents_list)).decode("utf-8")
-        body["contents"] = contents_list_bytes
+        contents_dict = msg.get("contents")
+        contents_dict_bytes = base64.b64encode(pickle.dumps(contents_dict)).decode("utf-8")
+        body["contents"] = contents_dict_bytes
 
         bytes_msg = json.dumps(body).encode("utf-8")
         return bytes_msg
@@ -33,7 +33,7 @@ class TwoPartyNegotiationSerializer(Serializer):
         target = json_body["target"]
         performative = json_body["performative"]
 
-        contents_list_bytes = base64.b64decode(json_body["contents"])
-        contents_list = pickle.loads(contents_list_bytes)
+        contents_dict_bytes = base64.b64decode(json_body["contents"])
+        contents_dict = pickle.loads(contents_dict_bytes)
 
-        return TwoPartyNegotiationMessage(message_id=message_id, target=target, performative=performative, contents=contents_list)
+        return TwoPartyNegotiationMessage(message_id=message_id, target=target, performative=performative, contents=contents_dict)

@@ -76,7 +76,7 @@ class TestGenerateProtocol:
         assert filecmp.cmp(p, original)
 
     def test_resource_folder_contains_module_protocol(self):
-        """Test that the protocol folder contains protocol.py module."""
+        """Test that the protocol folder contains serialization.py module."""
         p = Path(self.t, self.agent_name, "protocols", "two_party_negotiation", "serialization.py")
         original = Path(CUR_PATH, "data", "generator", "two_party_negotiation", "serialization.py")
         assert filecmp.cmp(p, original)
@@ -119,7 +119,6 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         os.chdir(cls.agent_name)
         # create a dummy 'myprotocol' folder
         Path(cls.t, cls.agent_name, "protocols", cls.protocol_name).mkdir(exist_ok=False, parents=True)
-        # import pdb; pdb.set_trace()
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "generate", "protocol", cls.path_to_specification], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
@@ -270,7 +269,6 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        # shutil.copyfile(Path(CUR_PATH, "data", "sample_specification.yaml"), Path(cls.t, "sample_specification.yaml"))
         cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
 
         os.chdir(cls.t)

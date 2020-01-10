@@ -128,9 +128,10 @@ class ProtocolGenerator:
                     speech_act_str += value
                     speech_act_str += ",\n"
                 speech_act_str = speech_act_str[:-2]
+                speech_act_str += "\n            "
             speech_act_str += "},\n"
         speech_act_str = speech_act_str[:-2]
-        speech_act_str += "}"
+        speech_act_str += "\n        }"
         return speech_act_str
 
     def _message_class_str(self) -> str:
@@ -143,7 +144,7 @@ class ProtocolGenerator:
         cls_str = str.format('\"\"\"This module contains {}\'s message definition.\"\"\"\n\n'.format(self.protocol_specification.name))
 
         # Imports
-        cls_str += 'from typing import cast, List\n\n'
+        cls_str += 'from typing import cast, Dict\n\n'
         cls_str += MESSAGE_IMPORT
         cls_str += '\n\n\n'
 
@@ -156,7 +157,7 @@ class ProtocolGenerator:
         cls_str += str.format('    \"\"\"{}\"\"\"\n\n', self.protocol_specification.description)
 
         # __init__
-        cls_str += '    def __init__(self, message_id: int, target: int, performative: str, contents: List, **kwargs):\n'
+        cls_str += '    def __init__(self, message_id: int, target: int, performative: str, contents: Dict, **kwargs):\n'
         cls_str += '        \"\"\"Initialise.\"\"\"\n'
         cls_str += '        super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)\n\n'
 
@@ -168,10 +169,7 @@ class ProtocolGenerator:
         cls_str += '    @property\n'
         cls_str += '    def performatives(self) -> set:\n'
         cls_str += '        \"\"\"Get allowed performatives.\"\"\"\n'
-        cls_str += '        performatives_set = set()\n'
-        cls_str += '        for performative in self.speech_acts:\n'
-        cls_str += '            performatives_set.add(performative)\n'
-        cls_str += '        return performatives_set\n\n'
+        cls_str += '        return set(self.speech_acts.keys())\n\n'
 
         # check_consistency method
         cls_str += '    def check_consistency(self) -> bool:\n'
@@ -192,20 +190,20 @@ class ProtocolGenerator:
 
         cls_str += '            assert self.is_set(\"contents\"), \"contents is not set\"\n'
         cls_str += '            contents = self.get(\"contents\")\n'
-        cls_str += '            assert type(contents) == list, \"contents is not list\"\n'
-        cls_str += '            contents = cast(List, contents)\n\n'
+        cls_str += '            assert type(contents) == dict, \"contents is not a dictionary\"\n'
+        cls_str += '            contents = cast(Dict, contents)\n\n'
 
         cls_str += '            # Light Protocol 2\n'
         cls_str += '            # Check correct performative\n'
         cls_str += '            assert performative in self.performatives, \"performative is not in the list of allowed performative\"\n\n'
 
         cls_str += '            # Check correct contents\n'
-        cls_str += '            content_sequence_definition = self.speech_acts[performative]  # type is List\n'
+        cls_str += '            contents_definition = self.speech_acts[performative]  # type is Dict\n'
         cls_str += '            # Check number of contents\n'
-        cls_str += '            assert len(contents) == len(content_sequence_definition), \"incorrect number of contents\"\n'
+        cls_str += '            assert len(contents) == len(contents_definition), \"incorrect number of contents\"\n'
         cls_str += '            # Check the content is of the correct type\n'
-        cls_str += '            for content in range(len(content_sequence_definition)):\n'
-        cls_str += '                assert isinstance(contents[content], content_sequence_definition[content][1]), \"incorrect content type\"\n\n'
+        cls_str += '            for content, content_type in contents_definition:\n'
+        cls_str += '                assert isinstance(contents[content], content_type), \"incorrect content type\"\n\n'
 
         cls_str += '            # Light Protocol 3\n'
         cls_str += '            if message_id == 1:\n'
@@ -260,9 +258,9 @@ class ProtocolGenerator:
         cls_str += "        body[\"message_id\"] = msg.get(\"message_id\")\n"
         cls_str += "        body[\"target\"] = msg.get(\"target\")\n"
         cls_str += "        body[\"performative\"] = msg.get(\"performative\")\n\n"
-        cls_str += "        contents_list = msg.get(\"contents\")\n"
-        cls_str += "        contents_list_bytes = base64.b64encode(pickle.dumps(contents_list)).decode(\"utf-8\")\n"
-        cls_str += "        body[\"contents\"] = contents_list_bytes\n\n"
+        cls_str += "        contents_dict = msg.get(\"contents\")\n"
+        cls_str += "        contents_dict_bytes = base64.b64encode(pickle.dumps(contents_dict)).decode(\"utf-8\")\n"
+        cls_str += "        body[\"contents\"] = contents_dict_bytes\n\n"
         cls_str += "        bytes_msg = json.dumps(body).encode(\"utf-8\")\n"
         cls_str += "        return bytes_msg\n\n"
 
@@ -273,9 +271,9 @@ class ProtocolGenerator:
         cls_str += "        message_id = json_body[\"message_id\"]\n"
         cls_str += "        target = json_body[\"target\"]\n"
         cls_str += "        performative = json_body[\"performative\"]\n\n"
-        cls_str += "        contents_list_bytes = base64.b64decode(json_body[\"contents\"])\n"
-        cls_str += "        contents_list = pickle.loads(contents_list_bytes)\n\n"
-        cls_str += str.format("        return {}Message(message_id=message_id, target=target, performative=performative, contents=contents_list)\n",
+        cls_str += "        contents_dict_bytes = base64.b64decode(json_body[\"contents\"])\n"
+        cls_str += "        contents_dict = pickle.loads(contents_dict_bytes)\n\n"
+        cls_str += str.format("        return {}Message(message_id=message_id, target=target, performative=performative, contents=contents_dict)\n",
                               to_camel_case(self.protocol_specification.name))
 
         return cls_str
