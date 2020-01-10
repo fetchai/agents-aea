@@ -68,7 +68,7 @@ class PushItemTestCase(TestCase):
             data={
                 'name': 'some-name',
                 'description': 'some-description',
-                'version': '1.0.0',
+                'version': 'some-version',
             },
             auth=True,
             filepath='cwd/some-name.tar.gz'
