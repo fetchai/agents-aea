@@ -24,6 +24,7 @@ import importlib.util
 import logging
 import os
 import sys
+import types
 from pathlib import Path
 from typing import Optional
 
@@ -89,7 +90,7 @@ def load_module(dotted_path: str, filepath: os.PathLike):
     return module
 
 
-def add_module_to_sys_modules(dotted_path: str, module_obj) -> None:
+def import_module(dotted_path: str, module_obj) -> None:
     """
     Add module to sys.modules.
 
@@ -97,6 +98,13 @@ def add_module_to_sys_modules(dotted_path: str, module_obj) -> None:
     :param module_obj: the module object. It is assumed it has been already executed.
     :return: None
     """
+    # if path is nested, and the root package is not present, add it to sys.modules
+    split = dotted_path.split(".")
+    if len(split) > 1 and split[0] not in sys.modules:
+        root = split[0]
+        sys.modules[root] = types.ModuleType(root)
+
+    # add the module at the specified path.
     sys.modules[dotted_path] = module_obj
 
 
@@ -126,7 +134,7 @@ def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, mo
     """
     item_type_plural = item_type + "s"
     dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
-    add_module_to_sys_modules(dotted_path, module_obj)
+    import_module(dotted_path, module_obj)
 
 
 def generate_fingerprint(author: str, package_name: str, version: str, nonce: Optional[int] = None) -> str:
