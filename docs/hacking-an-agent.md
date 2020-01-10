@@ -172,7 +172,7 @@ if os.path.isfile(output_filename):
 # set up the Wallet, stub connection, ledger and (empty) resources
 wallet = Wallet({'default': 'my_key.txt'})
 stub_connection = StubConnection(input_file_path=input_filename, output_file_path=output_filename)
-ledger_apis = LedgerApis({})
+ledger_apis = LedgerApis({}, 'default')
 resources = Resources('')
 
 # Create our AEA
@@ -185,7 +185,7 @@ default_protocol = Protocol("default", DefaultSerializer(), default_protocol_con
 resources.protocol_registry.register(("default", None), default_protocol)
 
 # Add the error skill and the echo skill
-echo_skill = Skill.from_dir(os.path.join(root_dir, "packages/", "skills", "echo"), my_agent.context)
+echo_skill = Skill.from_dir(os.path.join(root_dir, "packages", "skills", "echo"), my_agent.context)
 resources.add_skill(echo_skill)
 error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"), my_agent.context)
 resources.add_skill(error_skill)

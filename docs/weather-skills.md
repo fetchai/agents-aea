@@ -169,6 +169,18 @@ python scripts/fetchai_wealth_generation.py --private-key my_weather_client/fet_
 cd my_weather_client
 ```
 
+### Update the skill configs
+
+Tell the weather client skill of the weather client that we want to settle the transaction on the ledger:
+``` bash
+aea config set skills.weather_client.shared_classes.strategy.args.is_ledger_tx True
+```
+
+Similarly, for the weather station skill of the weather station:
+``` bash
+aea config set skills.weather_station.shared_classes.strategy.args.is_ledger_tx True
+```
+
 ### Run the AEAs
 
 Run both AEAs from their respective terminals.
@@ -240,11 +252,13 @@ In the weather station skill config (`my_weather_station/skills/weather_station/
 ``` bash
 currency_id: 'ETH'
 ledger_id: 'ethereum'
+is_ledger_tx: True
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
 aea config set skills.weather_station.shared_classes.strategy.args.currency_id ETH
 aea config set skills.weather_station.shared_classes.strategy.args.ledger_id ethereum
+aea config set skills.weather_station.shared_classes.strategy.args.is_ledger_tx True
 ```
 
 
@@ -253,12 +267,14 @@ In the weather client skill config (`my_weather_client/skills/weather_client/ski
 max_buyer_tx_fee: 20000
 currency_id: 'ETH'
 ledger_id: 'ethereum'
+is_ledger_tx: True
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set skills.weather_client.shared_classes.strategy.args.max_buyer.tx_fee 10000
+aea config set skills.weather_client.shared_classes.strategy.args.max_buyer_tx_fee 10000
 aea config set skills.weather_client.shared_classes.strategy.args.currency_id ETH
 aea config set skills.weather_client.shared_classes.strategy.args.ledger_id ethereum
+aea config set skills.weather_client.shared_classes.strategy.args.is_ledger_tx True
 ```
 
 ### Fund the weather client AEA

@@ -1,4 +1,4 @@
-name: weather_station_ledger
+name: weather_station
 author: fetchai
 version: 0.1.0
 license: Apache 2.0
@@ -24,6 +24,7 @@ shared_classes:
       seller_tx_fee: 0
       currency_id: 'FET'
       ledger_id: 'fetchai'
+      is_ledger_tx: False
   dialogues:
     class_name: Dialogues
     args: {}

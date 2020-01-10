@@ -33,7 +33,7 @@ from packages.protocols.fipa.serialization import FIPASerializer
 from packages.skills.weather_station.dialogues import Dialogue, Dialogues
 from packages.skills.weather_station.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_station_ledger_skill")
+logger = logging.getLogger("aea.weather_station_skill")
 
 
 class FIPAHandler(Handler):
@@ -216,7 +216,7 @@ class FIPAHandler(Handler):
                                                                   msg.counterparty[-5:]))
 
         strategy = cast(Strategy, self.context.strategy)
-        if strategy.is_ledger_tx and "transaction_digest" in msg.info.keys():
+        if strategy.is_ledger_tx and ("transaction_digest" in msg.info.keys()):
             tx_digest = msg.info['transaction_digest']
             logger.info("[{}]: checking whether transaction={} has been received ...".format(self.context.agent_name,
                                                                                              tx_digest))

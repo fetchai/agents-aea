@@ -30,7 +30,7 @@ from packages.protocols.oef.message import OEFMessage
 from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from packages.skills.weather_station.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_station_ledger_skill")
+logger = logging.getLogger("aea.weather_station_skill")
 
 SERVICE_ID = ''
 DEFAULT_SERVICES_INTERVAL = 30.0

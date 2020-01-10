@@ -28,7 +28,7 @@ from packages.protocols.oef.message import OEFMessage
 from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.skills.weather_client.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_client_ledger_skill")
+logger = logging.getLogger("aea.weather_client_skill")
 
 DEFAULT_SEARCH_INTERVAL = 5.0
 

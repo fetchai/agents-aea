@@ -92,7 +92,7 @@ class TestWeatherSkillsFetchaiLedger:
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_station_ledger:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_station:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
@@ -119,7 +119,7 @@ class TestWeatherSkillsFetchaiLedger:
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_client_ledger:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_client:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)

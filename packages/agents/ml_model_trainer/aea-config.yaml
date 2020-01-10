@@ -11,7 +11,7 @@ fingerprint: ''
 ledger_apis: {}
 license: Apache 2.0
 logging_config:
-  disable_existing_loggers: false
+  disable_existing_loggers: False
   version: 1
 private_key_paths: []
 protocols:

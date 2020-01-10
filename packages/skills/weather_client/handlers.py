@@ -36,7 +36,7 @@ from packages.protocols.oef.message import OEFMessage
 from packages.skills.weather_client.dialogues import Dialogue, Dialogues
 from packages.skills.weather_client.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_client_ledger_skill")
+logger = logging.getLogger("aea.weather_client_skill")
 
 
 class FIPAHandler(Handler):
@@ -184,7 +184,7 @@ class FIPAHandler(Handler):
             address = cast(str, info.get("address"))
             proposal = cast(Description, dialogue.proposal)
             tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["weather_client_ledger"],
+                                        skill_callback_ids=["weather_client"],
                                         tx_id="transaction0",
                                         tx_sender_addr=self.context.agent_addresses[proposal.values['ledger_id']],
                                         tx_counterparty_addr=address,

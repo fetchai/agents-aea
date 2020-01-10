@@ -93,7 +93,7 @@ python scripts/fetchai_wealth_generation.py --private-key car_data_buyer/fet_pri
 
 Then, in the detection agent we disable the detection logic:
 ``` bash
-aea config set skills.carpark_detection.shared_classes.strategy.args.db_is_rel_to_cwd false
+aea config set skills.carpark_detection.shared_classes.strategy.args.db_is_rel_to_cwd False
 ```
 
 ### Run both agents

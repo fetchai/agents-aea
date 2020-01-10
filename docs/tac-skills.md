@@ -24,14 +24,14 @@ Keep it running for all the following demos.
 This demo uses another agent - a controller agent - to take the role of running the competition and validating the transactions negotiated by the agents. 
 
 ### Create the TAC controller AEA
-In the root directory, create the tac controller AEA.
+In the root directory, create the tac controller AEA and enter the project.
 ``` bash
 aea create tac_controller
+cd tac_controller
 ```
 
 ### Add the tac control skill
 ``` bash
-cd tac_controller
 aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_control:0.1.0
 aea install
@@ -77,7 +77,7 @@ aea create tac_participant_two
 ### Add the tac participation skill to participant one
 ``` bash
 cd tac_participant_one
-aea add connection oef
+aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea install
@@ -91,7 +91,7 @@ aea config set agent.default_ledger ethereum
 ### Add the tac participation skill to participant two
 ``` bash
 cd tac_participant_two
-aea add connection oef
+aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/tac_participation:0.1.0
 aea add skill fetchai/tac_negotiation:0.1.0
 aea install
@@ -190,12 +190,11 @@ The AEA `tac_negotiation` skill demonstrates how negotiation strategies may be e
 The `tac_negotiation` skill `skill.yaml` configuration file looks like this.
 
 ```yaml
-name: 'tac_negotiation'
-authors: Fetch.AI Limited
+name: tac_negotiation
+authors: fetchai
 version: 0.1.0
 license: Apache 2.0
 description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
-url: ""
 behaviours:
   - behaviour:
       class_name: GoodsRegisterAndSearchBehaviour
@@ -236,7 +235,7 @@ shared_classes:
       class_name: Transactions
       args:
         pending_transaction_timeout: 30
-protocols: ['oef', 'fipa']
+protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']
 ```
 
 Above, you can see the registered `Behaviour` class name `GoodsRegisterAndSearchBehaviour` which implements register and search behaviour of an AEA for the `tac_negotiation` skill.

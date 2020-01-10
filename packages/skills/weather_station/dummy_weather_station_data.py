@@ -27,7 +27,7 @@ import sqlite3
 import time
 from typing import Dict, Union
 
-logger = logging.getLogger("aea.weather_station_ledger_skill")
+logger = logging.getLogger("aea.weather_station_skill")
 
 my_path = os.path.dirname(__file__)
 
