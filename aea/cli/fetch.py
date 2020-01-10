@@ -20,7 +20,6 @@
 """Implementation of the 'aea fetch' subcommand."""
 import click
 import os
-
 from distutils.dir_util import copy_tree
 from typing import cast
 
