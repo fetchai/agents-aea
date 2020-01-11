@@ -33,7 +33,7 @@ class TestHelpersBase:
         cwd = os.getcwd()
         os.chdir(os.path.join(CUR_PATH, ".."))
         assert locate("packages.fetchai.connections.gym") is not None
-        assert locate("packages.fetchai.connections.weather") is None
+        assert locate("packages.fetchai.connections.non_existing_connection") is None
         os.chdir(cwd)
 
     def test_locate_class(self):
