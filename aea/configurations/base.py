@@ -78,6 +78,11 @@ def _get_default_configuration_file_name_from_type(item_type: Union[str, Configu
     else:
         raise ValueError("Item type not valid: {}".format(str(item_type)))
 
+class ProtocolSpecificationParseError(Exception):
+    """Exception for parsing a protocol specification file."""
+
+    pass
+
 
 class JSONSerializable(ABC):
     """Interface for JSON-serializable objects."""
@@ -158,11 +163,11 @@ class PublicId(object):
 
         author/name:version
 
-    >>> public_id = PublicId("author", "my_package", "0.1.0")
+    >>> public_id = PublicId("author", "my_package", DEFAULT_VERSION)
     >>> assert public_id.author == "author"
     >>> assert public_id.name == "my_package"
-    >>> assert public_id.version == "0.1.0"
-    >>> another_public_id = PublicId("author", "my_package", "0.1.0")
+    >>> assert public_id.version == DEFAULT_VERSION
+    >>> another_public_id = PublicId("author", "my_package", DEFAULT_VERSION)
     >>> assert hash(public_id) == hash(another_public_id)
     >>> assert public_id == another_public_id
     """
@@ -198,7 +203,7 @@ class PublicId(object):
         """
         Initialize the public id from the string.
 
-        >>> str(PublicId.from_string("author/package_name:0.1.0"))
+        >>> str(PublicId.from_string("author/package_name:" + DEFAULT_VERSION))
         'author/package_name:0.1.0'
 
         A bad formatted input raises value error:
@@ -719,3 +724,86 @@ class AgentConfig(PackageConfiguration):
         agent_config.default_ledger = default_ledger_id
 
         return agent_config
+
+
+class SpeechActContentConfig(Configuration):
+    """Handle a speech_act content configuration."""
+
+    def __init__(self, **args):
+        """Initialize a speech_act content configuration."""
+        self.args = args  # type: Dict[str, str]
+        self._check_consistency()
+
+    def _check_consistency(self):
+        """Check consistency of the args."""
+        for content_name, content_type in self.args.items():
+            if type(content_name) is not str or type(content_type) is not str:
+                raise ProtocolSpecificationParseError("Contents' names and types must be string.")
+            # Check each content definition key/value (i.e. content name/type) is not empty
+            if content_name == "" or content_type == "":
+                raise ProtocolSpecificationParseError("Contents' names and types cannot be empty.")
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return self.args
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        return SpeechActContentConfig(
+            **obj
+        )
+
+
+class ProtocolSpecification(ProtocolConfig):
+    """Handle protocol specification."""
+
+    def __init__(self,
+                 name: str = "",
+                 author: str = "",
+                 version: str = "",
+                 license: str = "",
+                 description: str = ""):
+        """Initialize a protocol specification configuration object."""
+        super().__init__(name, author, version, license, description=description)
+        self.speech_acts = CRUDCollection[SpeechActContentConfig]()
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "name": self.name,
+            "author": self.author,
+            "version": self.version,
+            "license": self.license,
+            "description": self.description,
+            "speech_acts": {key: speech_act.json for key, speech_act in self.speech_acts.read_all()},
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        protocol_specification = ProtocolSpecification(
+            name=cast(str, obj.get("name")),
+            author=cast(str, obj.get("author")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            description=cast(str, obj.get("description", ""))
+        )
+        for speech_act, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
+            speech_act_content_config = SpeechActContentConfig.from_json(speech_act_content)
+            protocol_specification.speech_acts.create(speech_act, speech_act_content_config)
+        protocol_specification._check_consistency()
+        return protocol_specification
+
+    def _check_consistency(self):
+        """Validate the correctness of the speech_acts."""
+        if len(self.speech_acts.read_all()) == 0:
+            raise ProtocolSpecificationParseError(
+                "There should be at least one performative defined in the speech_acts.")
+        for performative, speech_act_content_config in self.speech_acts.read_all():
+            if type(performative) is not str:
+                raise ProtocolSpecificationParseError("A 'performative' is not specified as a string.")
+            if performative == "":
+                raise ProtocolSpecificationParseError("A 'performative' cannot be an empty string.")

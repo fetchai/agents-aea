@@ -31,12 +31,12 @@ import yaml
 from jsonschema import Draft4Validator
 from yaml import SafeLoader
 
-from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, ConfigurationType
+from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, ConfigurationType, ProtocolSpecification
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
-T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig)
+T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, ProtocolSpecification)
 
 
 class ConfigLoader(Generic[T]):
