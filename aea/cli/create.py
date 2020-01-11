@@ -30,8 +30,8 @@ from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import connection, skill
-from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL, DEFAULT_LEDGER
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, DEFAULT_VERSION
+from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL, DEFAULT_LEDGER, DEFAULT_VERSION
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 
 def _check_is_parent_folders_are_aea_projects_recursively() -> None:

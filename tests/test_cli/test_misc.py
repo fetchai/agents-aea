@@ -60,6 +60,7 @@ Commands:
   delete        Delete an agent.
   fetch         Fetch Agent from Registry.
   freeze        Get the dependencies.
+  generate      Generate a resource for the agent.
   generate-key  Generate private keys.
   gui           Run the CLI GUI.
   install       Install the dependencies.

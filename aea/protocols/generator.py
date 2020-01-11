@@ -209,7 +209,7 @@ class ProtocolGenerator:
         cls_str += '            if message_id == 1:\n'
         cls_str += '                assert target == 0, \"target should be 0\"\n'
         cls_str += '            else:\n'
-        cls_str += '                assert 1 < target < message_id, \"target should be between 1 and message_id\"\n'
+        cls_str += '                assert 0 < target < message_id, \"target should be strictly between 0 and message_id\"\n'
         cls_str += '        except (AssertionError, ValueError, KeyError) as e:\n'
         cls_str += '            print(str(e))\n'
         cls_str += '            return False\n\n'

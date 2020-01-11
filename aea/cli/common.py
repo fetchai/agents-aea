@@ -32,8 +32,7 @@ from dotenv import load_dotenv
 
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies, PublicId, \
-    DEFAULT_VERSION
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies, PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
 from aea.helpers.base import add_agent_component_module_to_sys_modules, load_agent_component_package
@@ -42,10 +41,10 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_VERSION = "0.1.0"
-DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_CONNECTION = PublicId.from_string("fetchai/stub:" + DEFAULT_VERSION)  # type: PublicId
 DEFAULT_SKILL = PublicId.from_string("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
 DEFAULT_LEDGER = FETCHAI
+DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 
 
 class Context(object):

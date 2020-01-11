@@ -29,7 +29,6 @@ DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = 'connection.yaml'
 DEFAULT_PROTOCOL_CONFIG_FILE = 'protocol.yaml'
 DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
-DEFAULT_VERSION = '0.1.0'
 T = TypeVar('T')
 
 ProtocolId = str

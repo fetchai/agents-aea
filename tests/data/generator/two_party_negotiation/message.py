@@ -83,7 +83,7 @@ class TwoPartyNegotiationMessage(Message):
             if message_id == 1:
                 assert target == 0, "target should be 0"
             else:
-                assert 1 < target < message_id, "target should be between 1 and message_id"
+                assert 0 < target < message_id, "target should be strictly between 0 and message_id"
         except (AssertionError, ValueError, KeyError) as e:
             print(str(e))
             return False
