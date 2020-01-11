@@ -78,6 +78,7 @@ def _get_default_configuration_file_name_from_type(item_type: Union[str, Configu
     else:
         raise ValueError("Item type not valid: {}".format(str(item_type)))
 
+
 class ProtocolSpecificationParseError(Exception):
     """Exception for parsing a protocol specification file."""
 
