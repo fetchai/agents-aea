@@ -23,7 +23,6 @@ import inspect
 import json
 import os
 import re
-from enum import Enum
 from pathlib import Path
 from typing import TextIO, Type, TypeVar, Generic
 
@@ -32,21 +31,12 @@ import yaml
 from jsonschema import Draft4Validator
 from yaml import SafeLoader
 
-from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig
+from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, ConfigurationType
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
 T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig)
-
-
-class ConfigurationType(Enum):
-    """Configuration types."""
-
-    AGENT = "agent"
-    PROTOCOL = "protocol"
-    CONNECTION = "connection"
-    SKILL = "skill"
 
 
 class ConfigLoader(Generic[T]):

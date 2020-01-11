@@ -20,6 +20,7 @@
 """Classes to handle AEA configurations."""
 import re
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast, Union
 
 # from aea.helpers.base import generate_fingerprint
@@ -52,6 +53,30 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 Dependencies = Dict[str, Dependency]
+
+
+class ConfigurationType(Enum):
+    """Configuration types."""
+
+    AGENT = "agent"
+    PROTOCOL = "protocol"
+    CONNECTION = "connection"
+    SKILL = "skill"
+
+
+def _get_default_configuration_file_name_from_type(item_type: Union[str, ConfigurationType]) -> str:
+    """Get the default configuration file name from item type."""
+    item_type = ConfigurationType(item_type)
+    if item_type == ConfigurationType.AGENT:
+        return DEFAULT_AEA_CONFIG_FILE
+    elif item_type == ConfigurationType.PROTOCOL:
+        return DEFAULT_PROTOCOL_CONFIG_FILE
+    elif item_type == ConfigurationType.CONNECTION:
+        return DEFAULT_CONNECTION_CONFIG_FILE
+    elif item_type == ConfigurationType.SKILL:
+        return DEFAULT_SKILL_CONFIG_FILE
+    else:
+        raise ValueError("Item type not valid: {}".format(str(item_type)))
 
 
 class JSONSerializable(ABC):
