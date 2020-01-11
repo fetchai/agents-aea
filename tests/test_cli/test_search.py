@@ -292,7 +292,9 @@ class TestSearchWithRegistryInSubfolder:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         # remove all the skills except the echo skill (to make testing easier).
-        [shutil.rmtree(p) for p in Path(cls.t, "packages", "skills").iterdir() if p.name != "echo" and p.is_dir()]
+        for p in Path(cls.t, "packages", "fetchai", "skills").iterdir():
+            if p.name != "echo" and p.is_dir():
+                shutil.rmtree(p)
 
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "search", "skills"], standalone_mode=False)
 
@@ -343,7 +345,7 @@ class TestSearchInAgentDirectory:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         # remove all the skills except the echo skill (to make testing easier).
-        [shutil.rmtree(p) for p in Path(cls.t, "packages", "skills").iterdir() if p.name != "echo" and p.is_dir()]
+        [shutil.rmtree(p) for p in Path(cls.t, "packages", "fetchai", "skills").iterdir() if p.name != "echo" and p.is_dir()]
 
         # create an AEA proejct and enter into it.
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", "myagent"], standalone_mode=False)

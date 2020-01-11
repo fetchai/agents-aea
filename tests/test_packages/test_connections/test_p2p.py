@@ -30,7 +30,7 @@ from fetchai.ledger.crypto import entity
 
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
-from packages.connections.p2p.connection import PeerToPeerConnection
+from packages.fetchai.connections.p2p.connection import PeerToPeerConnection
 
 logger = logging.getLogger(__name__)
 

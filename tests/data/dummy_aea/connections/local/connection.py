@@ -30,8 +30,8 @@ from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Envelope, AEAConnectionError, Address
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.oef import OEFMessage
+from packages.fetchai.protocols.oef import OEFSerializer, DEFAULT_OEF
 
 logger = logging.getLogger(__name__)
 

@@ -154,8 +154,9 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
     except FileNotFoundError:
         raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
 
-    connection_package = load_agent_component_package("connection", connection_name, Path("connections", connection_name))
-    add_agent_component_module_to_sys_modules("connection", connection_name, connection_package)
+    connection_package = load_agent_component_package("connection", connection_name, connection_config.author,
+                                                      Path("connections", connection_name))
+    add_agent_component_module_to_sys_modules("connection", connection_name, connection_config.author, connection_package)
     try:
         connection_module = load_module("connection_module", Path("connections", connection_name, "connection.py"))
     except FileNotFoundError:
