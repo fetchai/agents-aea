@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the 'aea add' subcommand."""
+"""Implementation of the 'aea scaffold' subcommand."""
 
 import os
 import shutil
