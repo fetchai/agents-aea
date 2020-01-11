@@ -2,7 +2,7 @@
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from packages.protocols.two_party_negotiation.message import TwoPartyNegotiationMessage
+from packages.fetchai.protocols.two_party_negotiation.message import TwoPartyNegotiationMessage
 
 import json
 import base64

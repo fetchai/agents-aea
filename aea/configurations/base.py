@@ -82,8 +82,6 @@ def _get_default_configuration_file_name_from_type(item_type: Union[str, Configu
 class ProtocolSpecificationParseError(Exception):
     """Exception for parsing a protocol specification file."""
 
-    pass
-
 
 class JSONSerializable(ABC):
     """Interface for JSON-serializable objects."""
@@ -164,11 +162,11 @@ class PublicId(object):
 
         author/name:version
 
-    >>> public_id = PublicId("author", "my_package", DEFAULT_VERSION)
+    >>> public_id = PublicId("author", "my_package", "0.1.0")
     >>> assert public_id.author == "author"
     >>> assert public_id.name == "my_package"
-    >>> assert public_id.version == DEFAULT_VERSION
-    >>> another_public_id = PublicId("author", "my_package", DEFAULT_VERSION)
+    >>> assert public_id.version == "0.1.0"
+    >>> another_public_id = PublicId("author", "my_package", "0.1.0")
     >>> assert hash(public_id) == hash(another_public_id)
     >>> assert public_id == another_public_id
     """
@@ -204,7 +202,7 @@ class PublicId(object):
         """
         Initialize the public id from the string.
 
-        >>> str(PublicId.from_string("author/package_name:" + DEFAULT_VERSION))
+        >>> str(PublicId.from_string("author/package_name:0.1.0"))
         'author/package_name:0.1.0'
 
         A bad formatted input raises value error:
@@ -212,7 +210,7 @@ class PublicId(object):
         Traceback (most recent call last):
         ...
         ValueError: Input 'bad/formatted:input' is not well formatted.
-
+1
         :param public_id_string: the public id in string format.
         :return: the public id object.
         :raises ValueError: if the string in input is not well formatted.
