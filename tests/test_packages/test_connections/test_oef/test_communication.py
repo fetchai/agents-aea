@@ -463,7 +463,7 @@ class TestFIPA:
                 dialogue_reference=(str(0), ''),
                 target=1,
                 query=None)
-            with mock.patch("packages.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
+            with mock.patch("packages.fetchai.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 FIPASerializer().encode(msg), "Raises Value Error"
         with pytest.raises(ValueError):
@@ -495,7 +495,7 @@ class TestFIPA:
                                   target=0,
                                   performative=FIPAMessage.Performative.CFP,
                                   query=b"hello")
-            with mock.patch("packages.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
+            with mock.patch("packages.fetchai.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 fipa_msg = fipa_pb2.FIPAMessage()
                 fipa_msg.message_id = cfp_msg.get("message_id")
