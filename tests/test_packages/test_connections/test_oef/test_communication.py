@@ -40,12 +40,12 @@ from aea.helpers.search.models import Description, DataModel, Attribute, Query, 
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from packages.connections.oef.connection import OEFConnection, OEFObjectTranslator
-from packages.protocols.fipa import fipa_pb2
-from packages.protocols.fipa.message import FIPAMessage
-from packages.protocols.fipa.serialization import FIPASerializer
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+from packages.fetchai.connections.oef.connection import OEFConnection, OEFObjectTranslator
+from packages.fetchai.protocols.fipa import fipa_pb2
+from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from ....conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
@@ -463,7 +463,7 @@ class TestFIPA:
                 dialogue_reference=(str(0), ''),
                 target=1,
                 query=None)
-            with mock.patch("packages.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
+            with mock.patch("packages.fetchai.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 FIPASerializer().encode(msg), "Raises Value Error"
         with pytest.raises(ValueError):
@@ -495,7 +495,7 @@ class TestFIPA:
                                   target=0,
                                   performative=FIPAMessage.Performative.CFP,
                                   query=b"hello")
-            with mock.patch("packages.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
+            with mock.patch("packages.fetchai.protocols.fipa.message.FIPAMessage.Performative") as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 fipa_msg = fipa_pb2.FIPAMessage()
                 fipa_msg.message_id = cfp_msg.get("message_id")
@@ -727,7 +727,7 @@ async def test_cancelled_receive(network_node):
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
 
-    patch = unittest.mock.patch.object(packages.connections.oef.connection.logger, 'debug')
+    patch = unittest.mock.patch.object(packages.fetchai.connections.oef.connection.logger, 'debug')
     mocked_logger_debug = patch.__enter__()
 
     async def receive():
@@ -767,7 +767,7 @@ async def test_cannot_connect_to_oef():
     oef_connection = OEFConnection(address=wallet.addresses['default'], oef_addr="a_fake_address", oef_port=10000)
     oef_connection.loop = asyncio.get_event_loop()
 
-    patch = unittest.mock.patch.object(packages.connections.oef.connection.logger, 'warning')
+    patch = unittest.mock.patch.object(packages.fetchai.connections.oef.connection.logger, 'warning')
     mocked_logger_warning = patch.__enter__()
 
     async def try_to_connect():

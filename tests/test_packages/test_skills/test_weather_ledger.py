@@ -89,10 +89,10 @@ class TestWeatherSkillsFetchaiLedger:
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "oef"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "weather_station_ledger"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_station:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
@@ -116,10 +116,10 @@ class TestWeatherSkillsFetchaiLedger:
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
         os.chdir(agent_two_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "oef"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "weather_client_ledger"], standalone_mode=False)
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_client:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
@@ -132,12 +132,11 @@ class TestWeatherSkillsFetchaiLedger:
         whole_file = file.read()
 
         # add in the ledger address
-        find_text = "ledger_apis: []"
+        find_text = "ledger_apis: {}"
         replace_text = """ledger_apis:
-            - ledger_api:
-                addr: alpha.fetch-ai.com
-                ledger: fetchai
-                port: 80"""
+        fetchai:
+            address: alpha.fetch-ai.com
+            port: 80"""
 
         whole_file = whole_file.replace(find_text, replace_text)
 

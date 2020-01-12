@@ -47,6 +47,7 @@ class TestRemoveProtocol:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        cls.protocol_id = "fetchai/gym:0.1.0"
         cls.protocol_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -55,9 +56,57 @@ class TestRemoveProtocol:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "protocol", cls.protocol_name], standalone_mode=False)
+
+    def test_exit_code_equal_to_zero(self):
+        """Test that the exit code is equal to 0 (i.e. success)."""
+        assert self.result.exit_code == 0
+
+    def test_directory_does_not_exist(self):
+        """Test that the directory of the removed protocol does not exist."""
+        assert not Path("protocols", self.protocol_name).exists()
+
+    def test_protocol_not_present_in_agent_config(self):
+        """Test that the name of the removed protocol is not present in the agent configuration file."""
+        agent_config = aea.configurations.base.AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
+        assert self.protocol_id not in agent_config.protocols
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestRemoveProtocolWithPublicId:
+    """Test that the command 'aea remove protocol' works correctly when using the public id."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        cls.protocol_id = "fetchai/gym:0.1.0"
+        cls.protocol_name = "gym"
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
+        assert result.exit_code == 0
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "protocol", cls.protocol_id], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -70,7 +119,7 @@ class TestRemoveProtocol:
     def test_protocol_not_present_in_agent_config(self):
         """Test that the name of the removed protocol is not present in the agent configuration file."""
         agent_config = aea.configurations.base.AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
-        assert self.protocol_name not in agent_config.protocols
+        assert self.protocol_id not in agent_config.protocols
 
     @classmethod
     def teardown_class(cls):
@@ -112,7 +161,7 @@ class TestRemoveProtocolFailsWhenProtocolDoesNotExist:
 
         The expected message is: 'Protocol '{protocol_name}' not found.'
         """
-        s = "Protocol '{}' not found.".format(self.protocol_name)
+        s = "The protocol '{}' is not supported.".format(self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -137,6 +186,7 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        cls.protocol_id = "fetchai/gym:0.1.0"
         cls.protocol_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -145,7 +195,7 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
         assert result.exit_code == 0
 
         cls.patch = unittest.mock.patch("shutil.rmtree", side_effect=BaseException("an exception"))

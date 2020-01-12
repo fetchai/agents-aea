@@ -34,10 +34,10 @@ from aea.crypto.wallet import DEFAULT
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
-sys.modules["gym_connection"] = locate("packages.connections.gym")
-sys.modules["gym_protocol"] = locate("packages.protocols.gym")
-from gym_protocol.message import GymMessage  # noqa: E402
-from gym_protocol.serialization import GymSerializer  # noqa: E402
+sys.modules["packages.fetchai.connections.gym"] = locate("packages.fetchai.connections.gym")
+sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
+from packages.fetchai.protocols.gym.message import GymMessage  # noqa: E402
+from packages.fetchai.protocols.gym.serialization import GymSerializer  # noqa: E402
 
 from .agent import ProxyAgent  # noqa: E402
 

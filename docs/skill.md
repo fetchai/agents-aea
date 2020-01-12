@@ -28,9 +28,9 @@ Then there is a specific method that the framework requires for each class.
 
 There can be none, one or more `Handler` class per skill.
 
-`Handler` classes can receive `Envelope` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol they require.
+`Handler` classes can receive `Message` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol they require.
 
-* `handle_envelope(self, Envelope)`: is where the skill receives a message contained within an `Envelope` and decides what to do with it.
+* `handle(self, message: Message)`: is where the skill receives a `Message` of the specified protocol and decides what to do with it.
 
 
 !!!	Todo
@@ -43,7 +43,7 @@ Conceptually, a `Behaviour`  class contains the business logic specific to initi
 
 There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
-* `act(self)`: is how the framework calls the `Behaviour` code. 
+* `act(self)`: is how the framework calls the `Behaviour` code.
 
 !!!	Todo
 	For example.
@@ -83,35 +83,29 @@ It also details the protocol types used in the skill and points to shared module
 
 ``` yaml
 name: echo
-authors: Fetch.ai Limited
+authors: fetchai
 version: 0.1.0
 license: Apache 2.0
-url: ""
 behaviours:
-  - behaviour:
-      class_name: EchoBehaviour
-      args:
-        foo: bar
+  echo:
+    class_name: EchoBehaviour
+    args:
+      foo: bar
 handlers:
-  - handler:
-      class_name: EchoHandler
-      args:
-        foo: bar
-        bar: foo
+  echo:
+    class_name: EchoHandler
+    args:
+      foo: bar
+      bar: foo
 tasks:
-  - task:
-      class_name: EchoTask
-      args:
-        foo: bar
-        bar: foo
-shared_classes: []
-dependencies:
-  - dependency:
-      class_name: EchoDependency
-      args:
-        foo: bar
-        bar: foo
-protocols: ["default"]
+  echo:
+    class_name: EchoTask
+    args:
+      foo: bar
+      bar: foo
+shared_classes: {}
+dependencies: {}
+protocols: ["fetchai/default:0.1.0"]
 ```
 
 

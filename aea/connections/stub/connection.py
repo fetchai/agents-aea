@@ -106,7 +106,8 @@ class StubConnection(Connection):
     restricted_to_protocols = set()  # type: Set[str]
 
     def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
-                 connection_id: str = "stub", restricted_to_protocols: Optional[Set[str]] = None):
+                 connection_id: str = "stub", restricted_to_protocols: Optional[Set[str]] = None,
+                 excluded_protocols: Optional[Set[str]] = None):
         """
         Initialize a stub connection.
 
@@ -114,6 +115,7 @@ class StubConnection(Connection):
         :param output_file_path: the output file for the outgoing messages.
         :param connection_id: the identifier of the connection object.
         :param restricted_to_protocols: the only supported protocols for this connection.
+        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
         super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
 
@@ -229,6 +231,9 @@ class StubConnection(Connection):
         """
         input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
         output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
+        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
+        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
         return StubConnection(input_file, output_file,
                               connection_id=connection_configuration.name,
-                              restricted_to_protocols=set(connection_configuration.restricted_to_protocols))
+                              restricted_to_protocols=restricted_to_protocols_names,
+                              excluded_protocols=excluded_protocols_names)

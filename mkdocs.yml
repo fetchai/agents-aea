@@ -29,8 +29,8 @@ nav:
       - "Trust issues": 'trust.md'
       # - "Two-layered machine learning": 'two-layer.md'
     - Demos:
-      - "Car park agent": 'car-park.md'
-      - "Gym demo": 'gym-plugin.md'
+      - "Car park agent": 'car-park-skills.md'
+      - "Gym example": 'gym-example.md'
       - "Gym skill": 'gym-skill.md'
       - "ML skills": 'ml-skills.md'
       - "TAC skills": 'tac-skills.md'
@@ -47,7 +47,8 @@ nav:
       - "Build your own skill": 'skill-guide.md'
       - "Protocol": 'protocol.md'
       - "Connection": 'connection.md'
-      - "Scaffolding": 'scaffolding.md'
+      - "Scaffolding packages": 'scaffolding.md'
+      - "Generating protocols": 'generator.md'
       - "Logging": 'logging.md'
       - CLI:
          - "CLI tool": 'cli-how-to.md'

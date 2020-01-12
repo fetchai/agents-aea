@@ -11,16 +11,22 @@ The `connection.yaml` file in the agent directory contains protocol details and 
 
 ``` json
 name: oef
-authors: Fetch.ai Limited
+author: fetchai
 version: 0.1.0
 license: Apache 2.0
-url: ""
+fingerprint: ""
+description: "The oef connection provides a wrapper around the OEF sdk."
 class_name: OEFConnection
-supported_protocols: ["oef"]
+protocols: ["fetchai/oef:0.1.0", "fetchai/fipa:0.1.0"]
+restricted_to_protocols: []
+excluded_protocols: ["fetchai/gym:0.1.0"]
 config:
-  addr: 127.0.0.1
-  port: 10000
-
+  addr: ${OEF_ADDR:127.0.0.1}
+  port: ${OEF_PORT:10000}
+dependencies:
+  colorlog: {}
+  oef:
+    version: ==0.8.1
 ```
 
 
@@ -89,31 +95,6 @@ def send(self, envelope: Envelope):
         return OEFConnection(address, oef_addr, oef_port)
 ```
 -->
-
-
-## Launching `oef` connections
-
-### `oef` - local node
-
-Download the scripts directory:
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
-```
-
-Then, start an oef from a separate terminal:
-
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-This pulls and runs an `oef` docker image.
-
-Now you can run an AEA with an `oef` connection.
-
-
-### `oef` - remote node
-
-Connect directly to a running `oef` via a given `URL:PORT`. Update the configuration of the `oef` connection in the `connection.yaml` file.
 
 
 <br />

@@ -37,9 +37,9 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
 from aea.skills.base import Skill
-from packages.connections.local.connection import LocalNode, OEFLocalConnection
-from packages.protocols.fipa.message import FIPAMessage
-from packages.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from .conftest import CUR_PATH
 
 
@@ -50,7 +50,7 @@ def test_initialise_AEA():
     connections1 = [OEFLocalConnection(address_1, node)]
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({'default': private_key_pem_path})
-    ledger_apis = LedgerApis({})
+    ledger_apis = LedgerApis({}, 'default')
     my_AEA = AEA("Agent0", connections1, wallet, ledger_apis, resources=Resources(str(Path(CUR_PATH, "aea"))))
     assert my_AEA.context == my_AEA._context, "Cannot access the Agent's Context"
     assert not my_AEA.context.connection_status.is_connected, "AEA should not be connected."
@@ -69,7 +69,7 @@ def test_act():
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
-        ledger_apis = LedgerApis({})
+        ledger_apis = LedgerApis({}, 'default')
         address = wallet.addresses['default']
         connections = [OEFLocalConnection(address, node)]
 
@@ -97,7 +97,7 @@ def test_react():
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
-        ledger_apis = LedgerApis({})
+        ledger_apis = LedgerApis({}, 'default')
         address = wallet.addresses['default']
         connection = OEFLocalConnection(address, node)
         connections = [connection]
@@ -121,9 +121,9 @@ def test_react():
         t = Thread(target=agent.start)
         try:
             t.start()
-            time.sleep(0.1)
+            time.sleep(1.0)
             agent.outbox.put(envelope)
-            time.sleep(0.5)
+            time.sleep(2.0)
             handler = agent.resources.handler_registry.fetch_by_skill('default', "dummy")
             assert handler is not None, "Handler is not set."
             assert msg in handler.handled_messages, "The message is not inside the handled_messages."
@@ -141,7 +141,7 @@ async def test_handle():
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
-        ledger_apis = LedgerApis({})
+        ledger_apis = LedgerApis({}, 'default')
         address = wallet.addresses['default']
         connection = OEFLocalConnection(address, node)
         connections = [connection]
@@ -218,7 +218,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.agent_name = "MyAgent"
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({})
+        cls.ledger_apis = LedgerApis({}, 'default')
         cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
         cls.connections = [cls.connection]
 
@@ -270,7 +270,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.agent_name = "MyAgent"
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({})
+        cls.ledger_apis = LedgerApis({}, 'default')
         cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
         cls.connections = [cls.connection]
 

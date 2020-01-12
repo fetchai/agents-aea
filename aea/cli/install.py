@@ -25,7 +25,7 @@ from typing import Optional
 
 import click
 
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
+from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config
 from aea.configurations.base import Dependency
 
 
@@ -68,7 +68,7 @@ def _install_from_requirement(file: str):
 @pass_ctx
 def install(ctx: Context, requirement: Optional[str]):
     """Install the dependencies."""
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
 
     if requirement:
         logger.debug("Installing the dependencies in '{}'...".format(requirement))

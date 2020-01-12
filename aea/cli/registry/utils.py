@@ -19,20 +19,23 @@
 """Utils used for operating Registry with CLI."""
 
 
-import click
 import os
-import requests
 import tarfile
+from typing import Dict
+
+import click
+import requests
 import yaml
 
-from typing import List, Dict
-
-from aea.cli.common import logger
+from aea.cli.common import (
+    logger, AEAConfigException
+)
 from aea.cli.registry.settings import (
     REGISTRY_API_URL,
     CLI_CONFIG_PATH,
     AUTH_TOKEN_KEY
 )
+from aea.configurations.base import PublicId
 
 
 def request_api(
@@ -52,16 +55,23 @@ def request_api(
     """
     headers = {}
     if auth:
-        token = read_cli_config()[AUTH_TOKEN_KEY]
-        headers.update({
-            'Authorization': 'Token {}'.format(token)
-        })
+        try:
+            token = read_cli_config()[AUTH_TOKEN_KEY]
+        except AEAConfigException:
+            raise click.ClickException(
+                'Unable to read authentication config. '
+                'Please sign in with "aea login" command.'
+            )
+        else:
+            headers.update({
+                'Authorization': 'Token {}'.format(token)
+            })
 
     files = None
     if filepath:
         files = {'file': open(filepath, 'rb')}
 
-    resp = requests.request(
+    request_kwargs = dict(
         method=method,
         url='{}{}'.format(REGISTRY_API_URL, path),
         params=params,
@@ -69,6 +79,11 @@ def request_api(
         data=data,
         headers=headers,
     )
+    try:
+        resp = requests.request(**request_kwargs)
+    except requests.exceptions.ConnectionError:
+        raise click.ClickException('Registry server is not responding.')
+
     resp_json = resp.json()
 
     if resp.status_code == 200:
@@ -93,18 +108,6 @@ def request_api(
             'Wrong server response. Status code: {}'.format(resp.status_code)
         )
     return resp_json
-
-
-def split_public_id(public_id: str) -> List[str]:
-    """
-    Split public ID to ownwer, name, version.
-
-    :param public_id: public ID of item from Registry.
-
-    :return: list of str [owner, name, version]
-    """
-    public_id = public_id.replace(':', '/')
-    return public_id.split('/')
 
 
 def download_file(url: str, cwd: str) -> str:
@@ -149,7 +152,7 @@ def extract(source: str, target: str) -> None:
     os.remove(source)
 
 
-def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
+def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
     """
     Fetch connection/protocol/skill from Registry.
 
@@ -164,10 +167,10 @@ def fetch_package(obj_type: str, public_id: str, cwd: str) -> None:
         public_id=public_id,
         obj_type=obj_type
     ))
-    owner, name, version = split_public_id(public_id)
+    author, name, version = public_id.author, public_id.name, public_id.version
     plural_obj_type = obj_type + 's'  # used for API and folder paths
 
-    api_path = '/{}/{}/{}/{}'.format(plural_obj_type, owner, name, version)
+    api_path = '/{}/{}/{}/{}'.format(plural_obj_type, author, name, version)
     resp = request_api('GET', api_path)
     file_url = resp['file']
 
@@ -254,7 +257,13 @@ def read_cli_config() -> Dict:
 
     :return: dict CLI config.
     """
-    return load_yaml(CLI_CONFIG_PATH)
+    try:
+        return load_yaml(CLI_CONFIG_PATH)
+    except FileNotFoundError:
+        raise AEAConfigException(
+            'Unable to read config from {} - file not found.'
+            .format(CLI_CONFIG_PATH)
+        )
 
 
 def _rm_tarfiles():

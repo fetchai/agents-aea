@@ -18,9 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """Classes to handle AEA configurations."""
-
+import re
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast
+from enum import Enum
+from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast, Union
+
 # from aea.helpers.base import generate_fingerprint
 
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
@@ -51,6 +53,34 @@ The main advantage of having a dictionary is that we implicitly filter out depen
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 """
 Dependencies = Dict[str, Dependency]
+
+
+class ConfigurationType(Enum):
+    """Configuration types."""
+
+    AGENT = "agent"
+    PROTOCOL = "protocol"
+    CONNECTION = "connection"
+    SKILL = "skill"
+
+
+def _get_default_configuration_file_name_from_type(item_type: Union[str, ConfigurationType]) -> str:
+    """Get the default configuration file name from item type."""
+    item_type = ConfigurationType(item_type)
+    if item_type == ConfigurationType.AGENT:
+        return DEFAULT_AEA_CONFIG_FILE
+    elif item_type == ConfigurationType.PROTOCOL:
+        return DEFAULT_PROTOCOL_CONFIG_FILE
+    elif item_type == ConfigurationType.CONNECTION:
+        return DEFAULT_CONNECTION_CONFIG_FILE
+    elif item_type == ConfigurationType.SKILL:
+        return DEFAULT_SKILL_CONFIG_FILE
+    else:
+        raise ValueError("Item type not valid: {}".format(str(item_type)))
+
+
+class ProtocolSpecificationParseError(Exception):
+    """Exception for parsing a protocol specification file."""
 
 
 class JSONSerializable(ABC):
@@ -120,6 +150,114 @@ class CRUDCollection(Generic[T]):
         return [(k, v) for k, v in self._items_by_id.items()]
 
 
+class PublicId(object):
+    """This class implement a public identifier.
+
+    A public identifier is composed of three elements:
+    - author
+    - name
+    - version
+
+    The concatenation of those three elements gives the public identifier:
+
+        author/name:version
+
+    >>> public_id = PublicId("author", "my_package", "0.1.0")
+    >>> assert public_id.author == "author"
+    >>> assert public_id.name == "my_package"
+    >>> assert public_id.version == "0.1.0"
+    >>> another_public_id = PublicId("author", "my_package", "0.1.0")
+    >>> assert hash(public_id) == hash(another_public_id)
+    >>> assert public_id == another_public_id
+    """
+
+    AUTHOR_REGEX = r"[a-zA-Z0-9_]*"
+    PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
+    VERSION_REGEX = r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
+    PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(AUTHOR_REGEX, PACKAGE_NAME_REGEX, VERSION_REGEX)
+
+    def __init__(self, author: str, name: str, version: str):
+        """Initialize the public identifier."""
+        self._author = author
+        self._name = name
+        self._version = version
+
+    @property
+    def author(self):
+        """Get the author."""
+        return self._author
+
+    @property
+    def name(self):
+        """Get the name."""
+        return self._name
+
+    @property
+    def version(self):
+        """Get the version."""
+        return self._version
+
+    @classmethod
+    def from_string(cls, public_id_string: str) -> 'PublicId':
+        """
+        Initialize the public id from the string.
+
+        >>> str(PublicId.from_string("author/package_name:0.1.0"))
+        'author/package_name:0.1.0'
+
+        A bad formatted input raises value error:
+        >>> PublicId.from_string("bad/formatted:input")
+        Traceback (most recent call last):
+        ...
+        ValueError: Input 'bad/formatted:input' is not well formatted.
+
+        :param public_id_string: the public id in string format.
+        :return: the public id object.
+        :raises ValueError: if the string in input is not well formatted.
+        """
+        if not re.match(cls.PUBLIC_ID_REGEX, public_id_string):
+            raise ValueError("Input '{}' is not well formatted.".format(public_id_string))
+        else:
+            username, package_name, version = re.findall(cls.PUBLIC_ID_REGEX, public_id_string)[0][:3]
+            return PublicId(username, package_name, version)
+
+    def __hash__(self):
+        """Get the hash."""
+        return hash((self.author, self.name, self.version))
+
+    def __str__(self):
+        """Get the string representation."""
+        return "{author}/{name}:{version}"\
+            .format(author=self.author, name=self.name, version=self.version)
+
+    def __eq__(self, other):
+        """Compare with another object."""
+        return isinstance(other, PublicId) and self.author == other.author and self.name == other.name \
+            and self.version == other.version
+
+    def __lt__(self, other):
+        """Compare two public ids."""
+        return str(self) < str(other)
+
+
+class PackageConfiguration(Configuration, ABC):
+    """This class represent a package configuration."""
+
+    def __init__(self,
+                 name: str,
+                 author: str,
+                 version: str):
+        """Initialize a package configuration."""
+        self.name = name
+        self.author = author
+        self.version = version
+
+    @property
+    def public_id(self) -> PublicId:
+        """Get the public id."""
+        return PublicId(self.author, self.name, self.version)
+
+
 class PrivateKeyPathConfig(Configuration):
     """Handle a private key path configuration."""
 
@@ -147,38 +285,7 @@ class PrivateKeyPathConfig(Configuration):
         )
 
 
-class LedgerAPIConfig(Configuration):
-    """Handle a ledger api configuration."""
-
-    def __init__(self, ledger: str = "", addr: str = "", port: int = 1000):
-        """Initialize a handler configuration."""
-        self.ledger = ledger
-        self.addr = addr
-        self.port = port
-
-    @property
-    def json(self) -> Dict:
-        """Return the JSON representation."""
-        return {
-            "ledger": self.ledger,
-            "addr": self.addr,
-            "port": self.port
-        }
-
-    @classmethod
-    def from_json(cls, obj: Dict):
-        """Initialize from a JSON object."""
-        ledger = cast(str, obj.get("ledger"))
-        addr = cast(str, obj.get("addr"))
-        port = cast(int, obj.get("port"))
-        return LedgerAPIConfig(
-            ledger=ledger,
-            addr=addr,
-            port=port
-        )
-
-
-class ConnectionConfig(Configuration):
+class ConnectionConfig(PackageConfiguration):
     """Handle connection configuration."""
 
     def __init__(self,
@@ -186,23 +293,19 @@ class ConnectionConfig(Configuration):
                  author: str = "",
                  version: str = "",
                  license: str = "",
-                 url: str = "",
                  class_name: str = "",
-                 protocols: List[str] = None,
-                 restricted_to_protocols: Optional[Set[str]] = None,
-                 excluded_protocols: Optional[Set[str]] = None,
+                 protocols: Optional[Set[PublicId]] = None,
+                 restricted_to_protocols: Optional[Set[PublicId]] = None,
+                 excluded_protocols: Optional[Set[PublicId]] = None,
                  dependencies: Optional[Dependencies] = None,
                  description: str = "",
                  **config):
         """Initialize a connection configuration object."""
-        self.name = name
-        self.author = author
-        self.version = version
+        super().__init__(name, author, version)
         self.license = license
         self.fingerprint = ""
-        self.url = url
         self.class_name = class_name
-        self.protocols = protocols
+        self.protocols = protocols if protocols is not None else []
         self.restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
         self.excluded_protocols = excluded_protocols if excluded_protocols is not None else set()
         self.dependencies = dependencies if dependencies is not None else {}
@@ -218,11 +321,10 @@ class ConnectionConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
-            "url": self.url,
             "class_name": self.class_name,
-            "protocols": self.protocols,
-            "restricted_to_protocols": self.restricted_to_protocols,
-            "excluded_protocols": self.excluded_protocols,
+            "protocols": list(map(str, self.protocols)),
+            "restricted_to_protocols": list(map(str, self.restricted_to_protocols)),
+            "excluded_protocols": list(map(str, self.excluded_protocols)),
             "dependencies": self.dependencies,
             "description": self.description,
             "config": self.config
@@ -231,29 +333,28 @@ class ConnectionConfig(Configuration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        restricted_to_protocols = obj.get("restricted_to_protocols")
-        restricted_to_protocols = restricted_to_protocols if restricted_to_protocols is not None else set()
-        excluded_protocols = obj.get("excluded_protocols")
-        excluded_protocols = excluded_protocols if excluded_protocols is not None else set()
-        dependencies = cast(Dependencies, obj.get("dependencies", {}))
-        protocols = cast(List[str], obj.get("protocols", []))
+        restricted_to_protocols = obj.get("restricted_to_protocols", set())
+        restricted_to_protocols = {PublicId.from_string(id_) for id_ in restricted_to_protocols}
+        excluded_protocols = obj.get("excluded_protocols", set())
+        excluded_protocols = {PublicId.from_string(id_) for id_ in excluded_protocols}
+        dependencies = obj.get("dependencies", {})
+        protocols = {PublicId.from_string(id_) for id_ in obj.get("protocols", set())}
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            url=cast(str, obj.get("url")),
             class_name=cast(str, obj.get("class_name")),
-            protocols=protocols,
-            restricted_to_protocols=cast(Set[str], restricted_to_protocols),
-            excluded_protocols=cast(Set[str], excluded_protocols),
-            dependencies=dependencies,
+            protocols=cast(Set[PublicId], protocols),
+            restricted_to_protocols=cast(Set[PublicId], restricted_to_protocols),
+            excluded_protocols=cast(Set[PublicId], excluded_protocols),
+            dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
             **cast(dict, obj.get("config"))
         )
 
 
-class ProtocolConfig(Configuration):
+class ProtocolConfig(PackageConfiguration):
     """Handle protocol configuration."""
 
     def __init__(self,
@@ -261,16 +362,12 @@ class ProtocolConfig(Configuration):
                  author: str = "",
                  version: str = "",
                  license: str = "",
-                 url: str = "",
                  dependencies: Optional[Dependencies] = None,
                  description: str = ""):
         """Initialize a connection configuration object."""
-        self.name = name
-        self.author = author
-        self.version = version
+        super().__init__(name, author, version)
         self.license = license
         self.fingerprint = ""
-        self.url = url
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
@@ -283,7 +380,6 @@ class ProtocolConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
-            "url": self.url,
             "dependencies": self.dependencies,
             "description": self.description
         }
@@ -297,7 +393,6 @@ class ProtocolConfig(Configuration):
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            url=cast(str, obj.get("url")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
         )
@@ -407,7 +502,7 @@ class SharedClassConfig(Configuration):
         )
 
 
-class SkillConfig(Configuration):
+class SkillConfig(PackageConfiguration):
     """Class to represent a skill configuration file."""
 
     def __init__(self,
@@ -415,18 +510,14 @@ class SkillConfig(Configuration):
                  author: str = "",
                  version: str = "",
                  license: str = "",
-                 url: str = "",
-                 protocols: List[str] = None,
+                 protocols: List[PublicId] = None,
                  dependencies: Optional[Dependencies] = None,
                  description: str = ""):
         """Initialize a skill configuration."""
-        self.name = name
-        self.author = author
-        self.version = version
+        super().__init__(name, author, version)
         self.license = license
         self.fingerprint = ""
-        self.url = url
-        self.protocols = protocols if protocols is not None else []  # type: List[str]
+        self.protocols = protocols if protocols is not None else []  # type: List[PublicId]
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
         self.handlers = CRUDCollection[HandlerConfig]()
@@ -443,8 +534,7 @@ class SkillConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
-            "url": self.url,
-            "protocols": self.protocols,
+            "protocols": list(map(str, self.protocols)),
             "dependencies": self.dependencies,
             "handlers": {key: h.json for key, h in self.handlers.read_all()},
             "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
@@ -460,8 +550,7 @@ class SkillConfig(Configuration):
         author = cast(str, obj.get("author"))
         version = cast(str, obj.get("version"))
         license = cast(str, obj.get("license"))
-        url = cast(str, obj.get("url"))
-        protocols = cast(List[str], obj.get("protocols", []))
+        protocols = cast(List[PublicId], [PublicId.from_string(id_) for id_ in obj.get("protocols", [])])
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         skill_config = SkillConfig(
@@ -469,7 +558,6 @@ class SkillConfig(Configuration):
             author=author,
             version=version,
             license=license,
-            url=url,
             protocols=protocols,
             dependencies=dependencies,
             description=description
@@ -494,7 +582,7 @@ class SkillConfig(Configuration):
         return skill_config
 
 
-class AgentConfig(Configuration):
+class AgentConfig(PackageConfiguration):
     """Class to represent the agent configuration file."""
 
     def __init__(self,
@@ -504,38 +592,31 @@ class AgentConfig(Configuration):
                  version: str = "",
                  license: str = "",
                  fingerprint: str = "",
-                 url: str = "",
                  registry_path: str = "",
                  description: str = "",
                  private_key_paths: Dict[str, str] = None,
-                 ledger_apis: Dict[str, Tuple[str, int]] = None,
                  logging_config: Optional[Dict] = None):
         """Instantiate the agent configuration object."""
+        super().__init__(agent_name, author, version)
         self.agent_name = agent_name
         self.aea_version = aea_version
-        self.author = author
-        self.version = version
         self.license = license
         self.fingerprint = fingerprint
-        self.url = url
         self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
-        self.ledger_apis = CRUDCollection[LedgerAPIConfig]()
+        self.ledger_apis = CRUDCollection[Dict]()
 
         private_key_paths = private_key_paths if private_key_paths is not None else {}
         for ledger, path in private_key_paths.items():
             self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
 
-        ledger_apis = ledger_apis if ledger_apis is not None else {}
-        for ledger, (addr, port) in ledger_apis.items():
-            self.ledger_apis.create(ledger, LedgerAPIConfig(ledger, addr, port))
-
         self.logging_config = logging_config if logging_config is not None else {}
-        self._default_connection = None  # type: Optional[str]
-        self.connections = set()  # type: Set[str]
-        self.protocols = set()  # type: Set[str]
-        self.skills = set()  # type: Set[str]
+        self._default_ledger = None  # type: Optional[str]
+        self._default_connection = None  # type: Optional[PublicId]
+        self.connections = set()  # type: Set[PublicId]
+        self.protocols = set()  # type: Set[PublicId]
+        self.skills = set()  # type: Set[PublicId]
 
         if self.logging_config == {}:
             self.logging_config["version"] = 1
@@ -545,17 +626,38 @@ class AgentConfig(Configuration):
     def default_connection(self) -> str:
         """Get the default connection."""
         assert self._default_connection is not None, "Default connection not set yet."
-        return self._default_connection
+        return str(self._default_connection)
 
     @default_connection.setter
-    def default_connection(self, connection_name: str):
+    def default_connection(self, connection_id: Optional[Union[str, PublicId]]):
         """
         Set the default connection.
 
-        :param connection_name: the name of the default connection.
+        :param connection_id: the name of the default connection.
         :return: None
         """
-        self._default_connection = connection_name
+        if connection_id is None:
+            self._default_connection = None
+        elif isinstance(connection_id, str):
+            self._default_connection = PublicId.from_string(connection_id)
+        else:
+            self._default_connection = connection_id
+
+    @property
+    def default_ledger(self) -> str:
+        """Get the default ledger."""
+        assert self._default_ledger is not None, "Default ledger not set yet."
+        return self._default_ledger
+
+    @default_ledger.setter
+    def default_ledger(self, ledger_id: str):
+        """
+        Set the default ledger.
+
+        :param ledger_id: the id of the default ledger.
+        :return: None
+        """
+        self._default_ledger = ledger_id
 
     @property
     def json(self) -> Dict:
@@ -567,16 +669,16 @@ class AgentConfig(Configuration):
             "version": self.version,
             "license": self.license,
             "fingerprint": self.fingerprint,
-            "url": self.url,
             "registry_path": self.registry_path,
             "description": self.description,
             "private_key_paths": [{"private_key_path": p.json} for l, p in self.private_key_paths.read_all()],
-            "ledger_apis": [{"ledger_api": t.json} for l, t in self.ledger_apis.read_all()],
+            "ledger_apis": {key: config for key, config in self.ledger_apis.read_all()},
             "logging_config": self.logging_config,
+            "default_ledger": self.default_ledger,
             "default_connection": self.default_connection,
-            "connections": sorted(self.connections),
-            "protocols": sorted(self.protocols),
-            "skills": sorted(self.skills)
+            "connections": sorted(map(str, self.connections)),
+            "protocols": sorted(map(str, self.protocols)),
+            "skills": sorted(map(str, self.skills))
         }
 
     @classmethod
@@ -587,31 +689,120 @@ class AgentConfig(Configuration):
             private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
             private_key_paths[private_key_path.ledger] = private_key_path.path
 
-        ledger_apis = {}
-        for l in obj.get("ledger_apis", []):  # type: ignore
-            ledger_api = LedgerAPIConfig.from_json(l["ledger_api"])
-            ledger_apis[ledger_api.ledger] = (ledger_api.addr, ledger_api.port)
-
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
             author=cast(str, obj.get("author")),
             version=cast(str, obj.get("version")),
             license=cast(str, obj.get("license")),
-            url=cast(str, obj.get("url")),
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
             private_key_paths=cast(Dict, private_key_paths),
-            ledger_apis=cast(Dict, ledger_apis)
         )
 
-        agent_config.connections = set(cast(List[str], obj.get("connections")))
-        agent_config.protocols = set(cast(List[str], obj.get("protocols")))
-        agent_config.skills = set(cast(List[str], obj.get("skills")))
+        for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
+            agent_config.ledger_apis.create(ledger_id, ledger_data)
 
-        # set default configuration
+        # parse connection public ids
+        connections = set(map(lambda x: PublicId.from_string(x), obj.get("connections", [])))
+        agent_config.connections = cast(Set[PublicId], connections)
+
+        # parse protocol public ids
+        protocols = set(map(lambda x: PublicId.from_string(x), obj.get("protocols", [])))
+        agent_config.protocols = cast(Set[PublicId], protocols)
+
+        # parse skills public ids
+        skills = set(map(lambda x: PublicId.from_string(x), obj.get("skills", [])))
+        agent_config.skills = cast(Set[PublicId], skills)
+
+        # set default connection
         default_connection_name = obj.get("default_connection", None)
         agent_config.default_connection = default_connection_name
+        default_ledger_id = obj.get("default_ledger", None)
+        agent_config.default_ledger = default_ledger_id
 
         return agent_config
+
+
+class SpeechActContentConfig(Configuration):
+    """Handle a speech_act content configuration."""
+
+    def __init__(self, **args):
+        """Initialize a speech_act content configuration."""
+        self.args = args  # type: Dict[str, str]
+        self._check_consistency()
+
+    def _check_consistency(self):
+        """Check consistency of the args."""
+        for content_name, content_type in self.args.items():
+            if type(content_name) is not str or type(content_type) is not str:
+                raise ProtocolSpecificationParseError("Contents' names and types must be string.")
+            # Check each content definition key/value (i.e. content name/type) is not empty
+            if content_name == "" or content_type == "":
+                raise ProtocolSpecificationParseError("Contents' names and types cannot be empty.")
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return self.args
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        return SpeechActContentConfig(
+            **obj
+        )
+
+
+class ProtocolSpecification(ProtocolConfig):
+    """Handle protocol specification."""
+
+    def __init__(self,
+                 name: str = "",
+                 author: str = "",
+                 version: str = "",
+                 license: str = "",
+                 description: str = ""):
+        """Initialize a protocol specification configuration object."""
+        super().__init__(name, author, version, license, description=description)
+        self.speech_acts = CRUDCollection[SpeechActContentConfig]()
+
+    @property
+    def json(self) -> Dict:
+        """Return the JSON representation."""
+        return {
+            "name": self.name,
+            "author": self.author,
+            "version": self.version,
+            "license": self.license,
+            "description": self.description,
+            "speech_acts": {key: speech_act.json for key, speech_act in self.speech_acts.read_all()},
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Initialize from a JSON object."""
+        protocol_specification = ProtocolSpecification(
+            name=cast(str, obj.get("name")),
+            author=cast(str, obj.get("author")),
+            version=cast(str, obj.get("version")),
+            license=cast(str, obj.get("license")),
+            description=cast(str, obj.get("description", ""))
+        )
+        for speech_act, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
+            speech_act_content_config = SpeechActContentConfig.from_json(speech_act_content)
+            protocol_specification.speech_acts.create(speech_act, speech_act_content_config)
+        protocol_specification._check_consistency()
+        return protocol_specification
+
+    def _check_consistency(self):
+        """Validate the correctness of the speech_acts."""
+        if len(self.speech_acts.read_all()) == 0:
+            raise ProtocolSpecificationParseError(
+                "There should be at least one performative defined in the speech_acts.")
+        for performative, speech_act_content_config in self.speech_acts.read_all():
+            if type(performative) is not str:
+                raise ProtocolSpecificationParseError("A 'performative' is not specified as a string.")
+            if performative == "":
+                raise ProtocolSpecificationParseError("A 'performative' cannot be an empty string.")

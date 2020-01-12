@@ -1,6 +1,6 @@
 ## Preliminaries
 
-Create and cd into a new working directory.
+Create and enter into a new working directory.
 
 ``` bash
 mkdir my_aea/
@@ -33,6 +33,8 @@ and follow the instructions for your platform.
 
 
 ### Download the scripts and packages directories
+
+Download folders containing examples, scripts and packages:
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
@@ -43,28 +45,16 @@ You can install the `svn` command with (`brew install subversion` or `sudo apt-g
 
 ## Installation
 
-Install the Autonomous Economic Agent framework.
-
-<!--
-
-The following installs the basic application without the cli.
-``` bash
-pip install aea
-```
--->
-
 The following installs the entire AEA package which also includes a command-line interface (CLI).
 
 ``` bash
 pip install aea[all]
-
 ```
 
 However, you can run this demo by installing the base AEA, including the CLI extension, alone.
 
 ``` bash
 pip install aea[cli]
-
 ```
 
 
@@ -86,6 +76,8 @@ sudo apt-get install python3.7-dev
 
 The echo skill is a simple demo that introduces you to the main business logic components of an AEA.
 
+## Option 1 - Step-by-step
+
 ### Create a new agent
 
 First create a new agent project and enter it.
@@ -97,10 +89,10 @@ cd my_first_agent
 ### Add the echo skill 
 
 ``` bash
-aea add skill echo
+aea add skill fetchai/echo:0.1.0
 ```
 
-This copies the echo application code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run.
+This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The full identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.
 
 ### Add a stub connection
 
@@ -126,12 +118,26 @@ For example:
 recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
 ```
 
-### Run the agent
+## Option 2 - Fetch the entire agent
 
-Run the agent with the `stub` connection.
+The preceding three steps can be executed at once with the command
+``` bash
+aea fetch fetchai/my_first_agent:0.1.0
+cd my_first_agent
+```
+
+## Run the agent
+
+Run the agent with the default `stub` connection.
 
 ``` bash
 aea run
+```
+
+or 
+
+``` bash
+aea run --connections stub
 ```
 
 You will see the echo task running in the terminal window.
@@ -144,7 +150,7 @@ Let's look at the `Handler` in more depth.
 
 ### Add a message to the input file
 
-We send the AEA a message wrapped in an envelope via the input file.
+From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
 echo 'my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
@@ -165,11 +171,11 @@ info: Echo Task: execute method called.
 
 <center>![Stub connection input and output](assets/input-output.png)</center>
 
-### Stop the agent
+## Stop the agent
 
 Stop the agent by pressing `CTRL C`
 
-### Delete the agent
+## Delete the agent
 
 Delete the agent from the parent directory (`cd ..` to go to the parent directory).
 

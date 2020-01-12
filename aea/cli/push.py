@@ -19,33 +19,84 @@
 
 """Implementation of the 'aea push' subcommand."""
 import click
+from shutil import copytree
 
+from aea.cli.common import pass_ctx, Context, PublicIdParameter, try_get_item_target_path, try_get_item_source_path, try_to_load_agent_config
 from aea.cli.registry.push import push_item
+from aea.configurations.base import PublicId
 
 
 @click.group()
-def push():
-    """Push item to Registry."""
-    # no action needed as just a group of command defined here
-    pass
+@click.option(
+    '--registry', is_flag=True, help="For pushing items to Registry."
+)
+@pass_ctx
+def push(ctx: Context, registry):
+    """Push item to Registry or save it in local packages."""
+    try_to_load_agent_config(ctx)
+    ctx.set_config("registry", registry)
 
 
 @push.command(name='connection')
-@click.argument('connection-name', type=str, required=True)
-def connection(connection_name):
-    """Push connection to Registry."""
-    push_item('connection', connection_name)
+@click.argument('connection-id', type=PublicIdParameter(), required=True)
+@pass_ctx
+def connection(ctx: Context, connection_id):
+    """Push connection to Registry or save it in local packages."""
+    if not ctx.config.get("registry"):
+        _save_item_locally(ctx, 'connection', connection_id)
+    else:
+        push_item(ctx, 'connection', connection_id)
 
 
 @push.command(name='protocol')
-@click.argument('protocol-name', type=str, required=True)
-def protocol(protocol_name):
-    """Push protocol to Registry."""
-    push_item('protocol', protocol_name)
+@click.argument('protocol-id', type=PublicIdParameter(), required=True)
+@pass_ctx
+def protocol(ctx: Context, protocol_id):
+    """Push protocol to Registry or save it in local packages."""
+    if not ctx.config.get("registry"):
+        _save_item_locally(ctx, 'protocol', protocol_id)
+    else:
+        push_item(ctx, 'protocol', protocol_id)
 
 
 @push.command(name='skill')
-@click.argument('skill-name', type=str, required=True)
-def skill(skill_name):
-    """Push skill to Registry."""
-    push_item('skill', skill_name)
+@click.argument('skill-id', type=PublicIdParameter(), required=True)
+@pass_ctx
+def skill(ctx: Context, skill_id):
+    """Push skill to Registry or save it in local packages."""
+    if not ctx.config.get("registry"):
+        _save_item_locally(ctx, 'skill', skill_id)
+    else:
+        push_item(ctx, 'skill', skill_id)
+
+
+def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
+    """
+    Save item to local packages.
+
+    :param item_type: str type of item (connection/protocol/skill).
+    :param item_id: the public id of the item.
+    :param packages_path: path to packages dir
+
+    :return: None
+    """
+    item_type_plural = item_type + 's'
+
+    source_path = try_get_item_source_path(ctx.cwd, item_type_plural, item_id.name)
+    target_path = try_get_item_target_path(ctx.agent_config.registry_path, item_type_plural, item_id.name)
+    # _check_package_public_id(source_path, item_type, item_id)
+    copytree(source_path, target_path)
+    click.echo('{} "{}" successfully saved in packages folder.'.format(item_type.title(), item_id))
+
+
+# TODO: clarify whether this is indeed needed
+# def _check_package_public_id(source_path, item_type, item_id):
+#     config = load_yaml(os.path.join(source_path, item_type + ".yaml"))
+#     item_author = config.get("author", "")
+#     item_name = config.get("name", "")
+#     item_version = config.get("version", "")
+#     if item_id.name != item_name or item_id.author != item_author or item_id.version != item_version:
+#         raise click.ClickException(
+#             "Version or author do not match. Expected '{}', found '{}'"
+#             .format(item_id, item_author + "/" + item_name + ":" + item_version)
+#         )

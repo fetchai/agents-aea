@@ -19,7 +19,6 @@
 
 """Implementation of the common utils of the aea cli."""
 
-import importlib.util
 import logging
 import logging.config
 import os
@@ -33,15 +32,19 @@ from dotenv import load_dotenv
 
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies, PublicId
 from aea.configurations.loader import ConfigLoader
+from aea.crypto.fetchai import FETCHAI
+from aea.helpers.base import add_agent_component_module_to_sys_modules, load_agent_component_package
 
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
-DEFAULT_REGISTRY_PATH = str(Path("..", "packages"))
-DEFAULT_CONNECTION = "stub"
-DEFAULT_SKILL = "error"
+DEFAULT_VERSION = "0.1.0"
+DEFAULT_CONNECTION = PublicId.from_string("fetchai/stub:" + DEFAULT_VERSION)  # type: PublicId
+DEFAULT_SKILL = PublicId.from_string("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
+DEFAULT_LEDGER = FETCHAI
+DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 
 
 class Context(object):
@@ -76,19 +79,19 @@ class Context(object):
         """
         dependencies = {}  # type: Dependencies
         for protocol_id in self.agent_config.protocols:
-            path = str(Path("protocols", protocol_id, DEFAULT_PROTOCOL_CONFIG_FILE))
+            path = str(Path("protocols", protocol_id.name, DEFAULT_PROTOCOL_CONFIG_FILE))
             protocol_config = self.protocol_loader.load(open(path))
             deps = cast(Dependencies, protocol_config.dependencies)
             dependencies.update(deps)
 
         for connection_id in self.agent_config.connections:
-            path = str(Path("connections", connection_id, DEFAULT_CONNECTION_CONFIG_FILE))
+            path = str(Path("connections", connection_id.name, DEFAULT_CONNECTION_CONFIG_FILE))
             connection_config = self.connection_loader.load(open(path))
             deps = cast(Dependencies, connection_config.dependencies)
             dependencies.update(deps)
 
         for skill_id in self.agent_config.skills:
-            path = str(Path("skills", skill_id, DEFAULT_SKILL_CONFIG_FILE))
+            path = str(Path("skills", skill_id.name, DEFAULT_SKILL_CONFIG_FILE))
             skill_config = self.skill_loader.load(open(path))
             deps = cast(Dependencies, skill_config.dependencies)
             dependencies.update(deps)
@@ -99,23 +102,35 @@ class Context(object):
 pass_ctx = click.make_pass_decorator(Context)
 
 
-def _try_to_load_agent_config(ctx: Context):
+def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
+    """
+    Load agent config to a click context object.
+
+    :param ctx: click command context object.
+    :param exit_on_except: bool option to exit on exception (default = True).
+
+    :return None
+    """
     try:
-        path = Path(DEFAULT_AEA_CONFIG_FILE)
-        fp = open(str(path), mode="r", encoding="utf-8")
-        ctx.agent_config = ctx.agent_loader.load(fp)
-        logging.config.dictConfig(ctx.agent_config.logging_config)
+        path = Path(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE))
+        with open(str(path), mode="r", encoding="utf-8") as fp:
+            ctx.agent_config = ctx.agent_loader.load(fp)
+            logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
-        logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
-        sys.exit(1)
+        if exit_on_except:
+            logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
+            sys.exit(1)
     except jsonschema.exceptions.ValidationError:
-        logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
-        sys.exit(1)
+        if exit_on_except:
+            logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
+            sys.exit(1)
 
 
 def _try_to_load_protocols(ctx: Context):
-    for protocol_name in ctx.agent_config.protocols:
-        logger.debug("Processing protocol {}".format(protocol_name))
+    for protocol_public_id in ctx.agent_config.protocols:
+        protocol_name = protocol_public_id.name
+        protocol_author = protocol_public_id.author
+        logger.debug("Processing protocol {}".format(protocol_public_id))
         try:
             ctx.protocol_loader.load(open(os.path.join("protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
         except FileNotFoundError:
@@ -123,12 +138,10 @@ def _try_to_load_protocols(ctx: Context):
             sys.exit(1)
 
         try:
-            protocol_spec = importlib.util.spec_from_file_location(protocol_name, os.path.join("protocols", protocol_name, "__init__.py"))
-            protocol_module = importlib.util.module_from_spec(protocol_spec)
-            protocol_spec.loader.exec_module(protocol_module)  # type: ignore
-            sys.modules[protocol_spec.name + "_protocol"] = protocol_module
+            protocol_package = load_agent_component_package("protocol", protocol_name, protocol_author, Path("protocols", protocol_name))
+            add_agent_component_module_to_sys_modules("protocol", protocol_name, protocol_author, protocol_package)
         except Exception:
-            logger.error("A problem occurred while processing protocol {}.".format(protocol_name))
+            logger.error("A problem occurred while processing protocol {}.".format(protocol_public_id))
             sys.exit(1)
 
 
@@ -151,12 +164,13 @@ def format_items(items):
             'Public ID: {public_id}\n'
             'Name: {name}\n'
             'Description: {description}\n'
+            'Author: {author}\n'
             'Version: {version}\n'
             '{line}\n'.format(
                 name=item['name'],
-                # TODO: switch to unsafe get public_id when every obj has it
-                public_id=item.get('public_id'),
+                public_id=item['public_id'],
                 description=item['description'],
+                author=item['author'],
                 version=item['version'],
                 line='-' * 30
             ))
@@ -189,10 +203,12 @@ def format_skills(items):
 
 
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
-    """Return description of a protocol, skill or connection."""
+    """Return description of a protocol, skill, connection."""
     config = loader.load(open(str(config_filepath)))
-    assert config.name == name
-    return {"name": config.name, "description": config.description, "version": config.version}
+    item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
+    assert item_name == name
+    return {"public_id": str(config.public_id), "name": item_name, "author": config.author,
+            "description": config.description, "version": config.version}
 
 
 class AEAConfigException(Exception):
@@ -222,3 +238,62 @@ class ConnectionsOption(click.Option):
             return list(connection_names)
         except Exception:  # pragma: no cover
             raise click.BadParameter(value)
+
+
+class PublicIdParameter(click.ParamType):
+    """Define a public id parameter for Click applications."""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the Public Id parameter.
+
+        Just forwards arguments to parent constructor.
+        """
+        super().__init__(*args, **kwargs)
+
+    def get_metavar(self, param):
+        """Return the metavar default for this param if it provides one."""
+        return "PUBLIC_ID"
+
+    def convert(self, value, param, ctx):
+        """Convert the value. This is not invoked for values that are `None` (the missing value)."""
+        try:
+            return PublicId.from_string(value)
+        except ValueError:
+            raise click.BadParameter(value)
+
+
+def try_get_item_source_path(path: str, item_type_plural: str, item_name: str) -> str:
+    """
+    Get the item source path.
+
+    :param path: the source path root
+    :param item_type_plural: the item type (plural)
+    :param item_name: the item name
+
+    :return: the item source path
+    """
+    source_path = os.path.join(path, item_type_plural, item_name)
+    if not os.path.exists(source_path):
+        raise click.ClickException(
+            'Item "{}" not found in source folder.'.format(item_name)
+        )
+    return source_path
+
+
+def try_get_item_target_path(path: str, item_type_plural: str, item_name: str) -> str:
+    """
+    Get the item target path.
+
+    :param path: the target path root
+    :param item_type_plural: the item type (plural)
+    :param item_name: the item name
+
+    :return: the item target path
+    """
+    target_path = os.path.join(path, item_type_plural, item_name)
+    if os.path.exists(target_path):
+        raise click.ClickException(
+            'Item "{}" already exists in target folder.'.format(item_name)
+        )
+    return target_path

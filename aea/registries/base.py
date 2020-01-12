@@ -227,7 +227,7 @@ class HandlerRegistry(Registry):
         for handler in handlers:
             protocol_id = cast(str, handler.SUPPORTED_PROTOCOL)
             if protocol_id in self._handlers.keys():
-                logger.info("More than one handler registered against protocol with id '{}'".format(protocol_id))
+                logger.debug("More than one handler registered against protocol with id '{}'".format(protocol_id))
             self._handlers.setdefault(protocol_id, {})[skill_id] = handler
 
     def unregister(self, skill_id: SkillId) -> None:
@@ -299,10 +299,9 @@ class HandlerRegistry(Registry):
 
         :return: None
         """
-        if self._handlers.values() is not None:
-            for skill_id_to_handler_dict in self._handlers.values():
-                for handler in skill_id_to_handler_dict.values():
-                    handler.setup()
+        for skill_id_to_handler_dict in self._handlers.values():
+            for handler in skill_id_to_handler_dict.values():
+                handler.setup()
 
     def teardown(self) -> None:
         """
@@ -310,10 +309,13 @@ class HandlerRegistry(Registry):
 
         :return: None
         """
-        if self._handlers.values() is not None:
-            for skill_id_to_handler_dict in self._handlers.values():
-                for handler in skill_id_to_handler_dict.values():
+        for skill_id_to_handler_dict in self._handlers.values():
+            for skill_id, handler in skill_id_to_handler_dict.items():
+                try:
                     handler.teardown()
+                except Exception as e:
+                    logger.warning("An error occurred while tearing down handler {}/{}: {}"
+                                   .format(skill_id, type(handler).__name__, str(e)))
         self._handlers = {}
 
 
@@ -378,9 +380,13 @@ class BehaviourRegistry(Registry):
 
         :return: None
         """
-        for behaviours in self._behaviours.values():
+        for skill_id, behaviours in self._behaviours.items():
             for behaviour in behaviours:
-                behaviour.teardown()
+                try:
+                    behaviour.teardown()
+                except Exception as e:
+                    logger.warning("An error occurred while tearing down behaviour {}/{}: {}"
+                                   .format(skill_id, type(behaviour).__name__, str(e)))
         self._behaviours = {}
 
 
@@ -449,9 +455,13 @@ class TaskRegistry(Registry):
 
         :return: None
         """
-        for tasks in self._tasks.values():
+        for skill_id, tasks in self._tasks.items():
             for task in tasks:
-                task.teardown()
+                try:
+                    task.teardown()
+                except Exception as e:
+                    logger.warning("An error occurred while tearing down task {}/{}: {}"
+                                   .format(skill_id, type(task).__name__, str(e)))
         self._tasks = {}
 
 

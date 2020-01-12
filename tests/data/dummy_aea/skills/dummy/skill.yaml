@@ -3,7 +3,6 @@ author: fetchai
 version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
-url: ""
 behaviours:
   dummy:
     class_name: DummyBehaviour
@@ -33,6 +32,6 @@ shared_classes:
     args:
       shared_class_arg_1: 1
       shared_class_arg_2: "2"
-protocols: ["default"]
+protocols: ["fetchai/default:0.1.0"]
 dependencies: {}
 description: "a dummy_skill for testing purposes."

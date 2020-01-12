@@ -27,7 +27,8 @@ import pytest
 
 import aea
 import aea.decision_maker.base
-from aea.crypto.ledger_apis import LedgerApis, DEFAULT_FETCHAI_CONFIG
+from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet, FETCHAI
 from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
 from aea.decision_maker.messages.base import InternalMessage
@@ -84,7 +85,7 @@ class TestUtilityPreferencesBase:
         msg.unset("Test")
         assert "Test" not in msg._body.keys(), "Test should not exist."
 
-    def test_transaction_is_consistent(self):
+    def test_transaction_is_affordable(self):
         """Test the consistency of the transaction message."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 20}
@@ -101,7 +102,7 @@ class TestUtilityPreferencesBase:
                                         info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
 
-        assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message),\
+        assert self.ownership_state.check_transaction_is_affordable(tx_message=tx_message),\
             "We should have the money for the transaction!"
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
@@ -116,7 +117,7 @@ class TestUtilityPreferencesBase:
                                         info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
 
-        assert self.ownership_state.check_transaction_is_consistent(tx_message=tx_message), \
+        assert self.ownership_state.check_transaction_is_affordable(tx_message=tx_message), \
             "We should have the goods for the transaction!"
 
     def test_apply(self):
@@ -140,7 +141,7 @@ class TestUtilityPreferencesBase:
         new_state = self.ownership_state.apply_transactions(transactions=list_of_transactions)
         assert state != new_state, "after applying a list_of_transactions must have a different state!"
 
-    def test_transaction_update(self):
+    def test_transaction__update(self):
         """Test the tranasction update."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 20}
@@ -159,7 +160,7 @@ class TestUtilityPreferencesBase:
                                         tx_quantities_by_good_id={"good_id": 10},
                                         info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
-        self.ownership_state.update(tx_message=tx_message)
+        self.ownership_state._update(tx_message=tx_message)
         expected_amount_by_currency_id = {"FET": 75}
         expected_quantities_by_good_id = {"good_id": 30}
         assert self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
@@ -176,7 +177,7 @@ class TestUtilityPreferencesBase:
                                         tx_quantities_by_good_id={"good_id": -10},
                                         info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
-        self.ownership_state.update(tx_message=tx_message)
+        self.ownership_state._update(tx_message=tx_message)
         expected_amount_by_currency_id = {"FET": 90}
         expected_quantities_by_good_id = {"good_id": 20}
         assert self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
@@ -278,7 +279,7 @@ class TestDecisionMaker:
         cls.outbox = OutBox(cls.multiplexer)
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet({FETCHAI: private_key_pem_path})
-        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG})
+        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
         cls.agent_name = "test"
         cls.ownership_state = OwnershipState()
         cls.preferences = Preferences()

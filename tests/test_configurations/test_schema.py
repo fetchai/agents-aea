@@ -33,22 +33,34 @@ from ..conftest import CUR_PATH, ROOT_DIR, AGENT_CONFIGURATION_SCHEMA, SKILL_CON
     CONNECTION_CONFIGURATION_SCHEMA, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
 
 
-def test_agent_configuration_schema_is_valid_wrt_draft_07():
-    """Test that the JSON schema for the agent configuration file is compliant with the specification Draft 07."""
+def test_agent_configuration_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the agent configuration file is compliant with the specification Draft 04."""
     agent_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "aea-config_schema.json")))
     Draft4Validator.check_schema(agent_config_schema)
 
 
-def test_skill_configuration_schema_is_valid_wrt_draft_07():
-    """Test that the JSON schema for the skill configuration file is compliant with the specification Draft 07."""
+def test_skill_configuration_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the skill configuration file is compliant with the specification Draft 04."""
     skill_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "skill-config_schema.json")))
     Draft4Validator.check_schema(skill_config_schema)
 
 
-def test_connection_configuration_schema_is_valid_wrt_draft_07():
-    """Test that the JSON schema for the connection configuration file is compliant with the specification Draft 07."""
+def test_connection_configuration_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the connection configuration file is compliant with the specification Draft 04."""
     connection_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "connection-config_schema.json")))
     Draft4Validator.check_schema(connection_config_schema)
+
+
+def test_protocol_configuration_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the protocol configuration file is compliant with the specification Draft 04."""
+    protocol_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "protocol-config_schema.json")))
+    Draft4Validator.check_schema(protocol_config_schema)
+
+
+def test_definitions_schema_is_valid_wrt_draft_04():
+    """Test that the JSON schema for the definitions is compliant with the specification Draft 04."""
+    definitions_config_schema = json.load(open(os.path.join(ROOT_DIR, "aea", "configurations", "schemas", "definitions.json")))
+    Draft4Validator.check_schema(definitions_config_schema)
 
 
 def test_validate_agent_config():
@@ -72,7 +84,8 @@ class TestAgentSchema:
     @pytest.mark.parametrize("agent_path",
                              [
                                  os.path.join(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE),
-                                 os.path.join(CUR_PATH, "data", "aea-config.example.yaml")
+                                 os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
+                                 os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml")
                              ])
     def test_validate_agent_config(self, agent_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
@@ -93,12 +106,12 @@ class TestProtocolsSchema:
     @pytest.mark.parametrize("protocol_path",
                              [
                                  os.path.join(ROOT_DIR, "aea", "protocols", "default"),
-                                 os.path.join(ROOT_DIR, "packages", "protocols", "fipa"),
-                                 os.path.join(ROOT_DIR, "packages", "protocols", "oef"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "oef"),
                                  os.path.join(ROOT_DIR, "aea", "protocols", "scaffold"),
-                                 os.path.join(ROOT_DIR, "packages", "protocols", "gym"),
-                                 os.path.join(ROOT_DIR, "packages", "protocols", "ml_trade"),
-                                 os.path.join(ROOT_DIR, "packages", "protocols", "tac"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "gym"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "ml_trade"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "tac"),
                              ])
     def test_validate_protocol_config(self, protocol_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
@@ -118,15 +131,16 @@ class TestConnectionsSchema:
 
     @pytest.mark.parametrize("connection_path",
                              [
-                                 os.path.join(ROOT_DIR, "packages", "connections", "local"),
-                                 os.path.join(ROOT_DIR, "packages", "connections", "oef"),
-                                 os.path.join(ROOT_DIR, "aea", "connections", "scaffold"),
-                                 os.path.join(ROOT_DIR, "packages", "connections", "gym"),
-                                 os.path.join(CUR_PATH, "data", "dummy_connection")
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "local", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "oef", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(ROOT_DIR, "aea", "connections", "scaffold", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "gym", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(CUR_PATH, "data", "dummy_connection", DEFAULT_CONNECTION_CONFIG_FILE),
+                                 os.path.join(CUR_PATH, "data", "gym-connection.yaml")
                              ])
     def test_validate_connection_config(self, connection_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        connection_config_file = yaml.safe_load(open(os.path.join(connection_path, DEFAULT_CONNECTION_CONFIG_FILE)))
+        connection_config_file = yaml.safe_load(open(connection_path))
         self.validator.validate(instance=connection_config_file)
 
 
@@ -144,19 +158,17 @@ class TestSkillsSchema:
                              [
                                  os.path.join(ROOT_DIR, "aea", "skills", "error"),
                                  os.path.join(ROOT_DIR, "aea", "skills", "scaffold"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "carpark_client"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "carpark_detection"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "echo"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "gym"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "ml_data_provider"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "ml_train"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "tac_control"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "tac_negotiation"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "tac_participation"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "weather_client"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "weather_client_ledger"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "weather_station"),
-                                 os.path.join(ROOT_DIR, "packages", "skills", "weather_station_ledger"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "carpark_client"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "carpark_detection"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "gym"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "ml_data_provider"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "ml_train"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_control"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_participation"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client"),
+                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_station"),
                                  os.path.join(CUR_PATH, "data", "dummy_skill"),
                                  os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy"),
                                  os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "error"),

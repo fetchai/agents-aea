@@ -22,8 +22,8 @@ from unittest import mock
 
 import pytest
 
-from packages.protocols.tac.message import TACMessage
-from packages.protocols.tac.serialization import TACSerializer, _from_dict_to_pairs
+from packages.fetchai.protocols.tac.message import TACMessage
+from packages.fetchai.protocols.tac.serialization import TACSerializer, _from_dict_to_pairs
 
 
 def test_tac_message_instantiation():
@@ -129,7 +129,7 @@ def test_tac_serialization():
     assert expected_msg == actual_msg
 
     with pytest.raises(ValueError, match="Type not recognized."):
-        with mock.patch('packages.protocols.tac.message.TACMessage.Type') as mocked_type:
+        with mock.patch('packages.fetchai.protocols.tac.message.TACMessage.Type') as mocked_type:
             mocked_type.TRANSACTION_CONFIRMATION.value = "unknown"
             TACSerializer().encode(msg)
 

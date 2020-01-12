@@ -18,13 +18,17 @@
 # ------------------------------------------------------------------------------
 """Methods for CLI push functionality."""
 
-import click
 import os
-import tarfile
 import shutil
+import tarfile
+import click
 
-from aea.cli.common import logger
-from aea.cli.registry.utils import request_api, load_yaml, clean_tarfiles
+from aea.cli.common import Context, logger, PublicIdParameter
+from aea.cli.registry.utils import (
+    request_api,
+    load_yaml,
+    clean_tarfiles
+)
 
 
 def _remove_pycache(source_dir: str):
@@ -40,7 +44,7 @@ def _compress_dir(output_filename: str, source_dir: str):
 
 
 @clean_tarfiles
-def push_item(item_type: str, item_name: str) -> None:
+def push_item(ctx: Context, item_type: str, item_id: PublicIdParameter) -> None:
     """
     Push item to the Registry.
 
@@ -50,46 +54,45 @@ def push_item(item_type: str, item_name: str) -> None:
     :return: None
     """
     item_type_plural = item_type + 's'
-    cwd = os.getcwd()
 
-    items_folder = os.path.join(cwd, item_type_plural)
-    item_path = os.path.join(items_folder, item_name)
+    items_folder = os.path.join(ctx.cwd, item_type_plural)
+    item_path = os.path.join(items_folder, item_id.name)
     logger.debug(
         'Searching for {} {} in {} ...'
-        .format(item_name, item_type, items_folder)
+        .format(item_id.name, item_type, items_folder)
     )
     if not os.path.exists(item_path):
         raise click.ClickException(
             '{} "{}" not found  in {}. Make sure you run push command '
             'from a correct folder.'.format(
-                item_type.title(), item_name, items_folder
+                item_type.title(), item_id.name, items_folder
             )
         )
 
-    output_filename = '{}.tar.gz'.format(item_name)
+    output_filename = '{}.tar.gz'.format(item_id.name)
     logger.debug(
         'Compressing {} {} to {} ...'
-        .format(item_name, item_type, output_filename)
+        .format(item_id.name, item_type, output_filename)
     )
     _compress_dir(output_filename, item_path)
-    output_filepath = os.path.join(cwd, output_filename)
+    output_filepath = os.path.join(ctx.cwd, output_filename)
 
     item_config_filepath = os.path.join(item_path, '{}.yaml'.format(item_type))
-    logger.debug('Reading {} {} config ...'.format(item_name, item_type))
+    logger.debug('Reading {} {} config ...'.format(item_id.name, item_type))
     item_config = load_yaml(item_config_filepath)
 
     data = {
-        'name': item_name,
+        'name': item_id.name,
         'description': item_config['description'],
         'version': item_config['version']
     }
     path = '/{}/create'.format(item_type_plural)
-    logger.debug('Pushing {} {} to Registry ...'.format(item_name, item_type))
+    logger.debug('Pushing {} {} to Registry ...'.format(item_id.name, item_type))
     resp = request_api(
         'POST', path, data=data, auth=True, filepath=output_filepath
     )
     click.echo(
         'Successfully pushed {} {} to the Registry. Public ID: {}'.format(
-            item_type, item_name, resp['public_id']
+            item_type, item_id.name, resp['public_id']
         )
     )

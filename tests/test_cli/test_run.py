@@ -57,7 +57,7 @@ def test_run(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     process = subprocess.Popen([
@@ -67,6 +67,52 @@ def test_run(pytestconfig):
         "run",
         "--connections",
         "local"
+    ],
+        stdout=subprocess.PIPE,
+        env=os.environ.copy())
+
+    time.sleep(10.0)
+    process.send_signal(signal.SIGINT)
+    process.wait(timeout=20)
+
+    assert process.returncode == 0
+
+    os.chdir(cwd)
+
+    poll = process.poll()
+    if poll is None:
+        process.terminate()
+        process.wait(2)
+
+    try:
+        shutil.rmtree(t)
+    except (OSError, IOError):
+        pass
+
+
+def test_run_with_default_connection(pytestconfig):
+    """Test that the command 'aea run' works as expected."""
+    if pytestconfig.getoption("ci"):
+        pytest.skip("Skipping the test since it doesn't work in CI.")
+
+    runner = CliRunner()
+    agent_name = "myagent"
+    cwd = os.getcwd()
+    t = tempfile.mkdtemp()
+    # copy the 'packages' directory in the parent of the agent folder.
+    shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(t, "packages"))
+
+    os.chdir(t)
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", agent_name])
+    assert result.exit_code == 0
+
+    os.chdir(Path(t, agent_name))
+
+    process = subprocess.Popen([
+        sys.executable,
+        '-m',
+        'aea.cli',
+        "run"
     ],
         stdout=subprocess.PIPE,
         env=os.environ.copy())
@@ -113,11 +159,11 @@ def test_run_multiple_connections(pytestconfig, connection_names):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     # stub is the default connection, so it should fail
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "stub"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/stub:0.1.0"])
     assert result.exit_code == 1
 
     process = subprocess.Popen([
@@ -168,7 +214,7 @@ def test_run_unknown_private_key(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
@@ -228,7 +274,7 @@ def test_run_unknown_ledger(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
@@ -238,12 +284,11 @@ def test_run_unknown_ledger(pytestconfig):
     whole_file = file.read()
 
     # add in the ledger address
-    find_text = "ledger_apis: []"
+    find_text = "ledger_apis: {}"
     replace_text = """ledger_apis:
-        - ledger_api:
-            addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-            ledger: ethereum-not
-            port: 3"""
+    unknown:
+        address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+        chain_id: 3"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -286,7 +331,7 @@ def test_run_default_private_key_config(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
@@ -342,7 +387,7 @@ def test_run_fet_private_key_config(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
@@ -398,7 +443,7 @@ def test_run_ethereum_private_key_config(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
@@ -454,7 +499,7 @@ def test_run_ledger_apis(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
@@ -464,16 +509,14 @@ def test_run_ledger_apis(pytestconfig):
     whole_file = file.read()
 
     # add in the ledger address
-    find_text = "ledger_apis: []"
+    find_text = "ledger_apis: {}"
     replace_text = """ledger_apis:
-        - ledger_api:
-            addr: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-            ledger: ethereum
-            port: 3
-        - ledger_api:
-            addr: alpha.fetch-ai.com
-            ledger: fetchai
-            port: 80"""
+    ethereum:
+        address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+        chain_id: 3
+    fetchai:
+        address: alpha.fetch-ai.com
+        port: 80"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -531,7 +574,7 @@ def test_run_fet_ledger_apis(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
@@ -542,11 +585,10 @@ def test_run_fet_ledger_apis(pytestconfig):
 
     # add in the ledger address
 
-    find_text = "ledger_apis: []"
+    find_text = "ledger_apis: {}"
     replace_text = """ledger_apis:
-    - ledger_api:
-        addr: alpha.fetch-ai.com
-        ledger: fetchai
+    fetchai:
+        address: alpha.fetch-ai.com
         port: 80"""
 
     whole_file = whole_file.replace(find_text, replace_text)
@@ -604,7 +646,7 @@ def test_run_with_install_deps(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     process = subprocess.Popen([
@@ -654,7 +696,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"])
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
@@ -710,13 +752,13 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
         os.chdir(Path(cls.t, cls.agent_name))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "local"], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"], standalone_mode=False)
         assert result.exit_code == 0
 
         shutil.copytree(Path(CUR_PATH, "data", "exception_skill"), Path(cls.t, cls.agent_name, "skills", "exception"))
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
-        config.setdefault("skills", []).append("exception")
+        config.setdefault("skills", []).append("fetchai/exception:0.1.0")
         yaml.safe_dump(config, open(config_path, "w"))
 
         try:
@@ -937,6 +979,7 @@ class TestRunFailsWhenConnectionNotComplete:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
+        cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -949,7 +992,7 @@ class TestRunFailsWhenConnectionNotComplete:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").unlink()
 
@@ -986,6 +1029,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
+        cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -998,7 +1042,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").write_text("")
 
@@ -1109,7 +1153,7 @@ class TestRunFailsWhenProtocolNotComplete:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "A problem occurred while processing protocol {}.".format("default")
+        s = "A problem occurred while processing protocol {}.".format("fetchai/default:0.1.0")
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

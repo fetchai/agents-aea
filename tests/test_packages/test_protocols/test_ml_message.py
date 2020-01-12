@@ -23,8 +23,8 @@ import logging
 import pytest
 
 from aea.helpers.search.models import DataModel, Attribute, Constraint, Query, ConstraintType, Description
-from packages.protocols.ml_trade.message import MLTradeMessage
-from packages.protocols.ml_trade.serialization import MLTradeSerializer
+from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
+from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
 
 import numpy as np
 
@@ -81,3 +81,4 @@ def test_ml_message_creation():
     with pytest.raises(ValueError):
         recovered_msg = MLTradeSerializer().decode(msg_bytes)
         assert recovered_msg == msg
+    assert np.array_equal(recovered_msg.data, msg.data)

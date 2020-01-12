@@ -19,21 +19,21 @@
 """This test module contains the tests for CLI Registry utils."""
 import os
 
+from builtins import FileNotFoundError
 from unittest import TestCase, mock
 from click import ClickException
 from yaml import YAMLError
+from requests.exceptions import ConnectionError
 
+from aea.cli.common import AEAConfigException
 from aea.cli.registry.utils import (
-    fetch_package, request_api, split_public_id, download_file, extract,
-    _init_config_folder, write_cli_config, read_cli_config
+    fetch_package, request_api, download_file, extract, _init_config_folder,
+    write_cli_config, read_cli_config
 )
 from aea.cli.registry.settings import REGISTRY_API_URL
+from aea.configurations.base import PublicId
 
 
-@mock.patch(
-    'aea.cli.registry.utils.split_public_id',
-    return_value=['owner', 'name', 'version']
-)
 @mock.patch(
     'aea.cli.registry.utils.request_api',
     return_value={'file': 'url'}
@@ -43,28 +43,34 @@ from aea.cli.registry.settings import REGISTRY_API_URL
     return_value='filepath'
 )
 @mock.patch('aea.cli.registry.utils.extract')
-class FetchPackageTestCase(TestCase):
+class TestFetchPackage:
     """Test case for fetch_package method."""
 
     def test_fetch_package_positive(
         self,
         extract_mock,
         download_file_mock,
-        request_api_mock,
-        split_public_id_mock
+        request_api_mock
     ):
         """Test for fetch_package method positive result."""
         obj_type = 'connection'
-        public_id = 'owner/name:version'
+        public_id = PublicId.from_string('author/name:0.1.0')
         cwd = 'cwd'
 
         fetch_package(obj_type, public_id, cwd)
-        split_public_id_mock.assert_called_with(public_id)
         request_api_mock.assert_called_with(
-            'GET', '/connections/owner/name/version'
+            'GET', '/connections/author/name/0.1.0'
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/connections')
+
+
+def _raise_connection_error(*args):
+    raise ConnectionError()
+
+
+def _raise_config_exception(*args):
+    raise AEAConfigException()
 
 
 @mock.patch('aea.cli.registry.utils.requests.request')
@@ -124,16 +130,21 @@ class RequestAPITestCase(TestCase):
         with self.assertRaises(ClickException):
             request_api('GET', '/path')
 
+    @mock.patch(
+        'aea.cli.registry.utils.requests.request', _raise_connection_error
+    )
+    def test_request_api_server_not_responding(self, request_mock):
+        """Test for fetch_package method no server response."""
+        with self.assertRaises(ClickException):
+            request_api('GET', '/path')
 
-class SplitPublicIDTestCase(TestCase):
-    """Test case for request_api method."""
-
-    def test_split_public_id_positive(self):
-        """Test for split_public_id method positive result."""
-        public_id = 'owner/name:version'
-        expected_result = ['owner', 'name', 'version']
-        result = split_public_id(public_id)
-        self.assertEqual(result, expected_result)
+    @mock.patch(
+        'aea.cli.registry.utils.read_cli_config', _raise_config_exception
+    )
+    def test_request_api_no_auth_data(self, request_mock):
+        """Test for fetch_package method no server response."""
+        with self.assertRaises(ClickException):
+            request_api('GET', '/path')
 
 
 @mock.patch('aea.cli.registry.utils.requests.get')
@@ -231,6 +242,10 @@ def _raise_yamlerror(*args):
     raise YAMLError()
 
 
+def _raise_file_not_found_error(*args):
+    raise FileNotFoundError()
+
+
 @mock.patch('builtins.open', mock.mock_open())
 class ReadCLIConfigTestCase(TestCase):
     """Test case for read_cli_config method."""
@@ -253,4 +268,13 @@ class ReadCLIConfigTestCase(TestCase):
     def test_read_cli_config_bad_yaml(self):
         """Test for read_cli_config method bad yaml behavior."""
         with self.assertRaises(ClickException):
+            read_cli_config()
+
+    @mock.patch(
+        'aea.cli.registry.utils.yaml.safe_load',
+        _raise_file_not_found_error
+    )
+    def test_read_cli_config_file_not_found(self):
+        """Test for read_cli_config method bad yaml behavior."""
+        with self.assertRaises(AEAConfigException):
             read_cli_config()

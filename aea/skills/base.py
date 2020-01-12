@@ -22,7 +22,6 @@ import inspect
 import logging
 import os
 import re
-import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
@@ -36,6 +35,7 @@ from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
+from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules, load_agent_component_package
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
 
@@ -221,9 +221,7 @@ class Behaviour(ABC):
         :return: a list of Behaviour.
         """
         behaviours = {}
-        behaviours_spec = importlib.util.spec_from_file_location("behaviours", location=path)
-        behaviour_module = importlib.util.module_from_spec(behaviours_spec)
-        behaviours_spec.loader.exec_module(behaviour_module)  # type: ignore
+        behaviour_module = load_module("behaviours", Path(path))
         classes = inspect.getmembers(behaviour_module, inspect.isclass)
         behaviours_classes = list(filter(lambda x: re.match("\\w+Behaviour", x[0]), classes))
 
@@ -389,9 +387,7 @@ class Task(ABC):
         :return: a list of Tasks.
         """
         tasks = {}
-        tasks_spec = importlib.util.spec_from_file_location("tasks", location=path)
-        task_module = importlib.util.module_from_spec(tasks_spec)
-        tasks_spec.loader.exec_module(task_module)  # type: ignore
+        task_module = load_module("tasks", Path(path))
         classes = inspect.getmembers(task_module, inspect.isclass)
         tasks_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
 
@@ -459,9 +455,7 @@ class SharedClass(ABC):
         for module_path in module_paths:
             logger.debug("Trying to load module {}".format(module_path))
             module_name = module_path.replace(".py", "")
-            shared_class_spec = importlib.util.spec_from_file_location(module_name, location=module_path)
-            shared_class_module = importlib.util.module_from_spec(shared_class_spec)
-            shared_class_spec.loader.exec_module(shared_class_module)  # type: ignore
+            shared_class_module = load_module(module_name, Path(module_path))
             classes = inspect.getmembers(shared_class_module, inspect.isclass)
             filtered_classes = list(
                 filter(
@@ -519,7 +513,7 @@ class Skill:
         """
         Load a skill from a directory.
 
-        :param directory: the skill
+        :param directory: the skill directory.
         :param agent_context: the agent's context
         :return: the Skill object.
         :raises Exception: if the parsing failed.
@@ -527,9 +521,8 @@ class Skill:
         # check if there is the config file. If not, then return None.
         skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
         skill_config = skill_loader.load(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
-        skills_spec = importlib.util.spec_from_file_location(skill_config.name, os.path.join(directory, "__init__.py"))
-        skill_module = importlib.util.module_from_spec(skills_spec)
-        sys.modules[skill_config.name + "_skill"] = skill_module
+        skill_module = load_agent_component_package("skill", skill_config.name, skill_config.author, Path(directory))
+        add_agent_component_module_to_sys_modules("skill", skill_config.name, skill_config.author, skill_module)
         loader_contents = [path.name for path in Path(directory).iterdir()]
         skills_packages = list(filter(lambda x: not x.startswith("__"), loader_contents))  # type: ignore
         logger.debug("Processing the following skill package: {}".format(skills_packages))

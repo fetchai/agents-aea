@@ -2,11 +2,21 @@ aea_version: 0.1.7
 agent_name: Agent0
 author: fetchai
 connections:
-- local
-default_connection: local
+- fetchai/local:0.1.0
+default_connection: fetchai/local:0.1.0
+default_ledger: fetchai
 description: dummy_aea agent description [Fill in]
 license: Apache 2.0
 fingerprint: ""
+ledger_apis:
+   fetchai:
+     args:
+       address: example.fetch-ai.com
+       port: 8080
+   ethereum:
+     args:
+       address: example.ethereum.com
+       chain_id: 8080
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -21,11 +31,10 @@ private_key_paths:
     ledger: ethereum
     path: eth_private_key.txt
 protocols:
-- default
-- fipa
+- fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
 registry_path: aea
 skills:
-- dummy
-- error
-url: ''
-version: v1
+- fetchai/dummy:0.1.0
+- fetchai/error:0.1.0
+version: 1.0.0

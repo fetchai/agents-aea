@@ -25,93 +25,89 @@ import sys
 
 import click
 
-from aea.cli.common import Context, pass_ctx, logger, _try_to_load_agent_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
 @click.group()
 @pass_ctx
 def remove(ctx: Context):
     """Remove a resource from the agent."""
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
+
+
+def _remove_item(ctx: Context, item_type, item):
+    """
+    Remove an item from the configuration file and agent.
+
+    The parameter 'item' can be either the public id (e.g. 'fetchai/default:0.1.0') or
+    the name of the package (e.g. 'default').
+    """
+    # allow for removal with both item public id and item name
+    try:
+        item_id = PublicId.from_string(item)
+        item_name = item_id.name
+    except ValueError:
+        item_id = item
+        item_name = item
+
+    item_type_plural = "{}s".format(item_type)
+    existing_item_ids = getattr(ctx.agent_config, item_type_plural)
+    existing_items_name_to_ids = {public_id.name: public_id for public_id in existing_item_ids}
+
+    agent_name = ctx.agent_config.agent_name
+    logger.info("Removing {item_type} '{item_name}' from the agent '{agent_name}'..."
+                .format(agent_name=agent_name, item_type=item_type, item_name=item_name))
+
+    if item_id not in existing_items_name_to_ids.keys() and item_id not in existing_item_ids:
+        logger.error("The {} '{}' is not supported.".format(item_type, item_id))
+        sys.exit(1)
+
+    item_folder = os.path.join(item_type_plural, item_name)
+    try:
+        shutil.rmtree(item_folder)
+    except BaseException:
+        logger.exception("An error occurred.")
+        sys.exit(1)
+
+    # removing the protocol to the configurations.
+    item_public_id = existing_items_name_to_ids[item_name]
+    logger.debug("Removing the {} from {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
+    existing_item_ids.remove(item_public_id)
+    ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
 
 @remove.command()
 @click.argument('connection_name', type=str, required=True)
 @pass_ctx
 def connection(ctx: Context, connection_name):
-    """Remove a connection from the agent."""
-    agent_name = ctx.agent_config.agent_name
-    logger.info("Removing connection '{connection_name}' from the agent '{agent_name}'..."
-                .format(agent_name=agent_name, connection_name=connection_name))
+    """
+    Remove a connection from the agent.
 
-    if connection_name not in ctx.agent_config.connections:
-        logger.error("Connection '{}' not found.".format(connection_name))
-        sys.exit(1)
-
-    connection_folder = os.path.join("connections", connection_name)
-    try:
-        shutil.rmtree(connection_folder)
-    except BaseException:
-        logger.exception("An error occurred while deleting '{}'.".format(connection_folder))
-        sys.exit(1)
-
-    # removing the connection to the configurations.
-    logger.debug("Removing the connection from {}".format(DEFAULT_AEA_CONFIG_FILE))
-    if connection_name in ctx.agent_config.connections:
-        ctx.agent_config.connections.remove(connection_name)
-        ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    It expects the name or public id of the connection to remove from the local registry.
+    """
+    _remove_item(ctx, "connection", connection_name)
 
 
 @remove.command()
 @click.argument('protocol_name', type=str, required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_name):
-    """Remove a protocol from the agent."""
-    agent_name = ctx.agent_config.agent_name
-    logger.info("Removing protocol '{protocol_name}' from the agent '{agent_name}'..."
-                .format(agent_name=agent_name, protocol_name=protocol_name))
+    """
+    Remove a protocol from the agent.
 
-    if protocol_name not in ctx.agent_config.protocols:
-        logger.error("Protocol '{}' not found.".format(protocol_name))
-        sys.exit(1)
-
-    protocol_folder = os.path.join("protocols", protocol_name)
-    try:
-        shutil.rmtree(protocol_folder)
-    except BaseException:
-        logger.exception("An error occurred.")
-        sys.exit(1)
-
-    # removing the protocol to the configurations.
-    logger.debug("Removing the protocol from {}".format(DEFAULT_AEA_CONFIG_FILE))
-    if protocol_name in ctx.agent_config.protocols:
-        ctx.agent_config.protocols.remove(protocol_name)
-        ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    It expects the name or public id of the protocol to remove from the local registry.
+    """
+    _remove_item(ctx, "protocol", protocol_name)
 
 
 @remove.command()
 @click.argument('skill_name', type=str, required=True)
 @pass_ctx
 def skill(ctx: Context, skill_name):
-    """Remove a skill from the agent."""
-    agent_name = ctx.agent_config.agent_name
-    logger.info("Removing skill '{skill_name}' from the agent '{agent_name}'..."
-                .format(agent_name=agent_name, skill_name=skill_name))
+    """
+    Remove a skill from the agent.
 
-    if skill_name not in ctx.agent_config.skills:
-        logger.error("The skill '{}' is not supported.".format(skill_name))
-        sys.exit(1)
-
-    skill_folder = os.path.join("skills", skill_name)
-    try:
-        shutil.rmtree(skill_folder)
-    except BaseException:
-        logger.exception("An error occurred.")
-        sys.exit(1)
-
-    # removing the protocol to the configurations.
-    logger.debug("Removing the skill from {}".format(DEFAULT_AEA_CONFIG_FILE))
-    if skill_name in ctx.agent_config.skills:
-        ctx.agent_config.skills.remove(skill_name)
-        ctx.agent_loader.dump(ctx.agent_config, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+    It expects the name or public id of the skill to remove from the local registry.
+    """
+    _remove_item(ctx, "skill", skill_name)

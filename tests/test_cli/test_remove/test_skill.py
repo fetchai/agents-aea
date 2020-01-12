@@ -45,6 +45,7 @@ class TestRemoveSkill:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.skill_id = "fetchai/gym:0.1.0"
         cls.skill_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -59,9 +60,61 @@ class TestRemoveSkill:
         config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
         assert result.exit_code == 0
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_name], standalone_mode=False)
+
+    def test_exit_code_equal_to_zero(self):
+        """Test that the exit code is equal to 0 (i.e. success)."""
+        assert self.result.exit_code == 0
+
+    def test_directory_does_not_exist(self):
+        """Test that the directory of the removed skill does not exist."""
+        assert not Path("skills", self.skill_name).exists()
+
+    def test_skill_not_present_in_agent_config(self):
+        """Test that the name of the removed skill is not present in the agent configuration file."""
+        agent_config = aea.configurations.base.AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
+        assert self.skill_id not in agent_config.skills
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestRemoveSkillWithPublicId:
+    """Test that the command 'aea remove skill' works correctly when using the public id."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.skill_id = "fetchai/gym:0.1.0"
+        cls.skill_name = "gym"
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+
+        # change default registry path
+        config = AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
+        config.registry_path = os.path.join(ROOT_DIR, "packages")
+        yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
+
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
+        assert result.exit_code == 0
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "skill", cls.skill_id], standalone_mode=False)
 
     def test_exit_code_equal_to_zero(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -74,7 +127,7 @@ class TestRemoveSkill:
     def test_skill_not_present_in_agent_config(self):
         """Test that the name of the removed skill is not present in the agent configuration file."""
         agent_config = aea.configurations.base.AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
-        assert self.skill_name not in agent_config.skills
+        assert self.skill_id not in agent_config.skills
 
     @classmethod
     def teardown_class(cls):
@@ -139,6 +192,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.skill_id = "fetchai/gym:0.1.0"
         cls.skill_name = "gym"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -153,7 +207,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_name], standalone_mode=False)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
         assert result.exit_code == 0
 
         cls.patch = unittest.mock.patch("shutil.rmtree", side_effect=BaseException("an exception"))

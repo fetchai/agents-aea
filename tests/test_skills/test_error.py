@@ -23,6 +23,7 @@ from pathlib import Path
 from threading import Thread
 
 from aea.aea import AEA
+from aea.crypto.default import DEFAULT
 from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
 from aea.mail.base import Envelope
@@ -33,10 +34,10 @@ from aea.skills.base import SkillContext
 from aea.skills.error.behaviours import ErrorBehaviour
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.error.tasks import ErrorTask
-from packages.connections.local.connection import LocalNode
-from packages.protocols.fipa.message import FIPAMessage
-from packages.protocols.fipa.serialization import FIPASerializer
-from packages.protocols.oef.message import OEFMessage
+from packages.fetchai.connections.local.connection import LocalNode
+from packages.fetchai.protocols.fipa.message import FIPAMessage
+from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+from packages.fetchai.protocols.oef.message import OEFMessage
 from ..conftest import CUR_PATH, DummyConnection
 
 
@@ -49,7 +50,7 @@ class TestSkillError:
         cls.node = LocalNode()
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({'default': private_key_pem_path})
-        cls.ledger_apis = LedgerApis({})
+        cls.ledger_apis = LedgerApis({}, DEFAULT)
         cls.agent_name = "Agent0"
         cls.address = cls.wallet.addresses['default']
 

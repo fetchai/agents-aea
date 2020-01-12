@@ -26,10 +26,10 @@ import click
 
 from aea import AEA_DIR
 from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, ConfigLoader, \
-    format_items, format_skills
+    format_items, format_skills, try_to_load_agent_config
 from aea.cli.registry.utils import request_api
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
-    DEFAULT_PROTOCOL_CONFIG_FILE
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
 
 
 @click.group()
@@ -38,32 +38,44 @@ from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKIL
 def search(ctx: Context, registry):
     """Search for components in the registry.
 
+    If called from an agent directory, it will check
+
     E.g.
 
-        aea search --registry packages/ skills
+        aea search connections
+        aea search --registry skills
     """
     if registry:
         ctx.set_config("is_registry", True)
     else:
-        registry = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
-        ctx.set_config("registry", registry)
-        logger.debug("Using registry {}".format(registry))
+        # if we are in an agent directory, try to load the configuration file.
+        # otherwise, use the default path (i.e. 'packages/' in the current directory.)
+        try:
+            try_to_load_agent_config(ctx, exit_on_except=False)
+            # path = Path(DEFAULT_AEA_CONFIG_FILE)
+            # fp = open(str(path), mode="r", encoding="utf-8")
+            # agent_config = ctx.agent_loader.load(fp)
+            registry_directory = ctx.agent_config.registry_path
+        except Exception:
+            registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
+
+        ctx.set_config("registry_directory", registry_directory)
+        logger.debug("Using registry {}".format(registry_directory))
 
 
 def _is_invalid_item(name, dir_path, config_path):
     """Return true if this protocol, connection or skill should not be returned in the list."""
-    return ".py" in name or "__" in name or name == "scaffold" or os.path.isfile(dir_path) or not os.path.isfile(config_path)
+    return name == "scaffold" or not Path(dir_path).is_dir() or not Path(config_path).is_file()
 
 
-def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_name: str, config_filename: str, results: List[Dict]):
-    for r in Path(root_path).glob(sub_dir_name + "/*/"):
-        dir_path = os.path.join(root_path, sub_dir_name, r.name)
-        config_path = os.path.join(root_path, sub_dir_name, r.name, config_filename)
+def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_glob_pattern: str, config_filename: str, results: List[Dict]):
+    for dir_path in Path(root_path).glob(sub_dir_glob_pattern + "/*/"):
+        config_path = dir_path / config_filename
 
-        if _is_invalid_item(r.name, dir_path, config_path):
+        if _is_invalid_item(dir_path.name, dir_path, config_path):
             continue
 
-        details = retrieve_details(r.name, loader, config_path)
+        details = retrieve_details(dir_path.name, loader, str(config_path))
         results.append(details)
 
 
@@ -85,10 +97,10 @@ def connections(ctx: Context, query):
             click.echo(format_items(resp))
         return
 
-    registry = cast(str, ctx.config.get("registry"))
-    result: List[Dict] = []
+    registry = cast(str, ctx.config.get("registry_directory"))
+    result = []  # type: List[Dict]
     _get_details_from_dir(ctx.connection_loader, AEA_DIR, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
-    _get_details_from_dir(ctx.connection_loader, registry, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.connection_loader, registry, "*/connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
 
     print("Available connections:")
     print(format_items(sorted(result, key=lambda k: k['name'])))
@@ -112,10 +124,10 @@ def protocols(ctx: Context, query):
             click.echo(format_items(resp))
         return
 
-    registry = cast(str, ctx.config.get("registry"))
-    result: List[Dict] = []
+    registry = cast(str, ctx.config.get("registry_directory"))
+    result = []  # type: List[Dict]
     _get_details_from_dir(ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
-    _get_details_from_dir(ctx.protocol_loader, registry, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.protocol_loader, registry, "*/protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
 
     print("Available protocols:")
     print(format_items(sorted(result, key=lambda k: k['name'])))
@@ -139,10 +151,35 @@ def skills(ctx: Context, query):
             click.echo(format_skills(resp))
         return
 
-    registry = cast(str, ctx.config.get("registry"))
+    registry = cast(str, ctx.config.get("registry_directory"))
     result: List[Dict] = []
     _get_details_from_dir(ctx.skill_loader, AEA_DIR, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
-    _get_details_from_dir(ctx.skill_loader, registry, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
+    _get_details_from_dir(ctx.skill_loader, registry, "*/skills", DEFAULT_SKILL_CONFIG_FILE, result)
 
     print("Available skills:")
     print(format_items(sorted(result, key=lambda k: k['name'])))
+
+
+@search.command()
+@click.option('--query', default='',
+              help='Query string to search Agents by name.')
+@pass_ctx
+def agents(ctx: Context, query):
+    """Search for Agents."""
+    if ctx.config.get("is_registry"):
+        resp = request_api(
+            'GET', '/agents', params={'search': query}
+        )
+        if not len(resp):
+            click.echo('No agents found.')  # pragma: no cover
+        else:
+            click.echo('Agents found:\n')
+            click.echo(format_items(resp))
+        return
+    else:
+        registry = cast(str, ctx.config.get("registry_directory"))
+        result = []  # type: List[Dict]
+        _get_details_from_dir(ctx.agent_loader, registry, "agents", DEFAULT_AEA_CONFIG_FILE, result)
+
+        print("Available agents:")
+        print(format_items(sorted(result, key=lambda k: k['name'])))

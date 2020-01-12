@@ -13,24 +13,27 @@ cd my_agent
 The `aea-config.yaml` file should look like this.
 
 ``` yaml
-aea_version: 0.1.6
+aea_version: 0.1.16
 agent_name: my_agent
-authors: ''
+author: ''
 connections:
-- oef
-default_connection: oef
+- fetchai/stub:0.1.0
+default_connection: fetchai/stub:0.1.0
+default_ledger: fetchai
+description: ''
+fingerprint: ''
+ledger_apis: {}
 license: ''
-private_key_pem_path: ''
-protocols:
-- default
-registry_path: ../packages
-skills:
-- error
-url: ''
-version: v1
 logging_config:
   disable_existing_loggers: false
   version: 1
+private_key_paths: []
+protocols:
+- fetchai/default:0.1.0
+registry_path: ../packages
+skills:
+- fetchai/error:0.1.0
+version: 0.1.0
 ```
 
 By updating the `logging_config` section, you can configure the loggers of your application.
@@ -45,7 +48,7 @@ Below is an example of the `logging_config` value.
 ```yaml
 logging_config:
   version: 1
-  disable_existing_loggers: false
+  disable_existing_loggers: False
   formatters:
     standard:
       format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
@@ -65,7 +68,7 @@ logging_config:
       - logfile
       - console
       level: DEBUG
-      propagate: true
+      propagate: True
 ```
 
 This configuration will set up a logger with name `aea`. It prints both on console and on file with a format specified by the `standard` formatter.

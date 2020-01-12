@@ -18,22 +18,22 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea run' subcommand."""
-import importlib.util
 import inspect
 import os
 import re
 import sys
 from pathlib import Path
-from typing import cast, List
+from typing import cast, List, Union
 
 import click
 from click import pass_context
 
 from aea.aea import AEA
-from aea.cli.common import Context, logger, _try_to_load_agent_config, _try_to_load_protocols, \
+from aea.cli.common import Context, logger, try_to_load_agent_config, _try_to_load_protocols, \
     AEAConfigException, _load_env_file, ConnectionsOption
 from aea.cli.install import install
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, LedgerAPIConfig
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, \
+    PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.crypto.ethereum import ETHEREUM
@@ -44,6 +44,7 @@ from aea.crypto.helpers import _create_default_private_key, _create_fetchai_priv
 from aea.crypto.ledger_apis import LedgerApis, _try_to_instantiate_fetchai_ledger_api, \
     _try_to_instantiate_ethereum_ledger_api, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet, DEFAULT, SUPPORTED_CRYPTOS
+from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules, load_agent_component_package
 from aea.registries.base import Resources
 
 
@@ -123,15 +124,14 @@ def _verify_ledger_apis_access() -> None:
     if fetchai_ledger_api_config is None:
         logger.debug("No fetchai ledger api config specified.")
     else:
-        fetchai_ledger_api_config = cast(LedgerAPIConfig, fetchai_ledger_api_config)
-        _try_to_instantiate_fetchai_ledger_api(fetchai_ledger_api_config.addr, fetchai_ledger_api_config.port)
+        _try_to_instantiate_fetchai_ledger_api(cast(str, fetchai_ledger_api_config.get('addr')),
+                                               cast(int, fetchai_ledger_api_config.get('port')))
 
     ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
     if ethereum_ledger_config is None:
         logger.debug("No ethereum ledger api config specified.")
     else:
-        ethereum_ledger_config = cast(LedgerAPIConfig, ethereum_ledger_config)
-        _try_to_instantiate_ethereum_ledger_api(ethereum_ledger_config.addr, ethereum_ledger_config.port)
+        _try_to_instantiate_ethereum_ledger_api(cast(str, ethereum_ledger_config.get('addr')))
 
 
 def _setup_connection(connection_name: str, address: str, ctx: Context) -> Connection:
@@ -145,7 +145,8 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
     :raises AEAConfigException: if the connection name provided as argument is not declared in the configuration file,
                               | or if the connection type is not supported by the framework.
     """
-    if connection_name not in ctx.agent_config.connections:
+    supported_connection_names = set(map(lambda x: x.name, ctx.agent_config.connections))
+    if connection_name not in supported_connection_names:
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
     try:
@@ -153,14 +154,14 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
     except FileNotFoundError:
         raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
 
+    connection_package = load_agent_component_package("connection", connection_name, connection_config.author,
+                                                      Path("connections", connection_name))
+    add_agent_component_module_to_sys_modules("connection", connection_name, connection_config.author, connection_package)
     try:
-        connection_spec = importlib.util.spec_from_file_location(connection_config.name, os.path.join(ctx.cwd, "connections", connection_config.name, "connection.py"))
-        connection_module = importlib.util.module_from_spec(connection_spec)
-        connection_spec.loader.exec_module(connection_module)  # type: ignore
+        connection_module = load_module("connection_module", Path("connections", connection_name, "connection.py"))
     except FileNotFoundError:
         raise AEAConfigException("Connection '{}' not found.".format(connection_name))
 
-    sys.modules[connection_spec.name + "_connection"] = connection_module
     classes = inspect.getmembers(connection_module, inspect.isclass)
     connection_classes = list(filter(lambda x: re.match("\\w+Connection", x[0]), classes))
     name_to_class = dict(connection_classes)
@@ -185,24 +186,25 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
 def run(click_context, connection_names: List[str], env_file: str, install_deps: bool):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
-    _try_to_load_agent_config(ctx)
+    try_to_load_agent_config(ctx)
     _load_env_file(env_file)
     agent_name = cast(str, ctx.agent_config.agent_name)
 
     _verify_or_create_private_keys(ctx)
     _verify_ledger_apis_access()
     private_key_paths = dict([(identifier, config.path) for identifier, config in ctx.agent_config.private_key_paths.read_all()])
-    ledger_api_configs = dict([(identifier, (config.addr, config.port)) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
+    ledger_api_configs = dict([(identifier, cast(List[Union[str, int]], list(config.values()))) for identifier, config in ctx.agent_config.ledger_apis.read_all()])
 
     wallet = Wallet(private_key_paths)
-    ledger_apis = LedgerApis(ledger_api_configs)
+    ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
-    connection_names = [ctx.agent_config.default_connection] if connection_names is None else connection_names
+    default_connection_name = PublicId.from_string(ctx.agent_config.default_connection).name
+    connection_names = [default_connection_name] if connection_names is None else connection_names
     connections = []
     _try_to_load_protocols(ctx)
     try:
         for connection_name in connection_names:
-            connection = _setup_connection(connection_name, wallet.addresses[FETCHAI], ctx)
+            connection = _setup_connection(connection_name, wallet.addresses[ctx.agent_config.default_ledger], ctx)
             connections.append(connection)
     except AEAConfigException as e:
         logger.error(str(e))

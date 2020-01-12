@@ -18,43 +18,90 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry fetch methods."""
 
-from unittest import TestCase, mock
+from unittest import mock, TestCase
+from click import ClickException
 
 from aea.cli.registry.fetch import fetch_agent
 
+from tests.test_cli.tools_for_testing import (
+    ContextMock,
+    PublicIdMock
+)
 
-@mock.patch(
-    'aea.cli.registry.fetch.split_public_id',
-    return_value=['owner', 'name', 'version']
-)
-@mock.patch(
-    'aea.cli.registry.fetch.request_api',
-    return_value={'file': 'url'}
-)
+
+def _raise_exception():
+    raise Exception()
+
+
 @mock.patch(
     'aea.cli.registry.fetch.download_file',
     return_value='filepath'
 )
 @mock.patch('aea.cli.registry.fetch.extract')
-@mock.patch('aea.cli.registry.fetch.os.getcwd', return_value='cwd')
-class FetchAgentTestCase(TestCase):
+class TestFetchAgent(TestCase):
     """Test case for fetch_package method."""
 
+    @mock.patch(
+        'aea.cli.registry.fetch.request_api',
+        return_value={
+            'file': 'url',
+            'connections': [],
+            'protocols': [],
+            'skills': []
+        }
+    )
     def test_fetch_agent_positive(
         self,
-        getcwd_mock,
+        request_api_mock,
         extract_mock,
         download_file_mock,
-        request_api_mock,
-        split_public_id_mock
     ):
         """Test for fetch_agent method positive result."""
-        public_id = 'owner/name:version'
-
-        fetch_agent(public_id)
-        split_public_id_mock.assert_called_with(public_id)
+        fetch_agent(ContextMock(), PublicIdMock())
         request_api_mock.assert_called_with(
-            'GET', '/agents/owner/name/version'
+            'GET', '/agents/author/name/{}'.format(PublicIdMock.DEFAULT_VERSION)
         )
         download_file_mock.assert_called_once_with('url', 'cwd')
         extract_mock.assert_called_once_with('filepath', 'cwd/name')
+
+    @mock.patch('aea.cli.registry.fetch.fetch_package')
+    @mock.patch(
+        'aea.cli.registry.fetch.request_api',
+        return_value={
+            'file': 'url',
+            'connections': ['public/id:{}'.format(PublicIdMock.DEFAULT_VERSION)],
+            'protocols': ['public/id:{}'.format(PublicIdMock.DEFAULT_VERSION)],
+            'skills': ['public/id:{}'.format(PublicIdMock.DEFAULT_VERSION)]
+        }
+    )
+    def test_fetch_agent_with_dependencies_positive(
+        self,
+        request_api_mock,
+        fetch_package_mock,
+        extract_mock,
+        download_file_mock,
+    ):
+        """Test for fetch_agent method with dependencies positive result."""
+        fetch_agent(ContextMock(), PublicIdMock())
+        request_api_mock.assert_called_with(
+            'GET', '/agents/author/name/{}'.format(PublicIdMock.DEFAULT_VERSION)
+        )
+        download_file_mock.assert_called_once_with('url', 'cwd')
+        extract_mock.assert_called_once_with('filepath', 'cwd/name')
+        fetch_package_mock.assert_called()
+
+    @mock.patch('aea.cli.registry.fetch.fetch_package', _raise_exception)
+    @mock.patch(
+        'aea.cli.registry.fetch.request_api',
+        return_value={
+            'file': 'url',
+            'connections': ['public/id:{}'.format(PublicIdMock.DEFAULT_VERSION)],
+            'protocols': [],
+            'skills': []
+        }
+    )
+    @mock.patch('aea.cli.registry.fetch.rmtree')
+    def test_fetch_agent_with_dependencies_unable_to_fetch(self, *mocks):
+        """Test for fetch_agent method positive result."""
+        with self.assertRaises(ClickException):
+            fetch_agent(ContextMock(), PublicIdMock())

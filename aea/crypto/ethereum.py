@@ -19,19 +19,23 @@
 # ------------------------------------------------------------------------------
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
+import time
 
-from web3 import Web3
+import web3
+from web3 import Web3, HTTPProvider
 from eth_account import Account
 from eth_keys import keys
 import logging
 from pathlib import Path
 from typing import Optional, BinaryIO
 
-from aea.crypto.base import Crypto
+from aea.crypto.base import Crypto, LedgerApi, AddressLike
 
 logger = logging.getLogger(__name__)
 
 ETHEREUM = "ethereum"
+GAS_PRICE = '50'
+GAS_ID = 'gwei'
 
 
 class EthereumCrypto(Crypto):
@@ -46,7 +50,7 @@ class EthereumCrypto(Crypto):
         :param private_key_path: the private key path of the agent
         """
         self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
-        bytes_representation = Web3.toBytes(hexstr=self._account.privateKey.hex())
+        bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
 
     @property
@@ -93,13 +97,24 @@ class EthereumCrypto(Crypto):
 
     def sign_transaction(self, tx_hash: bytes) -> bytes:
         """
-        Sing a transaction hash.
+        Sign a transaction hash.
 
         :param tx_hash: the transaction hash
         :return: Signed message in bytes
         """
         signature = self.entity.signHash(tx_hash)
-        return signature
+        return signature['signature']
+
+    # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
+    #     """
+    #     Recover the address from the hash.
+
+    #     :param tx_hash: the transaction hash
+    #     :param signature: the transaction signature
+    #     :return: the recovered address
+    #     """
+    #     address = self.entity.recoverHash(tx_hash, signature=signature)
+    #     return address
 
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""
@@ -133,4 +148,76 @@ class EthereumCrypto(Crypto):
         :param fp: the output file pointer. Must be set in binary mode (mode='wb')
         :return: None
         """
-        fp.write(self._account.privateKey.hex().encode("utf-8"))
+        fp.write(self._account.key.hex().encode("utf-8"))
+
+
+class EthereumApi(LedgerApi):
+    """Class to interact with the Ethereum Web3 APIs."""
+
+    identifier = ETHEREUM
+
+    def __init__(self, address: str):
+        """
+        Initialize the Ethereum ledger APIs.
+
+        :param address: the endpoint for Web3 APIs.
+        """
+        self._api = Web3(HTTPProvider(endpoint_uri=address))
+
+    @property
+    def api(self) -> Web3:
+        """Get the underlying API object."""
+        return self._api
+
+    def get_balance(self, address: AddressLike) -> int:
+        """Get the balance of a given account."""
+        return self._api.eth.getBalance(address)
+
+    def send_transaction(self,
+                         crypto: Crypto,
+                         destination_address: AddressLike,
+                         amount: int,
+                         tx_fee: int,
+                         chain_id: int = 1,
+                         **kwargs) -> Optional[str]:
+        """
+        Submit a transaction to the ledger.
+
+        :param crypto: the crypto object associated to the payer.
+        :param destination_address: the destination address of the payee.
+        :param amount: the amount of wealth to be transferred.
+        :param tx_fee: the transaction fee.
+        :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
+        :return: the transaction digest, or None if not available.
+        """
+        nonce = self._api.eth.getTransactionCount(self._api.toChecksumAddress(crypto.address))
+        # TODO : handle misconfiguration
+        transaction = {
+            'nonce': nonce,
+            'chainId': chain_id,
+            'to': destination_address,
+            'value': amount,
+            'gas': tx_fee,
+            'gasPrice': self._api.toWei(GAS_PRICE, GAS_ID)
+        }
+        signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
+        hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
+        logger.info("TX Hash: {}".format(str(hex_value.hex())))
+        while True:
+            try:
+                self._api.eth.getTransactionReceipt(hex_value)
+                logger.info("transaction validated - exiting")
+                tx_digest = hex_value.hex()
+                break
+            except web3.exceptions.TransactionNotFound:  # pragma: no cover
+                logger.info("transaction not found - sleeping for 3.0 seconds")
+                time.sleep(3.0)
+        return tx_digest
+
+    def is_transaction_settled(self, tx_digest: str) -> bool:
+        """Check whether a transaction is settled or not."""
+        tx_status = self._api.eth.getTransactionReceipt(tx_digest)
+        is_successful = False
+        if tx_status is not None:
+            is_successful = True
+        return is_successful

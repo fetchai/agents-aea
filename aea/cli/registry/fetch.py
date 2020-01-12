@@ -20,13 +20,16 @@
 
 import click
 import os
+from shutil import rmtree
 
+from aea.cli.common import Context
 from aea.cli.registry.utils import (
-    request_api, download_file, extract, split_public_id
+    request_api, download_file, extract, fetch_package
 )
+from aea.configurations.base import PublicId
 
 
-def fetch_agent(public_id: str) -> None:
+def fetch_agent(ctx: Context, public_id: PublicId) -> None:
     """
     Fetch Agent from Registry.
 
@@ -34,14 +37,26 @@ def fetch_agent(public_id: str) -> None:
 
     :return: None
     """
-    owner, name, version = split_public_id(public_id)
-    api_path = '/agents/{}/{}/{}'.format(owner, name, version)
+    author, name, version = public_id.author, public_id.name, public_id.version
+    api_path = '/agents/{}/{}/{}'.format(author, name, version)
     resp = request_api('GET', api_path)
     file_url = resp['file']
 
-    cwd = os.getcwd()
-    filepath = download_file(file_url, cwd)
-    target_folder = os.path.join(cwd, name)
+    target_folder = os.path.join(ctx.cwd, name)
+
+    for item_type in ('connection', 'skill', 'protocol'):
+        item_type_plural = item_type + 's'
+        for item_public_id in resp[item_type_plural]:
+            try:
+                fetch_package(item_type, item_public_id, target_folder)
+            except Exception as e:
+                rmtree(target_folder)
+                raise click.ClickException(
+                    'Unable to fetch dependency for agent "{}", aborting. {}'
+                    .format(name, e)
+                )
+
+    filepath = download_file(file_url, ctx.cwd)
     extract(filepath, target_folder)
     click.echo(
         'Agent {} successfully fetched to {}.'

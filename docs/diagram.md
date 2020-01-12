@@ -19,3 +19,5 @@ The following figure illustrates the framework's architecture:
 <center>![The AEA Framework Architecture](assets/framework-architecture.png)</center>
 
 <br />
+
+In most cases, as a developer in the AEA framework, it is sufficient to focus on skills development, utilising existing protocols and connections.

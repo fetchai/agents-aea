@@ -4,10 +4,10 @@ author: fetchai
 version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
-url: ""
 connections:
-- default-oef
-default_connection: default-oef
+- fetchai/oef:0.1.0
+default_connection: fetchai/oef:0.1.0
+default_ledger: fetchai
 private_key_paths:
 - private_key_path:
     ledger: default
@@ -19,23 +19,20 @@ private_key_paths:
     ledger: ethereum
     path: 'eth_private_key.txt'
 protocols:
-- oef
-- default
-- tac
-- fipa
+- fetchai/oef:0.1.0
+- fetchai/default:0.1.0
+- fetchai/tac:0.1.0
+- fetchai/fipa:0.1.0
 skills:
-- echo_skill
+- fetchai/echo:0.1.0
 description: "An example of agent configuration file for testing purposes."
 logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../../packages
 ledger_apis:
-- ledger_api:
-    ledger: fetchai
-    addr: example.fetch-ai.com
-    port: 8080
-- ledger_api:
-    ledger: ethereum
-    addr: example.ethereum.com
-    port: 8080
+   fetchai:
+     addr: example.fetch-ai.com
+     port: 8080
+   ethereum:
+     addr: example.ethereum.com

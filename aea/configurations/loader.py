@@ -23,7 +23,6 @@ import inspect
 import json
 import os
 import re
-from enum import Enum
 from pathlib import Path
 from typing import TextIO, Type, TypeVar, Generic
 
@@ -32,21 +31,12 @@ import yaml
 from jsonschema import Draft4Validator
 from yaml import SafeLoader
 
-from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig
+from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, ConfigurationType, ProtocolSpecification
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
-T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig)
-
-
-class ConfigurationType(Enum):
-    """Configuration types."""
-
-    AGENT = "agent"
-    PROTOCOL = "protocol"
-    CONNECTION = "connection"
-    SKILL = "skill"
+T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, ProtocolSpecification)
 
 
 class ConfigLoader(Generic[T]):
@@ -74,7 +64,10 @@ class ConfigLoader(Generic[T]):
         :raises
         """
         configuration_file_json = yaml.safe_load(fp)
-        self.validator.validate(instance=configuration_file_json)
+        try:
+            self.validator.validate(instance=configuration_file_json)
+        except Exception:
+            raise
         return self.configuration_type.from_json(configuration_file_json)
 
     def dump(self, configuration: T, fp: TextIO) -> None:

@@ -30,7 +30,7 @@ from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import connection, skill
-from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL
+from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL, DEFAULT_LEDGER, DEFAULT_VERSION
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
 
 
@@ -75,19 +75,21 @@ def create(click_context, agent_name):
         # create a config file inside it
         logger.info("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
-        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__, author="", version="v1", license="", fingerprint="", url="", registry_path=DEFAULT_REGISTRY_PATH, description="")
+        agent_config = AgentConfig(agent_name=agent_name, aea_version=aea.__version__,
+                                   author="", version=DEFAULT_VERSION, license="", fingerprint="",
+                                   registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH), description="")
         agent_config.default_connection = DEFAULT_CONNECTION
+        agent_config.default_ledger = DEFAULT_LEDGER
         ctx.agent_loader.dump(agent_config, config_file)
 
         # next commands must be done from the agent's directory -> overwrite ctx.cwd
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
 
-        logger.info("Default connections:")
-        click_context.invoke(connection, connection_name=DEFAULT_CONNECTION)
+        logger.info("Adding default packages ...")
+        click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)
 
-        logger.info("Default skills:")
-        click_context.invoke(skill, skill_name=DEFAULT_SKILL)
+        click_context.invoke(skill, skill_public_id=DEFAULT_SKILL)
 
     except OSError:
         logger.error("Directory already exist. Aborting...")

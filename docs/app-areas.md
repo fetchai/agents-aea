@@ -1,6 +1,6 @@
-An autonomous economic agent (AEA) is an intelligent agent whose goal is generating economic value for its owner. It can represent machines, humans, or data. 
+An AEA is an intelligent agent whose goal is generating economic value for its owner. It can represent machines, humans, or data. 
 
-There are five general application areas for Fetch.ai AEAs.
+There are five general application areas for AEAs:
 
 * **Inhabitants**: agents paired with real world hardware devices such as drones, laptops, heat sensors, etc.
 * **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between old (Web 2.0) and new (Web 3.0) economic models.
