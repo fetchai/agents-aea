@@ -241,7 +241,10 @@ class ProtocolGenerator:
         # Imports
         cls_str += "from aea.protocols.base import Message\n"
         cls_str += "from aea.protocols.base import Serializer\n"
-        cls_str += str.format("from {}.{}.message import {}Message\n\n", PATH_TO_MESSAGE_CLASS, self.protocol_specification.name,
+        cls_str += str.format("from {}.{}.{}.message import {}Message\n\n",
+                              PATH_TO_MESSAGE_CLASS,
+                              self.protocol_specification.author,
+                              self.protocol_specification.name,
                               to_camel_case(self.protocol_specification.name))
         cls_str += "import json\n"
         cls_str += "import base64\n"

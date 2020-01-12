@@ -210,7 +210,7 @@ class PublicId(object):
         Traceback (most recent call last):
         ...
         ValueError: Input 'bad/formatted:input' is not well formatted.
-1
+
         :param public_id_string: the public id in string format.
         :return: the public id object.
         :raises ValueError: if the string in input is not well formatted.
