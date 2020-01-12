@@ -144,3 +144,21 @@ Release History
 - Multiple minor doc updates
 - Adds additional tests
 - Multiple additional minor fixes and changes
+
+0.1.16 (2020-01-12)
+-------------------
+
+- Completes tac skills implementation
+- Adds default ledger field to agent config
+- Converts ledger apis to dictionary fields in agent config
+- Introduces public ids to CLI and deprecate usage of package names only
+- Adds local push and public commands to CLI
+- Introduces ledger api abstract class
+- Unifies import paths for static and dynamic imports
+- Disambiguates import paths by introducing pattern of `packages.author.package_type_pluralized.package_name`
+- Adds agent directory to packages with some samples
+- Adds protocol generator and exposes on CLI
+- Removes unused config fields
+- Updates docs to align with recent changes
+- Adds additional tests on CLI
+- Multiple additional minor fixes and changes
