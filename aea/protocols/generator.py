@@ -27,7 +27,8 @@ from aea.configurations.base import ProtocolSpecification
 DEFAULT_TYPES = ["int", "float", "bool", "str", "bytes", "list", "dict", "tuple", "set"]
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
-PATH_TO_MESSAGE_CLASS = "packages.protocols"
+SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
+PATH_TO_PACKAGES = "packages"
 INIT_FILE_NAME = "__init__.py"
 MESSAGE_FILE_NAME = "message.py"
 SERIALIZATION_FILE_NAME = "serialization.py"
@@ -239,11 +240,12 @@ class ProtocolGenerator:
         cls_str = str.format('\"\"\"Serialization for {} protocol.\"\"\"\n\n'.format(self.protocol_specification.name))
 
         # Imports
-        cls_str += "from aea.protocols.base import Message\n"
-        cls_str += "from aea.protocols.base import Serializer\n"
-        cls_str += str.format("from {}.{}.{}.message import {}Message\n\n",
-                              PATH_TO_MESSAGE_CLASS,
+        cls_str += MESSAGE_IMPORT + "\n"
+        cls_str += SERIALIZER_IMPORT + "\n"
+        cls_str += str.format("from {}.{}.{}.{}.message import {}Message\n\n",
+                              PATH_TO_PACKAGES,
                               self.protocol_specification.author,
+                              "protocols",
                               self.protocol_specification.name,
                               to_camel_case(self.protocol_specification.name))
         cls_str += "import json\n"
