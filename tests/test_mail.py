@@ -29,7 +29,7 @@ from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
-from packages.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from .conftest import DummyConnection
 
 

@@ -24,8 +24,8 @@
 # from unittest import mock
 
 from aea.helpers.search.models import DataModel, Attribute, Query, Constraint, ConstraintType, Description
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import OEFSerializer
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import OEFSerializer
 
 
 def test_oef_type_string_value():

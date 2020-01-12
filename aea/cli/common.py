@@ -129,6 +129,7 @@ def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
 def _try_to_load_protocols(ctx: Context):
     for protocol_public_id in ctx.agent_config.protocols:
         protocol_name = protocol_public_id.name
+        protocol_author = protocol_public_id.author
         logger.debug("Processing protocol {}".format(protocol_public_id))
         try:
             ctx.protocol_loader.load(open(os.path.join("protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
@@ -137,8 +138,8 @@ def _try_to_load_protocols(ctx: Context):
             sys.exit(1)
 
         try:
-            protocol_package = load_agent_component_package("protocol", protocol_name, Path("protocols", protocol_name))
-            add_agent_component_module_to_sys_modules("protocol", protocol_name, protocol_package)
+            protocol_package = load_agent_component_package("protocol", protocol_name, protocol_author, Path("protocols", protocol_name))
+            add_agent_component_module_to_sys_modules("protocol", protocol_name, protocol_author, protocol_package)
         except Exception:
             logger.error("A problem occurred while processing protocol {}.".format(protocol_public_id))
             sys.exit(1)
