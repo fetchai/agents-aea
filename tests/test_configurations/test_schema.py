@@ -27,10 +27,9 @@ import pytest
 import yaml
 from jsonschema import validate, Draft4Validator  # type: ignore
 
-from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
-    DEFAULT_SKILL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
 from ..conftest import CUR_PATH, ROOT_DIR, AGENT_CONFIGURATION_SCHEMA, SKILL_CONFIGURATION_SCHEMA, \
-    CONNECTION_CONFIGURATION_SCHEMA, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
+    CONNECTION_CONFIGURATION_SCHEMA, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, protocol_config_files, \
+    connection_config_files, skill_config_files, agent_config_files
 
 
 def test_agent_configuration_schema_is_valid_wrt_draft_04():
@@ -81,12 +80,7 @@ class TestAgentSchema:
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
-    @pytest.mark.parametrize("agent_path",
-                             [
-                                 os.path.join(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE),
-                                 os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
-                                 os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml")
-                             ])
+    @pytest.mark.parametrize("agent_path", agent_config_files)
     def test_validate_agent_config(self, agent_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
         protocol_config_file = yaml.safe_load(open(agent_path))
@@ -103,19 +97,10 @@ class TestProtocolsSchema:
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
-    @pytest.mark.parametrize("protocol_path",
-                             [
-                                 os.path.join(ROOT_DIR, "aea", "protocols", "default"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "oef"),
-                                 os.path.join(ROOT_DIR, "aea", "protocols", "scaffold"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "gym"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "ml_trade"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "tac"),
-                             ])
+    @pytest.mark.parametrize("protocol_path", protocol_config_files)
     def test_validate_protocol_config(self, protocol_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        protocol_config_file = yaml.safe_load(open(os.path.join(protocol_path, DEFAULT_PROTOCOL_CONFIG_FILE)))
+        protocol_config_file = yaml.safe_load(open(protocol_path))
         self.validator.validate(instance=protocol_config_file)
 
 
@@ -129,15 +114,7 @@ class TestConnectionsSchema:
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
-    @pytest.mark.parametrize("connection_path",
-                             [
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "local", DEFAULT_CONNECTION_CONFIG_FILE),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "oef", DEFAULT_CONNECTION_CONFIG_FILE),
-                                 os.path.join(ROOT_DIR, "aea", "connections", "scaffold", DEFAULT_CONNECTION_CONFIG_FILE),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "gym", DEFAULT_CONNECTION_CONFIG_FILE),
-                                 os.path.join(CUR_PATH, "data", "dummy_connection", DEFAULT_CONNECTION_CONFIG_FILE),
-                                 os.path.join(CUR_PATH, "data", "gym-connection.yaml")
-                             ])
+    @pytest.mark.parametrize("connection_path", connection_config_files)
     def test_validate_connection_config(self, connection_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
         connection_config_file = yaml.safe_load(open(connection_path))
@@ -154,28 +131,8 @@ class TestSkillsSchema:
         cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
-    @pytest.mark.parametrize("skill_path",
-                             [
-                                 os.path.join(ROOT_DIR, "aea", "skills", "error"),
-                                 os.path.join(ROOT_DIR, "aea", "skills", "scaffold"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "carpark_client"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "carpark_detection"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "gym"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "ml_data_provider"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "ml_train"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_control"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_participation"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client"),
-                                 os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_station"),
-                                 os.path.join(CUR_PATH, "data", "dummy_skill"),
-                                 os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy"),
-                                 os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "error"),
-                                 os.path.join(CUR_PATH, "data", "dependencies_skill"),
-                                 os.path.join(CUR_PATH, "data", "exception_skill")
-                             ])
+    @pytest.mark.parametrize("skill_path", skill_config_files)
     def test_validate_skill_config(self, skill_path):
         """Test that the validation of the protocol configuration file in aea/protocols works correctly."""
-        skill_config_file = yaml.safe_load(open(os.path.join(skill_path, DEFAULT_SKILL_CONFIG_FILE)))
+        skill_config_file = yaml.safe_load(open(os.path.join(skill_path, )))
         self.validator.validate(instance=skill_config_file)

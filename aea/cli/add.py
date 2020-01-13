@@ -48,17 +48,26 @@ def add(ctx: Context, registry):
     try_to_load_agent_config(ctx)
 
 
-def _copy_package_directory(ctx, package_path, item_type, item_name):
+def _is_item_present(item_type, item_public_id, ctx):
+    item_type_plural = item_type + 's'
+    dest_path = os.path.join(ctx.cwd, "vendor", item_public_id.author, item_type_plural, item_public_id.name)
+    items_in_config = getattr(ctx.agent_config, item_type_plural)
+    return item_public_id in items_in_config and os.path.exists(dest_path)
+
+
+def _copy_package_directory(ctx, package_path, item_type, item_name, author_name):
     # copy the item package into the agent's supported packages.
     item_type_plural = item_type + "s"
     src = str(package_path.absolute())
-    dest = os.path.join(ctx.cwd, item_type_plural, item_name)
+    dest = os.path.join(ctx.cwd, "vendor", author_name, item_type_plural, item_name)
     logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
     try:
         shutil.copytree(src, dest)
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
+
+    Path(ctx.cwd, "vendor", author_name, item_type_plural, "__init__.py").touch()
 
 
 def _add_protocols(click_context, protocols: Collection[PublicId]):
@@ -110,7 +119,7 @@ def _find_item_locally(ctx, item_type, item_public_id) -> PackageConfiguration:
         logger.error("Cannot find {} with author and version specified.".format(item_type))
         sys.exit(1)
 
-    _copy_package_directory(ctx, package_path, item_type, item_name)
+    _copy_package_directory(ctx, package_path, item_type, item_name, author)
     return item_configuration
 
 
@@ -209,10 +218,3 @@ def skill(click_context, skill_public_id: PublicId):
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.skills.add(skill_public_id)
     ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
-
-
-def _is_item_present(item_type, item_public_id, ctx):
-    item_type_plural = item_type + 's'
-    dest_path = os.path.join(ctx.cwd, item_type_plural, item_public_id.name)
-    items_in_config = getattr(ctx.agent_config, item_type_plural)
-    return item_public_id in items_in_config and os.path.exists(dest_path)

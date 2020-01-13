@@ -24,7 +24,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import TextIO, Type, TypeVar, Generic
+from typing import TextIO, Type, TypeVar, Generic, Union
 
 import jsonschema
 import yaml
@@ -82,8 +82,9 @@ class ConfigLoader(Generic[T]):
         yaml.safe_dump(result, fp)
 
     @classmethod
-    def from_configuration_type(cls, configuration_type: ConfigurationType) -> 'ConfigLoader':
+    def from_configuration_type(cls, configuration_type: Union[ConfigurationType, str]) -> 'ConfigLoader':
         """Get the configuration loader from the type."""
+        configuration_type = ConfigurationType(configuration_type)
         if configuration_type == ConfigurationType.AGENT:
             return ConfigLoader("aea-config_schema.json", AgentConfig)
         elif configuration_type == ConfigurationType.PROTOCOL:

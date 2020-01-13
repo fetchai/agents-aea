@@ -32,7 +32,8 @@ from dotenv import load_dotenv
 
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, Dependencies, PublicId
+    DEFAULT_PROTOCOL_CONFIG_FILE, Dependencies, PublicId, \
+    _get_default_configuration_file_name_from_type
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
 from aea.helpers.base import add_agent_component_module_to_sys_modules, load_agent_component_package
@@ -72,6 +73,19 @@ class Context(object):
         self.config[key] = value
         logger.debug('  config[%s] = %s' % (key, value))
 
+    def _get_item_dependencies(self, item_type, public_id: PublicId) -> Dependencies:
+        """Get the dependencies from item type and public id."""
+        item_type_plural = item_type + "s"
+        default_config_file_name = _get_default_configuration_file_name_from_type(item_type)
+        if public_id.author != self.agent_config.author:
+            path = str(Path("vendor", public_id.author, item_type_plural, public_id.name, default_config_file_name))
+        else:
+            path = str(Path(item_type_plural, public_id.name, default_config_file_name))
+        config_loader = ConfigLoader.from_configuration_type(item_type)
+        config = config_loader.load(open(path))
+        deps = cast(Dependencies, config.dependencies)
+        return deps
+
     def get_dependencies(self) -> Dependencies:
         """Aggregate the dependencies from every component.
 
@@ -79,22 +93,13 @@ class Context(object):
         """
         dependencies = {}  # type: Dependencies
         for protocol_id in self.agent_config.protocols:
-            path = str(Path("protocols", protocol_id.name, DEFAULT_PROTOCOL_CONFIG_FILE))
-            protocol_config = self.protocol_loader.load(open(path))
-            deps = cast(Dependencies, protocol_config.dependencies)
-            dependencies.update(deps)
+            dependencies.update(self._get_item_dependencies("protocol", protocol_id))
 
         for connection_id in self.agent_config.connections:
-            path = str(Path("connections", connection_id.name, DEFAULT_CONNECTION_CONFIG_FILE))
-            connection_config = self.connection_loader.load(open(path))
-            deps = cast(Dependencies, connection_config.dependencies)
-            dependencies.update(deps)
+            dependencies.update(self._get_item_dependencies("connection", connection_id))
 
         for skill_id in self.agent_config.skills:
-            path = str(Path("skills", skill_id.name, DEFAULT_SKILL_CONFIG_FILE))
-            skill_config = self.skill_loader.load(open(path))
-            deps = cast(Dependencies, skill_config.dependencies)
-            dependencies.update(deps)
+            dependencies.update(self._get_item_dependencies("skill", skill_id))
 
         return dependencies
 
@@ -131,14 +136,18 @@ def _try_to_load_protocols(ctx: Context):
         protocol_name = protocol_public_id.name
         protocol_author = protocol_public_id.author
         logger.debug("Processing protocol {}".format(protocol_public_id))
+        if protocol_public_id.author != ctx.agent_config.author:
+            protocol_dir = Path("vendor", protocol_public_id.author, "protocols", protocol_name)
+        else:
+            protocol_dir = Path("protocols", protocol_name)
         try:
-            ctx.protocol_loader.load(open(os.path.join("protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
+            ctx.protocol_loader.load(open(protocol_dir / DEFAULT_PROTOCOL_CONFIG_FILE))
         except FileNotFoundError:
             logger.error("Protocol configuration file for protocol {} not found.".format(protocol_name))
             sys.exit(1)
 
         try:
-            protocol_package = load_agent_component_package("protocol", protocol_name, protocol_author, Path("protocols", protocol_name))
+            protocol_package = load_agent_component_package("protocol", protocol_name, protocol_author, protocol_dir)
             add_agent_component_module_to_sys_modules("protocol", protocol_name, protocol_author, protocol_package)
         except Exception:
             logger.error("A problem occurred while processing protocol {}.".format(protocol_public_id))
@@ -202,7 +211,7 @@ def format_skills(items):
     return list_str
 
 
-def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str):
+def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> Dict:
     """Return description of a protocol, skill, connection."""
     config = loader.load(open(str(config_filepath)))
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name

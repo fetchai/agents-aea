@@ -994,7 +994,7 @@ class TestRunFailsWhenConnectionNotComplete:
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
         assert result.exit_code == 0
-        Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").unlink()
+        Path(cls.t, cls.agent_name, "vendor", "fetchai", "connections", cls.connection_name, "connection.py").unlink()
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
@@ -1044,7 +1044,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
         assert result.exit_code == 0
-        Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").write_text("")
+        Path(cls.t, cls.agent_name, "vendor", "fetchai", "connections", cls.connection_name, "connection.py").write_text("")
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
@@ -1092,7 +1092,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-        Path(cls.t, cls.agent_name, "protocols", "default", "protocol.yaml").unlink()
+        Path(cls.t, cls.agent_name, "vendor", "fetchai", "protocols", "default", "protocol.yaml").unlink()
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
@@ -1140,7 +1140,7 @@ class TestRunFailsWhenProtocolNotComplete:
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-        Path(cls.t, cls.agent_name, "protocols", "default", "__init__.py").unlink()
+        Path(cls.t, cls.agent_name, "vendor", "fetchai", "protocols", "default", "__init__.py").unlink()
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])

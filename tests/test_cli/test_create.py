@@ -135,38 +135,73 @@ class TestCreate:
         """Check that the 'version' field is equal to the string '0.1.0'."""
         assert self.agent_config["version"] == "0.1.0"
 
-    def test_connections_directory_exists(self):
-        """Check that the connections directory exists."""
-        connections_dirpath = Path(self.agent_name, "connections")
-        assert connections_dirpath.exists()
-        assert connections_dirpath.is_dir()
+    def test_vendor_content(self):
+        """Check the content of vendor directory is as expected."""
+        vendor_dir = Path(self.agent_name, "vendor")
+        assert vendor_dir.exists()
+        assert set(vendor_dir.iterdir()) == {vendor_dir / "fetchai", vendor_dir / "__init__.py"}
 
-    def test_connections_contains_stub_connection(self):
-        """Check that the connections directory contains the stub directory."""
-        stub_connection_dirpath = Path(self.agent_name, "connections", "stub")
+        # assert that every subdirectory of vendor/fetchai is a Python package
+        # (i.e. that contains __init__.py)
+        for package_dir in (vendor_dir / "fetchai").iterdir():
+            assert (package_dir / "__init__.py").exists()
+
+    def test_vendor_connections_contains_stub_connection(self):
+        """Check that the vendor connections directory contains the stub directory."""
+        stub_connection_dirpath = Path(self.agent_name, "vendor", "fetchai", "connections", "stub")
         assert stub_connection_dirpath.exists()
         assert stub_connection_dirpath.is_dir()
 
     def test_stub_connection_directory_is_equal_to_library_stub_connection(self):
         """Check that the stub connection directory is equal to the package's one (aea.connections.stub)."""
-        stub_connection_dirpath = Path(self.agent_name, "connections", "stub")
+        stub_connection_dirpath = Path(self.agent_name, "vendor", "fetchai", "connections", "stub")
         comparison = filecmp.dircmp(str(stub_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "stub")))
+        assert comparison.diff_files == []
+
+    def test_vendor_protocols_contains_default_protocol(self):
+        """Check that the vendor protocols directory contains the default protocol."""
+        stub_connection_dirpath = Path(self.agent_name, "vendor", "fetchai", "protocols", "default")
+        assert stub_connection_dirpath.exists()
+        assert stub_connection_dirpath.is_dir()
+
+    def test_default_protocol_is_equal_to_library_default_protocol(self):
+        """Check that the stub connection directory is equal to the package's one (aea.protocols.default)."""
+        default_protocol_dirpath = Path(self.agent_name, "vendor", "fetchai", "protocols", "default")
+        comparison = filecmp.dircmp(str(default_protocol_dirpath), str(Path(ROOT_DIR, "aea", "protocols", "default")))
+        assert comparison.diff_files == []
+
+    def test_vendor_skills_contains_error_skill(self):
+        """Check that the vendor skills directory contains the error skill."""
+        error_skill_dirpath = Path(self.agent_name, "vendor", "fetchai", "skills", "error")
+        assert error_skill_dirpath.exists()
+        assert error_skill_dirpath.is_dir()
+
+    def test_error_skill_is_equal_to_library_error_skill(self):
+        """Check that the error skill directory is equal to the package's one (aea.skills.error)."""
+        default_protocol_dirpath = Path(self.agent_name, "vendor", "fetchai", "skills", "error")
+        comparison = filecmp.dircmp(str(default_protocol_dirpath), str(Path(ROOT_DIR, "aea", "skills", "error")))
         assert comparison.diff_files == []
 
     def test_protocols_directory_content(self):
         """Test the content of the 'protocols' directory."""
         dir = Path(self.t, self.agent_name, "protocols")
-        assert set(dir.iterdir()) == {dir / "default", dir / "__init__.py"}
+        assert dir.exists()
+        assert dir.is_dir()
+        assert set(dir.iterdir()) == {dir / "__init__.py"}
 
     def test_connections_directory_content(self):
         """Test the content of the 'connections' directory."""
         dir = Path(self.t, self.agent_name, "connections")
-        assert set(dir.iterdir()) == {dir / "stub", dir / "__init__.py"}
+        assert dir.exists()
+        assert dir.is_dir()
+        assert set(dir.iterdir()) == {dir / "__init__.py"}
 
     def test_skills_directory_content(self):
         """Test the content of the 'skills' directory."""
         dir = Path(self.t, self.agent_name, "skills")
-        assert set(dir.iterdir()) == {dir / "error", dir / "__init__.py"}
+        assert dir.exists()
+        assert dir.is_dir()
+        assert set(dir.iterdir()) == {dir / "__init__.py"}
 
     @classmethod
     def teardown_class(cls):

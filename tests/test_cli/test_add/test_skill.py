@@ -275,7 +275,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        Path("skills", cls.skill_name).mkdir(parents=True, exist_ok=True)
+        Path(cls.t, cls.agent_name, "vendor", "fetchai", "skills", cls.skill_name).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
@@ -287,7 +287,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
-        s = "[Errno 17] File exists: './skills/{}'".format(self.skill_name)
+        s = "[Errno 17] File exists: './vendor/fetchai/skills/{}'".format(self.skill_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

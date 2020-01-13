@@ -74,7 +74,7 @@ def create(click_context, agent_name):
     path = Path(agent_name)
 
     logger.info("Initializing AEA project '{}'".format(agent_name))
-    logger.info("Creating project directory '/{}'".format(agent_name))
+    logger.info("Creating project directory './{}'".format(agent_name))
 
     # create the agent's directory
     try:
@@ -94,9 +94,14 @@ def create(click_context, agent_name):
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
 
+        # set up packages directories.
         _setup_package_folder(ctx, "protocols")
         _setup_package_folder(ctx, "connections")
         _setup_package_folder(ctx, "skills")
+
+        # set up a vendor directory
+        Path(ctx.cwd, "vendor").mkdir()
+        Path(ctx.cwd, "vendor", "__init__.py").touch()
 
         logger.info("Adding default packages ...")
         click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)

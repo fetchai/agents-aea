@@ -265,7 +265,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         assert result.exit_code == 0
 
         os.chdir(cls.agent_name)
-        Path("connections", cls.connection_name).mkdir(parents=True, exist_ok=True)
+        Path(cls.t, cls.agent_name, "vendor", "fetchai", "connections", cls.connection_name).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
@@ -277,7 +277,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        s = "[Errno 17] File exists: './connections/{}'".format(self.connection_name)
+        s = "[Errno 17] File exists: './vendor/fetchai/connections/{}'".format(self.connection_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

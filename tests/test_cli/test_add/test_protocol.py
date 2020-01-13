@@ -259,7 +259,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
         assert result.exit_code == 0
 
         os.chdir(cls.agent_name)
-        Path("protocols", cls.protocol_name).mkdir(parents=True, exist_ok=True)
+        Path(cls.t, cls.agent_name, "vendor", "fetchai", "protocols", cls.protocol_name).mkdir(parents=True, exist_ok=True)
         cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
@@ -271,7 +271,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}''
         """
-        s = "[Errno 17] File exists: './protocols/{}'".format(self.protocol_name)
+        s = "[Errno 17] File exists: './vendor/fetchai/protocols/{}'".format(self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
