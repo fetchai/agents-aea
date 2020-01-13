@@ -141,11 +141,6 @@ def connection(click_context, connection_public_id: PublicId):
         connection_configuration = cast(ConnectionConfig, connection_configuration)
         _add_protocols(click_context, connection_configuration.protocols)
 
-    # make the 'connections' folder a Python package.
-    connections_init_module = os.path.join(ctx.cwd, "connections", "__init__.py")
-    logger.debug("Creating {}".format(connections_init_module))
-    Path(connections_init_module).touch(exist_ok=True)
-
     # add the connections to the configurations.
     logger.debug("Registering the connection into {}".format(DEFAULT_AEA_CONFIG_FILE))
     ctx.agent_config.connections.add(connection_public_id)
@@ -176,10 +171,6 @@ def protocol(click_context, protocol_public_id):
         fetch_package('protocol', public_id=protocol_public_id, cwd=ctx.cwd)
     else:
         _find_item_locally(ctx, "protocol", protocol_public_id)
-
-    # make the 'protocols' folder a Python package.
-    logger.debug("Creating {}".format(os.path.join(agent_name, "protocols", "__init__.py")))
-    Path(os.path.join(ctx.cwd, "protocols", "__init__.py")).touch(exist_ok=True)
 
     # add the protocol to the configurations.
     logger.debug("Registering the protocol into {}".format(DEFAULT_AEA_CONFIG_FILE))
@@ -213,11 +204,6 @@ def skill(click_context, skill_public_id: PublicId):
         skill_configuration = _find_item_locally(ctx, "skill", skill_public_id)
         skill_configuration = cast(SkillConfig, skill_configuration)
         _add_protocols(click_context, skill_configuration.protocols)
-
-    # make the 'skills' folder a Python package.
-    skills_init_module = os.path.join(ctx.cwd, "skills", "__init__.py")
-    logger.debug("Creating {}".format(skills_init_module))
-    Path(skills_init_module).touch(exist_ok=True)
 
     # add the skill to the configurations.
     logger.debug("Registering the skill into {}".format(DEFAULT_AEA_CONFIG_FILE))
