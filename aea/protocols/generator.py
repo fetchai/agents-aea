@@ -161,56 +161,67 @@ class ProtocolGenerator:
         cls_str += '    def __init__(self, message_id: int, target: int, performative: str, contents: Dict, **kwargs):\n'
         cls_str += '        \"\"\"Initialise.\"\"\"\n'
         cls_str += '        super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)\n\n'
-
-        # variables
-        # cls_str += str.format('        self.performatives = {}\n', self._performatives_set())
-        cls_str += str.format('        self.speech_acts = {}\n\n', self._speech_acts_str())
+        cls_str += str.format('        self.speech_acts_definition = {}\n\n', self._speech_acts_str())
         cls_str += '        assert self.check_consistency()\n\n'
 
         cls_str += '    @property\n'
-        cls_str += '    def performatives(self) -> set:\n'
+        cls_str += '    def message_id(self) -> int:\n'
+        cls_str += '        \"\"\"Get the message_id of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set("message_id"), "message_id is not set"\n'
+        cls_str += '        return cast(int, self.get("message_id"))\n\n'
+
+        cls_str += '    @property\n'
+        cls_str += '    def target(self) -> int:\n'
+        cls_str += '        \"\"\"Get the target of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set("target"), "target is not set."\n'
+        cls_str += '        return cast(int, self.get("target"))\n\n'
+
+        cls_str += '    @property\n'
+        cls_str += '    def performative(self) -> str:\n'
+        cls_str += '        \"\"\"Get the performative of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set("performative"), "performative is not set"\n'
+        cls_str += '        return cast(str, self.get("performative"))\n\n'
+
+        cls_str += '    @property\n'
+        cls_str += '    def contents(self) -> Dict:\n'
+        cls_str += '        \"\"\"Get the contents of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set("contents"), "contents is not set"\n'
+        cls_str += '        return cast(Dict, self.get("contents"))\n\n'
+
+        cls_str += '    @property\n'
+        cls_str += '    def performatives_definition(self) -> set:\n'
         cls_str += '        \"\"\"Get allowed performatives.\"\"\"\n'
-        cls_str += '        return set(self.speech_acts.keys())\n\n'
+        cls_str += '        return set(self.speech_acts_definition.keys())\n\n'
 
         # check_consistency method
         cls_str += '    def check_consistency(self) -> bool:\n'
         cls_str += str.format('        \"\"\"Check that the message follows the {} protocol.\"\"\"\n', self.protocol_specification.name)
         cls_str += '        try:\n'
 
-        cls_str += '            assert self.is_set(\"message_id\"), \"message_id is not set\"\n'
-        cls_str += '            message_id = self.get(\"message_id\")\n'
-        cls_str += '            assert type(message_id) == int, \"message_id is not int\"\n\n'
-
-        cls_str += '            assert self.is_set(\"target\"), \"target is not set\"\n'
-        cls_str += '            target = self.get(\"target\")\n'
-        cls_str += '            assert type(target) == int, \"target is not int\"\n\n'
-
-        cls_str += '            assert self.is_set(\"performative\"), \"performative is not set\"\n'
-        cls_str += '            performative = self.get(\"performative\")\n'
-        cls_str += '            assert type(performative) == str, \"performative is not str\"\n\n'
-
-        cls_str += '            assert self.is_set(\"contents\"), \"contents is not set\"\n'
-        cls_str += '            contents = self.get(\"contents\")\n'
-        cls_str += '            assert type(contents) == dict, \"contents is not a dictionary\"\n'
-        cls_str += '            contents = cast(Dict, contents)\n\n'
+        cls_str += '            assert type(self.message_id) == int, \"message_id must be \'int\' but it is not.\"\n'
+        cls_str += '            assert type(self.target) == int, \"target must be \'int\' but it is not.\"\n'
+        cls_str += '            assert type(self.performative) == str, \"performative must be \'str\' but it is not.\"\n'
+        cls_str += '            assert type(self.contents) == dict, \"contents must be a \'Dict\' but it is not\"\n\n'
 
         cls_str += '            # Light Protocol 2\n'
         cls_str += '            # Check correct performative\n'
-        cls_str += '            assert performative in self.performatives, \"performative is not in the list of allowed performative\"\n\n'
+        cls_str += '            assert self.performative in self.performatives_definition, \"\'{}\' is not in the list of allowed performative\".format(self.performative)\n\n'
 
         cls_str += '            # Check correct contents\n'
-        cls_str += '            contents_definition = self.speech_acts[performative]  # type is Dict\n'
-        cls_str += '            # Check number of contents\n'
-        cls_str += '            assert len(contents) == len(contents_definition), \"incorrect number of contents\"\n'
-        cls_str += '            # Check the content is of the correct type\n'
-        cls_str += '            for content, content_type in contents_definition:\n'
-        cls_str += '                assert isinstance(contents[content], content_type), \"incorrect content type\"\n\n'
+        cls_str += '            contents_definition = self.speech_acts_definition[self.performative]\n'
+        cls_str += '            # Number of contents\n'
+        cls_str += '            assert len(self.contents) == len(contents_definition), \"Incorrect number of contents. Expected {} contents. Found {}\".format(len(self.contents), len(contents_definition))\n'
+        cls_str += '            # Name and type of each content\n'
+        cls_str += '            for content_name, content_value in self.contents:\n'
+        cls_str += '                assert isinstance(content_name, str), \"Incorrect type for content name \'{}\'. Expected \'str\'.\".format(str(content_name))\n'
+        cls_str += '                assert content_name in contents_definition.keys(), \"Incorrect content \'{}\'\".format(content_name)\n'
+        cls_str += '                assert isinstance(content_value, contents_definition[content_name]), \"Incorrect content type for \'{}\'. Expected {}. Found {}.\".format(content_name, contents_definition[content_name], type(content_value))\n\n'
 
         cls_str += '            # Light Protocol 3\n'
-        cls_str += '            if message_id == 1:\n'
-        cls_str += '                assert target == 0, \"target should be 0\"\n'
+        cls_str += '            if self.message_id == 1:\n'
+        cls_str += '                assert self.target == 0, \"Expected target to be 0 when message_id is 1. Found {}.\".format(self.target)\n'
         cls_str += '            else:\n'
-        cls_str += '                assert 0 < target < message_id, \"target should be strictly between 0 and message_id\"\n'
+        cls_str += '                assert 0 < self.target < self.message_id, \"Expected target to be between 1 to (message_id -1) inclusive. Found {}\".format(self.target)\n'
         cls_str += '        except (AssertionError, ValueError, KeyError) as e:\n'
         cls_str += '            print(str(e))\n'
         cls_str += '            return False\n\n'

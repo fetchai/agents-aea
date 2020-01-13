@@ -27,7 +27,7 @@ class TwoPartyNegotiationMessage(Message):
         """Initialise."""
         super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)
 
-        self.speech_acts = {
+        self.speech_acts_definition = {
             'cfp': {
                 'query', DataModel
             },
@@ -43,47 +43,61 @@ class TwoPartyNegotiationMessage(Message):
         assert self.check_consistency()
 
     @property
-    def performatives(self) -> set:
+    def message_id(self) -> int:
+        """Get the message_id of the message."""
+        assert self.is_set("message_id"), "message_id is not set"
+        return cast(int, self.get("message_id"))
+
+    @property
+    def target(self) -> int:
+        """Get the target of the message."""
+        assert self.is_set("target"), "target is not set."
+        return cast(int, self.get("target"))
+
+    @property
+    def performative(self) -> str:
+        """Get the performative of the message."""
+        assert self.is_set("performative"), "performative is not set"
+        return cast(str, self.get("performative"))
+
+    @property
+    def contents(self) -> Dict:
+        """Get the contents of the message."""
+        assert self.is_set("contents"), "contents is not set"
+        return cast(Dict, self.get("contents"))
+
+    @property
+    def performatives_definition(self) -> set:
         """Get allowed performatives."""
-        return set(self.speech_acts.keys())
+        return set(self.speech_acts_definition.keys())
 
     def check_consistency(self) -> bool:
         """Check that the message follows the two_party_negotiation protocol."""
         try:
-            assert self.is_set("message_id"), "message_id is not set"
-            message_id = self.get("message_id")
-            assert type(message_id) == int, "message_id is not int"
-
-            assert self.is_set("target"), "target is not set"
-            target = self.get("target")
-            assert type(target) == int, "target is not int"
-
-            assert self.is_set("performative"), "performative is not set"
-            performative = self.get("performative")
-            assert type(performative) == str, "performative is not str"
-
-            assert self.is_set("contents"), "contents is not set"
-            contents = self.get("contents")
-            assert type(contents) == dict, "contents is not a dictionary"
-            contents = cast(Dict, contents)
+            assert type(self.message_id) == int, "message_id must be 'int' but it is not."
+            assert type(self.target) == int, "target must be 'int' but it is not."
+            assert type(self.performative) == str, "performative must be 'str' but it is not."
+            assert type(self.contents) == dict, "contents must be a 'Dict' but it is not"
 
             # Light Protocol 2
             # Check correct performative
-            assert performative in self.performatives, "performative is not in the list of allowed performative"
+            assert self.performative in self.performatives_definition, "'{}' is not in the list of allowed performative".format(self.performative)
 
             # Check correct contents
-            contents_definition = self.speech_acts[performative]  # type is Dict
-            # Check number of contents
-            assert len(contents) == len(contents_definition), "incorrect number of contents"
-            # Check the content is of the correct type
-            for content, content_type in contents_definition:
-                assert isinstance(contents[content], content_type), "incorrect content type"
+            contents_definition = self.speech_acts_definition[self.performative]
+            # Number of contents
+            assert len(self.contents) == len(contents_definition), "Incorrect number of contents. Expected {} contents. Found {}".format(len(self.contents), len(contents_definition))
+            # Name and type of each content
+            for content_name, content_value in self.contents:
+                assert isinstance(content_name, str), "Incorrect type for content name '{}'. Expected 'str'.".format(str(content_name))
+                assert content_name in contents_definition.keys(), "Incorrect content '{}'".format(content_name)
+                assert isinstance(content_value, contents_definition[content_name]), "Incorrect content type for '{}'. Expected {}. Found {}.".format(content_name, contents_definition[content_name], type(content_value))
 
             # Light Protocol 3
-            if message_id == 1:
-                assert target == 0, "target should be 0"
+            if self.message_id == 1:
+                assert self.target == 0, "Expected target to be 0 when message_id is 1. Found {}.".format(self.target)
             else:
-                assert 0 < target < message_id, "target should be strictly between 0 and message_id"
+                assert 0 < self.target < self.message_id, "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(self.target)
         except (AssertionError, ValueError, KeyError) as e:
             print(str(e))
             return False
