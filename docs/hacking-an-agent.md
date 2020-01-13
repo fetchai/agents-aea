@@ -33,6 +33,7 @@ from aea.aea import AEA
 from aea import AEA_DIR
 from aea.skills.base import Skill
 from aea.connections.stub.connection import StubConnection
+from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.protocols.default.serialization import DefaultSerializer
@@ -64,28 +65,28 @@ We use the private key file we created to initialise a wallet, we also create th
 Then we pass all of this into the AEA constructor to create our agent.
 ``` python
 # Set up the wallet, stub connection, ledger and (empty) resources
-wallet = Wallet({'default': 'my_key.txt'})
+wallet = Wallet({DEFAULT: 'my_key.txt'})
 stub_connection = StubConnection(input_file_path=input_filename, output_file_path=output_filename)
-ledger_apis = LedgerApis({})
-resources = Resources('')
+ledger_apis = LedgerApis({}, DEFAULT)
+resources = Resources()
 
 # Create our AEA
-my_agent = AEA("my_agent", [stub_connection], wallet, ledger_apis, resources)
+my_agent = AEA("my_agent", [stub_connection], wallet, ledger_apis, resources, programmatic=True)
 ```
 
-Create the default protocol and add it to the agent
+Create the default protocol and add it to the agent.
 ``` python
-# Add the default protocol
+# Add the default protocol (which is part of the AEA distribution)
 default_protocol_configuration = ProtocolConfig.from_json(
     yaml.safe_load(open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))))
 default_protocol = Protocol("default", DefaultSerializer(), default_protocol_configuration)
 resources.protocol_registry.register(("default", None), default_protocol)
 ```
 
-Create the error skill (needed by all agents) and the echo skill which will bounce our messages back to us
+Create the error skill (needed by all agents) and the echo skill which will bounce our messages back to us, and add them both to the agent.
 ``` python
-# Add the error skill and the echo skill
-echo_skill = Skill.from_dir(os.path.join(root_dir, "packages", "skills", "echo"), my_agent.context)
+# Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
+echo_skill = Skill.from_dir(os.path.join(root_dir, "packages", "fetchai", "skills", "echo"), my_agent.context)
 resources.add_skill(echo_skill)
 error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"), my_agent.context)
 resources.add_skill(error_skill)
@@ -130,8 +131,6 @@ t.join()
 ## Running the agent
 If you now run this python script file, you should see this output:
 
-    No protocol found.
-    No skill found.
     input message: my_agent,other_agent,default,{"type": "bytes", "content": "aGVsbG8="}
     output message: other_agent,my_agent,default,{"type": "bytes", "content": "aGVsbG8="}
 
@@ -152,6 +151,7 @@ from aea.aea import AEA
 from aea import AEA_DIR
 from aea.skills.base import Skill
 from aea.connections.stub.connection import StubConnection
+from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.protocols.default.serialization import DefaultSerializer
@@ -170,22 +170,22 @@ if os.path.isfile(output_filename):
     os.remove(output_filename)
 
 # set up the Wallet, stub connection, ledger and (empty) resources
-wallet = Wallet({'default': 'my_key.txt'})
+wallet = Wallet({DEFAULT: 'my_key.txt'})
 stub_connection = StubConnection(input_file_path=input_filename, output_file_path=output_filename)
-ledger_apis = LedgerApis({}, 'default')
-resources = Resources('')
+ledger_apis = LedgerApis({}, DEFAULT)
+resources = Resources()
 
 # Create our AEA
-my_agent = AEA("my_agent", [stub_connection], wallet, ledger_apis, resources)
+my_agent = AEA("my_agent", [stub_connection], wallet, ledger_apis, resources, programmatic=True)
 
-# Add the default protocol
+# Add the default protocol (which is part of the AEA distribution)
 default_protocol_configuration = ProtocolConfig.from_json(
     yaml.safe_load(open(os.path.join(AEA_DIR, "protocols", "default", "protocol.yaml"))))
 default_protocol = Protocol("default", DefaultSerializer(), default_protocol_configuration)
 resources.protocol_registry.register(("default", None), default_protocol)
 
-# Add the error skill and the echo skill
-echo_skill = Skill.from_dir(os.path.join(root_dir, "packages", "skills", "echo"), my_agent.context)
+# Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
+echo_skill = Skill.from_dir(os.path.join(root_dir, "packages", "fetchai", "skills", "echo"), my_agent.context)
 resources.add_skill(echo_skill)
 error_skill = Skill.from_dir(os.path.join(AEA_DIR, "skills", "error"), my_agent.context)
 resources.add_skill(error_skill)

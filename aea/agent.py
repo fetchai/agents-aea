@@ -63,7 +63,8 @@ class Agent(ABC):
                  wallet: Wallet,
                  loop: Optional[AbstractEventLoop] = None,
                  timeout: float = 1.0,
-                 debug: bool = False) -> None:
+                 debug: bool = False,
+                 programmatic: bool = False) -> None:
         """
         Instantiate the agent.
 
@@ -73,6 +74,7 @@ class Agent(ABC):
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
+        :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
 
         :return: None
         """
@@ -87,6 +89,7 @@ class Agent(ABC):
         self._timeout = timeout
 
         self.debug = debug
+        self.programmatic = programmatic
 
     @property
     def multiplexer(self) -> Multiplexer:

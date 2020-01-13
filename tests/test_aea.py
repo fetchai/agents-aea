@@ -29,6 +29,7 @@ import yaml
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ProtocolConfig
+from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
@@ -217,8 +218,8 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.node.start()
         cls.agent_name = "MyAgent"
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({'default': cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({}, 'default')
+        cls.wallet = Wallet({DEFAULT: cls.private_key_pem_path})
+        cls.ledger_apis = LedgerApis({}, DEFAULT)
         cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
         cls.connections = [cls.connection]
 
@@ -276,7 +277,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
 
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
         cls.resources = Resources(cls.temp)
-        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, resources=cls.resources)
+        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, resources=cls.resources, programmatic=True)
 
         cls.default_protocol_configuration = ProtocolConfig.from_json(
             yaml.safe_load(open(Path(AEA_DIR, "protocols", "default", "protocol.yaml"))))
