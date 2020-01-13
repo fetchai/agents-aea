@@ -29,6 +29,7 @@ from aea.cli.registry.publish import (
 from tests.test_cli.tools_for_testing import ContextMock
 
 
+@mock.patch('aea.cli.registry.publish.check_is_author_logged_in')
 @mock.patch('aea.cli.registry.utils._rm_tarfiles')
 @mock.patch('aea.cli.registry.publish.os.getcwd', return_value='cwd')
 @mock.patch('aea.cli.registry.publish._compress')
@@ -38,6 +39,7 @@ from tests.test_cli.tools_for_testing import ContextMock
         'agent_name': 'agent-name',
         'description': 'some-description',
         'version': 'some-version',
+        'author': 'some-author',
         'connections': [],
         'protocols': [],
         'skills': []
@@ -56,7 +58,8 @@ class PublishAgentTestCase(TestCase):
         _load_agent_config_mock,
         _compress_mock,
         getcwd_mock,
-        _rm_tarfiles_mock
+        _rm_tarfiles_mock,
+        check_is_author_logged_in_mock
     ):
         """Test for publish_agent positive result."""
         publish_agent(ContextMock())
