@@ -71,7 +71,7 @@ ledger_apis = LedgerApis({}, DEFAULT)
 resources = Resources()
 
 # Create our AEA
-my_agent = AEA("my_agent", [stub_connection], wallet, ledger_apis, resources, programmatic=True)
+my_agent = AEA("my_agent", [stub_connection], wallet, ledger_apis, resources)
 ```
 
 Create the default protocol and add it to the agent.

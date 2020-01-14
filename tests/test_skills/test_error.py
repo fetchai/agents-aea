@@ -57,7 +57,7 @@ class TestSkillError:
         cls.connection = DummyConnection()
         cls.connections = [cls.connection]
         cls.my_aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, timeout=2.0,
-                         resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))))
+                         resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))), programmatic=False)
         cls.t = Thread(target=cls.my_aea.start)
         cls.t.start()
         time.sleep(0.5)

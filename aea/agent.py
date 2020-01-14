@@ -64,7 +64,7 @@ class Agent(ABC):
                  loop: Optional[AbstractEventLoop] = None,
                  timeout: float = 1.0,
                  debug: bool = False,
-                 programmatic: bool = False) -> None:
+                 programmatic: bool = True) -> None:
         """
         Instantiate the agent.
 

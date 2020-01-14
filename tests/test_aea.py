@@ -73,13 +73,15 @@ def test_act():
         ledger_apis = LedgerApis({}, 'default')
         address = wallet.addresses['default']
         connections = [OEFLocalConnection(address, node)]
+        resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         agent = AEA(
             agent_name,
             connections,
             wallet,
             ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+            resources,
+            programmatic=False)
         t = Thread(target=agent.start)
         try:
             t.start()
@@ -102,6 +104,7 @@ def test_react():
         address = wallet.addresses['default']
         connection = OEFLocalConnection(address, node)
         connections = [connection]
+        resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg.counterparty = address
@@ -118,7 +121,8 @@ def test_react():
             connections,
             wallet,
             ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+            resources,
+            programmatic=False)
         t = Thread(target=agent.start)
         try:
             t.start()
@@ -146,6 +150,7 @@ async def test_handle():
         address = wallet.addresses['default']
         connection = OEFLocalConnection(address, node)
         connections = [connection]
+        resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg.counterparty = agent_name
@@ -162,7 +167,8 @@ async def test_handle():
             connections,
             wallet,
             ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+            resources,
+            programmatic=False)
         t = Thread(target=agent.start)
         try:
             t.start()
@@ -224,7 +230,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.connections = [cls.connection]
 
         cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
-        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, cls.resources)
+        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, cls.resources, programmatic=False)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         cls.expected_message.counterparty = cls.agent_name
@@ -277,7 +283,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
 
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
         cls.resources = Resources(cls.temp)
-        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, resources=cls.resources, programmatic=True)
+        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, resources=cls.resources)
 
         cls.default_protocol_configuration = ProtocolConfig.from_json(
             yaml.safe_load(open(Path(AEA_DIR, "protocols", "default", "protocol.yaml"))))

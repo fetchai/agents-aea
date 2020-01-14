@@ -138,7 +138,7 @@ class TestResources:
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({}, 'default')
         cls.resources = Resources(os.path.join(cls.agent_folder))
-        cls.aea = AEA(cls.agent_name, connections, wallet, ledger_apis, resources=cls.resources)
+        cls.aea = AEA(cls.agent_name, connections, wallet, ledger_apis, resources=cls.resources, programmatic=False)
         cls.resources.load(cls.aea.context)
 
         cls.expected_skills = {"dummy", "error"}
@@ -302,7 +302,7 @@ class TestFilter:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({'default': private_key_pem_path})
         ledger_apis = LedgerApis({}, 'default')
-        cls.aea = AEA(cls.agent_name, connections, wallet, ledger_apis, resources=Resources(cls.agent_folder))
+        cls.aea = AEA(cls.agent_name, connections, wallet, ledger_apis, resources=Resources(cls.agent_folder), programmatic=False)
 
     def test_handle_internal_messages(self):
         """Test that the internal messages are handled."""

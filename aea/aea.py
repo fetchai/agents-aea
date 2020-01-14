@@ -48,7 +48,7 @@ class AEA(Agent):
                  loop: Optional[AbstractEventLoop] = None,
                  timeout: float = 0.0,
                  debug: bool = False,
-                 programmatic: bool = False,
+                 programmatic: bool = True,
                  max_reactions: int = 20,
                  executor: Optional[Executor] = None) -> None:
         """
