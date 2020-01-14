@@ -23,7 +23,7 @@ import shutil
 import tarfile
 import click
 
-from aea.cli.common import Context, logger, PublicIdParameter
+from aea.cli.common import Context, logger, PublicId
 from aea.cli.registry.utils import (
     request_api,
     load_yaml,
@@ -45,7 +45,7 @@ def _compress_dir(output_filename: str, source_dir: str):
 
 
 @clean_tarfiles
-def push_item(ctx: Context, item_type: str, item_id: PublicIdParameter) -> None:
+def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     Push item to the Registry.
 
