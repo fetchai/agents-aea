@@ -1,0 +1,20 @@
+name: gym
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+description: 'A protocol for interacting with a gym connection.'
+speech_acts:
+  act:
+    action: Action
+    step_id: int
+  percept:
+    step_id: int
+    observation: Observation
+    reward: float
+    done: bool
+    info: dict
+  reset: {}
+  close: {}
+
+  # Should we allow Any as a type and recognise it (e.g. for action: Action or observation: Observation)?
+  # or force everything to be either a primitive, or a custom type for which a class definition is provided.

@@ -1,0 +1,25 @@
+name: fipa
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+description: 'A protocol for FIPA ACL.'
+speech_acts:
+  cfp:
+    query: Query
+  propose:
+    proposal: list
+    price: float
+  accept_w_inform:
+    info: dict
+  match_accept_w_inform:
+    info: dict
+  inform:
+    info: dict
+  accept: {}
+  decline: {}
+  match_accept: {}
+
+  # Differences:
+  # propose -> proposal is a list of Descriptions. Declare each d in proposal is of type description.
+  # dialogue_reference is missing
+  # cfp -> query: could be either Query, byte, or None

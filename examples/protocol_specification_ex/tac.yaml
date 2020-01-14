@@ -1,0 +1,45 @@
+name: tac
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+description: 'A protocol for participating in a TAC.'
+speech_acts:
+  register:
+    agent_name: str
+  unregister: {}
+  transaction:
+    tx_id: str
+    tx_sender_addr: str
+    tx_counterparty_addr: str
+    amount_by_currency_id: dict
+    tx_sender_fee: int
+    tx_counterparty_fee: int
+    quantities_by_good_id: dict
+    tx_nonce: int
+    tx_sender_signature: bytes
+    tx_counterparty_signature: bytes
+  get_state_update: {}
+  cancelled: {}
+  game_data:
+    amount_by_currency_id: dict
+    exchange_params_by_currency_id: dict
+    quantities_by_good_id: dict
+    utility_params_by_good_id: dict
+    tx_fee: int
+    agent_addr_to_name: dict
+    good_id_to_name: dict
+    version_id: str
+  transaction_confirmation:
+    tx_id: str
+    amount_by_currency_id: dict
+    quantities_by_good_id: dict
+  tac_error:
+    error_code: ErrorCode
+    info: dict
+
+# transaction -> amount_by_currency_id is a dictionary. Declare each key, value in 'amount_by_currency_id' is of type str int respectively.
+# similarly for quantities_by_good_id, amount_by_currency_id, exchange_params_by_currency_id, quantities_by_good_id, utility_params_by_good_id, good_id_to_name,
+# currently you check whether keys in the above are unique (line 225). Is that necessary give it is dictionary?
+# declare tx_sender_fee>=0 and tx_counterparty_fee>=0. Declare amount_by_currency_id.keys() == exchange_params_by_currency_id.keys(). Declare quantities_by_good_id.keys == utility_params_by_good_id.keys
+# game_data -> agent_addr_to_nameand and good_id_to_name are defined to be either dict or defaultdict. Why? do we allow for either T1 or T2 or ... for types?
+# optional contents? (e.g. tac_error -> info)

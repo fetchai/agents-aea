@@ -1,0 +1,20 @@
+name: ml_trade
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+description: 'A protocol for trading data for training and prediction purposes.'
+speech_acts:
+  cfp:
+    query: Query
+  terms:
+    terms: Descrition
+  accept:
+    terms: Descrition
+    tx_digest: str
+  data:
+    terms: Descrition
+    data: Tuple
+
+
+  # data -> data is a tuple of type np.ndarrays. Declare each t in data is of type np.ndarray.
+  # More constraint on data -> data: Tuple (the shape of the two elements must match)
