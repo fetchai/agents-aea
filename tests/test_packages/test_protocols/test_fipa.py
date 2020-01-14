@@ -280,145 +280,195 @@ def test_fipa_decoding_unknown_performative():
             FIPASerializer().decode(encoded_msg)
 
 
-def test_dialogues():
-    """Test the dialogues model."""
-    dialogues = FIPADialogues()
-    result = dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent", is_seller=True)
-    assert isinstance(result, FIPADialogue)
-    result = dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent", dialogue_reference=(str(0), ''), is_seller=False)
-    assert isinstance(result, FIPADialogue)
-    assert result.role == FIPADialogue.AgentRole.BUYER
-    assert dialogues.dialogue_stats is not None
-    dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.SUCCESSFUL, is_self_initiated=True)
-    dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.DECLINED_CFP, is_self_initiated=False)
-    assert dialogues.dialogue_stats.self_initiated == {FIPADialogue.EndState.SUCCESSFUL: 1, FIPADialogue.EndState.DECLINED_PROPOSE: 0, FIPADialogue.EndState.DECLINED_ACCEPT: 0, FIPADialogue.EndState.DECLINED_CFP: 0}
-    assert dialogues.dialogue_stats.other_initiated == {FIPADialogue.EndState.SUCCESSFUL: 0, FIPADialogue.EndState.DECLINED_PROPOSE: 0, FIPADialogue.EndState.DECLINED_ACCEPT: 0, FIPADialogue.EndState.DECLINED_CFP: 1}
-    assert dialogues.dialogues_as_seller is not None
-    msg = FIPAMessage(message_id=0,
-                      dialogue_reference=(str(0), ''),
-                      target=1,
-                      performative=FIPAMessage.Performative.ACCEPT)
-    msg.counterparty = "opponent"
-    result = dialogues.is_permitted_for_new_dialogue(msg)
-    assert result is False
+class Test_dialogues:
+    """Tests dialogues model from the packages protocols fipa."""
 
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        cls.dialogues = FIPADialogues()
+        proposal = [
+            Description({"foo1": 1, "bar1": 2}),
+            Description({"foo2": 1, "bar2": 2}),
+        ]
+        cls.last_msg = FIPAMessage(message_id=0,
+                                   dialogue_reference=(str(0), ''),
+                                   target=0,
+                                   performative=FIPAMessage.Performative.PROPOSE,
+                                   proposal=proposal)
 
-def test_dialogues_is_belonging_to_registered_dialogue():
-    """Test if the dialogue is a part of an other dialogue."""
-    dialogues = FIPADialogues()
-    result = dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent", dialogue_reference=(str(0), ''), is_seller=True)
+    def test_dialogues(self):
+        """Test the dialogues model."""
+        result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter",
+                                                      dialogue_opponent_addr="opponent",
+                                                      is_seller=True)
+        assert isinstance(result, FIPADialogue)
+        result = self.dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent",
+                                                          dialogue_reference=(str(0), ''),
+                                                          is_seller=False)
+        assert isinstance(result, FIPADialogue)
+        assert result.role == FIPADialogue.AgentRole.BUYER
+        assert self.dialogues.dialogue_stats is not None
+        self.dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.SUCCESSFUL, is_self_initiated=True)
+        self.dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.DECLINED_CFP, is_self_initiated=False)
+        assert self.dialogues.dialogue_stats.self_initiated == {FIPADialogue.EndState.SUCCESSFUL: 1,
+                                                                FIPADialogue.EndState.DECLINED_PROPOSE: 0,
+                                                                FIPADialogue.EndState.DECLINED_ACCEPT: 0,
+                                                                FIPADialogue.EndState.DECLINED_CFP: 0}
+        assert self.dialogues.dialogue_stats.other_initiated == {FIPADialogue.EndState.SUCCESSFUL: 0,
+                                                                 FIPADialogue.EndState.DECLINED_PROPOSE: 0,
+                                                                 FIPADialogue.EndState.DECLINED_ACCEPT: 0,
+                                                                 FIPADialogue.EndState.DECLINED_CFP: 1}
+        assert self.dialogues.dialogues_as_seller is not None
+        msg = FIPAMessage(message_id=0,
+                          dialogue_reference=(str(0), ''),
+                          target=1,
+                          performative=FIPAMessage.Performative.ACCEPT)
+        msg.counterparty = "opponent"
+        result = self.dialogues.is_permitted_for_new_dialogue(msg)
+        assert result is False
 
-    proposal = [
-        Description({"foo1": 1, "bar1": 2}),
-        Description({"foo2": 1, "bar2": 2}),
-    ]
-    last_msg = FIPAMessage(message_id=0,
-                           dialogue_reference=(str(0), ''),
-                           target=0,
-                           performative=FIPAMessage.Performative.PROPOSE,
-                           proposal=proposal)
-    result._outgoing_messages.append(last_msg)
-
-    other_initiated_dialogue = DialogueLabel((str(0), ''), "opponent", "opponent")
-
-    dialogues.dialogues[other_initiated_dialogue] = cast(FIPADialogue, result)
-    msg = FIPAMessage(message_id=1,
-                      dialogue_reference=(str(0), ''),
-                      target=1,
-                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
-                      info={"address": "dummy_address"})
-    msg.counterparty = "opponent"
-    r = dialogues.is_belonging_to_registered_dialogue(msg, agent_addr="opponent")
-    assert r
-
-    result = dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent",
-                                             is_seller=True)
-    self_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
-    dialogues.dialogues[self_initiated_dialogue_label] = cast(FIPADialogue, result)
-    msg = FIPAMessage(message_id=1,
-                      dialogue_reference=(str(0), ''),
-                      target=1,
-                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
-                      info={"address": "dummy_address"})
-    msg.counterparty = "opponent"
-    r = dialogues.is_belonging_to_registered_dialogue(msg, agent_addr="starter")
-    assert r is False
-
-    msg = FIPAMessage(message_id=1,
-                      dialogue_reference=(str(0), ''),
-                      target=1,
-                      performative=FIPAMessage.Performative.ACCEPT)
-    alt_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
-    msg.counterparty = "opponent"
-    dialogues._initiated_dialogues[alt_initiated_dialogue_label] = cast(FIPADialogue, result)
-    r = dialogues.is_belonging_to_registered_dialogue(msg, agent_addr="starter")
-    assert r is False
-
-
-def test_get_dialogues():
-    """Test the returned dialogues."""
-    dialogues = FIPADialogues()
-    self_result = dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent",
-                                                  is_seller=True)
-    opponent_result = dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent",
+    def test_dialogues_is_belonging_to_other_initiated_dialogue_label(self):
+        """Test if the given dialogue belongs to an other initiated dialogue."""
+        result = self.dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent",
                                                           dialogue_reference=(str(0), ''), is_seller=True)
-    proposal = [
-        Description({"foo1": 1, "bar1": 2}),
-        Description({"foo2": 1, "bar2": 2}),
-    ]
-    last_msg = FIPAMessage(message_id=0,
-                           dialogue_reference=(str(0), ''),
-                           target=0,
-                           performative=FIPAMessage.Performative.PROPOSE,
-                           proposal=proposal)
-    self_result._outgoing_messages.append(last_msg)
+        result._outgoing_messages.append(self.last_msg)
+        other_initiated_dialogue = DialogueLabel((str(0), ''), "opponent", "opponent")
 
-    msg = FIPAMessage(message_id=1,
-                      dialogue_reference=(str(0), ''),
-                      target=1,
-                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
-                      info={"address": "dummy_address"})
+        self.dialogues.dialogues[other_initiated_dialogue] = cast(FIPADialogue, result)
+        msg = FIPAMessage(message_id=1,
+                          dialogue_reference=(str(0), ''),
+                          target=1,
+                          performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                          info={"address": "dummy_address"})
+        msg.counterparty = "opponent"
+        response = self.dialogues.is_belonging_to_registered_dialogue(msg, agent_addr="opponent")
+        assert response, "We expect the response from the function to be true."
 
-    msg.counterparty = "opponent"
-    self_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
-    dialogues.dialogues[self_initiated_dialogue_label] = cast(FIPADialogue, self_result)
+    def test_dialogues_is_belonging_to_self_initiated_dialogue_label(self):
+        """Test if the given dialogue belongs to self initiated dialogue."""
+        result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent",
+                                                      is_seller=False)
+        result._outgoing_messages.append(self.last_msg)
+        self_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
+        self.dialogues.dialogues[self_initiated_dialogue_label] = cast(FIPADialogue, result)
+        msg = FIPAMessage(message_id=1,
+                          dialogue_reference=(str(0), ''),
+                          target=1,
+                          performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                          info={"address": "dummy_address"})
+        msg.counterparty = "opponent"
+        response = self.dialogues.is_belonging_to_registered_dialogue(msg, agent_addr="starter")
+        assert response, "We expect the response from the function to be true"
 
-    opponent_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "opponent")
-    dialogues.dialogues[opponent_initiated_dialogue_label] = cast(FIPADialogue, opponent_result)
+    def test_dialogues_is_belonging_to_alternative_initiated_dialogue_label(self):
+        """Test if the given dialogue belongs to alternative initiated dialogue label."""
+        result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter",
+                                                      dialogue_opponent_addr="opponent",
+                                                      is_seller=True)
+        result._outgoing_messages.append(self.last_msg)
+        alt_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
+        self.dialogues._initiated_dialogues[alt_initiated_dialogue_label] = cast(FIPADialogue, result)
+        msg = FIPAMessage(message_id=1,
+                          dialogue_reference=(str(5), 'starter'),
+                          target=1,
+                          performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                          info={"address": "dummy_address"})
+        msg.counterparty = "opponent"
+        response = self.dialogues.is_belonging_to_registered_dialogue(msg, agent_addr="starter")
+        assert response, "We expect the response from the function to be true."
 
-    retrieved_dialogue = dialogues.get_dialogue(fipa_msg=msg, agent_addr="starter")
-    assert retrieved_dialogue.is_self_initiated
-    opponent_retrieved_dialogue = dialogues.get_dialogue(fipa_msg=msg, agent_addr="starter")
-    assert opponent_retrieved_dialogue.is_self_initiated
-    with pytest.raises(ValueError, match="Should have found dialogue."):
-        dialogues.get_dialogue(fipa_msg=msg, agent_addr="unknown_addr")
+    def test_get_dialogues_other_initiated(self):
+        """Test the returned opponent initiated dialogues."""
+        opponent_result = self.dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent",
+                                                                   dialogue_reference=(str(0), ''), is_seller=True)
+        msg = FIPAMessage(message_id=1,
+                          dialogue_reference=(str(0), ''),
+                          target=1,
+                          performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                          info={"address": "dummy_address"})
+
+        msg.counterparty = "opponent"
+        opponent_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "opponent")
+        self.dialogues.dialogues[opponent_initiated_dialogue_label] = cast(FIPADialogue, opponent_result)
+        opponent_retrieved_dialogue = self.dialogues.get_dialogue(fipa_msg=msg, agent_addr="starter")
+        assert opponent_retrieved_dialogue.is_self_initiated
+
+    def test_get_dialogues_self_initiated(self):
+        """Test the returned self initiated dialogues."""
+        result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent",
+                                                      is_seller=True)
+        result._outgoing_messages.append(self.last_msg)
+        self_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
+        self.dialogues.dialogues[self_initiated_dialogue_label] = cast(FIPADialogue, result)
+        msg = FIPAMessage(message_id=1,
+                          dialogue_reference=(str(0), ''),
+                          target=1,
+                          performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                          info={"address": "dummy_address"})
+        msg.counterparty = "opponent"
+        retrieved_dialogue = self.dialogues.get_dialogue(fipa_msg=msg, agent_addr="starter")
+        assert retrieved_dialogue.is_self_initiated
+
+    def test_get_dialogues_value_error(self):
+        """Test the value error of the get dialogues function."""
+        msg = FIPAMessage(message_id=1,
+                          dialogue_reference=(str(0), ''),
+                          target=1,
+                          performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                          info={"address": "dummy_address"})
+        msg.counterparty = "opponent"
+        with pytest.raises(ValueError, match="Should have found dialogue."):
+            self.dialogues.get_dialogue(fipa_msg=msg, agent_addr="unknown_addr")
 
 
-def test_dialogue():
-    """Test the dialogue model."""
-    dialogues = FIPADialogues()
-    result = dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent", is_seller=True)
-    assert isinstance(result, FIPADialogue)
-    assert result.is_seller
-    proposal = [
-        Description({"foo1": 1, "bar1": 2}),
-        Description({"foo2": 1, "bar2": 2}),
-    ]
-    last_msg = FIPAMessage(message_id=0,
-                           dialogue_reference=(str(0), ''),
-                           target=0,
-                           performative=FIPAMessage.Performative.PROPOSE,
-                           proposal=proposal)
-    result._outgoing_messages.append(last_msg)
-    assert result.last_outgoing_message == last_msg
-    msg = FIPAMessage(message_id=1,
-                      dialogue_reference=(str(0), ''),
-                      target=1,
-                      performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
-                      info={"address": "dummy_address"})
-    r = result.is_valid_next_message(msg)
-    assert r
+class Test_dialogue:
+    """Tests dialogue model from the protocols fipa."""
 
-    dialogue_label = DialogueLabel(dialogue_reference=("1", "2"), dialogue_opponent_addr="opponent", dialogue_starter_addr="starter")
-    result.assign_final_dialogue_label(final_dialogue_label=dialogue_label)
-    assert result.dialogue_label.dialogue_starter_reference == dialogue_label.dialogue_starter_reference
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        cls.dialogues = FIPADialogues()
+        proposal = [
+            Description({"foo1": 1, "bar1": 2}),
+            Description({"foo2": 1, "bar2": 2}),
+        ]
+        cls.last_msg = FIPAMessage(message_id=0,
+                                   dialogue_reference=(str(0), ''),
+                                   target=0,
+                                   performative=FIPAMessage.Performative.PROPOSE,
+                                   proposal=proposal)
+
+    def test_dialogue_last_outgoing_message(self):
+        """Test the last outgoing message from the dialogue."""
+        result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent", is_seller=True)
+        assert isinstance(result, FIPADialogue)
+        assert result.is_seller
+
+        result._outgoing_messages.append(self.last_msg)
+        assert result.last_outgoing_message == self.last_msg, "The last message must be the same with the initialised message"
+
+    def test_the_message_is_valid_as_next_message(self):
+        """Test if the message we are trying to send is a valid one based on the sequence."""
+        result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter",
+                                                      dialogue_opponent_addr="opponent", is_seller=True)
+        result._outgoing_messages.append(self.last_msg)
+        assert isinstance(result, FIPADialogue)
+        msg = FIPAMessage(message_id=1,
+                          dialogue_reference=(str(0), ''),
+                          target=1,
+                          performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                          info={"address": "dummy_address"})
+        response = result.is_valid_next_message(msg)
+        assert response
+
+    def test_assign_final_dialogue(self):
+        """Test the final_dialogue_label."""
+        result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter",
+                                                      dialogue_opponent_addr="opponent", is_seller=True)
+        result._outgoing_messages.append(self.last_msg)
+        assert isinstance(result, FIPADialogue)
+        dialogue_label = DialogueLabel(dialogue_reference=("3", "0"), dialogue_opponent_addr="opponent",
+                                       dialogue_starter_addr="starter")
+        result.assign_final_dialogue_label(final_dialogue_label=dialogue_label)
+        assert result.dialogue_label.dialogue_starter_reference == dialogue_label.dialogue_starter_reference
