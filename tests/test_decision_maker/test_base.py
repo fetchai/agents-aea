@@ -27,6 +27,7 @@ import pytest
 
 import aea
 import aea.decision_maker.base
+from aea.decision_maker.base import LedgerStateProxy
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet, FETCHAI
@@ -119,6 +120,36 @@ class TestUtilityPreferencesBase:
 
         assert self.ownership_state.check_transaction_is_affordable(tx_message=tx_message), \
             "We should have the goods for the transaction!"
+
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"FET": 0},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 0},
+                                        info={'some_info_key': 'some_info_value'},
+                                        ledger_id="fetchai")
+
+        assert not self.ownership_state.check_transaction_is_affordable(tx_message=tx_message), \
+            "We should reject the transaction!"
+
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"FET": 350},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 350},
+                                        info={'some_info_key': 'some_info_value'},
+                                        ledger_id="fetchai")
+
+        assert not self.ownership_state.check_transaction_is_affordable(tx_message=tx_message), \
+            "We should reject the transaction!"
 
     def test_apply(self):
         """Test the apply function."""
@@ -345,7 +376,10 @@ class TestDecisionMaker:
         assert self.decision_maker.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
 
     def test_decision_maker_handle_tx_message(self):
-        """Test the handle tx meessa method."""
+        """Test the handle tx message method."""
+
+        assert self.decision_maker.message_out_queue.empty()
+
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
                                         tx_id="transaction0",
@@ -381,6 +415,21 @@ class TestDecisionMaker:
                                         tx_quantities_by_good_id={"good_id": 10},
                                         info={'some_info_key': 'some_info_value'},
                                         ledger_id="fetchai")
+        self.decision_maker.handle(tx_message)
+        assert not self.decision_maker.message_out_queue.empty()
+
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"FET": -20},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 0},
+                                        ledger_id="fetchai",
+                                        info={'dialogue_label': "some_value"},
+                                        signing_payload={"key": b'some_bytes'})
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
 
@@ -457,3 +506,50 @@ class TestDecisionMaker:
         """Tear the tests down."""
         cls._unpatch_logger()
         cls.multiplexer.disconnect()
+
+
+class Test_LedgerStateProxy:
+    """Test the Ledger State Proxy"""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
+        cls.ledger_state_proxy = LedgerStateProxy(ledger_apis=cls.ledger_apis)
+
+    def test_ledger_apis(self):
+        """Test the returned ledger_apis."""
+        assert self.ledger_state_proxy.ledger_apis == self.ledger_apis, "Must be equal."
+
+    def test_transaction_is_affordable(self):
+        """Test if the transaction is affordable on the ledger."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"FET": -20},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
+                                        ledger_id="off_chain",
+                                        info={'some_info_key': 'some_info_value'})
+
+        with mock.patch.object(self.ledger_state_proxy.ledger_apis, "token_balance", return_value=0):
+            result = self.ledger_state_proxy.check_transaction_is_affordable(tx_message=tx_message)
+        assert not result
+
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"FET": 20},
+                                        tx_sender_fee=5,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
+                                        ledger_id="off_chain",
+                                        info={'some_info_key': 'some_info_value'})
+        with mock.patch.object(self.ledger_state_proxy.ledger_apis, "token_balance", return_value=0):
+            result = self.ledger_state_proxy.check_transaction_is_affordable(tx_message=tx_message)
+        assert result
