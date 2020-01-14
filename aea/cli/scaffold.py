@@ -98,8 +98,8 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
         # ensure the name in the yaml and the name of the folder are the same
-        config_filepath = os.path.join(ctx.cwd, item_type_plural, item_name, default_config_filename)
-        config = loader.load(open(str(config_filepath)))
+        config_filepath = Path(ctx.cwd, item_type_plural, item_name, default_config_filename)
+        config = loader.load(config_filepath.open())
         config.name = item_name
         loader.dump(config, open(config_filepath, "w"))
 

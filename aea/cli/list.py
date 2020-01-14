@@ -20,6 +20,7 @@
 """Implementation of the 'aea list' subcommand."""
 import os
 from collections import Set
+from pathlib import Path
 from typing import List, Dict
 
 import click
@@ -44,13 +45,12 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
     default_file_name = _get_default_configuration_file_name_from_type(item_type)
     for public_id in public_ids:
         # if author of item is different from author of the agent project, retrieve the item from the vendor directory.
-        if public_id.author != ctx.agent_config.author:
-            configuration_filepath = os.path.join(ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name, default_file_name)
-        # otherwise, retrieve the item from the agent custom packages
-        else:
-            configuration_filepath = os.path.join(ctx.cwd, item_type_plural, public_id.name, default_file_name)
+        configuration_filepath = Path(ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name, default_file_name)
+        # otherwise, if it does not exist, retrieve the item from the agent custom packages
+        if not configuration_filepath.exists():
+            configuration_filepath = Path(ctx.cwd, item_type_plural, public_id.name, default_file_name)
         configuration_loader = ConfigLoader.from_configuration_type(ConfigurationType(item_type))
-        details = retrieve_details(public_id.name, configuration_loader, configuration_filepath)
+        details = retrieve_details(public_id.name, configuration_loader, str(configuration_filepath))
         result.append(details)
     return result
 

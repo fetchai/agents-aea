@@ -24,9 +24,8 @@ import logging.config
 import os
 import shutil
 import sys
-from functools import reduce
 from pathlib import Path
-from typing import Dict, List, cast, Optional, Set
+from typing import Dict, List, cast, Optional
 
 import click
 import jsonschema  # type: ignore
@@ -81,12 +80,11 @@ class Context(object):
         """Get the dependencies from item type and public id."""
         item_type_plural = item_type + "s"
         default_config_file_name = _get_default_configuration_file_name_from_type(item_type)
-        if public_id.author != self.agent_config.author:
-            path = str(Path("vendor", public_id.author, item_type_plural, public_id.name, default_config_file_name))
-        else:
-            path = str(Path(item_type_plural, public_id.name, default_config_file_name))
+        path = Path("vendor", public_id.author, item_type_plural, public_id.name, default_config_file_name)
+        if not path.exists():
+            path = Path(item_type_plural, public_id.name, default_config_file_name)
         config_loader = ConfigLoader.from_configuration_type(item_type)
-        config = config_loader.load(open(path))
+        config = config_loader.load(path.open())
         deps = cast(Dependencies, config.dependencies)
         return deps
 
@@ -122,7 +120,7 @@ def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
     """
     try:
         path = Path(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE))
-        with open(str(path), mode="r", encoding="utf-8") as fp:
+        with path.open(mode="r", encoding="utf-8") as fp:
             ctx.agent_config = ctx.agent_loader.load(fp)
             logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
@@ -142,10 +140,10 @@ def _try_to_load_protocols(ctx: Context):
         protocol_name = protocol_public_id.name
         protocol_author = protocol_public_id.author
         logger.debug("Processing protocol {}".format(protocol_public_id))
-        if protocol_public_id.author != ctx.agent_config.author:
-            protocol_dir = Path("vendor", protocol_public_id.author, "protocols", protocol_name)
-        else:
+        protocol_dir = Path("vendor", protocol_public_id.author, "protocols", protocol_name)
+        if not protocol_dir.exists():
             protocol_dir = Path("protocols", protocol_name)
+
         try:
             ctx.protocol_loader.load(open(protocol_dir / DEFAULT_PROTOCOL_CONFIG_FILE))
         except FileNotFoundError:
@@ -370,7 +368,7 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     # try to load the item configuration file
     try:
         item_configuration_loader = ConfigLoader.from_configuration_type(ConfigurationType(item_type))
-        item_configuration = item_configuration_loader.load(open(str(item_configuration_filepath)))
+        item_configuration = item_configuration_loader.load(item_configuration_filepath.open())
     except ValidationError as e:
         logger.error("{} configuration file not valid: {}".format(item_type.capitalize(), str(e)))
         sys.exit(1)

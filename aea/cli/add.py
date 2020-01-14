@@ -95,7 +95,7 @@ def _add_item(click_context, item_type, item_public_id) -> None:
             configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
             configuration_path = package_path / configuration_file_name
             configuration_loader = ConfigLoader.from_configuration_type(ConfigurationType(item_type))
-            item_configuration = configuration_loader.load(open(str(configuration_path)))
+            item_configuration = configuration_loader.load(configuration_path.open())
             _add_protocols(click_context, item_configuration.protocols)
 
     # add the item to the configurations.

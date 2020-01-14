@@ -55,7 +55,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     """
     path = Path(DEFAULT_AEA_CONFIG_FILE)
     agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-    fp = open(str(path), mode="r", encoding="utf-8")
+    fp = path.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
     for identifier, value in aea_conf.private_key_paths.read_all():
@@ -103,7 +103,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
-    fp = open(str(path), mode="w", encoding="utf-8")
+    fp = path.open(mode="w", encoding="utf-8")
     agent_loader.dump(aea_conf, fp)
     ctx.agent_config = aea_conf
 
@@ -112,7 +112,7 @@ def _verify_ledger_apis_access() -> None:
     """Verify access to ledger apis."""
     path = Path(DEFAULT_AEA_CONFIG_FILE)
     agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-    fp = open(str(path), mode="r", encoding="utf-8")
+    fp = path.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
     for identifier, value in aea_conf.ledger_apis.read_all():
@@ -150,9 +150,8 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
     connection_public_id = supported_connection_names[connection_name]
-    if connection_public_id.author != ctx.agent_config.author:
-        connection_dir = Path("vendor", connection_public_id.author, "connections", connection_public_id.name)
-    else:
+    connection_dir = Path("vendor", connection_public_id.author, "connections", connection_public_id.name)
+    if not connection_dir.exists():
         connection_dir = Path("connections", connection_public_id.name)
 
     try:

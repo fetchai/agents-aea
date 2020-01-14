@@ -19,9 +19,9 @@
 
 """Implementation of the 'aea remove' subcommand."""
 
-import os
 import shutil
 import sys
+from pathlib import Path
 
 import click
 
@@ -51,10 +51,11 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
         logger.error("The {} '{}' is not supported.".format(item_type, item_id))
         sys.exit(1)
 
-    if item_id.author != ctx.agent_config.author:
-        item_folder = os.path.join("vendor", item_id.author, item_type_plural, item_name)
-    else:
-        item_folder = os.path.join(item_type_plural, item_name)
+    # TODO we assume the item in the agent config are necessarily in the agent projects.
+    item_folder = Path("vendor", item_id.author, item_type_plural, item_name)
+    if not item_folder.exists() and ctx.agent_config.author:
+        # check if it is present in custom packages.
+        item_folder = Path(item_type_plural, item_name)
 
     try:
         shutil.rmtree(item_folder)
