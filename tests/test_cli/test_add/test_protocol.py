@@ -24,13 +24,13 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
-from ...common.click_testing import CliRunner
+import yaml
 from jsonschema import ValidationError
 
-import aea
-import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION, CUR_PATH
 
 
@@ -44,7 +44,10 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "fetchai/gym:0.1.0"
+        cls.protocol_name = "gym"
+        cls.protocol_author = "fetchai"
+        cls.protocol_version = "0.1.0"
+        cls.protocol_id = cls.protocol_author + "/" + cls.protocol_name + ":" + cls.protocol_version
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
@@ -68,7 +71,83 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
 
         The expected message is: 'A protocol with id '{protocol_id}' already exists. Aborting...'
         """
-        s = "A protocol with id '{}' already exists. Aborting...".format(self.protocol_id)
+        s = "A protocol with id '{}' already exists. Aborting...".format(self.protocol_author + "/" + self.protocol_name)
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @unittest.mock.patch('aea.cli.add.fetch_package')
+    def test_add_protocol_from_registry_positive(
+        self, fetch_package_mock
+    ):
+        """Test add from registry positive result."""
+        public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
+        obj_type = 'protocol'
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
+            standalone_mode=False
+        )
+        assert result.exit_code == 0
+        fetch_package_mock.assert_called_once_with(
+            obj_type, public_id=public_id, cwd='.'
+        )
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
+    """Test that the command 'aea add protocol' fails when the protocol already exists."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.protocol_name = "gym"
+        cls.protocol_author = "fetchai"
+        cls.protocol_version = "0.1.0"
+        cls.protocol_id = cls.protocol_author + "/" + cls.protocol_name + ":" + cls.protocol_version
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", cls.protocol_id], standalone_mode=False)
+        assert result.exit_code == 0
+
+        # add protocol again, but with different version number
+        # first, change version number to package
+        different_version = "0.1.1"
+        different_id = cls.protocol_author + "/" + cls.protocol_name + ":" + different_version
+        config_path = Path(cls.t, "packages", cls.protocol_author, "protocols", cls.protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)
+        config = yaml.safe_load(config_path.open())
+        config["version"] = different_version
+        yaml.safe_dump(config, config_path.open(mode="w"))
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "protocol", different_id], standalone_mode=False)
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    def test_error_message_protocol_already_existing(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: 'A protocol with id '{protocol_id}' already exists. Aborting...'
+        """
+        s = "A protocol with id '{}' already exists. Aborting...".format(self.protocol_author + "/" + self.protocol_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @unittest.mock.patch('aea.cli.add.fetch_package')

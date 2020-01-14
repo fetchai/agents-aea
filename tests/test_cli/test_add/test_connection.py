@@ -24,12 +24,12 @@ import tempfile
 import unittest.mock
 from pathlib import Path
 
+import yaml
 from jsonschema import ValidationError
 
-import aea
-import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE
 from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION, CUR_PATH
 
@@ -44,8 +44,10 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
+        cls.connection_author = "fetchai"
+        cls.connection_version = "0.1.0"
+        cls.connection_id = cls.connection_author + "/" + cls.connection_name + ":" + cls.connection_version
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
         cls.mocked_logger_error = cls.patch.__enter__()
 
@@ -64,7 +66,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
 
     @unittest.mock.patch('aea.cli.add.fetch_package')
     def test_add_connection_from_registry_positive(
-        self, fetch_package_mock
+            self, fetch_package_mock
     ):
         """Test add from registry positive result."""
         public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
@@ -88,7 +90,67 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
 
         The expected message is: 'A connection with id '{connection_id}' already exists. Aborting...'
         """
-        s = "A connection with id '{}' already exists. Aborting...".format(self.connection_id)
+        s = "A connection with id '{}/{}' already exists. Aborting...".format(self.connection_author, self.connection_name)
+        self.mocked_logger_error.assert_called_once_with(s)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersion:
+    """Test that 'aea add connection' fails when the connection with different version already exists."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.connection_name = "local"
+        cls.connection_author = "fetchai"
+        cls.connection_version = "0.1.0"
+        cls.connection_id = cls.connection_author + "/" + cls.connection_name + ":" + cls.connection_version
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.mocked_logger_error = cls.patch.__enter__()
+
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+        # add connection first time
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        assert result.exit_code == 0
+
+        # add connection again, but with different version number
+        # first, change version number to package
+        different_version = "0.1.1"
+        different_id = cls.connection_author + "/" + cls.connection_name + ":" + different_version
+        config_path = Path(cls.t, "packages", cls.connection_author, "connections", cls.connection_name, DEFAULT_CONNECTION_CONFIG_FILE)
+        config = yaml.safe_load(config_path.open())
+        config["version"] = different_version
+        yaml.safe_dump(config, config_path.open(mode="w"))
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", different_id], standalone_mode=False)
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+        assert self.result.exit_code == 1
+
+    def test_error_message_connection_already_existing(self):
+        """Test that the log error message is fixed.
+
+        The expected message is: 'A connection with id '{connection_id}' already exists. Aborting...'
+        """
+        s = "A connection with id '{}' already exists. Aborting...".format(self.connection_author + "/" + self.connection_name)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -123,7 +185,8 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+                                       standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -169,7 +232,8 @@ class TestAddConnectionFailsWhenDifferentPublicId:
         result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+                                       standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -218,7 +282,8 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+                                       standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -265,8 +330,10 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         assert result.exit_code == 0
 
         os.chdir(cls.agent_name)
-        Path(cls.t, cls.agent_name, "vendor", "fetchai", "connections", cls.connection_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        Path(cls.t, cls.agent_name, "vendor", "fetchai", "connections", cls.connection_name).mkdir(parents=True,
+                                                                                                   exist_ok=True)
+        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+                                       standalone_mode=False)
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

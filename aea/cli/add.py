@@ -21,6 +21,7 @@
 
 import os
 import sys
+from pathlib import Path
 from typing import cast, Collection
 
 import click
@@ -46,9 +47,10 @@ def add(ctx: Context, registry):
 
 def _is_item_present(item_type, item_public_id, ctx):
     item_type_plural = item_type + 's'
-    dest_path = os.path.join(ctx.cwd, "vendor", item_public_id.author, item_type_plural, item_public_id.name)
-    items_in_config = getattr(ctx.agent_config, item_type_plural)
-    return item_public_id in items_in_config and os.path.exists(dest_path)
+    dest_path = Path(ctx.cwd, "vendor", item_public_id.author, item_type_plural, item_public_id.name)
+    # check item presence only by author/package_name pair, without version.
+    items_in_config = set(map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural)))
+    return (item_public_id.author, item_public_id.name) in items_in_config and dest_path.exists()
 
 
 def _add_protocols(click_context, protocols: Collection[PublicId]):
@@ -81,7 +83,9 @@ def _add_item(click_context, item_type, item_public_id) -> None:
     # check if we already have an item with the same name
     logger.debug("{} already supported by the agent: {}".format(item_type_plural.capitalize(), supported_items))
     if _is_item_present(item_type, item_public_id, ctx):
-        logger.error("A {} with id '{}' already exists. Aborting...".format(item_type, item_public_id))
+        logger.error("A {} with id '{}/{}' already exists. Aborting...".format(item_type,
+                                                                               item_public_id.author,
+                                                                               item_public_id.name))
         sys.exit(1)
 
     # find and add protocol

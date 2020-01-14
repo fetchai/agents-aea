@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea list' subcommand."""
-import os
 from collections import Set
 from pathlib import Path
 from typing import List, Dict
