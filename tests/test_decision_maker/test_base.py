@@ -27,6 +27,7 @@ import pytest
 
 import aea
 import aea.decision_maker.base
+from aea.crypto.ethereum import ETHEREUM
 from aea.decision_maker.base import LedgerStateProxy
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
 from aea.crypto.ledger_apis import LedgerApis
@@ -38,6 +39,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import OutBox, Multiplexer  # , Envelope
 from aea.protocols.default.message import DefaultMessage
 from ..conftest import CUR_PATH, DummyConnection
+from web3.auto import Web3
 
 MAX_REACTIONS = 10
 
@@ -309,7 +311,9 @@ class TestDecisionMaker:
         cls.multiplexer = Multiplexer([DummyConnection()])
         cls.outbox = OutBox(cls.multiplexer)
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
-        cls.wallet = Wallet({FETCHAI: private_key_pem_path})
+        eth_private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        cls.wallet = Wallet({FETCHAI: private_key_pem_path,
+                             ETHEREUM: eth_private_key_pem_path})
         cls.ledger_apis = LedgerApis({FETCHAI: DEFAULT_FETCHAI_CONFIG}, FETCHAI)
         cls.agent_name = "test"
         cls.ownership_state = OwnershipState()
@@ -467,6 +471,39 @@ class TestDecisionMaker:
 
         assert self.decision_maker._is_affordable(tx_message)
 
+    def test_is_not_affordable_ledger_state_proxy(self):
+        """Test that the tx_message is not affordable with initialized ledger_state_proxy."""
+        with mock.patch("aea.decision_maker.messages.transaction.TransactionMessage.check_consistency", return_value=True):
+            tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                            skill_callback_ids=["default"],
+                                            tx_id="transaction0",
+                                            tx_sender_addr="agent_1",
+                                            tx_counterparty_addr="pk",
+                                            tx_amount_by_currency_id={"FET": -20},
+                                            tx_sender_fee=0,
+                                            tx_counterparty_fee=0,
+                                            tx_quantities_by_good_id={"good_id": 10},
+                                            ledger_id="bitcoin",
+                                            info={'some_info_key': 'some_info_value'})
+            var = self.decision_maker._is_affordable(tx_message)
+            assert not var
+
+    def test_is_affordable_ledger_state_proxy(self):
+        """Test that the tx_message is affordable with initialized ledger_state_proxy."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"FET": -20},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
+                                        ledger_id="fetchai",
+                                        info={'some_info_key': 'some_info_value'})
+        with mock.patch.object(self.decision_maker.ledger_state_proxy, "check_transaction_is_affordable", return_value=True):
+            assert self.decision_maker._is_affordable(tx_message)
+
     def test_settle_tx_off_chain(self):
         """Test the off_chain message."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
@@ -484,7 +521,7 @@ class TestDecisionMaker:
         tx_digest = self.decision_maker._settle_tx(tx_message)
         assert tx_digest == "off_chain_settlement"
 
-    def test__is_utility_enhancing(self):
+    def test_is_utility_enhancing(self):
         """Test the utility enhancing for off_chain message."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
@@ -499,6 +536,42 @@ class TestDecisionMaker:
                                         info={'some_info_key': 'some_info_value'})
         self.decision_maker.ownership_state._quantities_by_good_id = None
         assert self.decision_maker._is_utility_enhancing(tx_message)
+
+    def test_sign_tx(self):
+        """Test the private function sign_tx of the decision maker."""
+        tx_hash = Web3.keccak(text="some_bytes")
+
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"FET": -20},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 0},
+                                        ledger_id="fetchai",
+                                        info={'dialogue_label': "some_value"},
+                                        signing_payload={"tx_hash": tx_hash})
+
+        tx_signature = self.decision_maker._sign_tx(tx_message)
+        assert tx_signature is not None
+
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+                                        skill_callback_ids=["default"],
+                                        tx_id="transaction0",
+                                        tx_sender_addr="agent_1",
+                                        tx_counterparty_addr="pk",
+                                        tx_amount_by_currency_id={"FET": -20},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 0},
+                                        ledger_id="off_chain",
+                                        info={'dialogue_label': "some_value"},
+                                        signing_payload={"tx_hash": tx_hash})
+
+        tx_signature = self.decision_maker._sign_tx(tx_message)
+        assert tx_signature is not None
 
     @classmethod
     def teardown_class(cls):

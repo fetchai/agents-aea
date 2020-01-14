@@ -204,6 +204,7 @@ class TransactionMessage(InternalMessage):
         :return: bool
         """
         try:
+
             assert isinstance(self.performative, TransactionMessage.Performative), "Performative is not of correct type."
             assert isinstance(self.skill_callback_ids, list) and all(isinstance(s, str) for s in self.skill_callback_ids), "Skill_callback_ids must be of type List[str]."
             assert isinstance(self.tx_id, str), "Tx_id must of type str."
