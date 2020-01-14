@@ -297,15 +297,22 @@ class Test_dialogues:
     def setup_class(cls):
         """Set up the test."""
         cls.dialogues = FIPADialogues()
+
+        cls.first_msg = cls.inc_msg = FIPAMessage(message_id=1,
+                                                  dialogue_reference=(str(0), ''),
+                                                  target=0,
+                                                  performative=FIPAMessage.Performative.CFP,
+                                                  query=None)
+
         proposal = [
             Description({"foo1": 1, "bar1": 2}),
             Description({"foo2": 1, "bar2": 2}),
         ]
-        cls.last_msg = FIPAMessage(message_id=0,
-                                   dialogue_reference=(str(0), ''),
-                                   target=0,
-                                   performative=FIPAMessage.Performative.PROPOSE,
-                                   proposal=proposal)
+        cls.second_msg = FIPAMessage(message_id=2,
+                                    dialogue_reference=(str(0), ''),
+                                    target=1,
+                                    performative=FIPAMessage.Performative.PROPOSE,
+                                    proposal=proposal)
 
     def test_dialogues(self):
         """Test the dialogues model."""
@@ -330,9 +337,9 @@ class Test_dialogues:
                                                                  FIPADialogue.EndState.DECLINED_ACCEPT: 0,
                                                                  FIPADialogue.EndState.DECLINED_CFP: 1}
         assert self.dialogues.dialogues_as_seller is not None
-        msg = FIPAMessage(message_id=0,
+        msg = FIPAMessage(message_id=3,
                           dialogue_reference=(str(0), ''),
-                          target=1,
+                          target=2,
                           performative=FIPAMessage.Performative.ACCEPT)
         msg.counterparty = "opponent"
         result = self.dialogues.is_permitted_for_new_dialogue(msg)
@@ -342,29 +349,29 @@ class Test_dialogues:
         """Test if the given dialogue belongs to an other initiated dialogue."""
         result = self.dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent",
                                                           dialogue_reference=(str(0), ''), is_seller=True)
-        result._outgoing_messages.append(self.last_msg)
+        result.incoming_extend(self.first_msg)
+        result.outgoing_extend(self.second_msg)
         other_initiated_dialogue = DialogueLabel((str(0), ''), "opponent", "opponent")
-
         self.dialogues.dialogues[other_initiated_dialogue] = cast(FIPADialogue, result)
-        msg = FIPAMessage(message_id=1,
-                          dialogue_reference=(str(0), ''),
-                          target=1,
-                          performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
-                          info={"address": "dummy_address"})
-        msg.counterparty = "opponent"
-        response = self.dialogues.is_belonging_to_registered_dialogue(msg, agent_addr="opponent")
+        third_msg = FIPAMessage(message_id=3,
+                                dialogue_reference=(str(0), ''),
+                                target=2,
+                                performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                                info={"address": "dummy_address"})
+        third_msg.counterparty = "opponent"
+        response = self.dialogues.is_belonging_to_registered_dialogue(third_msg, agent_addr="opponent")
         assert response, "We expect the response from the function to be true."
 
     def test_dialogues_is_belonging_to_self_initiated_dialogue_label(self):
         """Test if the given dialogue belongs to self initiated dialogue."""
         result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent",
                                                       is_seller=False)
-        result._outgoing_messages.append(self.last_msg)
+        result.outgoing_extend(self.second_msg)
         self_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
         self.dialogues.dialogues[self_initiated_dialogue_label] = cast(FIPADialogue, result)
-        msg = FIPAMessage(message_id=1,
+        msg = FIPAMessage(message_id=3,
                           dialogue_reference=(str(0), ''),
-                          target=1,
+                          target=2,
                           performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                           info={"address": "dummy_address"})
         msg.counterparty = "opponent"
@@ -376,12 +383,12 @@ class Test_dialogues:
         result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter",
                                                       dialogue_opponent_addr="opponent",
                                                       is_seller=True)
-        result._outgoing_messages.append(self.last_msg)
+        result.outgoing_extend(self.second_msg)
         alt_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
         self.dialogues._initiated_dialogues[alt_initiated_dialogue_label] = cast(FIPADialogue, result)
-        msg = FIPAMessage(message_id=1,
+        msg = FIPAMessage(message_id=3,
                           dialogue_reference=(str(5), 'starter'),
-                          target=1,
+                          target=2,
                           performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                           info={"address": "dummy_address"})
         msg.counterparty = "opponent"
@@ -392,9 +399,9 @@ class Test_dialogues:
         """Test the returned opponent initiated dialogues."""
         opponent_result = self.dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent",
                                                                    dialogue_reference=(str(0), ''), is_seller=True)
-        msg = FIPAMessage(message_id=1,
+        msg = FIPAMessage(message_id=3,
                           dialogue_reference=(str(0), ''),
-                          target=1,
+                          target=2,
                           performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                           info={"address": "dummy_address"})
 
@@ -408,12 +415,12 @@ class Test_dialogues:
         """Test the returned self initiated dialogues."""
         result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter", dialogue_opponent_addr="opponent",
                                                       is_seller=True)
-        result._outgoing_messages.append(self.last_msg)
+        result.outgoing_extend(self.second_msg)
         self_initiated_dialogue_label = DialogueLabel((str(0), ''), "opponent", "starter")
         self.dialogues.dialogues[self_initiated_dialogue_label] = cast(FIPADialogue, result)
-        msg = FIPAMessage(message_id=1,
+        msg = FIPAMessage(message_id=3,
                           dialogue_reference=(str(0), ''),
-                          target=1,
+                          target=2,
                           performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                           info={"address": "dummy_address"})
         msg.counterparty = "opponent"
@@ -422,9 +429,9 @@ class Test_dialogues:
 
     def test_get_dialogues_value_error(self):
         """Test the value error of the get dialogues function."""
-        msg = FIPAMessage(message_id=1,
+        msg = FIPAMessage(message_id=3,
                           dialogue_reference=(str(0), ''),
-                          target=1,
+                          target=2,
                           performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                           info={"address": "dummy_address"})
         msg.counterparty = "opponent"
@@ -451,9 +458,9 @@ class Test_dialogue:
             Description({"foo1": 1, "bar1": 2}),
             Description({"foo2": 1, "bar2": 2}),
         ]
-        cls.last_msg = FIPAMessage(message_id=0,
+        cls.last_msg = FIPAMessage(message_id=2,
                                    dialogue_reference=(str(0), ''),
-                                   target=0,
+                                   target=1,
                                    performative=FIPAMessage.Performative.PROPOSE,
                                    proposal=proposal)
 
@@ -463,18 +470,18 @@ class Test_dialogue:
         assert isinstance(result, FIPADialogue)
         assert result.is_seller
 
-        result._outgoing_messages.append(self.last_msg)
+        result.outgoing_extend(self.last_msg)
         assert result.last_outgoing_message == self.last_msg, "The last message must be the same with the initialised message"
 
     def test_the_message_is_valid_as_next_message(self):
         """Test if the message we are trying to send is a valid one based on the sequence."""
         result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter",
                                                       dialogue_opponent_addr="opponent", is_seller=True)
-        result._outgoing_messages.append(self.last_msg)
+        result.outgoing_extend(self.last_msg)
         assert isinstance(result, FIPADialogue)
-        msg = FIPAMessage(message_id=1,
+        msg = FIPAMessage(message_id=3,
                           dialogue_reference=(str(0), ''),
-                          target=1,
+                          target=2,
                           performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                           info={"address": "dummy_address"})
         response = result.is_valid_next_message(msg)
@@ -484,7 +491,7 @@ class Test_dialogue:
         """Test the final_dialogue_label."""
         result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter",
                                                       dialogue_opponent_addr="opponent", is_seller=True)
-        result._outgoing_messages.append(self.last_msg)
+        result.outgoing_extend(self.last_msg)
         assert isinstance(result, FIPADialogue)
         dialogue_label = DialogueLabel(dialogue_reference=("3", "0"), dialogue_opponent_addr="opponent",
                                        dialogue_starter_addr="starter")
