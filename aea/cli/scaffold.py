@@ -67,17 +67,15 @@ def skill(ctx: Context, skill_name: str):
 
 def _scaffold_item(ctx: Context, item_type, item_name):
     """Add an item scaffolding to the configuration file and agent."""
-    existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
-    existing_item_list = [public_id.name for public_id in existing_id_list]
-
+    author_name = ctx.agent_config.author
     loader = getattr(ctx, "{}_loader".format(item_type))
     default_config_filename = globals()["DEFAULT_{}_CONFIG_FILE".format(item_type.upper())]
 
     item_type_plural = item_type + "s"
-
-    # check if we already have an item with the same name
-    logger.debug("{} already supported by the agent: {}".format(item_type_plural, existing_item_list))
-    if item_name in existing_item_list:
+    existing_ids = getattr(ctx.agent_config, "{}s".format(item_type))
+    existing_ids_only_author_and_name = map(lambda x: (x.author, x.name), existing_ids)
+    # check if we already have an item with the same public id
+    if (author_name, item_name) in existing_ids_only_author_and_name:
         logger.error("A {} with name '{}' already exists. Aborting...".format(item_type, item_name))
         sys.exit(1)
 
@@ -96,7 +94,7 @@ def _scaffold_item(ctx: Context, item_type, item_name):
 
         # add the item to the configurations.
         logger.debug("Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
-        existing_id_list.add(PublicId("fetchai", item_name, DEFAULT_VERSION))
+        existing_ids.add(PublicId(author_name, item_name, DEFAULT_VERSION))
         ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
 
         # ensure the name in the yaml and the name of the folder are the same
@@ -104,8 +102,6 @@ def _scaffold_item(ctx: Context, item_type, item_name):
         config = loader.load(open(str(config_filepath)))
         config.name = item_name
         loader.dump(config, open(config_filepath, "w"))
-
-        # TODO: add user as author to config, update name of item in config
 
     except FileExistsError:
         logger.error("A {} with this name already exists. Please choose a different name and try again.".format(item_type))
