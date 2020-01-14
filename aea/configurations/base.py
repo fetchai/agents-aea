@@ -790,9 +790,9 @@ class ProtocolSpecification(ProtocolConfig):
             license=cast(str, obj.get("license")),
             description=cast(str, obj.get("description", ""))
         )
-        for speech_act, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
+        for performative, speech_act_content in obj.get("speech_acts", {}).items():  # type: ignore
             speech_act_content_config = SpeechActContentConfig.from_json(speech_act_content)
-            protocol_specification.speech_acts.create(speech_act, speech_act_content_config)
+            protocol_specification.speech_acts.create(performative, speech_act_content_config)
         protocol_specification._check_consistency()
         return protocol_specification
 
@@ -801,8 +801,14 @@ class ProtocolSpecification(ProtocolConfig):
         if len(self.speech_acts.read_all()) == 0:
             raise ProtocolSpecificationParseError(
                 "There should be at least one performative defined in the speech_acts.")
+        content_dict = {}
         for performative, speech_act_content_config in self.speech_acts.read_all():
             if type(performative) is not str:
                 raise ProtocolSpecificationParseError("A 'performative' is not specified as a string.")
             if performative == "":
                 raise ProtocolSpecificationParseError("A 'performative' cannot be an empty string.")
+            for content_name, content_type in speech_act_content_config.args.items():
+                if content_name in content_dict.keys():
+                    if content_type != content_dict[content_name]:
+                        raise ProtocolSpecificationParseError("The content \'{}\' appears more than once with different types in speech_acts.".format(content_name))
+                content_dict[content_name] = content_type

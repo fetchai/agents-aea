@@ -16,18 +16,21 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests for the protocol generator"""
+"""This module contains the tests for the protocol generator."""
 
 import inspect
 import os
-from unittest import TestCase
+# import sys
+# from unittest import TestCase
 import yaml
 import shutil
 import tempfile
+# from pathlib import Path
 
 from aea.protocols.generator import ProtocolGenerator
-from aea.configurations.base import ProtocolSpecificationParseError, ProtocolSpecification
+from aea.configurations.base import ProtocolSpecification
 from aea.configurations.loader import ConfigLoader
+# from aea.helpers.base import load_module, import_module
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 
@@ -38,7 +41,9 @@ class TestGenerateProtocol:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
+        # Specification
         cls.protocol_name = 'two_party_negotiation'
+        cls.specification_file_name = "spec.yaml"
         correct_specification = {
             'name': cls.protocol_name,
             'author': 'fetchai',
@@ -61,15 +66,12 @@ class TestGenerateProtocol:
 
         # Dump the config
         cls.cwd = os.getcwd()
-        cls.specification_file_name = "Spec.yaml"
-        # cls.path_to_specification = os.path.join(".", cls.specification_file_name)
-        cls.path_to_specification = os.path.join(CUR_PATH, cls.specification_file_name)
-        cls.path_to_protocol = os.path.join(cls.cwd, cls.protocol_name)
-
         # os.mkdir(os.path.join(CUR_PATH, "temp"))
-        # cls.cwd = os.getcwd()
-        # cls.t = tempfile.mkdtemp()
-        # os.chdir(cls.t)
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        # cls.path_to_specification = os.path.join(".", cls.specification_file_name)
+        cls.path_to_specification = os.path.join(cls.t, cls.specification_file_name)
         yaml.safe_dump(correct_specification, open(cls.path_to_specification, "w"))
 
         # Load the config
@@ -77,24 +79,30 @@ class TestGenerateProtocol:
         cls.protocol_specification = cls.config_loader.load(open(cls.path_to_specification))
 
         # Generate the protocol
-        cls.protocol_generator = ProtocolGenerator(cls.protocol_specification, cls.cwd)
+        cls.protocol_generator = ProtocolGenerator(cls.protocol_specification, cls.t)
         cls.protocol_generator.generate()
-        # import pdb;pdb.set_trace()
 
-    def test_exit_code_equal_to_0(self):
-        """Test that the exit code is equal to 0."""
-        from two_party_negotiation.message import TwoPartyNegotiationMessage
-        from two_party_negotiation.serialization import TwoPartyNegotiationSerializer
-        from two_party_negotiation.message import DataModel
-        assert 0 == 0
+        # Add as module
+        # dotted_path = "packages.fetchai.protocols." + cls.protocol_name
+        # import pdb;pdb.set_trace()
+        # module_object = load_module(dotted_path, Path(os.path.join(cls.t, cls.protocol_name)))
+        # import_module(dotted_path, module_object)
+        # sys.modules[dotted_path] = module_object
+
+    # def test_exit_code_equal_to_0(self):
+    #     """Test that the exit code is equal to 0."""
+    #     from packages.fetchai.protocols.two_party_negotiation.message import TwoPartyNegotiationMessage
+    #     # from two_party_negotiation.serialization import TwoPartyNegotiationSerializer
+    #     # from two_party_negotiation.message import DataModel
+    #     assert 0 == 0
 
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
-        # os.chdir(cls.cwd)
+        os.chdir(cls.cwd)
         try:
-            shutil.rmtree(cls.path_to_protocol)
-            os.remove(cls.path_to_specification)
+            shutil.rmtree(cls.t)
+            # os.remove(os.path.join(cls.t, cls.protocol_name))
         except (OSError, IOError):
             pass
 

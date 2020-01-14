@@ -62,6 +62,13 @@ class ProtocolGenerator:
         self.protocol_specification = protocol_specification
         self.output_folder_path = os.path.join(output_path, protocol_specification.name)
 
+    def _extract_all_contents(self):
+        all_contents = {}
+        for performative, speech_act_content_config in self.protocol_specification.speech_acts.read_all():
+            for content_name, content_type in speech_act_content_config.args.items():
+                all_contents[content_name] = content_type
+        return all_contents
+
     def _custom_types_classes_str(self) -> str:
         """
         Generate classes for every custom type.
@@ -73,7 +80,7 @@ class ProtocolGenerator:
         custom_types_set = set()
 
         # extract contents' types and separate custom types
-        for speech_act, speech_act_content_config in self.protocol_specification.speech_acts.read_all():
+        for performative, speech_act_content_config in self.protocol_specification.speech_acts.read_all():
             for content_type in speech_act_content_config.args.values():
                 type_set.add(content_type)
                 if content_type not in DEFAULT_TYPES:
@@ -164,36 +171,40 @@ class ProtocolGenerator:
         cls_str += str.format('        self.speech_acts_definition = {}\n\n', self._speech_acts_str())
         cls_str += '        assert self.check_consistency()\n\n'
 
-        cls_str += '    @property\n'
-        cls_str += '    def message_id(self) -> int:\n'
-        cls_str += '        \"\"\"Get the message_id of the message.\"\"\"\n'
-        cls_str += '        assert self.is_set("message_id"), "message_id is not set"\n'
-        cls_str += '        return cast(int, self.get("message_id"))\n\n'
-
-        cls_str += '    @property\n'
-        cls_str += '    def target(self) -> int:\n'
-        cls_str += '        \"\"\"Get the target of the message.\"\"\"\n'
-        cls_str += '        assert self.is_set("target"), "target is not set."\n'
-        cls_str += '        return cast(int, self.get("target"))\n\n'
-
-        cls_str += '    @property\n'
-        cls_str += '    def performative(self) -> str:\n'
-        cls_str += '        \"\"\"Get the performative of the message.\"\"\"\n'
-        cls_str += '        assert self.is_set("performative"), "performative is not set"\n'
-        cls_str += '        return cast(str, self.get("performative"))\n\n'
-
-        cls_str += '    @property\n'
-        cls_str += '    def contents(self) -> Dict:\n'
-        cls_str += '        \"\"\"Get the contents of the message.\"\"\"\n'
-        cls_str += '        assert self.is_set("contents"), "contents is not set"\n'
-        cls_str += '        return cast(Dict, self.get("contents"))\n\n'
-
+        # Properties
         cls_str += '    @property\n'
         cls_str += '    def performatives_definition(self) -> set:\n'
         cls_str += '        \"\"\"Get allowed performatives.\"\"\"\n'
         cls_str += '        return set(self.speech_acts_definition.keys())\n\n'
+        cls_str += '    @property\n'
+        cls_str += '    def message_id(self) -> int:\n'
+        cls_str += '        \"\"\"Get the message_id of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set(\"message_id\"), \"message_id is not set\"\n'
+        cls_str += '        return cast(int, self.get(\"message_id\"))\n\n'
+        cls_str += '    @property\n'
+        cls_str += '    def target(self) -> int:\n'
+        cls_str += '        \"\"\"Get the target of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set(\"target\"), \"target is not set.\"\n'
+        cls_str += '        return cast(int, self.get(\"target\"))\n\n'
+        cls_str += '    @property\n'
+        cls_str += '    def performative(self) -> str:\n'
+        cls_str += '        \"\"\"Get the performative of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set(\"performative\"), \"performative is not set\"\n'
+        cls_str += '        return cast(str, self.get(\"performative\"))\n\n'
+        cls_str += '    @property\n'
+        cls_str += '    def contents(self) -> Dict:\n'
+        cls_str += '        \"\"\"Get the contents of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set(\"contents\"), \"contents is not set\"\n'
+        cls_str += '        return cast(Dict, self.get(\"contents\"))\n\n'
+        all_contents = self._extract_all_contents()
+        for content_name, content_type in all_contents.items():
+            cls_str += '    @property\n'
+            cls_str += '    def {}(self) -> {}:\n'.format(content_name, content_type)
+            cls_str += '        \"\"\"Get \'{}\' from the contents of the message.\"\"\"\n'.format(content_name)
+            cls_str += '        assert self.is_set(\"{}\"), \"\\\'{}\\\' is not set\"\n'.format(content_name, content_name)
+            cls_str += '        return cast({}, self.get(\"{}\"))\n\n'.format(content_type, content_name)
 
-        # check_consistency method
+        # check_consistency() method
         cls_str += '    def check_consistency(self) -> bool:\n'
         cls_str += str.format('        \"\"\"Check that the message follows the {} protocol.\"\"\"\n', self.protocol_specification.name)
         cls_str += '        try:\n'
