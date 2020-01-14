@@ -421,6 +421,14 @@ class Test_dialogues:
         with pytest.raises(ValueError, match="Should have found dialogue."):
             self.dialogues.get_dialogue(fipa_msg=msg, agent_addr="unknown_addr")
 
+    def test_add_dialogue(self):
+        """Test the add functionality of the dialogues."""
+        result = self.dialogues.create_self_initiated(dialogue_starter_addr="starter",
+                                                      dialogue_opponent_addr="opponent",
+                                                      is_seller=False)
+        self.dialogues._add(cast(FIPADialogue, result))
+        assert result in self.dialogues._dialogues_as_buyer.values()
+
 
 class Test_dialogue:
     """Tests dialogue model from the protocols fipa."""
