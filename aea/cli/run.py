@@ -216,7 +216,7 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
         else:
             click_context.invoke(install)
 
-    agent = AEA(agent_name, connections, wallet, ledger_apis, resources=Resources(str(Path("."))))
+    agent = AEA(agent_name, connections, wallet, ledger_apis, resources=Resources(str(Path("."))), programmatic=False)
     try:
         agent.start()
     except KeyboardInterrupt:

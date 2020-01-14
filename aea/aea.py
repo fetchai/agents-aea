@@ -48,6 +48,7 @@ class AEA(Agent):
                  loop: Optional[AbstractEventLoop] = None,
                  timeout: float = 0.0,
                  debug: bool = False,
+                 programmatic: bool = True,
                  max_reactions: int = 20,
                  executor: Optional[Executor] = None) -> None:
         """
@@ -61,12 +62,13 @@ class AEA(Agent):
         :param resources: the resources of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
+        :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
         :param max_reactions: the processing rate of messages per iteration.
         :param executor: executor for asynchronous execution of tasks.
 
         :return: None
         """
-        super().__init__(name=name, wallet=wallet, connections=connections, loop=loop, timeout=timeout, debug=debug)
+        super().__init__(name=name, wallet=wallet, connections=connections, loop=loop, timeout=timeout, debug=debug, programmatic=programmatic)
 
         self.max_reactions = max_reactions
         self._task_manager = TaskManager(executor)
@@ -125,7 +127,8 @@ class AEA(Agent):
 
         :return: None
         """
-        self.resources.load(self.context)
+        if not self.programmatic:
+            self.resources.load(self.context)
         self.resources.setup()
         self.task_manager.start()
 
