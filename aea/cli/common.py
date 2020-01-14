@@ -22,18 +22,22 @@
 import logging
 import logging.config
 import os
+import shutil
 import sys
+from functools import reduce
 from pathlib import Path
-from typing import Dict, List, cast, Optional
+from typing import Dict, List, cast, Optional, Set
 
 import click
 import jsonschema  # type: ignore
 from dotenv import load_dotenv
+from jsonschema import ValidationError
 
+from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
     DEFAULT_PROTOCOL_CONFIG_FILE, Dependencies, PublicId, \
-    _get_default_configuration_file_name_from_type
+    _get_default_configuration_file_name_from_type, ConfigurationType
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
 from aea.helpers.base import add_agent_component_module_to_sys_modules, load_agent_component_package
@@ -123,11 +127,13 @@ def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
             logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         if exit_on_except:
-            logger.error("Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
+            logger.error(
+                "Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
             sys.exit(1)
     except jsonschema.exceptions.ValidationError:
         if exit_on_except:
-            logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE))
+            logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(
+                DEFAULT_AEA_CONFIG_FILE))
             sys.exit(1)
 
 
@@ -306,3 +312,74 @@ def try_get_item_target_path(path: str, item_type_plural: str, item_name: str) -
             'Item "{}" already exists in target folder.'.format(item_name)
         )
     return target_path
+
+
+def _copy_package_directory(ctx, package_path, item_type, item_name, author_name):
+    """
+     Copy a package directory to the agent vendor resources.
+
+    :param ctx: the CLI context .
+    :param package_path: the path to the package to be added.
+    :param item_type: the type of the package.
+    :param item_name: the name of the package.
+    :param author_name: the author of the package.
+    :return: None
+    :raises SystemExit: if the copy raises an exception.
+    """
+    # copy the item package into the agent's supported packages.
+    item_type_plural = item_type + "s"
+    src = str(package_path.absolute())
+    dest = os.path.join(ctx.cwd, "vendor", author_name, item_type_plural, item_name)
+    logger.debug("Copying {} modules. src={} dst={}".format(item_type, src, dest))
+    try:
+        shutil.copytree(src, dest)
+    except Exception as e:
+        logger.error(str(e))
+        sys.exit(1)
+
+    Path(ctx.cwd, "vendor", author_name, item_type_plural, "__init__.py").touch()
+
+
+def _find_item_locally(ctx, item_type, item_public_id) -> Path:
+    """
+    Find an item in the registry or in the AEA directory.
+
+    :param ctx: the CLI context.
+    :param item_type: the type of the item to load. One of: protocols, connections, skills
+    :param item_public_id: the public id of the item to find.
+    :return: path to the package directory (either in registry or in aea directory).
+    :raises SystemExit: if the search fails.
+    """
+    item_type_plural = item_type + 's'
+    item_name = item_public_id.name
+
+    # check in registry
+    registry_path = ctx.agent_config.registry_path
+    package_path = Path(registry_path, item_public_id.author, item_type_plural, item_name)
+    config_file_name = _get_default_configuration_file_name_from_type(item_type)
+    item_configuration_filepath = package_path / config_file_name
+    if not item_configuration_filepath.exists():
+        # then check in aea dir
+        registry_path = AEA_DIR
+        package_path = Path(registry_path, item_type_plural, item_name)
+        item_configuration_filepath = package_path / config_file_name
+        if not item_configuration_filepath.exists():
+            logger.error("Cannot find {}: '{}'.".format(item_type, item_public_id))
+            sys.exit(1)
+
+    # try to load the item configuration file
+    try:
+        item_configuration_loader = ConfigLoader.from_configuration_type(ConfigurationType(item_type))
+        item_configuration = item_configuration_loader.load(open(str(item_configuration_filepath)))
+    except ValidationError as e:
+        logger.error("{} configuration file not valid: {}".format(item_type.capitalize(), str(e)))
+        sys.exit(1)
+
+    # check that the configuration file of the found package matches the expected author and version.
+    version = item_configuration.version
+    author = item_configuration.author
+    if item_public_id.author != author or item_public_id.version != version:
+        logger.error("Cannot find {} with author and version specified.".format(item_type))
+        sys.exit(1)
+
+    return package_path
