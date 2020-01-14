@@ -235,6 +235,16 @@ def test_performative_inform():
     assert msg.get("performative") == deserialised_msg.get("performative")
 
 
+def test_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during check_consistency."""
+    msg = FIPAMessage(message_id=0,
+                      dialogue_reference=(str(0), ''),
+                      target=1,
+                      performative=FIPAMessage.Performative.ACCEPT)
+    with mock.patch.object(FIPAMessage.Performative, "__eq__", return_value=False):
+        assert not msg.check_consistency() is False
+
+
 def test_performative_string_value():
     """Test the string value of the performatives."""
     assert str(FIPAMessage.Performative.CFP) == "cfp",\
