@@ -377,7 +377,6 @@ class TestDecisionMaker:
 
     def test_decision_maker_handle_tx_message(self):
         """Test the handle tx message method."""
-
         assert self.decision_maker.message_out_queue.empty()
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
@@ -509,7 +508,7 @@ class TestDecisionMaker:
 
 
 class Test_LedgerStateProxy:
-    """Test the Ledger State Proxy"""
+    """Test the Ledger State Proxy."""
 
     @classmethod
     def setup_class(cls):
