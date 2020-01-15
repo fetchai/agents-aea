@@ -225,7 +225,6 @@ class FIPADialogues(Dialogues):
         if other_initiated_dialogue_label in self.dialogues:
             other_initiated_dialogue = cast(FIPADialogue, self.dialogues[other_initiated_dialogue_label])
             result = other_initiated_dialogue.is_valid_next_message(fipa_msg)
-            import pdb; pdb.set_trace()
         if self_initiated_dialogue_label in self.dialogues:
             self_initiated_dialogue = cast(FIPADialogue, self.dialogues[self_initiated_dialogue_label])
             result = self_initiated_dialogue.is_valid_next_message(fipa_msg)
