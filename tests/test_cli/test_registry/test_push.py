@@ -34,12 +34,17 @@ from tests.test_cli.tools_for_testing import (
 )
 
 
+@mock.patch('aea.cli.registry.push.check_is_author_logged_in')
 @mock.patch('aea.cli.registry.utils._rm_tarfiles')
 @mock.patch('aea.cli.registry.push.os.getcwd', return_value='cwd')
 @mock.patch('aea.cli.registry.push._compress_dir')
 @mock.patch(
     'aea.cli.registry.push.load_yaml',
-    return_value={'description': 'some-description', 'version': 'some-version'}
+    return_value={
+        'description': 'some-description',
+        'version': 'some-version',
+        'author': 'some-author'
+    }
 )
 @mock.patch(
     'aea.cli.registry.push.request_api', return_value={'public_id': 'public-id'}
@@ -55,7 +60,8 @@ class PushItemTestCase(TestCase):
         load_yaml_mock,
         compress_mock,
         getcwd_mock,
-        rm_tarfiles_mock
+        rm_tarfiles_mock,
+        check_is_author_logged_in_mock
     ):
         """Test for push_item positive result."""
         public_id = PublicIdMock(
@@ -82,7 +88,8 @@ class PushItemTestCase(TestCase):
         load_yaml_mock,
         compress_mock,
         getcwd_mock,
-        rm_tarfiles_mock
+        rm_tarfiles_mock,
+        check_is_author_logged_in_mock
     ):
         """Test for push_item - item not found."""
         with self.assertRaises(ClickException):

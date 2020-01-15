@@ -25,7 +25,7 @@ from typing import Dict
 
 from aea.cli.common import Context, logger
 from aea.cli.registry.utils import (
-    clean_tarfiles, load_yaml, request_api
+    clean_tarfiles, load_yaml, request_api, check_is_author_logged_in
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
@@ -51,6 +51,8 @@ def publish_agent(ctx: Context):
     """Publish an agent."""
     agent_config_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
     agent_config = _load_agent_config(agent_config_path)
+    check_is_author_logged_in(agent_config['author'])
+
     name = agent_config['agent_name']
     output_tar = os.path.join(ctx.cwd, '{}.tar.gz'.format(name))
     _compress(output_tar, agent_config_path)

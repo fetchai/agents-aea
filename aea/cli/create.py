@@ -51,6 +51,14 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
     return
 
 
+def _setup_package_folder(ctx, item_type_plural):
+    """Set a package folder up."""
+    Path(ctx.cwd, item_type_plural).mkdir()
+    connections_init_module = os.path.join(ctx.cwd, item_type_plural, "__init__.py")
+    logger.debug("Creating {}".format(connections_init_module))
+    Path(connections_init_module).touch(exist_ok=True)
+
+
 @click.command()
 @click.argument('agent_name', type=str, required=True)
 @pass_context
@@ -66,7 +74,7 @@ def create(click_context, agent_name):
     path = Path(agent_name)
 
     logger.info("Initializing AEA project '{}'".format(agent_name))
-    logger.info("Creating project directory '/{}'".format(agent_name))
+    logger.info("Creating project directory './{}'".format(agent_name))
 
     # create the agent's directory
     try:
@@ -85,6 +93,15 @@ def create(click_context, agent_name):
         # next commands must be done from the agent's directory -> overwrite ctx.cwd
         ctx.agent_config = agent_config
         ctx.cwd = agent_config.agent_name
+
+        # set up packages directories.
+        _setup_package_folder(ctx, "protocols")
+        _setup_package_folder(ctx, "connections")
+        _setup_package_folder(ctx, "skills")
+
+        # set up a vendor directory
+        Path(ctx.cwd, "vendor").mkdir()
+        Path(ctx.cwd, "vendor", "__init__.py").touch()
 
         logger.info("Adding default packages ...")
         click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)
