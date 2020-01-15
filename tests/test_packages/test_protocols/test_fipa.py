@@ -19,7 +19,7 @@
 
 """This module contains the tests for the FIPA protocol."""
 import logging
-from typing import cast
+from typing import cast, Tuple
 from unittest import mock
 
 import pytest
@@ -356,6 +356,10 @@ class Test_dialogues:
         # Extend the incoming list of messages.
         seller_dialogue.incoming_extend(cfp_msg)
 
+        last_msg = seller_dialogue.last_incoming_message
+        dialogue_reference = cast(Tuple[str, str], last_msg.body.get("dialogue_reference"))
+        assert dialogue_reference[0] != "" and dialogue_reference[1] == ""
+
         # Checks if the message we received is permitted for a new dialogue or if it is a registered dialogue.
         assert self.seller_dialogues.is_permitted_for_new_dialogue(seller_dialogue.last_incoming_message), \
             "Should be permitted since the first incoming msg is CFP"
@@ -379,6 +383,10 @@ class Test_dialogues:
 
         # Client received the message and we extend the incoming messages list.
         client_dialogue.incoming_extend(proposal_msg)
+
+        last_msg = client_dialogue.last_incoming_message
+        dialogue_reference = cast(Tuple[str, str], last_msg.body.get("dialogue_reference"))
+        assert dialogue_reference[0] != "" and dialogue_reference[1] != ""
 
         assert not self.client_dialogues.is_permitted_for_new_dialogue(client_dialogue.last_incoming_message),\
             "Should not be permitted since we registered the cfp message."
