@@ -22,6 +22,7 @@
 import time
 
 import web3
+from eth_account.messages import SignableMessage
 from web3 import Web3, HTTPProvider
 from eth_account import Account
 from eth_keys import keys
@@ -95,14 +96,14 @@ class EthereumCrypto(Crypto):
         except IOError as e:        # pragma: no cover
             logger.exception(str(e))
 
-    def sign_transaction(self, tx_hash: bytes) -> bytes:
+    def sign_transaction(self, tx_hash: SignableMessage) -> bytes:
         """
         Sign a transaction hash.
 
         :param tx_hash: the transaction hash
         :return: Signed message in bytes
         """
-        signature = self.entity.signHash(tx_hash)
+        signature = self.entity.sign_message(tx_hash)
         return signature['signature']
 
     # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
