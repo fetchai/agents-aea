@@ -296,18 +296,27 @@ class Test_dialogues:
         """Set up the test."""
         cls.client_dialogues = FIPADialogues()
         cls.seller_dialogues = FIPADialogues()
+        cls.client_addr = "client"
+        cls.seller_addr = "seller"
 
-    def test_dialogues(self):
-        """Test the dialogues model."""
+    def test_create_self_initiated(self):
+        """Test the self initialisation of a dialogue."""
         result = self.client_dialogues.create_self_initiated(dialogue_starter_addr="starter",
                                                              dialogue_opponent_addr="opponent",
                                                              is_seller=True)
         assert isinstance(result, FIPADialogue)
+        assert result.role == FIPADialogue.AgentRole.SELLER, "The role must be seller."
+
+    def test_create_opponent_initiated(self):
+        """Test the opponent initialisation of a dialogue."""
         result = self.client_dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent",
                                                                  dialogue_reference=(str(0), ''),
                                                                  is_seller=False)
         assert isinstance(result, FIPADialogue)
         assert result.role == FIPADialogue.AgentRole.BUYER
+
+    def test_dialogue_endstates(self):
+        """Test the end states of a dialogue."""
         assert self.client_dialogues.dialogue_stats is not None
         self.client_dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.SUCCESSFUL, is_self_initiated=True)
         self.client_dialogues.dialogue_stats.add_dialogue_endstate(FIPADialogue.EndState.DECLINED_CFP, is_self_initiated=False)
@@ -324,8 +333,8 @@ class Test_dialogues:
     def test_dialogues_self_initiated_no_seller(self):
         """Test an end to end scenario of client-seller dialogue."""
         # Initialise a dialogue
-        client_dialogue = self.client_dialogues.create_self_initiated(dialogue_opponent_addr="seller",
-                                                                      dialogue_starter_addr="client",
+        client_dialogue = self.client_dialogues.create_self_initiated(dialogue_opponent_addr=self.seller_addr,
+                                                                      dialogue_starter_addr=self.client_addr,
                                                                       is_seller=False)
 
         # Register the dialogue to the dictionary of dialogues.
@@ -337,13 +346,15 @@ class Test_dialogues:
                               target=0,
                               performative=FIPAMessage.Performative.CFP,
                               query=None)
-        cfp_msg.counterparty = "client"
+        cfp_msg.counterparty = self.client_addr
 
+        # Checking that I cannot retrieve the dialogue.
         retrieved_dialogue = self.client_dialogues.is_belonging_to_registered_dialogue(cfp_msg, "client")
-        assert not retrieved_dialogue
+        assert not retrieved_dialogue, "Should not belong to registered dialogue"
 
+        # Checking the value error when we are trying to retrieve an un-existing dialogue.
         with pytest.raises(ValueError, match='Should have found dialogue.'):
-            self.client_dialogues.get_dialogue(cfp_msg, "client")
+            self.client_dialogues.get_dialogue(cfp_msg, self.client_addr)
 
         # Extends the outgoing list of messages.
         client_dialogue.outgoing_extend(cfp_msg)
@@ -361,8 +372,10 @@ class Test_dialogues:
 
         # Check that both fields in the dialogue_reference are set.
         last_msg = seller_dialogue.last_incoming_message
+        assert last_msg == cfp_msg, "The messages must be equal"
         dialogue_reference = cast(Tuple[str, str], last_msg.body.get("dialogue_reference"))
-        assert dialogue_reference[0] != "" and dialogue_reference[1] == ""
+        assert dialogue_reference[0] != "" and dialogue_reference[1] == "", \
+            "The dialogue_reference is not set correctly."
 
         # Checks if the message we received is permitted for a new dialogue or if it is a registered dialogue.
         assert self.seller_dialogues.is_permitted_for_new_dialogue(seller_dialogue.last_incoming_message), \
@@ -380,7 +393,7 @@ class Test_dialogues:
                                    target=target,
                                    performative=FIPAMessage.Performative.PROPOSE,
                                    proposal=proposal)
-        proposal_msg.counterparty = "seller"
+        proposal_msg.counterparty = self.seller_addr
 
         # Extends the outgoing list of messages.
         seller_dialogue.outgoing_extend(proposal_msg)
@@ -390,18 +403,19 @@ class Test_dialogues:
 
         # Check that both fields in the dialogue_reference are set.
         last_msg = client_dialogue.last_incoming_message
+        assert last_msg == proposal_msg, "The two messages must be equal."
         dialogue_reference = cast(Tuple[str, str], last_msg.body.get("dialogue_reference"))
-        assert dialogue_reference[0] != "" and dialogue_reference[1] != ""
+        assert dialogue_reference[0] != "" and dialogue_reference[1] != "", "The dialogue_reference is not setup properly."
 
         assert not self.client_dialogues.is_permitted_for_new_dialogue(client_dialogue.last_incoming_message),\
             "Should not be permitted since we registered the cfp message."
 
-        response = self.client_dialogues.is_belonging_to_registered_dialogue(proposal_msg, agent_addr="client")
+        response = self.client_dialogues.is_belonging_to_registered_dialogue(proposal_msg, agent_addr=self.client_addr)
         assert response, "We expect the response from the function to be true."
 
         # Retrieve the dialogue based on the received message.
-        retrieved_dialogue = self.client_dialogues.get_dialogue(proposal_msg, "client")
-        assert retrieved_dialogue.dialogue_label in self.client_dialogues.dialogues
+        retrieved_dialogue = self.client_dialogues.get_dialogue(proposal_msg, self.client_addr)
+        assert retrieved_dialogue.dialogue_label is not None
 
         # Create an accept_w_inform message to send seller.
         message_id = proposal_msg.message_id + 1
@@ -411,24 +425,24 @@ class Test_dialogues:
                                  target=target,
                                  performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                                  info={"address": "dummy_address"})
-        accept_msg.counterparty = "client"
+        accept_msg.counterparty = self.client_addr
 
         # Adds the message to the client outgoing list.
         client_dialogue.outgoing_extend(accept_msg)
         # Adds the message to the seller incoming message list.
         seller_dialogue.incoming_extend(accept_msg)
         # Check if this message is registered to a dialogue.
-        response = self.seller_dialogues.is_belonging_to_registered_dialogue(accept_msg, agent_addr="seller")
+        response = self.seller_dialogues.is_belonging_to_registered_dialogue(accept_msg, agent_addr=self.seller_addr)
         assert response, "We expect the response from the function to be true."
 
-        retrieved_dialogue = self.seller_dialogues.get_dialogue(accept_msg, "seller")
+        retrieved_dialogue = self.seller_dialogues.get_dialogue(accept_msg, self.seller_addr)
         assert retrieved_dialogue.dialogue_label in self.seller_dialogues.dialogues
 
     def test_dialogues_self_initiated_is_seller(self):
         """Test an end to end scenario of seller-client dialogue."""
         # Initialise a dialogue
-        seller_dialogue = self.seller_dialogues.create_self_initiated(dialogue_opponent_addr="client",
-                                                                      dialogue_starter_addr="seller",
+        seller_dialogue = self.seller_dialogues.create_self_initiated(dialogue_opponent_addr=self.client_addr,
+                                                                      dialogue_starter_addr=self.seller_addr,
                                                                       is_seller=True)
 
         # Register the dialogue to the dictionary of dialogues.
@@ -440,7 +454,7 @@ class Test_dialogues:
                               target=0,
                               performative=FIPAMessage.Performative.CFP,
                               query=None)
-        cfp_msg.counterparty = "seller"
+        cfp_msg.counterparty = self.seller_addr
 
         seller_dialogue.outgoing_extend(cfp_msg)
 
@@ -471,7 +485,7 @@ class Test_dialogues:
                                    target=target,
                                    performative=FIPAMessage.Performative.PROPOSE,
                                    proposal=proposal)
-        proposal_msg.counterparty = "client"
+        proposal_msg.counterparty = self.client_addr
 
         # Extends the outgoing list of messages.
         client_dialogue.outgoing_extend(proposal_msg)
@@ -482,7 +496,7 @@ class Test_dialogues:
         assert not self.seller_dialogues.is_permitted_for_new_dialogue(seller_dialogue.last_incoming_message), \
             "Should not be permitted since we registered the cfp message."
 
-        response = self.seller_dialogues.is_belonging_to_registered_dialogue(proposal_msg, agent_addr="seller")
+        response = self.seller_dialogues.is_belonging_to_registered_dialogue(proposal_msg, agent_addr=self.seller_addr)
         assert response, "We expect the response from the function to be true."
 
         # Test the self_initiated_dialogue explicitly
@@ -493,12 +507,12 @@ class Test_dialogues:
                                  target=target,
                                  performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
                                  info={"address": "dummy_address"})
-        accept_msg.counterparty = "client"
+        accept_msg.counterparty = self.client_addr
 
         # Adds the message to the client outgoing list.
         seller_dialogue.outgoing_extend(accept_msg)
         # Adds the message to the seller incoming message list.
         client_dialogue.incoming_extend(accept_msg)
         # Check if this message is registered to a dialogue.
-        response = self.seller_dialogues.is_belonging_to_registered_dialogue(accept_msg, agent_addr="seller")
+        response = self.seller_dialogues.is_belonging_to_registered_dialogue(accept_msg, agent_addr=self.seller_addr)
         assert not response, "We expect the response from the function to be true."
