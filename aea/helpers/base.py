@@ -110,7 +110,7 @@ def import_module(dotted_path: str, module_obj) -> None:
 
 def load_agent_component_package(item_type: str, item_name: str, author_name: str, directory: os.PathLike):
     """
-    Load a Python package associated to .
+    Load a Python package associated to a component..
 
     :param item_type: the type of the item. One of "protocol", "connection", "skill".
     :param item_name: the name of the item to load.

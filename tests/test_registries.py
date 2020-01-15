@@ -68,7 +68,7 @@ class TestProtocolRegistry:
 
     def test_not_able_to_add_bad_formatted_protocol_message(self):
         """Test that the protocol registry has not been able to add the protocol 'bad'."""
-        self.mocked_logger.assert_called_with("Not able to add protocol {}.".format(self.fake_protocol_id))
+        self.mocked_logger.assert_called_with("Not able to add protocol '{}'.".format(self.fake_protocol_id))
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""

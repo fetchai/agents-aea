@@ -26,8 +26,8 @@ import os
 import pprint
 import re
 from abc import ABC, abstractmethod
-from queue import Queue
 from pathlib import Path
+from queue import Queue
 from typing import Optional, List, Dict, Any, Tuple, cast, Union
 
 from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
@@ -143,21 +143,21 @@ class ProtocolRegistry(Registry):
         :param directory: the filepath to the agent's resource directory.
         :return: None
         """
-        protocols_spec = importlib.util.spec_from_file_location("protocols",
-                                                                os.path.join(directory, "protocols", "__init__.py"))
-        path = cast(str, protocols_spec.origin)
-        if protocols_spec is None or not os.path.exists(path):
-            logger.warning("No protocol found.")
-            return
+        protocol_directory_paths = set()  # type: ignore
 
-        loader_contents = [path.name for path in Path(directory, "protocols").iterdir()]
-        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), loader_contents))  # type: ignore
-        logger.debug("Processing the following protocol package: {}".format(protocols_packages))
-        for protocol_name in protocols_packages:
+        # find all protocol directories from vendor/*/protocols
+        protocol_directory_paths.update(Path(directory, "vendor").glob("./*/protocols/*/"))
+        # find all protocol directories from protocols/
+        protocol_directory_paths.update(Path(directory, "protocols").glob("./*/"))
+
+        protocols_packages_paths = list(filter(lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(), protocol_directory_paths))  # type: ignore
+        logger.debug("Found the following protocol packages: {}".format(pprint.pformat(map(str, protocol_directory_paths))))
+        for protocol_package in protocols_packages_paths:
             try:
-                self._add_protocol(directory, protocol_name)
+                logger.debug("Processing the protocol package '{}'".format(protocol_package))
+                self._add_protocol(protocol_package)
             except Exception:
-                logger.exception("Not able to add protocol {}.".format(protocol_name))
+                logger.exception("Not able to add protocol '{}'.".format(protocol_package.name))
 
     def setup(self) -> None:
         """
@@ -175,17 +175,16 @@ class ProtocolRegistry(Registry):
         """
         self._protocols = {}
 
-    def _add_protocol(self, directory: str, protocol_name: str):
+    def _add_protocol(self, protocol_directory: Path):
         """
         Add a protocol.
 
-        :param directory: the agent's resources directory.
-        :param protocol_name: the name of the protocol to be added.
+        :param protocol_directory: the directory of the protocol to be added.
         :return: None
         """
         # get the serializer
-        serialization_spec = importlib.util.spec_from_file_location("serialization",
-                                                                    os.path.join(directory, "protocols", protocol_name, "serialization.py"))
+        protocol_name = protocol_directory.name
+        serialization_spec = importlib.util.spec_from_file_location("serialization", protocol_directory / "serialization.py")
         serialization_module = importlib.util.module_from_spec(serialization_spec)
         serialization_spec.loader.exec_module(serialization_module)  # type: ignore
         classes = inspect.getmembers(serialization_module, inspect.isclass)
@@ -197,7 +196,7 @@ class ProtocolRegistry(Registry):
         serializer = serializer_class()
 
         config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = config_loader.load(open(Path(directory, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
+        protocol_config = config_loader.load(open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE))
 
         # instantiate the protocol manager.
         protocol = Protocol(protocol_name, serializer, protocol_config)
@@ -497,17 +496,19 @@ class Resources(object):
         :param agent_context: the agent's context object
         :return: None
         """
-        root_skill_directory = os.path.join(directory, "skills")
-        if not os.path.exists(root_skill_directory):
-            logger.warning("No skill found.")
-            return
+        skill_directory_paths = set()  # type: ignore
 
-        skill_directories = [str(x) for x in Path(root_skill_directory).iterdir()
-                             if x.is_dir() and re.match(PACKAGE_NAME_REGEX, x.name)]
-        logger.debug("Processing the following skill directories: {}".format(pprint.pformat(skill_directories)))
-        for skill_directory in skill_directories:
+        # find all skill directories from vendor/*/skills
+        skill_directory_paths.update(Path(directory, "vendor").glob("./*/skills/*/"))
+        # find all skill directories from skills/
+        skill_directory_paths.update(Path(directory, "skills").glob("./*/"))
+
+        skills_packages_paths = list(filter(lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(), skill_directory_paths))  # type: ignore
+        logger.debug("Found the following skill packages: {}".format(pprint.pformat(map(str, skills_packages_paths))))
+        for skill_directory in skills_packages_paths:
+            logger.debug("Processing the following skill directory: '{}".format(skill_directory))
             try:
-                skill = Skill.from_dir(skill_directory, agent_context)
+                skill = Skill.from_dir(str(skill_directory), agent_context)
                 assert skill is not None
                 self.add_skill(skill)
             except Exception as e:
