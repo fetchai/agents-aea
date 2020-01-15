@@ -356,6 +356,7 @@ class Test_dialogues:
         # Extend the incoming list of messages.
         seller_dialogue.incoming_extend(cfp_msg)
 
+        # Check that both fields in the dialogue_reference are set.
         last_msg = seller_dialogue.last_incoming_message
         dialogue_reference = cast(Tuple[str, str], last_msg.body.get("dialogue_reference"))
         assert dialogue_reference[0] != "" and dialogue_reference[1] == ""
@@ -384,6 +385,7 @@ class Test_dialogues:
         # Client received the message and we extend the incoming messages list.
         client_dialogue.incoming_extend(proposal_msg)
 
+        # Check that both fields in the dialogue_reference are set.
         last_msg = client_dialogue.last_incoming_message
         dialogue_reference = cast(Tuple[str, str], last_msg.body.get("dialogue_reference"))
         assert dialogue_reference[0] != "" and dialogue_reference[1] != ""
