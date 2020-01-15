@@ -339,6 +339,9 @@ class Test_dialogues:
                               query=None)
         cfp_msg.counterparty = "client"
 
+        retrieved_dialogue = self.client_dialogues.is_belonging_to_registered_dialogue(cfp_msg, "client")
+        assert not retrieved_dialogue
+
         with pytest.raises(ValueError, match='Should have found dialogue.'):
             self.client_dialogues.get_dialogue(cfp_msg, "client")
 
@@ -481,3 +484,21 @@ class Test_dialogues:
 
         response = self.seller_dialogues.is_belonging_to_registered_dialogue(proposal_msg, agent_addr="seller")
         assert response, "We expect the response from the function to be true."
+
+        # Test the self_initiated_dialogue explicitly
+        message_id = proposal_msg.message_id + 1
+        target = proposal_msg.message_id
+        accept_msg = FIPAMessage(message_id=message_id,
+                                 dialogue_reference=seller_dialogue.dialogue_label.dialogue_reference,
+                                 target=target,
+                                 performative=FIPAMessage.Performative.ACCEPT_W_INFORM,
+                                 info={"address": "dummy_address"})
+        accept_msg.counterparty = "client"
+
+        # Adds the message to the client outgoing list.
+        seller_dialogue.outgoing_extend(accept_msg)
+        # Adds the message to the seller incoming message list.
+        client_dialogue.incoming_extend(accept_msg)
+        # Check if this message is registered to a dialogue.
+        response = self.seller_dialogues.is_belonging_to_registered_dialogue(accept_msg, agent_addr="seller")
+        assert not response, "We expect the response from the function to be true."
