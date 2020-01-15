@@ -309,10 +309,10 @@ class Test_dialogues:
             Description({"foo2": 1, "bar2": 2}),
         ]
         cls.second_msg = FIPAMessage(message_id=2,
-                                    dialogue_reference=(str(0), ''),
-                                    target=1,
-                                    performative=FIPAMessage.Performative.PROPOSE,
-                                    proposal=proposal)
+                                     dialogue_reference=(str(0), str(0)),
+                                     target=1,
+                                     performative=FIPAMessage.Performative.PROPOSE,
+                                     proposal=proposal)
 
     def test_dialogues(self):
         """Test the dialogues model."""
@@ -337,13 +337,15 @@ class Test_dialogues:
                                                                  FIPADialogue.EndState.DECLINED_ACCEPT: 0,
                                                                  FIPADialogue.EndState.DECLINED_CFP: 1}
         assert self.dialogues.dialogues_as_seller is not None
-        msg = FIPAMessage(message_id=3,
-                          dialogue_reference=(str(0), ''),
-                          target=2,
-                          performative=FIPAMessage.Performative.ACCEPT)
+
+        msg = FIPAMessage(dialogue_reference=(str(0), ''),
+                          message_id=1,
+                          target=0,
+                          performative=FIPAMessage.Performative.CFP,
+                          query=None)
         msg.counterparty = "opponent"
         result = self.dialogues.is_permitted_for_new_dialogue(msg)
-        assert result is False
+        assert result
 
     def test_dialogues_is_belonging_to_other_initiated_dialogue_label(self):
         """Test if the given dialogue belongs to an other initiated dialogue."""
