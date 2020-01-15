@@ -481,6 +481,3 @@ class Test_dialogues:
 
         response = self.seller_dialogues.is_belonging_to_registered_dialogue(proposal_msg, agent_addr="seller")
         assert response, "We expect the response from the function to be true."
-
-    def test_get_dialogues(self):
-        """Test the get_dialogues functionality."""
