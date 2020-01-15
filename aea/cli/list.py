@@ -43,7 +43,7 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
     public_ids = getattr(ctx.agent_config, item_type_plural)  # type: Set[PublicId]
     default_file_name = _get_default_configuration_file_name_from_type(item_type)
     for public_id in public_ids:
-        # if author of item is different from author of the agent project, retrieve the item from the vendor directory.
+        # first, try to retrieve the item from the vendor directory.
         configuration_filepath = Path(ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name, default_file_name)
         # otherwise, if it does not exist, retrieve the item from the agent custom packages
         if not configuration_filepath.exists():
