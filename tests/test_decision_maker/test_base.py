@@ -89,7 +89,7 @@ class TestUtilityPreferencesBase:
         assert "Test" not in msg._body.keys(), "Test should not exist."
 
     def test_transaction_is_affordable(self):
-        """Test the consistency of the transaction message."""
+        """Test the affordability of the transaction message."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 20}
         self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
@@ -123,6 +123,7 @@ class TestUtilityPreferencesBase:
         assert self.ownership_state.check_transaction_is_affordable(tx_message=tx_message), \
             "We should have the goods for the transaction!"
 
+        # Create a message that we expect to be rejected when we check if it is affordable.
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
                                         tx_id="transaction0",
@@ -138,6 +139,7 @@ class TestUtilityPreferencesBase:
         assert not self.ownership_state.check_transaction_is_affordable(tx_message=tx_message), \
             "We should reject the transaction!"
 
+        # Create a message that we expect to be rejected because we don't have enough tokens.
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
                                         tx_id="transaction0",
@@ -174,8 +176,8 @@ class TestUtilityPreferencesBase:
         new_state = self.ownership_state.apply_transactions(transactions=list_of_transactions)
         assert state != new_state, "after applying a list_of_transactions must have a different state!"
 
-    def test_transaction__update(self):
-        """Test the tranasction update."""
+    def test_transaction_update(self):
+        """Test the transaction update."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 20}
 
