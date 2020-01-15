@@ -73,8 +73,6 @@ def test_ml_message_creation():
     recovered_msg = MLTradeSerializer().decode(msg_bytes)
     assert recovered_msg == msg
 
-    #  TODO: Need to change the __eq__ function : Error message is :
-    #  ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
     data = np.zeros((5, 2)), np.zeros((5, 2))
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.DATA, terms=terms, data=data)
     msg_bytes = MLTradeSerializer().encode(msg)

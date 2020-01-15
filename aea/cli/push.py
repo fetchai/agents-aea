@@ -19,10 +19,12 @@
 
 """Implementation of the 'aea push' subcommand."""
 import click
+import os
 from shutil import copytree
 
 from aea.cli.common import pass_ctx, Context, PublicIdParameter, try_get_item_target_path, try_get_item_source_path, try_to_load_agent_config
 from aea.cli.registry.push import push_item
+from aea.cli.registry.utils import load_yaml
 from aea.configurations.base import PublicId
 
 
@@ -84,19 +86,19 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
     source_path = try_get_item_source_path(ctx.cwd, item_type_plural, item_id.name)
     target_path = try_get_item_target_path(ctx.agent_config.registry_path, item_type_plural, item_id.name)
-    # _check_package_public_id(source_path, item_type, item_id)
+    _check_package_public_id(source_path, item_type, item_id)
     copytree(source_path, target_path)
     click.echo('{} "{}" successfully saved in packages folder.'.format(item_type.title(), item_id))
 
 
-# TODO: clarify whether this is indeed needed
-# def _check_package_public_id(source_path, item_type, item_id):
-#     config = load_yaml(os.path.join(source_path, item_type + ".yaml"))
-#     item_author = config.get("author", "")
-#     item_name = config.get("name", "")
-#     item_version = config.get("version", "")
-#     if item_id.name != item_name or item_id.author != item_author or item_id.version != item_version:
-#         raise click.ClickException(
-#             "Version or author do not match. Expected '{}', found '{}'"
-#             .format(item_id, item_author + "/" + item_name + ":" + item_version)
-#         )
+def _check_package_public_id(source_path, item_type, item_id):
+    # we load only based on item_name, hence also check item_version and item_author match.
+    config = load_yaml(os.path.join(source_path, item_type + ".yaml"))
+    item_author = config.get("author", "")
+    item_name = config.get("name", "")
+    item_version = config.get("version", "")
+    if item_id.name != item_name or item_id.author != item_author or item_id.version != item_version:
+        raise click.ClickException(
+            "Version or author do not match. Expected '{}', found '{}'"
+            .format(item_id, item_author + "/" + item_name + ":" + item_version)
+        )

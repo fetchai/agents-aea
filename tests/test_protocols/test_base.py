@@ -92,4 +92,4 @@ class TestBaseSerializations:
 
     def test_check_consistency_returns_true(self):
         """Test that the check consistency method returns True."""
-        assert self.message.check_consistency()
+        assert self.message._check_consistency()

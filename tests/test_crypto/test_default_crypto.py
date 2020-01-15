@@ -66,7 +66,6 @@ def test_sign_data():
     assert c.is_confirmed_integrity(b"Hello", my_signature, c.public_key), "The verification must be True"
     obj = DefaultCrypto(private_key_pem_path=PRIVATE_KEY_PEM_PATH)
 
-    # TODO:  I am not sure about this :)
     assert type(obj._pvk_obj_to_pem(obj._private_key)) == bytes, "Must return the bytes for the .pem file!"
 
 

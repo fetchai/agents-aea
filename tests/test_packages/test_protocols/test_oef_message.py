@@ -59,7 +59,7 @@ def test_oef_message_consistency():
         id=2,
         query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel)
     )
-    assert msg.check_consistency(), "We expect the consistency to return TRUE"
+    assert msg._check_consistency(), "We expect the consistency to return TRUE"
 
     attribute_foo = Attribute("foo", int, True, "a foo attribute.")
     attribute_bar = Attribute("bar", str, True, "a bar attribute.")
@@ -69,14 +69,14 @@ def test_oef_message_consistency():
                      id=0,
                      agent_description=description_foobar,
                      agent_id="address")
-    assert msg.check_consistency()
+    assert msg._check_consistency()
 
     msg = OEFMessage(type=OEFMessage.Type.UNREGISTER_AGENT,
                      id=0,
                      agent_description=description_foobar,
                      agent_id="address")
 
-    assert msg.check_consistency()
+    assert msg._check_consistency()
 
 
 def test_oef_message_oef_error():

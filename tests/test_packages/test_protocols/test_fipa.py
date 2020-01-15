@@ -175,7 +175,7 @@ def test_performative_match_accept():
 #     with mock.patch("packages.fetchai.protocols.fipa.message.FIPAMessage.Performative")\
 #             as mock_performative_enum:
 #         mock_performative_enum.ACCEPT.value = "unknown"
-#         assert not msg.check_consistency(),\
+#         assert not msg._check_consistency(),\
 #             "We expect that the check_consistency will return False"
 
 

@@ -76,7 +76,7 @@ class OEFMessage(Message):
         :param id: the message id.
         """
         super().__init__(type=type, id=id, **kwargs)
-        assert self.check_consistency(), "OEFMessage initialization inconsistent."
+        assert self._check_consistency(), "OEFMessage initialization inconsistent."
 
     @property
     def type(self) -> Type:  # noqa: F821
@@ -144,7 +144,7 @@ class OEFMessage(Message):
         assert self.is_set("origin"), "origin is not set."
         return cast(str, self.get("origin"))
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.type, OEFMessage.Type), "type not of correct type."
