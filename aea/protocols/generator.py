@@ -146,7 +146,7 @@ class ProtocolGenerator:
         cls_str = str.format('\"\"\"This module contains {}\'s message definition.\"\"\"\n\n'.format(self.protocol_specification.name))
 
         # Imports
-        cls_str += 'from typing import cast, Dict\n\n'
+        cls_str += 'from typing import Dict, cast\n\n'
         cls_str += MESSAGE_IMPORT
         cls_str += '\n\n\n'
 
@@ -246,7 +246,7 @@ class ProtocolGenerator:
         cls_str += "import pickle\n\n"
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
-        cls_str += str.format("from {}.{}.{}.{}.message import {}Message\n\n",
+        cls_str += str.format("from {}.{}.{}.{}.message import {}Message\n\n\n",
                               PATH_TO_PACKAGES,
                               self.protocol_specification.author,
                               "protocols",
