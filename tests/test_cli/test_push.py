@@ -39,8 +39,12 @@ class SaveItemLocallyTestCase(TestCase):
     @mock.patch(
         'aea.cli.push.try_get_item_source_path', return_value='source'
     )
+    @mock.patch(
+        'aea.cli.push._check_package_public_id', return_value=None
+    )
     def test_save_item_locally_positive(
         self,
+        _check_package_public_id_mock,
         try_get_item_source_path_mock,
         try_get_item_target_path_mock,
         copy_tree_mock,
@@ -48,7 +52,7 @@ class SaveItemLocallyTestCase(TestCase):
         """Test for save_item_locally positive result."""
         item_type = 'skill'
         item_id = PublicIdMock()
-        _save_item_locally(ContextMock(), item_type, PublicIdMock())
+        _save_item_locally(ContextMock(), item_type, item_id)
         try_get_item_source_path_mock.assert_called_once_with(
             'cwd', 'skills', item_id.name
         )
@@ -56,6 +60,11 @@ class SaveItemLocallyTestCase(TestCase):
             ContextMock.agent_config.registry_path,
             item_type + 's',
             item_id.name,
+        )
+        _check_package_public_id_mock.assert_called_once_with(
+            'source',
+            item_type,
+            item_id
         )
         copy_tree_mock.assert_called_once_with('source', 'target')
 

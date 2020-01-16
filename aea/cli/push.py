@@ -93,7 +93,7 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     click.echo('{} "{}" successfully saved in packages folder.'.format(item_type.title(), item_id))
 
 
-def _check_package_public_id(source_path, item_type, item_id):
+def _check_package_public_id(source_path, item_type, item_id) -> None:
     # we load only based on item_name, hence also check item_version and item_author match.
     config = load_yaml(os.path.join(source_path, item_type + ".yaml"))
     item_author = config.get("author", "")
