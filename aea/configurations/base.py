@@ -21,7 +21,7 @@
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TypeVar, Generic, Optional, List, Tuple, Dict, Set, cast, Union
+from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
 
 # from aea.helpers.base import generate_fingerprint
 

@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the TAC protocol."""
+
 import base64
 import json
 import pickle
@@ -26,6 +27,7 @@ from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
+
 from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
 
 

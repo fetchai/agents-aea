@@ -22,7 +22,7 @@
 
 import logging
 import sys
-from typing import Dict, Optional, List, Union, cast
+from typing import Dict, List, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi

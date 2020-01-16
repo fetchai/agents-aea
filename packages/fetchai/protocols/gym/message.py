@@ -19,8 +19,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the FIPA message definition."""
+
 from enum import Enum
-from typing import cast, Dict, Any
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 
@@ -49,7 +50,7 @@ class GymMessage(Message):
         :param performative: the performative.
         """
         super().__init__(performative=performative, **kwargs)
-        assert self.check_consistency(), "GymMessage initialization inconsistent."
+        assert self._check_consistency(), "GymMessage initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
@@ -93,7 +94,7 @@ class GymMessage(Message):
         assert self.is_set("info"), "Info is not set."
         return cast(Dict[str, Any], self.get("info"))
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.performative, GymMessage.Performative)

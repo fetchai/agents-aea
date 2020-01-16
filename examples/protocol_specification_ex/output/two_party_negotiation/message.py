@@ -1,6 +1,6 @@
 """This module contains two_party_negotiation's message definition."""
 
-from typing import cast, Dict
+from typing import Dict, cast
 
 from aea.protocols.base import Message
 

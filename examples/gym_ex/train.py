@@ -20,11 +20,11 @@
 
 """Training a multi armed bandit rl agent using the aea framework."""
 
-from gyms.env import BanditNArmedRandom
-from proxy.env import ProxyEnv
-from rl.agent import RLAgent
-
 import argparse
+
+from gyms.env import BanditNArmedRandom  # noqa: I201
+from proxy.env import ProxyEnv  # noqa: I201
+from rl.agent import RLAgent  # noqa: I201
 
 DEFAULT_NB_GOODS = 10
 DEFAULT_NB_PRICES_PER_GOOD = 100

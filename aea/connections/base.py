@@ -20,9 +20,9 @@
 
 """The base connection package."""
 import logging
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from typing import TYPE_CHECKING, Optional, Set
+from typing import Optional, Set, TYPE_CHECKING
 
 from aea.configurations.base import ConnectionConfig
 

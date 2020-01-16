@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the FIPA message definition."""
+
 from enum import Enum
 from typing import Any, Dict, List, Tuple, Union, cast
 
@@ -68,7 +69,7 @@ class FIPAMessage(Message):
                          target=target,
                          performative=FIPAMessage.Performative(performative),
                          **kwargs)
-        assert self.check_consistency(), "FIPAMessage initialization inconsistent."
+        assert self._check_consistency(), "FIPAMessage initialization inconsistent."
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
@@ -111,7 +112,7 @@ class FIPAMessage(Message):
         assert self.is_set("info"), "info is not set."
         return cast(Dict[str, Any], self.get("info"))
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.performative, FIPAMessage.Performative)

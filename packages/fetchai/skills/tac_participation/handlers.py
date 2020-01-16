@@ -28,6 +28,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Address
 from aea.protocols.base import Message
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer

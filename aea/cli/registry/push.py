@@ -21,14 +21,15 @@
 import os
 import shutil
 import tarfile
+
 import click
 
-from aea.cli.common import Context, logger, PublicId
+from aea.cli.common import Context, PublicId, logger
 from aea.cli.registry.utils import (
-    request_api,
-    load_yaml,
+    check_is_author_logged_in,
     clean_tarfiles,
-    check_is_author_logged_in
+    load_yaml,
+    request_api
 )
 
 

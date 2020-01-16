@@ -18,18 +18,24 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the JSON schemas of the configuration files."""
+
 import json
 import os
 from pathlib import Path
 
 import jsonschema
-import pytest
-import yaml
-from jsonschema import validate, Draft4Validator  # type: ignore
+from jsonschema import Draft4Validator, validate  # type: ignore
 
-from ..conftest import CUR_PATH, ROOT_DIR, AGENT_CONFIGURATION_SCHEMA, SKILL_CONFIGURATION_SCHEMA, \
-    CONNECTION_CONFIGURATION_SCHEMA, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, protocol_config_files, \
-    connection_config_files, skill_config_files, agent_config_files
+import pytest
+
+import yaml
+
+from ..conftest import (
+    AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CONNECTION_CONFIGURATION_SCHEMA, CUR_PATH,
+    PROTOCOL_CONFIGURATION_SCHEMA, ROOT_DIR, SKILL_CONFIGURATION_SCHEMA,
+    agent_config_files, connection_config_files, protocol_config_files,
+    skill_config_files
+)
 
 
 def test_agent_configuration_schema_is_valid_wrt_draft_04():

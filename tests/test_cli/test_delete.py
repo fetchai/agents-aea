@@ -18,17 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea delete` sub-command."""
+
 import os
 import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
 
-from ..common.click_testing import CliRunner
-
 import aea
 import aea.cli.common
 from aea.cli import cli
+
+from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION
 
 

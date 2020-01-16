@@ -17,6 +17,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the base classes for the skills."""
+
 import os
 import shutil
 import tempfile
@@ -24,15 +25,15 @@ import unittest.mock
 from pathlib import Path
 from queue import Queue
 
-
 import aea.registries.base
 from aea.aea import AEA, Resources
 from aea.connections.base import ConnectionStatus
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
-from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
-from aea.skills.base import SkillContext, Skill
+from aea.crypto.wallet import Wallet
+from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.skills.base import Skill, SkillContext
+
 from ..conftest import CUR_PATH, DummyConnection
 
 

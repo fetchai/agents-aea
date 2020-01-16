@@ -22,12 +22,12 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, BinaryIO, cast
+from typing import BinaryIO, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
-from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
+from fetchai.ledger.crypto import Address, Entity, Identity  # type: ignore
 
-from aea.crypto.base import Crypto, LedgerApi, AddressLike
+from aea.crypto.base import AddressLike, Crypto, LedgerApi
 
 logger = logging.getLogger(__name__)
 

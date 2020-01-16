@@ -19,8 +19,9 @@
 # ------------------------------------------------------------------------------
 
 """Abstract module wrapping the public and private key cryptography and ledger api."""
+
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Union, Optional
+from typing import Any, BinaryIO, Optional, Union
 
 AddressLike = Union[str, bytes]
 

@@ -22,14 +22,14 @@
 
 import logging
 import time
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from enum import Enum
-from typing import Optional, List
+from typing import List, Optional
 
 from aea.connections.base import Connection
 from aea.crypto.wallet import Wallet
-from aea.mail.base import InBox, OutBox, Multiplexer
+from aea.mail.base import InBox, Multiplexer, OutBox
 
 logger = logging.getLogger(__name__)
 

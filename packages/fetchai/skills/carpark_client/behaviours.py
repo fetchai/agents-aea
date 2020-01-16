@@ -18,10 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a behaviour."""
+
 import logging
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.carpark_client.strategy import Strategy

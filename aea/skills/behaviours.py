@@ -19,7 +19,7 @@
 """This module contains the classes for specific behaviours."""
 import datetime
 from abc import ABC
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 from aea.skills.base import Behaviour
 

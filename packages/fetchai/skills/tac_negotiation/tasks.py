@@ -22,6 +22,7 @@
 from typing import cast
 
 from aea.skills.base import Task
+
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 

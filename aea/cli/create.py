@@ -26,12 +26,13 @@ from typing import cast
 
 import click
 from click import pass_context
+
 from jsonschema import ValidationError
 
 import aea
 from aea.cli.add import connection, skill
-from aea.cli.common import Context, logger, DEFAULT_REGISTRY_PATH, DEFAULT_CONNECTION, DEFAULT_SKILL, DEFAULT_LEDGER, DEFAULT_VERSION
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.cli.common import Context, DEFAULT_CONNECTION, DEFAULT_LEDGER, DEFAULT_REGISTRY_PATH, DEFAULT_SKILL, DEFAULT_VERSION, logger
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 
 
 def _check_is_parent_folders_are_aea_projects_recursively() -> None:

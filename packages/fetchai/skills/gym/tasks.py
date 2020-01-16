@@ -18,13 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'gym' skill."""
+
 import logging
 from queue import Queue
 from threading import Thread
 
 from aea.skills.base import Task
+
 from packages.fetchai.skills.gym.helpers import ProxyEnv
-from packages.fetchai.skills.gym.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
+from packages.fetchai.skills.gym.rl_agent import DEFAULT_NB_STEPS, MyRLAgent, NB_GOODS
 
 logger = logging.getLogger("aea.gym_skill")
 

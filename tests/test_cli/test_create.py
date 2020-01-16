@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea create` sub-command."""
+
 import filecmp
 import json
 import os
@@ -29,17 +30,20 @@ from typing import Dict
 from unittest.mock import patch
 
 import jsonschema
-import pytest
-import yaml
-from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
+
+import pytest
+
+import yaml
 
 import aea
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+
+from ..common.click_testing import CliRunner
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CLI_LOG_OPTION, CONFIGURATION_SCHEMA_DIR, ROOT_DIR
 
 
 class TestCreate:

@@ -20,7 +20,6 @@
 """This test module contains the integration test for the weather skills."""
 
 import os
-import pytest
 import shutil
 import signal
 import subprocess
@@ -28,10 +27,11 @@ import sys
 import tempfile
 import time
 
-from ...common.click_testing import CliRunner
+import pytest
 
 from aea.cli import cli
 
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION
 
 

@@ -19,8 +19,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the default message definition."""
+
 from enum import Enum
-from typing import cast, Dict, Any
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 

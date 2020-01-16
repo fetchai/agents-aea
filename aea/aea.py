@@ -21,7 +21,7 @@
 import logging
 from asyncio import AbstractEventLoop
 from concurrent.futures import Executor
-from typing import Optional, cast, List
+from typing import List, Optional, cast
 
 from aea.agent import Agent
 from aea.connections.base import Connection

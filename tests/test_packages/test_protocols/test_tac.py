@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the messages module."""
+
 from unittest import mock
 
 import pytest

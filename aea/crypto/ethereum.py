@@ -19,17 +19,20 @@
 # ------------------------------------------------------------------------------
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
+
+import logging
 import time
+from pathlib import Path
+from typing import BinaryIO, Optional
+
+from eth_account import Account
+
+from eth_keys import keys
 
 import web3
-from web3 import Web3, HTTPProvider
-from eth_account import Account
-from eth_keys import keys
-import logging
-from pathlib import Path
-from typing import Optional, BinaryIO
+from web3 import HTTPProvider, Web3
 
-from aea.crypto.base import Crypto, LedgerApi, AddressLike
+from aea.crypto.base import AddressLike, Crypto, LedgerApi
 
 logger = logging.getLogger(__name__)
 

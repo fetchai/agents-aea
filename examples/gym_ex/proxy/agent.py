@@ -27,7 +27,7 @@ from typing import Optional
 import gym
 
 from aea.agent import Agent
-from aea.crypto.wallet import Wallet, DEFAULT
+from aea.crypto.wallet import DEFAULT, Wallet
 from aea.helpers.base import locate
 from aea.mail.base import Envelope
 

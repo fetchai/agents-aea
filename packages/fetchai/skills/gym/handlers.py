@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'gym' skill."""
+
 import logging
 from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym.tasks import GymTask
 

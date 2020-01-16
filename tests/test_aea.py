@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/aea.py."""
+
 import os
 import tempfile
 import time
@@ -24,6 +25,7 @@ from pathlib import Path
 from threading import Thread
 
 import pytest
+
 import yaml
 
 from aea import AEA_DIR
@@ -38,9 +40,11 @@ from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
 from aea.skills.base import Skill
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
+
 from .conftest import CUR_PATH
 
 

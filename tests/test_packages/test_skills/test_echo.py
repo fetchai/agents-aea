@@ -19,25 +19,26 @@
 
 """This test module contains the integration test for the echo skill."""
 
-import yaml
 import os
-from pathlib import Path
-import pytest
 import shutil
 import signal
 import subprocess
 import sys
 import tempfile
 import time
+from pathlib import Path
 
-from ...common.click_testing import CliRunner
+import pytest
+
+import yaml
 
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION
 
 

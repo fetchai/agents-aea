@@ -18,14 +18,17 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the FIPA protocol."""
+
 import logging
-from typing import cast, Tuple
+from typing import Tuple, cast
 from unittest import mock
 
 import pytest
-from aea.helpers.search.models import Description, Query, Constraint, ConstraintType
+
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.mail.base import Envelope
-from packages.fetchai.protocols.fipa.dialogues import FIPADialogues, FIPADialogue
+
+from packages.fetchai.protocols.fipa.dialogues import FIPADialogue, FIPADialogues
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 

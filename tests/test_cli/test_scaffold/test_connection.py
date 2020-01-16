@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea scaffold connection` sub-command."""
+
 import filecmp
 import json
 import os
@@ -27,16 +28,18 @@ import unittest.mock
 from pathlib import Path
 
 import jsonschema
-import yaml
-from ...common.click_testing import CliRunner
-from jsonschema import ValidationError, Draft4Validator
+from jsonschema import Draft4Validator, ValidationError
 
-from aea import AEA_DIR
+import yaml
+
 import aea.cli.common
 import aea.configurations.base
-from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE
+from aea import AEA_DIR
 from aea.cli import cli
-from ...conftest import CLI_LOG_OPTION, CONNECTION_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE
+
+from ...common.click_testing import CliRunner
+from ...conftest import CLI_LOG_OPTION, CONFIGURATION_SCHEMA_DIR, CONNECTION_CONFIGURATION_SCHEMA
 
 
 class TestScaffoldConnection:

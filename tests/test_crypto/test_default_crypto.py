@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the crypto module."""
+
 import os
 from unittest import mock
 
@@ -25,6 +26,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 import aea.crypto.default
 from aea.crypto.default import DefaultCrypto, _load_pem_private_key_from_path
+
 from ..conftest import ROOT_DIR
 
 
@@ -66,7 +68,6 @@ def test_sign_data():
     assert c.is_confirmed_integrity(b"Hello", my_signature, c.public_key), "The verification must be True"
     obj = DefaultCrypto(private_key_pem_path=PRIVATE_KEY_PEM_PATH)
 
-    # TODO:  I am not sure about this :)
     assert type(obj._pvk_obj_to_pem(obj._private_key)) == bytes, "Must return the bytes for the .pem file!"
 
 

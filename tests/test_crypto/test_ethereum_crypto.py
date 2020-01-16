@@ -18,10 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+
 import os
 
-from aea.crypto.ethereum import EthereumCrypto
 from web3 import Web3
+
+from aea.crypto.ethereum import EthereumCrypto
+
 from ..conftest import ROOT_DIR
 
 PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/eth_private_key.txt")

@@ -22,15 +22,14 @@
 
 import sys
 import time
-
-from aea.helpers.base import locate
-
-import gym
 from queue import Queue
 from threading import Thread
 from typing import Any, Tuple, cast
 
+import gym
+
 from aea.crypto.wallet import DEFAULT
+from aea.helpers.base import locate
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
