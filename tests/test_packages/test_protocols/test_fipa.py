@@ -301,15 +301,15 @@ class Test_dialogues:
 
     def test_create_self_initiated(self):
         """Test the self initialisation of a dialogue."""
-        result = self.client_dialogues.create_self_initiated(dialogue_starter_addr="starter",
-                                                             dialogue_opponent_addr="opponent",
+        result = self.client_dialogues.create_self_initiated(dialogue_starter_addr=self.client_addr,
+                                                             dialogue_opponent_addr=self.seller_addr,
                                                              is_seller=True)
         assert isinstance(result, FIPADialogue)
         assert result.role == FIPADialogue.AgentRole.SELLER, "The role must be seller."
 
     def test_create_opponent_initiated(self):
         """Test the opponent initialisation of a dialogue."""
-        result = self.client_dialogues.create_opponent_initiated(dialogue_opponent_addr="opponent",
+        result = self.client_dialogues.create_opponent_initiated(dialogue_opponent_addr=self.seller_addr,
                                                                  dialogue_reference=(str(0), ''),
                                                                  is_seller=False)
         assert isinstance(result, FIPADialogue)
