@@ -22,7 +22,7 @@
 import datetime
 from typing import cast
 
-from aea.helpers.search.models import Attribute, DataModel, Query, Constraint, ConstraintType, Description
+from aea.helpers.search.models import Attribute, Constraint, ConstraintType, DataModel, Description, Query
 from aea.skills.base import SharedClass
 
 DEFAULT_DATASET_ID = 'UK'

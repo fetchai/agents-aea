@@ -26,33 +26,57 @@ import pickle
 import time
 from asyncio import AbstractEventLoop, CancelledError
 from threading import Thread
-from typing import List, Optional, cast, Set
+from typing import List, Optional, Set, cast
 
 import oef
 from oef.agents import OEFAgent
 from oef.core import AsyncioCore
 from oef.messages import CFP_TYPES, PROPOSE_TYPES
 from oef.query import (
-    Query as OEFQuery,
-    ConstraintExpr as OEFConstraintExpr,
     And as OEFAnd,
-    Or as OEFOr,
-    Not as OEFNot,
     Constraint as OEFConstraint,
-    ConstraintType as OEFConstraintType, Eq, NotEq, Lt, LtEq, Gt, GtEq, Range, In, NotIn)
-from oef.schema import Description as OEFDescription, DataModel as OEFDataModel, AttributeSchema as OEFAttribute
+    ConstraintExpr as OEFConstraintExpr,
+    ConstraintType as OEFConstraintType,
+    Eq,
+    Gt,
+    GtEq,
+    In,
+    Lt,
+    LtEq,
+    Not as OEFNot,
+    NotEq,
+    NotIn,
+    Or as OEFOr,
+    Query as OEFQuery,
+    Range
+)
+from oef.schema import (
+    AttributeSchema as OEFAttribute,
+    DataModel as OEFDataModel,
+    Description as OEFDescription
+)
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.helpers.search.models import Description, Attribute, DataModel, Query, ConstraintExpr, And, Or, Not, \
-    Constraint, \
-    ConstraintType, ConstraintTypes
-from aea.mail.base import Envelope, Address
+from aea.helpers.search.models import (
+    And,
+    Attribute,
+    Constraint,
+    ConstraintExpr,
+    ConstraintType,
+    ConstraintTypes,
+    DataModel,
+    Description,
+    Not,
+    Or,
+    Query
+)
+from aea.mail.base import Address, Envelope
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
 logger = logging.getLogger(__name__)
 

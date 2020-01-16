@@ -19,7 +19,7 @@
 
 """This module contains the handler for the 'ml_train' skill."""
 import logging
-from typing import cast, Optional, List
+from typing import List, Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage

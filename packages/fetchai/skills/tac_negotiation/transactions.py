@@ -24,10 +24,10 @@ import copy
 import datetime
 import logging
 from collections import defaultdict, deque
-from typing import Dict, Tuple, Deque
+from typing import Deque, Dict, Tuple
 
 from aea.decision_maker.base import OwnershipState
-from aea.decision_maker.messages.transaction import TransactionMessage, TransactionId, OFF_CHAIN
+from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionId, TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
 from aea.mail.base import Address

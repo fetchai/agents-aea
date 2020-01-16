@@ -19,17 +19,18 @@
 
 """Implementation of the 'aea generate' subcommand."""
 
-import click
 import os
 import shutil
 import sys
 
-from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config, DEFAULT_VERSION
-from aea.configurations.base import PublicId, ProtocolSpecification, DEFAULT_AEA_CONFIG_FILE
+import click
+
+from aea.cli.common import Context, DEFAULT_VERSION, logger, pass_ctx, try_to_load_agent_config
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, ProtocolSpecification, PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.protocols.generator import ProtocolGenerator
 # these variables are being used dynamically
-from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE  # noqa: F401
+from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE  # noqa: F401, I100
 
 
 @click.group()

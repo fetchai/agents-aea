@@ -18,32 +18,61 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea run' subcommand."""
+
 import inspect
 import re
 import sys
 from pathlib import Path
-from typing import cast, List, Union
+from typing import List, Union, cast
 
 import click
 from click import pass_context
 
 from aea.aea import AEA
-from aea.cli.common import Context, logger, try_to_load_agent_config, _try_to_load_protocols, \
-    AEAConfigException, _load_env_file, ConnectionsOption
+from aea.cli.common import (
+    AEAConfigException,
+    ConnectionsOption,
+    Context,
+    _load_env_file,
+    _try_to_load_protocols,
+    logger,
+    try_to_load_agent_config
+)
 from aea.cli.install import install
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, \
-    PublicId, DEFAULT_CONNECTION_CONFIG_FILE
+from aea.configurations.base import (
+    AgentConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    PrivateKeyPathConfig,
+    PublicId
+)
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
-from aea.crypto.helpers import _create_default_private_key, _create_fetchai_private_key, _create_ethereum_private_key, \
-    DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, _try_validate_private_key_pem_path, \
-    _try_validate_fet_private_key_path, _try_validate_ethereum_private_key_path
-from aea.crypto.ledger_apis import LedgerApis, _try_to_instantiate_fetchai_ledger_api, \
-    _try_to_instantiate_ethereum_ledger_api, SUPPORTED_LEDGER_APIS
-from aea.crypto.wallet import Wallet, DEFAULT, SUPPORTED_CRYPTOS
-from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules, load_agent_component_package
+from aea.crypto.helpers import (
+    DEFAULT_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE,
+    _create_default_private_key,
+    _create_ethereum_private_key,
+    _create_fetchai_private_key,
+    _try_validate_ethereum_private_key_path,
+    _try_validate_fet_private_key_path,
+    _try_validate_private_key_pem_path
+)
+from aea.crypto.ledger_apis import (
+    LedgerApis,
+    SUPPORTED_LEDGER_APIS,
+    _try_to_instantiate_ethereum_ledger_api,
+    _try_to_instantiate_fetchai_ledger_api
+)
+from aea.crypto.wallet import DEFAULT, SUPPORTED_CRYPTOS, Wallet
+from aea.helpers.base import (
+    add_agent_component_module_to_sys_modules,
+    load_agent_component_package,
+    load_module
+)
 from aea.registries.base import Resources
 
 

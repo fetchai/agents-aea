@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea publish' subcommand."""
-import click
+
 import os
 from shutil import copyfile
 
-from aea.cli.common import pass_ctx, Context, try_to_load_agent_config, try_get_item_target_path, DEFAULT_AEA_CONFIG_FILE
+import click
+
+from aea.cli.common import Context, DEFAULT_AEA_CONFIG_FILE, pass_ctx, try_get_item_target_path, try_to_load_agent_config
 from aea.cli.registry.publish import publish_agent
 
 

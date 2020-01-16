@@ -27,7 +27,7 @@ from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
 logger = logging.getLogger("aea.ml_train_skill")

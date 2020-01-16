@@ -18,13 +18,17 @@
 # ------------------------------------------------------------------------------
 """Methods for CLI fetch functionality."""
 
-import click
 import os
 from shutil import rmtree
 
+import click
+
 from aea.cli.common import Context
 from aea.cli.registry.utils import (
-    request_api, download_file, extract, fetch_package
+    download_file,
+    extract,
+    fetch_package,
+    request_api
 )
 from aea.configurations.base import PublicId
 

@@ -18,14 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """Mail module abstract base classes."""
+
 import asyncio
 import logging
 import queue
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
-from threading import Thread, Lock
-from typing import Optional, TYPE_CHECKING, List, Tuple, Dict, cast
+from threading import Lock, Thread
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, cast
 from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId

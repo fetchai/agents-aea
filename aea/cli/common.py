@@ -25,18 +25,29 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import Dict, List, cast, Optional
+from typing import Dict, List, Optional, cast
 
 import click
-import jsonschema  # type: ignore
+
 from dotenv import load_dotenv
+
+import jsonschema  # type: ignore
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
 from aea.cli.loggers import default_logging_config
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, Dependencies, PublicId, \
-    _get_default_configuration_file_name_from_type, ConfigurationType
+from aea.configurations.base import (
+    AgentConfig,
+    ConfigurationType,
+    ConnectionConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    Dependencies,
+    ProtocolConfig,
+    PublicId,
+    SkillConfig,
+    _get_default_configuration_file_name_from_type
+)
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
 from aea.helpers.base import add_agent_component_module_to_sys_modules, load_agent_component_package

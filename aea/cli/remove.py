@@ -25,7 +25,7 @@ from pathlib import Path
 
 import click
 
-from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config, PublicIdParameter
+from aea.cli.common import Context, PublicIdParameter, logger, pass_ctx, try_to_load_agent_config
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 

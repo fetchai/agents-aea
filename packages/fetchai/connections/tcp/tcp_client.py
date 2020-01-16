@@ -22,12 +22,12 @@
 import asyncio
 import logging
 import struct
-from asyncio import StreamWriter, StreamReader, CancelledError
+from asyncio import CancelledError, StreamReader, StreamWriter
 from typing import Optional, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
 
 from packages.fetchai.connections.tcp.base import TCPConnection
 

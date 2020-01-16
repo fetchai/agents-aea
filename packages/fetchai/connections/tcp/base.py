@@ -22,11 +22,11 @@
 import logging
 import struct
 from abc import ABC, abstractmethod
-from asyncio import CancelledError, StreamWriter, StreamReader
+from asyncio import CancelledError, StreamReader, StreamWriter
 from typing import Optional, Set
 
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 

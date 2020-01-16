@@ -31,7 +31,7 @@ import gym
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.helpers.base import locate
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
 
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer

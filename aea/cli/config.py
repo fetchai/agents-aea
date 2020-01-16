@@ -18,16 +18,23 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea list' subcommand."""
+
 import sys
 from pathlib import Path
 from typing import Dict, List, cast
 
 import click
+
 import yaml
 
-from aea.cli.common import Context, pass_ctx, try_to_load_agent_config, logger
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, \
-    DEFAULT_CONNECTION_CONFIG_FILE, ConfigurationType
+from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
+from aea.configurations.base import (
+    ConfigurationType,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE
+)
 from aea.configurations.loader import ConfigLoader
 
 ALLOWED_PATH_ROOTS = ["agent", "skills", "protocols", "connections"]

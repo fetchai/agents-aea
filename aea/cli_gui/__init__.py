@@ -18,18 +18,20 @@
 # ------------------------------------------------------------------------------
 
 """Key pieces of functionality for CLI GUI."""
-import sys
-from enum import Enum
+
 import glob
 import io
 import logging
 import os
 import subprocess
+import sys
 import threading
 import time
-from typing import List, Dict
+from enum import Enum
+from typing import Dict, List
 
 import connexion
+
 import flask
 
 

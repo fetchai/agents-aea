@@ -22,7 +22,7 @@ import logging
 from enum import Enum
 from typing import Dict, List, Optional
 
-from aea.helpers.search.models import Query, Constraint, ConstraintType
+from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.mail.base import Address
 from aea.skills.base import SharedClass
 

@@ -20,7 +20,7 @@
 """This package contains a scaffold of a behaviour."""
 
 import logging
-from typing import cast, Optional
+from typing import Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -28,7 +28,7 @@ from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.weather_station.strategy import Strategy
 
 logger = logging.getLogger("aea.weather_station_skill")

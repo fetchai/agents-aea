@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea push' subcommand."""
-import click
+
 import os
 from shutil import copytree
 
-from aea.cli.common import pass_ctx, Context, PublicIdParameter, try_get_item_target_path, try_get_item_source_path, try_to_load_agent_config
+import click
+
+from aea.cli.common import Context, PublicIdParameter, pass_ctx, try_get_item_source_path, try_get_item_target_path, try_to_load_agent_config
 from aea.cli.registry.push import push_item
 from aea.cli.registry.utils import load_yaml
 from aea.configurations.base import PublicId

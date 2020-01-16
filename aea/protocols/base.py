@@ -20,9 +20,9 @@
 
 """This module contains the base message and serialization definition."""
 
-from abc import abstractmethod, ABC
-from copy import copy
 import json
+from abc import ABC, abstractmethod
+from copy import copy
 from typing import Any, Dict, Optional
 
 from google.protobuf.struct_pb2 import Struct
