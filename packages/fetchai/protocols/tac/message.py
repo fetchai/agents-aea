@@ -19,9 +19,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the default message definition."""
-from enum import Enum
-from typing import Dict, cast, Any
+
 from collections import defaultdict
+from enum import Enum
+from typing import Any, Dict, cast
 
 from aea.mail.base import Address
 from aea.protocols.base import Message
@@ -84,7 +85,7 @@ class TACMessage(Message):
         :param tac_type: the type of TAC message.
         """
         super().__init__(type=type, **kwargs)
-        assert self.check_consistency(), "TACMessage initialization inconsistent."
+        assert self._check_consistency(), "TACMessage initialization inconsistent."
 
     @property
     def type(self) -> Type:  # noqa: F821
@@ -206,7 +207,7 @@ class TACMessage(Message):
         assert self.is_set("tx_counterparty_signature"), "Tx_counterparty_fee is not set."
         return cast(bytes, self.get("tx_counterparty_signature"))
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.type, TACMessage.Type), "Type is not valid type."

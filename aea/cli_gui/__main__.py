@@ -18,9 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """Main entry point for CLI GUI."""
-import aea.cli_gui
 
 import argparse
+
+import aea.cli_gui
 
 parser = argparse.ArgumentParser(description='Launch the gui through python')
 parser.add_argument(

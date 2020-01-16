@@ -20,6 +20,7 @@
 """This test module contains the tests for the OEF serializer."""
 
 from aea.helpers.search.models import Attribute, DataModel, Description
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import OEFSerializer
 

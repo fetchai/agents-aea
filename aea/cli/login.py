@@ -18,10 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea login' subcommand."""
+
 import click
 
-from aea.cli.registry.utils import registry_login, write_cli_config
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
+from aea.cli.registry.utils import registry_login, write_cli_config
 
 
 @click.command(name='login', help='Login to Registry account')

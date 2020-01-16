@@ -28,13 +28,13 @@ import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
-from typing import Optional, List, Dict, Any, Tuple, cast, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, ProtocolConfig, ProtocolId, SkillId
 from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.protocols.base import Protocol, Message
-from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext
+from aea.protocols.base import Message, Protocol
+from aea.skills.base import AgentContext, Behaviour, Handler, Skill, Task
 
 logger = logging.getLogger(__name__)
 

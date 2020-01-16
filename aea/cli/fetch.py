@@ -18,10 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea fetch' subcommand."""
-import click
+
 import os
 from distutils.dir_util import copy_tree
 from typing import cast
+
+import click
 
 from aea.cli.add import (
     connection as add_connection_command,
@@ -30,11 +32,11 @@ from aea.cli.add import (
 )
 from aea.cli.common import (
     Context,
-    PublicIdParameter,
     DEFAULT_REGISTRY_PATH,
+    PublicIdParameter,
+    logger,
     try_get_item_source_path,
-    try_to_load_agent_config,
-    logger
+    try_to_load_agent_config
 )
 from aea.cli.registry.fetch import fetch_agent
 from aea.configurations.base import PublicId

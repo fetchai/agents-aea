@@ -18,19 +18,24 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the crypto/helpers module."""
+
 import logging
 import os
 from typing import Dict
 from unittest import mock
 
-import pytest
 from hexbytes import HexBytes
 
+import pytest
+
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
-from aea.crypto.fetchai import FETCHAI, FetchAICrypto, DEFAULT_FETCHAI_CONFIG
-from aea.crypto.ledger_apis import LedgerApis, \
-    _try_to_instantiate_fetchai_ledger_api, \
-    _try_to_instantiate_ethereum_ledger_api
+from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG, FETCHAI, FetchAICrypto
+from aea.crypto.ledger_apis import (
+    LedgerApis,
+    _try_to_instantiate_ethereum_ledger_api,
+    _try_to_instantiate_fetchai_ledger_api
+)
+
 from ..conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)

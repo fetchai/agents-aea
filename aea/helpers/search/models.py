@@ -22,7 +22,7 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
-from typing import Dict, Type, Union, Optional, List, Any
+from typing import Any, Dict, List, Optional, Type, Union
 
 ATTRIBUTE_TYPES = Union[float, str, bool, int]
 

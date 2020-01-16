@@ -20,7 +20,6 @@
 """This test module contains the integration test for the gym skill."""
 
 import os
-import pytest
 import shutil
 import signal
 import subprocess
@@ -29,13 +28,14 @@ import tempfile
 import time
 from pathlib import Path
 
+import pytest
+
 import yaml
 
-from aea.configurations.base import SkillConfig
-from ...common.click_testing import CliRunner
-
 from aea.cli import cli
+from aea.configurations.base import SkillConfig
 
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION, ROOT_DIR
 
 

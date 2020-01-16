@@ -19,13 +19,14 @@
 
 """This module contains the handler for the 'ml_train' skill."""
 import logging
-from typing import cast, Optional, List
+from typing import List, Optional, cast
 
 from aea.configurations.base import ProtocolId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
 from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
 from packages.fetchai.protocols.oef.message import OEFMessage

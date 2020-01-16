@@ -20,9 +20,9 @@
 
 """This module contains the base message and serialization definition."""
 
-from abc import abstractmethod, ABC
-from copy import copy
 import json
+from abc import ABC, abstractmethod
+from copy import copy
 from typing import Any, Dict, Optional
 
 from google.protobuf.struct_pb2 import Struct
@@ -47,6 +47,7 @@ class Message:
         self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
+        assert self._check_consistency(), "Message initialization inconsistent."
 
     @property
     def counterparty(self) -> Address:
@@ -104,7 +105,7 @@ class Message:
         """Check value is set for key."""
         return key in self._body
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         return True
 

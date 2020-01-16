@@ -22,9 +22,10 @@
 
 from typing import List, Tuple
 
-import numpy as np
 import gym
 from gym import spaces  # type: ignore
+
+import numpy as np
 
 BanditId = int
 Price = int

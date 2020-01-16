@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for transaction."""
+
 import pytest
 
 from aea.decision_maker.messages.transaction import TransactionMessage

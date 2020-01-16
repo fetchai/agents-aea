@@ -20,7 +20,7 @@
 """This package contains a class representing the search state."""
 
 import datetime
-from typing import cast, Set
+from typing import Set, cast
 
 from aea.skills.base import SharedClass
 

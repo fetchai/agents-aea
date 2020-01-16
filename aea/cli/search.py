@@ -18,18 +18,28 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea search' subcommand."""
+
 import os
 from pathlib import Path
-from typing import cast, List, Dict
+from typing import Dict, List, cast
 
 import click
 
 from aea import AEA_DIR
-from aea.cli.common import Context, pass_ctx, DEFAULT_REGISTRY_PATH, logger, retrieve_details, ConfigLoader, \
-    format_items, format_skills, try_to_load_agent_config
+from aea.cli.common import (
+    ConfigLoader,
+    Context,
+    DEFAULT_REGISTRY_PATH,
+    format_items,
+    format_skills,
+    logger,
+    pass_ctx,
+    retrieve_details,
+    try_to_load_agent_config
+)
 from aea.cli.registry.utils import request_api
-from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
+    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
 
 
 @click.group()

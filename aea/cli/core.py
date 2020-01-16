@@ -29,7 +29,7 @@ import click
 
 import aea
 from aea.cli.add import add
-from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config
+from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.fetch import fetch
@@ -38,8 +38,8 @@ from aea.cli.install import install
 from aea.cli.list import list as _list
 from aea.cli.loggers import simple_verbosity_option
 from aea.cli.login import login
-from aea.cli.push import push
 from aea.cli.publish import publish
+from aea.cli.push import push
 from aea.cli.remove import remove
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
@@ -48,7 +48,7 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfi
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, \
+from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, \
     _validate_private_key_path
 
 

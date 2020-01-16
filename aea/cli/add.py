@@ -22,15 +22,14 @@
 import os
 import sys
 from pathlib import Path
-from typing import cast, Collection
+from typing import Collection, cast
 
 import click
 from click import pass_context
 
-from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config, PublicIdParameter, _find_item_locally, \
-    _copy_package_directory
+from aea.cli.common import Context, PublicIdParameter, _copy_package_directory, _find_item_locally, logger, pass_ctx, try_to_load_agent_config
 from aea.cli.registry.utils import fetch_package
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId, ConfigurationType, \
+from aea.configurations.base import ConfigurationType, DEFAULT_AEA_CONFIG_FILE, PublicId, \
     _get_default_configuration_file_name_from_type
 from aea.configurations.loader import ConfigLoader
 

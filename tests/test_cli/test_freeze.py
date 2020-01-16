@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea freeze` sub-command."""
+
 import json
 import os
 from pathlib import Path
@@ -26,8 +27,9 @@ import jsonschema
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, CUR_PATH
+
 from ..common.click_testing import CliRunner
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CLI_LOG_OPTION, CONFIGURATION_SCHEMA_DIR, CUR_PATH
 
 
 class TestFreeze:

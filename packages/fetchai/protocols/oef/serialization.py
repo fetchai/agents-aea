@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
+
 import base64
 import copy
 import json
@@ -27,6 +28,7 @@ from typing import cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 
 """default 'to' field for OEF envelopes."""

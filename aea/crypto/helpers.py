@@ -19,11 +19,13 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping the helpers of public and private key cryptography."""
-import sys
+
 import logging
+import sys
+
+from eth_account import Account  # type: ignore
 
 from fetchai.ledger.crypto import Entity  # type: ignore
-from eth_account import Account  # type: ignore
 
 from aea.crypto.default import DefaultCrypto
 

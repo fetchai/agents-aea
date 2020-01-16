@@ -21,7 +21,7 @@
 """The state update message module."""
 
 from enum import Enum
-from typing import cast, Dict
+from typing import Dict, cast
 
 from aea.decision_maker.messages.base import InternalMessage
 

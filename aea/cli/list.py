@@ -18,14 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea list' subcommand."""
+
 from collections import Set
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 import click
 
-from aea.cli.common import Context, pass_ctx, try_to_load_agent_config, retrieve_details, format_items
-from aea.configurations.base import PublicId, ConfigurationType, _get_default_configuration_file_name_from_type
+from aea.cli.common import Context, format_items, pass_ctx, retrieve_details, try_to_load_agent_config
+from aea.configurations.base import ConfigurationType, PublicId, _get_default_configuration_file_name_from_type
 from aea.configurations.loader import ConfigLoader
 
 

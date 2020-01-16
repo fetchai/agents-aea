@@ -22,7 +22,7 @@
 import time
 from typing import cast
 
-from aea.helpers.search.models import Description, Query, Constraint, ConstraintType
+from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.skills.base import SharedClass
 
 DEFAULT_COUNTRY = 'UK'

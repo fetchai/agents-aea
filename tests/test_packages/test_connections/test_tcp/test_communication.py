@@ -18,18 +18,21 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the TCP connection communication."""
+
 import asyncio
 import struct
 import unittest.mock
 
 import pytest
 
-import packages
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
+import packages
 from packages.fetchai.connections.tcp.connection import TCPClientConnection, TCPServerConnection
+
 from ....conftest import get_unused_tcp_port
 
 

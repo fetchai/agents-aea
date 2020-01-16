@@ -18,18 +18,19 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the stub connection."""
+
 import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Union, Optional, Set
+from typing import Optional, Set, Union
 
-from watchdog.events import FileSystemEventHandler, FileModifiedEvent
+from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 

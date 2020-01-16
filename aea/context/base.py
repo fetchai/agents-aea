@@ -23,9 +23,9 @@ from queue import Queue
 from typing import Any, Dict
 
 from aea.connections.base import ConnectionStatus
-from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
-from aea.mail.base import OutBox
 from aea.crypto.ledger_apis import LedgerApis
+from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.mail.base import OutBox
 
 
 class AgentContext:

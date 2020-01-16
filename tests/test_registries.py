@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for aea/registries/base.py."""
+
 import os
 import random
 import shutil
@@ -35,6 +36,7 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Protocol
 from aea.registries.base import ProtocolRegistry, Resources
+
 from .conftest import CUR_PATH, DummyConnection
 
 

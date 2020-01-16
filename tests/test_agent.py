@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the agent module."""
+
 import os
 import time
 from threading import Thread
@@ -25,7 +26,9 @@ from threading import Thread
 from aea.agent import Agent, AgentState
 from aea.crypto.wallet import Wallet
 from aea.mail.base import InBox, OutBox
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+
 from .conftest import CUR_PATH
 
 

@@ -20,19 +20,19 @@
 """This module contains the decision maker class."""
 
 import copy
-from enum import Enum
-import math
 import logging
+import math
+from enum import Enum
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
-from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
-from aea.decision_maker.messages.transaction import TransactionMessage, OFF_CHAIN
+from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.state_update import StateUpdateMessage
-from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
-from aea.mail.base import OutBox  # , Envelope
+from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
+from aea.helpers.preference_representations.base import linear_utility, logarithmic_utility
+from aea.mail.base import OutBox
 from aea.protocols.base import Message
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity

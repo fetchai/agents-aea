@@ -18,9 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea gui` sub-commands."""
-from flask import Flask
 
 import unittest.mock
+
+from flask import Flask
 
 import aea.cli_gui
 
