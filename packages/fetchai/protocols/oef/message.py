@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the default message definition."""
+
 from enum import Enum
 from typing import List, cast
 

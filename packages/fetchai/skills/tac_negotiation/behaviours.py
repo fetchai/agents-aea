@@ -18,10 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a behaviour."""
+
 import logging
 from typing import cast
 
 from aea.skills.base import Behaviour
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from packages.fetchai.skills.tac_negotiation.registration import Registration

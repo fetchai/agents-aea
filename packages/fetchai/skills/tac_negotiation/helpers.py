@@ -22,6 +22,7 @@
 
 import collections
 from typing import Dict, List, Union, cast
+
 from web3 import Web3
 
 from aea.helpers.search.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \

@@ -21,13 +21,14 @@
 
 import logging
 import os
-from typing import Any, Dict, List, Tuple, cast
 import time
+from typing import Any, Dict, List, Tuple, cast
 
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
-from packages.fetchai.skills.carpark_detection.detection_database import DetectionDatabase
+
 from packages.fetchai.skills.carpark_detection.carpark_detection_data_model import CarParkDataModel
+from packages.fetchai.skills.carpark_detection.detection_database import DetectionDatabase
 
 DEFAULT_PRICE = 2000
 DEFAULT_DB_IS_REL_TO_CWD = False

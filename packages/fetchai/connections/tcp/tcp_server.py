@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the TCP server."""
+
 import asyncio
 import logging
 from asyncio import StreamReader, StreamWriter, AbstractServer, Future
@@ -27,6 +28,7 @@ from typing import Dict, Optional, Tuple, cast
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.mail.base import Envelope, Address
+
 from packages.fetchai.connections.tcp.base import TCPConnection
 
 logger = logging.getLogger(__name__)

@@ -25,6 +25,7 @@ from typing import cast, Optional
 
 from aea.helpers.search.models import Description, DataModel, Attribute
 from aea.skills.base import Behaviour
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 from packages.fetchai.protocols.tac.message import TACMessage

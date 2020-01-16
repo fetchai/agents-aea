@@ -19,8 +19,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the FIPA message definition."""
+
 from enum import Enum
-from typing import cast, Tuple
+from typing import Tuple, cast
+
 import numpy as np
 
 from aea.helpers.search.models import Description, Query

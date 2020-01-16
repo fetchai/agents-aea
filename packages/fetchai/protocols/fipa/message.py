@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the FIPA message definition."""
+
 from enum import Enum
 from typing import Any, Dict, List, Tuple, Union, cast
 

@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Extension to the Local Node."""
+
 import asyncio
 import logging
 from asyncio import Queue, AbstractEventLoop
@@ -30,6 +31,7 @@ from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Envelope, AEAConnectionError, Address
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
 

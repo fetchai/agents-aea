@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Extension to the OEF Python SDK."""
+
 import asyncio
 import logging
 import pickle
@@ -47,6 +48,7 @@ from aea.helpers.search.models import Description, Attribute, DataModel, Query, 
     Constraint, \
     ConstraintType, ConstraintTypes
 from aea.mail.base import Envelope, Address
+
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage

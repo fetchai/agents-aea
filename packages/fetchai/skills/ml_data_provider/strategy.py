@@ -20,6 +20,7 @@
 """This module contains the strategy class."""
 
 import numpy as np
+
 from tensorflow import keras
 
 from aea.helpers.search.models import Attribute, DataModel, Description, Query

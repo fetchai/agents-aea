@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 
 from fetchai.ledger.api import LedgerApi        # type: ignore
-from fetchai.ledger.crypto import Entity, Address  # type: ignore
+from fetchai.ledger.crypto import Address, Entity  # type: ignore
 
 
 def generate_fetchai_wealth(arguments: argparse.Namespace) -> None:
