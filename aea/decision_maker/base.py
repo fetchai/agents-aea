@@ -444,7 +444,7 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: None
         """
-        if tx_message.ledger_id not in SUPPORTED_LEDGER_APIS + [OFF_CHAIN]:  # pragma: no cover
+        if tx_message.ledger_id not in SUPPORTED_LEDGER_APIS + [OFF_CHAIN]:
             logger.error("[{}]: ledger_id={} is not supported".format(self._agent_name, tx_message.ledger_id))
             return
 

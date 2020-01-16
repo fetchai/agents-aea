@@ -456,6 +456,27 @@ class Test_DecisionMaker:
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
 
+    def test_decision_maker_handle_unknown_tx_message(self):
+        """Test the handle tx message method."""
+        patch_logger_error = mock.patch.object(aea.decision_maker.base.logger, 'error')
+        mocked_logger_error = patch_logger_error.__enter__()
+
+        with mock.patch("aea.decision_maker.messages.transaction.TransactionMessage.check_consistency",
+                        return_value=True):
+            tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                            skill_callback_ids=["default"],
+                                            tx_id=self.tx_id,
+                                            tx_sender_addr=self.tx_sender_addr,
+                                            tx_counterparty_addr=self.tx_counterparty_addr,
+                                            tx_amount_by_currency_id={"FET": -2},
+                                            tx_sender_fee=0,
+                                            tx_counterparty_fee=0,
+                                            tx_quantities_by_good_id={"good_id": 10},
+                                            info=self.info,
+                                            ledger_id="bitcoin")
+            self.decision_maker.handle(tx_message)
+        mocked_logger_error.assert_called_with('[test]: ledger_id=bitcoin is not supported')
+
     def test_decision_maker_handle_tx_message_not_ready(self):
         """Test that the decision maker is not ready to pursuit the goals.Cannot handle the message."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
