@@ -29,6 +29,7 @@ import yaml
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ProtocolConfig
+from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
@@ -72,13 +73,15 @@ def test_act():
         ledger_apis = LedgerApis({}, 'default')
         address = wallet.addresses['default']
         connections = [OEFLocalConnection(address, node)]
+        resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         agent = AEA(
             agent_name,
             connections,
             wallet,
             ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+            resources,
+            programmatic=False)
         t = Thread(target=agent.start)
         try:
             t.start()
@@ -101,6 +104,7 @@ def test_react():
         address = wallet.addresses['default']
         connection = OEFLocalConnection(address, node)
         connections = [connection]
+        resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg.counterparty = address
@@ -117,7 +121,8 @@ def test_react():
             connections,
             wallet,
             ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+            resources,
+            programmatic=False)
         t = Thread(target=agent.start)
         try:
             t.start()
@@ -145,6 +150,7 @@ async def test_handle():
         address = wallet.addresses['default']
         connection = OEFLocalConnection(address, node)
         connections = [connection]
+        resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         msg.counterparty = agent_name
@@ -161,7 +167,8 @@ async def test_handle():
             connections,
             wallet,
             ledger_apis,
-            resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))))
+            resources,
+            programmatic=False)
         t = Thread(target=agent.start)
         try:
             t.start()
@@ -217,13 +224,13 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.node.start()
         cls.agent_name = "MyAgent"
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({'default': cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({}, 'default')
+        cls.wallet = Wallet({DEFAULT: cls.private_key_pem_path})
+        cls.ledger_apis = LedgerApis({}, DEFAULT)
         cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
         cls.connections = [cls.connection]
 
         cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
-        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, cls.resources)
+        cls.aea = AEA(cls.agent_name, cls.connections, cls.wallet, cls.ledger_apis, cls.resources, programmatic=False)
 
         cls.expected_message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         cls.expected_message.counterparty = cls.agent_name

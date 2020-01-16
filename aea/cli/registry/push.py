@@ -23,11 +23,12 @@ import shutil
 import tarfile
 import click
 
-from aea.cli.common import Context, logger, PublicIdParameter
+from aea.cli.common import Context, logger, PublicId
 from aea.cli.registry.utils import (
     request_api,
     load_yaml,
-    clean_tarfiles
+    clean_tarfiles,
+    check_is_author_logged_in
 )
 
 
@@ -44,7 +45,7 @@ def _compress_dir(output_filename: str, source_dir: str):
 
 
 @clean_tarfiles
-def push_item(ctx: Context, item_type: str, item_id: PublicIdParameter) -> None:
+def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     Push item to the Registry.
 
@@ -57,6 +58,12 @@ def push_item(ctx: Context, item_type: str, item_id: PublicIdParameter) -> None:
 
     items_folder = os.path.join(ctx.cwd, item_type_plural)
     item_path = os.path.join(items_folder, item_id.name)
+
+    item_config_filepath = os.path.join(item_path, '{}.yaml'.format(item_type))
+    logger.debug('Reading {} {} config ...'.format(item_id.name, item_type))
+    item_config = load_yaml(item_config_filepath)
+    check_is_author_logged_in(item_config['author'])
+
     logger.debug(
         'Searching for {} {} in {} ...'
         .format(item_id.name, item_type, items_folder)
@@ -76,10 +83,6 @@ def push_item(ctx: Context, item_type: str, item_id: PublicIdParameter) -> None:
     )
     _compress_dir(output_filename, item_path)
     output_filepath = os.path.join(ctx.cwd, output_filename)
-
-    item_config_filepath = os.path.join(item_path, '{}.yaml'.format(item_type))
-    logger.debug('Reading {} {} config ...'.format(item_id.name, item_type))
-    item_config = load_yaml(item_config_filepath)
 
     data = {
         'name': item_id.name,

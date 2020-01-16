@@ -287,3 +287,22 @@ def clean_tarfiles(func):
             return result
 
     return wrapper
+
+
+def check_is_author_logged_in(author_name: str) -> None:
+    """
+    Check if current user's name equals to item's author.
+
+    :param author_name: str item author username.
+
+    :raise ClickException: if username and author's name are not equal.
+    :return: None.
+    """
+    resp = request_api('GET', '/rest-auth/user/', auth=True)
+    if not author_name == resp['username']:
+        raise click.ClickException(
+            'Author username is not equal to current logged in username '
+            '(logged in: {}, author: {}). '
+            'You are allowed to push only items of your authorship.'
+            .format(resp['username'], author_name)
+        )

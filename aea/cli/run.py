@@ -19,7 +19,6 @@
 
 """Implementation of the 'aea run' subcommand."""
 import inspect
-import os
 import re
 import sys
 from pathlib import Path
@@ -33,7 +32,7 @@ from aea.cli.common import Context, logger, try_to_load_agent_config, _try_to_lo
     AEAConfigException, _load_env_file, ConnectionsOption
 from aea.cli.install import install
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig, \
-    PublicId
+    PublicId, DEFAULT_CONNECTION_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.crypto.ethereum import ETHEREUM
@@ -56,7 +55,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     """
     path = Path(DEFAULT_AEA_CONFIG_FILE)
     agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-    fp = open(str(path), mode="r", encoding="utf-8")
+    fp = path.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
     for identifier, value in aea_conf.private_key_paths.read_all():
@@ -104,7 +103,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
 
     # update aea config
     path = Path(DEFAULT_AEA_CONFIG_FILE)
-    fp = open(str(path), mode="w", encoding="utf-8")
+    fp = path.open(mode="w", encoding="utf-8")
     agent_loader.dump(aea_conf, fp)
     ctx.agent_config = aea_conf
 
@@ -113,7 +112,7 @@ def _verify_ledger_apis_access() -> None:
     """Verify access to ledger apis."""
     path = Path(DEFAULT_AEA_CONFIG_FILE)
     agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
-    fp = open(str(path), mode="r", encoding="utf-8")
+    fp = path.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
     for identifier, value in aea_conf.ledger_apis.read_all():
@@ -145,20 +144,25 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
     :raises AEAConfigException: if the connection name provided as argument is not declared in the configuration file,
                               | or if the connection type is not supported by the framework.
     """
-    supported_connection_names = set(map(lambda x: x.name, ctx.agent_config.connections))
+    # TODO handle the case when there are multiple connections with the same name
+    supported_connection_names = dict(map(lambda x: (x.name, x), ctx.agent_config.connections))
     if connection_name not in supported_connection_names:
         raise AEAConfigException("Connection name '{}' not declared in the configuration file.".format(connection_name))
 
+    connection_public_id = supported_connection_names[connection_name]
+    connection_dir = Path("vendor", connection_public_id.author, "connections", connection_public_id.name)
+    if not connection_dir.exists():
+        connection_dir = Path("connections", connection_public_id.name)
+
     try:
-        connection_config = ctx.connection_loader.load(open(os.path.join(ctx.cwd, "connections", connection_name, "connection.yaml")))
+        connection_config = ctx.connection_loader.load(open(connection_dir / DEFAULT_CONNECTION_CONFIG_FILE))
     except FileNotFoundError:
         raise AEAConfigException("Connection config for '{}' not found.".format(connection_name))
 
-    connection_package = load_agent_component_package("connection", connection_name, connection_config.author,
-                                                      Path("connections", connection_name))
+    connection_package = load_agent_component_package("connection", connection_name, connection_config.author, connection_dir)
     add_agent_component_module_to_sys_modules("connection", connection_name, connection_config.author, connection_package)
     try:
-        connection_module = load_module("connection_module", Path("connections", connection_name, "connection.py"))
+        connection_module = load_module("connection_module", connection_dir / "connection.py")
     except FileNotFoundError:
         raise AEAConfigException("Connection '{}' not found.".format(connection_name))
 
@@ -216,7 +220,7 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
         else:
             click_context.invoke(install)
 
-    agent = AEA(agent_name, connections, wallet, ledger_apis, resources=Resources(str(Path("."))))
+    agent = AEA(agent_name, connections, wallet, ledger_apis, resources=Resources(str(Path("."))), programmatic=False)
     try:
         agent.start()
     except KeyboardInterrupt:

@@ -28,7 +28,7 @@ from requests.exceptions import ConnectionError
 from aea.cli.common import AEAConfigException
 from aea.cli.registry.utils import (
     fetch_package, request_api, download_file, extract, _init_config_folder,
-    write_cli_config, read_cli_config
+    write_cli_config, read_cli_config, check_is_author_logged_in
 )
 from aea.cli.registry.settings import REGISTRY_API_URL
 from aea.configurations.base import PublicId
@@ -278,3 +278,20 @@ class ReadCLIConfigTestCase(TestCase):
         """Test for read_cli_config method bad yaml behavior."""
         with self.assertRaises(AEAConfigException):
             read_cli_config()
+
+
+@mock.patch(
+    'aea.cli.registry.utils.request_api',
+    return_value={'username': 'current-user'}
+)
+class CheckIsAuthorLoggedInTestCase(TestCase):
+    """Test case for check_is_author_logged_in method."""
+
+    def test_check_is_author_logged_in_positive(self, request_api_mock):
+        """Test for check_is_author_logged_in method positive result."""
+        check_is_author_logged_in('current-user')
+
+    def test_check_is_author_logged_in_negative(self, request_api_mock):
+        """Test for check_is_author_logged_in method negative result."""
+        with self.assertRaises(ClickException):
+            check_is_author_logged_in('not-current-user')
