@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF communication using an OEF."""
+
 import asyncio
 import logging
 import os
@@ -27,25 +28,27 @@ import unittest
 from typing import Dict, cast
 from unittest import mock
 
-import pytest
 from oef.messages import OEFErrorOperation
 from oef.query import ConstraintExpr
 
-import packages
+import pytest
+
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
-from aea.helpers.search.models import Description, DataModel, Attribute, Query, Constraint, ConstraintType, \
-    ConstraintTypes
+from aea.helpers.search.models import Attribute, Constraint, ConstraintType, ConstraintTypes, DataModel, Description, Query
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
+import packages
 from packages.fetchai.connections.oef.connection import OEFConnection, OEFObjectTranslator
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+
 from ....conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)

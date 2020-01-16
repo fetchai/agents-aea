@@ -17,11 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI login command."""
+
 from unittest import TestCase, mock
 
 from aea.cli import cli
 
 from tests.common.click_testing import CliRunner
+
 from ..conftest import CLI_LOG_OPTION
 
 

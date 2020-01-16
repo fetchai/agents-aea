@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """The test error skill module contains the tests of the error skill."""
+
 import os
 import time
 from pathlib import Path
@@ -24,8 +25,8 @@ from threading import Thread
 
 from aea.aea import AEA
 from aea.crypto.default import DEFAULT
-from aea.crypto.wallet import Wallet
 from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -34,10 +35,12 @@ from aea.skills.base import SkillContext
 from aea.skills.error.behaviours import ErrorBehaviour
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.error.tasks import ErrorTask
+
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
+
 from ..conftest import CUR_PATH, DummyConnection
 
 

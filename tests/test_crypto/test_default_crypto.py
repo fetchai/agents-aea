@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the crypto module."""
+
 import os
 from unittest import mock
 
@@ -25,6 +26,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 import aea.crypto.default
 from aea.crypto.default import DefaultCrypto, _load_pem_private_key_from_path
+
 from ..conftest import ROOT_DIR
 
 

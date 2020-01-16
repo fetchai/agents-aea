@@ -18,12 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF models."""
+
 import pickle
 from unittest import mock
 
 import pytest
 
-from aea.helpers.search.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint, ConstraintType
+from aea.helpers.search.models import And, Attribute, Constraint, ConstraintType, DataModel, Description, Not, Or, Query
+
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 
 

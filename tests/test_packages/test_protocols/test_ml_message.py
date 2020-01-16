@@ -18,15 +18,17 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ml_messages module."""
+
 import logging
+
+import numpy as np
 
 import pytest
 
-from aea.helpers.search.models import DataModel, Attribute, Constraint, Query, ConstraintType, Description
+from aea.helpers.search.models import Attribute, Constraint, ConstraintType, DataModel, Description, Query
+
 from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
 from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
-
-import numpy as np
 
 logger = logging.getLogger(__name__)
 

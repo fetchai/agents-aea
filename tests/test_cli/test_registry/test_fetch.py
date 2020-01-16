@@ -18,7 +18,8 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry fetch methods."""
 
-from unittest import mock, TestCase
+from unittest import TestCase, mock
+
 from click import ClickException
 
 from aea.cli.registry.fetch import fetch_agent

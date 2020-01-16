@@ -18,10 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for decision_maker."""
-from unittest import mock
-
 import os
 from queue import Queue
+from unittest import mock
 
 import pytest
 
@@ -29,13 +28,14 @@ import aea
 import aea.decision_maker.base
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import Wallet, FETCHAI
-from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
+from aea.crypto.wallet import FETCHAI, Wallet
+from aea.decision_maker.base import DecisionMaker, OwnershipState, Preferences
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.mail.base import OutBox, Multiplexer  # , Envelope
+from aea.mail.base import Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
+
 from ..conftest import CUR_PATH, DummyConnection
 
 MAX_REACTIONS = 10

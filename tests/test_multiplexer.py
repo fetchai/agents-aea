@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the Multiplexer."""
+
 import asyncio
 import shutil
 import tempfile
@@ -31,10 +32,12 @@ import pytest
 
 import aea
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import Multiplexer, AEAConnectionError, Envelope, EnvelopeContext
+from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+
 from .conftest import DummyConnection
 
 

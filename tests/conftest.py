@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Conftest module for Pytest."""
+
 import asyncio
 import inspect
 import logging
@@ -30,16 +31,19 @@ from threading import Timer
 from typing import Optional, Set
 
 import docker as docker
-import gym
-import pytest
 from docker.models.containers import Container
+
+import gym
+
 from oef.agents import AsyncioCore, OEFAgent
 
+import pytest
+
 from aea import AEA_DIR
-from aea.configurations.base import ConnectionConfig, DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
-    DEFAULT_SKILL_CONFIG_FILE, DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import ConnectionConfig, DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, \
+    DEFAULT_SKILL_CONFIG_FILE
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 

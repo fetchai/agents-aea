@@ -23,7 +23,7 @@ import sys
 import time
 import unittest.mock
 
-from .test_base import create_app, DummyPID
+from .test_base import DummyPID, create_app
 
 
 def test_create_and_run_oef():

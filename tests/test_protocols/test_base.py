@@ -18,12 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the messages module."""
+
 from typing import cast
 
 from aea.configurations.base import ProtocolConfig
 from aea.mail.base import Envelope
-from aea.protocols.base import Message, Serializer, Protocol
-from aea.protocols.base import ProtobufSerializer, JSONSerializer
+from aea.protocols.base import JSONSerializer, Message, ProtobufSerializer, Protocol, Serializer
 
 
 class TestBaseSerializations:

@@ -18,12 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the OEF protocol."""
-# from enum import Enum
-# import base64
-# import json
-# from unittest import mock
 
-from aea.helpers.search.models import DataModel, Attribute, Query, Constraint, ConstraintType, Description
+from aea.helpers.search.models import Attribute, Constraint, ConstraintType, DataModel, Description, Query
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import OEFSerializer
 

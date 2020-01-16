@@ -19,17 +19,21 @@
 # ------------------------------------------------------------------------------
 
 """Peer to Peer connection and channel."""
+
 import asyncio
 import logging
 from unittest import mock
 from unittest.mock import MagicMock
 
 import fetch.p2p.api.http_calls
-import pytest
+
 from fetchai.ledger.crypto import entity
+
+import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
+
 from packages.fetchai.connections.p2p.connection import PeerToPeerConnection
 
 logger = logging.getLogger(__name__)

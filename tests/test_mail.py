@@ -18,18 +18,21 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for Envelope of mail.base.py."""
+
 import time
 import unittest.mock
 
 import pytest
 
 import aea
-from aea.mail.base import Envelope, InBox, OutBox, Multiplexer, URI
+from aea.mail.base import Envelope, InBox, Multiplexer, OutBox, URI
 from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+
 from .conftest import DummyConnection
 
 

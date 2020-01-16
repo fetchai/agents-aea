@@ -18,7 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for cli.common module."""
+
 from unittest import TestCase, mock
+
 from click import ClickException
 
 from aea.cli.common import format_items, format_skills, try_get_item_source_path, try_get_item_target_path

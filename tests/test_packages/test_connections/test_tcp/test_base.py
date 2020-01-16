@@ -18,15 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the TCP base module."""
+
 import asyncio
+import unittest.mock
 from asyncio import CancelledError
 
-import packages
 import pytest
-import unittest.mock
 
 from aea.mail.base import Envelope
+
+import packages
 from packages.fetchai.connections.tcp.connection import TCPClientConnection, TCPServerConnection
+
 from ....conftest import get_unused_tcp_port
 
 

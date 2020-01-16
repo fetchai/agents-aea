@@ -17,20 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry utils."""
-import os
 
+import os
 from builtins import FileNotFoundError
 from unittest import TestCase, mock
+
 from click import ClickException
-from yaml import YAMLError
+
 from requests.exceptions import ConnectionError
 
+from yaml import YAMLError
+
 from aea.cli.common import AEAConfigException
-from aea.cli.registry.utils import (
-    fetch_package, request_api, download_file, extract, _init_config_folder,
-    write_cli_config, read_cli_config, check_is_author_logged_in
-)
 from aea.cli.registry.settings import REGISTRY_API_URL
+from aea.cli.registry.utils import (
+    _init_config_folder, check_is_author_logged_in, download_file, extract, fetch_package, read_cli_config, request_api,
+    write_cli_config
+)
 from aea.configurations.base import PublicId
 
 

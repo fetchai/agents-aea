@@ -19,9 +19,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+
 import os
 
 from aea.crypto.fetchai import FetchAICrypto
+
 from ..conftest import ROOT_DIR
 
 PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/fet_private_key.txt")

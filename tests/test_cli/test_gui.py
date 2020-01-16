@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea gui` sub-command."""
+
 import json
 import os
 import subprocess
@@ -27,10 +28,11 @@ import time
 from pathlib import Path
 
 import jsonschema
-import pytest
 from jsonschema import Draft4Validator
 
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION, tcpping
+import pytest
+
+from ..conftest import AGENT_CONFIGURATION_SCHEMA, CLI_LOG_OPTION, CONFIGURATION_SCHEMA_DIR, tcpping
 
 
 class TestGui:
