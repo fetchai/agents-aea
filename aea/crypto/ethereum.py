@@ -22,7 +22,7 @@
 import time
 
 import web3
-from eth_account.messages import SignableMessage
+from eth_account.messages import encode_defunct
 from web3 import Web3, HTTPProvider
 from eth_account import Account
 from eth_keys import keys
@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Optional, BinaryIO
 
 from aea.crypto.base import Crypto, LedgerApi, AddressLike
+from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
@@ -96,26 +97,28 @@ class EthereumCrypto(Crypto):
         except IOError as e:        # pragma: no cover
             logger.exception(str(e))
 
-    def sign_transaction(self, tx_hash: SignableMessage) -> bytes:
+    def sign_transaction(self, tx_hash: bytes) -> bytes:
         """
         Sign a transaction hash.
 
         :param tx_hash: the transaction hash
         :return: Signed message in bytes
         """
-        signature = self.entity.sign_message(tx_hash)
+        tx = encode_defunct(primitive=tx_hash)
+        signature = self.entity.sign_message(tx)
         return signature['signature']
 
-    # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
-    #     """
-    #     Recover the address from the hash.
+    def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
 
-    #     :param tx_hash: the transaction hash
-    #     :param signature: the transaction signature
-    #     :return: the recovered address
-    #     """
-    #     address = self.entity.recoverHash(tx_hash, signature=signature)
-    #     return address
+        :param tx_hash: the transaction hash
+        :param signature: the transaction signature
+        :return: the recovered address
+        """
+        tx = encode_defunct(primitive=tx_hash)
+        addr = Account.recover_message(signable_message=tx, signature=signature)
+        return addr
 
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""

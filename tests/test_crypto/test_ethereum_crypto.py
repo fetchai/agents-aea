@@ -19,7 +19,6 @@
 
 """This module contains the tests of the ethereum module."""
 import os
-from eth_account.messages import encode_defunct
 
 from aea.crypto.ethereum import EthereumCrypto
 from ..conftest import ROOT_DIR
@@ -46,6 +45,7 @@ def test_initialization():
 def test_sign_transaction():
     """Test the signing function for the eth_crypto."""
     account = EthereumCrypto(PRIVATE_KEY_PATH)
-    tx = encode_defunct(text='hello')
-    sign_bytes = account.sign_transaction(tx)
+    sign_bytes = account.sign_transaction(b'hello')
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
+    recovered_addr = account.recover_from_hash(b'hello', signature=sign_bytes)
+    assert recovered_addr == account.address, "Failed to recover the correct address."
