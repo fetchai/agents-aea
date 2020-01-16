@@ -188,7 +188,7 @@ class Test_Ownership_state:
         assert state != new_state, "after applying a list_of_transactions must have a different state!"
 
     def test_transaction_update(self):
-        """Test the transaction update."""
+        """Test the transaction update when sending tokens."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 20}
 
@@ -212,6 +212,13 @@ class Test_Ownership_state:
         assert self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
         assert self.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
 
+    def test_transaction_update_receive(self):
+        """Test the transaction update when receiving tokens."""
+        currency_endowment = {"FET": 75}
+        good_endowment = {"good_id": 30}
+        self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
+        assert self.ownership_state.amount_by_currency_id == currency_endowment
+        assert self.ownership_state.quantities_by_good_id == good_endowment
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
                                         tx_id="transaction0",
@@ -330,7 +337,7 @@ class Test_Preferences_Decision_maker:
         """Teardown any state that was previously setup with a call to setup_class."""
 
 
-class TestDecisionMaker:
+class Test_DecisionMaker:
     """Test the decision maker."""
 
     @classmethod
@@ -449,6 +456,20 @@ class TestDecisionMaker:
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
 
+    def test_decision_maker_handle_tx_message_not_ready(self):
+        """Test that the decision maker is not ready to pursuit the goals.Cannot handle the message."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id=self.tx_id,
+                                        tx_sender_addr=self.tx_sender_addr,
+                                        tx_counterparty_addr=self.tx_counterparty_addr,
+                                        tx_amount_by_currency_id={"FET": -2},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
+                                        info=self.info,
+                                        ledger_id=self.ledger_id)
+
         with mock.patch.object(self.decision_maker.ledger_apis, "token_balance", return_value=1000000):
             with mock.patch.object(self.decision_maker.ledger_apis, "transfer", return_value="This is a test digest"):
                 with mock.patch("aea.decision_maker.base.GoalPursuitReadiness.Status") as mocked_status:
@@ -470,6 +491,8 @@ class TestDecisionMaker:
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
 
+    def test_decision_maker_hand_tx_ready_for_signing(self):
+        """Test that the decision maker can handle a message that is ready for signing."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
                                         skill_callback_ids=["default"],
                                         tx_id=self.tx_id,
@@ -485,10 +508,37 @@ class TestDecisionMaker:
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
 
+    def test_decision_maker_handle_tx_message_acceptable_for_settlement(self):
+        """Test that a tx_message is acceptable for settlement."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id=self.tx_id,
+                                        tx_sender_addr=self.tx_sender_addr,
+                                        tx_counterparty_addr=self.tx_counterparty_addr,
+                                        tx_amount_by_currency_id={"FET": -2},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
+                                        info=self.info,
+                                        ledger_id=self.ledger_id)
         with mock.patch.object(self.decision_maker, '_is_acceptable_for_settlement', return_value=True):
-            self.decision_maker.handle(tx_message)
-            assert not self.decision_maker.message_out_queue.empty()
+            with mock.patch.object(self.decision_maker, '_settle_tx', return_value="tx_digest"):
+                self.decision_maker.handle(tx_message)
+                assert not self.decision_maker.message_out_queue.empty()
 
+    def test_decision_maker_cannot_handle_tx_message_acceptable_for_settlement(self):
+        """Test that a tx_message is not acceptable for settlement."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id=self.tx_id,
+                                        tx_sender_addr=self.tx_sender_addr,
+                                        tx_counterparty_addr=self.tx_counterparty_addr,
+                                        tx_amount_by_currency_id={"FET": -2},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
+                                        info=self.info,
+                                        ledger_id=self.ledger_id)
         with mock.patch.object(self.decision_maker, '_is_acceptable_for_settlement', return_value=True):
             with mock.patch.object(self.decision_maker, '_settle_tx', return_value=None):
                 self.decision_maker.handle(tx_message)
@@ -550,7 +600,11 @@ class TestDecisionMaker:
                                         tx_quantities_by_good_id={"good_id": 10},
                                         ledger_id=self.ledger_id,
                                         info=self.info)
-        assert not self.decision_maker._is_affordable(tx_message)
+
+        with mock.patch.object(self.decision_maker, '_is_acceptable_for_settlement', return_value=True):
+            with mock.patch.object(self.decision_maker, '_settle_tx', return_value="tx_digest"):
+                self.decision_maker._is_affordable(tx_message)
+                assert not self.decision_maker.message_out_queue.empty()
 
     def test_settle_tx_off_chain(self):
         """Test the off_chain message."""
@@ -569,6 +623,24 @@ class TestDecisionMaker:
         tx_digest = self.decision_maker._settle_tx(tx_message)
         assert tx_digest == "off_chain_settlement"
 
+    def test_settle_tx_known_chain(self):
+        """Test the off_chain message."""
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                                        skill_callback_ids=["default"],
+                                        tx_id=self.tx_id,
+                                        tx_sender_addr=self.tx_sender_addr,
+                                        tx_counterparty_addr=self.tx_counterparty_addr,
+                                        tx_amount_by_currency_id={"FET": -20},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 10},
+                                        ledger_id=self.ledger_id,
+                                        info=self.info)
+
+        with mock.patch.object(self.decision_maker.ledger_apis, "transfer", return_value="tx_digest"):
+            tx_digest = self.decision_maker._settle_tx(tx_message)
+        assert tx_digest == "tx_digest"
+
     def test_is_utility_enhancing(self):
         """Test the utility enhancing for off_chain message."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
@@ -586,6 +658,26 @@ class TestDecisionMaker:
         assert self.decision_maker._is_utility_enhancing(tx_message)
 
     def test_sign_tx_fetchai(self):
+        """Test the private function sign_tx of the decision maker for fetchai ledger_id."""
+        tx_hash = Web3.keccak(text="some_bytes")
+
+        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
+                                        skill_callback_ids=["default"],
+                                        tx_id=self.tx_id,
+                                        tx_sender_addr=self.tx_sender_addr,
+                                        tx_counterparty_addr=self.tx_counterparty_addr,
+                                        tx_amount_by_currency_id={"FET": -20},
+                                        tx_sender_fee=0,
+                                        tx_counterparty_fee=0,
+                                        tx_quantities_by_good_id={"good_id": 0},
+                                        ledger_id=self.ledger_id,
+                                        info=self.info,
+                                        signing_payload={"tx_hash": tx_hash})
+
+        tx_signature = self.decision_maker._sign_tx(tx_message)
+        assert tx_signature is not None
+
+    def test_sign_tx_fetchai_is_acceptable_for_signing(self):
         """Test the private function sign_tx of the decision maker for fetchai ledger_id."""
         tx_hash = Web3.keccak(text="some_bytes")
 
@@ -644,7 +736,7 @@ class Test_LedgerStateProxy:
         """Test the returned ledger_apis."""
         assert self.ledger_state_proxy.ledger_apis == self.ledger_apis, "Must be equal."
 
-    def test_transaction_is_affordable(self):
+    def test_transaction_is_not_affordable(self):
         """Test if the transaction is affordable on the ledger."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
@@ -661,6 +753,9 @@ class Test_LedgerStateProxy:
         with mock.patch.object(self.ledger_state_proxy.ledger_apis, "token_balance", return_value=0):
             result = self.ledger_state_proxy.check_transaction_is_affordable(tx_message=tx_message)
         assert not result
+
+    def test_transaction_is_affordable(self):
+        """Test if the transaction is affordable on the ledger."""
 
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
