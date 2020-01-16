@@ -41,5 +41,5 @@ speech_acts:
 # similarly for quantities_by_good_id, amount_by_currency_id, exchange_params_by_currency_id, quantities_by_good_id, utility_params_by_good_id, good_id_to_name,
 # currently you check whether keys in the above are unique (line 225). Is that necessary give it is dictionary?
 # declare tx_sender_fee>=0 and tx_counterparty_fee>=0. Declare amount_by_currency_id.keys() == exchange_params_by_currency_id.keys(). Declare quantities_by_good_id.keys == utility_params_by_good_id.keys
-# game_data -> agent_addr_to_nameand and good_id_to_name are defined to be either dict or defaultdict. Why? do we allow for either T1 or T2 or ... for types?
+# game_data -> agent_addr_to_name and and good_id_to_name are defined to be either dict or defaultdict. Why? do we allow for either T1 or T2 or ... for types?
 # optional contents? (e.g. tac_error -> info)

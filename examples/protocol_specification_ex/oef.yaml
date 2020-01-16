@@ -28,4 +28,4 @@ speech_acts:
     dialogue_id: int
     origin: str
 
-# search_result -> agents is a tuple of type list. Declare each a in 'agents' is of type str.
+# search_result -> agents is of type list. Declare each a in 'agents' is of type str.
