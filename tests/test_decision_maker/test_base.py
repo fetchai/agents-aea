@@ -756,7 +756,6 @@ class Test_LedgerStateProxy:
 
     def test_transaction_is_affordable(self):
         """Test if the transaction is affordable on the ledger."""
-
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
                                         tx_id="transaction0",
