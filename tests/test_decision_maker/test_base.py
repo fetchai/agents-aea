@@ -24,14 +24,16 @@ from unittest import mock
 
 import pytest
 
+from web3.auto import Web3
+
 import aea
 import aea.decision_maker.base
 from aea.crypto.ethereum import ETHEREUM
-from aea.decision_maker.base import LedgerStateProxy
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import FETCHAI, Wallet
 from aea.decision_maker.base import DecisionMaker, OwnershipState, Preferences
+from aea.decision_maker.base import LedgerStateProxy
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -39,7 +41,6 @@ from aea.mail.base import Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
 from ..conftest import CUR_PATH, DummyConnection
-from web3.auto import Web3
 
 MAX_REACTIONS = 10
 
@@ -116,7 +117,6 @@ class TestOwnershipState:
         assert self.ownership_state.check_transaction_is_affordable(
             tx_message=tx_message
         ), "We should have the money for the transaction!"
-
 
     def test_transaction_is_affordable_there_is_no_wealth(self):
         """Reject the transaction when there is no wealth exchange."""
@@ -226,7 +226,6 @@ class TestOwnershipState:
             state != new_state
         ), "after applying a list_of_transactions must have a different state!"
 
-
     def test_transaction_update(self):
         """Test the transaction update when sending tokens."""
         currency_endowment = {"FET": 100}
@@ -294,7 +293,8 @@ class TestOwnershipState:
             self.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
         )
 
-class Test_Preferences_Decision_maker:
+
+class TestPreferencesDecisionMaker:
     """Test the preferences."""
 
     @classmethod
@@ -377,7 +377,6 @@ class Test_Preferences_Decision_maker:
             delta_amount_by_currency_id=delta_currency_holdings,
         )
         assert marginal_utility is not None, "Marginal utility must not be none."
-
 
     def test_score_diff_from_transaction(self):
         """Test the difference between the scores."""
