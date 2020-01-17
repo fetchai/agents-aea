@@ -820,6 +820,7 @@ class ProtocolSpecification(ProtocolConfig):
             raise ProtocolSpecificationParseError(
                 "There should be at least one performative defined in the speech_acts."
             )
+        content_dict = {}
         for performative, speech_act_content_config in self.speech_acts.read_all():
             if type(performative) is not str:
                 raise ProtocolSpecificationParseError(
@@ -829,3 +830,12 @@ class ProtocolSpecification(ProtocolConfig):
                 raise ProtocolSpecificationParseError(
                     "A 'performative' cannot be an empty string."
                 )
+            for content_name, content_type in speech_act_content_config.args.items():
+                if content_name in content_dict.keys():
+                    if content_type != content_dict[content_name]:
+                        raise ProtocolSpecificationParseError(
+                            "The content '{}' appears more than once with different types in speech_acts.".format(
+                                content_name
+                            )
+                        )
+                content_dict[content_name] = content_type
