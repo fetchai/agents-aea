@@ -9,4 +9,7 @@ speech_acts:
   error:
     error_code: ErrorCode
     error_msg: str
-    error_data: dict
+    error_data: dict[str, Any]
+
+  # Problems:
+  # error -> error_data is of type dict[str, Any]. Any is problematic.

@@ -21,11 +21,9 @@ speech_acts:
   search_agents:
     query: Query
   search_result:
-    agents: list
+    agents: list[str]
   oef_error:
     operation: OEFErrorOperation
   dialogue_error:
     dialogue_id: int
     origin: str
-
-# search_result -> agents is of type list. Declare each a in 'agents' is of type str.

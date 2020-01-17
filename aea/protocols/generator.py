@@ -149,10 +149,10 @@ class ProtocolGenerator:
         :return: the message class string
         """
         cls_str = ""
-        cls_str = str.format('\"\"\"This module contains {}\'s message definition.\"\"\"\n\n'.format(self.protocol_specification.name))
+        cls_str += str.format('\"\"\"This module contains {}\'s message definition.\"\"\"\n\n'.format(self.protocol_specification.name))
 
         # Imports
-        cls_str += 'from typing import cast, Dict\n\n'
+        cls_str += 'from typing import cast, Dict, Tuple\n\n'
         cls_str += MESSAGE_IMPORT
         cls_str += '\n\n\n'
 
@@ -164,18 +164,31 @@ class ProtocolGenerator:
         cls_str += str.format('class {}Message(Message):\n', to_camel_case(self.protocol_specification.name))
         cls_str += str.format('    \"\"\"{}\"\"\"\n\n', self.protocol_specification.description)
 
+        # Class attribute
+        cls_str += str.format('    _speech_acts = {}\n\n', self._speech_acts_str())
+
         # __init__
         cls_str += '    def __init__(self, message_id: int, target: int, performative: str, contents: Dict, **kwargs):\n'
         cls_str += '        \"\"\"Initialise.\"\"\"\n'
-        cls_str += '        super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)\n\n'
-        cls_str += str.format('        self.speech_acts_definition = {}\n\n', self._speech_acts_str())
+        cls_str += '        super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)\n'
         cls_str += '        assert self.check_consistency()\n\n'
 
-        # Properties
-        cls_str += '    @property\n'
-        cls_str += '    def performatives_definition(self) -> set:\n'
+        # Class properties
+        cls_str += '    @classmethod\n'
+        cls_str += '    def speech_acts(cls) -> Dict:\n'
+        cls_str += '        \"\"\"Get allowed speech_acts.\"\"\"\n'
+        cls_str += '        return cls._speech_acts\n\n'
+        cls_str += '    @classmethod\n'
+        cls_str += '    def allowed_performatives(cls) -> set:\n'
         cls_str += '        \"\"\"Get allowed performatives.\"\"\"\n'
-        cls_str += '        return set(self.speech_acts_definition.keys())\n\n'
+        cls_str += '        return set(cls.speech_acts().keys())\n\n'
+
+        # Instance properties
+        cls_str += '    @property\n'
+        cls_str += '    def dialogue_reference(self) -> Tuple[str, str]:\n'
+        cls_str += '        \"\"\"Get the dialogue_reference of the message.\"\"\"\n'
+        cls_str += '        assert self.is_set(\"dialogue_reference\"), \"dialogue_reference is not set\"\n'
+        cls_str += '        return cast(Tuple[str, str], self.get(\"dialogue_reference\"))\n\n'
         cls_str += '    @property\n'
         cls_str += '    def message_id(self) -> int:\n'
         cls_str += '        \"\"\"Get the message_id of the message.\"\"\"\n'
@@ -209,6 +222,9 @@ class ProtocolGenerator:
         cls_str += str.format('        \"\"\"Check that the message follows the {} protocol.\"\"\"\n', self.protocol_specification.name)
         cls_str += '        try:\n'
 
+        cls_str += '            assert isinstance(self.dialogue_reference, Tuple), \"dialogue_reference must be \'Tuple\' but it is not.\"\n'
+        cls_str += '            assert isinstance(self.dialogue_reference[0], str), \"The first element of dialogue_reference must be \'str\' but it is not.\"\n'
+        cls_str += '            assert isinstance(self.dialogue_reference[1], str), \"The second element of dialogue_reference must be \'str\' but it is not.\"\n'
         cls_str += '            assert type(self.message_id) == int, \"message_id must be \'int\' but it is not.\"\n'
         cls_str += '            assert type(self.target) == int, \"target must be \'int\' but it is not.\"\n'
         cls_str += '            assert type(self.performative) == str, \"performative must be \'str\' but it is not.\"\n'
@@ -216,17 +232,17 @@ class ProtocolGenerator:
 
         cls_str += '            # Light Protocol 2\n'
         cls_str += '            # Check correct performative\n'
-        cls_str += '            assert self.performative in self.performatives_definition, \"\'{}\' is not in the list of allowed performative\".format(self.performative)\n\n'
+        cls_str += '            assert self.performative in self.allowed_performatives, \"\'{}\' is not in the list of allowed performative\".format(self.performative)\n\n'
 
         cls_str += '            # Check correct contents\n'
-        cls_str += '            contents_definition = self.speech_acts_definition[self.performative]\n'
+        cls_str += '            allowed_contents_definition = self.speech_acts()[self.performative]\n'
         cls_str += '            # Number of contents\n'
-        cls_str += '            assert len(self.contents) == len(contents_definition), \"Incorrect number of contents. Expected {} contents. Found {}\".format(len(self.contents), len(contents_definition))\n'
+        cls_str += '            assert len(self.contents) == len(allowed_contents_definition), \"Incorrect number of contents. Expected {} contents. Found {}\".format(len(self.contents), len(allowed_contents_definition))\n'
         cls_str += '            # Name and type of each content\n'
         cls_str += '            for content_name, content_value in self.contents:\n'
         cls_str += '                assert isinstance(content_name, str), \"Incorrect type for content name \'{}\'. Expected \'str\'.\".format(str(content_name))\n'
-        cls_str += '                assert content_name in contents_definition.keys(), \"Incorrect content \'{}\'\".format(content_name)\n'
-        cls_str += '                assert isinstance(content_value, contents_definition[content_name]), \"Incorrect content type for \'{}\'. Expected {}. Found {}.\".format(content_name, contents_definition[content_name], type(content_value))\n\n'
+        cls_str += '                assert content_name in allowed_contents_definition.keys(), \"Incorrect content \'{}\'\".format(content_name)\n'
+        cls_str += '                assert isinstance(content_value, allowed_contents_definition[content_name]), \"Incorrect content type for \'{}\'. Expected {}. Found {}.\".format(content_name, allowed_contents_definition[content_name], type(content_value))\n\n'
 
         cls_str += '            # Light Protocol 3\n'
         cls_str += '            if self.message_id == 1:\n'

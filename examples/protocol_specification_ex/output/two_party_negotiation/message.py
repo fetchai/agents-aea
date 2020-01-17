@@ -1,6 +1,6 @@
 """This module contains two_party_negotiation's message definition."""
 
-from typing import cast, Dict
+from typing import cast, Dict, Tuple
 
 from aea.protocols.base import Message
 
@@ -43,6 +43,17 @@ class TwoPartyNegotiationMessage(Message):
         assert self.check_consistency()
 
     @property
+    def performatives_definition(self) -> set:
+        """Get allowed performatives."""
+        return set(self.speech_acts_definition.keys())
+
+    @property
+    def dialogue_reference(self) -> Tuple[str, str]:
+        """Get the dialogue_reference of the message."""
+        assert self.is_set("dialogue_reference"), "dialogue_reference is not set"
+        return cast(Tuple[str, str], self.get("dialogue_reference"))
+
+    @property
     def message_id(self) -> int:
         """Get the message_id of the message."""
         assert self.is_set("message_id"), "message_id is not set"
@@ -67,13 +78,22 @@ class TwoPartyNegotiationMessage(Message):
         return cast(Dict, self.get("contents"))
 
     @property
-    def performatives_definition(self) -> set:
-        """Get allowed performatives."""
-        return set(self.speech_acts_definition.keys())
+    def query(self) -> DataModel:
+        """Get 'query' from the contents of the message."""
+        assert self.is_set("query"), "\'query\' is not set"
+        return cast(DataModel, self.get("query"))
+
+    @property
+    def price(self) -> float:
+        """Get 'price' from the contents of the message."""
+        assert self.is_set("price"), "\'price\' is not set"
+        return cast(float, self.get("price"))
 
     def check_consistency(self) -> bool:
         """Check that the message follows the two_party_negotiation protocol."""
         try:
+            assert isinstance(self.dialogue_reference, Tuple)
+            assert isinstance(self.dialogue_reference[0], str) and isinstance(self.dialogue_reference[1], str)
             assert type(self.message_id) == int, "message_id must be 'int' but it is not."
             assert type(self.target) == int, "target must be 'int' but it is not."
             assert type(self.performative) == str, "performative must be 'str' but it is not."

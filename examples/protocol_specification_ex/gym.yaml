@@ -12,9 +12,13 @@ speech_acts:
     observation: Observation
     reward: float
     done: bool
-    info: dict
+    info: dict[str, Any]
   reset: {}
   close: {}
 
-  # Should we allow Any as a type and recognise it (e.g. for action: Action or observation: Observation)?
-  # or force everything to be either a primitive, or a custom type for which a class definition is provided.
+
+  # Problems:
+  # info is of type dict[str, Any]. Any is problematic.
+  #
+  # Differences:
+  # Previously action and observation were of type 'Any'. 'Any' is problematic. We decided to use custom types instead.
