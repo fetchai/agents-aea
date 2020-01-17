@@ -161,28 +161,25 @@ class TestResources:
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
         assert len(self.resources.handler_registry.fetch_all()) == 3
-        error_handler = self.resources.handler_registry.fetch_by_skill(
-            "default", "error"
-        )
-        self.resources.handler_registry.unregister("error")
+        default_protocol_public_id = "fetchai/default:0.1.0"
+        error_skill_public_id = "fetchai/error:0.1.0"
+        dummy_skill_public_id = "dummy_author/dummy:0.1.0"
+        error_handler = self.resources.handler_registry.fetch_by_protocol(default_protocol_public_id, error_skill_public_id)
+        self.resources.handler_registry.unregister(error_skill_public_id)
 
         # unregister the handler and test that it has been actually unregistered.
-        assert (
-            self.resources.handler_registry.fetch_by_skill("default", "error") is None
-        )
+        assert self.resources.handler_registry.fetch_by_protocol(default_protocol_public_id, error_skill_public_id) is None
         handlers = self.resources.handler_registry.fetch_all()
         assert len(handlers) == 2
         assert handlers[0].__class__.__name__ == "DummyHandler"
 
-        dummy_handler = self.resources.handler_registry.fetch_by_skill(
-            "default", "dummy"
-        )
-        self.resources.handler_registry.unregister("dummy")
+        dummy_handler = self.resources.handler_registry.fetch_by_protocol(default_protocol_public_id, dummy_skill_public_id)
+        self.resources.handler_registry.unregister(dummy_skill_public_id)
         assert len(self.resources.handler_registry.fetch_all()) == 0
 
         # restore the handlers
-        self.resources.handler_registry.register((None, "error"), [error_handler])
-        self.resources.handler_registry.register((None, "dummy"), [dummy_handler])
+        self.resources.handler_registry.register(error_skill_public_id, [error_handler])
+        self.resources.handler_registry.register(dummy_skill_public_id, [dummy_handler])
         assert len(self.resources.handler_registry.fetch_all()) == 2
 
     def test_fake_skill_loading_failed(self):
@@ -352,9 +349,7 @@ class TestFilter:
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()
 
-        internal_handler = self.aea.resources.handler_registry.fetch_by_skill(
-            "internal", "dummy"
-        )
+        internal_handler = self.aea.resources.handler_registry.fetch_by_protocol("internal", "dummy")
         assert len(internal_handler.handled_internal_messages) == 1
         self.aea.teardown()
 

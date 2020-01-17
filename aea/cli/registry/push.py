@@ -93,6 +93,6 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     resp = request_api("POST", path, data=data, auth=True, filepath=output_filepath)
     click.echo(
         "Successfully pushed {} {} to the Registry. Public ID: {}".format(
-            item_type, item_id.name, resp["public_id"]
+            item_type, item_id.name, resp["item_id"]
         )
     )

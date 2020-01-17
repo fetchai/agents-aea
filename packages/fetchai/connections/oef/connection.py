@@ -56,7 +56,7 @@ from oef.schema import (
     Description as OEFDescription,
 )
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import (
     And,
@@ -534,7 +534,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
-        if envelope.protocol_id == "oef":
+        if envelope.protocol_id == PublicId.from_string("fetchai/oef:0.1.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)

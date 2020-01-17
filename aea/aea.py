@@ -24,6 +24,7 @@ from concurrent.futures import Executor
 from typing import List, Optional, cast
 
 from aea.agent import Agent
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
@@ -175,9 +176,12 @@ class AEA(Agent):
         logger.debug("Handling envelope: {}".format(envelope))
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
-        error_handler = self.resources.handler_registry.fetch_by_skill(
-            "default", "error"
+        # TODO make this working for different skill/protocol versions.
+        error_handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+            PublicId.from_string("fetchai/default:0.1.0"),
+            PublicId.from_string("fetchai/error:0.1.0")
         )
+
         assert error_handler is not None, "ErrorHandler not initialized"
         error_handler = cast(ErrorHandler, error_handler)
 

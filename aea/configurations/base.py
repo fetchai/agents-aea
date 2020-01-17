@@ -32,8 +32,6 @@ DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
 DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
 T = TypeVar("T")
 
-ProtocolId = str
-SkillId = str
 """
 A dependency is a dictionary with the following (optional) keys:
     - version: a version specifier(s) (e.g. '==0.1.0').
@@ -164,13 +162,13 @@ class PublicId(object):
 
         author/name:version
 
-    >>> public_id = PublicId("author", "my_package", "0.1.0")
-    >>> assert public_id.author == "author"
-    >>> assert public_id.name == "my_package"
-    >>> assert public_id.version == "0.1.0"
+    >>> item_id = PublicId("author", "my_package", "0.1.0")
+    >>> assert item_id.author == "author"
+    >>> assert item_id.name == "my_package"
+    >>> assert item_id.version == "0.1.0"
     >>> another_public_id = PublicId("author", "my_package", "0.1.0")
-    >>> assert hash(public_id) == hash(another_public_id)
-    >>> assert public_id == another_public_id
+    >>> assert hash(item_id) == hash(another_public_id)
+    >>> assert item_id == another_public_id
     """
 
     AUTHOR_REGEX = r"[a-zA-Z0-9_]*"
@@ -251,6 +249,10 @@ class PublicId(object):
     def __lt__(self, other):
         """Compare two public ids."""
         return str(self) < str(other)
+
+
+ProtocolId = PublicId
+SkillId = PublicId
 
 
 class PackageConfiguration(Configuration, ABC):

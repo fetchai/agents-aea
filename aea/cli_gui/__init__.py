@@ -34,6 +34,7 @@ import connexion
 
 import flask
 
+from aea.configurations.base import PublicId
 
 elements = [
     ["local", "agent", "localAgents"],
@@ -366,7 +367,7 @@ def stop_oef_node():
     return "All fine", 200  # 200 (OK)
 
 
-def start_agent(agent_id: str, connection_id: str):
+def start_agent(agent_id: str, connection_id: PublicId):
     """Start a local agent running."""
     # Test if it is already running in some form
     if agent_id in app_context.agent_processes:

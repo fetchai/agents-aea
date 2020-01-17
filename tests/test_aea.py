@@ -30,7 +30,7 @@ import yaml
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.configurations.base import ProtocolConfig
+from aea.configurations.base import ProtocolConfig, PublicId
 from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -52,7 +52,7 @@ def test_initialise_AEA():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
     address_1 = "address"
-    connections1 = [OEFLocalConnection(address_1, node)]
+    connections1 = [OEFLocalConnection(address_1, node, PublicId("fetchai", "local", "0.1.0"))]
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({"default": private_key_pem_path})
     ledger_apis = LedgerApis({}, "default")
@@ -102,7 +102,7 @@ def test_act():
             t.start()
             time.sleep(1.0)
 
-            behaviour = agent.resources.behaviour_registry.fetch("dummy")
+            behaviour = agent.resources.behaviour_registry.fetch(PublicId.from_string("dummy_author/dummy:0.1.0"))
             assert behaviour[0].nb_act_called > 0, "Act() wasn't called"
         finally:
             agent.stop()
@@ -117,7 +117,7 @@ def test_react():
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
         address = wallet.addresses["default"]
-        connection = OEFLocalConnection(address, node)
+        connection = OEFLocalConnection(address, node, PublicId.from_string("fetchai/local:0.1.0"))
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
@@ -126,7 +126,7 @@ def test_react():
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
-            to=address, sender=address, protocol_id="default", message=message_bytes
+            to=address, sender=address, protocol_id="fetchai/default:0.1.0", message=message_bytes
         )
 
         agent = AEA(
@@ -138,9 +138,11 @@ def test_react():
             time.sleep(1.0)
             agent.outbox.put(envelope)
             time.sleep(2.0)
-            handler = agent.resources.handler_registry.fetch_by_skill(
-                "default", "dummy"
-            )
+            default_protocol_public_id = PublicId.from_string('fetchai/default:0.1.0')
+            dummy_skill_public_id = PublicId.from_string("dummy_author/dummy:0.1.0")
+            handler = agent.resources.handler_registry.fetch_by_protocol_and_skill(
+                default_protocol_public_id,
+                dummy_skill_public_id)
             assert handler is not None, "Handler is not set."
             assert (
                 msg in handler.handled_messages
@@ -172,7 +174,7 @@ async def test_handle():
         envelope = Envelope(
             to=address,
             sender=address,
-            protocol_id="unknown_protocol",
+            protocol_id="unknown_author/unknown_protocol:0.1.0",
             message=message_bytes,
         )
 
@@ -183,7 +185,7 @@ async def test_handle():
         try:
             t.start()
             time.sleep(2.0)
-            dummy_skill = agent.resources.get_skill("dummy")
+            dummy_skill = agent.resources.get_skill(PublicId.from_string("fetchai/dummy:0.1.0"))
             dummy_handler = dummy_skill.handlers["dummy"]
 
             expected_envelope = envelope
@@ -319,7 +321,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({"default": cls.private_key_pem_path})
         cls.ledger_apis = LedgerApis({}, "default")
-        cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
+        cls.connection = OEFLocalConnection(cls.agent_name, cls.node, PublicId("fetchai", "local", "0.1.0"))
         cls.connections = [cls.connection]
 
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
@@ -364,7 +366,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
             Envelope(
                 to=cls.agent_name,
                 sender=cls.agent_name,
-                protocol_id="default",
+                protocol_id=PublicId.from_string("fetchai/default:0.1.0"),
                 message=DefaultSerializer().encode(cls.expected_message),
             )
         )

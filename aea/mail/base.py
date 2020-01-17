@@ -26,10 +26,10 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Lock, Thread
-from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, cast
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, cast, Union
 from urllib.parse import urlparse
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.connections.base import ConnectionStatus
 from aea.mail import base_pb2
 
@@ -186,7 +186,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb = base_pb2.Envelope()
         envelope_pb.to = envelope.to
         envelope_pb.sender = envelope.sender
-        envelope_pb.protocol_id = envelope.protocol_id
+        envelope_pb.protocol_id = str(envelope.protocol_id)
         envelope_pb.message = envelope.message
 
         envelope_bytes = envelope_pb.SerializeToString()
@@ -220,7 +220,7 @@ class Envelope:
         self,
         to: Address,
         sender: Address,
-        protocol_id: ProtocolId,
+        protocol_id: Union[ProtocolId, str],
         message: bytes,
         context: Optional[EnvelopeContext] = None,
     ):
@@ -232,6 +232,7 @@ class Envelope:
         :param protocol_id: the protocol id.
         :param message: the protocol-specific message
         """
+        protocol_id = PublicId.from_string(protocol_id) if isinstance(protocol_id, str) else protocol_id
         self._to = to
         self._sender = sender
         self._protocol_id = protocol_id
@@ -361,7 +362,7 @@ class Multiplexer:
         ), "Connection names must be unique."
         self._connections = connections  # type: List['Connection']
         self._name_to_connection = {
-            c.connection_id: c for c in connections
+            c.connection_id.name: c for c in connections
         }  # type: Dict[str, Connection]
         self.default_connection = self._connections[
             default_connection_index

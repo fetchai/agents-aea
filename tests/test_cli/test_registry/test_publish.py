@@ -44,7 +44,7 @@ from tests.test_cli.tools_for_testing import ContextMock
     },
 )
 @mock.patch(
-    "aea.cli.registry.publish.request_api", return_value={"public_id": "public-id"}
+    "aea.cli.registry.publish.request_api", return_value={"item_id": "public-id"}
 )
 class PublishAgentTestCase(TestCase):
     """Test case for publish_agent method."""

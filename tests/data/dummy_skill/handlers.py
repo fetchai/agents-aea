@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'dummy' skill."""
-
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -26,7 +26,7 @@ from aea.skills.base import Handler
 class DummyHandler(Handler):
     """Dummy handler."""
 
-    SUPPORTED_PROTOCOL = "default"
+    SUPPORTED_PROTOCOL = PublicId("fetchai", "default", "0.1.0")
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -64,7 +64,7 @@ class DummyHandler(Handler):
 class DummyInternalHandler(Handler):
     """Dummy internal handler."""
 
-    SUPPORTED_PROTOCOL = "internal"
+    SUPPORTED_PROTOCOL = PublicId("fetchai", "internal", "0.1.0")
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

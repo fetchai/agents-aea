@@ -21,8 +21,9 @@
 """The transaction message module."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast, Union
 
+from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import SUPPORTED_CURRENCIES, SUPPORTED_LEDGER_APIS
 from aea.decision_maker.messages.base import InternalMessage
 from aea.mail.base import Address
@@ -50,7 +51,7 @@ class TransactionMessage(InternalMessage):
     def __init__(
         self,
         performative: Performative,
-        skill_callback_ids: List[str],
+        skill_callback_ids: List[Union[PublicId, str]],
         tx_id: TransactionId,
         tx_sender_addr: Address,
         tx_counterparty_addr: Address,
@@ -77,6 +78,12 @@ class TransactionMessage(InternalMessage):
         :param ledger_id: the ledger id
         :param info: a dictionary for arbitrary information
         """
+        skill_callback_ids = [
+            public_id
+            if isinstance(public_id, PublicId)
+            else PublicId.from_string(public_id)
+            for public_id in skill_callback_ids
+        ]
         super().__init__(
             performative=performative,
             skill_callback_ids=skill_callback_ids,
@@ -102,10 +109,10 @@ class TransactionMessage(InternalMessage):
         return TransactionMessage.Performative(self.get("performative"))
 
     @property
-    def skill_callback_ids(self) -> List[str]:
+    def skill_callback_ids(self) -> List[PublicId]:
         """Get the list of skill_callback_ids from the message."""
         assert self.is_set("skill_callback_ids"), "Skill_callback_ids is not set."
-        return cast(List[str], self.get("skill_callback_ids"))
+        return cast(List[PublicId], self.get("skill_callback_ids"))
 
     @property
     def tx_id(self) -> str:
@@ -219,7 +226,7 @@ class TransactionMessage(InternalMessage):
                 self.performative, TransactionMessage.Performative
             ), "Performative is not of correct type."
             assert isinstance(self.skill_callback_ids, list) and all(
-                isinstance(s, str) for s in self.skill_callback_ids
+                isinstance(s, (str, PublicId)) for s in self.skill_callback_ids
             ), "Skill_callback_ids must be of type List[str]."
             assert isinstance(self.tx_id, str), "Tx_id must of type str."
             assert isinstance(
