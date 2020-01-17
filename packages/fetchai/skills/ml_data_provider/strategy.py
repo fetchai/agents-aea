@@ -31,8 +31,8 @@ DEFAULT_DATASET_ID = "fmnist"
 DEFAULT_BATCH_SIZE = 32
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_BUYER_TX_FEE = 0
-DEFAULT_CURRENCY_PBK = 'FET'
-DEFAULT_LEDGER_ID = 'fetchai'
+DEFAULT_CURRENCY_PBK = "FET"
+DEFAULT_LEDGER_ID = "fetchai"
 
 
 class Strategy(SharedClass):
@@ -40,19 +40,24 @@ class Strategy(SharedClass):
 
     def __init__(self, **kwargs) -> None:
         """Initialize the strategy of the agent."""
-        self.price_per_data_batch = kwargs.pop('price_per_data_batch', DEFAULT_PRICE_PER_DATA_BATCH)
-        self.batch_size = kwargs.pop('batch_size', DEFAULT_BATCH_SIZE)
-        self.dataset_id = kwargs.pop('dataset_id', DEFAULT_DATASET_ID)
-        self.seller_tx_fee = kwargs.pop('seller_tx_fee', DEFAULT_SELLER_TX_FEE)
-        self.buyer_tx_fee = kwargs.pop('buyer_tx_fee', DEFAULT_BUYER_TX_FEE)
-        self.currency_id = kwargs.pop('currency_id', DEFAULT_CURRENCY_PBK)
-        self.ledger_id = kwargs.pop('ledger_id', DEFAULT_LEDGER_ID)
+        self.price_per_data_batch = kwargs.pop(
+            "price_per_data_batch", DEFAULT_PRICE_PER_DATA_BATCH
+        )
+        self.batch_size = kwargs.pop("batch_size", DEFAULT_BATCH_SIZE)
+        self.dataset_id = kwargs.pop("dataset_id", DEFAULT_DATASET_ID)
+        self.seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
+        self.buyer_tx_fee = kwargs.pop("buyer_tx_fee", DEFAULT_BUYER_TX_FEE)
+        self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
+        self.ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         super().__init__(**kwargs)
         self._oef_msg_id = 0
 
         # loading ML dataset
         # TODO this should be parametrized
-        (self.train_x, self.train_y), (self.test_x, self.test_y) = keras.datasets.fashion_mnist.load_data()
+        (
+            (self.train_x, self.train_y),
+            (self.test_x, self.test_y),
+        ) = keras.datasets.fashion_mnist.load_data()
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -70,7 +75,7 @@ class Strategy(SharedClass):
         :return: a description of the offered services
         """
         dm = DataModel("ml_datamodel", [Attribute("dataset_id", str, True)])
-        desc = Description({'dataset_id': self.dataset_id}, data_model=dm)
+        desc = Description({"dataset_id": self.dataset_id}, data_model=dm)
         return desc
 
     def sample_data(self, n: int):
@@ -102,13 +107,17 @@ class Strategy(SharedClass):
         :return: a tuple of proposal and the weather data
         """
         address = self.context.agent_addresses[self.ledger_id]
-        proposal = Description({"batch_size": self.batch_size,
-                                "price": self.price_per_data_batch,
-                                "seller_tx_fee": self.seller_tx_fee,
-                                "buyer_tx_fee": self.buyer_tx_fee,
-                                "currency_id": self.currency_id,
-                                "ledger_id": self.ledger_id,
-                                "address": address})
+        proposal = Description(
+            {
+                "batch_size": self.batch_size,
+                "price": self.price_per_data_batch,
+                "seller_tx_fee": self.seller_tx_fee,
+                "buyer_tx_fee": self.buyer_tx_fee,
+                "currency_id": self.currency_id,
+                "ledger_id": self.ledger_id,
+                "address": address,
+            }
+        )
         return proposal
 
     def is_valid_terms(self, terms: Description) -> bool:

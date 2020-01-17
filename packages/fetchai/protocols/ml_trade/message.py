@@ -37,10 +37,10 @@ class MLTradeMessage(Message):
     class Performative(Enum):
         """ML trade performatives."""
 
-        CFT = 'cft'
-        TERMS = 'terms'
-        ACCEPT = 'accept'
-        DATA = 'data'
+        CFT = "cft"
+        TERMS = "terms"
+        ACCEPT = "accept"
+        DATA = "data"
 
         def __str__(self):
             """Get string representation."""
@@ -88,7 +88,9 @@ class MLTradeMessage(Message):
     def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert isinstance(self.performative, MLTradeMessage.Performative), "Performative is invalid type."
+            assert isinstance(
+                self.performative, MLTradeMessage.Performative
+            ), "Performative is invalid type."
             if self.performative == MLTradeMessage.Performative.CFT:
                 assert isinstance(self.query, Query)
                 assert len(self.body) == 2

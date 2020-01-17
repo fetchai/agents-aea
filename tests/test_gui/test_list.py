@@ -58,17 +58,17 @@ def _test_list_items(item_type: str):
     # Test for actual agent
     with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
         response_list = app.get(
-            'api/agent/' + agent_name + "/" + item_type,
+            "api/agent/" + agent_name + "/" + item_type,
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
     data = json.loads(response_list.get_data(as_text=True))
     assert response_list.status_code == 200
     assert len(data) == 2
-    assert data[0]['id'] == 'default'
-    assert data[0]['description'] == 'The default item allows for any byte logic.'
-    assert data[1]['id'] == 'oef'
-    assert data[1]['description'] == 'The oef item implements the OEF specific logic.'
+    assert data[0]["id"] == "default"
+    assert data[0]["description"] == "The default item allows for any byte logic."
+    assert data[1]["id"] == "oef"
+    assert data[1]["description"] == "The oef item implements the OEF specific logic."
 
 
 def _test_list_items_none(item_type: str):
@@ -87,9 +87,9 @@ def _test_list_items_none(item_type: str):
 
     with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
         response_list = app.get(
-            'api/agent/' + agent_name + "/" + item_type,
+            "api/agent/" + agent_name + "/" + item_type,
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
@@ -114,32 +114,32 @@ def _test_list_items_fail(item_type: str):
     # Test for actual agent
     with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
         response_list = app.get(
-            'api/agent/' + agent_name + "/" + item_type,
+            "api/agent/" + agent_name + "/" + item_type,
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
     assert response_list.status_code == 400
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert data['detail'] == dummy_error + '\n'
+    assert data["detail"] == dummy_error + "\n"
 
 
 def test_list_protocols():
     """Test for listing protocols supported by an agent."""
-    _test_list_items('protocol')
-    _test_list_items_none('protocol')
-    _test_list_items_fail('protocol')
+    _test_list_items("protocol")
+    _test_list_items_none("protocol")
+    _test_list_items_fail("protocol")
 
 
 def test_list_connections():
     """Test for listing connections supported by an agent."""
-    _test_list_items('connection')
-    _test_list_items_none('connection')
-    _test_list_items_fail('connection')
+    _test_list_items("connection")
+    _test_list_items_none("connection")
+    _test_list_items_fail("connection")
 
 
 def test_list_skills():
     """Test for listing connections supported by an agent."""
-    _test_list_items('skill')
-    _test_list_items_none('skill')
-    _test_list_items_fail('skill')
+    _test_list_items("skill")
+    _test_list_items_none("skill")
+    _test_list_items_fail("skill")

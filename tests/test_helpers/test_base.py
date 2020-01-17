@@ -43,7 +43,9 @@ class TestHelpersBase:
         cwd = os.getcwd()
         os.chdir(os.path.join(CUR_PATH, ".."))
         expected_class = OEFConnection
-        actual_class = locate("packages.fetchai.connections.oef.connection.OEFConnection")
+        actual_class = locate(
+            "packages.fetchai.connections.oef.connection.OEFConnection"
+        )
         # although they are the same class, they are different instances in memory
         # and the build-in default "__eq__" method does not compare the attributes.
         # so compare the names

@@ -25,8 +25,18 @@ from typing import Dict, List
 
 import click
 
-from aea.cli.common import Context, format_items, pass_ctx, retrieve_details, try_to_load_agent_config
-from aea.configurations.base import ConfigurationType, PublicId, _get_default_configuration_file_name_from_type
+from aea.cli.common import (
+    Context,
+    format_items,
+    pass_ctx,
+    retrieve_details,
+    try_to_load_agent_config,
+)
+from aea.configurations.base import (
+    ConfigurationType,
+    PublicId,
+    _get_default_configuration_file_name_from_type,
+)
 from aea.configurations.loader import ConfigLoader
 
 
@@ -45,12 +55,25 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
     default_file_name = _get_default_configuration_file_name_from_type(item_type)
     for public_id in public_ids:
         # first, try to retrieve the item from the vendor directory.
-        configuration_filepath = Path(ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name, default_file_name)
+        configuration_filepath = Path(
+            ctx.cwd,
+            "vendor",
+            public_id.author,
+            item_type_plural,
+            public_id.name,
+            default_file_name,
+        )
         # otherwise, if it does not exist, retrieve the item from the agent custom packages
         if not configuration_filepath.exists():
-            configuration_filepath = Path(ctx.cwd, item_type_plural, public_id.name, default_file_name)
-        configuration_loader = ConfigLoader.from_configuration_type(ConfigurationType(item_type))
-        details = retrieve_details(public_id.name, configuration_loader, str(configuration_filepath))
+            configuration_filepath = Path(
+                ctx.cwd, item_type_plural, public_id.name, default_file_name
+            )
+        configuration_loader = ConfigLoader.from_configuration_type(
+            ConfigurationType(item_type)
+        )
+        details = retrieve_details(
+            public_id.name, configuration_loader, str(configuration_filepath)
+        )
         result.append(details)
     return result
 
@@ -60,7 +83,7 @@ def _get_item_details(ctx, item_type) -> List[Dict]:
 def connections(ctx: Context):
     """List all the installed connections."""
     result = _get_item_details(ctx, "connection")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @list.command()
@@ -68,7 +91,7 @@ def connections(ctx: Context):
 def protocols(ctx: Context):
     """List all the installed protocols."""
     result = _get_item_details(ctx, "protocol")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @list.command()
@@ -76,4 +99,4 @@ def protocols(ctx: Context):
 def skills(ctx: Context):
     """List all the installed skills."""
     result = _get_item_details(ctx, "skill")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))

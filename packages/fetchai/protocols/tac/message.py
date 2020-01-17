@@ -74,11 +74,10 @@ class TACMessage(Message):
         ErrorCode.TRANSACTION_NOT_MATCHING: "The transaction request does not match with a previous transaction request with the same id.",
         ErrorCode.AGENT_NAME_NOT_IN_WHITELIST: "Agent name not in whitelist.",
         ErrorCode.COMPETITION_NOT_RUNNING: "The competition is not running yet.",
-        ErrorCode.DIALOGUE_INCONSISTENT: "The message is inconsistent with the dialogue."
+        ErrorCode.DIALOGUE_INCONSISTENT: "The message is inconsistent with the dialogue.",
     }  # type: Dict[ErrorCode, str]
 
-    def __init__(self, type: Type,
-                 **kwargs):
+    def __init__(self, type: Type, **kwargs):
         """
         Initialize.
 
@@ -121,7 +120,7 @@ class TACMessage(Message):
     def amount_by_currency_id(self) -> Dict[str, int]:
         """Get the amount for each currency."""
         assert self.is_set("amount_by_currency_id"), "Amount by currency is not set."
-        return cast(Dict[str, int], self.get('amount_by_currency_id'))
+        return cast(Dict[str, int], self.get("amount_by_currency_id"))
 
     @property
     def tx_sender_fee(self) -> int:
@@ -138,19 +137,23 @@ class TACMessage(Message):
     @property
     def quantities_by_good_id(self) -> Dict[str, int]:
         """Get the quantities of the good ids from the message."""
-        assert self.is_set('quantities_by_good_id')
+        assert self.is_set("quantities_by_good_id")
         return cast(Dict[str, int], self.get("quantities_by_good_id"))
 
     @property
     def exchange_params_by_currency_id(self) -> Dict[str, float]:
         """Get the exchange parameters for each currency."""
-        assert self.is_set("exchange_params_by_currency_id"), "exchange_params_by_currency_id is not set."
+        assert self.is_set(
+            "exchange_params_by_currency_id"
+        ), "exchange_params_by_currency_id is not set."
         return cast(Dict[str, float], self.get("exchange_params_by_currency_id"))
 
     @property
     def utility_params_by_good_id(self) -> Dict[str, float]:
         """Get the utility parameters for each good."""
-        assert self.is_set("utility_params_by_good_id"), "utility_params_by_good_id is not set."
+        assert self.is_set(
+            "utility_params_by_good_id"
+        ), "utility_params_by_good_id is not set."
         return cast(Dict[str, float], self.get("utility_params_by_good_id"))
 
     @property
@@ -204,7 +207,9 @@ class TACMessage(Message):
     @property
     def tx_counterparty_signature(self) -> bytes:
         """Get the transaction signature for the counterparty."""
-        assert self.is_set("tx_counterparty_signature"), "Tx_counterparty_fee is not set."
+        assert self.is_set(
+            "tx_counterparty_signature"
+        ), "Tx_counterparty_fee is not set."
         return cast(bytes, self.get("tx_counterparty_signature"))
 
     def _check_consistency(self) -> bool:
@@ -223,7 +228,9 @@ class TACMessage(Message):
                 assert isinstance(self.amount_by_currency_id, dict)
                 for key, int_value in self.amount_by_currency_id.items():
                     assert type(key) == str and type(int_value) == int
-                assert len(self.amount_by_currency_id.keys()) == len(set(self.amount_by_currency_id.keys()))
+                assert len(self.amount_by_currency_id.keys()) == len(
+                    set(self.amount_by_currency_id.keys())
+                )
                 assert isinstance(self.tx_sender_fee, int)
                 assert self.tx_sender_fee >= 0
                 assert isinstance(self.tx_counterparty_fee, int)
@@ -231,7 +238,9 @@ class TACMessage(Message):
                 assert isinstance(self.quantities_by_good_id, dict)
                 for key, int_value in self.quantities_by_good_id.items():
                     assert type(key) == str and type(int_value) == int
-                assert len(self.quantities_by_good_id.keys()) == len(set(self.quantities_by_good_id.keys()))
+                assert len(self.quantities_by_good_id.keys()) == len(
+                    set(self.quantities_by_good_id.keys())
+                )
                 assert isinstance(self.tx_nonce, int)
                 assert isinstance(self.tx_sender_signature, bytes)
                 assert isinstance(self.tx_counterparty_signature, bytes)
@@ -247,14 +256,20 @@ class TACMessage(Message):
                 assert isinstance(self.exchange_params_by_currency_id, dict)
                 for key, float_value in self.exchange_params_by_currency_id.items():
                     assert type(key) == str and type(float_value) == float
-                assert self.amount_by_currency_id.keys() == self.exchange_params_by_currency_id.keys()
+                assert (
+                    self.amount_by_currency_id.keys()
+                    == self.exchange_params_by_currency_id.keys()
+                )
                 assert isinstance(self.quantities_by_good_id, dict)
                 for key, int_value in self.quantities_by_good_id.items():
                     assert type(key) == str and type(int_value) == int
                 assert isinstance(self.utility_params_by_good_id, dict)
                 for key, float_value in self.utility_params_by_good_id.items():
                     assert type(key) == str and type(float_value) == float
-                assert self.quantities_by_good_id.keys() == self.utility_params_by_good_id.keys()
+                assert (
+                    self.quantities_by_good_id.keys()
+                    == self.utility_params_by_good_id.keys()
+                )
                 assert isinstance(self.tx_fee, int)
                 assert type(self.agent_addr_to_name) in [dict, defaultdict]
                 assert type(self.good_id_to_name) in [dict, defaultdict]
@@ -267,11 +282,15 @@ class TACMessage(Message):
                 assert isinstance(self.amount_by_currency_id, dict)
                 for key, int_value in self.amount_by_currency_id.items():
                     assert type(key) == str and type(int_value) == int
-                assert len(self.amount_by_currency_id.keys()) == len(set(self.amount_by_currency_id.keys()))
+                assert len(self.amount_by_currency_id.keys()) == len(
+                    set(self.amount_by_currency_id.keys())
+                )
                 assert isinstance(self.quantities_by_good_id, dict)
                 for key, int_value in self.quantities_by_good_id.items():
                     assert type(key) == str and type(int_value) == int
-                assert len(self.quantities_by_good_id.keys()) == len(set(self.quantities_by_good_id.keys()))
+                assert len(self.quantities_by_good_id.keys()) == len(
+                    set(self.quantities_by_good_id.keys())
+                )
                 assert len(self.body) == 4
             # elif tac_type == TACMessage.Type.STATE_UPDATE:
             #     assert self.is_set("game_data")

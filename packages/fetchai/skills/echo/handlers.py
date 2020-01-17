@@ -49,9 +49,15 @@ class EchoHandler(Handler):
         :param message: the message.
         :return: None
         """
-        logger.info("Echo Handler: message={}, sender={}".format(message, message.counterparty))
-        self.context.outbox.put_message(to=message.counterparty, sender=self.context.agent_name, protocol_id="default",
-                                        message=DefaultSerializer().encode(message))
+        logger.info(
+            "Echo Handler: message={}, sender={}".format(message, message.counterparty)
+        )
+        self.context.outbox.put_message(
+            to=message.counterparty,
+            sender=self.context.agent_name,
+            protocol_id="default",
+            message=DefaultSerializer().encode(message),
+        )
 
     def teardown(self) -> None:
         """

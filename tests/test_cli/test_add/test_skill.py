@@ -32,7 +32,11 @@ import yaml
 import aea
 import aea.cli.common
 from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import (
+    AgentConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
 from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
@@ -52,20 +56,24 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         cls.skill_author = "fetchai"
         cls.skill_version = "0.1.0"
         cls.skill_id = cls.skill_author + "/" + cls.skill_name + ":" + cls.skill_version
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         # this also by default adds the oef skill and error skill
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
         # add the error skill again
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -76,24 +84,24 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
 
         The expected message is: 'A skill with id '{skill_id}' already exists. Aborting...'
         """
-        s = "A skill with id '{}' already exists. Aborting...".format(self.skill_author + "/" + self.skill_name)
+        s = "A skill with id '{}' already exists. Aborting...".format(
+            self.skill_author + "/" + self.skill_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
-    @unittest.mock.patch('aea.cli.add.fetch_package')
-    def test_add_skill_from_registry_positive(
-        self, fetch_package_mock
-    ):
+    @unittest.mock.patch("aea.cli.add.fetch_package")
+    def test_add_skill_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
         public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
-        obj_type = 'skill'
+        obj_type = "skill"
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
-            standalone_mode=False
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id, cwd='.'
+            obj_type, public_id=public_id, cwd="."
         )
 
     @classmethod
@@ -120,29 +128,42 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         cls.skill_author = "fetchai"
         cls.skill_version = "0.1.0"
         cls.skill_id = cls.skill_author + "/" + cls.skill_name + ":" + cls.skill_version
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         # this also by default adds the oef skill and error skill
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+        )
         assert cls.result.exit_code == 0
 
         # add skill again, but with different version number
         # first, change version number to package
         different_version = "0.1.1"
         different_id = cls.skill_author + "/" + cls.skill_name + ":" + different_version
-        config_path = Path(cls.t, "packages", cls.skill_author, "skills", cls.skill_name, DEFAULT_SKILL_CONFIG_FILE)
+        config_path = Path(
+            cls.t,
+            "packages",
+            cls.skill_author,
+            "skills",
+            cls.skill_name,
+            DEFAULT_SKILL_CONFIG_FILE,
+        )
         config = yaml.safe_load(config_path.open())
         config["version"] = different_version
         yaml.safe_dump(config, config_path.open(mode="w"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", different_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "skill", different_id], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -153,24 +174,24 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
 
         The expected message is: 'A skill with id '{skill_id}' already exists. Aborting...'
         """
-        s = "A skill with id '{}' already exists. Aborting...".format(self.skill_author + "/" + self.skill_name)
+        s = "A skill with id '{}' already exists. Aborting...".format(
+            self.skill_author + "/" + self.skill_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
-    @unittest.mock.patch('aea.cli.add.fetch_package')
-    def test_add_skill_from_registry_positive(
-        self, fetch_package_mock
-    ):
+    @unittest.mock.patch("aea.cli.add.fetch_package")
+    def test_add_skill_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
         public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
-        obj_type = 'skill'
+        obj_type = "skill"
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
-            standalone_mode=False
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id, cwd='.'
+            obj_type, public_id=public_id, cwd="."
         )
 
     @classmethod
@@ -195,17 +216,21 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "author/unknown_skill:0.1.0"
         cls.skill_name = "unknown_skill"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -241,17 +266,21 @@ class TestAddSkillFailsWhenDifferentPublicId:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "different_author/error:0.1.0"
         cls.skill_name = "unknown_skill"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -284,14 +313,16 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "fetchai/echo:0.1.0"
         cls.skill_name = "echo"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
@@ -301,11 +332,16 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
-        cls.patch = unittest.mock.patch.object(aea.configurations.base.SkillConfig, "from_json",
-                                               side_effect=ValidationError("test error message"))
+        cls.patch = unittest.mock.patch.object(
+            aea.configurations.base.SkillConfig,
+            "from_json",
+            side_effect=ValidationError("test error message"),
+        )
         cls.patch.__enter__()
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -316,7 +352,9 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
-        self.mocked_logger_error.assert_called_once_with("Skill configuration file not valid: test error message")
+        self.mocked_logger_error.assert_called_once_with(
+            "Skill configuration file not valid: test error message"
+        )
 
     @classmethod
     def teardown_class(cls):
@@ -341,14 +379,16 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         cls.t = tempfile.mkdtemp()
         cls.skill_id = "fetchai/echo:0.1.0"
         cls.skill_name = "echo"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
@@ -357,8 +397,12 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         config.registry_path = os.path.join(ROOT_DIR, "packages")
         yaml.safe_dump(config.json, open(DEFAULT_AEA_CONFIG_FILE, "w"))
 
-        Path(cls.t, cls.agent_name, "vendor", "fetchai", "skills", cls.skill_name).mkdir(parents=True, exist_ok=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False)
+        Path(
+            cls.t, cls.agent_name, "vendor", "fetchai", "skills", cls.skill_name
+        ).mkdir(parents=True, exist_ok=True)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "skill", cls.skill_id], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -369,7 +413,9 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find skill: '{skill_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/skills/{}'".format(self.skill_name)
+        s = "[Errno 17] File exists: './vendor/fetchai/skills/{}'".format(
+            self.skill_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

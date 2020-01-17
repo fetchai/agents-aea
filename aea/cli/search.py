@@ -35,15 +35,19 @@ from aea.cli.common import (
     logger,
     pass_ctx,
     retrieve_details,
-    try_to_load_agent_config
+    try_to_load_agent_config,
 )
 from aea.cli.registry.utils import request_api
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, \
-    DEFAULT_PROTOCOL_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import (
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
 
 @click.group()
-@click.option('--registry', is_flag=True, help="For Registry search.")
+@click.option("--registry", is_flag=True, help="For Registry search.")
 @pass_ctx
 def search(ctx: Context, registry):
     """Search for components in the registry.
@@ -75,10 +79,20 @@ def search(ctx: Context, registry):
 
 def _is_invalid_item(name, dir_path, config_path):
     """Return true if this protocol, connection or skill should not be returned in the list."""
-    return name == "scaffold" or not Path(dir_path).is_dir() or not Path(config_path).is_file()
+    return (
+        name == "scaffold"
+        or not Path(dir_path).is_dir()
+        or not Path(config_path).is_file()
+    )
 
 
-def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_glob_pattern: str, config_filename: str, results: List[Dict]):
+def _get_details_from_dir(
+    loader: ConfigLoader,
+    root_path: str,
+    sub_dir_glob_pattern: str,
+    config_filename: str,
+    results: List[Dict],
+):
     for dir_path in Path(root_path).glob(sub_dir_glob_pattern + "/*/"):
         config_path = dir_path / config_filename
 
@@ -90,106 +104,120 @@ def _get_details_from_dir(loader: ConfigLoader, root_path: str, sub_dir_glob_pat
 
 
 @search.command()
-@click.option('--query', default='',
-              help='Query string to search Connections by name.')
+@click.option("--query", default="", help="Query string to search Connections by name.")
 @pass_ctx
 def connections(ctx: Context, query):
     """Search for Connections."""
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
-        resp = request_api(
-            'GET', '/connections', params={'search': query}
-        )
+        resp = request_api("GET", "/connections", params={"search": query})
         if not len(resp):
-            click.echo('No connections found.')  # pragma: no cover
+            click.echo("No connections found.")  # pragma: no cover
         else:
-            click.echo('Connections found:\n')
+            click.echo("Connections found:\n")
             click.echo(format_items(resp))
         return
 
     registry = cast(str, ctx.config.get("registry_directory"))
     result = []  # type: List[Dict]
-    _get_details_from_dir(ctx.connection_loader, AEA_DIR, "connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
-    _get_details_from_dir(ctx.connection_loader, registry, "*/connections", DEFAULT_CONNECTION_CONFIG_FILE, result)
+    _get_details_from_dir(
+        ctx.connection_loader,
+        AEA_DIR,
+        "connections",
+        DEFAULT_CONNECTION_CONFIG_FILE,
+        result,
+    )
+    _get_details_from_dir(
+        ctx.connection_loader,
+        registry,
+        "*/connections",
+        DEFAULT_CONNECTION_CONFIG_FILE,
+        result,
+    )
 
     print("Available connections:")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @search.command()
-@click.option('--query', default='',
-              help='Query string to search Protocols by name.')
+@click.option("--query", default="", help="Query string to search Protocols by name.")
 @pass_ctx
 def protocols(ctx: Context, query):
     """Search for Protocols."""
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
-        resp = request_api(
-            'GET', '/protocols', params={'search': query}
-        )
+        resp = request_api("GET", "/protocols", params={"search": query})
         if not len(resp):
-            click.echo('No protocols found.')  # pragma: no cover
+            click.echo("No protocols found.")  # pragma: no cover
         else:
-            click.echo('Protocols found:\n')
+            click.echo("Protocols found:\n")
             click.echo(format_items(resp))
         return
 
     registry = cast(str, ctx.config.get("registry_directory"))
     result = []  # type: List[Dict]
-    _get_details_from_dir(ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
-    _get_details_from_dir(ctx.protocol_loader, registry, "*/protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result)
+    _get_details_from_dir(
+        ctx.protocol_loader, AEA_DIR, "protocols", DEFAULT_PROTOCOL_CONFIG_FILE, result
+    )
+    _get_details_from_dir(
+        ctx.protocol_loader,
+        registry,
+        "*/protocols",
+        DEFAULT_PROTOCOL_CONFIG_FILE,
+        result,
+    )
 
     print("Available protocols:")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @search.command()
-@click.option('--query', default='',
-              help='Query string to search Skills by name.')
+@click.option("--query", default="", help="Query string to search Skills by name.")
 @pass_ctx
 def skills(ctx: Context, query):
     """Search for Skills."""
     if ctx.config.get("is_registry"):
         click.echo('Searching for "{}"...'.format(query))
-        resp = request_api(
-            'GET', '/skills', params={'search': query}
-        )
+        resp = request_api("GET", "/skills", params={"search": query})
         if not len(resp):
-            click.echo('No skills found.')  # pragma: no cover
+            click.echo("No skills found.")  # pragma: no cover
         else:
-            click.echo('Skills found:\n')
+            click.echo("Skills found:\n")
             click.echo(format_skills(resp))
         return
 
     registry = cast(str, ctx.config.get("registry_directory"))
     result: List[Dict] = []
-    _get_details_from_dir(ctx.skill_loader, AEA_DIR, "skills", DEFAULT_SKILL_CONFIG_FILE, result)
-    _get_details_from_dir(ctx.skill_loader, registry, "*/skills", DEFAULT_SKILL_CONFIG_FILE, result)
+    _get_details_from_dir(
+        ctx.skill_loader, AEA_DIR, "skills", DEFAULT_SKILL_CONFIG_FILE, result
+    )
+    _get_details_from_dir(
+        ctx.skill_loader, registry, "*/skills", DEFAULT_SKILL_CONFIG_FILE, result
+    )
 
     print("Available skills:")
-    print(format_items(sorted(result, key=lambda k: k['name'])))
+    print(format_items(sorted(result, key=lambda k: k["name"])))
 
 
 @search.command()
-@click.option('--query', default='',
-              help='Query string to search Agents by name.')
+@click.option("--query", default="", help="Query string to search Agents by name.")
 @pass_ctx
 def agents(ctx: Context, query):
     """Search for Agents."""
     if ctx.config.get("is_registry"):
-        resp = request_api(
-            'GET', '/agents', params={'search': query}
-        )
+        resp = request_api("GET", "/agents", params={"search": query})
         if not len(resp):
-            click.echo('No agents found.')  # pragma: no cover
+            click.echo("No agents found.")  # pragma: no cover
         else:
-            click.echo('Agents found:\n')
+            click.echo("Agents found:\n")
             click.echo(format_items(resp))
         return
     else:
         registry = cast(str, ctx.config.get("registry_directory"))
         result = []  # type: List[Dict]
-        _get_details_from_dir(ctx.agent_loader, registry, "agents", DEFAULT_AEA_CONFIG_FILE, result)
+        _get_details_from_dir(
+            ctx.agent_loader, registry, "agents", DEFAULT_AEA_CONFIG_FILE, result
+        )
 
         print("Available agents:")
-        print(format_items(sorted(result, key=lambda k: k['name'])))
+        print(format_items(sorted(result, key=lambda k: k["name"])))

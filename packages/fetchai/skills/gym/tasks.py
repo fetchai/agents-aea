@@ -41,7 +41,9 @@ class GymTask(Task):
         self._rl_agent = MyRLAgent(NB_GOODS)
         self._proxy_env = ProxyEnv(self.context)
         self.nb_steps = nb_steps
-        self._rl_agent_training_thread = Thread(target=self._rl_agent.fit, args=[self._proxy_env, self.nb_steps])
+        self._rl_agent_training_thread = Thread(
+            target=self._rl_agent.fit, args=[self._proxy_env, self.nb_steps]
+        )
         self.is_rl_agent_training = False
 
     @property

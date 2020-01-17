@@ -38,7 +38,6 @@ SEPARATOR = b","
 
 
 class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
-
     def __init__(self, connection, file_to_observe: Union[str, Path]):
         self._connection = connection
         self._file_to_observe = Path(file_to_observe).absolute()
@@ -106,9 +105,14 @@ class StubConnection(Connection):
 
     restricted_to_protocols = set()  # type: Set[str]
 
-    def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
-                 connection_id: str = "stub", restricted_to_protocols: Optional[Set[str]] = None,
-                 excluded_protocols: Optional[Set[str]] = None):
+    def __init__(
+        self,
+        input_file_path: Union[str, Path],
+        output_file_path: Union[str, Path],
+        connection_id: str = "stub",
+        restricted_to_protocols: Optional[Set[str]] = None,
+        excluded_protocols: Optional[Set[str]] = None,
+    ):
         """
         Initialize a stub connection.
 
@@ -118,7 +122,9 @@ class StubConnection(Connection):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
+        super().__init__(
+            connection_id=connection_id, restricted_to_protocols=restricted_to_protocols
+        )
 
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -163,7 +169,7 @@ class StubConnection(Connection):
         except Exception as e:
             logger.error("Error when processing a line. Message: {}".format(str(e)))
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
         try:
             assert self.in_queue is not None
@@ -184,7 +190,7 @@ class StubConnection(Connection):
             # which is known only at connection time.
             self.in_queue = asyncio.Queue()
             self._observer.start()
-        except Exception as e:      # pragma: no cover
+        except Exception as e:  # pragma: no cover
             raise e
         finally:
             self.connection_status.is_connected = False
@@ -222,7 +228,9 @@ class StubConnection(Connection):
         self.output_file.flush()
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """
         Get the OEF connection from the connection configuration.
 
@@ -230,11 +238,22 @@ class StubConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
-        output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
-        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
-        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
-        return StubConnection(input_file, output_file,
-                              connection_id=connection_configuration.name,
-                              restricted_to_protocols=restricted_to_protocols_names,
-                              excluded_protocols=excluded_protocols_names)
+        input_file = connection_configuration.config.get(
+            "input_file", "./input_file"
+        )  # type: str
+        output_file = connection_configuration.config.get(
+            "output_file", "./output_file"
+        )  # type: str
+        restricted_to_protocols_names = {
+            p.name for p in connection_configuration.restricted_to_protocols
+        }
+        excluded_protocols_names = {
+            p.name for p in connection_configuration.excluded_protocols
+        }
+        return StubConnection(
+            input_file,
+            output_file,
+            connection_id=connection_configuration.name,
+            restricted_to_protocols=restricted_to_protocols_names,
+            excluded_protocols=excluded_protocols_names,
+        )

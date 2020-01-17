@@ -40,8 +40,13 @@ from oef.agents import AsyncioCore, OEFAgent
 import pytest
 
 from aea import AEA_DIR
-from aea.configurations.base import ConnectionConfig, DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE, DEFAULT_PROTOCOL_CONFIG_FILE, \
-    DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import (
+    ConnectionConfig,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
@@ -52,57 +57,202 @@ ROOT_DIR = os.path.join(CUR_PATH, "..")
 CLI_LOG_OPTION = ["-v", "OFF"]
 
 CONFIGURATION_SCHEMA_DIR = os.path.join(AEA_DIR, "configurations", "schemas")
-AGENT_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "aea-config_schema.json")
-SKILL_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "skill-config_schema.json")
-CONNECTION_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "connection-config_schema.json")
-PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(CONFIGURATION_SCHEMA_DIR, "protocol-config_schema.json")
+AGENT_CONFIGURATION_SCHEMA = os.path.join(
+    CONFIGURATION_SCHEMA_DIR, "aea-config_schema.json"
+)
+SKILL_CONFIGURATION_SCHEMA = os.path.join(
+    CONFIGURATION_SCHEMA_DIR, "skill-config_schema.json"
+)
+CONNECTION_CONFIGURATION_SCHEMA = os.path.join(
+    CONFIGURATION_SCHEMA_DIR, "connection-config_schema.json"
+)
+PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(
+    CONFIGURATION_SCHEMA_DIR, "protocol-config_schema.json"
+)
 
 DUMMY_ENV = gym.GoalEnv
 
-protocol_config_files = [os.path.join(ROOT_DIR, "aea", "protocols", "default", DEFAULT_PROTOCOL_CONFIG_FILE),
-                         os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "fipa", DEFAULT_PROTOCOL_CONFIG_FILE),
-                         os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "oef", DEFAULT_PROTOCOL_CONFIG_FILE),
-                         os.path.join(ROOT_DIR, "aea", "protocols", "scaffold", DEFAULT_PROTOCOL_CONFIG_FILE),
-                         os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "gym", DEFAULT_PROTOCOL_CONFIG_FILE),
-                         os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "ml_trade", DEFAULT_PROTOCOL_CONFIG_FILE),
-                         os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "tac", DEFAULT_PROTOCOL_CONFIG_FILE), ]
+protocol_config_files = [
+    os.path.join(ROOT_DIR, "aea", "protocols", "default", DEFAULT_PROTOCOL_CONFIG_FILE),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "protocols",
+        "fipa",
+        DEFAULT_PROTOCOL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "protocols",
+        "oef",
+        DEFAULT_PROTOCOL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR, "aea", "protocols", "scaffold", DEFAULT_PROTOCOL_CONFIG_FILE
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "protocols",
+        "gym",
+        DEFAULT_PROTOCOL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "protocols",
+        "ml_trade",
+        DEFAULT_PROTOCOL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "protocols",
+        "tac",
+        DEFAULT_PROTOCOL_CONFIG_FILE,
+    ),
+]
 
-connection_config_files = [os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "local", DEFAULT_CONNECTION_CONFIG_FILE),
-                           os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "oef", DEFAULT_CONNECTION_CONFIG_FILE),
-                           os.path.join(ROOT_DIR, "aea", "connections", "scaffold", DEFAULT_CONNECTION_CONFIG_FILE),
-                           os.path.join(ROOT_DIR, "packages", "fetchai", "connections", "gym", DEFAULT_CONNECTION_CONFIG_FILE),
-                           os.path.join(CUR_PATH, "data", "dummy_connection", DEFAULT_CONNECTION_CONFIG_FILE),
-                           os.path.join(CUR_PATH, "data", "gym-connection.yaml")]
+connection_config_files = [
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "connections",
+        "local",
+        DEFAULT_CONNECTION_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "connections",
+        "oef",
+        DEFAULT_CONNECTION_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR, "aea", "connections", "scaffold", DEFAULT_CONNECTION_CONFIG_FILE
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "connections",
+        "gym",
+        DEFAULT_CONNECTION_CONFIG_FILE,
+    ),
+    os.path.join(CUR_PATH, "data", "dummy_connection", DEFAULT_CONNECTION_CONFIG_FILE),
+    os.path.join(CUR_PATH, "data", "gym-connection.yaml"),
+]
 
 
-skill_config_files = [os.path.join(ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "aea", "skills", "scaffold", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "carpark_client", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "carpark_detection", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "gym", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "ml_data_provider", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "ml_train", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_control", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "tac_participation", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_client", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "weather_station", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(CUR_PATH, "data", "dummy_skill", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(CUR_PATH, "data", "dependencies_skill", DEFAULT_SKILL_CONFIG_FILE),
-                      os.path.join(CUR_PATH, "data", "exception_skill", DEFAULT_SKILL_CONFIG_FILE)]
+skill_config_files = [
+    os.path.join(ROOT_DIR, "aea", "skills", "error", DEFAULT_SKILL_CONFIG_FILE),
+    os.path.join(ROOT_DIR, "aea", "skills", "scaffold", DEFAULT_SKILL_CONFIG_FILE),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "carpark_client",
+        DEFAULT_SKILL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "carpark_detection",
+        DEFAULT_SKILL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR, "packages", "fetchai", "skills", "echo", DEFAULT_SKILL_CONFIG_FILE
+    ),
+    os.path.join(
+        ROOT_DIR, "packages", "fetchai", "skills", "gym", DEFAULT_SKILL_CONFIG_FILE
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "ml_data_provider",
+        DEFAULT_SKILL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR, "packages", "fetchai", "skills", "ml_train", DEFAULT_SKILL_CONFIG_FILE
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "tac_control",
+        DEFAULT_SKILL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "tac_negotiation",
+        DEFAULT_SKILL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "tac_participation",
+        DEFAULT_SKILL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "weather_client",
+        DEFAULT_SKILL_CONFIG_FILE,
+    ),
+    os.path.join(
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "weather_station",
+        DEFAULT_SKILL_CONFIG_FILE,
+    ),
+    os.path.join(CUR_PATH, "data", "dummy_skill", DEFAULT_SKILL_CONFIG_FILE),
+    os.path.join(
+        CUR_PATH, "data", "dummy_aea", "skills", "dummy", DEFAULT_SKILL_CONFIG_FILE
+    ),
+    os.path.join(CUR_PATH, "data", "dependencies_skill", DEFAULT_SKILL_CONFIG_FILE),
+    os.path.join(CUR_PATH, "data", "exception_skill", DEFAULT_SKILL_CONFIG_FILE),
+]
 
 
-agent_config_files = [os.path.join(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE),
-                      os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
-                      os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml")]
+agent_config_files = [
+    os.path.join(CUR_PATH, "data", "dummy_aea", DEFAULT_AEA_CONFIG_FILE),
+    os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
+    os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml"),
+]
 
 
 def pytest_addoption(parser):
     """Add options to the parser."""
     parser.addoption("--ci", action="store_true", default=False)
-    parser.addoption("--no-integration-tests", action="store_true", default=False, help="Skip integration tests.")
+    parser.addoption(
+        "--no-integration-tests",
+        action="store_true",
+        default=False,
+        help="Skip integration tests.",
+    )
 
 
 @pytest.fixture(scope="session")
@@ -134,9 +284,15 @@ class DummyConnection(Connection):
 
     restricted_to_protocols = set()  # type: Set[str]
 
-    def __init__(self, connection_id: str = "dummy", restricted_to_protocols: Optional[Set[str]] = None):
+    def __init__(
+        self,
+        connection_id: str = "dummy",
+        restricted_to_protocols: Optional[Set[str]] = None,
+    ):
         """Initialize."""
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
+        super().__init__(
+            connection_id=connection_id, restricted_to_protocols=restricted_to_protocols
+        )
         self.connection_status.is_connected = False
         self._queue = None
 
@@ -150,12 +306,12 @@ class DummyConnection(Connection):
         await self._queue.put(None)
         self.connection_status.is_connected = False
 
-    async def send(self, envelope: 'Envelope'):
+    async def send(self, envelope: "Envelope"):
         """Send an envelope."""
         assert self._queue is not None
         self._queue.put_nowait(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
         try:
             assert self._queue is not None
@@ -176,14 +332,21 @@ class DummyConnection(Connection):
         self._queue.put_nowait(envelope)
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """Return a connection obj fom a configuration."""
 
 
 class OEFHealthCheck(object):
     """A health check class."""
 
-    def __init__(self, oef_addr: str, oef_port: int, loop: Optional[asyncio.AbstractEventLoop] = None):
+    def __init__(
+        self,
+        oef_addr: str,
+        oef_port: int,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+    ):
         """
         Initialize.
 
@@ -196,7 +359,9 @@ class OEFHealthCheck(object):
         self._result = False
         self._stop = False
         self._core = AsyncioCore()
-        self.agent = OEFAgent("check", core=self._core, oef_addr=self.oef_addr, oef_port=self.oef_port)
+        self.agent = OEFAgent(
+            "check", core=self._core, oef_addr=self.oef_addr, oef_port=self.oef_port
+        )
         self.agent.on_connect_success = self.on_connect_ok
         self.agent.on_connection_terminated = self.on_connect_terminated
         self.agent.on_connect_failed = self.exception_handler
@@ -278,7 +443,9 @@ def _wait_for_oef(max_attempts: int = 15, sleep_rate: float = 1.0):
         if result:
             success = True
         else:
-            logger.info("OEF not available yet - sleeping for {} second...".format(sleep_rate))
+            logger.info(
+                "OEF not available yet - sleeping for {} second...".format(sleep_rate)
+            )
             time.sleep(sleep_rate)
 
     return success
@@ -287,14 +454,24 @@ def _wait_for_oef(max_attempts: int = 15, sleep_rate: float = 1.0):
 def _create_oef_docker_image(oef_addr_, oef_port_) -> Container:
     client = docker.from_env()
 
-    logger.info(ROOT_DIR + '/tests/common/oef_search_pluto_scripts')
-    ports = {'20000/tcp': ("0.0.0.0", 20000), '30000/tcp': ("0.0.0.0", 30000),
-             '{}/tcp'.format(oef_port_): ("0.0.0.0", oef_port_)}
-    volumes = {ROOT_DIR + '/tests/common/oef_search_pluto_scripts': {'bind': '/config', 'mode': 'rw'},
-               ROOT_DIR + '/data/oef-logs': {'bind': '/logs', 'mode': 'rw'}}
-    c = client.containers.run("fetchai/oef-search:0.7",
-                              "/config/node_config.json",
-                              detach=True, ports=ports, volumes=volumes)
+    logger.info(ROOT_DIR + "/tests/common/oef_search_pluto_scripts")
+    ports = {
+        "20000/tcp": ("0.0.0.0", 20000),
+        "30000/tcp": ("0.0.0.0", 30000),
+        "{}/tcp".format(oef_port_): ("0.0.0.0", oef_port_),
+    }
+    volumes = {
+        ROOT_DIR
+        + "/tests/common/oef_search_pluto_scripts": {"bind": "/config", "mode": "rw"},
+        ROOT_DIR + "/data/oef-logs": {"bind": "/logs", "mode": "rw"},
+    }
+    c = client.containers.run(
+        "fetchai/oef-search:0.7",
+        "/config/node_config.json",
+        detach=True,
+        ports=ports,
+        volumes=volumes,
+    )
     return c
 
 
@@ -304,7 +481,7 @@ def network_node(oef_addr, oef_port, pytestconfig):
     if sys.version_info < (3, 7):
         pytest.skip("Python version < 3.7 not supported by the OEF.")
     if pytestconfig.getoption("no_integration_tests"):
-        pytest.skip('skipped: no OEF running')
+        pytest.skip("skipped: no OEF running")
         return
 
     if pytestconfig.getoption("ci"):
