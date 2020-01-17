@@ -43,7 +43,7 @@ Or, you can have more control on the installed dependencies by leveraging the se
 
       pip install .[cli]
 
-### Contribute
+## Contribute
 
 The following dependency is only relevant if you intend to contribute to the repository:
 - the project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
@@ -58,7 +58,7 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 	  pip install -e .
 
-- After changes to the protobuf schema run:
+- After changes to any protobuf schema run:
 
 	  python setup.py protoc
 
@@ -73,6 +73,10 @@ The following steps are only relevant if you intend to contribute to the reposit
 - To run static type checks:
 
 	  tox -e mypy
+
+- To run black code formatter:
+
+	  tox -e black
 
 - Docs:
 
