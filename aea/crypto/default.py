@@ -21,20 +21,26 @@
 """Default module wrapping the public and private key cryptography and ledger api."""
 
 import logging
-from typing import Optional, BinaryIO
+from typing import BinaryIO, Optional
 
 import base58
+
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, utils
-from cryptography.hazmat.primitives.serialization import load_pem_private_key, NoEncryption, PrivateFormat, Encoding
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+    load_pem_private_key,
+)
 
 from aea.crypto.base import Crypto
 
 logger = logging.getLogger(__name__)
 
-CHOSEN_ALGORITHM_ID = b'MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE'
+CHOSEN_ALGORITHM_ID = b"MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE"
 CHOSEN_PBK_LENGTH = 160
 
 DEFAULT = "default"
@@ -53,13 +59,19 @@ class DefaultCrypto(Crypto):
 
     def __init__(self, private_key_pem_path: Optional[str] = None):
         """Instantiate a crypto object."""
-        self._private_key = self._generate_pk() if private_key_pem_path is None else self._load_pem_private_key_from_path(private_key_pem_path)
+        self._private_key = (
+            self._generate_pk()
+            if private_key_pem_path is None
+            else self._load_pem_private_key_from_path(private_key_pem_path)
+        )
         self._public_key_obj = self._compute_pbk()
         self._public_key_pem = self._pbk_obj_to_pem(self._public_key_obj)
         self._public_key_b64 = self._pbk_pem_to_b64(self._public_key_pem)
         self._public_key_b58 = self._pbk_b64_to_b58(self._public_key_b64)
         self._fingerprint_hex = self._pbk_b64_to_hex(self._public_key_b64)
-        assert self._pbk_obj_to_b58(self._public_key_obj) == self._pbk_obj_to_b58(self._pbk_b58_to_obj(self._public_key_b58))
+        assert self._pbk_obj_to_b58(self._public_key_obj) == self._pbk_obj_to_b58(
+            self._pbk_b58_to_obj(self._public_key_b58)
+        )
 
     @property
     def entity(self) -> None:
@@ -112,7 +124,7 @@ class DefaultCrypto(Crypto):
         return self._fingerprint_hex
 
     @classmethod
-    def load(cls, fp: BinaryIO) -> 'DefaultCrypto':
+    def load(cls, fp: BinaryIO) -> "DefaultCrypto":
         """
         Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
 
@@ -151,13 +163,19 @@ class DefaultCrypto(Crypto):
 
         :return: the private key.
         """
-        private_key = load_pem_private_key(open(path, "rb").read(), None, default_backend())
+        private_key = load_pem_private_key(
+            open(path, "rb").read(), None, default_backend()
+        )
         try:
             assert private_key.curve.name == self._chosen_ec.name
         except ValueError as e:  # pragma: no cover
             raise e  # pragma: no cover
         except AssertionError:  # pragma: no cover
-            raise ValueError("Expected elliptic curve: {} actual: {}".format(private_key.curve.name, self._chosen_ec.name))  # pragma: no cover
+            raise ValueError(
+                "Expected elliptic curve: {} actual: {}".format(
+                    private_key.curve.name, self._chosen_ec.name
+                )
+            )  # pragma: no cover
         return private_key
 
     def _compute_pbk(self) -> object:
@@ -188,7 +206,7 @@ class DefaultCrypto(Crypto):
 
         :return: the public key as a bytes string (base64)
         """
-        result = b''.join(pbk.splitlines()[1:-1])
+        result = b"".join(pbk.splitlines()[1:-1])
         return result
 
     def _pbk_b64_to_b58(self, pbk: bytes) -> str:
@@ -199,7 +217,7 @@ class DefaultCrypto(Crypto):
 
         :return: the public key as a string (base58)
         """
-        result = base58.b58encode(pbk).decode('utf-8')
+        result = base58.b58encode(pbk).decode("utf-8")
         return result
 
     def _pbk_obj_to_b58(self, pbk: object) -> str:
@@ -235,9 +253,11 @@ class DefaultCrypto(Crypto):
         :return: the public key as a bytes string (PEM base64)
         """
         assert len(pbk) == CHOSEN_PBK_LENGTH, "Public key is not of expected length."
-        assert pbk[0:32] == CHOSEN_ALGORITHM_ID, "Public key has not expected algorithm id."
-        pbk = pbk[0:64] + b'\n' + pbk[64:128] + b'\n' + pbk[128:] + b'\n'
-        pbk_pem = b'-----BEGIN PUBLIC KEY-----\n' + pbk + b'-----END PUBLIC KEY-----\n'
+        assert (
+            pbk[0:32] == CHOSEN_ALGORITHM_ID
+        ), "Public key has not expected algorithm id."
+        pbk = pbk[0:64] + b"\n" + pbk[64:128] + b"\n" + pbk[128:] + b"\n"
+        pbk_pem = b"-----BEGIN PUBLIC KEY-----\n" + pbk + b"-----END PUBLIC KEY-----\n"
         return pbk_pem
 
     def _pbk_b58_to_obj(self, pbk: str) -> object:
@@ -264,7 +284,9 @@ class DefaultCrypto(Crypto):
         signature = self._private_key.sign(digest, ec.ECDSA(utils.Prehashed(self._chosen_hash)))  # type: ignore
         return signature
 
-    def is_confirmed_integrity(self, data: bytes, signature: bytes, signer_pbk: str) -> bool:
+    def is_confirmed_integrity(
+        self, data: bytes, signature: bytes, signer_pbk: str
+    ) -> bool:
         """
         Confirrm the integrity of the data with respect to its signature.
 

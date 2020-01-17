@@ -21,16 +21,16 @@
 """The state update message module."""
 
 from enum import Enum
-from typing import cast, Dict
+from typing import Dict, cast
 
 from aea.decision_maker.messages.base import InternalMessage
 
 TransactionId = str
 
 Currencies = Dict[str, int]  # a map from identifier to quantity
-Goods = Dict[str, int]   # a map from identifier to quantity
-UtilityParams = Dict[str, float]   # a map from identifier to quantity
-ExchangeParams = Dict[str, float]   # a map from identifier to quantity
+Goods = Dict[str, int]  # a map from identifier to quantity
+UtilityParams = Dict[str, float]  # a map from identifier to quantity
+ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
 
 class StateUpdateMessage(InternalMessage):
@@ -42,10 +42,13 @@ class StateUpdateMessage(InternalMessage):
         INITIALIZE = "initialize"
         APPLY = "apply"
 
-    def __init__(self, performative: Performative,
-                 amount_by_currency_id: Currencies,
-                 quantities_by_good_id: Goods,
-                 **kwargs):
+    def __init__(
+        self,
+        performative: Performative,
+        amount_by_currency_id: Currencies,
+        quantities_by_good_id: Goods,
+        **kwargs
+    ):
         """
         Instantiate transaction message.
 
@@ -53,17 +56,21 @@ class StateUpdateMessage(InternalMessage):
         :param amount_by_currency_id: the amounts of currencies.
         :param quantities_by_good_id: the quantities of goods.
         """
-        super().__init__(performative=performative,
-                         amount_by_currency_id=amount_by_currency_id,
-                         quantities_by_good_id=quantities_by_good_id,
-                         **kwargs)
-        assert self.check_consistency(), "StateUpdateMessage initialization inconsistent."
+        super().__init__(
+            performative=performative,
+            amount_by_currency_id=amount_by_currency_id,
+            quantities_by_good_id=quantities_by_good_id,
+            **kwargs
+        )
+        assert (
+            self.check_consistency()
+        ), "StateUpdateMessage initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "Performative is not set."
-        return StateUpdateMessage.Performative(self.get('performative'))
+        return StateUpdateMessage.Performative(self.get("performative"))
 
     @property
     def amount_by_currency_id(self) -> Currencies:
@@ -116,12 +123,18 @@ class StateUpdateMessage(InternalMessage):
                 for key, float_value in self.exchange_params_by_currency_id.items():
                     assert isinstance(key, str)
                     assert isinstance(float_value, float)
-                assert self.amount_by_currency_id.keys() == self.exchange_params_by_currency_id.keys()
+                assert (
+                    self.amount_by_currency_id.keys()
+                    == self.exchange_params_by_currency_id.keys()
+                )
                 assert isinstance(self.utility_params_by_good_id, dict)
                 for key, float_value in self.utility_params_by_good_id.items():
                     assert isinstance(key, str)
                     assert isinstance(float_value, float)
-                assert self.quantities_by_good_id.keys() == self.utility_params_by_good_id.keys()
+                assert (
+                    self.quantities_by_good_id.keys()
+                    == self.utility_params_by_good_id.keys()
+                )
                 assert isinstance(self.tx_fee, int)
                 assert len(self.body) == 6
             elif self.performative == self.Performative.APPLY:

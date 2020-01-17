@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the Gym protocol."""
+
 import base64
 import copy
 import json
@@ -27,6 +28,7 @@ from typing import Any, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
+
 from packages.fetchai.protocols.gym.message import GymMessage
 
 
@@ -52,7 +54,9 @@ class GymSerializer(Serializer):
         elif msg.performative == GymMessage.Performative.PERCEPT:
             # observation, reward and info are gym implementation specific, done is boolean
             observation = msg.observation
-            observation_bytes = base64.b64encode(pickle.dumps(observation)).decode("utf-8")
+            observation_bytes = base64.b64encode(pickle.dumps(observation)).decode(
+                "utf-8"
+            )
             new_body["observation"] = observation_bytes
             reward = msg.reward
             reward_bytes = base64.b64encode(pickle.dumps(reward)).decode("utf-8")

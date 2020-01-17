@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea run` sub-command."""
+
 import os
 import shutil
 import signal
@@ -29,13 +30,17 @@ import unittest.mock
 from pathlib import Path
 
 import pytest
+
 import yaml
-from ..common.click_testing import CliRunner
 
 import aea.cli.common
 from aea.cli import cli
+from aea.configurations.base import (
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+)
 
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, DEFAULT_CONNECTION_CONFIG_FILE
+from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
 
 
@@ -57,19 +62,16 @@ def test_run(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
-    process = subprocess.Popen([
-        sys.executable,
-        '-m',
-        'aea.cli',
-        "run",
-        "--connections",
-        "local"
-    ],
+    process = subprocess.Popen(
+        [sys.executable, "-m", "aea.cli", "run", "--connections", "local"],
         stdout=subprocess.PIPE,
-        env=os.environ.copy())
+        env=os.environ.copy(),
+    )
 
     time.sleep(10.0)
     process.send_signal(signal.SIGINT)
@@ -108,14 +110,11 @@ def test_run_with_default_connection(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    process = subprocess.Popen([
-        sys.executable,
-        '-m',
-        'aea.cli',
-        "run"
-    ],
+    process = subprocess.Popen(
+        [sys.executable, "-m", "aea.cli", "run"],
         stdout=subprocess.PIPE,
-        env=os.environ.copy())
+        env=os.environ.copy(),
+    )
 
     time.sleep(10.0)
     process.send_signal(signal.SIGINT)
@@ -136,11 +135,10 @@ def test_run_with_default_connection(pytestconfig):
         pass
 
 
-@pytest.mark.parametrize(argnames=["connection_names"], argvalues=[
-    ["local,stub"],
-    ["'local, stub'"],
-    ["local,,stub,"],
-])
+@pytest.mark.parametrize(
+    argnames=["connection_names"],
+    argvalues=[["local,stub"], ["'local, stub'"], ["local,,stub,"]],
+)
 def test_run_multiple_connections(pytestconfig, connection_names):
     """Test that the command 'aea run' works as expected when specifying multiple connections."""
     if pytestconfig.getoption("ci"):
@@ -159,23 +157,22 @@ def test_run_multiple_connections(pytestconfig, connection_names):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     # stub is the default connection, so it should fail
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/stub:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/stub:0.1.0"]
+    )
     assert result.exit_code == 1
 
-    process = subprocess.Popen([
-        sys.executable,
-        '-m',
-        'aea.cli',
-        "run",
-        "--connections",
-        connection_names,
-    ],
+    process = subprocess.Popen(
+        [sys.executable, "-m", "aea.cli", "run", "--connections", connection_names],
         stdout=subprocess.PIPE,
-        env=os.environ.copy())
+        env=os.environ.copy(),
+    )
 
     time.sleep(5.0)
     process.send_signal(signal.SIGINT)
@@ -214,11 +211,13 @@ def test_run_unknown_private_key(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode='r')
+    file = open("aea-config.yaml", mode="r")
 
     # read all lines at once
     whole_file = file.read()
@@ -234,11 +233,11 @@ def test_run_unknown_private_key(pytestconfig):
     # close the file
     file.close()
 
-    with open("aea-config.yaml", 'w') as f:
+    with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
     # Private key needs to exist otherwise doesn't get to code path we are interested in testing
-    with open("fet_private_key.txt", 'w') as f:
+    with open("fet_private_key.txt", "w") as f:
         f.write("3801d3703a1fcef18f6bf393fba89245f36b175f4989d8d6e026300dad21e05d")
 
     error_msg = ""
@@ -274,11 +273,13 @@ def test_run_unknown_ledger(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode='r')
+    file = open("aea-config.yaml", mode="r")
 
     # read all lines at once
     whole_file = file.read()
@@ -295,7 +296,7 @@ def test_run_unknown_ledger(pytestconfig):
     # close the file
     file.close()
 
-    with open("aea-config.yaml", 'w') as f:
+    with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
     error_msg = ""
@@ -331,11 +332,13 @@ def test_run_default_private_key_config(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode='r')
+    file = open("aea-config.yaml", mode="r")
 
     # read all lines at once
     whole_file = file.read()
@@ -351,7 +354,7 @@ def test_run_default_private_key_config(pytestconfig):
     # close the file
     file.close()
 
-    with open("aea-config.yaml", 'w') as f:
+    with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
     error_msg = ""
@@ -387,11 +390,13 @@ def test_run_fet_private_key_config(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode='r')
+    file = open("aea-config.yaml", mode="r")
 
     # read all lines at once
     whole_file = file.read()
@@ -407,7 +412,7 @@ def test_run_fet_private_key_config(pytestconfig):
     # close the file
     file.close()
 
-    with open("aea-config.yaml", 'w') as f:
+    with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
     error_msg = ""
@@ -443,11 +448,13 @@ def test_run_ethereum_private_key_config(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode='r')
+    file = open("aea-config.yaml", mode="r")
 
     # read all lines at once
     whole_file = file.read()
@@ -463,7 +470,7 @@ def test_run_ethereum_private_key_config(pytestconfig):
     # close the file
     file.close()
 
-    with open("aea-config.yaml", 'w') as f:
+    with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
     error_msg = ""
@@ -499,11 +506,13 @@ def test_run_ledger_apis(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode='r')
+    file = open("aea-config.yaml", mode="r")
 
     # read all lines at once
     whole_file = file.read()
@@ -523,19 +532,14 @@ def test_run_ledger_apis(pytestconfig):
     # close the file
     file.close()
 
-    with open("aea-config.yaml", 'w') as f:
+    with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    process = subprocess.Popen([
-        sys.executable,
-        '-m',
-        'aea.cli',
-        "run",
-        "--connections",
-        "local"
-    ],
+    process = subprocess.Popen(
+        [sys.executable, "-m", "aea.cli", "run", "--connections", "local"],
         stdout=subprocess.PIPE,
-        env=os.environ.copy())
+        env=os.environ.copy(),
+    )
 
     time.sleep(10.0)
     process.send_signal(signal.SIGINT)
@@ -574,11 +578,13 @@ def test_run_fet_ledger_apis(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     # Load the agent yaml file and manually insert the things we need
-    file = open("aea-config.yaml", mode='r')
+    file = open("aea-config.yaml", mode="r")
 
     # read all lines at once
     whole_file = file.read()
@@ -596,19 +602,14 @@ def test_run_fet_ledger_apis(pytestconfig):
     # close the file
     file.close()
 
-    with open("aea-config.yaml", 'w') as f:
+    with open("aea-config.yaml", "w") as f:
         f.write(whole_file)
 
-    process = subprocess.Popen([
-        sys.executable,
-        '-m',
-        'aea.cli',
-        "run",
-        "--connections",
-        "local"
-    ],
+    process = subprocess.Popen(
+        [sys.executable, "-m", "aea.cli", "run", "--connections", "local"],
         stdout=subprocess.PIPE,
-        env=os.environ.copy())
+        env=os.environ.copy(),
+    )
 
     time.sleep(10.0)
     process.send_signal(signal.SIGINT)
@@ -646,20 +647,24 @@ def test_run_with_install_deps(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
-    process = subprocess.Popen([
-        sys.executable,
-        '-m',
-        'aea.cli',
-        "run",
-        "--install-deps",
-        "--connections",
-        "local"
-    ],
+    process = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "aea.cli",
+            "run",
+            "--install-deps",
+            "--connections",
+            "local",
+        ],
         stdout=subprocess.PIPE,
-        env=os.environ.copy())
+        env=os.environ.copy(),
+    )
 
     time.sleep(10.0)
     process.send_signal(signal.SIGINT)
@@ -696,24 +701,28 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
 
     os.chdir(Path(t, agent_name))
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"]
+    )
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"])
     assert result.exit_code == 0
     Path(t, agent_name, "requirements.txt").write_text(result.output)
 
-    process = subprocess.Popen([
-        sys.executable,
-        '-m',
-        'aea.cli',
-        "run",
-        "--install-deps",
-        "--connections",
-        "local"
-    ],
+    process = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "aea.cli",
+            "run",
+            "--install-deps",
+            "--connections",
+            "local",
+        ],
         stdout=subprocess.PIPE,
-        env=os.environ.copy())
+        env=os.environ.copy(),
+    )
 
     time.sleep(10.0)
     process.send_signal(signal.SIGINT)
@@ -747,15 +756,24 @@ class TestRunFailsWhenExceptionOccursInSkill:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         os.chdir(Path(cls.t, cls.agent_name))
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/local:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        shutil.copytree(Path(CUR_PATH, "data", "exception_skill"), Path(cls.t, cls.agent_name, "skills", "exception"))
+        shutil.copytree(
+            Path(CUR_PATH, "data", "exception_skill"),
+            Path(cls.t, cls.agent_name, "skills", "exception"),
+        )
         config_path = Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE)
         config = yaml.safe_load(open(config_path))
         config.setdefault("skills", []).append("fetchai/exception:0.1.0")
@@ -788,7 +806,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -796,7 +814,9 @@ class TestRunFailsWhenConfigurationFileNotFound:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).unlink()
 
@@ -813,7 +833,9 @@ class TestRunFailsWhenConfigurationFileNotFound:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE)
+        s = "Agent configuration file '{}' not found in the current directory.".format(
+            DEFAULT_AEA_CONFIG_FILE
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -835,7 +857,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -843,7 +865,9 @@ class TestRunFailsWhenConfigurationFileInvalid:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         Path(cls.t, cls.agent_name, DEFAULT_AEA_CONFIG_FILE).write_text("")
@@ -861,7 +885,9 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Agent configuration file '{}' is invalid. Please check the documentation.".format(DEFAULT_AEA_CONFIG_FILE)
+        s = "Agent configuration file '{}' is invalid. Please check the documentation.".format(
+            DEFAULT_AEA_CONFIG_FILE
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -884,7 +910,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.connection_name = "unknown_connection"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -892,7 +918,9 @@ class TestRunFailsWhenConnectionNotDeclared:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         os.chdir(Path(cls.t, cls.agent_name))
@@ -908,7 +936,9 @@ class TestRunFailsWhenConnectionNotDeclared:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection name '{}' not declared in the configuration file.".format(self.connection_name)
+        s = "Connection name '{}' not declared in the configuration file.".format(
+            self.connection_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -931,7 +961,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.connection_name = "myconnection"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -939,12 +969,24 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "connection", cls.connection_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "connection", cls.connection_name],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
-        Path(cls.t, cls.agent_name, "connections", cls.connection_name, DEFAULT_CONNECTION_CONFIG_FILE).unlink()
+        Path(
+            cls.t,
+            cls.agent_name,
+            "connections",
+            cls.connection_name,
+            DEFAULT_CONNECTION_CONFIG_FILE,
+        ).unlink()
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
@@ -981,7 +1023,7 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.agent_name = "myagent"
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -989,12 +1031,26 @@ class TestRunFailsWhenConnectionNotComplete:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
-        Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").unlink()
+        Path(
+            cls.t,
+            cls.agent_name,
+            "vendor",
+            "fetchai",
+            "connections",
+            cls.connection_name,
+            "connection.py",
+        ).unlink()
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
@@ -1031,7 +1087,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         cls.agent_name = "myagent"
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1039,12 +1095,26 @@ class TestRunFailsWhenConnectionClassNotPresent:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
-        Path(cls.t, cls.agent_name, "connections", cls.connection_name, "connection.py").write_text("")
+        Path(
+            cls.t,
+            cls.agent_name,
+            "vendor",
+            "fetchai",
+            "connections",
+            cls.connection_name,
+            "connection.py",
+        ).write_text("")
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
@@ -1080,7 +1150,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1088,11 +1158,21 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-        Path(cls.t, cls.agent_name, "protocols", "default", "protocol.yaml").unlink()
+        Path(
+            cls.t,
+            cls.agent_name,
+            "vendor",
+            "fetchai",
+            "protocols",
+            "default",
+            "protocol.yaml",
+        ).unlink()
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
@@ -1128,7 +1208,7 @@ class TestRunFailsWhenProtocolNotComplete:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
@@ -1136,11 +1216,21 @@ class TestRunFailsWhenProtocolNotComplete:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-        Path(cls.t, cls.agent_name, "protocols", "default", "__init__.py").unlink()
+        Path(
+            cls.t,
+            cls.agent_name,
+            "vendor",
+            "fetchai",
+            "protocols",
+            "default",
+            "__init__.py",
+        ).unlink()
 
         try:
             cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
@@ -1153,7 +1243,9 @@ class TestRunFailsWhenProtocolNotComplete:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "A problem occurred while processing protocol {}.".format("fetchai/default:0.1.0")
+        s = "A problem occurred while processing protocol {}.".format(
+            "fetchai/default:0.1.0"
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

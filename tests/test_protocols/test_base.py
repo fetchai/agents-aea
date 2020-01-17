@@ -18,12 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the messages module."""
+
 from typing import cast
 
 from aea.configurations.base import ProtocolConfig
 from aea.mail.base import Envelope
-from aea.protocols.base import Message, Serializer, Protocol
-from aea.protocols.base import ProtobufSerializer, JSONSerializer
+from aea.protocols.base import (
+    JSONSerializer,
+    Message,
+    ProtobufSerializer,
+    Protocol,
+    Serializer,
+)
 
 
 class TestBaseSerializations:
@@ -38,7 +44,12 @@ class TestBaseSerializations:
     def test_default_protobuf_serialization(self):
         """Test that the default Protobuf serialization works."""
         message_bytes = ProtobufSerializer().encode(self.message)
-        envelope = Envelope(to="receiver", sender="sender", protocol_id="my_own_protocol", message=message_bytes)
+        envelope = Envelope(
+            to="receiver",
+            sender="sender",
+            protocol_id="my_own_protocol",
+            message=message_bytes,
+        )
         envelope_bytes = envelope.encode()
 
         expected_envelope = Envelope.decode(envelope_bytes)
@@ -52,7 +63,12 @@ class TestBaseSerializations:
     def test_default_json_serialization(self):
         """Test that the default JSON serialization works."""
         message_bytes = JSONSerializer().encode(self.message)
-        envelope = Envelope(to="receiver", sender="sender", protocol_id="my_own_protocol", message=message_bytes)
+        envelope = Envelope(
+            to="receiver",
+            sender="sender",
+            protocol_id="my_own_protocol",
+            message=message_bytes,
+        )
         envelope_bytes = envelope.encode()
 
         expected_envelope = Envelope.decode(envelope_bytes)
@@ -87,9 +103,13 @@ class TestBaseSerializations:
 
     def test_protocols_config(self):
         """Test the protocol config."""
-        protocol = Protocol(id="test", serializer=cast(Serializer, ProtobufSerializer), config=ProtocolConfig())
+        protocol = Protocol(
+            id="test",
+            serializer=cast(Serializer, ProtobufSerializer),
+            config=ProtocolConfig(),
+        )
         assert protocol.config is not None
 
     def test_check_consistency_returns_true(self):
         """Test that the check consistency method returns True."""
-        assert self.message.check_consistency()
+        assert self.message._check_consistency()

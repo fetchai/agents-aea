@@ -19,10 +19,9 @@
 
 """This test module contains the tests for the `aea gui` sub-commands."""
 import json
-
 import unittest.mock
 
-from .test_base import create_app, DummyPID
+from .test_base import DummyPID, create_app
 
 dummy_output = """Available items:
 ------------------------------
@@ -50,19 +49,25 @@ def _test_search_items_with_query(item_type: str, query: str):
     # Test for actual agent
     with unittest.mock.patch("aea.cli_gui._call_aea_async", return_value=pid):
         response_list = app.get(
-            'api/' + item_type + "/" + query,
+            "api/" + item_type + "/" + query,
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
     assert len(data["search_result"]) == 2
-    assert data["search_result"][0]['id'] == 'default'
-    assert data["search_result"][0]['description'] == 'The default item allows for any byte logic.'
-    assert data["search_result"][1]['id'] == 'oef'
-    assert data["search_result"][1]['description'] == 'The oef item implements the OEF specific logic.'
+    assert data["search_result"][0]["id"] == "default"
+    assert (
+        data["search_result"][0]["description"]
+        == "The default item allows for any byte logic."
+    )
+    assert data["search_result"][1]["id"] == "oef"
+    assert (
+        data["search_result"][1]["description"]
+        == "The oef item implements the OEF specific logic."
+    )
     assert data["item_type"] == item_type
-    assert data["search_term"] == 'test'
+    assert data["search_term"] == "test"
 
 
 def _test_search_items(item_type: str):
@@ -74,17 +79,15 @@ def _test_search_items(item_type: str):
     # Test for actual agent
     with unittest.mock.patch("aea.cli_gui._call_aea_async", return_value=pid):
         response_list = app.get(
-            'api/' + item_type,
-            data=None,
-            content_type='application/json',
+            "api/" + item_type, data=None, content_type="application/json",
         )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
     assert len(data) == 2
-    assert data[0]['id'] == 'default'
-    assert data[0]['description'] == 'The default item allows for any byte logic.'
-    assert data[1]['id'] == 'oef'
-    assert data[1]['description'] == 'The oef item implements the OEF specific logic.'
+    assert data[0]["id"] == "default"
+    assert data[0]["description"] == "The default item allows for any byte logic."
+    assert data[1]["id"] == "oef"
+    assert data[1]["description"] == "The oef item implements the OEF specific logic."
 
 
 def _test_search_items_fail(item_type: str):
@@ -95,35 +98,33 @@ def _test_search_items_fail(item_type: str):
 
     with unittest.mock.patch("aea.cli_gui._call_aea_async", return_value=pid):
         response_list = app.get(
-            'api/' + item_type,
-            data=None,
-            content_type='application/json',
+            "api/" + item_type, data=None, content_type="application/json",
         )
     assert response_list.status_code == 400
     data = json.loads(response_list.get_data(as_text=True))
 
-    assert data['detail'] == dummy_error + '\n'
+    assert data["detail"] == dummy_error + "\n"
 
 
 def test_search_protocols():
     """Test for listing protocols supported by an agent."""
-    _test_search_items('protocol')
-    _test_search_items_fail('protocol')
-    _test_search_items_with_query('protocol', 'test')
+    _test_search_items("protocol")
+    _test_search_items_fail("protocol")
+    _test_search_items_with_query("protocol", "test")
 
 
 def test_search_connections():
     """Test for listing connections supported by an agent."""
-    _test_search_items('connection')
-    _test_search_items_fail('connection')
-    _test_search_items_with_query('connection', 'test')
+    _test_search_items("connection")
+    _test_search_items_fail("connection")
+    _test_search_items_with_query("connection", "test")
 
 
 def test_list_skills():
     """Test for listing connections supported by an agent."""
-    _test_search_items('skill')
-    _test_search_items_fail('skill')
-    _test_search_items_with_query('skill', 'test')
+    _test_search_items("skill")
+    _test_search_items_fail("skill")
+    _test_search_items_with_query("skill", "test")
 
 
 def test_real_search():
@@ -132,29 +133,42 @@ def test_real_search():
 
     # Test for actual agent
     response_list = app.get(
-        'api/connection',
-        data=None,
-        content_type='application/json',
+        "api/connection", data=None, content_type="application/json",
     )
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
     assert len(data) == 6
     i = 0
 
-    assert data[i]['id'] == 'gym'
-    assert data[i]['description'] == 'The gym connection wraps an OpenAI gym.'
+    assert data[i]["id"] == "gym"
+    assert data[i]["description"] == "The gym connection wraps an OpenAI gym."
     i += 1
-    assert data[i]['id'] == 'local'
-    assert data[i]['description'] == 'The local connection provides a stub for an OEF node.'
+    assert data[i]["id"] == "local"
+    assert (
+        data[i]["description"]
+        == "The local connection provides a stub for an OEF node."
+    )
     i += 1
-    assert data[i]['id'] == 'oef'
-    assert data[i]['description'] == 'The oef connection provides a wrapper around the OEF sdk.'
+    assert data[i]["id"] == "oef"
+    assert (
+        data[i]["description"]
+        == "The oef connection provides a wrapper around the OEF sdk."
+    )
     i += 1
-    assert data[i]['id'] == 'p2p'
-    assert data[i]['description'] == 'The p2p connection provides a connection with the fetch.ai mail provider.'
+    assert data[i]["id"] == "p2p"
+    assert (
+        data[i]["description"]
+        == "The p2p connection provides a connection with the fetch.ai mail provider."
+    )
     i += 1
-    assert data[i]['id'] == 'stub'
-    assert data[i]['description'] == 'The stub connection implements a connection stub which reads/writes messages from/to file.'
+    assert data[i]["id"] == "stub"
+    assert (
+        data[i]["description"]
+        == "The stub connection implements a connection stub which reads/writes messages from/to file."
+    )
     i += 1
-    assert data[i]['id'] == 'tcp'
-    assert data[i]['description'] == 'The tcp connection implements a tcp server and client.'
+    assert data[i]["id"] == "tcp"
+    assert (
+        data[i]["description"]
+        == "The tcp connection implements a tcp server and client."
+    )

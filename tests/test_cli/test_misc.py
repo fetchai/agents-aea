@@ -19,10 +19,10 @@
 
 """This test module contains the tests for the `aea` sub-commands."""
 
-from ..common.click_testing import CliRunner
-
 import aea
 from aea.cli import cli
+
+from ..common.click_testing import CliRunner
 
 
 def test_no_argument():
@@ -43,7 +43,9 @@ def test_flag_help():
     """Test that the flag '--help' works correctly."""
     runner = CliRunner()
     result = runner.invoke(cli, ["--help"])
-    assert result.stdout == """Usage: aea [OPTIONS] COMMAND [ARGS]...
+    assert (
+        result.stdout
+        == """Usage: aea [OPTIONS] COMMAND [ARGS]...
 
   Command-line tool for setting up an Autonomous Economic Agent.
 
@@ -73,3 +75,4 @@ Commands:
   scaffold      Scaffold a resource for the agent.
   search        Search for components in the registry.
 """
+    )

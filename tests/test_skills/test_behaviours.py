@@ -17,7 +17,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the behaviours."""
-from aea.skills.behaviours import SequenceBehaviour, OneShotBehaviour, FSMBehaviour, State
+
+from aea.skills.behaviours import (
+    FSMBehaviour,
+    OneShotBehaviour,
+    SequenceBehaviour,
+    State,
+)
 
 
 def test_sequence_behaviour():
@@ -25,7 +31,6 @@ def test_sequence_behaviour():
     outputs = []
 
     class MySequenceBehaviour(SequenceBehaviour):
-
         def setup(self) -> None:
             pass
 
@@ -33,7 +38,6 @@ def test_sequence_behaviour():
             pass
 
     class SimpleOneShotBehaviour(OneShotBehaviour):
-
         def __init__(self, id, **kwargs):
             super().__init__(**kwargs)
             self.id = id
@@ -67,7 +71,6 @@ def test_fms_behaviour():
     outputs = []
 
     class MyFSMBehaviour(FSMBehaviour):
-
         def setup(self) -> None:
             pass
 
@@ -75,7 +78,6 @@ def test_fms_behaviour():
             pass
 
     class SimpleOneShotBehaviour(State):
-
         def __init__(self, id: int, **kwargs):
             super().__init__(**kwargs)
             self.id = id

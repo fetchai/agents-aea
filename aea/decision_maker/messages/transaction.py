@@ -23,7 +23,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, cast
 
-from aea.crypto.ledger_apis import SUPPORTED_LEDGER_APIS, SUPPORTED_CURRENCIES
+from aea.crypto.ledger_apis import SUPPORTED_CURRENCIES, SUPPORTED_LEDGER_APIS
 from aea.decision_maker.messages.base import InternalMessage
 from aea.mail.base import Address
 
@@ -215,7 +215,6 @@ class TransactionMessage(InternalMessage):
         :return: bool
         """
         try:
-
             assert isinstance(
                 self.performative, TransactionMessage.Performative
             ), "Performative is not of correct type."

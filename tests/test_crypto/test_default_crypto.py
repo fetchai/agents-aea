@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the crypto module."""
+
 import os
 from unittest import mock
 
@@ -25,6 +26,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 import aea.crypto.default
 from aea.crypto.default import DefaultCrypto, _load_pem_private_key_from_path
+
 from ..conftest import ROOT_DIR
 
 
@@ -38,7 +40,9 @@ def test_initialization_from_existing_private_key():
     assert private_key is not None, "The private key is not None after the loading!"
     c = DefaultCrypto(private_key_pem_path=PRIVATE_KEY_PEM_PATH)
 
-    expected_public_key = private_key.public_key().public_bytes(encoding=Encoding.PEM, format=PublicFormat.SubjectPublicKeyInfo)
+    expected_public_key = private_key.public_key().public_bytes(
+        encoding=Encoding.PEM, format=PublicFormat.SubjectPublicKeyInfo
+    )
     actual_public_key = c.public_key_pem
     assert expected_public_key == actual_public_key
 
@@ -63,20 +67,25 @@ def test_sign_data():
     c = DefaultCrypto(private_key_pem_path=PRIVATE_KEY_PEM_PATH)
     my_signature = c.sign_data(b"Hello")
     assert len(my_signature) > 0, "Signed data must not be none"
-    assert c.is_confirmed_integrity(b"Hello", my_signature, c.public_key), "The verification must be True"
+    assert c.is_confirmed_integrity(
+        b"Hello", my_signature, c.public_key
+    ), "The verification must be True"
     obj = DefaultCrypto(private_key_pem_path=PRIVATE_KEY_PEM_PATH)
 
-    # TODO:  I am not sure about this :)
-    assert type(obj._pvk_obj_to_pem(obj._private_key)) == bytes, "Must return the bytes for the .pem file!"
+    assert (
+        type(obj._pvk_obj_to_pem(obj._private_key)) == bytes
+    ), "Must return the bytes for the .pem file!"
 
 
 def test_sign_data_failure():
     """Test the sign message and the verification of the message failure."""
-    patch_logger_exception = mock.patch.object(aea.crypto.default.logger, 'exception')
+    patch_logger_exception = mock.patch.object(aea.crypto.default.logger, "exception")
     mocked_logger_exception = patch_logger_exception.__enter__()
     c = DefaultCrypto(private_key_pem_path=PRIVATE_KEY_PEM_PATH)
     my_signature = c.sign_data(b"Hello")
     assert len(my_signature) > 0, "Signed data must not be none"
-    c.is_confirmed_integrity(b"Hello", my_signature + b'something', c.public_key), "The verification must be True"
-    mocked_logger_exception.assert_called_with('')
+    c.is_confirmed_integrity(
+        b"Hello", my_signature + b"something", c.public_key
+    ), "The verification must be True"
+    mocked_logger_exception.assert_called_with("")
     mocked_logger_exception.__exit__()

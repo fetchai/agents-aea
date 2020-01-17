@@ -18,14 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """Base classes for TCP communication."""
+
 import logging
 import struct
 from abc import ABC, abstractmethod
-from asyncio import CancelledError, StreamWriter, StreamReader
+from asyncio import CancelledError, StreamReader, StreamWriter
 from typing import Optional, Set
 
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 
@@ -35,13 +36,15 @@ class TCPConnection(Connection, ABC):
 
     restricted_to_protocols = set()  # type: Set[str]
 
-    def __init__(self,
-                 address: Address,
-                 host: str,
-                 port: int,
-                 connection_id: str,
-                 restricted_to_protocols: Optional[Set[str]] = None,
-                 excluded_protocols: Optional[Set[str]] = None):
+    def __init__(
+        self,
+        address: Address,
+        host: str,
+        port: int,
+        connection_id: str,
+        restricted_to_protocols: Optional[Set[str]] = None,
+        excluded_protocols: Optional[Set[str]] = None,
+    ):
         """
         Initialize the TCP connection.
 
@@ -52,8 +55,11 @@ class TCPConnection(Connection, ABC):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the excluded protocols for this connection.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
-                         excluded_protocols=excluded_protocols)
+        super().__init__(
+            connection_id=connection_id,
+            restricted_to_protocols=restricted_to_protocols,
+            excluded_protocols=excluded_protocols,
+        )
         self.address = address
 
         self.host = host
@@ -116,7 +122,7 @@ class TCPConnection(Connection, ABC):
         nbytes_read = 0
         data = b""
         while nbytes_read < nbytes:
-            data += (await reader.read(nbytes - nbytes_read))
+            data += await reader.read(nbytes - nbytes_read)
             nbytes_read = len(data)
         return data
 

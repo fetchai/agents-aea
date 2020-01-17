@@ -19,17 +19,19 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping the helpers of public and private key cryptography."""
-import sys
+
 import logging
+import sys
+
+from eth_account import Account  # type: ignore
 
 from fetchai.ledger.crypto import Entity  # type: ignore
-from eth_account import Account  # type: ignore
 
 from aea.crypto.default import DefaultCrypto
 
-DEFAULT_PRIVATE_KEY_FILE = 'default_private_key.pem'
-FETCHAI_PRIVATE_KEY_FILE = 'fet_private_key.txt'
-ETHEREUM_PRIVATE_KEY_FILE = 'eth_private_key.txt'
+DEFAULT_PRIVATE_KEY_FILE = "default_private_key.pem"
+FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
+ETHEREUM_PRIVATE_KEY_FILE = "eth_private_key.txt"
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +47,9 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
     try:
         DefaultCrypto(private_key_pem_path=private_key_pem_path)
     except ValueError:
-        logger.error("This is not a valid private key file: '{}'".format(private_key_pem_path))
+        logger.error(
+            "This is not a valid private key file: '{}'".format(private_key_pem_path)
+        )
         sys.exit(1)
 
 
@@ -62,7 +66,9 @@ def _try_validate_fet_private_key_path(private_key_path: str) -> None:
             data = key.read()
             Entity.from_hex(data)
     except ValueError:
-        logger.error("This is not a valid private key file: '{}'".format(private_key_path))
+        logger.error(
+            "This is not a valid private key file: '{}'".format(private_key_path)
+        )
         sys.exit(1)
 
 
@@ -79,7 +85,9 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
             data = key.read()
             Account.from_key(data)
     except ValueError:
-        logger.error("This is not a valid private key file: '{}'".format(private_key_path))
+        logger.error(
+            "This is not a valid private key file: '{}'".format(private_key_path)
+        )
         sys.exit(1)
 
 
@@ -99,7 +107,9 @@ def _validate_private_key_path(private_key_path: str, ledger_id: str):
     elif ledger_id == "ethereum":
         _try_validate_ethereum_private_key_path(private_key_path)
     else:
-        raise ValueError("Ledger id {} is not valid.".format(repr(ledger_id)))  # pragma: no cover
+        raise ValueError(
+            "Ledger id {} is not valid.".format(repr(ledger_id))
+        )  # pragma: no cover
 
 
 def _create_default_private_key() -> None:

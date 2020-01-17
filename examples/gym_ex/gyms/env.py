@@ -22,9 +22,10 @@
 
 from typing import List, Tuple
 
-import numpy as np
 import gym
 from gym import spaces  # type: ignore
+
+import numpy as np
 
 BanditId = int
 Price = int
@@ -41,7 +42,12 @@ Feedback = Tuple[Observation, Reward, Done, Info]
 class BanditEnv(gym.Env):
     """Base environment for n-armed bandits."""
 
-    def __init__(self, nb_bandits: int, nb_prices_per_bandit: int, reward_params: List[Tuple[float, int]]):
+    def __init__(
+        self,
+        nb_bandits: int,
+        nb_prices_per_bandit: int,
+        reward_params: List[Tuple[float, int]],
+    ):
         """
         Initialize the environment.
 
@@ -53,9 +59,15 @@ class BanditEnv(gym.Env):
         self.nb_prices_per_bandit = nb_prices_per_bandit
         self.reward_params = reward_params
 
-        self.action_space = spaces.Tuple((spaces.Discrete(self.nb_bandits), spaces.Discrete(
-            self.nb_prices_per_bandit)))  # an action is specifying one of nb_bandits and specifying a price for the bandit.
-        self.observation_space = spaces.Space()  # None type space. agents only get a reward back.
+        self.action_space = spaces.Tuple(
+            (
+                spaces.Discrete(self.nb_bandits),
+                spaces.Discrete(self.nb_prices_per_bandit),
+            )
+        )  # an action is specifying one of nb_bandits and specifying a price for the bandit.
+        self.observation_space = (
+            spaces.Space()
+        )  # None type space. agents only get a reward back.
 
         self.seed()  # seed environment randomness
 
@@ -75,7 +87,7 @@ class BanditEnv(gym.Env):
         :param action: the id of the bandit chosen
         :return: a Tuple containing the Feedback of Observation, Reward, Done and Info
         """
-        assert self.action_space.contains(action), 'This is not a valid action.'
+        assert self.action_space.contains(action), "This is not a valid action."
 
         bandit = action[0]
         offered_price = action[1]
@@ -85,7 +97,9 @@ class BanditEnv(gym.Env):
         done = False
         info = {}  # type: Info
 
-        cutoff_price = np.random.normal(self.reward_params[bandit][0], self.reward_params[bandit][1])
+        cutoff_price = np.random.normal(
+            self.reward_params[bandit][0], self.reward_params[bandit][1]
+        )
 
         if offered_price > cutoff_price:
             reward = 1.0
@@ -94,7 +108,7 @@ class BanditEnv(gym.Env):
 
         return observation, reward, done, info
 
-    def render(self, mode: str = 'human', close: int = False) -> None:
+    def render(self, mode: str = "human", close: int = False) -> None:
         """
         Render the environment to the screen.
 
@@ -108,7 +122,13 @@ class BanditEnv(gym.Env):
 class BanditNArmedRandom(BanditEnv):
     """N-armed bandit randomly initialized."""
 
-    def __init__(self, nb_bandits: int = 10, nb_prices_per_bandit: int = 100, stdev: int = 1, seed: int = 42):
+    def __init__(
+        self,
+        nb_bandits: int = 10,
+        nb_prices_per_bandit: int = 100,
+        stdev: int = 1,
+        seed: int = 42,
+    ):
         """
         Initialize the environment.
 
@@ -126,5 +146,9 @@ class BanditNArmedRandom(BanditEnv):
             mean = np.random.uniform(0, nb_prices_per_bandit)
             reward_params.append((mean, stdev))  # type: ignore
 
-        BanditEnv.__init__(self, nb_bandits=nb_bandits, nb_prices_per_bandit=nb_prices_per_bandit,
-                           reward_params=reward_params)
+        BanditEnv.__init__(
+            self,
+            nb_bandits=nb_bandits,
+            nb_prices_per_bandit=nb_prices_per_bandit,
+            reward_params=reward_params,
+        )

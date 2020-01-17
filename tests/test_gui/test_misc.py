@@ -18,9 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea gui` sub-commands."""
-from flask import Flask
 
 import unittest.mock
+
+from flask import Flask
 
 import aea.cli_gui
 
@@ -33,7 +34,7 @@ def test_home_page_exits():
 
     # sends HTTP GET request to the application
     # on the specified path
-    result = app.get('/')
+    result = app.get("/")
 
     # assert the status code of the response
     assert result.status_code == 200
@@ -46,7 +47,7 @@ def test_icon():
 
     # sends HTTP GET request to the application
     # on the specified path
-    result = app.get('/favicon.ico')
+    result = app.get("/favicon.ico")
 
     # assert the status code of the response
     assert result.status_code == 200
@@ -58,7 +59,7 @@ def test_js():
 
     # sends HTTP GET request to the application
     # on the specified path
-    result = app.get('/static/js/home.js')
+    result = app.get("/static/js/home.js")
 
     # assert the status code of the response
     assert result.status_code == 200
@@ -67,5 +68,5 @@ def test_js():
 def test_run_app():
     """Test that running the app in non-test mode works."""
     with unittest.mock.patch("subprocess.call", return_value=None):
-        with unittest.mock.patch.object(Flask, 'run', return_value=None):
+        with unittest.mock.patch.object(Flask, "run", return_value=None):
             aea.cli_gui.run(8080)

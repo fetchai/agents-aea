@@ -26,8 +26,8 @@ from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 class AgentConfigMock:
     """An object to mock Agent config."""
 
-    registry_path = 'registry'
-    name = 'name'
+    registry_path = "registry"
+    name = "name"
 
     connections: List[str] = []
     protocols: List[str] = []
@@ -37,7 +37,7 @@ class AgentConfigMock:
 class ContextMock:
     """An object to mock Context."""
 
-    cwd = 'cwd'
+    cwd = "cwd"
     agent_config = AgentConfigMock()
 
 
@@ -46,9 +46,7 @@ class PublicIdMock:
 
     DEFAULT_VERSION = DEFAULT_TESTING_VERSION
 
-    def __init__(
-        self, name='name', author='author', version=DEFAULT_TESTING_VERSION
-    ):
+    def __init__(self, name="name", author="author", version=DEFAULT_TESTING_VERSION):
         """Init the Public ID mock object."""
         self.name = name
         self.author = author
