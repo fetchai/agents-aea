@@ -39,11 +39,15 @@ class TwoPartyNegotiationMessage(Message):
         message_id: int,
         target: int,
         performative: str,
-        **kwargs
+        **kwargs,
     ):
         """Initialise."""
         super().__init__(
-            message_id=message_id, target=target, performative=performative, **kwargs
+            dialogue_reference=dialogue_reference,
+            message_id=message_id,
+            target=target,
+            performative=performative,
+            **kwargs,
         )
         assert self._check_consistency()
 

@@ -208,7 +208,7 @@ class ProtocolGenerator:
         cls_str += "            message_id=message_id,\n"
         cls_str += "            target=target,\n"
         cls_str += "            performative=performative,\n"
-        cls_str += "            **kwargs\n"
+        cls_str += "            **kwargs,\n"
         cls_str += "        )\n"
         cls_str += "        assert self._check_consistency()\n\n"
 
@@ -300,7 +300,8 @@ class ProtocolGenerator:
         cls_str += "            assert (\n"
         cls_str += "                self.performative in self.valid_performatives\n"
         cls_str += "            ), \"'{}' is not in the list of valid performativs: {}\".format(\n"
-        cls_str += "                self.performative, self.valid_performatives)\n\n"
+        cls_str += "                self.performative, self.valid_performatives\n"
+        cls_str += "            )\n\n"
         cls_str += "            # Check correct contents\n"
         cls_str += (
             "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
@@ -336,7 +337,8 @@ class ProtocolGenerator:
         cls_str += "                assert (\n"
         cls_str += "                    0 < self.target < self.message_id\n"
         cls_str += '                ), "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(\n'
-        cls_str += "                    self.target)\n"
+        cls_str += "                    self.target\n"
+        cls_str += "                )\n"
         cls_str += "        except (AssertionError, ValueError, KeyError) as e:\n"
         cls_str += "            print(str(e))\n"
         cls_str += "            return False\n\n"
