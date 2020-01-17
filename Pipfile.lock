@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "96bd582674256ea11e38e329b36a241e3ef14a3291f6fece63b559e5ca6c3b3e"
+            "sha256": "a6982276c92c0ade47fde433670ba529a0d2f190c09804b43839b6d8d6924a1d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -818,6 +818,14 @@
             ],
             "index": "pypi",
             "version": "==3.7.9"
+        },
+        "flake8-bugbear": {
+            "hashes": [
+                "sha256:09a12ebe427279cf7aa9445114a68d83a6f0ffccdd4105368d6e85373541eb8f",
+                "sha256:bc4a35972342256abddf84591fbb82f7360981db1b71e39a8ba0400e906239cf"
+            ],
+            "index": "pypi",
+            "version": "==20.1.2"
         },
         "flake8-docstrings": {
             "hashes": [
