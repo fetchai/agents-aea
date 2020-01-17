@@ -43,6 +43,11 @@ from aea.configurations.base import (
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.base import (  # noqa: F401
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 from aea.configurations.loader import ConfigLoader
 
 

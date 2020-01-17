@@ -37,6 +37,11 @@ from aea.cli.common import (
     try_to_load_agent_config,
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.configurations.base import (  # noqa: F401
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
 
 @click.group()
