@@ -29,8 +29,7 @@ class InternalMessage:
 
     protocol_id = "internal"
 
-    def __init__(self, body: Optional[Dict] = None,
-                 **kwargs):
+    def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
 
@@ -87,10 +86,17 @@ class InternalMessage:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, InternalMessage) \
-            and self.body == other.body \
-
+        return isinstance(other, InternalMessage) and self.body == other.body
 
     def __str__(self):
         """Get the string representation of the message."""
-        return "InternalMessage(" + " ".join(map(lambda key_value: str(key_value[0]) + "=" + str(key_value[1]), self.body.items())) + ")"
+        return (
+            "InternalMessage("
+            + " ".join(
+                map(
+                    lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
+                    self.body.items(),
+                )
+            )
+            + ")"
+        )

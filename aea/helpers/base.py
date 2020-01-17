@@ -43,11 +43,11 @@ def _get_module(spec):
 
 def locate(path):
     """Locate an object by name or dotted path, importing as necessary."""
-    parts = [part for part in path.split('.') if part]
+    parts = [part for part in path.split(".") if part]
     module, n = None, 0
     while n < len(parts):
-        file_location = os.path.join(*parts[:n + 1])
-        spec_name = '.'.join(parts[:n + 1])
+        file_location = os.path.join(*parts[: n + 1])
+        spec_name = ".".join(parts[: n + 1])
         module_location = os.path.join(file_location, "__init__.py")
         spec = importlib.util.spec_from_file_location(spec_name, module_location)
         logger.debug("Trying to import {}".format(module_location))
@@ -108,7 +108,9 @@ def import_module(dotted_path: str, module_obj) -> None:
     sys.modules[dotted_path] = module_obj
 
 
-def load_agent_component_package(item_type: str, item_name: str, author_name: str, directory: os.PathLike):
+def load_agent_component_package(
+    item_type: str, item_name: str, author_name: str, directory: os.PathLike
+):
     """
     Load a Python package associated to a component..
 
@@ -124,7 +126,9 @@ def load_agent_component_package(item_type: str, item_name: str, author_name: st
     return load_module(dotted_path, filepath)
 
 
-def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, author_name: str, module_obj) -> None:
+def add_agent_component_module_to_sys_modules(
+    item_type: str, item_name: str, author_name: str, module_obj
+) -> None:
     """
     Add an agent component module to sys.modules.
 
@@ -139,7 +143,9 @@ def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, au
     import_module(dotted_path, module_obj)
 
 
-def generate_fingerprint(author: str, package_name: str, version: str, nonce: Optional[int] = None) -> str:
+def generate_fingerprint(
+    author: str, package_name: str, version: str, nonce: Optional[int] = None
+) -> str:
     """Generate a unique id for the package.
 
     :param author: The author of the package.
@@ -149,6 +155,7 @@ def generate_fingerprint(author: str, package_name: str, version: str, nonce: Op
            (Can be used with different configuration)
     """
     import hashlib
+
     if nonce is not None:
         string_for_hash = "".join([author, package_name, version, str(nonce)])
     else:

@@ -25,7 +25,7 @@ import pprint
 import sys
 from pathlib import Path
 
-from fetchai.ledger.api import LedgerApi        # type: ignore
+from fetchai.ledger.api import LedgerApi  # type: ignore
 from fetchai.ledger.crypto import Address, Entity  # type: ignore
 
 
@@ -54,17 +54,35 @@ def generate_fetchai_wealth(arguments: argparse.Namespace) -> None:
     api.sync(api.tokens.wealth(entity_to_generate_wealth, arguments.amount))
     address = Address(entity_to_generate_wealth)
     balance = api.tokens.balance(address)
-    logging.info('The new balance of the address {} is : {} FET'.format(address, balance))
+    logging.info(
+        "The new balance of the address {} is : {} FET".format(address, balance)
+    )
 
 
 def parse_arguments():
     """Arguments parsing."""
     parser = argparse.ArgumentParser("wealth_creation")
-    parser.add_argument("--addr", type=str, default="127.0.0.1", help="The addr for the ledger api")
-    parser.add_argument("--port", type=int, default=8000, help="The port for the ledger api")
-    parser.add_argument("--amount", type=int, default=10, help="The amount we want to generate to the address")
-    parser.add_argument("--private-key", type=str, default=None, help="The path to the private key file.")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Increase verbosity.")
+    parser.add_argument(
+        "--addr", type=str, default="127.0.0.1", help="The addr for the ledger api"
+    )
+    parser.add_argument(
+        "--port", type=int, default=8000, help="The port for the ledger api"
+    )
+    parser.add_argument(
+        "--amount",
+        type=int,
+        default=10,
+        help="The amount we want to generate to the address",
+    )
+    parser.add_argument(
+        "--private-key",
+        type=str,
+        default=None,
+        help="The path to the private key file.",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Increase verbosity."
+    )
     arguments = parser.parse_args()
 
     return arguments
@@ -73,7 +91,9 @@ def parse_arguments():
 if __name__ == "__main__":
     arguments = parse_arguments()
     if arguments.verbose:
-        logging.basicConfig(format="[%(asctime)s][%(levelname)s] %(message)s", level=logging.DEBUG)
+        logging.basicConfig(
+            format="[%(asctime)s][%(levelname)s] %(message)s", level=logging.DEBUG
+        )
     else:
         logging.basicConfig(format="%(message)s", level=logging.INFO)
 

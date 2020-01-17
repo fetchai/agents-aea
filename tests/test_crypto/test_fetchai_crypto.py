@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -32,22 +31,30 @@ PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/fet_private_key.txt")
 def test_initialisation():
     """Test the initialisation of the the fet crypto."""
     fet_crypto = FetchAICrypto()
-    assert fet_crypto.public_key is not None, "Public key must not be None after Initialisation"
-    assert fet_crypto.address is not None, "Address must not be None after Initialisation"
-    assert FetchAICrypto(PRIVATE_KEY_PATH), "Couldn't load the fet private_key from the path!"
+    assert (
+        fet_crypto.public_key is not None
+    ), "Public key must not be None after Initialisation"
+    assert (
+        fet_crypto.address is not None
+    ), "Address must not be None after Initialisation"
+    assert FetchAICrypto(
+        PRIVATE_KEY_PATH
+    ), "Couldn't load the fet private_key from the path!"
     assert FetchAICrypto("./"), "Couldn't create a new entity for the given path!"
 
 
 def test_get_address():
     """Test the get address."""
     fet_crypto = FetchAICrypto()
-    assert fet_crypto.get_address_from_public_key(fet_crypto.public_key) is not None, "Get address must work"
+    assert (
+        fet_crypto.get_address_from_public_key(fet_crypto.public_key) is not None
+    ), "Get address must work"
 
 
 def test_sign_transaction():
     """Test the signing process."""
     fet_crypto = FetchAICrypto()
-    signature = fet_crypto.sign_transaction(tx_hash=b'HelloWorld')
+    signature = fet_crypto.sign_transaction(tx_hash=b"HelloWorld")
     assert len(signature) > 1, "The len(signature) must be more than 0"
 
 

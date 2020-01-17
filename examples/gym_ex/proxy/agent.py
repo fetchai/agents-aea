@@ -31,7 +31,9 @@ from aea.crypto.wallet import DEFAULT, Wallet
 from aea.helpers.base import locate
 from aea.mail.base import Envelope
 
-sys.modules["packages.fetchai.connections.gym"] = locate("packages.fetchai.connections.gym")
+sys.modules["packages.fetchai.connections.gym"] = locate(
+    "packages.fetchai.connections.gym"
+)
 from packages.fetchai.connections.gym.connection import GymConnection  # noqa: E402
 
 
@@ -48,7 +50,12 @@ class ProxyAgent(Agent):
         :return: None
         """
         wallet = Wallet({DEFAULT: None})
-        super().__init__(name, [GymConnection(wallet.addresses.get(DEFAULT), gym_env)], wallet, timeout=0)
+        super().__init__(
+            name,
+            [GymConnection(wallet.addresses.get(DEFAULT), gym_env)],
+            wallet,
+            timeout=0,
+        )
         self.proxy_env_queue = proxy_env_queue
 
     def setup(self) -> None:

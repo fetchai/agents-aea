@@ -25,11 +25,20 @@ from typing import Dict, List, Union, cast
 
 from web3 import Web3
 
-from aea.helpers.search.models import Attribute, Constraint, ConstraintExpr, ConstraintType, DataModel, Description, Or, Query
+from aea.helpers.search.models import (
+    Attribute,
+    Constraint,
+    ConstraintExpr,
+    ConstraintType,
+    DataModel,
+    Description,
+    Or,
+    Query,
+)
 from aea.mail.base import Address
 
-SUPPLY_DATAMODEL_NAME = 'supply'
-DEMAND_DATAMODEL_NAME = 'demand'
+SUPPLY_DATAMODEL_NAME = "supply"
+DEMAND_DATAMODEL_NAME = "demand"
 
 
 def _build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
@@ -42,19 +51,45 @@ def _build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
 
     :return: the data model.
     """
-    good_quantities_attributes = [Attribute(good_id, int, True, "A good on offer.") for good_id in good_ids]
-    currency_attribute = Attribute('currency_id', str, True, "The currency for pricing and transacting the goods.")
-    price_attribute = Attribute('price', int, False, "The price of the goods in the currency.")
-    seller_tx_fee_attribute = Attribute('seller_tx_fee', int, False, "The transaction fee payable by the seller in the currency.")
-    buyer_tx_fee_attribute = Attribute('buyer_tx_fee', int, False, "The transaction fee payable by the buyer in the currency.")
-    tx_nonce_attribute = Attribute('tx_nonce', str, False, "The nonce to distinguish identical descriptions.")
+    good_quantities_attributes = [
+        Attribute(good_id, int, True, "A good on offer.") for good_id in good_ids
+    ]
+    currency_attribute = Attribute(
+        "currency_id", str, True, "The currency for pricing and transacting the goods."
+    )
+    price_attribute = Attribute(
+        "price", int, False, "The price of the goods in the currency."
+    )
+    seller_tx_fee_attribute = Attribute(
+        "seller_tx_fee",
+        int,
+        False,
+        "The transaction fee payable by the seller in the currency.",
+    )
+    buyer_tx_fee_attribute = Attribute(
+        "buyer_tx_fee",
+        int,
+        False,
+        "The transaction fee payable by the buyer in the currency.",
+    )
+    tx_nonce_attribute = Attribute(
+        "tx_nonce", str, False, "The nonce to distinguish identical descriptions."
+    )
     description = SUPPLY_DATAMODEL_NAME if is_supply else DEMAND_DATAMODEL_NAME
-    attributes = good_quantities_attributes + [currency_attribute, price_attribute, seller_tx_fee_attribute, buyer_tx_fee_attribute, tx_nonce_attribute]
+    attributes = good_quantities_attributes + [
+        currency_attribute,
+        price_attribute,
+        seller_tx_fee_attribute,
+        buyer_tx_fee_attribute,
+        tx_nonce_attribute,
+    ]
     data_model = DataModel(description, attributes)
     return data_model
 
 
-def build_goods_description(good_id_to_quantities: Dict[str, int], currency_id: str, is_supply: bool) -> Description:
+def build_goods_description(
+    good_id_to_quantities: Dict[str, int], currency_id: str, is_supply: bool
+) -> Description:
     """
     Get the service description (good quantities supplied or demanded and their price).
 
@@ -64,14 +99,18 @@ def build_goods_description(good_id_to_quantities: Dict[str, int], currency_id: 
 
     :return: the description to advertise on the Service Directory.
     """
-    data_model = _build_goods_datamodel(good_ids=list(good_id_to_quantities.keys()), is_supply=is_supply)
+    data_model = _build_goods_datamodel(
+        good_ids=list(good_id_to_quantities.keys()), is_supply=is_supply
+    )
     values = cast(Dict[str, Union[int, str]], good_id_to_quantities)
-    values.update({'currency_id': currency_id})
+    values.update({"currency_id": currency_id})
     desc = Description(values, data_model=data_model)
     return desc
 
 
-def build_goods_query(good_ids: List[str], currency_id: str, is_searching_for_sellers: bool) -> Query:
+def build_goods_query(
+    good_ids: List[str], currency_id: str, is_searching_for_sellers: bool
+) -> Query:
     """
     Build buyer or seller search query.
 
@@ -92,9 +131,11 @@ def build_goods_query(good_ids: List[str], currency_id: str, is_searching_for_se
 
     :return: the query
     """
-    data_model = _build_goods_datamodel(good_ids=good_ids, is_supply=is_searching_for_sellers)
+    data_model = _build_goods_datamodel(
+        good_ids=good_ids, is_supply=is_searching_for_sellers
+    )
     constraints = [Constraint(good_id, ConstraintType(">=", 1)) for good_id in good_ids]
-    constraints.append(Constraint('currency_id', ConstraintType("==", currency_id)))
+    constraints.append(Constraint("currency_id", ConstraintType("==", currency_id)))
     constraint_expr = cast(List[ConstraintExpr], constraints)
 
     if len(good_ids) > 1:
@@ -104,13 +145,15 @@ def build_goods_query(good_ids: List[str], currency_id: str, is_searching_for_se
     return query
 
 
-def _get_hash(tx_sender_addr: Address,
-              tx_counterparty_addr: Address,
-              good_ids: List[int],
-              sender_supplied_quantities: List[int],
-              counterparty_supplied_quantities: List[int],
-              tx_amount: int,
-              tx_nonce: int) -> bytes:
+def _get_hash(
+    tx_sender_addr: Address,
+    tx_counterparty_addr: Address,
+    good_ids: List[int],
+    sender_supplied_quantities: List[int],
+    counterparty_supplied_quantities: List[int],
+    tx_amount: int,
+    tx_nonce: int,
+) -> bytes:
     """
     Generate a hash from transaction information.
 
@@ -123,21 +166,35 @@ def _get_hash(tx_sender_addr: Address,
     :param tx_nonce: the nonce of the transaction
     :return: the hash
     """
-    aggregate_hash = Web3.keccak(b''.join(
-        [good_ids[0].to_bytes(32, 'big'), sender_supplied_quantities[0].to_bytes(32, 'big'), counterparty_supplied_quantities[0].to_bytes(32, 'big')]))
+    aggregate_hash = Web3.keccak(
+        b"".join(
+            [
+                good_ids[0].to_bytes(32, "big"),
+                sender_supplied_quantities[0].to_bytes(32, "big"),
+                counterparty_supplied_quantities[0].to_bytes(32, "big"),
+            ]
+        )
+    )
     for i in range(len(good_ids)):
         if not i == 0:
-            aggregate_hash = Web3.keccak(b''.join(
-                [aggregate_hash, good_ids[i].to_bytes(32, 'big'), sender_supplied_quantities[i].to_bytes(32, 'big'),
-                 counterparty_supplied_quantities[i].to_bytes(32, 'big')]))
+            aggregate_hash = Web3.keccak(
+                b"".join(
+                    [
+                        aggregate_hash,
+                        good_ids[i].to_bytes(32, "big"),
+                        sender_supplied_quantities[i].to_bytes(32, "big"),
+                        counterparty_supplied_quantities[i].to_bytes(32, "big"),
+                    ]
+                )
+            )
 
     m_list = []  # type: List[bytes]
-    m_list.append(tx_sender_addr.encode('utf-8'))
-    m_list.append(tx_counterparty_addr.encode('utf-8'))
+    m_list.append(tx_sender_addr.encode("utf-8"))
+    m_list.append(tx_counterparty_addr.encode("utf-8"))
     m_list.append(aggregate_hash)
-    m_list.append(tx_amount.to_bytes(32, 'big'))
-    m_list.append(tx_nonce.to_bytes(32, 'big'))
-    return Web3.keccak(b''.join(m_list))
+    m_list.append(tx_amount.to_bytes(32, "big"))
+    m_list.append(tx_nonce.to_bytes(32, "big"))
+    return Web3.keccak(b"".join(m_list))
 
 
 def _recover_uid(good_id) -> int:
@@ -147,22 +204,27 @@ def _recover_uid(good_id) -> int:
     :param int good_id: the good id
     :return: the uid
     """
-    uid = int(good_id.split('_')[-2])
+    uid = int(good_id.split("_")[-2])
     return uid
 
 
-def tx_hash_from_values(tx_sender_addr: str,
-                        tx_counterparty_addr: str,
-                        tx_quantities_by_good_id: Dict[str, int],
-                        tx_amount_by_currency_id: Dict[str, int],
-                        tx_nonce: int) -> bytes:
+def tx_hash_from_values(
+    tx_sender_addr: str,
+    tx_counterparty_addr: str,
+    tx_quantities_by_good_id: Dict[str, int],
+    tx_amount_by_currency_id: Dict[str, int],
+    tx_nonce: int,
+) -> bytes:
     """
     Get the hash for a transaction based on the transaction message.
 
     :param tx_message: the transaction message
     :return: the hash
     """
-    converted = {_recover_uid(good_id): quantity for good_id, quantity in tx_quantities_by_good_id.items()}
+    converted = {
+        _recover_uid(good_id): quantity
+        for good_id, quantity in tx_quantities_by_good_id.items()
+    }
     ordered = collections.OrderedDict(sorted(converted.items()))
     good_uids = []  # type: List[int]
     sender_supplied_quantities = []  # type: List[int]
@@ -178,11 +240,13 @@ def tx_hash_from_values(tx_sender_addr: str,
     assert len(tx_amount_by_currency_id) == 1
     for currency_id, amount in tx_amount_by_currency_id.items():
         tx_amount = amount if amount >= 0 else 0
-    tx_hash = _get_hash(tx_sender_addr=tx_sender_addr,
-                        tx_counterparty_addr=tx_counterparty_addr,
-                        good_ids=good_uids,
-                        sender_supplied_quantities=sender_supplied_quantities,
-                        counterparty_supplied_quantities=counterparty_supplied_quantities,
-                        tx_amount=tx_amount,
-                        tx_nonce=tx_nonce)
+    tx_hash = _get_hash(
+        tx_sender_addr=tx_sender_addr,
+        tx_counterparty_addr=tx_counterparty_addr,
+        good_ids=good_uids,
+        sender_supplied_quantities=sender_supplied_quantities,
+        counterparty_supplied_quantities=counterparty_supplied_quantities,
+        tx_amount=tx_amount,
+        tx_nonce=tx_nonce,
+    )
     return tx_hash

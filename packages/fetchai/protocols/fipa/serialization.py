@@ -103,7 +103,10 @@ class FIPASerializer(Serializer):
         fipa_pb = fipa_pb2.FIPAMessage()
         fipa_pb.ParseFromString(obj)
         message_id = fipa_pb.message_id
-        dialogue_reference = (fipa_pb.dialogue_starter_reference, fipa_pb.dialogue_responder_reference)
+        dialogue_reference = (
+            fipa_pb.dialogue_starter_reference,
+            fipa_pb.dialogue_responder_reference,
+        )
         target = fipa_pb.target
 
         performative = fipa_pb.WhichOneof("performative")
@@ -132,10 +135,10 @@ class FIPASerializer(Serializer):
             pass
         elif performative_id == FIPAMessage.Performative.ACCEPT_W_INFORM:
             info = pickle.loads(fipa_pb.accept_w_inform.bytes)
-            performative_content['info'] = info
+            performative_content["info"] = info
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             info = pickle.loads(fipa_pb.match_accept_w_inform.bytes)
-            performative_content['info'] = info
+            performative_content["info"] = info
         elif performative_id == FIPAMessage.Performative.DECLINE:
             pass
         elif performative_id == FIPAMessage.Performative.INFORM:
@@ -144,5 +147,10 @@ class FIPASerializer(Serializer):
         else:
             raise ValueError("Performative not valid: {}.".format(performative))
 
-        return FIPAMessage(message_id=message_id, dialogue_reference=dialogue_reference, target=target,
-                           performative=performative, **performative_content)
+        return FIPAMessage(
+            message_id=message_id,
+            dialogue_reference=dialogue_reference,
+            target=target,
+            performative=performative,
+            **performative_content
+        )

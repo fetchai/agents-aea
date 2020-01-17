@@ -56,32 +56,46 @@ class TestGymSkill:
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
-        packages_src = os.path.join(self.cwd, 'packages')
-        packages_dst = os.path.join(os.getcwd(), 'packages')
+        packages_src = os.path.join(self.cwd, "packages")
+        packages_dst = os.path.join(os.getcwd(), "packages")
         shutil.copytree(packages_src, packages_dst)
 
         # create agent
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", self.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         agent_dir_path = os.path.join(self.t, self.agent_name)
         os.chdir(agent_dir_path)
 
         # add packages and install dependencies
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/gym:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "skill", "fetchai/gym:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/gym:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/gym:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # add gyms folder from examples
-        gyms_src = os.path.join(self.cwd, 'examples', 'gym_ex', 'gyms')
-        gyms_dst = os.path.join(self.t, self.agent_name, 'gyms')
+        gyms_src = os.path.join(self.cwd, "examples", "gym_ex", "gyms")
+        gyms_dst = os.path.join(self.t, self.agent_name, "gyms")
         shutil.copytree(gyms_src, gyms_dst)
 
         # change config file of gym connection
-        file_src = os.path.join(ROOT_DIR, 'tests', 'data', 'gym-connection.yaml')
-        file_dst = os.path.join(self.t, self.agent_name, 'connections', 'gym', 'connection.yaml')
+        file_src = os.path.join(ROOT_DIR, "tests", "data", "gym-connection.yaml")
+        file_dst = os.path.join(
+            self.t, self.agent_name, "connections", "gym", "connection.yaml"
+        )
         shutil.copyfile(file_src, file_dst)
 
         # change number of training steps
@@ -90,16 +104,11 @@ class TestGymSkill:
         skill_config.tasks.read("gym").args["nb_steps"] = 100
         yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
 
-        process = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            "--connections",
-            "gym"
-        ],
+        process = subprocess.Popen(
+            [sys.executable, "-m", "aea.cli", "run", "--connections", "gym"],
             stdout=subprocess.PIPE,
-            env=os.environ.copy())
+            env=os.environ.copy(),
+        )
 
         # check the gym run ends
 
@@ -115,7 +124,9 @@ class TestGymSkill:
             process.wait(2)
 
         os.chdir(self.t)
-        self.result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False)
+        self.result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", self.agent_name], standalone_mode=False
+        )
 
     @classmethod
     def teardown_class(cls):

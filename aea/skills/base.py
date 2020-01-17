@@ -29,14 +29,25 @@ from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, cast
 
-from aea.configurations.base import BehaviourConfig, DEFAULT_SKILL_CONFIG_FILE, HandlerConfig, ProtocolId, SharedClassConfig, SkillConfig, \
-    TaskConfig
+from aea.configurations.base import (
+    BehaviourConfig,
+    DEFAULT_SKILL_CONFIG_FILE,
+    HandlerConfig,
+    ProtocolId,
+    SharedClassConfig,
+    SkillConfig,
+    TaskConfig,
+)
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.helpers.base import add_agent_component_module_to_sys_modules, load_agent_component_package, load_module
+from aea.helpers.base import (
+    add_agent_component_module_to_sys_modules,
+    load_agent_component_package,
+    load_module,
+)
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
 
@@ -166,7 +177,7 @@ class Behaviour(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments
         """
-        self._context = kwargs.pop('skill_context')  # type: SkillContext
+        self._context = kwargs.pop("skill_context")  # type: SkillContext
         self._config = kwargs
 
     @property
@@ -212,7 +223,12 @@ class Behaviour(ABC):
         self.act()
 
     @classmethod
-    def parse_module(cls, path: str, behaviours_configs: Dict[str, BehaviourConfig], skill_context: SkillContext) -> Dict[str, 'Behaviour']:
+    def parse_module(
+        cls,
+        path: str,
+        behaviours_configs: Dict[str, BehaviourConfig],
+        skill_context: SkillContext,
+    ) -> Dict[str, "Behaviour"]:
         """
         Parse the behaviours module.
 
@@ -224,20 +240,28 @@ class Behaviour(ABC):
         behaviours = {}
         behaviour_module = load_module("behaviours", Path(path))
         classes = inspect.getmembers(behaviour_module, inspect.isclass)
-        behaviours_classes = list(filter(lambda x: re.match("\\w+Behaviour", x[0]), classes))
+        behaviours_classes = list(
+            filter(lambda x: re.match("\\w+Behaviour", x[0]), classes)
+        )
 
         name_to_class = dict(behaviours_classes)
         for behaviour_id, behaviour_config in behaviours_configs.items():
             behaviour_class_name = cast(str, behaviour_config.class_name)
             logger.debug("Processing behaviour {}".format(behaviour_class_name))
-            assert behaviour_id.isidentifier(), "'{}' is not a valid identifier.".format(behaviour_id)
+            assert (
+                behaviour_id.isidentifier()
+            ), "'{}' is not a valid identifier.".format(behaviour_id)
             behaviour_class = name_to_class.get(behaviour_class_name, None)
             if behaviour_class is None:
-                logger.warning("Behaviour '{}' cannot be found.".format(behaviour_class_name))
+                logger.warning(
+                    "Behaviour '{}' cannot be found.".format(behaviour_class_name)
+                )
             else:
                 args = behaviour_config.args
-                assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-                args['skill_context'] = skill_context
+                assert (
+                    "skill_context" not in args.keys()
+                ), "'skill_context' is a reserved key. Please rename your arguments!"
+                args["skill_context"] = skill_context
                 behaviour = behaviour_class(**args)
                 behaviours[behaviour_id] = behaviour
 
@@ -256,7 +280,7 @@ class Handler(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments
         """
-        self._context = kwargs.pop('skill_context')  # type: SkillContext
+        self._context = kwargs.pop("skill_context")  # type: SkillContext
         self._config = kwargs
 
     @property
@@ -295,7 +319,12 @@ class Handler(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, handler_configs: Dict[str, HandlerConfig], skill_context: SkillContext) -> Dict[str, 'Handler']:
+    def parse_module(
+        cls,
+        path: str,
+        handler_configs: Dict[str, HandlerConfig],
+        skill_context: SkillContext,
+    ) -> Dict[str, "Handler"]:
         """
         Parse the handler module.
 
@@ -315,14 +344,20 @@ class Handler(ABC):
         for handler_id, handler_config in handler_configs.items():
             handler_class_name = cast(str, handler_config.class_name)
             logger.debug("Processing handler {}".format(handler_class_name))
-            assert handler_id.isidentifier(), "'{}' is not a valid identifier.".format(handler_id)
+            assert handler_id.isidentifier(), "'{}' is not a valid identifier.".format(
+                handler_id
+            )
             handler_class = name_to_class.get(handler_class_name, None)
             if handler_class is None:
-                logger.warning("Handler '{}' cannot be found.".format(handler_class_name))
+                logger.warning(
+                    "Handler '{}' cannot be found.".format(handler_class_name)
+                )
             else:
                 args = handler_config.args
-                assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-                args['skill_context'] = skill_context
+                assert (
+                    "skill_context" not in args.keys()
+                ), "'skill_context' is a reserved key. Please rename your arguments!"
+                args["skill_context"] = skill_context
                 handler = handler_class(**args)
                 handlers[handler_id] = handler
 
@@ -339,7 +374,7 @@ class Task(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments.
         """
-        self._context = kwargs.pop('skill_context')  # type: SkillContext
+        self._context = kwargs.pop("skill_context")  # type: SkillContext
         self._config = kwargs
         self.completed = False
 
@@ -378,7 +413,12 @@ class Task(ABC):
         """
 
     @classmethod
-    def parse_module(cls, path: str, tasks_configs: Dict[str, TaskConfig], skill_context: SkillContext) -> Dict[str, 'Task']:
+    def parse_module(
+        cls,
+        path: str,
+        tasks_configs: Dict[str, TaskConfig],
+        skill_context: SkillContext,
+    ) -> Dict[str, "Task"]:
         """
         Parse the tasks module.
 
@@ -396,14 +436,18 @@ class Task(ABC):
         for task_id, task_config in tasks_configs.items():
             task_class_name = task_config.class_name
             logger.debug("Processing task {}".format(task_class_name))
-            assert task_id.isidentifier(), "'{}' is not a valid identifier.".format(task_id)
+            assert task_id.isidentifier(), "'{}' is not a valid identifier.".format(
+                task_id
+            )
             task_class = name_to_class.get(task_class_name, None)
             if task_class is None:
                 logger.warning("Task '{}' cannot be found.".format(task_class_name))
             else:
                 args = task_config.args
-                assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-                args['skill_context'] = skill_context
+                assert (
+                    "skill_context" not in args.keys()
+                ), "'skill_context' is a reserved key. Please rename your arguments!"
+                args["skill_context"] = skill_context
                 task = task_class(**args)
                 tasks[task_id] = task
 
@@ -420,7 +464,7 @@ class SharedClass(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments.
         """
-        self._context = kwargs.pop('skill_context')  # type: SkillContext
+        self._context = kwargs.pop("skill_context")  # type: SkillContext
         self._config = kwargs
 
     @property
@@ -434,7 +478,12 @@ class SharedClass(ABC):
         return self._config
 
     @classmethod
-    def parse_module(cls, path: str, shared_classes_configs: Dict[str, SharedClassConfig], skill_context: SkillContext) -> Dict[str, 'SharedClass']:
+    def parse_module(
+        cls,
+        path: str,
+        shared_classes_configs: Dict[str, SharedClassConfig],
+        skill_context: SkillContext,
+    ) -> Dict[str, "SharedClass"]:
         """
         Parse the tasks module.
 
@@ -446,12 +495,21 @@ class SharedClass(ABC):
         instances = {}
         shared_classes = []
 
-        shared_classes_names = set(config.class_name for _, config in shared_classes_configs.items())
+        shared_classes_names = set(
+            config.class_name for _, config in shared_classes_configs.items()
+        )
 
         # get all Python modules except the standard ones
         ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "__.*"])
         all_python_modules = Path(path).glob("*.py")
-        module_paths = set(map(str, filter(lambda x: not re.match(ignore_regex, x.name), all_python_modules)))
+        module_paths = set(
+            map(
+                str,
+                filter(
+                    lambda x: not re.match(ignore_regex, x.name), all_python_modules
+                ),
+            )
+        )
 
         for module_path in module_paths:
             logger.debug("Trying to load module {}".format(module_path))
@@ -460,24 +518,37 @@ class SharedClass(ABC):
             classes = inspect.getmembers(shared_class_module, inspect.isclass)
             filtered_classes = list(
                 filter(
-                    lambda x:
-                        any(re.match(shared, x[0]) for shared in shared_classes_names) and SharedClass in inspect.getmro(x[1]),
-                    classes)
+                    lambda x: any(
+                        re.match(shared, x[0]) for shared in shared_classes_names
+                    )
+                    and SharedClass in inspect.getmro(x[1]),
+                    classes,
+                )
             )
             shared_classes.extend(filtered_classes)
 
         name_to_class = dict(shared_classes)
         for shared_class_id, shared_class_config in shared_classes_configs.items():
             shared_class_name = shared_class_config.class_name
-            logger.debug("Processing shared class id={}, class={}".format(shared_class_id, shared_class_name))
-            assert shared_class_id.isidentifier(), "'{}' is not a valid identifier.".format(shared_class_id)
+            logger.debug(
+                "Processing shared class id={}, class={}".format(
+                    shared_class_id, shared_class_name
+                )
+            )
+            assert (
+                shared_class_id.isidentifier()
+            ), "'{}' is not a valid identifier.".format(shared_class_id)
             shared_class = name_to_class.get(shared_class_name, None)
             if shared_class is None:
-                logger.warning("Shared class '{}' cannot be found.".format(shared_class_name))
+                logger.warning(
+                    "Shared class '{}' cannot be found.".format(shared_class_name)
+                )
             else:
                 args = shared_class_config.args
-                assert 'skill_context' not in args.keys(), "'skill_context' is a reserved key. Please rename your arguments!"
-                args['skill_context'] = skill_context
+                assert (
+                    "skill_context" not in args.keys()
+                ), "'skill_context' is a reserved key. Please rename your arguments!"
+                args["skill_context"] = skill_context
                 shared_class_instance = shared_class(**args)
                 instances[shared_class_id] = shared_class_instance
                 setattr(skill_context, shared_class_id, shared_class_instance)
@@ -487,12 +558,15 @@ class SharedClass(ABC):
 class Skill:
     """This class implements a skill."""
 
-    def __init__(self, config: SkillConfig,
-                 skill_context: SkillContext,
-                 handlers: Optional[Dict[str, Handler]],
-                 behaviours: Optional[Dict[str, Behaviour]],
-                 tasks: Optional[Dict[str, Task]],
-                 shared_classes: Optional[Dict[str, SharedClass]]):
+    def __init__(
+        self,
+        config: SkillConfig,
+        skill_context: SkillContext,
+        handlers: Optional[Dict[str, Handler]],
+        behaviours: Optional[Dict[str, Behaviour]],
+        tasks: Optional[Dict[str, Task]],
+        shared_classes: Optional[Dict[str, SharedClass]],
+    ):
         """
         Initialize a skill.
 
@@ -510,7 +584,7 @@ class Skill:
         self.shared_classes = shared_classes if shared_classes is not None else {}
 
     @classmethod
-    def from_dir(cls, directory: str, agent_context: AgentContext) -> 'Skill':
+    def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
         """
         Load a skill from a directory.
 
@@ -521,40 +595,65 @@ class Skill:
         """
         # check if there is the config file. If not, then return None.
         skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
-        skill_config = skill_loader.load(open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE)))
-        skill_module = load_agent_component_package("skill", skill_config.name, skill_config.author, Path(directory))
-        add_agent_component_module_to_sys_modules("skill", skill_config.name, skill_config.author, skill_module)
+        skill_config = skill_loader.load(
+            open(os.path.join(directory, DEFAULT_SKILL_CONFIG_FILE))
+        )
+        skill_module = load_agent_component_package(
+            "skill", skill_config.name, skill_config.author, Path(directory)
+        )
+        add_agent_component_module_to_sys_modules(
+            "skill", skill_config.name, skill_config.author, skill_module
+        )
         loader_contents = [path.name for path in Path(directory).iterdir()]
         skills_packages = list(filter(lambda x: not x.startswith("__"), loader_contents))  # type: ignore
-        logger.debug("Processing the following skill package: {}".format(skills_packages))
+        logger.debug(
+            "Processing the following skill package: {}".format(skills_packages)
+        )
 
         skill_context = SkillContext(agent_context)
 
         handlers_by_id = dict(skill_config.handlers.read_all())
         if len(handlers_by_id) > 0:
-            handlers = Handler.parse_module(os.path.join(directory, "handlers.py"), handlers_by_id, skill_context)
+            handlers = Handler.parse_module(
+                os.path.join(directory, "handlers.py"), handlers_by_id, skill_context
+            )
         else:
             handlers = {}
 
         behaviours_by_id = dict(skill_config.behaviours.read_all())
         if len(behaviours_by_id) > 0:
-            behaviours = Behaviour.parse_module(os.path.join(directory, "behaviours.py"), behaviours_by_id, skill_context)
+            behaviours = Behaviour.parse_module(
+                os.path.join(directory, "behaviours.py"),
+                behaviours_by_id,
+                skill_context,
+            )
         else:
             behaviours = {}
 
         tasks_by_id = dict(skill_config.tasks.read_all())
         if len(tasks_by_id) > 0:
-            tasks = Task.parse_module(os.path.join(directory, "tasks.py"), tasks_by_id, skill_context)
+            tasks = Task.parse_module(
+                os.path.join(directory, "tasks.py"), tasks_by_id, skill_context
+            )
         else:
             tasks = {}
 
         shared_classes_by_id = dict(skill_config.shared_classes.read_all())
         if len(shared_classes_by_id) > 0:
-            shared_classes_instances = SharedClass.parse_module(directory, shared_classes_by_id, skill_context)
+            shared_classes_instances = SharedClass.parse_module(
+                directory, shared_classes_by_id, skill_context
+            )
         else:
             shared_classes_instances = {}
 
-        skill = Skill(skill_config, skill_context, handlers, behaviours, tasks, shared_classes_instances)
+        skill = Skill(
+            skill_config,
+            skill_context,
+            handlers,
+            behaviours,
+            tasks,
+            shared_classes_instances,
+        )
         skill_context._skill = skill
 
         return skill

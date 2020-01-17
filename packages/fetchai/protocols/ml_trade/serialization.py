@@ -64,7 +64,7 @@ class MLTradeSerializer(Serializer):
             data = msg.data
             data_bytes = base64.b64encode(pickle.dumps(data)).decode("utf-8")
             body["data"] = data_bytes
-        else:   # pragma: no cover
+        else:  # pragma: no cover
             raise ValueError("Type not recognized.")
 
         bytes_msg = json.dumps(body).encode("utf-8")
@@ -99,7 +99,7 @@ class MLTradeSerializer(Serializer):
             data_bytes = base64.b64decode(json_body["data"])
             data = pickle.loads(data_bytes)
             body["data"] = data
-        else:   # pragma: no cover
+        else:  # pragma: no cover
             raise ValueError("Type not recognized.")
 
         return MLTradeMessage(performative=msg_type, body=body)

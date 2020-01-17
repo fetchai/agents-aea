@@ -48,8 +48,12 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfi
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, \
-    _validate_private_key_path
+from aea.crypto.helpers import (
+    DEFAULT_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE,
+    _validate_private_key_path,
+)
 
 
 @click.group(name="aea")
@@ -62,7 +66,11 @@ def cli(ctx) -> None:
 
 
 @cli.command()
-@click.argument('agent_name', type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True)
+@click.argument(
+    "agent_name",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    required=True,
+)
 @pass_ctx
 def delete(ctx: Context, agent_name):
     """Delete an agent."""
@@ -87,7 +95,9 @@ def delete(ctx: Context, agent_name):
     try:
         shutil.rmtree(path, ignore_errors=False)
     except OSError:
-        logger.error("An error occurred while deleting the agent directory. Aborting...")
+        logger.error(
+            "An error occurred while deleting the agent directory. Aborting..."
+        )
         sys.exit(1)
 
 
@@ -96,33 +106,47 @@ def delete(ctx: Context, agent_name):
 def freeze(ctx: Context):
     """Get the dependencies."""
     try_to_load_agent_config(ctx)
-    for dependency_name, dependency_data in sorted(ctx.get_dependencies().items(), key=lambda x: x[0]):
+    for dependency_name, dependency_data in sorted(
+        ctx.get_dependencies().items(), key=lambda x: x[0]
+    ):
         print(dependency_name + dependency_data.get("version", ""))
 
 
 @cli.command()
 @pass_ctx
-@click.option('-p', '--port', default=8080)
+@click.option("-p", "--port", default=8080)
 def gui(ctx: Context, port):
     """Run the CLI GUI."""
     import aea.cli_gui  # pragma: no cover
-    logger.info("Running the GUI.....(press Ctrl+C to exit)")   # pragma: no cover
-    aea.cli_gui.run(port)   # pragma: no cover
+
+    logger.info("Running the GUI.....(press Ctrl+C to exit)")  # pragma: no cover
+    aea.cli_gui.run(port)  # pragma: no cover
 
 
 @cli.command()
-@click.argument("type_", metavar="TYPE", type=click.Choice([
-    DefaultCrypto.identifier,
-    FetchAICrypto.identifier,
-    EthereumCrypto.identifier,
-    "all"]), required=True)
+@click.argument(
+    "type_",
+    metavar="TYPE",
+    type=click.Choice(
+        [
+            DefaultCrypto.identifier,
+            FetchAICrypto.identifier,
+            EthereumCrypto.identifier,
+            "all",
+        ]
+    ),
+    required=True,
+)
 @pass_ctx
 def generate_key(ctx: Context, type_):
     """Generate private keys."""
+
     def _can_write(path) -> bool:
         if Path(path).exists():
-            value = click.confirm('The file {} already exists. Do you want to overwrite it?'
-                                  .format(path), default=False)
+            value = click.confirm(
+                "The file {} already exists. Do you want to overwrite it?".format(path),
+                default=False,
+            )
             return value
         else:
             return True
@@ -139,23 +163,34 @@ def generate_key(ctx: Context, type_):
 
 
 @cli.command()
-@click.argument("type_", metavar="TYPE", type=click.Choice([
-    DefaultCrypto.identifier,
-    FetchAICrypto.identifier,
-    EthereumCrypto.identifier
-]), required=True)
-@click.argument("file", metavar="FILE", type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
-                required=True)
+@click.argument(
+    "type_",
+    metavar="TYPE",
+    type=click.Choice(
+        [DefaultCrypto.identifier, FetchAICrypto.identifier, EthereumCrypto.identifier]
+    ),
+    required=True,
+)
+@click.argument(
+    "file",
+    metavar="FILE",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
+    required=True,
+)
 @pass_ctx
 def add_key(ctx: Context, type_, file):
     """Add a private key to the wallet."""
     try_to_load_agent_config(ctx)
     _validate_private_key_path(file, type_)
     try:
-        ctx.agent_config.private_key_paths.create(type_, PrivateKeyPathConfig(type_, file))
-    except ValueError as e:     # pragma: no cover
-        logger.error(str(e))    # pragma: no cover
-    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
+        ctx.agent_config.private_key_paths.create(
+            type_, PrivateKeyPathConfig(type_, file)
+        )
+    except ValueError as e:  # pragma: no cover
+        logger.error(str(e))  # pragma: no cover
+    ctx.agent_loader.dump(
+        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+    )
 
 
 cli.add_command(_list)

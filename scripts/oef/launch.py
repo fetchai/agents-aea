@@ -8,14 +8,14 @@ import os
 
 
 def run(cmd):
-    print(' '.join(cmd))
+    print(" ".join(cmd))
     c = subprocess.Popen(cmd)
     c.wait()
     return c.returncode
 
 
 def error(*x):
-    print(''.join([str(xx) for xx in x]), file=sys.stderr)
+    print("".join([str(xx) for xx in x]), file=sys.stderr)
 
 
 def fail(*x):
@@ -27,10 +27,10 @@ def pull_image(run_sudo, img):
     c = []
 
     if run_sudo:
-        c += [ 'sudo' ]
+        c += ["sudo"]
     c += [
-        'docker',
-        'pull',
+        "docker",
+        "pull",
         img,
     ]
     r = run(c)
@@ -47,50 +47,36 @@ def parse_command(j):
     for key in j:
         if key in used_keys:
             continue
-        cmd.extend(
-            [
-                "--"+key,
-                str(j[key])
-            ]
-        )
+        cmd.extend(["--" + key, str(j[key])])
     return cmd
 
 
 def launch_job(args, j):
-    img = j['image']
-    if '/' in img:
+    img = j["image"]
+    if "/" in img:
         pull_image(args.sudo, img)
 
     c = []
     if args.sudo:
-        c += ['sudo']
-    c += [
-        'docker',
-        'run'
-    ]
+        c += ["sudo"]
+    c += ["docker", "run"]
     if args.background:
-        c += ['-d']
+        c += ["-d"]
     elif not args.disable_stdin:
-        c += ['-it']
+        c += ["-it"]
     else:
-        c += ['-t']
-
+        c += ["-t"]
 
     if args.name:
-        c += ['--name']
+        c += ["--name"]
         c += [args.name]
 
     work_dir = os.path.abspath(os.path.dirname(__file__))
-    project_dir = os.path.abspath(os.path.join(work_dir, '..', '..'))
+    project_dir = os.path.abspath(os.path.join(work_dir, "..", ".."))
     print("Work dir: ", work_dir)
-    c += [
-        "-v",
-        work_dir+":/config",
-        "-v",
-        project_dir+"/data/oef-logs:/logs"
-    ]
+    c += ["-v", work_dir + ":/config", "-v", project_dir + "/data/oef-logs:/logs"]
 
-    for arg in j['params']:
+    for arg in j["params"]:
         c += map(lambda x: x.replace("$PWD", project_dir), arg)
 
     c += [img]
@@ -114,15 +100,37 @@ def main(args):
     launch_job(args, config)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', required=True, type=str, help='Publish the image to GCR')
-    parser.add_argument("--sudo", required=False, action='store_true', help="Run docker as root")
-    parser.add_argument("--background", required=False,  action='store_true', help="Run image in background.")
-    parser.add_argument("--disable_stdin", required=False,  action='store_true', help="Disable disable_stdin.")
-    parser.add_argument('-n', '--name', required=False, type=str, help='give thre container a name')
-    parser.add_argument("--cmd", required=False, type=str, default="oef-search", help="The available commands are defined"
-                                                                                    " in the config file "
-                                                                                    "('cmd' dictionary) ")
-    parser.add_argument('rest', nargs=argparse.REMAINDER)
+    parser.add_argument(
+        "-c", "--config", required=True, type=str, help="Publish the image to GCR"
+    )
+    parser.add_argument(
+        "--sudo", required=False, action="store_true", help="Run docker as root"
+    )
+    parser.add_argument(
+        "--background",
+        required=False,
+        action="store_true",
+        help="Run image in background.",
+    )
+    parser.add_argument(
+        "--disable_stdin",
+        required=False,
+        action="store_true",
+        help="Disable disable_stdin.",
+    )
+    parser.add_argument(
+        "-n", "--name", required=False, type=str, help="give thre container a name"
+    )
+    parser.add_argument(
+        "--cmd",
+        required=False,
+        type=str,
+        default="oef-search",
+        help="The available commands are defined"
+        " in the config file "
+        "('cmd' dictionary) ",
+    )
+    parser.add_argument("rest", nargs=argparse.REMAINDER)
     main(parser.parse_args())

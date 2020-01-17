@@ -67,9 +67,7 @@ class OEFMessage(Message):
             """Get string representation."""
             return str(self.value)
 
-    def __init__(self, type: Type,
-                 id: int,
-                 **kwargs):
+    def __init__(self, type: Type, id: int, **kwargs):
         """
         Initialize.
 
@@ -89,13 +87,13 @@ class OEFMessage(Message):
     def id(self) -> int:
         """Get the id of the oef_message."""
         assert self.is_set("id"), "id is not set."
-        return cast(int, self.get('id'))
+        return cast(int, self.get("id"))
 
     @property
     def service_description(self) -> Description:
         """Get the service_description from the message."""
         assert self.is_set("service_description"), "service_description is not set"
-        return cast(Description, self.get('service_description'))
+        return cast(Description, self.get("service_description"))
 
     @property
     def service_id(self) -> str:
@@ -151,35 +149,53 @@ class OEFMessage(Message):
             assert isinstance(self.type, OEFMessage.Type), "type not of correct type."
             assert isinstance(self.id, int), "id must be int."
             if self.type == OEFMessage.Type.REGISTER_SERVICE:
-                assert isinstance(self.service_description, Description), \
-                    "service_description must be of type Description."
-                assert isinstance(self.service_id, str), "service_id must be of type str."
+                assert isinstance(
+                    self.service_description, Description
+                ), "service_description must be of type Description."
+                assert isinstance(
+                    self.service_id, str
+                ), "service_id must be of type str."
                 assert len(self.body) == 4
             elif self.type == OEFMessage.Type.REGISTER_AGENT:
-                assert isinstance(self.agent_description, Description), "agent_description must be of type Description."
+                assert isinstance(
+                    self.agent_description, Description
+                ), "agent_description must be of type Description."
                 assert isinstance(self.agent_id, str), "agent_id must be of type str."
                 assert len(self.body) == 4
             elif self.type == OEFMessage.Type.UNREGISTER_SERVICE:
-                assert isinstance(self.service_description, Description), \
-                    "service_description must be of type Description."
-                assert isinstance(self.service_id, str), "service_id must be of type str."
+                assert isinstance(
+                    self.service_description, Description
+                ), "service_description must be of type Description."
+                assert isinstance(
+                    self.service_id, str
+                ), "service_id must be of type str."
                 assert len(self.body) == 4
             elif self.type == OEFMessage.Type.UNREGISTER_AGENT:
-                assert isinstance(self.agent_description, Description), "agent_description must be of type Description."
+                assert isinstance(
+                    self.agent_description, Description
+                ), "agent_description must be of type Description."
                 assert isinstance(self.agent_id, str), "agent_id must be of type str."
                 assert len(self.body) == 4
-            elif self.type == OEFMessage.Type.SEARCH_SERVICES or self.type == OEFMessage.Type.SEARCH_AGENTS:
+            elif (
+                self.type == OEFMessage.Type.SEARCH_SERVICES
+                or self.type == OEFMessage.Type.SEARCH_AGENTS
+            ):
                 assert isinstance(self.query, Query), "query must be of type Query."
                 assert len(self.body) == 3
             elif self.type == OEFMessage.Type.SEARCH_RESULT:
-                assert type(self.agents) == list and all(type(a) == str for a in self.agents)
+                assert type(self.agents) == list and all(
+                    type(a) == str for a in self.agents
+                )
                 assert len(self.body) == 3
             elif self.type == OEFMessage.Type.OEF_ERROR:
-                assert isinstance(self.operation, OEFMessage.OEFErrorOperation), \
-                    "operation must be type of OEFErrorOperation"
+                assert isinstance(
+                    self.operation, OEFMessage.OEFErrorOperation
+                ), "operation must be type of OEFErrorOperation"
                 assert len(self.body) == 3
             elif self.type == OEFMessage.Type.DIALOGUE_ERROR:
-                assert isinstance(self.dialogue_id, int), "dialogue_id must be of type int."
+                assert isinstance(
+                    self.dialogue_id, int
+                ), "dialogue_id must be of type int."
                 assert isinstance(self.origin, str), "origin must be of type str."
                 assert len(self.body) == 4
             else:

@@ -32,8 +32,8 @@ from aea.crypto.base import AddressLike, Crypto, LedgerApi
 logger = logging.getLogger(__name__)
 
 FETCHAI = "fetchai"
-SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
-DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
+SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
+DEFAULT_FETCHAI_CONFIG = ("alpha.fetch-ai.com", 80)
 
 
 class FetchAICrypto(Crypto):
@@ -47,7 +47,11 @@ class FetchAICrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        self._entity = (
+            self._generate_private_key()
+            if private_key_path is None
+            else self._load_private_key_from_path(private_key_path)
+        )
         self._address = str(Address(Identity.from_hex(self.public_key)))
 
     @property
@@ -174,14 +178,18 @@ class FetchAIApi(LedgerApi):
         """Get the balance of a given account."""
         return self._api.tokens.balance(address)
 
-    def send_transaction(self,
-                         crypto: Crypto,
-                         destination_address: AddressLike,
-                         amount: int,
-                         tx_fee: int,
-                         **kwargs) -> Optional[str]:
+    def send_transaction(
+        self,
+        crypto: Crypto,
+        destination_address: AddressLike,
+        amount: int,
+        tx_fee: int,
+        **kwargs
+    ) -> Optional[str]:
         """Submit a transaction to the ledger."""
-        tx_digest = self._api.tokens.transfer(crypto.entity, destination_address, amount, tx_fee)
+        tx_digest = self._api.tokens.transfer(
+            crypto.entity, destination_address, amount, tx_fee
+        )
         self._api.sync(tx_digest)
         return tx_digest
 
