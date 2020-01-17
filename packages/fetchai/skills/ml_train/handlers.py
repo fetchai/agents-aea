@@ -21,7 +21,7 @@
 import logging
 from typing import List, Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
@@ -41,7 +41,7 @@ DUMMY_DIGEST = "dummy_digest"
 class TrainHandler(Handler):
     """Train handler."""
 
-    SUPPORTED_PROTOCOL = "ml_trade"
+    SUPPORTED_PROTOCOL = PublicId("fetchai", "ml_trade", "0.1.0")
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

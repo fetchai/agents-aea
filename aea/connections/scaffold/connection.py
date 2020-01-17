@@ -23,7 +23,7 @@
 import logging
 from typing import Optional, Set
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
@@ -36,7 +36,7 @@ class MyScaffoldConnection(Connection):
     restricted_to_protocols = set()  # type: Set[str]
     excluded_protocols = set()  # type: Set[str]
 
-    def __init__(self, connection_id: str, address: Address, *args, **kwargs):
+    def __init__(self, connection_id: PublicId, address: Address, *args, **kwargs):
         """
         Initialize a connection to an SDK or API.
 

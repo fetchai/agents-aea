@@ -27,7 +27,7 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, Set, cast
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId, ProtocolId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
@@ -134,7 +134,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == "oef":
+        if envelope.protocol_id == ProtocolId.from_string("fetchai/oef:0.1.0"):
             await self._handle_oef_message(envelope)
         else:
             await self._handle_agent_message(envelope)
@@ -392,7 +392,7 @@ class OEFLocalConnection(Connection):
         self,
         address: Address,
         local_node: LocalNode,
-        connection_id: str = "local",
+        connection_id: PublicId,
         restricted_to_protocols: Optional[Set[str]] = None,
         excluded_protocols: Optional[Set[str]] = None,
     ):
@@ -401,6 +401,7 @@ class OEFLocalConnection(Connection):
 
         :param address: the address used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
+        :param connection_id: the connection id.
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the excluded protocols for this connection.
         """

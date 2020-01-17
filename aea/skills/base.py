@@ -167,8 +167,8 @@ class SkillContext:
         return super().__getattribute__(item)  # pragma: no cover
 
 
-class Behaviour(ABC):
-    """This class implements an abstract behaviour."""
+class SkillComponent(ABC):
+    """This class defines an abstract interface for skill component classes."""
 
     def __init__(self, **kwargs):
         """
@@ -179,6 +179,13 @@ class Behaviour(ABC):
         """
         self._context = kwargs.pop("skill_context")  # type: SkillContext
         self._config = kwargs
+        if "name" not in self._config:
+            raise ValueError("Missing name of skill component.")
+
+    @property
+    def name(self) -> str:
+        """Get the name of the skill component."""
+        return self._config.get("name")
 
     @property
     def context(self) -> SkillContext:
@@ -199,17 +206,30 @@ class Behaviour(ABC):
         """
 
     @abstractmethod
-    def act(self) -> None:
+    def teardown(self) -> None:
         """
-        Implement the behaviour.
+        Implement the behaviour teardown.
 
         :return: None
         """
 
+    @classmethod
     @abstractmethod
-    def teardown(self) -> None:
+    def parse_module(cls, *args, **kwargs):
+        """Parse the component module."""
+
+
+class Behaviour(SkillComponent):
+    """This class implements an abstract behaviour."""
+
+    def __init__(self, **kwargs):
+        """Initialize a behaviour."""
+        super().__init__(**kwargs)
+
+    @abstractmethod
+    def act(self) -> None:
         """
-        Implement the behaviour teardown.
+        Implement the behaviour.
 
         :return: None
         """
@@ -262,36 +282,21 @@ class Behaviour(ABC):
                     "skill_context" not in args.keys()
                 ), "'skill_context' is a reserved key. Please rename your arguments!"
                 args["skill_context"] = skill_context
+                args["name"] = behaviour_id
                 behaviour = behaviour_class(**args)
                 behaviours[behaviour_id] = behaviour
 
         return behaviours
 
 
-class Handler(ABC):
+class Handler(SkillComponent):
     """This class implements an abstract behaviour."""
 
     SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
 
     def __init__(self, **kwargs):
-        """
-        Initialize a handler object.
-
-        :param skill_context: the skill context
-        :param kwargs: keyword arguments
-        """
-        self._context = kwargs.pop("skill_context")  # type: SkillContext
-        self._config = kwargs
-
-    @property
-    def context(self) -> SkillContext:
-        """Get the context of the handler."""
-        return self._context
-
-    @property
-    def config(self) -> Dict[Any, Any]:
-        """Get the config of the handler."""
-        return self._config
+        """Initialize a handler object."""
+        super().__init__(**kwargs)
 
     @abstractmethod
     def handle(self, message: Message) -> None:
@@ -299,22 +304,6 @@ class Handler(ABC):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
-        """
-
-    @abstractmethod
-    def setup(self) -> None:
-        """
-        Implement the behaviour setup.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
         :return: None
         """
 
@@ -358,13 +347,14 @@ class Handler(ABC):
                     "skill_context" not in args.keys()
                 ), "'skill_context' is a reserved key. Please rename your arguments!"
                 args["skill_context"] = skill_context
+                args["name"] = handler_id
                 handler = handler_class(**args)
                 handlers[handler_id] = handler
 
         return handlers
 
 
-class Task(ABC):
+class Task(SkillComponent):
     """This class implements an abstract task."""
 
     def __init__(self, *args, **kwargs):
@@ -374,40 +364,13 @@ class Task(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments.
         """
-        self._context = kwargs.pop("skill_context")  # type: SkillContext
-        self._config = kwargs
+        super().__init__(**kwargs)
         self.completed = False
-
-    @property
-    def context(self) -> SkillContext:
-        """Get the context of the task."""
-        return self._context
-
-    @property
-    def config(self) -> Dict[Any, Any]:
-        """Get the config of the task."""
-        return self._config
 
     @abstractmethod
     def execute(self) -> None:
         """
         Run the task logic.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def setup(self) -> None:
-        """
-        Implement the behaviour setup.
-
-        :return: None
-        """
-
-    @abstractmethod
-    def teardown(self) -> None:
-        """
-        Teardown the task.
 
         :return: None
         """
@@ -448,13 +411,14 @@ class Task(ABC):
                     "skill_context" not in args.keys()
                 ), "'skill_context' is a reserved key. Please rename your arguments!"
                 args["skill_context"] = skill_context
+                args["name"] = task_id
                 task = task_class(**args)
                 tasks[task_id] = task
 
         return tasks
 
 
-class SharedClass(ABC):
+class SharedClass(SkillComponent):
     """This class implements an abstract shared class."""
 
     def __init__(self, *args, **kwargs):
@@ -464,18 +428,13 @@ class SharedClass(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments.
         """
-        self._context = kwargs.pop("skill_context")  # type: SkillContext
-        self._config = kwargs
+        super().__init__(**kwargs)
 
-    @property
-    def context(self) -> SkillContext:
-        """Get the context of the task."""
-        return self._context
+    def setup(self) -> None:
+        """Set the class up."""
 
-    @property
-    def config(self) -> Dict[Any, Any]:
-        """Get the config of the task."""
-        return self._config
+    def teardown(self) -> None:
+        """Tear the class down."""
 
     @classmethod
     def parse_module(
@@ -549,6 +508,7 @@ class SharedClass(ABC):
                     "skill_context" not in args.keys()
                 ), "'skill_context' is a reserved key. Please rename your arguments!"
                 args["skill_context"] = skill_context
+                args["name"] = shared_class_id
                 shared_class_instance = shared_class(**args)
                 instances[shared_class_id] = shared_class_instance
                 setattr(skill_context, shared_class_id, shared_class_instance)

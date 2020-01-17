@@ -233,7 +233,7 @@ def format_items(items):
             "Version: {version}\n"
             "{line}\n".format(
                 name=item["name"],
-                public_id=item["public_id"],
+                public_id=item["item_id"],
                 description=item["description"],
                 author=item["author"],
                 version=item["version"],
@@ -256,7 +256,7 @@ def format_skills(items):
             "Version: {version}\n"
             "{line}\n".format(
                 name=item["name"],
-                public_id=item["public_id"],
+                public_id=item["item_id"],
                 description=item["description"],
                 version=item["version"],
                 protocols="".join(name + " | " for name in item["protocol_names"]),
@@ -272,7 +272,7 @@ def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> D
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
     assert item_name == name
     return {
-        "public_id": str(config.public_id),
+        "item_id": str(config.public_id),
         "name": item_name,
         "author": config.author,
         "description": config.description,

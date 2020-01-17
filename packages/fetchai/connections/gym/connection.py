@@ -28,7 +28,7 @@ from typing import Dict, Optional, cast
 
 import gym
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Address, Envelope
@@ -85,7 +85,7 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == "gym":
+        if envelope.protocol_id == PublicId.from_string("fetchai/gym:0.1.0"):
             self.handle_gym_message(envelope)
         else:
             raise ValueError("This protocol is not valid for gym.")
