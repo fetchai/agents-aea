@@ -935,7 +935,7 @@ class TestDecisionMaker:
         cls.multiplexer.disconnect()
 
 
-class Test_LedgerStateProxy:
+class TestLedgerStateProxy:
     """Test the Ledger State Proxy."""
 
     @classmethod
