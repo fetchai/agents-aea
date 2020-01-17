@@ -44,7 +44,7 @@ from web3.auto import Web3
 MAX_REACTIONS = 10
 
 
-class Test_Ownership_state:
+class TestOwnershipState:
     """Test the base.py for DecisionMaker."""
 
     @classmethod
@@ -147,7 +147,7 @@ class Test_Ownership_state:
             "We must reject the transaction."
 
     def tests_transaction_is_affordable_else_statement(self):
-        """Check that the function returns fall if we cannot satisfy any if/elif statements."""
+        """Check that the function returns false if we cannot satisfy any if/elif statements."""
         currency_endowment = {"FET": 0}
         good_endowment = {"good_id": 0}
         self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
@@ -337,7 +337,7 @@ class Test_Preferences_Decision_maker:
         """Teardown any state that was previously setup with a call to setup_class."""
 
 
-class Test_DecisionMaker:
+class TestDecisionMaker:
     """Test the decision maker."""
 
     @classmethod
@@ -547,7 +547,7 @@ class Test_DecisionMaker:
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
 
-    def test_decision_maker_cannot_handle_tx_message_acceptable_for_settlement(self):
+    def test_decision_maker_tx_message_is_not_acceptable_for_settlement(self):
         """Test that a tx_message is not acceptable for settlement."""
         tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                                         skill_callback_ids=["default"],
