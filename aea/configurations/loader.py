@@ -24,14 +24,15 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import TextIO, Type, TypeVar, Generic, Union
+from typing import Generic, TextIO, Type, TypeVar, Union
 
 import jsonschema
-import yaml
 from jsonschema import Draft4Validator
+
+import yaml
 from yaml import SafeLoader
 
-from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig, ConfigurationType, ProtocolSpecification
+from aea.configurations.base import AgentConfig, ConfigurationType, ConnectionConfig, ProtocolConfig, ProtocolSpecification, SkillConfig
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")

@@ -19,13 +19,17 @@
 """Methods for CLI publish functionality."""
 
 import os
-import click
 import tarfile
 from typing import Dict
 
+import click
+
 from aea.cli.common import Context, logger
 from aea.cli.registry.utils import (
-    clean_tarfiles, load_yaml, request_api, check_is_author_logged_in
+    check_is_author_logged_in,
+    clean_tarfiles,
+    load_yaml,
+    request_api
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 

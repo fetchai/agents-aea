@@ -23,9 +23,10 @@
 
 import collections
 import math
-import numpy as np
 import random
 from typing import Dict, List, Tuple, cast
+
+import numpy as np
 
 from web3 import Web3
 

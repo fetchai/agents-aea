@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+
 import os
 
 from aea.crypto.ethereum import EthereumCrypto

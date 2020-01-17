@@ -1,12 +1,13 @@
 """Serialization for two_party_negotiation protocol."""
 
+import base64
+import json
+import pickle
+
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from packages.fetchai.protocols.two_party_negotiation.message import TwoPartyNegotiationMessage
 
-import json
-import base64
-import pickle
+from packages.fetchai.protocols.two_party_negotiation.message import TwoPartyNegotiationMessage
 
 
 class TwoPartyNegotiationSerializer(Serializer):

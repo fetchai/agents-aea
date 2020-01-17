@@ -18,10 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'ml_train' skill."""
+
 import logging
 from typing import Tuple
 
 import numpy as np
+
 from tensorflow import keras
 
 from aea.skills.base import Task

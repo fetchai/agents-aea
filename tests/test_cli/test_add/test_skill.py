@@ -18,21 +18,24 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add skill` sub-command."""
+
 import os
 import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
 
-import yaml
-from ...common.click_testing import CliRunner
 from jsonschema import ValidationError
+
+import yaml
 
 import aea
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, DEFAULT_SKILL_CONFIG_FILE
-from ...conftest import ROOT_DIR, CLI_LOG_OPTION, CUR_PATH
+
+from ...common.click_testing import CliRunner
+from ...conftest import CLI_LOG_OPTION, CUR_PATH, ROOT_DIR
 
 
 class TestAddSkillFailsWhenSkillAlreadyExists:

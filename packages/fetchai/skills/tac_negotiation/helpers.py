@@ -22,10 +22,10 @@
 
 import collections
 from typing import Dict, List, Union, cast
+
 from web3 import Web3
 
-from aea.helpers.search.models import Attribute, DataModel, Description, Query, Constraint, ConstraintType, Or, \
-    ConstraintExpr
+from aea.helpers.search.models import Attribute, Constraint, ConstraintExpr, ConstraintType, DataModel, Description, Or, Query
 from aea.mail.base import Address
 
 SUPPLY_DATAMODEL_NAME = 'supply'

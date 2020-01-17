@@ -21,14 +21,15 @@
 """Default module wrapping the public and private key cryptography and ledger api."""
 
 import logging
-from typing import Optional, BinaryIO
+from typing import BinaryIO, Optional
 
 import base58
+
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, utils
-from cryptography.hazmat.primitives.serialization import load_pem_private_key, NoEncryption, PrivateFormat, Encoding
+from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, load_pem_private_key
 
 from aea.crypto.base import Crypto
 

@@ -17,7 +17,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the behaviours."""
-from aea.skills.behaviours import SequenceBehaviour, OneShotBehaviour, FSMBehaviour, State
+
+from aea.skills.behaviours import FSMBehaviour, OneShotBehaviour, SequenceBehaviour, State
 
 
 def test_sequence_behaviour():

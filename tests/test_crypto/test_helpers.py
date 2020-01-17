@@ -19,12 +19,17 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the crypto/helpers module."""
-import logging
 
+import logging
 import os
+
 import pytest
-from aea.crypto.helpers import _try_validate_private_key_pem_path, _try_validate_fet_private_key_path, \
-    _try_validate_ethereum_private_key_path
+
+from aea.crypto.helpers import (
+    _try_validate_ethereum_private_key_path,
+    _try_validate_fet_private_key_path,
+    _try_validate_private_key_pem_path
+)
 
 from ..conftest import CUR_PATH
 

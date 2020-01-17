@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the stub connection."""
+
 import base64
 import shutil
 import tempfile

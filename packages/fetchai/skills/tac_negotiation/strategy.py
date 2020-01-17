@@ -27,8 +27,9 @@ from enum import Enum
 from typing import Dict, Optional, cast
 
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.helpers.search.models import Query, Description
+from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
+
 from packages.fetchai.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 

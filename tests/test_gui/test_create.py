@@ -22,11 +22,10 @@ import json
 import shutil
 import sys
 import time
-
 import unittest.mock
 from pathlib import Path
 
-from .test_base import create_app, TempCWD
+from .test_base import TempCWD, create_app
 from ..conftest import CUR_PATH
 
 

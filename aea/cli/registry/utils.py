@@ -24,16 +24,19 @@ import tarfile
 from typing import Dict
 
 import click
+
 import requests
+
 import yaml
 
 from aea.cli.common import (
-    logger, AEAConfigException
+    AEAConfigException,
+    logger
 )
 from aea.cli.registry.settings import (
-    REGISTRY_API_URL,
+    AUTH_TOKEN_KEY,
     CLI_CONFIG_PATH,
-    AUTH_TOKEN_KEY
+    REGISTRY_API_URL
 )
 from aea.configurations.base import PublicId
 

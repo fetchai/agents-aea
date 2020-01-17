@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'echo' skill."""
+
 import logging
 import time
 

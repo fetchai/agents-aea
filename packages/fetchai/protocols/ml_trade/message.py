@@ -19,8 +19,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the FIPA message definition."""
+
 from enum import Enum
-from typing import cast, Tuple
+from typing import Tuple, cast
+
 import numpy as np
 
 from aea.helpers.search.models import Description, Query
@@ -51,7 +53,7 @@ class MLTradeMessage(Message):
         :param type: the type.
         """
         super().__init__(performative=performative, **kwargs)
-        assert self.check_consistency(), "MLTradeMessage initialization inconsistent."
+        assert self._check_consistency(), "MLTradeMessage initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
@@ -83,7 +85,7 @@ class MLTradeMessage(Message):
         assert self.is_set("data"), "Data is not set."
         return cast(Tuple[np.ndarray, np.ndarray], self.get("data"))
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.performative, MLTradeMessage.Performative), "Performative is invalid type."

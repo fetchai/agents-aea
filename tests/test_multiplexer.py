@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the Multiplexer."""
+
 import asyncio
 import shutil
 import tempfile
@@ -31,10 +32,12 @@ import pytest
 
 import aea
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import Multiplexer, AEAConnectionError, Envelope, EnvelopeContext
+from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+
 from .conftest import DummyConnection
 
 
@@ -159,7 +162,6 @@ def test_multiplexer_disconnect_all_raises_error():
         with pytest.raises(AEAConnectionError, match="Failed to disconnect the multiplexer."):
             multiplexer.disconnect()
 
-    # TODO is this what we want?
     assert multiplexer.connection_status.is_connected
 
 
@@ -191,7 +193,6 @@ def test_multiplexer_disconnect_one_raises_error_many_connections():
             # with pytest.raises(AEAConnectionError, match="Failed to disconnect the multiplexer."):
             multiplexer.disconnect()
 
-        # TODO is this what we want?
         assert not connection_1.connection_status.is_connected
         assert not connection_2.connection_status.is_connected
         assert connection_3.connection_status.is_connected

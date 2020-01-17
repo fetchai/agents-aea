@@ -24,8 +24,8 @@ from unittest import TestCase, mock
 from click import ClickException
 
 from aea.cli.registry.push import (
-    push_item,
     _remove_pycache,
+    push_item
 )
 
 from tests.test_cli.tools_for_testing import (

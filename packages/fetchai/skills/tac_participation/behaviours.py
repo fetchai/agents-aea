@@ -23,8 +23,9 @@ import logging
 from typing import cast
 
 from aea.skills.base import Behaviour
+
 from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.tac_participation.game import Game, Phase
 from packages.fetchai.skills.tac_participation.search import Search
 

@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
+
 import threading
 from pathlib import Path
 

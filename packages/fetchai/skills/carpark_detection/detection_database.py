@@ -22,8 +22,9 @@ import logging
 import os
 import shutil
 import sqlite3
-import skimage  # type: ignore
 import time
+
+import skimage  # type: ignore
 
 logger = logging.getLogger("aea.carpark_detection_skill")
 

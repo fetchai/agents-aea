@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea remove protocol` sub-command."""
+
 import os
 import shutil
 import tempfile
@@ -25,13 +26,14 @@ import unittest.mock
 from pathlib import Path
 
 import yaml
-from ...common.click_testing import CliRunner
 
 import aea
 import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION, CUR_PATH
 
 

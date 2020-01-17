@@ -26,13 +26,13 @@ import threading
 import time
 from asyncio import CancelledError
 from threading import Thread
-from typing import Optional, cast, Dict, List, Any, Set
+from typing import Any, Dict, List, Optional, Set, cast
 
 from fetch.p2p.api.http_calls import HTTPCalls
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, AEAConnectionError, Address
+from aea.mail.base import AEAConnectionError, Address, Envelope
 
 logger = logging.getLogger(__name__)
 

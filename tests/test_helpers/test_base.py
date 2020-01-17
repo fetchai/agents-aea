@@ -21,7 +21,9 @@
 import os
 
 from aea.helpers.base import locate
+
 from packages.fetchai.connections.oef.connection import OEFConnection
+
 from ..conftest import CUR_PATH
 
 

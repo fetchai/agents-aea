@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea install' subcommand."""
+
 import pprint
 import subprocess
 import sys
@@ -25,7 +26,7 @@ from typing import Optional
 
 import click
 
-from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config
+from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
 from aea.configurations.base import Dependency
 
 

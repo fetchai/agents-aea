@@ -28,6 +28,7 @@ import gym
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.skills.base import SkillContext
+
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
 

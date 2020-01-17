@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the Gym protocol."""
+
 import base64
 import copy
 import json
@@ -27,6 +28,7 @@ from typing import Any, cast
 
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
+
 from packages.fetchai.protocols.gym.message import GymMessage
 
 

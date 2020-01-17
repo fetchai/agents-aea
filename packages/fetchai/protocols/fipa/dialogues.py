@@ -29,9 +29,10 @@ This module contains the classes required for FIPA dialogue management.
 from enum import Enum
 from typing import Dict, Tuple, cast
 
-from aea.helpers.dialogue.base import DialogueLabel, Dialogue, Dialogues
+from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.mail.base import Address
 from aea.protocols.base import Message
+
 from packages.fetchai.protocols.fipa.message import FIPAMessage, VALID_PREVIOUS_PERFORMATIVES
 
 
@@ -247,6 +248,7 @@ class FIPADialogues(Dialogues):
 
         :return: the dialogue
         """
+        result = None
         fipa_msg = cast(FIPAMessage, fipa_msg)
         dialogue_reference = fipa_msg.dialogue_reference
         self_initiated_dialogue_label = DialogueLabel(dialogue_reference, fipa_msg.counterparty, agent_addr)

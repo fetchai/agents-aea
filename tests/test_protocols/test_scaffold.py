@@ -19,8 +19,9 @@
 
 """This module contains the tests for the Scaffold protocol."""
 
-from aea.protocols.scaffold.message import MyScaffoldMessage
 import pytest
+
+from aea.protocols.scaffold.message import MyScaffoldMessage
 
 
 def test_scaffold_message():

@@ -20,7 +20,7 @@
 """This module contains the tests for the helper module."""
 from typing import Dict
 
-from aea.helpers.dialogue.base import DialogueLabel, Dialogue, Dialogues
+from aea.helpers.dialogue.base import Dialogue, DialogueLabel, Dialogues
 from aea.protocols.default.message import DefaultMessage
 
 

@@ -24,17 +24,19 @@ import datetime
 import pprint
 from collections import defaultdict
 from enum import Enum
-from typing import cast, Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM
-from aea.helpers.preference_representations.base import logarithmic_utility, linear_utility
+from aea.helpers.preference_representations.base import linear_utility, logarithmic_utility
 from aea.mail.base import Address
 from aea.skills.base import SharedClass
+
 from packages.fetchai.protocols.tac.message import TACMessage
-from packages.fetchai.skills.tac_control.helpers import generate_good_id_to_name, determine_scaling_factor, \
-    generate_money_endowments, generate_good_endowments, generate_utility_params, \
-    generate_equilibrium_prices_and_holdings, tx_hash_from_values
+from packages.fetchai.skills.tac_control.helpers import determine_scaling_factor, generate_equilibrium_prices_and_holdings, \
+    generate_good_endowments, generate_good_id_to_name, \
+    generate_money_endowments, generate_utility_params, \
+    tx_hash_from_values
 from packages.fetchai.skills.tac_control.parameters import Parameters
 
 GoodId = str

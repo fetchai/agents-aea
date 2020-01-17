@@ -26,6 +26,7 @@ from typing import cast
 from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
+
 from packages.fetchai.protocols.fipa import fipa_pb2
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 

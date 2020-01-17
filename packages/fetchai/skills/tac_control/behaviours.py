@@ -21,12 +21,13 @@
 
 import datetime
 import logging
-from typing import cast, Optional
+from typing import Optional, cast
 
-from aea.helpers.search.models import Description, DataModel, Attribute
+from aea.helpers.search.models import Attribute, DataModel, Description
 from aea.skills.base import Behaviour
+
 from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.protocols.tac.serialization import TACSerializer
 from packages.fetchai.skills.tac_control.game import Game, Phase

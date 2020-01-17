@@ -17,6 +17,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the base classes for the skills."""
+
 import importlib.util
 import inspect
 import logging
@@ -26,16 +27,16 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Optional, Dict, Any, cast
+from typing import Any, Dict, Optional, cast
 
-from aea.configurations.base import BehaviourConfig, HandlerConfig, TaskConfig, SharedClassConfig, SkillConfig, \
-    ProtocolId, DEFAULT_SKILL_CONFIG_FILE
+from aea.configurations.base import BehaviourConfig, DEFAULT_SKILL_CONFIG_FILE, HandlerConfig, ProtocolId, SharedClassConfig, SkillConfig, \
+    TaskConfig
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import ConnectionStatus
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
-from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
-from aea.helpers.base import load_module, add_agent_component_module_to_sys_modules, load_agent_component_package
+from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.helpers.base import add_agent_component_module_to_sys_modules, load_agent_component_package, load_module
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
 
