@@ -20,17 +20,15 @@
 
 import inspect
 import os
-# import sys
-# from unittest import TestCase
-import yaml
 import shutil
 import tempfile
-# from pathlib import Path
 
-from aea.protocols.generator import ProtocolGenerator
+import yaml
+
 from aea.configurations.base import ProtocolSpecification
 from aea.configurations.loader import ConfigLoader
-# from aea.helpers.base import load_module, import_module
+from aea.protocols.generator import ProtocolGenerator
+
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 
