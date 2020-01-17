@@ -277,7 +277,7 @@ def test_unknown_performative():
         performative=FIPAMessage.Performative.ACCEPT,
     )
     with mock.patch.object(FIPAMessage.Performative, "__eq__", return_value=False):
-        assert not msg.check_consistency()
+        assert not msg._check_consistency()
 
 
 def test_performative_string_value():

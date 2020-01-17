@@ -17,15 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests for the Scaffold protocol."""
-
-import pytest
-
-from aea.protocols.scaffold.message import MyScaffoldMessage
-
-
-def test_scaffold_message():
-    """Testing the creation of a scaffold message."""
-    with pytest.raises(NotImplementedError):
-        msg = MyScaffoldMessage(performative="")
-        assert not msg._check_consistency(), "Not Implemented Error"
+"""This module contains the implementation of the error skill."""

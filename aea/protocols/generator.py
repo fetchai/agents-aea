@@ -131,23 +131,20 @@ class ProtocolGenerator:
             speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
             speech_act_str += "            "
-            speech_act_str += "'"
+            speech_act_str += '"'
             speech_act_str += performative
-            speech_act_str += "': {"
+            speech_act_str += '": {'
             if len(speech_act_content_config.args.items()) > 0:
-                speech_act_str += "\n"
                 for key, value in speech_act_content_config.args.items():
-                    speech_act_str += "                "
-                    speech_act_str += "'"
+                    speech_act_str += '"'
                     speech_act_str += key
-                    speech_act_str += "'"
-                    speech_act_str += ", "
+                    speech_act_str += '"'
+                    speech_act_str += ": "
                     speech_act_str += value
-                    speech_act_str += ",\n"
+                    speech_act_str += ", "
                 speech_act_str = speech_act_str[:-2]
-                speech_act_str += "\n            "
             speech_act_str += "},\n"
-        speech_act_str = speech_act_str[:-2]
+        speech_act_str = speech_act_str[:-1]
         speech_act_str += "\n        }"
         return speech_act_str
 
@@ -183,9 +180,17 @@ class ProtocolGenerator:
         )
 
         # __init__
-        cls_str += "    def __init__(self, message_id: int, target: int, performative: str, contents: Dict, **kwargs):\n"
+        cls_str += "    def __init__(\n"
+        cls_str += "        self, message_id: int, target: int, performative: str, contents: Dict, **kwargs\n"
+        cls_str += "    ):\n"
         cls_str += '        """Initialise."""\n'
-        cls_str += "        super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)\n\n"
+        cls_str += "        super().__init__(\n"
+        cls_str += "            message_id=message_id,\n"
+        cls_str += "            target=target,\n"
+        cls_str += "            performative=performative,\n"
+        cls_str += "            contents=contents,\n"
+        cls_str += "            **kwargs\n"
+        cls_str += "        )\n\n"
 
         # variables
         # cls_str += str.format('        self.performatives = {}\n', self._performatives_set())
@@ -230,21 +235,29 @@ class ProtocolGenerator:
 
         cls_str += "            # Light Protocol 2\n"
         cls_str += "            # Check correct performative\n"
-        cls_str += '            assert performative in self.performatives, "performative is not in the list of allowed performative"\n\n'
+        cls_str += "            assert (\n"
+        cls_str += "                performative in self.performatives\n"
+        cls_str += '            ), "performative is not in the list of allowed performative"\n\n'
 
         cls_str += "            # Check correct contents\n"
         cls_str += "            contents_definition = self.speech_acts[performative]  # type is Dict\n"
         cls_str += "            # Check number of contents\n"
-        cls_str += '            assert len(contents) == len(contents_definition), "incorrect number of contents"\n'
+        cls_str += "            assert len(contents) == len(\n"
+        cls_str += "                contents_definition\n"
+        cls_str += '            ), "incorrect number of contents"\n'
         cls_str += "            # Check the content is of the correct type\n"
         cls_str += "            for content, content_type in contents_definition:\n"
-        cls_str += '                assert isinstance(contents[content], content_type), "incorrect content type"\n\n'
+        cls_str += "                assert isinstance(\n"
+        cls_str += "                    contents[content], content_type\n"
+        cls_str += '                ), "incorrect content type"\n\n'
 
         cls_str += "            # Light Protocol 3\n"
         cls_str += "            if message_id == 1:\n"
         cls_str += '                assert target == 0, "target should be 0"\n'
         cls_str += "            else:\n"
-        cls_str += '                assert 0 < target < message_id, "target should be strictly between 0 and message_id"\n'
+        cls_str += "                assert (\n"
+        cls_str += "                    0 < target < message_id\n"
+        cls_str += '                ), "target should be strictly between 0 and message_id"\n'
         cls_str += "        except (AssertionError, ValueError, KeyError) as e:\n"
         cls_str += "            print(str(e))\n"
         cls_str += "            return False\n\n"
@@ -284,7 +297,7 @@ class ProtocolGenerator:
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += str.format(
-            "from {}.{}.{}.{}.message import {}Message\n\n\n",
+            "from {}.{}.{}.{}.message import (\n    {}Message,\n)\n\n\n",
             PATH_TO_PACKAGES,
             self.protocol_specification.author,
             "protocols",
@@ -313,7 +326,9 @@ class ProtocolGenerator:
         cls_str += '        body["target"] = msg.get("target")\n'
         cls_str += '        body["performative"] = msg.get("performative")\n\n'
         cls_str += '        contents_dict = msg.get("contents")\n'
-        cls_str += '        contents_dict_bytes = base64.b64encode(pickle.dumps(contents_dict)).decode("utf-8")\n'
+        cls_str += "        contents_dict_bytes = base64.b64encode(pickle.dumps(contents_dict)).decode(\n"
+        cls_str += '            "utf-8"\n'
+        cls_str += "        )\n"
         cls_str += '        body["contents"] = contents_dict_bytes\n\n'
         cls_str += '        bytes_msg = json.dumps(body).encode("utf-8")\n'
         cls_str += "        return bytes_msg\n\n"
@@ -333,9 +348,14 @@ class ProtocolGenerator:
         )
         cls_str += "        contents_dict = pickle.loads(contents_dict_bytes)\n\n"
         cls_str += str.format(
-            "        return {}Message(message_id=message_id, target=target, performative=performative, contents=contents_dict)\n",
+            "        return {}Message(\n",
             to_camel_case(self.protocol_specification.name),
         )
+        cls_str += "            message_id=message_id,\n"
+        cls_str += "            target=target,\n"
+        cls_str += "            performative=performative,\n"
+        cls_str += "            contents=contents_dict,\n"
+        cls_str += "        )\n"
 
         return cls_str
 

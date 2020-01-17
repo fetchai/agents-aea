@@ -278,7 +278,7 @@ class OEFChannel(OEFAgent):
         oef_addr: str,
         oef_port: int,
         core: AsyncioCore,
-        excluded_protocols: Optional[List[str]] = None,
+        excluded_protocols: Optional[Set[str]] = None,
     ):
         """
         Initialize.

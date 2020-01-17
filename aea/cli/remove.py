@@ -67,7 +67,7 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
 
     # TODO we assume the item in the agent config are necessarily in the agent projects.
     item_folder = Path("vendor", item_id.author, item_type_plural, item_name)
-    if not item_folder.exists() and ctx.agent_config.author:
+    if not item_folder.exists() and ctx.agent_config.author == item_id.author:
         # check if it is present in custom packages.
         item_folder = Path(item_type_plural, item_name)
 

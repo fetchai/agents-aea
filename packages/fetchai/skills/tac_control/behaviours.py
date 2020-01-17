@@ -35,7 +35,7 @@ from packages.fetchai.skills.tac_control.parameters import Parameters
 
 CONTROLLER_DATAMODEL = DataModel(
     "tac",
-    [Attribute("version", str, True, "Version number of the TAC Controller Agent."),],
+    [Attribute("version", str, True, "Version number of the TAC Controller Agent.")],
 )
 
 logger = logging.getLogger("aea.tac_control_skill")

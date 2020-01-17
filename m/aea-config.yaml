@@ -1,0 +1,22 @@
+aea_version: 0.1.16
+agent_name: m
+author: fetchai
+connections:
+- fetchai/stub:0.1.0
+default_connection: fetchai/stub:0.1.0
+default_ledger: fetchai
+description: ''
+fingerprint: ''
+ledger_apis: {}
+license: ''
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: []
+protocols:
+- fetchai/default:0.1.0
+- fetchai/two_party_negotiation:0.1.0
+registry_path: ../packages
+skills:
+- fetchai/error:0.1.0
+version: 0.1.0

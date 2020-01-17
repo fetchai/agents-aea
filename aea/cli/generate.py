@@ -40,13 +40,6 @@ from aea.configurations.base import (
 from aea.configurations.loader import ConfigLoader
 from aea.protocols.generator import ProtocolGenerator
 
-# these variables are being used dynamically
-from aea.configurations.base import (
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
-)  # noqa: F401, I100
-
 
 @click.group()
 @pass_ctx

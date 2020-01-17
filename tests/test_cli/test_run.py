@@ -137,7 +137,7 @@ def test_run_with_default_connection(pytestconfig):
 
 @pytest.mark.parametrize(
     argnames=["connection_names"],
-    argvalues=[["local,stub"], ["'local, stub'"], ["local,,stub,"],],
+    argvalues=[["local,stub"], ["'local, stub'"], ["local,,stub,"]],
 )
 def test_run_multiple_connections(pytestconfig, connection_names):
     """Test that the command 'aea run' works as expected when specifying multiple connections."""
@@ -169,7 +169,7 @@ def test_run_multiple_connections(pytestconfig, connection_names):
     assert result.exit_code == 1
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "aea.cli", "run", "--connections", connection_names,],
+        [sys.executable, "-m", "aea.cli", "run", "--connections", connection_names],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )

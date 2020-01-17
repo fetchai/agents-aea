@@ -38,13 +38,6 @@ from aea.cli.common import (
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
-# these variables are being used dynamically
-from aea.configurations.base import (
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
-)  # noqa: F401
-
 
 @click.group()
 @pass_ctx
