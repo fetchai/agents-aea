@@ -43,7 +43,9 @@ class TestInstall:
         cls.runner = CliRunner()
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -65,7 +67,11 @@ class TestInstallFromRequirementFile:
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install", "-r", "requirements.txt"], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "install", "-r", "requirements.txt"],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -86,16 +92,22 @@ class TestInstallFailsWhenDependencyDoesNotExist:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", "my_protocol"], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "protocol", "my_protocol"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
         config_path = Path("protocols", "my_protocol", DEFAULT_PROTOCOL_CONFIG_FILE)
@@ -104,16 +116,18 @@ class TestInstallFailsWhenDependencyDoesNotExist:
             {
                 "this_is_a_test_dependency": {
                     "version": "==0.1.0",
-                    "index": "https://test.pypi.org/simple"
+                    "index": "https://test.pypi.org/simple",
                 },
                 "this_is_a_test_dependency_on_git": {
                     "git": "https://github.com/an_user/a_repo.git",
-                    "ref": "master"
-                }
+                    "ref": "master",
+                },
             }
         )
         yaml.safe_dump(config, open(config_path, "w"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -135,7 +149,11 @@ class TestInstallWithRequirementFailsWhenFileIsBad:
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "install", "-r", "bad_requirements.txt"], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "install", "-r", "bad_requirements.txt"],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""

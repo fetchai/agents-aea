@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -49,9 +48,10 @@ def test_add_item():
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
         response_remove = app.post(
-            'api/agent/' + agent_name + "/connection",
-            content_type='application/json',
-            data=json.dumps(connection_id))
+            "api/agent/" + agent_name + "/connection",
+            content_type="application/json",
+            data=json.dumps(connection_id),
+        )
     assert response_remove.status_code == 201
     data = json.loads(response_remove.get_data(as_text=True))
     assert data == agent_name
@@ -80,9 +80,12 @@ def test_delete_agent_fail():
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
         response_remove = app.post(
-            'api/agent/' + agent_name + "/connection",
-            content_type='application/json',
-            data=json.dumps(connection_id))
+            "api/agent/" + agent_name + "/connection",
+            content_type="application/json",
+            data=json.dumps(connection_id),
+        )
     assert response_remove.status_code == 400
     data = json.loads(response_remove.get_data(as_text=True))
-    assert data["detail"] == "Failed to add connection {} to agent {}".format(connection_id, agent_name)
+    assert data["detail"] == "Failed to add connection {} to agent {}".format(
+        connection_id, agent_name
+    )

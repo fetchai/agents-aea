@@ -34,10 +34,9 @@ from aea.mail.base import Address
 class Message:
     """This class implements a message."""
 
-    protocol_id = 'base'
+    protocol_id = "base"
 
-    def __init__(self, body: Optional[Dict] = None,
-                 **kwargs):
+    def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
 
@@ -111,13 +110,24 @@ class Message:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, Message) \
-            and self.body == other.body \
+        return (
+            isinstance(other, Message)
+            and self.body == other.body
             and self._counterparty == other._counterparty
+        )
 
     def __str__(self):
         """Get the string representation of the message."""
-        return "Message(" + " ".join(map(lambda key_value: str(key_value[0]) + "=" + str(key_value[1]), self.body.items())) + ")"
+        return (
+            "Message("
+            + " ".join(
+                map(
+                    lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
+                    self.body.items(),
+                )
+            )
+            + ")"
+        )
 
 
 class Encoder(ABC):

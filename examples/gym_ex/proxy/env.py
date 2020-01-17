@@ -33,7 +33,9 @@ from aea.helpers.base import locate
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
-sys.modules["packages.fetchai.connections.gym"] = locate("packages.fetchai.connections.gym")
+sys.modules["packages.fetchai.connections.gym"] = locate(
+    "packages.fetchai.connections.gym"
+)
 sys.modules["packages.fetchai.protocols.gym"] = locate("packages.fetchai.protocols.gym")
 from packages.fetchai.protocols.gym.message import GymMessage  # noqa: E402
 from packages.fetchai.protocols.gym.serialization import GymSerializer  # noqa: E402
@@ -47,7 +49,7 @@ Done = bool
 Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
 
-DEFAULT_GYM = 'gym'
+DEFAULT_GYM = "gym"
 
 
 class ProxyEnv(gym.Env):
@@ -63,7 +65,9 @@ class ProxyEnv(gym.Env):
         super().__init__()
         self._queue = Queue()
         self._action_counter = 0
-        self._agent = ProxyAgent(name="proxy", gym_env=gym_env, proxy_env_queue=self._queue)
+        self._agent = ProxyAgent(
+            name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
+        )
         crypto_object = self._agent.wallet.crypto_objects.get(DEFAULT)
         self._agent_address = crypto_object.address
         self._agent_thread = Thread(target=self._agent.start)
@@ -100,7 +104,7 @@ class ProxyEnv(gym.Env):
 
         return observation, reward, done, info
 
-    def render(self, mode='human') -> None:
+    def render(self, mode="human") -> None:
         """
         Render the environment.
 
@@ -119,8 +123,12 @@ class ProxyEnv(gym.Env):
             self._connect()
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent_address, protocol_id=GymMessage.protocol_id,
-                            message=gym_bytes)
+        envelope = Envelope(
+            to=DEFAULT_GYM,
+            sender=self._agent_address,
+            protocol_id=GymMessage.protocol_id,
+            message=gym_bytes,
+        )
         self._agent.outbox.put(envelope)
 
     def close(self) -> None:
@@ -131,8 +139,12 @@ class ProxyEnv(gym.Env):
         """
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent_address, protocol_id=GymMessage.protocol_id,
-                            message=gym_bytes)
+        envelope = Envelope(
+            to=DEFAULT_GYM,
+            sender=self._agent_address,
+            protocol_id=GymMessage.protocol_id,
+            message=gym_bytes,
+        )
         self._agent.outbox.put(envelope)
         self._disconnect()
 
@@ -165,10 +177,16 @@ class ProxyEnv(gym.Env):
         :param step_id: the step id
         :return: an envelope
         """
-        gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
+        gym_msg = GymMessage(
+            performative=GymMessage.Performative.ACT, action=action, step_id=step_id
+        )
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._agent_address, protocol_id=GymMessage.protocol_id,
-                            message=gym_bytes)
+        envelope = Envelope(
+            to=DEFAULT_GYM,
+            sender=self._agent_address,
+            protocol_id=GymMessage.protocol_id,
+            message=gym_bytes,
+        )
         return envelope
 
     def _decode_percept(self, envelope: Envelope, expected_step_id: int) -> Message:
@@ -181,14 +199,23 @@ class ProxyEnv(gym.Env):
         :return: a message received as a response to the action performed in apply_action.
         """
         if envelope is not None:
-            if envelope.protocol_id == 'gym':
+            if envelope.protocol_id == "gym":
                 gym_msg = GymSerializer().decode(envelope.message)
-                gym_msg_performative = GymMessage.Performative(gym_msg.get("performative"))
+                gym_msg_performative = GymMessage.Performative(
+                    gym_msg.get("performative")
+                )
                 gym_msg_step_id = gym_msg.get("step_id")
-                if gym_msg_performative == GymMessage.Performative.PERCEPT and gym_msg_step_id == expected_step_id:
+                if (
+                    gym_msg_performative == GymMessage.Performative.PERCEPT
+                    and gym_msg_step_id == expected_step_id
+                ):
                     return gym_msg
                 else:
-                    raise ValueError("Unexpected performative or no step_id: {}".format(gym_msg_performative))
+                    raise ValueError(
+                        "Unexpected performative or no step_id: {}".format(
+                            gym_msg_performative
+                        )
+                    )
             else:
                 raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
         else:

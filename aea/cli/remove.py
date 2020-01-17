@@ -25,7 +25,13 @@ from pathlib import Path
 
 import click
 
-from aea.cli.common import Context, PublicIdParameter, logger, pass_ctx, try_to_load_agent_config
+from aea.cli.common import (
+    Context,
+    PublicIdParameter,
+    logger,
+    pass_ctx,
+    try_to_load_agent_config,
+)
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
 
 
@@ -41,13 +47,21 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
     item_name = item_id.name
     item_type_plural = "{}s".format(item_type)
     existing_item_ids = getattr(ctx.agent_config, item_type_plural)
-    existing_items_name_to_ids = {public_id.name: public_id for public_id in existing_item_ids}
+    existing_items_name_to_ids = {
+        public_id.name: public_id for public_id in existing_item_ids
+    }
 
     agent_name = ctx.agent_config.agent_name
-    logger.info("Removing {item_type} '{item_name}' from the agent '{agent_name}'..."
-                .format(agent_name=agent_name, item_type=item_type, item_name=item_name))
+    logger.info(
+        "Removing {item_type} '{item_name}' from the agent '{agent_name}'...".format(
+            agent_name=agent_name, item_type=item_type, item_name=item_name
+        )
+    )
 
-    if item_id not in existing_items_name_to_ids.keys() and item_id not in existing_item_ids:
+    if (
+        item_id not in existing_items_name_to_ids.keys()
+        and item_id not in existing_item_ids
+    ):
         logger.error("The {} '{}' is not supported.".format(item_type, item_id))
         sys.exit(1)
 
@@ -71,7 +85,7 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
 
 
 @remove.command()
-@click.argument('connection_id', type=PublicIdParameter(), required=True)
+@click.argument("connection_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def connection(ctx: Context, connection_id):
     """
@@ -83,7 +97,7 @@ def connection(ctx: Context, connection_id):
 
 
 @remove.command()
-@click.argument('protocol_id', type=PublicIdParameter(), required=True)
+@click.argument("protocol_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_id):
     """
@@ -95,7 +109,7 @@ def protocol(ctx: Context, protocol_id):
 
 
 @remove.command()
-@click.argument('skill_id', type=PublicIdParameter(), required=True)
+@click.argument("skill_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def skill(ctx: Context, skill_id):
     """

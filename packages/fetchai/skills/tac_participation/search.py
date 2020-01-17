@@ -32,7 +32,11 @@ class Search(SharedClass):
 
     def __init__(self, **kwargs):
         """Instantiate the search class."""
-        self._search_interval = cast(float, kwargs.pop('search_interval')) if 'search_interval' in kwargs.keys() else DEFAULT_SEARCH_INTERVAL
+        self._search_interval = (
+            cast(float, kwargs.pop("search_interval"))
+            if "search_interval" in kwargs.keys()
+            else DEFAULT_SEARCH_INTERVAL
+        )
         super().__init__(**kwargs)
         self._id = 0
         self.ids_for_tac = set()  # type: Set[int]

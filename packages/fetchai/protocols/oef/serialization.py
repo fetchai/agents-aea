@@ -48,17 +48,30 @@ class OEFSerializer(Serializer):
         msg = cast(OEFMessage, msg)
         new_body = copy.copy(msg.body)
         new_body["type"] = msg.type.value
-        new_body['id'] = msg.id
+        new_body["id"] = msg.id
 
-        if msg.type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
+        if msg.type in {
+            OEFMessage.Type.REGISTER_SERVICE,
+            OEFMessage.Type.UNREGISTER_SERVICE,
+        }:
             service_description = msg.service_description
-            service_description_bytes = base64.b64encode(pickle.dumps(service_description)).decode("utf-8")
+            service_description_bytes = base64.b64encode(
+                pickle.dumps(service_description)
+            ).decode("utf-8")
             new_body["service_description"] = service_description_bytes
-        elif msg.type in {OEFMessage.Type.REGISTER_AGENT, OEFMessage.Type.UNREGISTER_AGENT}:
+        elif msg.type in {
+            OEFMessage.Type.REGISTER_AGENT,
+            OEFMessage.Type.UNREGISTER_AGENT,
+        }:
             agent_description = msg.agent_description
-            agent_description_bytes = base64.b64encode(pickle.dumps(agent_description)).decode("utf-8")
+            agent_description_bytes = base64.b64encode(
+                pickle.dumps(agent_description)
+            ).decode("utf-8")
             new_body["agent_description"] = agent_description_bytes
-        elif msg.type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
+        elif msg.type in {
+            OEFMessage.Type.SEARCH_SERVICES,
+            OEFMessage.Type.SEARCH_AGENTS,
+        }:
             query = msg.query
             query_bytes = base64.b64encode(pickle.dumps(query)).decode("utf-8")
             new_body["query"] = query_bytes
@@ -81,18 +94,29 @@ class OEFSerializer(Serializer):
         """
         json_msg = json.loads(obj.decode("utf-8"))
         oef_type = OEFMessage.Type(json_msg["type"])
-        oef_id = json_msg['id']
+        oef_id = json_msg["id"]
         new_body = copy.copy(json_msg)
 
-        if oef_type in {OEFMessage.Type.REGISTER_SERVICE, OEFMessage.Type.UNREGISTER_SERVICE}:
-            service_description_bytes = base64.b64decode(json_msg["service_description"])
+        if oef_type in {
+            OEFMessage.Type.REGISTER_SERVICE,
+            OEFMessage.Type.UNREGISTER_SERVICE,
+        }:
+            service_description_bytes = base64.b64decode(
+                json_msg["service_description"]
+            )
             service_description = pickle.loads(service_description_bytes)
             new_body["service_description"] = service_description
-        elif oef_type in {OEFMessage.Type.REGISTER_AGENT, OEFMessage.Type.UNREGISTER_AGENT}:
+        elif oef_type in {
+            OEFMessage.Type.REGISTER_AGENT,
+            OEFMessage.Type.UNREGISTER_AGENT,
+        }:
             agent_description_bytes = base64.b64decode(json_msg["agent_description"])
             agent_description = pickle.loads(agent_description_bytes)
             new_body["agent_description"] = agent_description
-        elif oef_type in {OEFMessage.Type.SEARCH_SERVICES, OEFMessage.Type.SEARCH_AGENTS}:
+        elif oef_type in {
+            OEFMessage.Type.SEARCH_SERVICES,
+            OEFMessage.Type.SEARCH_AGENTS,
+        }:
             query_bytes = base64.b64decode(json_msg["query"])
             query = pickle.loads(query_bytes)
             new_body["query"] = query

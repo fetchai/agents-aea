@@ -38,32 +38,33 @@ def test_create_and_run_agent():
         app = create_app()
 
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(temp_cwd.temp_dir, "packages"))
+        shutil.copytree(
+            Path(CUR_PATH, "..", "packages"), Path(temp_cwd.temp_dir, "packages")
+        )
 
         agent_id = "test_agent"
 
         # Make an agent
         response_create = app.post(
-            'api/agent',
-            content_type='application/json',
-            data=json.dumps(agent_id))
+            "api/agent", content_type="application/json", data=json.dumps(agent_id)
+        )
         assert response_create.status_code == 201
         data = json.loads(response_create.get_data(as_text=True))
         assert data == agent_id
 
         # Add the local connection
         response_add = app.post(
-            'api/agent/' + agent_id + "/connection",
-            content_type='application/json',
-            data=json.dumps("fetchai/local:0.1.0")
+            "api/agent/" + agent_id + "/connection",
+            content_type="application/json",
+            data=json.dumps("fetchai/local:0.1.0"),
         )
         assert response_add.status_code == 201
 
         # Get the running status before we have run it
         response_status = app.get(
-            'api/agent/' + agent_id + "/run",
+            "api/agent/" + agent_id + "/run",
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
@@ -71,35 +72,35 @@ def test_create_and_run_agent():
 
         # run the agent with a non existent connection
         response_run = app.post(
-            'api/agent/' + agent_id + "/run",
-            content_type='application/json',
-            data=json.dumps("author/non-existent-connection:0.1.0")
+            "api/agent/" + agent_id + "/run",
+            content_type="application/json",
+            data=json.dumps("author/non-existent-connection:0.1.0"),
         )
         assert response_run.status_code == 400
 
         # run the agent with default connection - should be something in the error output?
         response_run = app.post(
-            'api/agent/' + agent_id + "/run",
-            content_type='application/json',
-            data=json.dumps("")
+            "api/agent/" + agent_id + "/run",
+            content_type="application/json",
+            data=json.dumps(""),
         )
         assert response_run.status_code == 201
         time.sleep(2)
 
         # Stop the agent running
         response_stop = app.delete(
-            'api/agent/' + agent_id + "/run",
+            "api/agent/" + agent_id + "/run",
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
         assert response_stop.status_code == 200
         time.sleep(2)
 
         # run the agent with local connection (as no OEF node is running)
         response_run = app.post(
-            'api/agent/' + agent_id + "/run",
-            content_type='application/json',
-            data=json.dumps("local")
+            "api/agent/" + agent_id + "/run",
+            content_type="application/json",
+            data=json.dumps("local"),
         )
         assert response_run.status_code == 201
 
@@ -107,17 +108,17 @@ def test_create_and_run_agent():
 
         # Try running it again (this should fail)
         response_run = app.post(
-            'api/agent/' + agent_id + "/run",
-            content_type='application/json',
-            data=json.dumps("local")
+            "api/agent/" + agent_id + "/run",
+            content_type="application/json",
+            data=json.dumps("local"),
         )
         assert response_run.status_code == 400
 
         # Get the running status
         response_status = app.get(
-            'api/agent/' + agent_id + "/run",
+            "api/agent/" + agent_id + "/run",
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
@@ -137,17 +138,17 @@ def test_create_and_run_agent():
 
         with unittest.mock.patch("aea.cli_gui._stop_agent", _stop_agent_override):
             app.delete(
-                'api/agent/' + agent_id + "/run",
+                "api/agent/" + agent_id + "/run",
                 data=None,
-                content_type='application/json',
+                content_type="application/json",
             )
         time.sleep(1)
 
         # Get the running status
         response_status = app.get(
-            'api/agent/' + agent_id + "/run",
+            "api/agent/" + agent_id + "/run",
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
@@ -156,9 +157,9 @@ def test_create_and_run_agent():
 
         # run the agent again (takes a different path through code)
         response_run = app.post(
-            'api/agent/' + agent_id + "/run",
-            content_type='application/json',
-            data=json.dumps("local")
+            "api/agent/" + agent_id + "/run",
+            content_type="application/json",
+            data=json.dumps("local"),
         )
         assert response_run.status_code == 201
 
@@ -166,9 +167,9 @@ def test_create_and_run_agent():
 
         # Get the running status
         response_status = app.get(
-            'api/agent/' + agent_id + "/run",
+            "api/agent/" + agent_id + "/run",
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
@@ -178,18 +179,18 @@ def test_create_and_run_agent():
 
         # Stop the agent running
         response_stop = app.delete(
-            'api/agent/' + agent_id + "/run",
+            "api/agent/" + agent_id + "/run",
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
         assert response_stop.status_code == 200
         time.sleep(2)
 
         # Get the running status
         response_status = app.get(
-            'api/agent/' + agent_id + "/run",
+            "api/agent/" + agent_id + "/run",
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
@@ -199,9 +200,9 @@ def test_create_and_run_agent():
 
         # Stop a none existent agent running
         response_stop = app.delete(
-            'api/agent/' + agent_id + "_NOT" + "/run",
+            "api/agent/" + agent_id + "_NOT" + "/run",
             data=None,
-            content_type='application/json',
+            content_type="application/json",
         )
         assert response_stop.status_code == 400
         time.sleep(2)
@@ -220,8 +221,8 @@ def test_create_and_run_agent():
         # Run when process files (but other call - such as status should not fail)
         with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
             response_run = app.post(
-                'api/agent/' + agent_id + "/run",
-                content_type='application/json',
-                data=json.dumps("local")
+                "api/agent/" + agent_id + "/run",
+                content_type="application/json",
+                data=json.dumps("local"),
             )
         assert response_run.status_code == 400

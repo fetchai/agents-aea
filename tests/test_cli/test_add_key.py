@@ -32,7 +32,11 @@ from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.default import DEFAULT, DefaultCrypto
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI, FetchAICrypto
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE
+from aea.crypto.helpers import (
+    DEFAULT_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE,
+)
 
 from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION
@@ -64,7 +68,9 @@ class TestAddKey:
         # this line tests that the content of the file is correct.
         DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", DEFAULT, DEFAULT_PRIVATE_KEY_FILE])
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", DEFAULT, DEFAULT_PRIVATE_KEY_FILE]
+        )
         assert result.exit_code == 0
 
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
@@ -86,7 +92,9 @@ class TestAddKey:
         # this line tests that the content of the file is correct.
         FetchAICrypto(FETCHAI_PRIVATE_KEY_FILE)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, FETCHAI_PRIVATE_KEY_FILE])
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, FETCHAI_PRIVATE_KEY_FILE]
+        )
         assert result.exit_code == 0
 
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
@@ -108,7 +116,9 @@ class TestAddKey:
         # this line tests that the content of the file is correct.
         FetchAICrypto(FETCHAI_PRIVATE_KEY_FILE)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE])
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE]
+        )
         assert result.exit_code == 0
 
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
@@ -146,7 +156,9 @@ def test_add_key_fails_bad_key():
 
             result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", DEFAULT, pvk_file])
             assert result.exit_code == 1
-            mock_logger_error.assert_called_with("This is not a valid private key file: '{}'".format(pvk_file))
+            mock_logger_error.assert_called_with(
+                "This is not a valid private key file: '{}'".format(pvk_file)
+            )
 
             # check that no key has been added.
             f = open(Path(DEFAULT_AEA_CONFIG_FILE))
@@ -174,7 +186,9 @@ def test_add_key_fails_bad_ledger_id():
         assert Path(DEFAULT_PRIVATE_KEY_FILE).exists()
         bad_ledger_id = "this_is_a_bad_ledger_id"
 
-        result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", bad_ledger_id, DEFAULT_PRIVATE_KEY_FILE])
+        result = runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", bad_ledger_id, DEFAULT_PRIVATE_KEY_FILE]
+        )
         assert result.exit_code == 2
 
         # check that no key has been added.

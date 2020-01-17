@@ -37,16 +37,21 @@ def test_default_bytes_serialization():
     assert expected_msg == actual_msg
 
     with pytest.raises(ValueError):
-        with mock.patch("aea.protocols.default.message.DefaultMessage.Type")\
-                as mock_type_enum:
+        with mock.patch(
+            "aea.protocols.default.message.DefaultMessage.Type"
+        ) as mock_type_enum:
             mock_type_enum.BYTES.value = "unknown"
-            assert DefaultSerializer().encode(expected_msg),\
-                ""
+            assert DefaultSerializer().encode(expected_msg), ""
 
 
 def test_default_error_serialization():
     """Test that the serialization for the 'simple' protocol works for the ERROR message."""
-    msg = DefaultMessage(type=DefaultMessage.Type.ERROR, error_code=-10001, error_msg="An error", error_data={'error': 'Some data'})
+    msg = DefaultMessage(
+        type=DefaultMessage.Type.ERROR,
+        error_code=-10001,
+        error_msg="An error",
+        error_data={"error": "Some data"},
+    )
     msg_bytes = DefaultSerializer().encode(msg)
     actual_msg = DefaultSerializer().decode(msg_bytes)
     expected_msg = msg
@@ -54,8 +59,9 @@ def test_default_error_serialization():
 
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     with pytest.raises(ValueError):
-        with mock.patch("aea.protocols.default.message.DefaultMessage.Type") \
-                as mock_type_enum:
+        with mock.patch(
+            "aea.protocols.default.message.DefaultMessage.Type"
+        ) as mock_type_enum:
             mock_type_enum.BYTES.value = "unknown"
             body = {}  # Dict[str, Any]
             body["type"] = str(msg.type.value)
@@ -68,10 +74,12 @@ def test_default_error_serialization():
 
 def test_default_message_str_values():
     """Tests the returned string values of default Message."""
-    assert str(DefaultMessage.Type.BYTES) == "bytes",\
-        "DefaultMessage.Type.BYTES must be bytes"
-    assert str(DefaultMessage.Type.ERROR) == "error",\
-        "DefaultMessage.Type.ERROR must be error"
+    assert (
+        str(DefaultMessage.Type.BYTES) == "bytes"
+    ), "DefaultMessage.Type.BYTES must be bytes"
+    assert (
+        str(DefaultMessage.Type.ERROR) == "error"
+    ), "DefaultMessage.Type.ERROR must be error"
 
 
 def test_check_consistency_raises_exception_when_type_not_recognized():

@@ -29,7 +29,7 @@ from aea.cli.registry.utils import (
     check_is_author_logged_in,
     clean_tarfiles,
     load_yaml,
-    request_api
+    request_api,
 )
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
@@ -44,8 +44,8 @@ def _compress(output_filename: str, *filepaths):
 def _load_agent_config(agent_config_path: str) -> Dict:
     if not os.path.exists(agent_config_path):
         raise click.ClickException(
-            'Agent config not found. Make sure you run push command '
-            'from a correct folder.'
+            "Agent config not found. Make sure you run push command "
+            "from a correct folder."
         )
     return load_yaml(agent_config_path)
 
@@ -55,27 +55,25 @@ def publish_agent(ctx: Context):
     """Publish an agent."""
     agent_config_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
     agent_config = _load_agent_config(agent_config_path)
-    check_is_author_logged_in(agent_config['author'])
+    check_is_author_logged_in(agent_config["author"])
 
-    name = agent_config['agent_name']
-    output_tar = os.path.join(ctx.cwd, '{}.tar.gz'.format(name))
+    name = agent_config["agent_name"]
+    output_tar = os.path.join(ctx.cwd, "{}.tar.gz".format(name))
     _compress(output_tar, agent_config_path)
 
     data = {
-        'name': name,
-        'description': agent_config['description'],
-        'version': agent_config['version']
+        "name": name,
+        "description": agent_config["description"],
+        "version": agent_config["version"],
     }
-    for key in ('connections', 'protocols', 'skills'):
+    for key in ("connections", "protocols", "skills"):
         data[key] = agent_config[key]
 
-    path = '/agents/create'
-    logger.debug('Publishing agent {} to Registry ...'.format(name))
-    resp = request_api(
-        'POST', path, data=data, auth=True, filepath=output_tar
-    )
+    path = "/agents/create"
+    logger.debug("Publishing agent {} to Registry ...".format(name))
+    resp = request_api("POST", path, data=data, auth=True, filepath=output_tar)
     click.echo(
-        'Successfully published agent {} to the Registry. Public ID: {}'.format(
-            name, resp['public_id']
+        "Successfully published agent {} to the Registry. Public ID: {}".format(
+            name, resp["public_id"]
         )
     )

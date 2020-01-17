@@ -33,26 +33,39 @@ class Parameters(SharedClass):
 
     def __init__(self, **kwargs):
         """Instantiate the search class."""
-        self._min_nb_agents = kwargs.pop('min_nb_agents', 5)  # type: int
-        self._money_endowment = kwargs.pop('money_endowment', 200)  # type: int
-        self._nb_goods = kwargs.pop('nb_goods', 5)  # type: int
-        self._tx_fee = kwargs.pop('tx_fee', 1)
-        self._base_good_endowment = kwargs.pop('base_good_endowment', 2)  # type: int
-        self._lower_bound_factor = kwargs.pop('lower_bound_factor', 1)  # type: int
-        self._upper_bound_factor = kwargs.pop('upper_bound_factor', 1)  # type: int
-        start_time = kwargs.pop('start_time', '01 01 2020  00:01')  # type: str
-        self._start_time = datetime.datetime.strptime(start_time, '%d %m %Y %H:%M')  # type: datetime.datetime
-        self._registration_timeout = kwargs.pop('registration_timeout', 10)  # type: int
-        self._competition_timeout = kwargs.pop('competition_timeout', 20)  # type: int
-        self._inactivity_timeout = kwargs.pop('inactivity_timeout', 10)  # type: int
-        self._whitelist = set(kwargs.pop('whitelist', []))  # type: Set[str]
-        self._version_id = kwargs.pop('version_id', 'v1')  # type: str
+        self._min_nb_agents = kwargs.pop("min_nb_agents", 5)  # type: int
+        self._money_endowment = kwargs.pop("money_endowment", 200)  # type: int
+        self._nb_goods = kwargs.pop("nb_goods", 5)  # type: int
+        self._tx_fee = kwargs.pop("tx_fee", 1)
+        self._base_good_endowment = kwargs.pop("base_good_endowment", 2)  # type: int
+        self._lower_bound_factor = kwargs.pop("lower_bound_factor", 1)  # type: int
+        self._upper_bound_factor = kwargs.pop("upper_bound_factor", 1)  # type: int
+        start_time = kwargs.pop("start_time", "01 01 2020  00:01")  # type: str
+        self._start_time = datetime.datetime.strptime(
+            start_time, "%d %m %Y %H:%M"
+        )  # type: datetime.datetime
+        self._registration_timeout = kwargs.pop("registration_timeout", 10)  # type: int
+        self._competition_timeout = kwargs.pop("competition_timeout", 20)  # type: int
+        self._inactivity_timeout = kwargs.pop("inactivity_timeout", 10)  # type: int
+        self._whitelist = set(kwargs.pop("whitelist", []))  # type: Set[str]
+        self._version_id = kwargs.pop("version_id", "v1")  # type: str
         super().__init__(**kwargs)
         now = datetime.datetime.now()
         if now > self.registration_start_time:
-            logger.warning("[{}]: TAC registration start time {} is in the past!".format(self.context.agent_name, self.registration_start_time))
+            logger.warning(
+                "[{}]: TAC registration start time {} is in the past!".format(
+                    self.context.agent_name, self.registration_start_time
+                )
+            )
         else:
-            logger.info("[{}]: TAC registation start time: {}, and start time: {}, and end time: {}".format(self.context.agent_name, self.registration_start_time, self.start_time, self.end_time))
+            logger.info(
+                "[{}]: TAC registation start time: {}, and start time: {}, and end time: {}".format(
+                    self.context.agent_name,
+                    self.registration_start_time,
+                    self.start_time,
+                    self.end_time,
+                )
+            )
 
     @property
     def min_nb_agents(self) -> int:

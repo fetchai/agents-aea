@@ -32,7 +32,12 @@ from jsonschema import Draft4Validator
 
 import pytest
 
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CLI_LOG_OPTION, CONFIGURATION_SCHEMA_DIR, tcpping
+from ..conftest import (
+    AGENT_CONFIGURATION_SCHEMA,
+    CLI_LOG_OPTION,
+    CONFIGURATION_SCHEMA_DIR,
+    tcpping,
+)
 
 
 class TestGui:
@@ -42,20 +47,24 @@ class TestGui:
     def setup_class(cls):
         """Set the test up."""
         cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.resolver = jsonschema.RefResolver(
+            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+        )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.proc = subprocess.Popen([sys.executable, "-m", "aea.cli", *CLI_LOG_OPTION, "gui"])
+        cls.proc = subprocess.Popen(
+            [sys.executable, "-m", "aea.cli", *CLI_LOG_OPTION, "gui"]
+        )
         time.sleep(10.0)
 
     def test_gui(self, pytestconfig):
         """Test that the gui process has been spawned correctly."""
         if pytestconfig.getoption("ci"):
-            pytest.skip('skipped: CI')
+            pytest.skip("skipped: CI")
         else:
             assert tcpping("localhost", 8080)
 

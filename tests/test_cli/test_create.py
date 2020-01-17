@@ -43,7 +43,12 @@ from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
 
 from ..common.click_testing import CliRunner
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CLI_LOG_OPTION, CONFIGURATION_SCHEMA_DIR, ROOT_DIR
+from ..conftest import (
+    AGENT_CONFIGURATION_SCHEMA,
+    CLI_LOG_OPTION,
+    CONFIGURATION_SCHEMA_DIR,
+    ROOT_DIR,
+)
 
 
 class TestCreate:
@@ -53,7 +58,9 @@ class TestCreate:
     def setup_class(cls):
         """Set the test up."""
         cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.resolver = jsonschema.RefResolver(
+            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+        )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         cls.runner = CliRunner()
@@ -61,7 +68,9 @@ class TestCreate:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         cls.agent_config = cls._load_config_file(cls.agent_name)
 
     @classmethod
@@ -93,7 +102,11 @@ class TestCreate:
         try:
             self.validator.validate(instance=self.agent_config)
         except jsonschema.exceptions.ValidationError as e:
-            pytest.fail("Configuration file is not compliant with the schema. Exception: {}".format(str(e)))
+            pytest.fail(
+                "Configuration file is not compliant with the schema. Exception: {}".format(
+                    str(e)
+                )
+            )
 
     def test_aea_version_is_correct(self):
         """Check that the aea version in the configuration file is correct, i.e. the same of the installed package."""
@@ -143,7 +156,10 @@ class TestCreate:
         """Check the content of vendor directory is as expected."""
         vendor_dir = Path(self.agent_name, "vendor")
         assert vendor_dir.exists()
-        assert set(vendor_dir.iterdir()) == {vendor_dir / "fetchai", vendor_dir / "__init__.py"}
+        assert set(vendor_dir.iterdir()) == {
+            vendor_dir / "fetchai",
+            vendor_dir / "__init__.py",
+        }
 
         # assert that every subdirectory of vendor/fetchai is a Python package
         # (i.e. that contains __init__.py)
@@ -152,38 +168,58 @@ class TestCreate:
 
     def test_vendor_connections_contains_stub_connection(self):
         """Check that the vendor connections directory contains the stub directory."""
-        stub_connection_dirpath = Path(self.agent_name, "vendor", "fetchai", "connections", "stub")
+        stub_connection_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "connections", "stub"
+        )
         assert stub_connection_dirpath.exists()
         assert stub_connection_dirpath.is_dir()
 
     def test_stub_connection_directory_is_equal_to_library_stub_connection(self):
         """Check that the stub connection directory is equal to the package's one (aea.connections.stub)."""
-        stub_connection_dirpath = Path(self.agent_name, "vendor", "fetchai", "connections", "stub")
-        comparison = filecmp.dircmp(str(stub_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "stub")))
+        stub_connection_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "connections", "stub"
+        )
+        comparison = filecmp.dircmp(
+            str(stub_connection_dirpath),
+            str(Path(ROOT_DIR, "aea", "connections", "stub")),
+        )
         assert comparison.diff_files == []
 
     def test_vendor_protocols_contains_default_protocol(self):
         """Check that the vendor protocols directory contains the default protocol."""
-        stub_connection_dirpath = Path(self.agent_name, "vendor", "fetchai", "protocols", "default")
+        stub_connection_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "protocols", "default"
+        )
         assert stub_connection_dirpath.exists()
         assert stub_connection_dirpath.is_dir()
 
     def test_default_protocol_is_equal_to_library_default_protocol(self):
         """Check that the stub connection directory is equal to the package's one (aea.protocols.default)."""
-        default_protocol_dirpath = Path(self.agent_name, "vendor", "fetchai", "protocols", "default")
-        comparison = filecmp.dircmp(str(default_protocol_dirpath), str(Path(ROOT_DIR, "aea", "protocols", "default")))
+        default_protocol_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "protocols", "default"
+        )
+        comparison = filecmp.dircmp(
+            str(default_protocol_dirpath),
+            str(Path(ROOT_DIR, "aea", "protocols", "default")),
+        )
         assert comparison.diff_files == []
 
     def test_vendor_skills_contains_error_skill(self):
         """Check that the vendor skills directory contains the error skill."""
-        error_skill_dirpath = Path(self.agent_name, "vendor", "fetchai", "skills", "error")
+        error_skill_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "skills", "error"
+        )
         assert error_skill_dirpath.exists()
         assert error_skill_dirpath.is_dir()
 
     def test_error_skill_is_equal_to_library_error_skill(self):
         """Check that the error skill directory is equal to the package's one (aea.skills.error)."""
-        default_protocol_dirpath = Path(self.agent_name, "vendor", "fetchai", "skills", "error")
-        comparison = filecmp.dircmp(str(default_protocol_dirpath), str(Path(ROOT_DIR, "aea", "skills", "error")))
+        default_protocol_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "skills", "error"
+        )
+        comparison = filecmp.dircmp(
+            str(default_protocol_dirpath), str(Path(ROOT_DIR, "aea", "skills", "error"))
+        )
         assert comparison.diff_files == []
 
     def test_protocols_directory_content(self):
@@ -226,7 +262,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.cwd = os.getcwd()
@@ -235,7 +271,9 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
@@ -270,14 +308,18 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
-        cls.patch = patch.object(aea.configurations.base.AgentConfig, "json", return_value={"hello": "world"})
+        cls.patch = patch.object(
+            aea.configurations.base.AgentConfig, "json", return_value={"hello": "world"}
+        )
         cls.patch.__enter__()
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
@@ -315,7 +357,9 @@ class TestCreateFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
@@ -346,19 +390,23 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert cls.result.exit_code == 0
 
         # calling 'aea create myagent' again within an AEA project - recursively.
         os.chdir(cls.agent_name)
         os.mkdir("another_subdir")
         os.chdir("another_subdir")
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""

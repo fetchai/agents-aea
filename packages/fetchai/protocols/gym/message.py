@@ -34,10 +34,10 @@ class GymMessage(Message):
     class Performative(Enum):
         """Gym performatives."""
 
-        ACT = 'act'
-        PERCEPT = 'percept'
-        RESET = 'reset'
-        CLOSE = 'close'
+        ACT = "act"
+        PERCEPT = "percept"
+        RESET = "reset"
+        CLOSE = "close"
 
         def __str__(self):
             """Get string representation."""
@@ -56,7 +56,7 @@ class GymMessage(Message):
     def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "Performative is not set."
-        return GymMessage.Performative(self.get('performative'))
+        return GymMessage.Performative(self.get("performative"))
 
     @property
     def action(self) -> Any:
@@ -109,7 +109,10 @@ class GymMessage(Message):
                 assert isinstance(self.info, dict)
                 assert isinstance(self.step_id, int)
                 assert len(self.body) == 6
-            elif self.performative == GymMessage.Performative.RESET or self.performative == GymMessage.Performative.CLOSE:
+            elif (
+                self.performative == GymMessage.Performative.RESET
+                or self.performative == GymMessage.Performative.CLOSE
+            ):
                 assert len(self.body) == 1
             else:
                 raise ValueError("Performative not recognized.")

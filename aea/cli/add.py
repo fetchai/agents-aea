@@ -27,15 +27,27 @@ from typing import Collection, cast
 import click
 from click import pass_context
 
-from aea.cli.common import Context, PublicIdParameter, _copy_package_directory, _find_item_locally, logger, pass_ctx, try_to_load_agent_config
+from aea.cli.common import (
+    Context,
+    PublicIdParameter,
+    _copy_package_directory,
+    _find_item_locally,
+    logger,
+    pass_ctx,
+    try_to_load_agent_config,
+)
 from aea.cli.registry.utils import fetch_package
-from aea.configurations.base import ConfigurationType, DEFAULT_AEA_CONFIG_FILE, PublicId, \
-    _get_default_configuration_file_name_from_type
+from aea.configurations.base import (
+    ConfigurationType,
+    DEFAULT_AEA_CONFIG_FILE,
+    PublicId,
+    _get_default_configuration_file_name_from_type,
+)
 from aea.configurations.loader import ConfigLoader
 
 
 @click.group()
-@click.option('--registry', is_flag=True, help="For adding from Registry.")
+@click.option("--registry", is_flag=True, help="For adding from Registry.")
 @pass_ctx
 def add(ctx: Context, registry):
     """Add a resource to the agent."""
@@ -45,11 +57,18 @@ def add(ctx: Context, registry):
 
 
 def _is_item_present(item_type, item_public_id, ctx):
-    item_type_plural = item_type + 's'
-    dest_path = Path(ctx.cwd, "vendor", item_public_id.author, item_type_plural, item_public_id.name)
+    item_type_plural = item_type + "s"
+    dest_path = Path(
+        ctx.cwd, "vendor", item_public_id.author, item_type_plural, item_public_id.name
+    )
     # check item presence only by author/package_name pair, without version.
-    items_in_config = set(map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural)))
-    return (item_public_id.author, item_public_id.name) in items_in_config and dest_path.exists()
+    items_in_config = set(
+        map(lambda x: (x.author, x.name), getattr(ctx.agent_config, item_type_plural))
+    )
+    return (
+        item_public_id.author,
+        item_public_id.name,
+    ) in items_in_config and dest_path.exists()
 
 
 def _add_protocols(click_context, protocols: Collection[PublicId]):
@@ -57,7 +76,9 @@ def _add_protocols(click_context, protocols: Collection[PublicId]):
     # check for dependencies not yet added, and add them.
     for protocol_public_id in protocols:
         if protocol_public_id not in ctx.agent_config.protocols:
-            logger.debug("Adding protocol '{}' to the agent...".format(protocol_public_id))
+            logger.debug(
+                "Adding protocol '{}' to the agent...".format(protocol_public_id)
+            )
             click_context.invoke(protocol, protocol_public_id=protocol_public_id)
 
 
@@ -77,14 +98,24 @@ def _add_item(click_context, item_type, item_public_id) -> None:
 
     is_registry = ctx.config.get("is_registry")
 
-    logger.info("Adding {} '{}' to the agent '{}'...".format(item_type, item_public_id, agent_name))
+    logger.info(
+        "Adding {} '{}' to the agent '{}'...".format(
+            item_type, item_public_id, agent_name
+        )
+    )
 
     # check if we already have an item with the same name
-    logger.debug("{} already supported by the agent: {}".format(item_type_plural.capitalize(), supported_items))
+    logger.debug(
+        "{} already supported by the agent: {}".format(
+            item_type_plural.capitalize(), supported_items
+        )
+    )
     if _is_item_present(item_type, item_public_id, ctx):
-        logger.error("A {} with id '{}/{}' already exists. Aborting...".format(item_type,
-                                                                               item_public_id.author,
-                                                                               item_public_id.name))
+        logger.error(
+            "A {} with id '{}/{}' already exists. Aborting...".format(
+                item_type, item_public_id.author, item_public_id.name
+            )
+        )
         sys.exit(1)
 
     # find and add protocol
@@ -93,22 +124,32 @@ def _add_item(click_context, item_type, item_public_id) -> None:
         fetch_package(item_type, public_id=item_public_id, cwd=ctx.cwd)
     else:
         package_path = _find_item_locally(ctx, item_type, item_public_id)
-        _copy_package_directory(ctx, package_path, item_type, item_public_id.name, item_public_id.author)
+        _copy_package_directory(
+            ctx, package_path, item_type, item_public_id.name, item_public_id.author
+        )
         if item_type in {"connection", "skill"}:
-            configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
+            configuration_file_name = _get_default_configuration_file_name_from_type(
+                item_type
+            )
             configuration_path = package_path / configuration_file_name
-            configuration_loader = ConfigLoader.from_configuration_type(ConfigurationType(item_type))
+            configuration_loader = ConfigLoader.from_configuration_type(
+                ConfigurationType(item_type)
+            )
             item_configuration = configuration_loader.load(configuration_path.open())
             _add_protocols(click_context, item_configuration.protocols)
 
     # add the item to the configurations.
-    logger.debug("Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE))
+    logger.debug(
+        "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
+    )
     supported_items.add(item_public_id)
-    ctx.agent_loader.dump(ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"))
+    ctx.agent_loader.dump(
+        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+    )
 
 
 @add.command()
-@click.argument('connection_public_id', type=PublicIdParameter(), required=True)
+@click.argument("connection_public_id", type=PublicIdParameter(), required=True)
 @pass_context
 def connection(click_context, connection_public_id: PublicId):
     """Add a connection to the configuration file."""
@@ -116,7 +157,7 @@ def connection(click_context, connection_public_id: PublicId):
 
 
 @add.command()
-@click.argument('protocol_public_id', type=PublicIdParameter(), required=True)
+@click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
 @pass_context
 def protocol(click_context, protocol_public_id):
     """Add a protocol to the agent."""
@@ -124,7 +165,7 @@ def protocol(click_context, protocol_public_id):
 
 
 @add.command()
-@click.argument('skill_public_id', type=PublicIdParameter(), required=True)
+@click.argument("skill_public_id", type=PublicIdParameter(), required=True)
 @pass_context
 def skill(click_context, skill_public_id: PublicId):
     """Add a skill to the agent."""

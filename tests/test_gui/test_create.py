@@ -45,9 +45,8 @@ def test_create_agent():
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
         response_create = app.post(
-            'api/agent',
-            content_type='application/json',
-            data=json.dumps(agent_name))
+            "api/agent", content_type="application/json", data=json.dumps(agent_name)
+        )
     assert response_create.status_code == 201
     data = json.loads(response_create.get_data(as_text=True))
     assert data == agent_name
@@ -69,12 +68,15 @@ def test_create_agent_fail():
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
         response_create = app.post(
-            'api/agent',
-            content_type='application/json',
-            data=json.dumps(agent_name))
+            "api/agent", content_type="application/json", data=json.dumps(agent_name)
+        )
     assert response_create.status_code == 400
     data = json.loads(response_create.get_data(as_text=True))
-    assert data['detail'] == 'Failed to create Agent {} - a folder of this name may exist already'.format(agent_name)
+    assert data[
+        "detail"
+    ] == "Failed to create Agent {} - a folder of this name may exist already".format(
+        agent_name
+    )
 
 
 def test_real_create():
@@ -84,13 +86,14 @@ def test_real_create():
         app = create_app()
 
         # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(temp_cwd.temp_dir, "packages"))
+        shutil.copytree(
+            Path(CUR_PATH, "..", "packages"), Path(temp_cwd.temp_dir, "packages")
+        )
 
         agent_id = "test_agent_id"
         response_create = app.post(
-            'api/agent',
-            content_type='application/json',
-            data=json.dumps(agent_id))
+            "api/agent", content_type="application/json", data=json.dumps(agent_id)
+        )
         assert response_create.status_code == 201
         data = json.loads(response_create.get_data(as_text=True))
         assert data == agent_id
@@ -100,22 +103,18 @@ def test_real_create():
 
         # Check that we can actually see this agent too
         response_agents = app.get(
-            'api/agent',
-            data=None,
-            content_type='application/json',
+            "api/agent", data=None, content_type="application/json",
         )
         data = json.loads(response_agents.get_data(as_text=True))
         assert response_agents.status_code == 200
         assert len(data) == 1
-        assert data[0]['id'] == agent_id
-        assert data[0]['description'] == "placeholder description"
+        assert data[0]["id"] == agent_id
+        assert data[0]["description"] == "placeholder description"
 
         # do same but this time find that this is not an agent directory.
         with unittest.mock.patch("os.path.isdir", return_value=False):
             response_agents = app.get(
-                'api/agent',
-                data=None,
-                content_type='application/json',
+                "api/agent", data=None, content_type="application/json",
             )
         data = json.loads(response_agents.get_data(as_text=True))
         assert response_agents.status_code == 200
