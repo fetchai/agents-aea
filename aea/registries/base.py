@@ -26,21 +26,28 @@ import os
 import pprint
 import re
 from abc import ABC, abstractmethod
-from queue import Queue
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Tuple, cast, Union
+from queue import Queue
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-from aea.configurations.base import ProtocolId, SkillId, ProtocolConfig, DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.base import (
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    ProtocolConfig,
+    ProtocolId,
+    SkillId,
+)
 from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.protocols.base import Protocol, Message
-from aea.skills.base import Handler, Behaviour, Task, Skill, AgentContext
+from aea.protocols.base import Message, Protocol
+from aea.skills.base import AgentContext, Behaviour, Handler, Skill, Task
 
 logger = logging.getLogger(__name__)
 
-PACKAGE_NAME_REGEX = re.compile("^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE)
-INTERNAL_PROTOCOL_ID = 'internal'
-DECISION_MAKER = 'decision_maker'
+PACKAGE_NAME_REGEX = re.compile(
+    "^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", re.IGNORECASE
+)
+INTERNAL_PROTOCOL_ID = "internal"
+DECISION_MAKER = "decision_maker"
 
 
 class Registry(ABC):
@@ -143,21 +150,31 @@ class ProtocolRegistry(Registry):
         :param directory: the filepath to the agent's resource directory.
         :return: None
         """
-        protocols_spec = importlib.util.spec_from_file_location("protocols",
-                                                                os.path.join(directory, "protocols", "__init__.py"))
-        path = cast(str, protocols_spec.origin)
-        if protocols_spec is None or not os.path.exists(path):
-            logger.warning("No protocol found.")
-            return
+        protocol_directory_paths = set()  # type: ignore
 
-        loader_contents = [path.name for path in Path(directory, "protocols").iterdir()]
-        protocols_packages = list(filter(lambda x: PACKAGE_NAME_REGEX.match(x), loader_contents))  # type: ignore
-        logger.debug("Processing the following protocol package: {}".format(protocols_packages))
-        for protocol_name in protocols_packages:
+        # find all protocol directories from vendor/*/protocols
+        protocol_directory_paths.update(
+            Path(directory, "vendor").glob("./*/protocols/*/")
+        )
+        # find all protocol directories from protocols/
+        protocol_directory_paths.update(Path(directory, "protocols").glob("./*/"))
+
+        protocols_packages_paths = list(filter(lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(), protocol_directory_paths))  # type: ignore
+        logger.debug(
+            "Found the following protocol packages: {}".format(
+                pprint.pformat(map(str, protocol_directory_paths))
+            )
+        )
+        for protocol_package in protocols_packages_paths:
             try:
-                self._add_protocol(directory, protocol_name)
+                logger.debug(
+                    "Processing the protocol package '{}'".format(protocol_package)
+                )
+                self._add_protocol(protocol_package)
             except Exception:
-                logger.exception("Not able to add protocol {}.".format(protocol_name))
+                logger.exception(
+                    "Not able to add protocol '{}'.".format(protocol_package.name)
+                )
 
     def setup(self) -> None:
         """
@@ -175,29 +192,37 @@ class ProtocolRegistry(Registry):
         """
         self._protocols = {}
 
-    def _add_protocol(self, directory: str, protocol_name: str):
+    def _add_protocol(self, protocol_directory: Path):
         """
         Add a protocol.
 
-        :param directory: the agent's resources directory.
-        :param protocol_name: the name of the protocol to be added.
+        :param protocol_directory: the directory of the protocol to be added.
         :return: None
         """
         # get the serializer
-        serialization_spec = importlib.util.spec_from_file_location("serialization",
-                                                                    os.path.join(directory, "protocols", protocol_name, "serialization.py"))
+        protocol_name = protocol_directory.name
+        serialization_spec = importlib.util.spec_from_file_location(
+            "serialization", protocol_directory / "serialization.py"
+        )
         serialization_module = importlib.util.module_from_spec(serialization_spec)
         serialization_spec.loader.exec_module(serialization_module)  # type: ignore
         classes = inspect.getmembers(serialization_module, inspect.isclass)
-        serializer_classes = list(filter(lambda x: re.match("\\w+Serializer", x[0]), classes))
+        serializer_classes = list(
+            filter(lambda x: re.match("\\w+Serializer", x[0]), classes)
+        )
         serializer_class = serializer_classes[0][1]
 
-        logger.debug("Found serializer class {serializer_class} for protocol {protocol_name}"
-                     .format(serializer_class=serializer_class, protocol_name=protocol_name))
+        logger.debug(
+            "Found serializer class {serializer_class} for protocol {protocol_name}".format(
+                serializer_class=serializer_class, protocol_name=protocol_name
+            )
+        )
         serializer = serializer_class()
 
         config_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
-        protocol_config = config_loader.load(open(Path(directory, "protocols", protocol_name, DEFAULT_PROTOCOL_CONFIG_FILE)))
+        protocol_config = config_loader.load(
+            open(protocol_directory / DEFAULT_PROTOCOL_CONFIG_FILE)
+        )
 
         # instantiate the protocol manager.
         protocol = Protocol(protocol_name, serializer, protocol_config)
@@ -227,7 +252,11 @@ class HandlerRegistry(Registry):
         for handler in handlers:
             protocol_id = cast(str, handler.SUPPORTED_PROTOCOL)
             if protocol_id in self._handlers.keys():
-                logger.debug("More than one handler registered against protocol with id '{}'".format(protocol_id))
+                logger.debug(
+                    "More than one handler registered against protocol with id '{}'".format(
+                        protocol_id
+                    )
+                )
             self._handlers.setdefault(protocol_id, {})[skill_id] = handler
 
     def unregister(self, skill_id: SkillId) -> None:
@@ -262,7 +291,9 @@ class HandlerRegistry(Registry):
             # TODO: introduce a filter class which intelligently selects the appropriate handler.
             return [handler for handler in result.values()]
 
-    def fetch_by_skill(self, protocol_id: ProtocolId, skill_id: SkillId) -> Optional[Handler]:
+    def fetch_by_skill(
+        self, protocol_id: ProtocolId, skill_id: SkillId
+    ) -> Optional[Handler]:
         """
         Fetch the handler for the protocol_id and skill id.
 
@@ -314,8 +345,11 @@ class HandlerRegistry(Registry):
                 try:
                     handler.teardown()
                 except Exception as e:
-                    logger.warning("An error occurred while tearing down handler {}/{}: {}"
-                                   .format(skill_id, type(handler).__name__, str(e)))
+                    logger.warning(
+                        "An error occurred while tearing down handler {}/{}: {}".format(
+                            skill_id, type(handler).__name__, str(e)
+                        )
+                    )
         self._handlers = {}
 
 
@@ -340,7 +374,9 @@ class BehaviourRegistry(Registry):
         """
         skill_id = ids[1]
         if skill_id in self._behaviours.keys():
-            logger.warning("Behaviours already registered with skill id '{}'".format(skill_id))
+            logger.warning(
+                "Behaviours already registered with skill id '{}'".format(skill_id)
+            )
         self._behaviours.setdefault(skill_id, []).extend(behaviours)
 
     def unregister(self, skill_id: SkillId) -> None:
@@ -362,7 +398,11 @@ class BehaviourRegistry(Registry):
 
     def fetch_all(self) -> List[Behaviour]:
         """Fetch all the behaviours."""
-        return [b for skill_behaviours in self._behaviours.values() for b in skill_behaviours]
+        return [
+            b
+            for skill_behaviours in self._behaviours.values()
+            for b in skill_behaviours
+        ]
 
     def setup(self) -> None:
         """
@@ -385,8 +425,11 @@ class BehaviourRegistry(Registry):
                 try:
                     behaviour.teardown()
                 except Exception as e:
-                    logger.warning("An error occurred while tearing down behaviour {}/{}: {}"
-                                   .format(skill_id, type(behaviour).__name__, str(e)))
+                    logger.warning(
+                        "An error occurred while tearing down behaviour {}/{}: {}".format(
+                            skill_id, type(behaviour).__name__, str(e)
+                        )
+                    )
         self._behaviours = {}
 
 
@@ -411,7 +454,9 @@ class TaskRegistry(Registry):
         """
         skill_id = ids[1]
         if skill_id in self._tasks.keys():
-            logger.warning("Tasks already registered with skill id '{}'".format(skill_id))
+            logger.warning(
+                "Tasks already registered with skill id '{}'".format(skill_id)
+            )
         self._tasks.setdefault(skill_id, []).extend(tasks)
 
     def unregister(self, skill_id: SkillId) -> None:
@@ -460,8 +505,11 @@ class TaskRegistry(Registry):
                 try:
                     task.teardown()
                 except Exception as e:
-                    logger.warning("An error occurred while tearing down task {}/{}: {}"
-                                   .format(skill_id, type(task).__name__, str(e)))
+                    logger.warning(
+                        "An error occurred while tearing down task {}/{}: {}".format(
+                            skill_id, type(task).__name__, str(e)
+                        )
+                    )
         self._tasks = {}
 
 
@@ -470,14 +518,23 @@ class Resources(object):
 
     def __init__(self, directory: Optional[Union[str, os.PathLike]] = None):
         """Instantiate the resources."""
-        self._directory = str(Path(directory).absolute()) if directory is not None else str(Path(".").absolute())
+        self._directory = (
+            str(Path(directory).absolute())
+            if directory is not None
+            else str(Path(".").absolute())
+        )
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = BehaviourRegistry()
         self.task_registry = TaskRegistry()
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
-        self._registries = [self.protocol_registry, self.handler_registry, self.behaviour_registry, self.task_registry]
+        self._registries = [
+            self.protocol_registry,
+            self.handler_registry,
+            self.behaviour_registry,
+            self.task_registry,
+        ]
 
     @property
     def directory(self) -> str:
@@ -497,33 +554,50 @@ class Resources(object):
         :param agent_context: the agent's context object
         :return: None
         """
-        root_skill_directory = os.path.join(directory, "skills")
-        if not os.path.exists(root_skill_directory):
-            logger.warning("No skill found.")
-            return
+        skill_directory_paths = set()  # type: ignore
 
-        skill_directories = [str(x) for x in Path(root_skill_directory).iterdir()
-                             if x.is_dir() and re.match(PACKAGE_NAME_REGEX, x.name)]
-        logger.debug("Processing the following skill directories: {}".format(pprint.pformat(skill_directories)))
-        for skill_directory in skill_directories:
+        # find all skill directories from vendor/*/skills
+        skill_directory_paths.update(Path(directory, "vendor").glob("./*/skills/*/"))
+        # find all skill directories from skills/
+        skill_directory_paths.update(Path(directory, "skills").glob("./*/"))
+
+        skills_packages_paths = list(filter(lambda x: PACKAGE_NAME_REGEX.match(str(x.name)) and x.is_dir(), skill_directory_paths))  # type: ignore
+        logger.debug(
+            "Found the following skill packages: {}".format(
+                pprint.pformat(map(str, skills_packages_paths))
+            )
+        )
+        for skill_directory in skills_packages_paths:
+            logger.debug(
+                "Processing the following skill directory: '{}".format(skill_directory)
+            )
             try:
-                skill = Skill.from_dir(skill_directory, agent_context)
+                skill = Skill.from_dir(str(skill_directory), agent_context)
                 assert skill is not None
                 self.add_skill(skill)
             except Exception as e:
-                logger.warning("A problem occurred while parsing the skill directory {}. Exception: {}"
-                               .format(skill_directory, str(e)))
+                logger.warning(
+                    "A problem occurred while parsing the skill directory {}. Exception: {}".format(
+                        skill_directory, str(e)
+                    )
+                )
 
     def add_skill(self, skill: Skill):
         """Add a skill to the set of resources."""
         skill_id = skill.config.name
         self._skills[skill_id] = skill
         if skill.handlers is not None:
-            self.handler_registry.register((None, skill_id), cast(List[Handler], list(skill.handlers.values())))
+            self.handler_registry.register(
+                (None, skill_id), cast(List[Handler], list(skill.handlers.values()))
+            )
         if skill.behaviours is not None:
-            self.behaviour_registry.register((None, skill_id), cast(List[Behaviour], list(skill.behaviours.values())))
+            self.behaviour_registry.register(
+                (None, skill_id), cast(List[Behaviour], list(skill.behaviours.values()))
+            )
         if skill.tasks is not None:
-            self.task_registry.register((None, skill_id), cast(List[Task], list(skill.tasks.values())))
+            self.task_registry.register(
+                (None, skill_id), cast(List[Task], list(skill.tasks.values()))
+            )
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""
@@ -618,13 +692,25 @@ class Filter(object):
         :return: None
         """
         while not self.decision_maker_out_queue.empty():
-            tx_message = self.decision_maker_out_queue.get_nowait()  # type: Optional[TransactionMessage]
+            tx_message = (
+                self.decision_maker_out_queue.get_nowait()
+            )  # type: Optional[TransactionMessage]
             if tx_message is not None:
                 skill_callback_ids = tx_message.skill_callback_ids
                 for skill_id in skill_callback_ids:
-                    handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
+                    handler = self.resources.handler_registry.fetch_internal_handler(
+                        skill_id
+                    )
                     if handler is not None:
-                        logger.debug("Calling handler {} of skill {}".format(type(handler), skill_id))
+                        logger.debug(
+                            "Calling handler {} of skill {}".format(
+                                type(handler), skill_id
+                            )
+                        )
                         handler.handle(cast(Message, tx_message))
                     else:
-                        logger.warning("No internal handler fetched for skill_id={}".format(skill_id))
+                        logger.warning(
+                            "No internal handler fetched for skill_id={}".format(
+                                skill_id
+                            )
+                        )

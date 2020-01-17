@@ -1,6 +1,6 @@
 """This module contains two_party_negotiation's message definition."""
 
-from typing import cast, Dict, Tuple
+from typing import Dict, Tuple, cast
 
 from aea.protocols.base import Message
 
@@ -23,21 +23,24 @@ class DataModel:
 class TwoPartyNegotiationMessage(Message):
     """A protocol for negotiation over a fixed set of resources involving two parties."""
 
-    def __init__(self, message_id: int, target: int, performative: str, contents: Dict, **kwargs):
+    def __init__(
+        self, message_id: int, target: int, performative: str, contents: Dict, **kwargs
+    ):
         """Initialise."""
-        super().__init__(message_id=message_id, target=target, performative=performative, contents=contents, **kwargs)
+        super().__init__(
+            message_id=message_id,
+            target=target,
+            performative=performative,
+            contents=contents,
+            **kwargs
+        )
 
-        self.speech_acts_definition = {
-            'cfp': {
-                'query', DataModel
-            },
-            'propose': {
-                'query', DataModel,
-                'price', float
-            },
-            'accept': {},
-            'decline': {},
-            'match_accept': {}
+        self.speech_acts = {
+            "cfp": {"query": DataModel},
+            "propose": {"query": DataModel, "price": float},
+            "accept": {},
+            "decline": {},
+            "match_accept": {},
         }
 
         assert self.check_consistency()
@@ -101,13 +104,18 @@ class TwoPartyNegotiationMessage(Message):
 
             # Light Protocol 2
             # Check correct performative
-            assert self.performative in self.performatives_definition, "'{}' is not in the list of allowed performative".format(self.performative)
+            assert (
+                performative in self.performatives
+            ), "performative is not in the list of allowed performative"
 
             # Check correct contents
-            contents_definition = self.speech_acts_definition[self.performative]
-            # Number of contents
-            assert len(self.contents) == len(contents_definition), "Incorrect number of contents. Expected {} contents. Found {}".format(len(self.contents), len(contents_definition))
-            # Name and type of each content
+            contents_definition = self.speech_acts[performative]  # type is Dict
+            # Check number of contents
+            assert len(contents) == len(
+                contents_definition
+            ), "incorrect number of contents"
+            # Check the content is of the correct type
+            for content, content_type in contents_definition:
             for content_name, content_value in self.contents:
                 assert isinstance(content_name, str), "Incorrect type for content name '{}'. Expected 'str'.".format(str(content_name))
                 assert content_name in contents_definition.keys(), "Incorrect content '{}'".format(content_name)
@@ -117,7 +125,9 @@ class TwoPartyNegotiationMessage(Message):
             if self.message_id == 1:
                 assert self.target == 0, "Expected target to be 0 when message_id is 1. Found {}.".format(self.target)
             else:
-                assert 0 < self.target < self.message_id, "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(self.target)
+                assert (
+                    0 < target < message_id
+                ), "target should be strictly between 0 and message_id"
         except (AssertionError, ValueError, KeyError) as e:
             print(str(e))
             return False

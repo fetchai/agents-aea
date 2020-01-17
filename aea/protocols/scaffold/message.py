@@ -35,17 +35,18 @@ class MyScaffoldMessage(Message):
 
         def __str__(self):
             """Get string representation."""
-            return self.value   # pragma: no cover
+            return self.value  # pragma: no cover
 
-    def __init__(self, performative: Performative,
-                 **kwargs):
+    def __init__(self, performative: Performative, **kwargs):
         """
         Initialize.
 
         :param performative: the type of message.
         """
         super().__init__(performative=performative, **kwargs)
-        assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."
+        assert (
+            self.check_consistency()
+        ), "MyScaffoldMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
@@ -54,4 +55,4 @@ class MyScaffoldMessage(Message):
         except (AssertionError, ValueError):
             return False  # pragma: no cover
 
-        return True     # pragma: no cover
+        return True  # pragma: no cover

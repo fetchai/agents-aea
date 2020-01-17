@@ -18,10 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for decision_maker."""
-from unittest import mock
-
 import os
 from queue import Queue
+from unittest import mock
 
 import pytest
 
@@ -29,13 +28,14 @@ import aea
 import aea.decision_maker.base
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.wallet import Wallet, FETCHAI
-from aea.decision_maker.base import OwnershipState, Preferences, DecisionMaker
+from aea.crypto.wallet import FETCHAI, Wallet
+from aea.decision_maker.base import DecisionMaker, OwnershipState, Preferences
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.mail.base import OutBox, Multiplexer  # , Envelope
+from aea.mail.base import Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
+
 from ..conftest import CUR_PATH, DummyConnection
 
 MAX_REACTIONS = 10
@@ -63,7 +63,10 @@ class TestUtilityPreferencesBase:
         """Test the initialisation of the ownership_state."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 2}
-        self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
+        self.ownership_state.init(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
         assert self.ownership_state.amount_by_currency_id is not None
         assert self.ownership_state.quantities_by_good_id is not None
         assert self.ownership_state.is_initialized
@@ -75,11 +78,12 @@ class TestUtilityPreferencesBase:
 
         other_msg = InternalMessage(body={"test_key": "test_value"})
         assert msg == other_msg, "Messages should be equal."
-        assert msg.check_consistency(), "It is true."
-        assert str(msg) == 'InternalMessage(test_key=test_value)'
+        assert str(msg) == "InternalMessage(test_key=test_value)"
         assert msg._body is not None
         msg.body = {"Test": "My_test"}
-        assert msg._body == {"Test": "My_test"}, "Message body must be equal with the above dictionary."
+        assert msg._body == {
+            "Test": "My_test"
+        }, "Message body must be equal with the above dictionary."
         msg.set("Test", 2)
         assert msg._body["Test"] == 2, "body['Test'] should be equal to 2."
         msg.unset("Test")
@@ -89,99 +93,132 @@ class TestUtilityPreferencesBase:
         """Test the consistency of the transaction message."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 20}
-        self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -1},
-                                        tx_sender_fee=0,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        self.ownership_state.init(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -1},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
 
-        assert self.ownership_state.check_transaction_is_affordable(tx_message=tx_message),\
-            "We should have the money for the transaction!"
+        assert self.ownership_state.check_transaction_is_affordable(
+            tx_message=tx_message
+        ), "We should have the money for the transaction!"
 
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 1},
-                                        tx_sender_fee=0,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": -10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": 1},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": -10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
 
-        assert self.ownership_state.check_transaction_is_affordable(tx_message=tx_message), \
-            "We should have the goods for the transaction!"
+        assert self.ownership_state.check_transaction_is_affordable(
+            tx_message=tx_message
+        ), "We should have the goods for the transaction!"
 
     def test_apply(self):
         """Test the apply function."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 2}
-        self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -20},
-                                        tx_sender_fee=5,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        self.ownership_state.init(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -20},
+            tx_sender_fee=5,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
         list_of_transactions = [tx_message]
         state = self.ownership_state
-        new_state = self.ownership_state.apply_transactions(transactions=list_of_transactions)
-        assert state != new_state, "after applying a list_of_transactions must have a different state!"
+        new_state = self.ownership_state.apply_transactions(
+            transactions=list_of_transactions
+        )
+        assert (
+            state != new_state
+        ), "after applying a list_of_transactions must have a different state!"
 
     def test_transaction__update(self):
         """Test the tranasction update."""
         currency_endowment = {"FET": 100}
         good_endowment = {"good_id": 20}
 
-        self.ownership_state.init(amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment)
+        self.ownership_state.init(
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+        )
         assert self.ownership_state.amount_by_currency_id == currency_endowment
         assert self.ownership_state.quantities_by_good_id == good_endowment
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -20},
-                                        tx_sender_fee=5,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -20},
+            tx_sender_fee=5,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
         self.ownership_state._update(tx_message=tx_message)
         expected_amount_by_currency_id = {"FET": 75}
         expected_quantities_by_good_id = {"good_id": 30}
-        assert self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
-        assert self.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
+        assert (
+            self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
+        )
+        assert (
+            self.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
+        )
 
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": 20},
-                                        tx_sender_fee=5,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": -10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": 20},
+            tx_sender_fee=5,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": -10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
         self.ownership_state._update(tx_message=tx_message)
         expected_amount_by_currency_id = {"FET": 90}
         expected_quantities_by_good_id = {"good_id": 20}
-        assert self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
-        assert self.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
+        assert (
+            self.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
+        )
+        assert (
+            self.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
+        )
 
     # # PREFERENCES
     def test_preferences_properties(self):
@@ -196,11 +233,15 @@ class TestUtilityPreferencesBase:
         utility_params = {"good_id": 20.0}
         exchange_params = {"FET": 10.0}
         tx_fee = 9
-        self.preferences.init(exchange_params_by_currency_id=exchange_params, utility_params_by_good_id=utility_params, tx_fee=tx_fee)
+        self.preferences.init(
+            exchange_params_by_currency_id=exchange_params,
+            utility_params_by_good_id=utility_params,
+            tx_fee=tx_fee,
+        )
         assert self.preferences.utility_params_by_good_id is not None
         assert self.preferences.exchange_params_by_currency_id is not None
-        assert self.preferences.transaction_fees['seller_tx_fee'] == 4
-        assert self.preferences.transaction_fees['buyer_tx_fee'] == 5
+        assert self.preferences.transaction_fees["seller_tx_fee"] == 4
+        assert self.preferences.transaction_fees["buyer_tx_fee"] == 5
         assert self.preferences.is_initialized
 
     def test_utilities(self):
@@ -210,20 +251,36 @@ class TestUtilityPreferencesBase:
         utility_params = {"good_id": 20.0}
         exchange_params = {"FET": 10.0}
         tx_fee = 9
-        self.preferences.init(utility_params_by_good_id=utility_params, exchange_params_by_currency_id=exchange_params, tx_fee=tx_fee)
-        log_utility = self.preferences.logarithmic_utility(quantities_by_good_id=good_holdings)
+        self.preferences.init(
+            utility_params_by_good_id=utility_params,
+            exchange_params_by_currency_id=exchange_params,
+            tx_fee=tx_fee,
+        )
+        log_utility = self.preferences.logarithmic_utility(
+            quantities_by_good_id=good_holdings
+        )
         assert log_utility is not None
 
-        linear_utility = self.preferences.linear_utility(amount_by_currency_id=currency_holdings)
+        linear_utility = self.preferences.linear_utility(
+            amount_by_currency_id=currency_holdings
+        )
         assert linear_utility is not None
 
-        score = self.preferences.get_score(quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings)
+        score = self.preferences.get_score(
+            quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings
+        )
         assert score == log_utility + linear_utility
 
         delta_good_holdings = {"good_id": 1}
         delta_currency_holdings = {"FET": -5}
-        self.ownership_state.init(amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings)
-        marginal_utility = self.preferences.marginal_utility(ownership_state=self.ownership_state, delta_quantities_by_good_id=delta_good_holdings, delta_amount_by_currency_id=delta_currency_holdings)
+        self.ownership_state.init(
+            amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings
+        )
+        marginal_utility = self.preferences.marginal_utility(
+            ownership_state=self.ownership_state,
+            delta_quantities_by_good_id=delta_good_holdings,
+            delta_amount_by_currency_id=delta_currency_holdings,
+        )
         assert marginal_utility is not None
 
     def test_score_diff_from_transaction(self):
@@ -233,25 +290,40 @@ class TestUtilityPreferencesBase:
         utility_params = {"good_id": 20.0}
         exchange_params = {"FET": 10.0}
         tx_fee = 3
-        self.ownership_state.init(amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings)
-        self.preferences.init(utility_params_by_good_id=utility_params, exchange_params_by_currency_id=exchange_params, tx_fee=tx_fee)
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -20},
-                                        tx_sender_fee=self.preferences.transaction_fees['seller_tx_fee'],
-                                        tx_counterparty_fee=self.preferences.transaction_fees['buyer_tx_fee'],
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        self.ownership_state.init(
+            amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings
+        )
+        self.preferences.init(
+            utility_params_by_good_id=utility_params,
+            exchange_params_by_currency_id=exchange_params,
+            tx_fee=tx_fee,
+        )
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -20},
+            tx_sender_fee=self.preferences.transaction_fees["seller_tx_fee"],
+            tx_counterparty_fee=self.preferences.transaction_fees["buyer_tx_fee"],
+            tx_quantities_by_good_id={"good_id": 10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
 
-        cur_score = self.preferences.get_score(quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings)
+        cur_score = self.preferences.get_score(
+            quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings
+        )
         new_state = self.ownership_state.apply_transactions([tx_message])
-        new_score = self.preferences.get_score(quantities_by_good_id=new_state.quantities_by_good_id, amount_by_currency_id=new_state.amount_by_currency_id)
+        new_score = self.preferences.get_score(
+            quantities_by_good_id=new_state.quantities_by_good_id,
+            amount_by_currency_id=new_state.amount_by_currency_id,
+        )
         dif_scores = new_score - cur_score
-        score_difference = self.preferences.get_score_diff_from_transaction(ownership_state=self.ownership_state, tx_message=tx_message)
+        score_difference = self.preferences.get_score_diff_from_transaction(
+            ownership_state=self.ownership_state, tx_message=tx_message
+        )
         assert score_difference == dif_scores
 
     @classmethod
@@ -264,7 +336,9 @@ class TestDecisionMaker:
 
     @classmethod
     def _patch_logger(cls):
-        cls.patch_logger_warning = mock.patch.object(aea.decision_maker.base.logger, 'warning')
+        cls.patch_logger_warning = mock.patch.object(
+            aea.decision_maker.base.logger, "warning"
+        )
         cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
 
     @classmethod
@@ -283,8 +357,13 @@ class TestDecisionMaker:
         cls.agent_name = "test"
         cls.ownership_state = OwnershipState()
         cls.preferences = Preferences()
-        cls.decision_maker = DecisionMaker(agent_name=cls.agent_name, max_reactions=MAX_REACTIONS, outbox=cls.outbox,
-                                           wallet=cls.wallet, ledger_apis=cls.ledger_apis)
+        cls.decision_maker = DecisionMaker(
+            agent_name=cls.agent_name,
+            max_reactions=MAX_REACTIONS,
+            outbox=cls.outbox,
+            wallet=cls.wallet,
+            ledger_apis=cls.ledger_apis,
+        )
         cls.multiplexer.connect()
 
     def test_properties(self):
@@ -297,20 +376,22 @@ class TestDecisionMaker:
 
     def test_decision_maker_execute(self):
         """Test the execute method."""
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -20},
-                                        tx_sender_fee=0,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -20},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
 
         self.decision_maker.message_in_queue.put_nowait(tx_message)
-        with mock.patch.object(self.decision_maker, 'handle'):
+        with mock.patch.object(self.decision_maker, "handle"):
             self.decision_maker.execute()
         assert self.decision_maker.message_in_queue.empty()
 
@@ -321,134 +402,187 @@ class TestDecisionMaker:
         utility_params = {"good_id": 20.0}
         exchange_params = {"FET": 10.0}
         tx_fee = 1
-        state_update_message = StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE,
-                                                  amount_by_currency_id=currency_holdings,
-                                                  quantities_by_good_id=good_holdings,
-                                                  exchange_params_by_currency_id=exchange_params,
-                                                  utility_params_by_good_id=utility_params,
-                                                  tx_fee=tx_fee)
+        state_update_message = StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.INITIALIZE,
+            amount_by_currency_id=currency_holdings,
+            quantities_by_good_id=good_holdings,
+            exchange_params_by_currency_id=exchange_params,
+            utility_params_by_good_id=utility_params,
+            tx_fee=tx_fee,
+        )
         self.decision_maker.handle(state_update_message)
         assert self.decision_maker.ownership_state.amount_by_currency_id is not None
         assert self.decision_maker.ownership_state.quantities_by_good_id is not None
-        assert self.decision_maker.preferences.exchange_params_by_currency_id is not None
+        assert (
+            self.decision_maker.preferences.exchange_params_by_currency_id is not None
+        )
         assert self.decision_maker.preferences.utility_params_by_good_id is not None
 
         currency_deltas = {"FET": -10}
         good_deltas = {"good_id": 1}
-        state_update_message = StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY,
-                                                  amount_by_currency_id=currency_deltas,
-                                                  quantities_by_good_id=good_deltas)
+        state_update_message = StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.APPLY,
+            amount_by_currency_id=currency_deltas,
+            quantities_by_good_id=good_deltas,
+        )
         self.decision_maker.handle(state_update_message)
-        expected_amount_by_currency_id = {key: currency_holdings.get(key, 0) + currency_deltas.get(key, 0) for key in set(currency_holdings) | set(currency_deltas)}
-        expected_quantities_by_good_id = {key: good_holdings.get(key, 0) + good_deltas.get(key, 0) for key in set(good_holdings) | set(good_deltas)}
-        assert self.decision_maker.ownership_state.amount_by_currency_id == expected_amount_by_currency_id
-        assert self.decision_maker.ownership_state.quantities_by_good_id == expected_quantities_by_good_id
+        expected_amount_by_currency_id = {
+            key: currency_holdings.get(key, 0) + currency_deltas.get(key, 0)
+            for key in set(currency_holdings) | set(currency_deltas)
+        }
+        expected_quantities_by_good_id = {
+            key: good_holdings.get(key, 0) + good_deltas.get(key, 0)
+            for key in set(good_holdings) | set(good_deltas)
+        }
+        assert (
+            self.decision_maker.ownership_state.amount_by_currency_id
+            == expected_amount_by_currency_id
+        )
+        assert (
+            self.decision_maker.ownership_state.quantities_by_good_id
+            == expected_quantities_by_good_id
+        )
 
     def test_decision_maker_handle_tx_message(self):
         """Test the handle tx meessa method."""
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -2},
-                                        tx_sender_fee=0,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -2},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
 
-        with mock.patch.object(self.decision_maker.ledger_apis, "token_balance", return_value=1000000):
-            with mock.patch.object(self.decision_maker.ledger_apis, "transfer", return_value="This is a test digest"):
+        with mock.patch.object(
+            self.decision_maker.ledger_apis, "token_balance", return_value=1000000
+        ):
+            with mock.patch.object(
+                self.decision_maker.ledger_apis,
+                "transfer",
+                return_value="This is a test digest",
+            ):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
 
-        with mock.patch.object(self.decision_maker.ledger_apis, "token_balance", return_value=1000000):
-            with mock.patch.object(self.decision_maker.ledger_apis, "transfer", return_value="This is a test digest"):
-                with mock.patch("aea.decision_maker.base.GoalPursuitReadiness.Status") as mocked_status:
+        with mock.patch.object(
+            self.decision_maker.ledger_apis, "token_balance", return_value=1000000
+        ):
+            with mock.patch.object(
+                self.decision_maker.ledger_apis,
+                "transfer",
+                return_value="This is a test digest",
+            ):
+                with mock.patch(
+                    "aea.decision_maker.base.GoalPursuitReadiness.Status"
+                ) as mocked_status:
                     mocked_status.READY.value = False
                     self.decision_maker.handle(tx_message)
                     assert not self.decision_maker.goal_pursuit_readiness.is_ready
 
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -2},
-                                        tx_sender_fee=0,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        info={'some_info_key': 'some_info_value'},
-                                        ledger_id="fetchai")
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -2},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            info={"some_info_key": "some_info_value"},
+            ledger_id="fetchai",
+        )
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
 
-        with mock.patch.object(self.decision_maker, '_is_acceptable_for_settlement', return_value=True):
+        with mock.patch.object(
+            self.decision_maker, "_is_acceptable_for_settlement", return_value=True
+        ):
             self.decision_maker.handle(tx_message)
             assert not self.decision_maker.message_out_queue.empty()
 
-        with mock.patch.object(self.decision_maker, '_is_acceptable_for_settlement', return_value=True):
-            with mock.patch.object(self.decision_maker, '_settle_tx', return_value=None):
+        with mock.patch.object(
+            self.decision_maker, "_is_acceptable_for_settlement", return_value=True
+        ):
+            with mock.patch.object(
+                self.decision_maker, "_settle_tx", return_value=None
+            ):
                 self.decision_maker.handle(tx_message)
                 assert not self.decision_maker.message_out_queue.empty()
 
     def test_decision_maker_execute_w_wrong_input(self):
         """Test the execute method with wrong input."""
-        default_message = DefaultMessage(type=DefaultMessage.Type.BYTES,
-                                         content=b'hello')
+        default_message = DefaultMessage(
+            type=DefaultMessage.Type.BYTES, content=b"hello"
+        )
 
         self.decision_maker.message_in_queue.put_nowait(default_message)
         self.decision_maker.execute()
 
-        self.mocked_logger_warning.assert_called_with("[{}]: Message received by the decision maker is not of protocol_id=internal.".format(self.agent_name))
+        self.mocked_logger_warning.assert_called_with(
+            "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
+                self.agent_name
+            )
+        )
 
     def test_is_affordable_off_chain(self):
         """Test the off_chain message."""
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -20},
-                                        tx_sender_fee=0,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        ledger_id="off_chain",
-                                        info={'some_info_key': 'some_info_value'})
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -20},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            ledger_id="off_chain",
+            info={"some_info_key": "some_info_value"},
+        )
 
         assert self.decision_maker._is_affordable(tx_message)
 
     def test_settle_tx_off_chain(self):
         """Test the off_chain message."""
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -20},
-                                        tx_sender_fee=0,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        ledger_id="off_chain",
-                                        info={'some_info_key': 'some_info_value'})
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -20},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            ledger_id="off_chain",
+            info={"some_info_key": "some_info_value"},
+        )
 
         tx_digest = self.decision_maker._settle_tx(tx_message)
         assert tx_digest == "off_chain_settlement"
 
     def test__is_utility_enhancing(self):
         """Test the utility enhancing for off_chain message."""
-        tx_message = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=["default"],
-                                        tx_id="transaction0",
-                                        tx_sender_addr="agent_1",
-                                        tx_counterparty_addr="pk",
-                                        tx_amount_by_currency_id={"FET": -20},
-                                        tx_sender_fee=0,
-                                        tx_counterparty_fee=0,
-                                        tx_quantities_by_good_id={"good_id": 10},
-                                        ledger_id="off_chain",
-                                        info={'some_info_key': 'some_info_value'})
+        tx_message = TransactionMessage(
+            performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+            skill_callback_ids=["default"],
+            tx_id="transaction0",
+            tx_sender_addr="agent_1",
+            tx_counterparty_addr="pk",
+            tx_amount_by_currency_id={"FET": -20},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"good_id": 10},
+            ledger_id="off_chain",
+            info={"some_info_key": "some_info_value"},
+        )
         self.decision_maker.ownership_state._quantities_by_good_id = None
         assert self.decision_maker._is_utility_enhancing(tx_message)
 

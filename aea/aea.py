@@ -21,7 +21,7 @@
 import logging
 from asyncio import AbstractEventLoop
 from concurrent.futures import Executor
-from typing import Optional, cast, List
+from typing import List, Optional, cast
 
 from aea.agent import Agent
 from aea.connections.base import Connection
@@ -40,16 +40,20 @@ logger = logging.getLogger(__name__)
 class AEA(Agent):
     """This class implements an autonomous economic agent."""
 
-    def __init__(self, name: str,
-                 connections: List[Connection],
-                 wallet: Wallet,
-                 ledger_apis: LedgerApis,
-                 resources: Resources,
-                 loop: Optional[AbstractEventLoop] = None,
-                 timeout: float = 0.0,
-                 debug: bool = False,
-                 max_reactions: int = 20,
-                 executor: Optional[Executor] = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        connections: List[Connection],
+        wallet: Wallet,
+        ledger_apis: LedgerApis,
+        resources: Resources,
+        loop: Optional[AbstractEventLoop] = None,
+        timeout: float = 0.0,
+        debug: bool = False,
+        programmatic: bool = True,
+        max_reactions: int = 20,
+        executor: Optional[Executor] = None,
+    ) -> None:
         """
         Instantiate the agent.
 
@@ -61,31 +65,40 @@ class AEA(Agent):
         :param resources: the resources of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
+        :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
         :param max_reactions: the processing rate of messages per iteration.
         :param executor: executor for asynchronous execution of tasks.
 
         :return: None
         """
-        super().__init__(name=name, wallet=wallet, connections=connections, loop=loop, timeout=timeout, debug=debug)
+        super().__init__(
+            name=name,
+            wallet=wallet,
+            connections=connections,
+            loop=loop,
+            timeout=timeout,
+            debug=debug,
+            programmatic=programmatic,
+        )
 
         self.max_reactions = max_reactions
         self._task_manager = TaskManager(executor)
-        self._decision_maker = DecisionMaker(self.name,
-                                             self.max_reactions,
-                                             self.outbox,
-                                             self.wallet,
-                                             ledger_apis)
-        self._context = AgentContext(self.name,
-                                     self.wallet.public_keys,
-                                     self.wallet.addresses,
-                                     ledger_apis,
-                                     self.multiplexer.connection_status,
-                                     self.outbox,
-                                     self.decision_maker.message_in_queue,
-                                     self.decision_maker.ownership_state,
-                                     self.decision_maker.preferences,
-                                     self.decision_maker.goal_pursuit_readiness,
-                                     self.task_manager.task_queue)
+        self._decision_maker = DecisionMaker(
+            self.name, self.max_reactions, self.outbox, self.wallet, ledger_apis
+        )
+        self._context = AgentContext(
+            self.name,
+            self.wallet.public_keys,
+            self.wallet.addresses,
+            ledger_apis,
+            self.multiplexer.connection_status,
+            self.outbox,
+            self.decision_maker.message_in_queue,
+            self.decision_maker.ownership_state,
+            self.decision_maker.preferences,
+            self.decision_maker.goal_pursuit_readiness,
+            self.task_manager.task_queue,
+        )
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
 
@@ -105,7 +118,7 @@ class AEA(Agent):
         return self._resources
 
     @resources.setter
-    def resources(self, resources: 'Resources'):
+    def resources(self, resources: "Resources") -> None:
         """Set resources."""
         self._resources = resources
 
@@ -125,7 +138,8 @@ class AEA(Agent):
 
         :return: None
         """
-        self.resources.load(self.context)
+        if not self.programmatic:
+            self.resources.load(self.context)
         self.resources.setup()
         self.task_manager.start()
 
@@ -161,7 +175,9 @@ class AEA(Agent):
         logger.debug("Handling envelope: {}".format(envelope))
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
-        error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")
+        error_handler = self.resources.handler_registry.fetch_by_skill(
+            "default", "error"
+        )
         assert error_handler is not None, "ErrorHandler not initialized"
         error_handler = cast(ErrorHandler, error_handler)
 
@@ -177,9 +193,9 @@ class AEA(Agent):
             logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
-        if not protocol.check(msg):                         # pragma: no cover
-            error_handler.send_invalid_message(envelope)    # pragma: no cover
-            return                                          # pragma: no cover
+        if not protocol.check(msg):  # pragma: no cover
+            error_handler.send_invalid_message(envelope)  # pragma: no cover
+            return  # pragma: no cover
 
         handlers = self.filter.get_active_handlers(protocol.id)
         if handlers is None:

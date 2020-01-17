@@ -23,7 +23,7 @@ import sys
 import time
 import unittest.mock
 
-from .test_base import create_app, DummyPID
+from .test_base import DummyPID, create_app
 
 
 def test_create_and_run_oef():
@@ -40,9 +40,7 @@ def test_create_and_run_oef():
     with unittest.mock.patch("subprocess.call", return_value=None):
         with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
             response_start = app.post(
-                'api/oef',
-                data=None,
-                content_type='application/json',
+                "api/oef", data=None, content_type="application/json",
             )
     assert response_start.status_code == 200
 
@@ -53,9 +51,7 @@ def test_create_and_run_oef():
     oef_started = False
     while time.time() - start_time < oef_startup_timeout and not oef_started:
         response_status = app.get(
-            'api/oef',
-            data=None,
-            content_type='application/json',
+            "api/oef", data=None, content_type="application/json",
         )
         assert response_status.status_code == 200
         data = json.loads(response_status.get_data(as_text=True))
@@ -70,9 +66,7 @@ def test_create_and_run_oef():
     pid.return_code = 1
     with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
         response_status = app.get(
-            'api/oef',
-            data=None,
-            content_type='application/json',
+            "api/oef", data=None, content_type="application/json",
         )
     assert response_status.status_code == 200
     data = json.loads(response_status.get_data(as_text=True))
@@ -82,9 +76,7 @@ def test_create_and_run_oef():
     pid.return_code = 0
     with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
         response_status = app.get(
-            'api/oef',
-            data=None,
-            content_type='application/json',
+            "api/oef", data=None, content_type="application/json",
         )
     assert response_status.status_code == 200
     data = json.loads(response_status.get_data(as_text=True))
@@ -93,9 +85,7 @@ def test_create_and_run_oef():
     # Stop the OEF Node
     with unittest.mock.patch("subprocess.call", return_value=None):
         response_stop = app.delete(
-            'api/oef',
-            data=None,
-            content_type='application/json',
+            "api/oef", data=None, content_type="application/json",
         )
     assert response_stop.status_code == 200
 
@@ -103,9 +93,7 @@ def test_create_and_run_oef():
     pid.return_code = 0
     with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
         response_status = app.get(
-            'api/oef',
-            data=None,
-            content_type='application/json',
+            "api/oef", data=None, content_type="application/json",
         )
     assert response_status.status_code == 200
     data = json.loads(response_status.get_data(as_text=True))
@@ -124,8 +112,6 @@ def test_create_and_run_oef_fail():
     with unittest.mock.patch("subprocess.call", return_value=None):
         with unittest.mock.patch("aea.cli_gui._call_aea_async", _dummy_call_aea_async):
             response_start = app.post(
-                'api/oef',
-                data=None,
-                content_type='application/json',
+                "api/oef", data=None, content_type="application/json",
             )
     assert response_start.status_code == 400

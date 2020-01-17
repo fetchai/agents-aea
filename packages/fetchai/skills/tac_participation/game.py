@@ -22,9 +22,10 @@ import logging
 from enum import Enum
 from typing import Dict, List, Optional
 
-from aea.helpers.search.models import Query, Constraint, ConstraintType
+from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.mail.base import Address
 from aea.skills.base import SharedClass
+
 from packages.fetchai.protocols.tac.message import TACMessage
 
 logger = logging.getLogger("aea.tac_participation_skill")
@@ -33,22 +34,24 @@ logger = logging.getLogger("aea.tac_participation_skill")
 class Phase(Enum):
     """This class defines the phases of the game."""
 
-    PRE_GAME = 'pre_game'
-    GAME_REGISTRATION = 'game_registration'
-    GAME_SETUP = 'game_setup'
-    GAME = 'game'
-    POST_GAME = 'post_game'
+    PRE_GAME = "pre_game"
+    GAME_REGISTRATION = "game_registration"
+    GAME_SETUP = "game_setup"
+    GAME = "game"
+    POST_GAME = "post_game"
 
 
 class Configuration:
     """Class containing the game configuration of a TAC instance."""
 
-    def __init__(self,
-                 version_id: str,
-                 tx_fee: int,
-                 agent_addr_to_name: Dict[Address, str],
-                 good_id_to_name: Dict[str, str],
-                 controller_addr: Address):
+    def __init__(
+        self,
+        version_id: str,
+        tx_fee: int,
+        agent_addr_to_name: Dict[Address, str],
+        good_id_to_name: Dict[str, str],
+        controller_addr: Address,
+    ):
         """
         Instantiate a game configuration.
 
@@ -134,10 +137,18 @@ class Configuration:
         assert self.tx_fee >= 0, "Tx fee must be non-negative."
         assert self.nb_agents > 1, "Must have at least two agents."
         assert self.nb_goods > 1, "Must have at least two goods."
-        assert len(self.agent_addresses) == self.nb_agents, "There must be one address for each agent."
-        assert len(set(self.agent_names)) == self.nb_agents, "Agents' names must be unique."
-        assert len(self.good_ids) == self.nb_goods, "There must be one id for each good."
-        assert len(set(self.good_names)) == self.nb_goods, "Goods' names must be unique."
+        assert (
+            len(self.agent_addresses) == self.nb_agents
+        ), "There must be one address for each agent."
+        assert (
+            len(set(self.agent_names)) == self.nb_agents
+        ), "Agents' names must be unique."
+        assert (
+            len(self.good_ids) == self.nb_goods
+        ), "There must be one id for each good."
+        assert (
+            len(set(self.good_names)) == self.nb_goods
+        ), "Goods' names must be unique."
 
 
 class Game(SharedClass):
@@ -145,8 +156,10 @@ class Game(SharedClass):
 
     def __init__(self, **kwargs):
         """Instantiate the game class."""
-        self._expected_version_id = kwargs.pop('expected_version_id', '')  # type: str
-        self._expected_controller_addr = kwargs.pop('expected_controller_addr', None)  # type: Optional[str]
+        self._expected_version_id = kwargs.pop("expected_version_id", "")  # type: str
+        self._expected_controller_addr = kwargs.pop(
+            "expected_controller_addr", None
+        )  # type: Optional[str]
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
         self._configuration = None  # type: Optional[Configuration]
@@ -164,7 +177,9 @@ class Game(SharedClass):
     @property
     def expected_controller_addr(self) -> Address:
         """Get the expected controller pbk."""
-        assert self._expected_controller_addr is not None, "Expected controller address not assigned!"
+        assert (
+            self._expected_controller_addr is not None
+        ), "Expected controller address not assigned!"
         return self._expected_controller_addr
 
     @property
@@ -182,14 +197,22 @@ class Game(SharedClass):
 
         :return: None
         """
-        assert tac_message.type == TACMessage.Type.GAME_DATA, "Wrong TACMessage for initialization of TAC game."
-        assert controller_addr == self.expected_controller_addr, "TACMessage from unexpected controller."
-        assert tac_message.version_id == self.expected_version_id, "TACMessage for unexpected game."
-        self._configuration = Configuration(tac_message.version_id,
-                                            tac_message.tx_fee,
-                                            tac_message.agent_addr_to_name,
-                                            tac_message.good_id_to_name,
-                                            controller_addr)
+        assert (
+            tac_message.type == TACMessage.Type.GAME_DATA
+        ), "Wrong TACMessage for initialization of TAC game."
+        assert (
+            controller_addr == self.expected_controller_addr
+        ), "TACMessage from unexpected controller."
+        assert (
+            tac_message.version_id == self.expected_version_id
+        ), "TACMessage for unexpected game."
+        self._configuration = Configuration(
+            tac_message.version_id,
+            tac_message.tx_fee,
+            tac_message.agent_addr_to_name,
+            tac_message.good_id_to_name,
+            controller_addr,
+        )
 
     def update_expected_controller_addr(self, controller_addr: Address):
         """
@@ -199,7 +222,11 @@ class Game(SharedClass):
 
         :return: None
         """
-        logger.warning("[{}]: TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.".format(self.context.agent_name))
+        logger.warning(
+            "[{}]: TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it.".format(
+                self.context.agent_name
+            )
+        )
         self._expected_controller_addr = controller_addr
 
     def update_game_phase(self, phase: Phase) -> None:
@@ -216,5 +243,7 @@ class Game(SharedClass):
 
         :return: the query
         """
-        query = Query([Constraint("version", ConstraintType("==", self.expected_version_id))])
+        query = Query(
+            [Constraint("version", ConstraintType("==", self.expected_version_id))]
+        )
         return query

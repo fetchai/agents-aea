@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the agent module."""
+
 import os
 import time
 from threading import Thread
@@ -25,7 +26,9 @@ from threading import Thread
 from aea.agent import Agent, AgentState
 from aea.crypto.wallet import Wallet
 from aea.mail.base import InBox, OutBox
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+
 from .conftest import CUR_PATH
 
 
@@ -62,14 +65,18 @@ def test_run_agent():
     with LocalNode() as node:
         agent_name = "dummyagent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path})
+        wallet = Wallet({"default": private_key_pem_path})
         agent = DummyAgent(agent_name, [OEFLocalConnection("mypbk", node)], wallet)
         assert agent.name == agent_name
         assert isinstance(agent.wallet, Wallet)
-        assert agent.agent_state == AgentState.INITIATED, "Agent state must be 'initiated'"
+        assert (
+            agent.agent_state == AgentState.INITIATED
+        ), "Agent state must be 'initiated'"
 
         agent.multiplexer.connect()
-        assert agent.agent_state == AgentState.CONNECTED, "Agent state must be 'connected'"
+        assert (
+            agent.agent_state == AgentState.CONNECTED
+        ), "Agent state must be 'connected'"
 
         assert isinstance(agent.inbox, InBox)
         assert isinstance(agent.outbox, OutBox)
@@ -79,7 +86,9 @@ def test_run_agent():
         time.sleep(1.0)
 
         try:
-            assert agent.agent_state == AgentState.RUNNING, "Agent state must be 'running'"
+            assert (
+                agent.agent_state == AgentState.RUNNING
+            ), "Agent state must be 'running'"
         finally:
             agent.stop()
             agent.multiplexer.disconnect()

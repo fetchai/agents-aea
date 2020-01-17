@@ -22,20 +22,20 @@
 
 import logging
 import sys
-from typing import Dict, Optional, List, Union, cast
+from typing import Dict, List, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.crypto.fetchai import FETCHAI, FetchAIApi
 
-SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
+SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
-SUPPORTED_CURRENCIES = {ETHEREUM: 'ETH', FETCHAI: 'FET'}
+SUPPORTED_CURRENCIES = {ETHEREUM: "ETH", FETCHAI: "FET"}
 
 logger = logging.getLogger(__name__)
 
-GAS_PRICE = '50'
-GAS_ID = 'gwei'
+GAS_PRICE = "50"
+GAS_ID = "gwei"
 UNKNOWN = "UNKNOWN"
 OK = "OK"
 ERROR = "ERROR"
@@ -44,7 +44,11 @@ ERROR = "ERROR"
 class LedgerApis(object):
     """Store all the ledger apis we initialise."""
 
-    def __init__(self, ledger_api_configs: Dict[str, List[Union[str, int]]], default_ledger_id: str):
+    def __init__(
+        self,
+        ledger_api_configs: Dict[str, List[Union[str, int]]],
+        default_ledger_id: str,
+    ):
         """
         Instantiate a wallet object.
 
@@ -123,13 +127,22 @@ class LedgerApis(object):
             balance = api.get_balance(address)
             self._last_tx_statuses[identifier] = OK
         except Exception:
-            logger.warning("An error occurred while attempting to get the current balance.")
+            logger.warning(
+                "An error occurred while attempting to get the current balance."
+            )
             self._last_tx_statuses[identifier] = ERROR
             # TODO raise exception instead of returning zero.
             balance = 0
         return balance
 
-    def transfer(self, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int, **kwargs) -> Optional[str]:
+    def transfer(
+        self,
+        crypto_object: Crypto,
+        destination_address: str,
+        amount: int,
+        tx_fee: int,
+        **kwargs
+    ) -> Optional[str]:
         """
         Transfer from self to destination.
 
@@ -140,11 +153,15 @@ class LedgerApis(object):
 
         :return: tx digest if successful, otherwise None
         """
-        assert crypto_object.identifier in self.apis.keys(), "Unsupported ledger identifier."
+        assert (
+            crypto_object.identifier in self.apis.keys()
+        ), "Unsupported ledger identifier."
         api = self.apis[crypto_object.identifier]
         logger.info("Waiting for the validation of the transaction ...")
         try:
-            tx_digest = api.send_transaction(crypto_object, destination_address, amount, tx_fee, **kwargs)
+            tx_digest = api.send_transaction(
+                crypto_object, destination_address, amount, tx_fee, **kwargs
+            )
             logger.info("transaction validated. TX digest: {}".format(tx_digest))
             self._last_tx_statuses[crypto_object.identifier] = OK
         except Exception:
@@ -167,7 +184,9 @@ class LedgerApis(object):
             is_successful = api.is_transaction_settled(tx_digest)
             self._last_tx_statuses[identifier] = OK
         except Exception:
-            logger.warning("An error occured while attempting to check the transaction!")
+            logger.warning(
+                "An error occured while attempting to check the transaction!"
+            )
             is_successful = False
             self._last_tx_statuses[identifier] = ERROR
         return is_successful
@@ -182,6 +201,7 @@ def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
     """
     try:
         from fetchai.ledger.api import LedgerApi
+
         LedgerApi(addr, port)
     except Exception:
         logger.error("Cannot connect to fetchai ledger with provided config.")
@@ -196,6 +216,7 @@ def _try_to_instantiate_ethereum_ledger_api(addr: str) -> None:
     """
     try:
         from web3 import Web3, HTTPProvider
+
         Web3(HTTPProvider(addr))
     except Exception:
         logger.error("Cannot connect to ethereum ledger with provided config.")

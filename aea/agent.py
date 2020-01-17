@@ -22,14 +22,14 @@
 
 import logging
 import time
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from enum import Enum
-from typing import Optional, List
+from typing import List, Optional
 
 from aea.connections.base import Connection
 from aea.crypto.wallet import Wallet
-from aea.mail.base import InBox, OutBox, Multiplexer
+from aea.mail.base import InBox, Multiplexer, OutBox
 
 logger = logging.getLogger(__name__)
 
@@ -58,12 +58,16 @@ class Liveness:
 class Agent(ABC):
     """This class implements a template agent."""
 
-    def __init__(self, name: str,
-                 connections: List[Connection],
-                 wallet: Wallet,
-                 loop: Optional[AbstractEventLoop] = None,
-                 timeout: float = 1.0,
-                 debug: bool = False) -> None:
+    def __init__(
+        self,
+        name: str,
+        connections: List[Connection],
+        wallet: Wallet,
+        loop: Optional[AbstractEventLoop] = None,
+        timeout: float = 1.0,
+        debug: bool = False,
+        programmatic: bool = True,
+    ) -> None:
         """
         Instantiate the agent.
 
@@ -73,6 +77,7 @@ class Agent(ABC):
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
+        :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
 
         :return: None
         """
@@ -87,6 +92,7 @@ class Agent(ABC):
         self._timeout = timeout
 
         self.debug = debug
+        self.programmatic = programmatic
 
     @property
     def multiplexer(self) -> Multiplexer:
@@ -131,11 +137,19 @@ class Agent(ABC):
         :return the agent state.
         :raises ValueError: if the state does not satisfy any of the foreseen conditions.
         """
-        if self.multiplexer is not None and not self.multiplexer.connection_status.is_connected:
+        if (
+            self.multiplexer is not None
+            and not self.multiplexer.connection_status.is_connected
+        ):
             return AgentState.INITIATED
-        elif self.multiplexer.connection_status.is_connected and self.liveness.is_stopped:
+        elif (
+            self.multiplexer.connection_status.is_connected and self.liveness.is_stopped
+        ):
             return AgentState.CONNECTED
-        elif self.multiplexer.connection_status.is_connected and not self.liveness.is_stopped:
+        elif (
+            self.multiplexer.connection_status.is_connected
+            and not self.liveness.is_stopped
+        ):
             return AgentState.RUNNING
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover

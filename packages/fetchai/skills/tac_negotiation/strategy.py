@@ -27,9 +27,13 @@ from enum import Enum
 from typing import Dict, Optional, cast
 
 from aea.decision_maker.messages.transaction import TransactionMessage
-from aea.helpers.search.models import Query, Description
+from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
-from packages.fetchai.skills.tac_negotiation.helpers import build_goods_description, build_goods_query
+
+from packages.fetchai.skills.tac_negotiation.helpers import (
+    build_goods_description,
+    build_goods_query,
+)
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 logger = logging.getLogger("aea.tac_negotiation_skill")
@@ -43,16 +47,16 @@ class Strategy(SharedClass):
     class RegisterAs(Enum):
         """This class defines the service registration options."""
 
-        SELLER = 'seller'
-        BUYER = 'buyer'
-        BOTH = 'both'
+        SELLER = "seller"
+        BUYER = "buyer"
+        BOTH = "both"
 
     class SearchFor(Enum):
         """This class defines the service search options."""
 
-        SELLERS = 'sellers'
-        BUYERS = 'buyers'
-        BOTH = 'both'
+        SELLERS = "sellers"
+        BUYERS = "buyers"
+        BOTH = "both"
 
     def __init__(self, **kwargs) -> None:
         """
@@ -63,29 +67,49 @@ class Strategy(SharedClass):
 
         :return: None
         """
-        self._register_as = Strategy.RegisterAs(kwargs.pop('register_as')) if 'register_as' in kwargs.keys() else Strategy.RegisterAs.BOTH
-        self._search_for = Strategy.SearchFor(kwargs.pop('search_for')) if 'search_for' in kwargs.keys() else Strategy.SearchFor.BOTH
+        self._register_as = (
+            Strategy.RegisterAs(kwargs.pop("register_as"))
+            if "register_as" in kwargs.keys()
+            else Strategy.RegisterAs.BOTH
+        )
+        self._search_for = (
+            Strategy.SearchFor(kwargs.pop("search_for"))
+            if "search_for" in kwargs.keys()
+            else Strategy.SearchFor.BOTH
+        )
         super().__init__(**kwargs)
 
     @property
     def is_registering_as_seller(self) -> bool:
         """Check if the agent registers as a seller on the OEF."""
-        return self._register_as == Strategy.RegisterAs.SELLER or self._register_as == Strategy.RegisterAs.BUYER
+        return (
+            self._register_as == Strategy.RegisterAs.SELLER
+            or self._register_as == Strategy.RegisterAs.BUYER
+        )
 
     @property
     def is_searching_for_sellers(self) -> bool:
         """Check if the agent searches for sellers on the OEF."""
-        return self._search_for == Strategy.SearchFor.SELLERS or self._search_for == Strategy.SearchFor.BOTH
+        return (
+            self._search_for == Strategy.SearchFor.SELLERS
+            or self._search_for == Strategy.SearchFor.BOTH
+        )
 
     @property
     def is_registering_as_buyer(self) -> bool:
         """Check if the agent registers as a buyer on the OEF."""
-        return self._register_as == Strategy.RegisterAs.BUYER or self._register_as == Strategy.RegisterAs.BOTH
+        return (
+            self._register_as == Strategy.RegisterAs.BUYER
+            or self._register_as == Strategy.RegisterAs.BOTH
+        )
 
     @property
     def is_searching_for_buyers(self) -> bool:
         """Check if the agent searches for buyers on the OEF."""
-        return self._search_for == Strategy.SearchFor.BUYERS or self._search_for == Strategy.SearchFor.BOTH
+        return (
+            self._search_for == Strategy.SearchFor.BUYERS
+            or self._search_for == Strategy.SearchFor.BOTH
+        )
 
     def get_own_service_description(self, is_supply: bool) -> Description:
         """
@@ -96,10 +120,20 @@ class Strategy(SharedClass):
         :return: the description (to advertise on the Service Directory).
         """
         transactions = cast(Transactions, self.context.transactions)
-        ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=is_supply)
-        good_id_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_id) if is_supply else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
+        ownership_state_after_locks = transactions.ownership_state_after_locks(
+            is_seller=is_supply
+        )
+        good_id_to_quantities = (
+            self._supplied_goods(ownership_state_after_locks.quantities_by_good_id)
+            if is_supply
+            else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
+        )
         currency_id = list(ownership_state_after_locks.amount_by_currency_id.keys())[0]
-        desc = build_goods_description(good_id_to_quantities=good_id_to_quantities, currency_id=currency_id, is_supply=is_supply)
+        desc = build_goods_description(
+            good_id_to_quantities=good_id_to_quantities,
+            currency_id=currency_id,
+            is_supply=is_supply,
+        )
         return desc
 
     def _supplied_goods(self, good_holdings: Dict[str, int]) -> Dict[str, int]:
@@ -139,13 +173,25 @@ class Strategy(SharedClass):
         :return: the Query, or None.
         """
         transactions = cast(Transactions, self.context.transactions)
-        ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=not is_searching_for_sellers)
-        good_id_to_quantities = self._demanded_goods(ownership_state_after_locks.quantities_by_good_id) if is_searching_for_sellers else self._supplied_goods(ownership_state_after_locks.quantities_by_good_id)
+        ownership_state_after_locks = transactions.ownership_state_after_locks(
+            is_seller=not is_searching_for_sellers
+        )
+        good_id_to_quantities = (
+            self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
+            if is_searching_for_sellers
+            else self._supplied_goods(ownership_state_after_locks.quantities_by_good_id)
+        )
         currency_id = list(ownership_state_after_locks.amount_by_currency_id.keys())[0]
-        query = build_goods_query(good_ids=list(good_id_to_quantities.keys()), currency_id=currency_id, is_searching_for_sellers=is_searching_for_sellers)
+        query = build_goods_query(
+            good_ids=list(good_id_to_quantities.keys()),
+            currency_id=currency_id,
+            is_searching_for_sellers=is_searching_for_sellers,
+        )
         return query
 
-    def _get_proposal_for_query(self, query: Query, is_seller: bool) -> Optional[Description]:
+    def _get_proposal_for_query(
+        self, query: Query, is_seller: bool
+    ) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
 
@@ -157,14 +203,17 @@ class Strategy(SharedClass):
         candidate_proposals = self._generate_candidate_proposals(is_seller)
         proposals = []
         for proposal in candidate_proposals:
-            if not query.check(proposal): continue
+            if not query.check(proposal):
+                continue
             proposals.append(proposal)
         if not proposals:
             return None
         else:
             return random.choice(proposals)
 
-    def get_proposal_for_query(self, query: Query, is_seller: bool) -> Optional[Description]:
+    def get_proposal_for_query(
+        self, query: Query, is_seller: bool
+    ) -> Optional[Description]:
         """
         Generate proposal (in the form of a description) which matches the query.
 
@@ -175,12 +224,22 @@ class Strategy(SharedClass):
         """
         own_service_description = self.get_own_service_description(is_supply=is_seller)
         if not query.check(own_service_description):
-            logger.debug("[{}]: Current holdings do not satisfy CFP query.".format(self.context.agent_name))
+            logger.debug(
+                "[{}]: Current holdings do not satisfy CFP query.".format(
+                    self.context.agent_name
+                )
+            )
             return None
         else:
-            proposal_description = self._get_proposal_for_query(query, is_seller=is_seller)
+            proposal_description = self._get_proposal_for_query(
+                query, is_seller=is_seller
+            )
             if proposal_description is None:
-                logger.debug("[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(self.context.agent_name))
+                logger.debug(
+                    "[{}]: Current strategy does not generate proposal that satisfies CFP query.".format(
+                        self.context.agent_name
+                    )
+                )
             return proposal_description
 
     def _generate_candidate_proposals(self, is_seller: bool):
@@ -192,38 +251,68 @@ class Strategy(SharedClass):
         :return: a list of proposals in Description form
         """
         transactions = cast(Transactions, self.context.transactions)
-        ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller=is_seller)
-        good_id_to_quantities = self._supplied_goods(ownership_state_after_locks.quantities_by_good_id) if is_seller else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
-        nil_proposal_dict = {good_id: 0 for good_id in good_id_to_quantities.keys()}  # type: Dict[str, int]
+        ownership_state_after_locks = transactions.ownership_state_after_locks(
+            is_seller=is_seller
+        )
+        good_id_to_quantities = (
+            self._supplied_goods(ownership_state_after_locks.quantities_by_good_id)
+            if is_seller
+            else self._demanded_goods(ownership_state_after_locks.quantities_by_good_id)
+        )
+        nil_proposal_dict = {
+            good_id: 0 for good_id in good_id_to_quantities.keys()
+        }  # type: Dict[str, int]
         proposals = []
-        seller_tx_fee = self.context.agent_preferences.transaction_fees['seller_tx_fee']
-        buyer_tx_fee = self.context.agent_preferences.transaction_fees['buyer_tx_fee']
-        currency_id = list(self.context.agent_ownership_state.amount_by_currency_id.keys())[0]
+        seller_tx_fee = self.context.agent_preferences.transaction_fees["seller_tx_fee"]
+        buyer_tx_fee = self.context.agent_preferences.transaction_fees["buyer_tx_fee"]
+        currency_id = list(
+            self.context.agent_ownership_state.amount_by_currency_id.keys()
+        )[0]
         for good_id, quantity in good_id_to_quantities.items():
-            if is_seller and quantity == 0: continue
+            if is_seller and quantity == 0:
+                continue
             proposal_dict = copy.copy(nil_proposal_dict)
             proposal_dict[good_id] = 1
-            proposal = build_goods_description(good_id_to_quantities=proposal_dict, currency_id=currency_id, is_supply=is_seller)
+            proposal = build_goods_description(
+                good_id_to_quantities=proposal_dict,
+                currency_id=currency_id,
+                is_supply=is_seller,
+            )
             if is_seller:
-                delta_quantities_by_good_id = {good_id: quantity * -1 for good_id, quantity in proposal_dict.items()}  # type: Dict[str, int]
+                delta_quantities_by_good_id = {
+                    good_id: quantity * -1
+                    for good_id, quantity in proposal_dict.items()
+                }  # type: Dict[str, int]
             else:
                 delta_quantities_by_good_id = proposal_dict
-            marginal_utility_from_delta_good_holdings = self.context.agent_preferences.marginal_utility(ownership_state=ownership_state_after_locks, delta_quantities_by_good_id=delta_quantities_by_good_id)
+            marginal_utility_from_delta_good_holdings = self.context.agent_preferences.marginal_utility(
+                ownership_state=ownership_state_after_locks,
+                delta_quantities_by_good_id=delta_quantities_by_good_id,
+            )
             switch = -1 if is_seller else 1
-            breakeven_price_rounded = round(marginal_utility_from_delta_good_holdings) * switch
+            breakeven_price_rounded = (
+                round(marginal_utility_from_delta_good_holdings) * switch
+            )
             if is_seller:
-                proposal.values["price"] = breakeven_price_rounded + seller_tx_fee + ROUNDING_ADJUSTMENT
+                proposal.values["price"] = (
+                    breakeven_price_rounded + seller_tx_fee + ROUNDING_ADJUSTMENT
+                )
             else:
-                proposal.values["price"] = breakeven_price_rounded - buyer_tx_fee - ROUNDING_ADJUSTMENT
+                proposal.values["price"] = (
+                    breakeven_price_rounded - buyer_tx_fee - ROUNDING_ADJUSTMENT
+                )
             proposal.values["seller_tx_fee"] = seller_tx_fee
             proposal.values["buyer_tx_fee"] = buyer_tx_fee
-            if not proposal.values["price"] > 0: continue
+            if not proposal.values["price"] > 0:
+                continue
             tx_nonce = transactions.get_next_tx_nonce()
             proposal.values["tx_nonce"] = tx_nonce
             proposals.append(proposal)
         return proposals
 
-    def is_profitable_transaction(self, transaction_msg: TransactionMessage, is_seller: bool) -> bool:
+    def is_profitable_transaction(
+        self, transaction_msg: TransactionMessage, is_seller: bool
+    ) -> bool:
         """
         Check if a transaction is profitable.
 
@@ -238,10 +327,16 @@ class Strategy(SharedClass):
         :return: True if the transaction is good (as stated above), False otherwise.
         """
         transactions = cast(Transactions, self.context.transactions)
-        ownership_state_after_locks = transactions.ownership_state_after_locks(is_seller)
-        if not ownership_state_after_locks.check_transaction_is_affordable(transaction_msg):
+        ownership_state_after_locks = transactions.ownership_state_after_locks(
+            is_seller
+        )
+        if not ownership_state_after_locks.check_transaction_is_affordable(
+            transaction_msg
+        ):
             return False
-        proposal_delta_score = self.context.agent_preferences.get_score_diff_from_transaction(ownership_state_after_locks, transaction_msg)
+        proposal_delta_score = self.context.agent_preferences.get_score_diff_from_transaction(
+            ownership_state_after_locks, transaction_msg
+        )
         if proposal_delta_score >= 0:
             return True
         else:

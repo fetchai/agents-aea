@@ -18,17 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea delete` sub-command."""
+
 import os
 import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
 
-from ..common.click_testing import CliRunner
-
 import aea
 import aea.cli.common
 from aea.cli import cli
+
+from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION
 
 
@@ -44,8 +45,12 @@ class TestDelete:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False)
+        cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -79,7 +84,9 @@ class TestDeleteFailsWhenDirectoryDoesNotExist:
         os.chdir(cls.t)
 
         # agent's directory does not exist -> command will fail.
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False
+        )
 
     # def test_exit_code_equal_to_2(self):
     #     """Test that the error code is equal to 2 (i.e. Misuse of shell builtins)."""
@@ -107,15 +114,19 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # agent's directory does not exist -> command will fail.
         with unittest.mock.patch.object(shutil, "rmtree", side_effect=OSError):
-            cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False)
+            cls.result = cls.runner.invoke(
+                cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False
+            )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
@@ -152,12 +163,14 @@ class TestDeleteFailsWhenDirectoryIsNotAnAEAProject:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # directory is not AEA project -> command will fail.
         Path(cls.t, cls.agent_name).mkdir()
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""

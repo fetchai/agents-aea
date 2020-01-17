@@ -19,14 +19,16 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the TCP server."""
+
 import asyncio
 import logging
-from asyncio import StreamReader, StreamWriter, AbstractServer, Future
+from asyncio import AbstractServer, Future, StreamReader, StreamWriter
 from typing import Dict, Optional, Tuple, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
+
 from packages.fetchai.connections.tcp.base import TCPConnection
 
 logger = logging.getLogger(__name__)
@@ -37,12 +39,14 @@ STUB_DIALOGUE_ID = 0
 class TCPServerConnection(TCPConnection):
     """This class implements a TCP server."""
 
-    def __init__(self,
-                 address: Address,
-                 host: str,
-                 port: int,
-                 connection_id: str = "tcp_server",
-                 **kwargs):
+    def __init__(
+        self,
+        address: Address,
+        host: str,
+        port: int,
+        connection_id: str = "tcp_server",
+        **kwargs
+    ):
         """
         Initialize a TCP channel.
 
@@ -74,14 +78,16 @@ class TCPServerConnection(TCPConnection):
             read_task = asyncio.ensure_future(self._recv(reader), loop=self._loop)
             self._read_tasks_to_address[read_task] = address
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
         :return: the received envelope, or None if an error occurred.
         """
         if len(self._read_tasks_to_address) == 0:
-            logger.warning("Tried to read from the TCP server. However, there is no open connection to read from.")
+            logger.warning(
+                "Tried to read from the TCP server. However, there is no open connection to read from."
+            )
             return None
 
         try:
@@ -109,7 +115,9 @@ class TCPServerConnection(TCPConnection):
 
     async def setup(self):
         """Set the connection up."""
-        self._server = await asyncio.start_server(self.handle, host=self.host, port=self.port)
+        self._server = await asyncio.start_server(
+            self.handle, host=self.host, port=self.port
+        )
         logger.debug("Start listening on {}:{}".format(self.host, self.port))
 
     async def teardown(self):
@@ -131,7 +139,9 @@ class TCPServerConnection(TCPConnection):
         return writer
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """Get the TCP server connection from the connection configuration.
 
         :param address: the address of the agent.
@@ -140,9 +150,17 @@ class TCPServerConnection(TCPConnection):
         """
         server_address = cast(str, connection_configuration.config.get("address"))
         port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
-        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
-        return TCPServerConnection(address, server_address, port,
-                                   connection_id=connection_configuration.name,
-                                   restricted_to_protocols=restricted_to_protocols_names,
-                                   excluded_protocols=excluded_protocols_names)
+        restricted_to_protocols_names = {
+            p.name for p in connection_configuration.restricted_to_protocols
+        }
+        excluded_protocols_names = {
+            p.name for p in connection_configuration.excluded_protocols
+        }
+        return TCPServerConnection(
+            address,
+            server_address,
+            port,
+            connection_id=connection_configuration.name,
+            restricted_to_protocols=restricted_to_protocols_names,
+            excluded_protocols=excluded_protocols_names,
+        )

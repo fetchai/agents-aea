@@ -26,13 +26,13 @@ import threading
 import time
 from asyncio import CancelledError
 from threading import Thread
-from typing import Optional, cast, Dict, List, Any, Set
+from typing import Any, Dict, List, Optional, Set, cast
 
 from fetch.p2p.api.http_calls import HTTPCalls
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, AEAConnectionError, Address
+from aea.mail.base import AEAConnectionError, Address, Envelope
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,13 @@ logger = logging.getLogger(__name__)
 class PeerToPeerChannel:
     """A wrapper for an SDK or API."""
 
-    def __init__(self, address: Address, provider_addr: str, provider_port: int,
-                 excluded_protocols: Optional[List[str]] = None):
+    def __init__(
+        self,
+        address: Address,
+        provider_addr: str,
+        provider_port: int,
+        excluded_protocols: Optional[List[str]] = None,
+    ):
         """
         Initialize a channel.
 
@@ -67,7 +72,9 @@ class PeerToPeerChannel:
         """
         with self.lock:
             if self.stopped:
-                self._httpCall = HTTPCalls(server_address=self.provider_addr, port=self.provider_port)
+                self._httpCall = HTTPCalls(
+                    server_address=self.provider_addr, port=self.provider_port
+                )
                 self.stopped = False
                 self.thread.start()
                 logger.debug("P2P Channel is connected.")
@@ -79,7 +86,7 @@ class PeerToPeerChannel:
             assert self._httpCall is not None
             logger.info(self.address)
             query = self._httpCall.register(sender_address=self.address, mailbox=True)
-            return query['status'] == "OK"
+            return query["status"] == "OK"
         except Exception:  # pragma: no cover
             logger.warning("Could not register to the provider.")
             raise AEAConnectionError()
@@ -96,14 +103,19 @@ class PeerToPeerChannel:
         if self.excluded_protocols is not None:
             if envelope.protocol_id in self.excluded_protocols:
                 logger.error(
-                    "This envelope cannot be sent with the oef connection: protocol_id={}".format(envelope.protocol_id))
+                    "This envelope cannot be sent with the oef connection: protocol_id={}".format(
+                        envelope.protocol_id
+                    )
+                )
                 raise ValueError("Cannot send message.")
 
-        self._httpCall.send_message(sender_address=envelope.sender,
-                                    receiver_address=envelope.to,
-                                    protocol=envelope.protocol_id,
-                                    context=b"None",
-                                    payload=envelope.message)
+        self._httpCall.send_message(
+            sender_address=envelope.sender,
+            receiver_address=envelope.to,
+            protocol=envelope.protocol_id,
+            context=b"None",
+            payload=envelope.message,
+        )
 
     def receiving_loop(self) -> None:
         """Receive the messages from the provider."""
@@ -111,13 +123,17 @@ class PeerToPeerChannel:
         assert self.in_queue is not None
         assert self.loop is not None
         while not self.stopped:
-            messages = self._httpCall.get_messages(sender_address=self.address)  # type: List[Dict[str, Any]]
+            messages = self._httpCall.get_messages(
+                sender_address=self.address
+            )  # type: List[Dict[str, Any]]
             for message in messages:
                 logger.debug("Received message: {}".format(message))
-                envelope = Envelope(to=message['TO']['RECEIVER_ADDRESS'],
-                                    sender=message['FROM']['SENDER_ADDRESS'],
-                                    protocol_id=message['PROTOCOL'],
-                                    message=message['PAYLOAD'])
+                envelope = Envelope(
+                    to=message["TO"]["RECEIVER_ADDRESS"],
+                    sender=message["FROM"]["SENDER_ADDRESS"],
+                    protocol_id=message["PROTOCOL"],
+                    message=message["PAYLOAD"],
+                )
                 self.loop.call_soon_threadsafe(self.in_queue.put_nowait, envelope)
             time.sleep(0.5)
         logger.debug("Receiving loop stopped.")
@@ -142,15 +158,25 @@ class PeerToPeerConnection(Connection):
 
     restricted_to_protocols = set()  # type: Set[str]
 
-    def __init__(self, address: Address, provider_addr: str, provider_port: int = 8000, connection_id: str = "p2p",
-                 restricted_to_protocols: Optional[Set[str]] = None, excluded_protocols: Optional[Set[str]] = None):
+    def __init__(
+        self,
+        address: Address,
+        provider_addr: str,
+        provider_port: int = 8000,
+        connection_id: str = "p2p",
+        restricted_to_protocols: Optional[Set[str]] = None,
+        excluded_protocols: Optional[Set[str]] = None,
+    ):
         """
         Initialize a connection to an SDK or API.
 
         :param address: the address used in the protocols.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
-                         excluded_protocols=excluded_protocols)
+        super().__init__(
+            connection_id=connection_id,
+            restricted_to_protocols=restricted_to_protocols,
+            excluded_protocols=excluded_protocols,
+        )
         self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=excluded_protocols)  # type: ignore
         self.address = address
 
@@ -176,7 +202,7 @@ class PeerToPeerConnection(Connection):
             self.connection_status.is_connected = False
             self.channel.disconnect()
 
-    async def send(self, envelope: 'Envelope') -> None:
+    async def send(self, envelope: "Envelope") -> None:
         """
         Send an envelope.
 
@@ -184,17 +210,21 @@ class PeerToPeerConnection(Connection):
         :return: None
         """
         if not self.connection_status.is_connected:
-            raise ConnectionError("Connection not established yet. Please use 'connect()'.")  # pragma: no cover
+            raise ConnectionError(
+                "Connection not established yet. Please use 'connect()'."
+            )  # pragma: no cover
         self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
         :return: the envelope received, or None.
         """
         if not self.connection_status.is_connected:
-            raise ConnectionError("Connection not established yet. Please use 'connect()'.")  # pragma: no cover
+            raise ConnectionError(
+                "Connection not established yet. Please use 'connect()'."
+            )  # pragma: no cover
         assert self.channel.in_queue is not None
         try:
             envelope = await self.channel.in_queue.get()
@@ -206,7 +236,9 @@ class PeerToPeerConnection(Connection):
             return None
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """
         Get the P2P connection from the connection configuration.
 
@@ -216,8 +248,16 @@ class PeerToPeerConnection(Connection):
         """
         addr = cast(str, connection_configuration.config.get("addr"))
         port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
-        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
-        return PeerToPeerConnection(address, addr, port,
-                                    restricted_to_protocols=restricted_to_protocols_names,
-                                    excluded_protocols=excluded_protocols_names)
+        restricted_to_protocols_names = {
+            p.name for p in connection_configuration.restricted_to_protocols
+        }
+        excluded_protocols_names = {
+            p.name for p in connection_configuration.excluded_protocols
+        }
+        return PeerToPeerConnection(
+            address,
+            addr,
+            port,
+            restricted_to_protocols=restricted_to_protocols_names,
+            excluded_protocols=excluded_protocols_names,
+        )

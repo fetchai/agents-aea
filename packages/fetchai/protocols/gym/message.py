@@ -19,8 +19,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the FIPA message definition."""
+
 from enum import Enum
-from typing import cast, Dict, Any
+from typing import Any, Dict, cast
 
 from aea.protocols.base import Message
 
@@ -33,10 +34,10 @@ class GymMessage(Message):
     class Performative(Enum):
         """Gym performatives."""
 
-        ACT = 'act'
-        PERCEPT = 'percept'
-        RESET = 'reset'
-        CLOSE = 'close'
+        ACT = "act"
+        PERCEPT = "percept"
+        RESET = "reset"
+        CLOSE = "close"
 
         def __str__(self):
             """Get string representation."""
@@ -49,13 +50,13 @@ class GymMessage(Message):
         :param performative: the performative.
         """
         super().__init__(performative=performative, **kwargs)
-        assert self.check_consistency(), "GymMessage initialization inconsistent."
+        assert self._check_consistency(), "GymMessage initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "Performative is not set."
-        return GymMessage.Performative(self.get('performative'))
+        return GymMessage.Performative(self.get("performative"))
 
     @property
     def action(self) -> Any:
@@ -93,7 +94,7 @@ class GymMessage(Message):
         assert self.is_set("info"), "Info is not set."
         return cast(Dict[str, Any], self.get("info"))
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.performative, GymMessage.Performative)
@@ -108,7 +109,10 @@ class GymMessage(Message):
                 assert isinstance(self.info, dict)
                 assert isinstance(self.step_id, int)
                 assert len(self.body) == 6
-            elif self.performative == GymMessage.Performative.RESET or self.performative == GymMessage.Performative.CLOSE:
+            elif (
+                self.performative == GymMessage.Performative.RESET
+                or self.performative == GymMessage.Performative.CLOSE
+            ):
                 assert len(self.body) == 1
             else:
                 raise ValueError("Performative not recognized.")

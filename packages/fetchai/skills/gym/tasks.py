@@ -18,13 +18,15 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'gym' skill."""
+
 import logging
 from queue import Queue
 from threading import Thread
 
 from aea.skills.base import Task
+
 from packages.fetchai.skills.gym.helpers import ProxyEnv
-from packages.fetchai.skills.gym.rl_agent import MyRLAgent, DEFAULT_NB_STEPS, NB_GOODS
+from packages.fetchai.skills.gym.rl_agent import DEFAULT_NB_STEPS, MyRLAgent, NB_GOODS
 
 logger = logging.getLogger("aea.gym_skill")
 
@@ -39,7 +41,9 @@ class GymTask(Task):
         self._rl_agent = MyRLAgent(NB_GOODS)
         self._proxy_env = ProxyEnv(self.context)
         self.nb_steps = nb_steps
-        self._rl_agent_training_thread = Thread(target=self._rl_agent.fit, args=[self._proxy_env, self.nb_steps])
+        self._rl_agent_training_thread = Thread(
+            target=self._rl_agent.fit, args=[self._proxy_env, self.nb_steps]
+        )
         self.is_rl_agent_training = False
 
     @property

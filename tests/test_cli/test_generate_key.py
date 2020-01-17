@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea generate-key` sub-command."""
+
 import os
 import shutil
 import tempfile
@@ -27,9 +28,14 @@ from aea.cli import cli
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE, ETHEREUM_PRIVATE_KEY_FILE
-from ..conftest import CLI_LOG_OPTION
+from aea.crypto.helpers import (
+    DEFAULT_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE,
+)
+
 from ..common.click_testing import CliRunner
+from ..conftest import CLI_LOG_OPTION
 
 
 class TestGenerateKey:
@@ -117,12 +123,16 @@ class TestGenerateKeyWhenAlreadyExists:
         content = Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes()
 
         # Saying 'no' leave the files as it is.
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="n")
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="n"
+        )
         assert result.exit_code == 0
         assert Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes() == content
 
         # Saying 'yes' overwrites the file.
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="y")
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="y"
+        )
         assert result.exit_code == 0
         assert Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes() != content
         DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)

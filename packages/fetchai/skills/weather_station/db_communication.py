@@ -26,7 +26,7 @@ from typing import Dict, cast
 
 my_path = os.path.dirname(__file__)
 
-DB_SOURCE = os.path.join(my_path, 'dummy_weather_station_data.db')
+DB_SOURCE = os.path.join(my_path, "dummy_weather_station_data.db")
 
 
 class DBCommunication:
@@ -49,7 +49,9 @@ class DBCommunication:
         con = sqlite3.connect(self.source)
         return con
 
-    def get_data_for_specific_dates(self, start_date: str, end_date: str) -> Dict[str, int]:
+    def get_data_for_specific_dates(
+        self, start_date: str, end_date: str
+    ) -> Dict[str, int]:
         """
         Get data for specific dates.
 
@@ -59,11 +61,13 @@ class DBCommunication:
         """
         con = self.db_connection()
         cur = con.cursor()
-        start_dt = datetime.datetime.strptime(start_date, '%d/%m/%Y')
-        start = start_dt.strftime('%s')
-        end_dt = datetime.datetime.strptime(end_date, '%d/%m/%Y')
-        end = end_dt.strftime('%s')
-        cur.execute("SELECT * FROM data WHERE idx BETWEEN ? AND ?", (str(start), str(end)))
+        start_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
+        start = start_dt.strftime("%s")
+        end_dt = datetime.datetime.strptime(end_date, "%d/%m/%Y")
+        end = end_dt.strftime("%s")
+        cur.execute(
+            "SELECT * FROM data WHERE idx BETWEEN ? AND ?", (str(start), str(end))
+        )
         data = cast(Dict[str, int], cur.fetchall())
         cur.close()
         con.close()

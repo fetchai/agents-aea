@@ -18,10 +18,12 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a behaviour."""
+
 import logging
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.carpark_client.strategy import Strategy
@@ -39,11 +41,21 @@ class MySearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
-        balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
+        balance = self.context.ledger_apis.token_balance(
+            "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
+        )
         if balance > 0:
-            logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, balance))
+            logger.info(
+                "[{}]: starting balance on fetchai ledger={}.".format(
+                    self.context.agent_name, balance
+                )
+            )
         else:
-            logger.warning("[{}]: you have no starting balance on fetchai ledger!".format(self.context.agent_name))
+            logger.warning(
+                "[{}]: you have no starting balance on fetchai ledger!".format(
+                    self.context.agent_name
+                )
+            )
             # TODO: deregister skill from filter
 
     def act(self) -> None:
@@ -57,13 +69,15 @@ class MySearchBehaviour(TickerBehaviour):
             strategy.on_submit_search()
             self._search_id += 1
             query = strategy.get_service_query()
-            search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
-                                        id=self._search_id,
-                                        query=query)
-            self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_address,
-                                            protocol_id=OEFMessage.protocol_id,
-                                            message=OEFSerializer().encode(search_request))
+            search_request = OEFMessage(
+                type=OEFMessage.Type.SEARCH_SERVICES, id=self._search_id, query=query
+            )
+            self.context.outbox.put_message(
+                to=DEFAULT_OEF,
+                sender=self.context.agent_address,
+                protocol_id=OEFMessage.protocol_id,
+                message=OEFSerializer().encode(search_request),
+            )
 
     def teardown(self) -> None:
         """
@@ -71,5 +85,11 @@ class MySearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        balance = self.context.ledger_apis.token_balance('fetchai', cast(str, self.context.agent_addresses.get('fetchai')))
-        logger.info("[{}]: ending balance on fetchai ledger={}.".format(self.context.agent_name, balance))
+        balance = self.context.ledger_apis.token_balance(
+            "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
+        )
+        logger.info(
+            "[{}]: ending balance on fetchai ledger={}.".format(
+                self.context.agent_name, balance
+            )
+        )

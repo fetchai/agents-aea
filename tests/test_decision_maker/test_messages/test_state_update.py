@@ -34,11 +34,21 @@ class TestStateUpdateMessage:
         exchange_params = {"FET": 10.0}
         utility_params = {"a_good": 20.0}
         tx_fee = 10
-        assert StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE, amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
-                                  exchange_params_by_currency_id=exchange_params, utility_params_by_good_id=utility_params, tx_fee=tx_fee)
+        assert StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.INITIALIZE,
+            amount_by_currency_id=currency_endowment,
+            quantities_by_good_id=good_endowment,
+            exchange_params_by_currency_id=exchange_params,
+            utility_params_by_good_id=utility_params,
+            tx_fee=tx_fee,
+        )
         currency_change = {"FET": 10}
         good_change = {"a_good": 1}
-        assert StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY, amount_by_currency_id=currency_change, quantities_by_good_id=good_change)
+        assert StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.APPLY,
+            amount_by_currency_id=currency_change,
+            quantities_by_good_id=good_change,
+        )
 
     def test_message_inconsistency(self):
         """Test for an error in consistency of a message."""
@@ -48,5 +58,11 @@ class TestStateUpdateMessage:
             exchange_params = {"UNKNOWN": 10.0}
             utility_params = {"a_good": 20.0}
             tx_fee = 10
-            assert StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE, amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
-                                      exchange_params_by_currency_id=exchange_params, utility_params_by_good_id=utility_params, tx_fee=tx_fee)
+            assert StateUpdateMessage(
+                performative=StateUpdateMessage.Performative.INITIALIZE,
+                amount_by_currency_id=currency_endowment,
+                quantities_by_good_id=good_endowment,
+                exchange_params_by_currency_id=exchange_params,
+                utility_params_by_good_id=utility_params,
+                tx_fee=tx_fee,
+            )

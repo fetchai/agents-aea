@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea remove connection` sub-command."""
+
 import os
 import shutil
 import tempfile
@@ -25,62 +26,15 @@ import unittest.mock
 from pathlib import Path
 
 import yaml
-from ...common.click_testing import CliRunner
 
 import aea
 import aea.cli.common
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
+
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION, CUR_PATH
-
-
-class TestRemoveConnection:
-    """Test that the command 'aea remove connection' works correctly."""
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
-        cls.connection_id = "fetchai/local:0.1.0"
-        cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
-        cls.mocked_logger_error = cls.patch.__enter__()
-
-        os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
-        assert result.exit_code == 0
-        os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
-        assert result.exit_code == 0
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_name], standalone_mode=False)
-
-    def test_exit_code_equal_to_zero(self):
-        """Test that the exit code is equal to 0 (i.e. success)."""
-        assert self.result.exit_code == 0
-
-    def test_directory_does_not_exist(self):
-        """Test that the directory of the removed connection does not exist."""
-        assert not Path("connections", self.connection_name).exists()
-
-    def test_connection_not_present_in_agent_config(self):
-        """Test that the name of the removed connection is not present in the agent configuration file."""
-        agent_config = aea.configurations.base.AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
-        assert self.connection_id not in agent_config.connections
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
 
 class TestRemoveConnectionWithPublicId:
@@ -97,16 +51,26 @@ class TestRemoveConnectionWithPublicId:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "remove", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_zero(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -118,7 +82,9 @@ class TestRemoveConnectionWithPublicId:
 
     def test_connection_not_present_in_agent_config(self):
         """Test that the name of the removed connection is not present in the agent configuration file."""
-        agent_config = aea.configurations.base.AgentConfig.from_json(yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE)))
+        agent_config = aea.configurations.base.AgentConfig.from_json(
+            yaml.safe_load(open(DEFAULT_AEA_CONFIG_FILE))
+        )
         assert self.connection_id not in agent_config.connections
 
     @classmethod
@@ -141,16 +107,22 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.connection_id = "fetchai/local:0.1.0"
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "remove", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -161,7 +133,7 @@ class TestRemoveConnectionFailsWhenConnectionDoesNotExist:
 
         The expected message is: 'Connection '{connection_name}' not found.'
         """
-        s = "The connection '{}' is not supported.".format(self.connection_name)
+        s = "The connection '{}' is not supported.".format(self.connection_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -188,20 +160,32 @@ class TestRemoveConnectionFailsWhenExceptionOccurs:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        cls.patch = unittest.mock.patch("shutil.rmtree", side_effect=BaseException("an exception"))
+        cls.patch = unittest.mock.patch(
+            "shutil.rmtree", side_effect=BaseException("an exception")
+        )
         cls.patch.__enter__()
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "remove", "connection", cls.connection_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "remove", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
