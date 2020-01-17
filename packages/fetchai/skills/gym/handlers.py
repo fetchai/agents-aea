@@ -58,7 +58,9 @@ class GymHandler(Handler):
             gym_task = cast(GymTask, self.context.tasks.gym)
             gym_task.proxy_env_queue.put(gym_msg)
         else:
-            raise ValueError("Unexpected performative or no step_id: {}".format(gym_msg.performative))
+            raise ValueError(
+                "Unexpected performative or no step_id: {}".format(gym_msg.performative)
+            )
 
     def teardown(self) -> None:
         """

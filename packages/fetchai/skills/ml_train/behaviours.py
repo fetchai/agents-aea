@@ -32,7 +32,7 @@ from packages.fetchai.skills.ml_train.strategy import Strategy
 
 logger = logging.getLogger("aea.ml_train_skill")
 
-SERVICE_ID = ''
+SERVICE_ID = ""
 DEFAULT_SEARCH_INTERVAL = 5.0
 
 
@@ -41,7 +41,7 @@ class MySearchBehaviour(TickerBehaviour):
 
     def __init__(self, **kwargs):
         """Initialize the search behaviour."""
-        search_interval = kwargs.pop('search_interval', DEFAULT_SEARCH_INTERVAL)
+        search_interval = kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
         super().__init__(tick_interval=search_interval, **kwargs)
 
     def setup(self) -> None:
@@ -51,18 +51,38 @@ class MySearchBehaviour(TickerBehaviour):
         :return: None
         """
         if self.context.ledger_apis.has_fetchai:
-            fet_balance = self.context.ledger_apis.token_balance(FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI)))
+            fet_balance = self.context.ledger_apis.token_balance(
+                FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
+            )
             if fet_balance > 0:
-                logger.info("[{}]: starting balance on fetchai ledger={}.".format(self.context.agent_name, fet_balance))
+                logger.info(
+                    "[{}]: starting balance on fetchai ledger={}.".format(
+                        self.context.agent_name, fet_balance
+                    )
+                )
             else:
-                logger.warning("[{}]: you have no starting balance on fetchai ledger!".format(self.context.agent_name))
+                logger.warning(
+                    "[{}]: you have no starting balance on fetchai ledger!".format(
+                        self.context.agent_name
+                    )
+                )
 
         if self.context.ledger_apis.has_ethereum:
-            eth_balance = self.context.ledger_apis.token_balance(ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM)))
+            eth_balance = self.context.ledger_apis.token_balance(
+                ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
+            )
             if eth_balance > 0:
-                logger.info("[{}]: starting balance on ethereum ledger={}.".format(self.context.agent_name, eth_balance))
+                logger.info(
+                    "[{}]: starting balance on ethereum ledger={}.".format(
+                        self.context.agent_name, eth_balance
+                    )
+                )
             else:
-                logger.warning("[{}]: you have no starting balance on ethereum ledger!".format(self.context.agent_name))
+                logger.warning(
+                    "[{}]: you have no starting balance on ethereum ledger!".format(
+                        self.context.agent_name
+                    )
+                )
 
     def act(self) -> None:
         """
@@ -74,13 +94,15 @@ class MySearchBehaviour(TickerBehaviour):
         if strategy.is_searching:
             query = strategy.get_service_query()
             search_id = strategy.get_next_search_id()
-            oef_msg = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
-                                 id=search_id,
-                                 query=query)
-            self.context.outbox.put_message(to=DEFAULT_OEF,
-                                            sender=self.context.agent_address,
-                                            protocol_id=OEFMessage.protocol_id,
-                                            message=OEFSerializer().encode(oef_msg))
+            oef_msg = OEFMessage(
+                type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query
+            )
+            self.context.outbox.put_message(
+                to=DEFAULT_OEF,
+                sender=self.context.agent_address,
+                protocol_id=OEFMessage.protocol_id,
+                message=OEFSerializer().encode(oef_msg),
+            )
 
     def teardown(self) -> None:
         """
@@ -89,9 +111,21 @@ class MySearchBehaviour(TickerBehaviour):
         :return: None
         """
         if self.context.ledger_apis.has_fetchai:
-            balance = self.context.ledger_apis.token_balance(FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI)))
-            logger.info("[{}]: ending balance on fetchai ledger={}.".format(self.context.agent_name, balance))
+            balance = self.context.ledger_apis.token_balance(
+                FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
+            )
+            logger.info(
+                "[{}]: ending balance on fetchai ledger={}.".format(
+                    self.context.agent_name, balance
+                )
+            )
 
         if self.context.ledger_apis.has_ethereum:
-            balance = self.context.ledger_apis.token_balance(ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM)))
-            logger.info("[{}]: ending balance on ethereum ledger={}.".format(self.context.agent_name, balance))
+            balance = self.context.ledger_apis.token_balance(
+                ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
+            )
+            logger.info(
+                "[{}]: ending balance on ethereum ledger={}.".format(
+                    self.context.agent_name, balance
+                )
+            )

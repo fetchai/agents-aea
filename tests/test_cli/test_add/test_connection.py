@@ -50,38 +50,52 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.connection_name = "local"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.1.0"
-        cls.connection_id = cls.connection_author + "/" + cls.connection_name + ":" + cls.connection_version
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.connection_id = (
+            cls.connection_author
+            + "/"
+            + cls.connection_name
+            + ":"
+            + cls.connection_version
+        )
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add connection first time
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
         # add connection again
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
 
-    @unittest.mock.patch('aea.cli.add.fetch_package')
-    def test_add_connection_from_registry_positive(
-            self, fetch_package_mock
-    ):
+    @unittest.mock.patch("aea.cli.add.fetch_package")
+    def test_add_connection_from_registry_positive(self, fetch_package_mock):
         """Test add from registry positive result."""
         public_id = aea.configurations.base.PublicId("author", "name", "0.1.0")
-        obj_type = 'connection'
+        obj_type = "connection"
         result = self.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "add", "--registry", obj_type, str(public_id)],
-            standalone_mode=False
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id, cwd='.'
+            obj_type, public_id=public_id, cwd="."
         )
 
     def test_exit_code_equal_to_1(self):
@@ -93,7 +107,9 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
 
         The expected message is: 'A connection with id '{connection_id}' already exists. Aborting...'
         """
-        s = "A connection with id '{}/{}' already exists. Aborting...".format(self.connection_author, self.connection_name)
+        s = "A connection with id '{}/{}' already exists. Aborting...".format(
+            self.connection_author, self.connection_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -119,30 +135,55 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         cls.connection_name = "local"
         cls.connection_author = "fetchai"
         cls.connection_version = "0.1.0"
-        cls.connection_id = cls.connection_author + "/" + cls.connection_name + ":" + cls.connection_version
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.connection_id = (
+            cls.connection_author
+            + "/"
+            + cls.connection_name
+            + ":"
+            + cls.connection_version
+        )
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add connection first time
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
         # add connection again, but with different version number
         # first, change version number to package
         different_version = "0.1.1"
-        different_id = cls.connection_author + "/" + cls.connection_name + ":" + different_version
-        config_path = Path(cls.t, "packages", cls.connection_author, "connections", cls.connection_name, DEFAULT_CONNECTION_CONFIG_FILE)
+        different_id = (
+            cls.connection_author + "/" + cls.connection_name + ":" + different_version
+        )
+        config_path = Path(
+            cls.t,
+            "packages",
+            cls.connection_author,
+            "connections",
+            cls.connection_name,
+            DEFAULT_CONNECTION_CONFIG_FILE,
+        )
         config = yaml.safe_load(config_path.open())
         config["version"] = different_version
         yaml.safe_dump(config, config_path.open(mode="w"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", different_id], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", different_id],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -153,7 +194,9 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
 
         The expected message is: 'A connection with id '{connection_id}' already exists. Aborting...'
         """
-        s = "A connection with id '{}' already exists. Aborting...".format(self.connection_author + "/" + self.connection_name)
+        s = "A connection with id '{}' already exists. Aborting...".format(
+            self.connection_author + "/" + self.connection_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -178,18 +221,23 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         cls.t = tempfile.mkdtemp()
         cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
-                                       standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -225,18 +273,23 @@ class TestAddConnectionFailsWhenDifferentPublicId:
         cls.t = tempfile.mkdtemp()
         cls.connection_id = "different_author/local:0.1.0"
         cls.connection_name = "unknown_connection"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
-                                       standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -269,24 +322,32 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         cls.t = tempfile.mkdtemp()
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
-        cls.patch = unittest.mock.patch.object(aea.configurations.base.ConnectionConfig, "from_json",
-                                               side_effect=ValidationError("test error message"))
+        cls.patch = unittest.mock.patch.object(
+            aea.configurations.base.ConnectionConfig,
+            "from_json",
+            side_effect=ValidationError("test error message"),
+        )
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
-                                       standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -297,7 +358,9 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        self.mocked_logger_error.assert_called_once_with("Connection configuration file not valid: test error message")
+        self.mocked_logger_error.assert_called_once_with(
+            "Connection configuration file not valid: test error message"
+        )
 
     @classmethod
     def teardown_class(cls):
@@ -322,21 +385,32 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         cls.t = tempfile.mkdtemp()
         cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         os.chdir(cls.agent_name)
-        Path(cls.t, cls.agent_name, "vendor", "fetchai", "connections", cls.connection_name).mkdir(parents=True,
-                                                                                                   exist_ok=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
-                                       standalone_mode=False)
+        Path(
+            cls.t,
+            cls.agent_name,
+            "vendor",
+            "fetchai",
+            "connections",
+            cls.connection_name,
+        ).mkdir(parents=True, exist_ok=True)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -347,7 +421,9 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
-        s = "[Errno 17] File exists: './vendor/fetchai/connections/{}'".format(self.connection_name)
+        s = "[Errno 17] File exists: './vendor/fetchai/connections/{}'".format(
+            self.connection_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod

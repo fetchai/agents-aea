@@ -50,11 +50,14 @@ class FIPAMessage(Message):
             """Get string representation."""
             return self.value
 
-    def __init__(self, dialogue_reference: Tuple[str, str],
-                 message_id: int,
-                 target: int,
-                 performative: Performative,
-                 **kwargs):
+    def __init__(
+        self,
+        dialogue_reference: Tuple[str, str],
+        message_id: int,
+        target: int,
+        performative: Performative,
+        **kwargs
+    ):
         """
         Initialize.
 
@@ -63,11 +66,13 @@ class FIPAMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        super().__init__(message_id=message_id,
-                         dialogue_reference=dialogue_reference,
-                         target=target,
-                         performative=FIPAMessage.Performative(performative),
-                         **kwargs)
+        super().__init__(
+            message_id=message_id,
+            dialogue_reference=dialogue_reference,
+            target=target,
+            performative=FIPAMessage.Performative(performative),
+            **kwargs
+        )
         assert self._check_consistency(), "FIPAMessage initialization inconsistent."
 
     @property
@@ -116,22 +121,34 @@ class FIPAMessage(Message):
         try:
             assert isinstance(self.performative, FIPAMessage.Performative)
             assert isinstance(self.dialogue_reference, tuple)
-            assert isinstance(self.dialogue_reference[0], str) and isinstance(self.dialogue_reference[1], str)
+            assert isinstance(self.dialogue_reference[0], str) and isinstance(
+                self.dialogue_reference[1], str
+            )
             assert isinstance(self.message_id, int)
             assert isinstance(self.target, int)
             if self.performative == FIPAMessage.Performative.CFP:
-                assert isinstance(self.query, Query) or isinstance(self.query, bytes) or self.query is None
+                assert (
+                    isinstance(self.query, Query)
+                    or isinstance(self.query, bytes)
+                    or self.query is None
+                )
                 assert len(self.body) == 5
             elif self.performative == FIPAMessage.Performative.PROPOSE:
-                assert isinstance(self.proposal, list) and all(isinstance(d, Description) for d in self.proposal)
+                assert isinstance(self.proposal, list) and all(
+                    isinstance(d, Description) for d in self.proposal
+                )
                 assert len(self.body) == 5
-            elif self.performative == FIPAMessage.Performative.ACCEPT \
-                    or self.performative == FIPAMessage.Performative.MATCH_ACCEPT \
-                    or self.performative == FIPAMessage.Performative.DECLINE:
+            elif (
+                self.performative == FIPAMessage.Performative.ACCEPT
+                or self.performative == FIPAMessage.Performative.MATCH_ACCEPT
+                or self.performative == FIPAMessage.Performative.DECLINE
+            ):
                 assert len(self.body) == 4
-            elif self.performative == FIPAMessage.Performative.ACCEPT_W_INFORM\
-                    or self.performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM\
-                    or self.performative == FIPAMessage.Performative.INFORM:
+            elif (
+                self.performative == FIPAMessage.Performative.ACCEPT_W_INFORM
+                or self.performative == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM
+                or self.performative == FIPAMessage.Performative.INFORM
+            ):
                 assert isinstance(self.info, dict)
                 assert len(self.body) == 5
             else:
@@ -148,8 +165,23 @@ VALID_PREVIOUS_PERFORMATIVES = {
     FIPAMessage.Performative.PROPOSE: [FIPAMessage.Performative.CFP],
     FIPAMessage.Performative.ACCEPT: [FIPAMessage.Performative.PROPOSE],
     FIPAMessage.Performative.ACCEPT_W_INFORM: [FIPAMessage.Performative.PROPOSE],
-    FIPAMessage.Performative.MATCH_ACCEPT: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_INFORM],
-    FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM: [FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_INFORM],
-    FIPAMessage.Performative.INFORM: [FIPAMessage.Performative.MATCH_ACCEPT, FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM, FIPAMessage.Performative.INFORM],
-    FIPAMessage.Performative.DECLINE: [FIPAMessage.Performative.CFP, FIPAMessage.Performative.PROPOSE, FIPAMessage.Performative.ACCEPT, FIPAMessage.Performative.ACCEPT_W_INFORM]
+    FIPAMessage.Performative.MATCH_ACCEPT: [
+        FIPAMessage.Performative.ACCEPT,
+        FIPAMessage.Performative.ACCEPT_W_INFORM,
+    ],
+    FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM: [
+        FIPAMessage.Performative.ACCEPT,
+        FIPAMessage.Performative.ACCEPT_W_INFORM,
+    ],
+    FIPAMessage.Performative.INFORM: [
+        FIPAMessage.Performative.MATCH_ACCEPT,
+        FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
+        FIPAMessage.Performative.INFORM,
+    ],
+    FIPAMessage.Performative.DECLINE: [
+        FIPAMessage.Performative.CFP,
+        FIPAMessage.Performative.PROPOSE,
+        FIPAMessage.Performative.ACCEPT,
+        FIPAMessage.Performative.ACCEPT_W_INFORM,
+    ],
 }  # type: Dict[FIPAMessage.Performative, List[Union[None, FIPAMessage.Performative]]]

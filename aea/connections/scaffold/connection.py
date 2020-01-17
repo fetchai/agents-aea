@@ -62,7 +62,7 @@ class MyScaffoldConnection(Connection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    async def send(self, envelope: 'Envelope') -> None:
+    async def send(self, envelope: "Envelope") -> None:
         """
         Send an envelope.
 
@@ -71,7 +71,7 @@ class MyScaffoldConnection(Connection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 
@@ -80,7 +80,9 @@ class MyScaffoldConnection(Connection):
         raise NotImplementedError  # pragma: no cover
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """
         Get the Gym connection from the connection configuration.
 

@@ -39,7 +39,7 @@ Done = bool
 Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
 
-DEFAULT_GYM = 'gym'
+DEFAULT_GYM = "gym"
 NB_STEPS = 500
 
 
@@ -98,11 +98,15 @@ class ProxyEnv(gym.Env):
         if gym_msg.step_id == step_id:
             observation, reward, done, info = self._message_to_percept(gym_msg)
         else:
-            raise ValueError("Unexpected step id! expected={}, actual={}".format(step_id, gym_msg.step_id))
+            raise ValueError(
+                "Unexpected step id! expected={}, actual={}".format(
+                    step_id, gym_msg.step_id
+                )
+            )
 
         return observation, reward, done, info
 
-    def render(self, mode='human') -> None:
+    def render(self, mode="human") -> None:
         """
         Render the environment.
 
@@ -120,8 +124,12 @@ class ProxyEnv(gym.Env):
         self._is_rl_agent_trained = False
         gym_msg = GymMessage(performative=GymMessage.Performative.RESET)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_address, protocol_id=GymMessage.protocol_id,
-                            message=gym_bytes)
+        envelope = Envelope(
+            to=DEFAULT_GYM,
+            sender=self._skill_context.agent_address,
+            protocol_id=GymMessage.protocol_id,
+            message=gym_bytes,
+        )
         self._skill_context.outbox.put(envelope)
 
     def close(self) -> None:
@@ -133,8 +141,12 @@ class ProxyEnv(gym.Env):
         self._is_rl_agent_trained = True
         gym_msg = GymMessage(performative=GymMessage.Performative.CLOSE)
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_address, protocol_id=GymMessage.protocol_id,
-                            message=gym_bytes)
+        envelope = Envelope(
+            to=DEFAULT_GYM,
+            sender=self._skill_context.agent_address,
+            protocol_id=GymMessage.protocol_id,
+            message=gym_bytes,
+        )
         self._skill_context.outbox.put(envelope)
 
     def _encode_action(self, action: Action, step_id: int) -> Envelope:
@@ -145,10 +157,16 @@ class ProxyEnv(gym.Env):
         :param step_id: the step id
         :return: an envelope
         """
-        gym_msg = GymMessage(performative=GymMessage.Performative.ACT, action=action, step_id=step_id)
+        gym_msg = GymMessage(
+            performative=GymMessage.Performative.ACT, action=action, step_id=step_id
+        )
         gym_bytes = GymSerializer().encode(gym_msg)
-        envelope = Envelope(to=DEFAULT_GYM, sender=self._skill_context.agent_address, protocol_id=GymMessage.protocol_id,
-                            message=gym_bytes)
+        envelope = Envelope(
+            to=DEFAULT_GYM,
+            sender=self._skill_context.agent_address,
+            protocol_id=GymMessage.protocol_id,
+            message=gym_bytes,
+        )
         return envelope
 
     def _message_to_percept(self, message: Message) -> Feedback:

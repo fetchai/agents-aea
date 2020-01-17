@@ -31,19 +31,22 @@ from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
-from aea.helpers.preference_representations.base import linear_utility, logarithmic_utility
+from aea.helpers.preference_representations.base import (
+    linear_utility,
+    logarithmic_utility,
+)
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity
-UtilityParams = Dict[str, float]   # a map from identifier to quantity
-ExchangeParams = Dict[str, float]   # a map from identifier to quantity
+UtilityParams = Dict[str, float]  # a map from identifier to quantity
+ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
 SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
-INTERNAL_PROTOCOL_ID = 'internal'
-OFF_CHAIN_SETTLEMENT_DIGEST = cast(Optional[str], 'off_chain_settlement')
+INTERNAL_PROTOCOL_ID = "internal"
+OFF_CHAIN_SETTLEMENT_DIGEST = cast(Optional[str], "off_chain_settlement")
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +57,8 @@ class GoalPursuitReadiness:
     class Status(Enum):
         """The enum of status."""
 
-        READY = 'ready'
-        NOT_READY = 'not_ready'
+        READY = "ready"
+        NOT_READY = "not_ready"
 
     def __init__(self):
         """Instantiate an ownership state object."""
@@ -79,7 +82,12 @@ class OwnershipState:
         self._amount_by_currency_id = None  # type: CurrencyHoldings
         self._quantities_by_good_id = None  # type: GoodHoldings
 
-    def init(self, amount_by_currency_id: CurrencyHoldings, quantities_by_good_id: GoodHoldings, agent_name: str = ''):
+    def init(
+        self,
+        amount_by_currency_id: CurrencyHoldings,
+        quantities_by_good_id: GoodHoldings,
+        agent_name: str = "",
+    ):
         """
         Instantiate an ownership state object.
 
@@ -87,14 +95,19 @@ class OwnershipState:
         :param quantities_by_good_id: the good endowment of the agent in this state.
         :param agent_name: the agent name
         """
-        logger.warning("[{}]: Careful! OwnershipState are being initialized!".format(agent_name))
+        logger.warning(
+            "[{}]: Careful! OwnershipState are being initialized!".format(agent_name)
+        )
         self._amount_by_currency_id = copy.copy(amount_by_currency_id)
         self._quantities_by_good_id = copy.copy(quantities_by_good_id)
 
     @property
     def is_initialized(self) -> bool:
         """Get the initialization status."""
-        return self._amount_by_currency_id is not None and self._quantities_by_good_id is not None
+        return (
+            self._amount_by_currency_id is not None
+            and self._quantities_by_good_id is not None
+        )
 
     @property
     def amount_by_currency_id(self) -> CurrencyHoldings:
@@ -116,15 +129,27 @@ class OwnershipState:
         Note, the agent is the sender of the transaction message by design.
         :return: True if the transaction is legal wrt the current state, false otherwise.
         """
-        if tx_message.amount == 0 and all(quantity == 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
+        if tx_message.amount == 0 and all(
+            quantity == 0 for quantity in tx_message.tx_quantities_by_good_id.values()
+        ):
             # reject the transaction when there is no wealth exchange
             result = False
-        elif tx_message.amount <= 0 and all(quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
+        elif tx_message.amount <= 0 and all(
+            quantity >= 0 for quantity in tx_message.tx_quantities_by_good_id.values()
+        ):
             # check if the agent has the money to cover the sender_amount (the agent=sender is the buyer)
-            result = self.amount_by_currency_id[tx_message.currency_id] >= tx_message.sender_amount
-        elif tx_message.amount >= 0 and all(quantity <= 0 for quantity in tx_message.tx_quantities_by_good_id.values()):
+            result = (
+                self.amount_by_currency_id[tx_message.currency_id]
+                >= tx_message.sender_amount
+            )
+        elif tx_message.amount >= 0 and all(
+            quantity <= 0 for quantity in tx_message.tx_quantities_by_good_id.values()
+        ):
             # check if the agent has the goods (the agent=sender is the seller).
-            result = all(self.quantities_by_good_id[good_id] >= -quantity for good_id, quantity in tx_message.tx_quantities_by_good_id.items())
+            result = all(
+                self.quantities_by_good_id[good_id] >= -quantity
+                for good_id, quantity in tx_message.tx_quantities_by_good_id.items()
+            )
         else:
             result = False
         return result
@@ -136,14 +161,18 @@ class OwnershipState:
         :param tx_message:
         :return: None
         """
-        assert self.check_transaction_is_affordable(tx_message), "Inconsistent transaction."
+        assert self.check_transaction_is_affordable(
+            tx_message
+        ), "Inconsistent transaction."
 
         self._amount_by_currency_id[tx_message.currency_id] += tx_message.sender_amount
 
         for good_id, quantity_delta in tx_message.tx_quantities_by_good_id.items():
             self._quantities_by_good_id[good_id] += quantity_delta
 
-    def apply_transactions(self, transactions: List[TransactionMessage]) -> 'OwnershipState':
+    def apply_transactions(
+        self, transactions: List[TransactionMessage]
+    ) -> "OwnershipState":
         """
         Apply a list of transactions to (a copy of) the current state.
 
@@ -156,7 +185,11 @@ class OwnershipState:
 
         return new_state
 
-    def apply_state_update(self, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int]) -> 'OwnershipState':
+    def apply_state_update(
+        self,
+        amount_by_currency_id: Dict[str, int],
+        quantities_by_good_id: Dict[str, int],
+    ) -> "OwnershipState":
         """
         Apply a state update to the current state.
 
@@ -177,13 +210,16 @@ class OwnershipState:
     def __copy__(self):
         """Copy the object."""
         state = OwnershipState()
-        if self.amount_by_currency_id is not None and self.quantities_by_good_id is not None:
+        if (
+            self.amount_by_currency_id is not None
+            and self.quantities_by_good_id is not None
+        ):
             state._amount_by_currency_id = self.amount_by_currency_id
             state._quantities_by_good_id = self.quantities_by_good_id
         return state
 
 
-class LedgerStateProxy():
+class LedgerStateProxy:
     """Class to represent a proxy to a ledger state."""
 
     def __init__(self, ledger_apis: LedgerApis):
@@ -209,8 +245,12 @@ class LedgerStateProxy():
         """
         if tx_message.sender_amount <= 0:
             # check if the agent has the money to cover counterparty amount and tx fees
-            available_balance = self.ledger_apis.token_balance(tx_message.ledger_id, tx_message.tx_sender_addr)
-            is_affordable = tx_message.counterparty_amount + tx_message.fees <= available_balance
+            available_balance = self.ledger_apis.token_balance(
+                tx_message.ledger_id, tx_message.tx_sender_addr
+            )
+            is_affordable = (
+                tx_message.counterparty_amount + tx_message.fees <= available_balance
+            )
         else:
             is_affordable = True
         return is_affordable
@@ -226,7 +266,13 @@ class Preferences:
         self._transaction_fees = None  # type: Dict[str, int]
         self._quantity_shift = QUANTITY_SHIFT
 
-    def init(self, exchange_params_by_currency_id: ExchangeParams, utility_params_by_good_id: UtilityParams, tx_fee: int, agent_name: str = ''):
+    def init(
+        self,
+        exchange_params_by_currency_id: ExchangeParams,
+        utility_params_by_good_id: UtilityParams,
+        tx_fee: int,
+        agent_name: str = "",
+    ):
         """
         Instantiate an agent preference object.
 
@@ -234,7 +280,9 @@ class Preferences:
         :param utility_params_by_good_id: the utility params for every asset.
         :param agent_name: the agent name
         """
-        logger.warning("[{}]: Careful! Preferences are being initialized!".format(agent_name))
+        logger.warning(
+            "[{}]: Careful! Preferences are being initialized!".format(agent_name)
+        )
         self._exchange_params_by_currency_id = exchange_params_by_currency_id
         self._utility_params_by_good_id = utility_params_by_good_id
         self._transaction_fees = self._split_tx_fees(tx_fee)
@@ -242,14 +290,18 @@ class Preferences:
     @property
     def is_initialized(self) -> bool:
         """Get the initialization status."""
-        return (self._exchange_params_by_currency_id is not None) and \
-            (self._utility_params_by_good_id is not None) and \
-            (self._transaction_fees is not None)
+        return (
+            (self._exchange_params_by_currency_id is not None)
+            and (self._utility_params_by_good_id is not None)
+            and (self._transaction_fees is not None)
+        )
 
     @property
     def exchange_params_by_currency_id(self) -> ExchangeParams:
         """Get exchange parameter for each currency."""
-        assert self._exchange_params_by_currency_id is not None, "ExchangeParams not set!"
+        assert (
+            self._exchange_params_by_currency_id is not None
+        ), "ExchangeParams not set!"
         return self._exchange_params_by_currency_id
 
     @property
@@ -271,7 +323,9 @@ class Preferences:
         :param quantities_by_good_id: the good holdings (dictionary) with the identifier (key) and quantity (value) for each good
         :return: utility value
         """
-        result = logarithmic_utility(self.utility_params_by_good_id, quantities_by_good_id, self._quantity_shift)
+        result = logarithmic_utility(
+            self.utility_params_by_good_id, quantities_by_good_id, self._quantity_shift
+        )
         return result
 
     def linear_utility(self, amount_by_currency_id: CurrencyHoldings) -> float:
@@ -281,10 +335,16 @@ class Preferences:
         :param amount_by_currency_id: the currency holdings (dictionary) with the identifier (key) and quantity (value) for each currency
         :return: utility value
         """
-        result = linear_utility(self.exchange_params_by_currency_id, amount_by_currency_id)
+        result = linear_utility(
+            self.exchange_params_by_currency_id, amount_by_currency_id
+        )
         return result
 
-    def get_score(self, quantities_by_good_id: GoodHoldings, amount_by_currency_id: CurrencyHoldings) -> float:
+    def get_score(
+        self,
+        quantities_by_good_id: GoodHoldings,
+        amount_by_currency_id: CurrencyHoldings,
+    ) -> float:
         """
         Compute the score given the good and currency holdings.
 
@@ -297,7 +357,12 @@ class Preferences:
         score = goods_score + currency_score
         return score
 
-    def marginal_utility(self, ownership_state: OwnershipState, delta_quantities_by_good_id: Optional[GoodHoldings] = None, delta_amount_by_currency_id: Optional[CurrencyHoldings] = None) -> float:
+    def marginal_utility(
+        self,
+        ownership_state: OwnershipState,
+        delta_quantities_by_good_id: Optional[GoodHoldings] = None,
+        delta_amount_by_currency_id: Optional[CurrencyHoldings] = None,
+    ) -> float:
         """
         Compute the marginal utility.
 
@@ -306,30 +371,51 @@ class Preferences:
         :param delta_amount_by_currency_id: the change in money holdings
         :return: the marginal utility score
         """
-        current_goods_score = self.logarithmic_utility(ownership_state.quantities_by_good_id)
-        current_currency_score = self.linear_utility(ownership_state.amount_by_currency_id)
+        current_goods_score = self.logarithmic_utility(
+            ownership_state.quantities_by_good_id
+        )
+        current_currency_score = self.linear_utility(
+            ownership_state.amount_by_currency_id
+        )
         new_goods_score = current_goods_score
         new_currency_score = current_currency_score
         if delta_quantities_by_good_id is not None:
-            new_quantities_by_good_id = {good_id: quantity + delta_quantities_by_good_id[good_id] for good_id, quantity in ownership_state.quantities_by_good_id.items()}
+            new_quantities_by_good_id = {
+                good_id: quantity + delta_quantities_by_good_id[good_id]
+                for good_id, quantity in ownership_state.quantities_by_good_id.items()
+            }
             new_goods_score = self.logarithmic_utility(new_quantities_by_good_id)
         if delta_amount_by_currency_id is not None:
-            new_amount_by_currency_id = {currency: amount + delta_amount_by_currency_id[currency] for currency, amount in ownership_state.amount_by_currency_id.items()}
+            new_amount_by_currency_id = {
+                currency: amount + delta_amount_by_currency_id[currency]
+                for currency, amount in ownership_state.amount_by_currency_id.items()
+            }
             new_currency_score = self.linear_utility(new_amount_by_currency_id)
-        return new_goods_score + new_currency_score - current_goods_score - current_currency_score
+        return (
+            new_goods_score
+            + new_currency_score
+            - current_goods_score
+            - current_currency_score
+        )
 
-    def get_score_diff_from_transaction(self, ownership_state: OwnershipState, tx_message: TransactionMessage) -> float:
+    def get_score_diff_from_transaction(
+        self, ownership_state: OwnershipState, tx_message: TransactionMessage
+    ) -> float:
         """
         Simulate a transaction and get the resulting score (taking into account the fee).
 
         :param tx_message: a transaction object.
         :return: the score.
         """
-        current_score = self.get_score(quantities_by_good_id=ownership_state.quantities_by_good_id,
-                                       amount_by_currency_id=ownership_state.amount_by_currency_id)
+        current_score = self.get_score(
+            quantities_by_good_id=ownership_state.quantities_by_good_id,
+            amount_by_currency_id=ownership_state.amount_by_currency_id,
+        )
         new_ownership_state = ownership_state.apply_transactions([tx_message])
-        new_score = self.get_score(quantities_by_good_id=new_ownership_state.quantities_by_good_id,
-                                   amount_by_currency_id=new_ownership_state.amount_by_currency_id)
+        new_score = self.get_score(
+            quantities_by_good_id=new_ownership_state.quantities_by_good_id,
+            amount_by_currency_id=new_ownership_state.amount_by_currency_id,
+        )
         return new_score - current_score
 
     def _split_tx_fees(self, tx_fee: int) -> Dict[str, int]:
@@ -343,13 +429,20 @@ class Preferences:
         seller_part = math.ceil(tx_fee * (1 - SENDER_TX_SHARE))
         if buyer_part + seller_part > tx_fee:
             seller_part -= 1
-        return {'seller_tx_fee': seller_part, 'buyer_tx_fee': buyer_part}
+        return {"seller_tx_fee": seller_part, "buyer_tx_fee": buyer_part}
 
 
 class DecisionMaker:
     """This class implements the decision maker."""
 
-    def __init__(self, agent_name: str, max_reactions: int, outbox: OutBox, wallet: Wallet, ledger_apis: LedgerApis):
+    def __init__(
+        self,
+        agent_name: str,
+        max_reactions: int,
+        outbox: OutBox,
+        wallet: Wallet,
+        ledger_apis: LedgerApis,
+    ):
         """
         Initialize the decision maker.
 
@@ -423,7 +516,11 @@ class DecisionMaker:
                 if message.protocol_id == INTERNAL_PROTOCOL_ID:
                     self.handle(message)
                 else:
-                    logger.warning("[{}]: Message received by the decision maker is not of protocol_id=internal.".format(self._agent_name))
+                    logger.warning(
+                        "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
+                            self._agent_name
+                        )
+                    )
 
     def handle(self, message: Message) -> None:
         """
@@ -445,19 +542,37 @@ class DecisionMaker:
         :return: None
         """
         if tx_message.ledger_id not in SUPPORTED_LEDGER_APIS + [OFF_CHAIN]:
-            logger.error("[{}]: ledger_id={} is not supported".format(self._agent_name, tx_message.ledger_id))
+            logger.error(
+                "[{}]: ledger_id={} is not supported".format(
+                    self._agent_name, tx_message.ledger_id
+                )
+            )
             return
 
         if not self.goal_pursuit_readiness.is_ready:
-            logger.debug("[{}]: Preferences and ownership state not initialized!".format(self._agent_name))
+            logger.debug(
+                "[{}]: Preferences and ownership state not initialized!".format(
+                    self._agent_name
+                )
+            )
 
         # check if the transaction is acceptable and process it accordingly
-        if tx_message.performative == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT:
+        if (
+            tx_message.performative
+            == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT
+        ):
             self._handle_tx_message_for_settlement(tx_message)
-        elif tx_message.performative == TransactionMessage.Performative.PROPOSE_FOR_SIGNING:
+        elif (
+            tx_message.performative
+            == TransactionMessage.Performative.PROPOSE_FOR_SIGNING
+        ):
             self._handle_tx_message_for_signing(tx_message)
         else:
-            logger.error("[{}]: Unexpected transaction message performative".format(self._agent_name))
+            logger.error(
+                "[{}]: Unexpected transaction message performative".format(
+                    self._agent_name
+                )
+            )
 
     def _handle_tx_message_for_settlement(self, tx_message) -> None:
         """
@@ -469,15 +584,21 @@ class DecisionMaker:
         if self._is_acceptable_for_settlement(tx_message):
             tx_digest = self._settle_tx(tx_message)
             if tx_digest is not None:
-                tx_message_response = TransactionMessage.respond_settlement(tx_message,
-                                                                            performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-                                                                            tx_digest=tx_digest)
+                tx_message_response = TransactionMessage.respond_settlement(
+                    tx_message,
+                    performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+                    tx_digest=tx_digest,
+                )
             else:
-                tx_message_response = TransactionMessage.respond_settlement(tx_message,
-                                                                            performative=TransactionMessage.Performative.FAILED_SETTLEMENT)
+                tx_message_response = TransactionMessage.respond_settlement(
+                    tx_message,
+                    performative=TransactionMessage.Performative.FAILED_SETTLEMENT,
+                )
         else:
-            tx_message_response = TransactionMessage.respond_settlement(tx_message,
-                                                                        performative=TransactionMessage.Performative.REJECTED_SETTLEMENT)
+            tx_message_response = TransactionMessage.respond_settlement(
+                tx_message,
+                performative=TransactionMessage.Performative.REJECTED_SETTLEMENT,
+            )
         self.message_out_queue.put(tx_message_response)
 
     def _is_acceptable_for_settlement(self, tx_message: TransactionMessage) -> bool:
@@ -487,7 +608,11 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        result = self._is_valid_tx_amount(tx_message) and self._is_utility_enhancing(tx_message) and self._is_affordable(tx_message)
+        result = (
+            self._is_valid_tx_amount(tx_message)
+            and self._is_utility_enhancing(tx_message)
+            and self._is_affordable(tx_message)
+        )
         return result
 
     def _is_valid_tx_amount(self, tx_message: TransactionMessage) -> bool:
@@ -507,9 +632,18 @@ class DecisionMaker:
         :return: whether the transaction is utility enhancing or not
         """
         if self.preferences.is_initialized and self.ownership_state.is_initialized:
-            is_utility_enhancing = self.preferences.get_score_diff_from_transaction(self.ownership_state, tx_message) >= 0.0
+            is_utility_enhancing = (
+                self.preferences.get_score_diff_from_transaction(
+                    self.ownership_state, tx_message
+                )
+                >= 0.0
+            )
         else:
-            logger.warning("[{}]: Cannot verify whether transaction improves utility. Assuming it does!".format(self._agent_name))
+            logger.warning(
+                "[{}]: Cannot verify whether transaction improves utility. Assuming it does!".format(
+                    self._agent_name
+                )
+            )
             is_utility_enhancing = True
         return is_utility_enhancing
 
@@ -522,15 +656,35 @@ class DecisionMaker:
         """
         is_affordable = True
         if self.ownership_state.is_initialized:
-            is_affordable = self.ownership_state.check_transaction_is_affordable(tx_message)
-        if self.ledger_state_proxy.is_initialized and (tx_message.ledger_id != OFF_CHAIN):
+            is_affordable = self.ownership_state.check_transaction_is_affordable(
+                tx_message
+            )
+        if self.ledger_state_proxy.is_initialized and (
+            tx_message.ledger_id != OFF_CHAIN
+        ):
             if tx_message.ledger_id in self.ledger_apis.apis.keys():
-                is_affordable = is_affordable and self.ledger_state_proxy.check_transaction_is_affordable(tx_message)
+                is_affordable = (
+                    is_affordable
+                    and self.ledger_state_proxy.check_transaction_is_affordable(
+                        tx_message
+                    )
+                )
             else:
-                logger.error("[{}]: Ledger api not available for ledger_id={}!".format(self._agent_name, tx_message.ledger_id))
+                logger.error(
+                    "[{}]: Ledger api not available for ledger_id={}!".format(
+                        self._agent_name, tx_message.ledger_id
+                    )
+                )
                 is_affordable = False
-        if not self.ownership_state.is_initialized and not (self.ledger_state_proxy.is_initialized and (tx_message.ledger_id != OFF_CHAIN)):
-            logger.warning("[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(self._agent_name))
+        if not self.ownership_state.is_initialized and not (
+            self.ledger_state_proxy.is_initialized
+            and (tx_message.ledger_id != OFF_CHAIN)
+        ):
+            logger.warning(
+                "[{}]: Cannot verify whether transaction is affordable. Assuming it is!".format(
+                    self._agent_name
+                )
+            )
             is_affordable = True
         return is_affordable
 
@@ -542,12 +696,21 @@ class DecisionMaker:
         :return: the transaction digest
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            logger.info("[{}]: Cannot settle transaction, settlement happens off chain!".format(self._agent_name))
+            logger.info(
+                "[{}]: Cannot settle transaction, settlement happens off chain!".format(
+                    self._agent_name
+                )
+            )
             tx_digest = OFF_CHAIN_SETTLEMENT_DIGEST
         else:
             logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
             crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
-            tx_digest = self.ledger_apis.transfer(crypto_object, tx_message.tx_counterparty_addr, tx_message.counterparty_amount, tx_message.fees)
+            tx_digest = self.ledger_apis.transfer(
+                crypto_object,
+                tx_message.tx_counterparty_addr,
+                tx_message.counterparty_amount,
+                tx_message.fees,
+            )
         return tx_digest
 
     def _handle_tx_message_for_signing(self, tx_message: TransactionMessage) -> None:
@@ -559,12 +722,16 @@ class DecisionMaker:
         """
         if self._is_acceptable_for_signing(tx_message):
             tx_signature = self._sign_tx(tx_message)
-            tx_message_response = TransactionMessage.respond_signing(tx_message,
-                                                                     performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
-                                                                     tx_signature=tx_signature)
+            tx_message_response = TransactionMessage.respond_signing(
+                tx_message,
+                performative=TransactionMessage.Performative.SUCCESSFUL_SIGNING,
+                tx_signature=tx_signature,
+            )
         else:
-            tx_message_response = TransactionMessage.respond_signing(tx_message,
-                                                                     performative=TransactionMessage.Performative.REJECTED_SIGNING)
+            tx_message_response = TransactionMessage.respond_signing(
+                tx_message,
+                performative=TransactionMessage.Performative.REJECTED_SIGNING,
+            )
         self.message_out_queue.put(tx_message_response)
 
     def _is_acceptable_for_signing(self, tx_message: TransactionMessage) -> bool:
@@ -574,7 +741,11 @@ class DecisionMaker:
         :param tx_message: the transaction message
         :return: whether the transaction is acceptable or not
         """
-        result = self._is_valid_tx_hash(tx_message) and self._is_utility_enhancing(tx_message) and self._is_affordable(tx_message)
+        result = (
+            self._is_valid_tx_hash(tx_message)
+            and self._is_utility_enhancing(tx_message)
+            and self._is_affordable(tx_message)
+        )
         return result
 
     def _is_valid_tx_hash(self, tx_message: TransactionMessage) -> bool:
@@ -585,7 +756,7 @@ class DecisionMaker:
         :return: whether the transaction hash is valid
         """
         # TODO check the hash matches the terms of the transaction, this means dm requires knowledge of how the hash is composed
-        tx_hash = tx_message.signing_payload.get('tx_hash')
+        tx_hash = tx_message.signing_payload.get("tx_hash")
         is_valid = isinstance(tx_hash, bytes)
         return is_valid
 
@@ -601,23 +772,40 @@ class DecisionMaker:
             # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
         else:
             crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
-        tx_hash = tx_message.signing_payload.get('tx_hash')
+        tx_hash = tx_message.signing_payload.get("tx_hash")
         tx_signature = crypto_object.sign_transaction(tx_hash)
         return tx_signature
 
-    def _handle_state_update_message(self, state_update_message: StateUpdateMessage) -> None:
+    def _handle_state_update_message(
+        self, state_update_message: StateUpdateMessage
+    ) -> None:
         """
         Handle a state update message.
 
         :param state_update_message: the state update message
         :return: None
         """
-        if state_update_message.performative == StateUpdateMessage.Performative.INITIALIZE:
+        if (
+            state_update_message.performative
+            == StateUpdateMessage.Performative.INITIALIZE
+        ):
             logger.info("[{}]: Applying state initialization!".format(self._agent_name))
-            self.ownership_state.init(amount_by_currency_id=state_update_message.amount_by_currency_id, quantities_by_good_id=state_update_message.quantities_by_good_id, agent_name=self._agent_name)
-            self.preferences.init(exchange_params_by_currency_id=state_update_message.exchange_params_by_currency_id, utility_params_by_good_id=state_update_message.utility_params_by_good_id, tx_fee=state_update_message.tx_fee, agent_name=self._agent_name)
+            self.ownership_state.init(
+                amount_by_currency_id=state_update_message.amount_by_currency_id,
+                quantities_by_good_id=state_update_message.quantities_by_good_id,
+                agent_name=self._agent_name,
+            )
+            self.preferences.init(
+                exchange_params_by_currency_id=state_update_message.exchange_params_by_currency_id,
+                utility_params_by_good_id=state_update_message.utility_params_by_good_id,
+                tx_fee=state_update_message.tx_fee,
+                agent_name=self._agent_name,
+            )
             self.goal_pursuit_readiness.update(GoalPursuitReadiness.Status.READY)
         elif state_update_message.performative == StateUpdateMessage.Performative.APPLY:
             logger.info("[{}]: Applying state update!".format(self._agent_name))
-            new_ownership_state = self.ownership_state.apply_state_update(amount_by_currency_id=state_update_message.amount_by_currency_id, quantities_by_good_id=state_update_message.quantities_by_good_id)
+            new_ownership_state = self.ownership_state.apply_state_update(
+                amount_by_currency_id=state_update_message.amount_by_currency_id,
+                quantities_by_good_id=state_update_message.quantities_by_good_id,
+            )
             self._ownership_state = new_ownership_state

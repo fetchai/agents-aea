@@ -27,8 +27,8 @@ from tests.common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION
 
 
-@mock.patch('aea.cli.login.registry_login', return_value='token')
-@mock.patch('aea.cli.login.write_cli_config')
+@mock.patch("aea.cli.login.registry_login", return_value="token")
+@mock.patch("aea.cli.login.write_cli_config")
 class LoginTestCase(TestCase):
     """Test case for CLI login command."""
 
@@ -38,21 +38,13 @@ class LoginTestCase(TestCase):
 
     def test_login_positive(self, write_cli_config_mock, registry_login_mock):
         """Test for CLI login positive result."""
-        username, password = ('Username', 'Password')
+        username, password = ("Username", "Password")
         result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "login",
-                username,
-                password
-            ],
-            standalone_mode=False
+            cli, [*CLI_LOG_OPTION, "login", username, password], standalone_mode=False
         )
         expected_output = (
-            'Signing in as Username...\n'
-            'Successfully signed in: Username.\n'
+            "Signing in as Username...\n" "Successfully signed in: Username.\n"
         )
         self.assertEqual(result.output, expected_output)
         registry_login_mock.assert_called_once_with(username, password)
-        write_cli_config_mock.assert_called_once_with({'auth_token': 'token'})
+        write_cli_config_mock.assert_called_once_with({"auth_token": "token"})

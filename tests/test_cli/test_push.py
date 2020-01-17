@@ -29,19 +29,13 @@ from tests.conftest import CLI_LOG_OPTION
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
-@mock.patch('aea.cli.push.copytree')
+@mock.patch("aea.cli.push.copytree")
 class SaveItemLocallyTestCase(TestCase):
     """Test case for save_item_locally method."""
 
-    @mock.patch(
-        'aea.cli.push.try_get_item_target_path', return_value='target'
-    )
-    @mock.patch(
-        'aea.cli.push.try_get_item_source_path', return_value='source'
-    )
-    @mock.patch(
-        'aea.cli.push._check_package_public_id', return_value=None
-    )
+    @mock.patch("aea.cli.push.try_get_item_target_path", return_value="target")
+    @mock.patch("aea.cli.push.try_get_item_source_path", return_value="source")
+    @mock.patch("aea.cli.push._check_package_public_id", return_value=None)
     def test_save_item_locally_positive(
         self,
         _check_package_public_id_mock,
@@ -50,23 +44,19 @@ class SaveItemLocallyTestCase(TestCase):
         copy_tree_mock,
     ):
         """Test for save_item_locally positive result."""
-        item_type = 'skill'
+        item_type = "skill"
         item_id = PublicIdMock()
         _save_item_locally(ContextMock(), item_type, item_id)
         try_get_item_source_path_mock.assert_called_once_with(
-            'cwd', 'skills', item_id.name
+            "cwd", "skills", item_id.name
         )
         try_get_item_target_path_mock.assert_called_once_with(
-            ContextMock.agent_config.registry_path,
-            item_type + 's',
-            item_id.name,
+            ContextMock.agent_config.registry_path, item_type + "s", item_id.name,
         )
         _check_package_public_id_mock.assert_called_once_with(
-            'source',
-            item_type,
-            item_id
+            "source", item_type, item_id
         )
-        copy_tree_mock.assert_called_once_with('source', 'target')
+        copy_tree_mock.assert_called_once_with("source", "target")
 
 
 class TestPushLocalFailsArgumentNotPublicId:
@@ -76,8 +66,11 @@ class TestPushLocalFailsArgumentNotPublicId:
     def setup_class(cls):
         """Set the tests up."""
         cls.runner = CliRunner()
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "push", "--local", "connection", "oef"],
-                                       standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "push", "--local", "connection", "oef"],
+            standalone_mode=False,
+        )
 
     def test_exit_code_2(self):
         """Test the exit code is 2 (i.e. bad usage)."""

@@ -80,8 +80,8 @@ class GoodPriceModel(object):
     def __init__(self, bound: int = 100):
         """Instantiate a good price model."""
         self.price_bandits = dict(
-            (price, PriceBandit(price))
-            for price in range(bound + 1))
+            (price, PriceBandit(price)) for price in range(bound + 1)
+        )
 
     def update(self, outcome: float, price: int) -> None:
         """
@@ -121,7 +121,8 @@ class RLAgent:
         :return: None
         """
         self.good_price_models = dict(
-            (good_id, GoodPriceModel()) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
+            (good_id, GoodPriceModel()) for good_id in range(nb_goods)
+        )  # type: Dict[int, GoodPriceModel]
 
     def _pick_an_action(self) -> Action:
         """
@@ -140,7 +141,14 @@ class RLAgent:
 
         return action
 
-    def _update_model(self, observation: Observation, reward: Reward, done: Done, info: Info, action: Action) -> None:
+    def _update_model(
+        self,
+        observation: Observation,
+        reward: Reward,
+        done: Done,
+        info: Info,
+        action: Action,
+    ) -> None:
         """
         Update the model.
 
@@ -190,6 +198,17 @@ class RLAgent:
                 obs, reward, done, info = env.step(action)
                 self._update_model(obs, reward, done, info, action)
                 if action_counter % 10 == 0:
-                    print(("Step {:" + str(nb_steps_digits) + "}/{}, episode={}, action={:7}, reward={}")
-                          .format(action_counter, nb_steps, episode_counter, str(action), reward))
+                    print(
+                        (
+                            "Step {:"
+                            + str(nb_steps_digits)
+                            + "}/{}, episode={}, action={:7}, reward={}"
+                        ).format(
+                            action_counter,
+                            nb_steps,
+                            episode_counter,
+                            str(action),
+                            reward,
+                        )
+                    )
         env.close()

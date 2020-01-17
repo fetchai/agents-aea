@@ -39,12 +39,14 @@ STUB_DIALOGUE_ID = 0
 class TCPClientConnection(TCPConnection):
     """This class implements a TCP client."""
 
-    def __init__(self,
-                 address: Address,
-                 host: str,
-                 port: int,
-                 connection_id: str = "tcp_client",
-                 **kwargs):
+    def __init__(
+        self,
+        address: Address,
+        host: str,
+        port: int,
+        connection_id: str = "tcp_client",
+        **kwargs
+    ):
         """
         Initialize a TCP channel.
 
@@ -55,7 +57,10 @@ class TCPClientConnection(TCPConnection):
         """
         super().__init__(address, host, port, connection_id, **kwargs)
 
-        self._reader, self._writer = (None, None)  # type: Optional[StreamReader], Optional[StreamWriter]
+        self._reader, self._writer = (
+            None,
+            None,
+        )  # type: Optional[StreamReader], Optional[StreamWriter]
 
     async def setup(self):
         """Set the connection up."""
@@ -69,7 +74,7 @@ class TCPClientConnection(TCPConnection):
             self._reader.feed_eof()
         self._writer.close()
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
@@ -100,7 +105,9 @@ class TCPClientConnection(TCPConnection):
         return self._writer
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """Get the TCP server connection from the connection configuration.
 
         :param address: the address of the agent.
@@ -109,9 +116,17 @@ class TCPClientConnection(TCPConnection):
         """
         server_address = cast(str, connection_configuration.config.get("address"))
         server_port = cast(int, connection_configuration.config.get("port"))
-        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
-        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
-        return TCPClientConnection(address, server_address, server_port,
-                                   connection_id=connection_configuration.name,
-                                   restricted_to_protocols=restricted_to_protocols_names,
-                                   excluded_protocols=excluded_protocols_names)
+        restricted_to_protocols_names = {
+            p.name for p in connection_configuration.restricted_to_protocols
+        }
+        excluded_protocols_names = {
+            p.name for p in connection_configuration.excluded_protocols
+        }
+        return TCPClientConnection(
+            address,
+            server_address,
+            server_port,
+            connection_id=connection_configuration.name,
+            restricted_to_protocols=restricted_to_protocols_names,
+            excluded_protocols=excluded_protocols_names,
+        )

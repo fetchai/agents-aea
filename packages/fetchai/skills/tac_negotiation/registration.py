@@ -31,7 +31,7 @@ class Registration(SharedClass):
 
     def __init__(self, **kwargs):
         """Instantiate the search class."""
-        self._update_interval = kwargs.pop('update_interval', 5)  # type: int
+        self._update_interval = kwargs.pop("update_interval", 5)  # type: int
         super().__init__(**kwargs)
         self._id = 0
         self.registered_goods_demanded_description = None  # type: Optional[Description]

@@ -30,7 +30,7 @@ class Search(SharedClass):
 
     def __init__(self, **kwargs):
         """Instantiate the search class."""
-        self._search_interval = kwargs.pop('search_interval', 5)  # type: int
+        self._search_interval = kwargs.pop("search_interval", 5)  # type: int
         super().__init__(**kwargs)
         self._id = 0
         self._ids_for_sellers = set()  # type: Set[int]

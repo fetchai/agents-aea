@@ -66,7 +66,11 @@ class OEFHandler(Handler):
         oef_message = cast(OEFMessage, message)
         oef_type = oef_message.type
 
-        logger.debug("[{}]: Handling OEF message. type={}".format(self.context.agent_name, oef_type))
+        logger.debug(
+            "[{}]: Handling OEF message. type={}".format(
+                self.context.agent_name, oef_type
+            )
+        )
         if oef_type == OEFMessage.Type.SEARCH_RESULT:
             self._on_search_result(oef_message)
         elif oef_type == OEFMessage.Type.OEF_ERROR:
@@ -90,8 +94,11 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        logger.error("[{}]: Received OEF error: answer_id={}, operation={}"
-                     .format(self.context.agent_name, oef_error.id, oef_error.operation))
+        logger.error(
+            "[{}]: Received OEF error: answer_id={}, operation={}".format(
+                self.context.agent_name, oef_error.id, oef_error.operation
+            )
+        )
 
     def _on_dialogue_error(self, dialogue_error: OEFMessage) -> None:
         """
@@ -101,8 +108,14 @@ class OEFHandler(Handler):
 
         :return: None
         """
-        logger.error("[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}"
-                     .format(self.context.agent_name, dialogue_error.id, dialogue_error.dialogue_id, dialogue_error.origin))
+        logger.error(
+            "[{}]: Received Dialogue error: answer_id={}, dialogue_id={}, origin={}".format(
+                self.context.agent_name,
+                dialogue_error.id,
+                dialogue_error.dialogue_id,
+                dialogue_error.origin,
+            )
+        )
 
     def _on_search_result(self, search_result: OEFMessage) -> None:
         """
@@ -115,11 +128,19 @@ class OEFHandler(Handler):
         search = cast(Search, self.context.search)
         search_id = search_result.id
         agents = search_result.agents
-        logger.debug("[{}]: on search result: {} {}".format(self.context.agent_name, search_id, agents))
+        logger.debug(
+            "[{}]: on search result: {} {}".format(
+                self.context.agent_name, search_id, agents
+            )
+        )
         if search_id in search.ids_for_tac:
             self._on_controller_search_result(agents)
         else:
-            logger.debug("[{}]: Unknown search id: search_id={}".format(self.context.agent_name, search_id))
+            logger.debug(
+                "[{}]: Unknown search id: search_id={}".format(
+                    self.context.agent_name, search_id
+                )
+            )
 
     def _on_controller_search_result(self, agent_addresses: List[Address]) -> None:
         """
@@ -131,19 +152,35 @@ class OEFHandler(Handler):
         """
         game = cast(Game, self.context.game)
         if game.phase.value != Phase.PRE_GAME.value:
-            logger.debug("[{}]: Ignoring controller search result, the agent is already competing.".format(self.context.agent_name))
+            logger.debug(
+                "[{}]: Ignoring controller search result, the agent is already competing.".format(
+                    self.context.agent_name
+                )
+            )
             return
 
         if len(agent_addresses) == 0:
-            logger.info("[{}]: Couldn't find the TAC controller. Retrying...".format(self.context.agent_name))
+            logger.info(
+                "[{}]: Couldn't find the TAC controller. Retrying...".format(
+                    self.context.agent_name
+                )
+            )
         elif len(agent_addresses) > 1:
-            logger.error("[{}]: Found more than one TAC controller. Retrying...".format(self.context.agent_name))
+            logger.error(
+                "[{}]: Found more than one TAC controller. Retrying...".format(
+                    self.context.agent_name
+                )
+            )
         # elif self._rejoin:
         #     logger.debug("[{}]: Found the TAC controller. Rejoining...".format(self.context.agent_name))
         #     controller_addr = agent_addresses[0]
         #     self._rejoin_tac(controller_addr)
         else:
-            logger.info("[{}]: Found the TAC controller. Registering...".format(self.context.agent_name))
+            logger.info(
+                "[{}]: Found the TAC controller. Registering...".format(
+                    self.context.agent_name
+                )
+            )
             controller_addr = agent_addresses[0]
             self._register_to_tac(controller_addr)
 
@@ -158,9 +195,16 @@ class OEFHandler(Handler):
         game = cast(Game, self.context.game)
         game.update_expected_controller_addr(controller_addr)
         game.update_game_phase(Phase.GAME_REGISTRATION)
-        tac_msg = TACMessage(type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name)
+        tac_msg = TACMessage(
+            type=TACMessage.Type.REGISTER, agent_name=self.context.agent_name
+        )
         tac_bytes = TACSerializer().encode(tac_msg)
-        self.context.outbox.put_message(to=controller_addr, sender=self.context.agent_address, protocol_id=TACMessage.protocol_id, message=tac_bytes)
+        self.context.outbox.put_message(
+            to=controller_addr,
+            sender=self.context.agent_address,
+            protocol_id=TACMessage.protocol_id,
+            message=tac_bytes,
+        )
 
     # def _rejoin_tac(self, controller_addr: Address) -> None:
     #     """
@@ -201,15 +245,23 @@ class TACHandler(Handler):
         tac_msg = cast(TACMessage, message)
         tac_msg_type = tac_msg.type
         game = cast(Game, self.context.game)
-        logger.debug("[{}]: Handling controller response. type={}".format(self.context.agent_name, tac_msg_type))
+        logger.debug(
+            "[{}]: Handling controller response. type={}".format(
+                self.context.agent_name, tac_msg_type
+            )
+        )
         try:
             if message.counterparty != game.expected_controller_addr:
-                raise ValueError("The sender of the message is not the controller agent we registered with.")
+                raise ValueError(
+                    "The sender of the message is not the controller agent we registered with."
+                )
 
             if tac_msg_type == TACMessage.Type.TAC_ERROR:
                 self._on_tac_error(tac_msg)
             elif game.phase.value == Phase.PRE_GAME.value:
-                raise ValueError("We do not expect a controller agent message in the pre game phase.")
+                raise ValueError(
+                    "We do not expect a controller agent message in the pre game phase."
+                )
             elif game.phase.value == Phase.GAME_REGISTRATION.value:
                 if tac_msg_type == TACMessage.Type.GAME_DATA:
                     self._on_start(tac_msg)
@@ -223,7 +275,9 @@ class TACHandler(Handler):
                 # elif tac_msg_type == TACMessage.Type.STATE_UPDATE:
                 #     self._on_state_update(tac_msg, sender)
             elif game.phase.value == Phase.POST_GAME.value:
-                raise ValueError("We do not expect a controller agent message in the post game phase.")
+                raise ValueError(
+                    "We do not expect a controller agent message in the post game phase."
+                )
         except ValueError as e:
             logger.warning(str(e))
 
@@ -244,11 +298,23 @@ class TACHandler(Handler):
         :return: None
         """
         error_code = tac_message.error_code
-        logger.error("[{}]: Received error from the controller. error_msg={}".format(self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)))
+        logger.error(
+            "[{}]: Received error from the controller. error_msg={}".format(
+                self.context.agent_name, TACMessage._from_ec_to_msg.get(error_code)
+            )
+        )
         if error_code == TACMessage.ErrorCode.TRANSACTION_NOT_VALID:
             info = tac_message.info
-            transaction_id = cast(str, info.get("transaction_id")) if (info.get("transaction_id") is not None) else 'NO_TX_ID'
-            logger.warning("[{}]: Received error on transaction id: {}".format(self.context.agent_name, transaction_id[-10:]))
+            transaction_id = (
+                cast(str, info.get("transaction_id"))
+                if (info.get("transaction_id") is not None)
+                else "NO_TX_ID"
+            )
+            logger.warning(
+                "[{}]: Received error on transaction id: {}".format(
+                    self.context.agent_name, transaction_id[-10:]
+                )
+            )
 
     def _on_start(self, tac_message: TACMessage) -> None:
         """
@@ -258,16 +324,22 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info("[{}]: Received start event from the controller. Starting to compete...".format(self.context.agent_name))
+        logger.info(
+            "[{}]: Received start event from the controller. Starting to compete...".format(
+                self.context.agent_name
+            )
+        )
         game = cast(Game, self.context.game)
         game.init(tac_message, tac_message.counterparty)
         game.update_game_phase(Phase.GAME)
-        state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.INITIALIZE,
-                                              amount_by_currency_id=tac_message.amount_by_currency_id,
-                                              quantities_by_good_id=tac_message.quantities_by_good_id,
-                                              exchange_params_by_currency_id=tac_message.exchange_params_by_currency_id,
-                                              utility_params_by_good_id=tac_message.utility_params_by_good_id,
-                                              tx_fee=tac_message.tx_fee)
+        state_update_msg = StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.INITIALIZE,
+            amount_by_currency_id=tac_message.amount_by_currency_id,
+            quantities_by_good_id=tac_message.quantities_by_good_id,
+            exchange_params_by_currency_id=tac_message.exchange_params_by_currency_id,
+            utility_params_by_good_id=tac_message.utility_params_by_good_id,
+            tx_fee=tac_message.tx_fee,
+        )
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
 
     def _on_cancelled(self) -> None:
@@ -276,7 +348,11 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info("[{}]: Received cancellation from the controller.".format(self.context.agent_name))
+        logger.info(
+            "[{}]: Received cancellation from the controller.".format(
+                self.context.agent_name
+            )
+        )
         game = cast(Game, self.context.game)
         game.update_game_phase(Phase.POST_GAME)
 
@@ -288,14 +364,20 @@ class TACHandler(Handler):
 
         :return: None
         """
-        logger.info("[{}]: Received transaction confirmation from the controller: transaction_id={}".format(self.context.agent_name, message.tx_id[-10:]))
-        state_update_msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.APPLY,
-                                              amount_by_currency_id=message.amount_by_currency_id,
-                                              quantities_by_good_id=message.quantities_by_good_id)
+        logger.info(
+            "[{}]: Received transaction confirmation from the controller: transaction_id={}".format(
+                self.context.agent_name, message.tx_id[-10:]
+            )
+        )
+        state_update_msg = StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.APPLY,
+            amount_by_currency_id=message.amount_by_currency_id,
+            quantities_by_good_id=message.quantities_by_good_id,
+        )
         self.context.decision_maker_message_queue.put_nowait(state_update_msg)
-        if 'confirmed_tx_ids' not in self.context.shared_state.keys():
-            self.context.shared_state['confirmed_tx_ids'] = []
-        self.context.shared_state['confirmed_tx_ids'].append(message.tx_id)
+        if "confirmed_tx_ids" not in self.context.shared_state.keys():
+            self.context.shared_state["confirmed_tx_ids"] = []
+        self.context.shared_state["confirmed_tx_ids"].append(message.tx_id)
 
     # def _on_state_update(self, tac_message: TACMessage, controller_addr: Address) -> None:
     #     """
@@ -363,32 +445,55 @@ class TransactionHandler(Handler):
         :return: None
         """
         tx_message = cast(TransactionMessage, message)
-        if tx_message.performative == TransactionMessage.Performative.SUCCESSFUL_SIGNING:
-            logger.info("[{}]: transaction confirmed by decision maker, sending to controller.".format(self.context.agent_name))
+        if (
+            tx_message.performative
+            == TransactionMessage.Performative.SUCCESSFUL_SIGNING
+        ):
+            logger.info(
+                "[{}]: transaction confirmed by decision maker, sending to controller.".format(
+                    self.context.agent_name
+                )
+            )
             game = cast(Game, self.context.game)
-            tx_counterparty_signature = cast(bytes, tx_message.info.get('tx_counterparty_signature'))
-            tx_counterparty_id = cast(str, tx_message.info.get('tx_counterparty_id'))
-            if (tx_counterparty_signature is not None) and (tx_counterparty_id is not None):
+            tx_counterparty_signature = cast(
+                bytes, tx_message.info.get("tx_counterparty_signature")
+            )
+            tx_counterparty_id = cast(str, tx_message.info.get("tx_counterparty_id"))
+            if (tx_counterparty_signature is not None) and (
+                tx_counterparty_id is not None
+            ):
                 tx_id = tx_message.tx_id + "_" + tx_counterparty_id
-                msg = TACMessage(type=TACMessage.Type.TRANSACTION,
-                                 tx_id=tx_id,
-                                 tx_sender_addr=tx_message.tx_sender_addr,
-                                 tx_counterparty_addr=tx_message.tx_counterparty_addr,
-                                 amount_by_currency_id=tx_message.tx_amount_by_currency_id,
-                                 tx_sender_fee=tx_message.tx_sender_fee,
-                                 tx_counterparty_fee=tx_message.tx_counterparty_fee,
-                                 quantities_by_good_id=tx_message.tx_quantities_by_good_id,
-                                 tx_sender_signature=tx_message.tx_signature,
-                                 tx_counterparty_signature=tx_message.info.get('tx_counterparty_signature'),
-                                 tx_nonce=tx_message.info.get('tx_nonce'))
-                self.context.outbox.put_message(to=game.configuration.controller_addr,
-                                                sender=self.context.agent_address,
-                                                protocol_id=TACMessage.protocol_id,
-                                                message=TACSerializer().encode(msg))
+                msg = TACMessage(
+                    type=TACMessage.Type.TRANSACTION,
+                    tx_id=tx_id,
+                    tx_sender_addr=tx_message.tx_sender_addr,
+                    tx_counterparty_addr=tx_message.tx_counterparty_addr,
+                    amount_by_currency_id=tx_message.tx_amount_by_currency_id,
+                    tx_sender_fee=tx_message.tx_sender_fee,
+                    tx_counterparty_fee=tx_message.tx_counterparty_fee,
+                    quantities_by_good_id=tx_message.tx_quantities_by_good_id,
+                    tx_sender_signature=tx_message.tx_signature,
+                    tx_counterparty_signature=tx_message.info.get(
+                        "tx_counterparty_signature"
+                    ),
+                    tx_nonce=tx_message.info.get("tx_nonce"),
+                )
+                self.context.outbox.put_message(
+                    to=game.configuration.controller_addr,
+                    sender=self.context.agent_address,
+                    protocol_id=TACMessage.protocol_id,
+                    message=TACSerializer().encode(msg),
+                )
             else:
-                logger.warning("[{}]: transaction has no counterparty id or signature!".format(self.context.agent_name))
+                logger.warning(
+                    "[{}]: transaction has no counterparty id or signature!".format(
+                        self.context.agent_name
+                    )
+                )
         else:
-            logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
+            logger.info(
+                "[{}]: transaction was not successful.".format(self.context.agent_name)
+            )
 
     def teardown(self) -> None:
         """
