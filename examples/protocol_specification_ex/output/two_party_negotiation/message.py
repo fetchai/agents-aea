@@ -34,14 +34,16 @@ class TwoPartyNegotiationMessage(Message):
     }
 
     def __init__(
-        self, dialogue_reference: Tuple[str, str], message_id: int, target: int, performative: str, **kwargs
+        self,
+        dialogue_reference: Tuple[str, str],
+        message_id: int,
+        target: int,
+        performative: str,
+        **kwargs
     ):
         """Initialise."""
         super().__init__(
-            message_id=message_id,
-            target=target,
-            performative=performative,
-            **kwargs
+            message_id=message_id, target=target, performative=performative, **kwargs
         )
         assert self._check_consistency()
 
@@ -94,9 +96,15 @@ class TwoPartyNegotiationMessage(Message):
     def _check_consistency(self) -> bool:
         """Check that the message follows the two_party_negotiation protocol."""
         try:
-            assert isinstance(self.dialogue_reference, Tuple), "dialogue_reference must be 'Tuple' but it is not."
-            assert isinstance(self.dialogue_reference[0], str), "The first element of dialogue_reference must be 'str' but it is not."
-            assert isinstance(self.dialogue_reference[1], str), "The second element of dialogue_reference must be 'str' but it is not."
+            assert isinstance(
+                self.dialogue_reference, Tuple
+            ), "dialogue_reference must be 'Tuple' but it is not."
+            assert isinstance(
+                self.dialogue_reference[0], str
+            ), "The first element of dialogue_reference must be 'str' but it is not."
+            assert isinstance(
+                self.dialogue_reference[1], str
+            ), "The second element of dialogue_reference must be 'str' but it is not."
             assert type(self.message_id) == int, "message_id is not int"
             assert type(self.target) == int, "target is not int"
             assert type(self.performative) == str, "performative is not str"
@@ -105,7 +113,9 @@ class TwoPartyNegotiationMessage(Message):
             # Check correct performative
             assert (
                 self.performative in self.valid_performatives
-            ), "'{}' is not in the list of valid performativs: {}".format(self.performative, self.valid_performatives)
+            ), "'{}' is not in the list of valid performativs: {}".format(
+                self.performative, self.valid_performatives
+            )
 
             # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
@@ -126,15 +136,23 @@ class TwoPartyNegotiationMessage(Message):
             # Check body size
             assert (
                 expexted_nb_of_contents == actual_nb_of_contents
-            ), "Incorrect number of contents. Expected {} contents. Found {}".format(expexted_nb_of_contents, actual_nb_of_contents)
+            ), "Incorrect number of contents. Expected {} contents. Found {}".format(
+                expexted_nb_of_contents, actual_nb_of_contents
+            )
 
             # Light Protocol 3
             if self.message_id == 1:
-                assert self.target == 0, "Expected target to be 0 when message_id is 1. Found {}.".format(self.target)
+                assert (
+                    self.target == 0
+                ), "Expected target to be 0 when message_id is 1. Found {}.".format(
+                    self.target
+                )
             else:
                 assert (
                     0 < self.target < self.message_id
-                ), "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(self.target)
+                ), "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(
+                    self.target
+                )
         except (AssertionError, ValueError, KeyError) as e:
             print(str(e))
             return False

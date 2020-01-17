@@ -833,5 +833,9 @@ class ProtocolSpecification(ProtocolConfig):
             for content_name, content_type in speech_act_content_config.args.items():
                 if content_name in content_dict.keys():
                     if content_type != content_dict[content_name]:
-                        raise ProtocolSpecificationParseError("The content \'{}\' appears more than once with different types in speech_acts.".format(content_name))
+                        raise ProtocolSpecificationParseError(
+                            "The content '{}' appears more than once with different types in speech_acts.".format(
+                                content_name
+                            )
+                        )
                 content_dict[content_name] = content_type

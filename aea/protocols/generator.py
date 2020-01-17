@@ -67,7 +67,10 @@ class ProtocolGenerator:
 
     def _extract_all_contents(self) -> Dict[str, Dict[str, str]]:
         all_contents = {}  # type: Dict[str, Dict[str, str]]
-        for performative, speech_act_content_config in self.protocol_specification.speech_acts.read_all():
+        for (
+            performative,
+            speech_act_content_config,
+        ) in self.protocol_specification.speech_acts.read_all():
             all_contents[performative] = {}
             for content_name, content_type in speech_act_content_config.args.items():
                 all_contents[performative][content_name] = content_type
@@ -188,14 +191,20 @@ class ProtocolGenerator:
         )
 
         # Class attribute
-        cls_str += str.format('    _speech_acts = {}\n\n', self._speech_acts_str())
+        cls_str += str.format("    _speech_acts = {}\n\n", self._speech_acts_str())
 
         # __init__
         cls_str += "    def __init__(\n"
-        cls_str += "        self, dialogue_reference: Tuple[str, str], message_id: int, target: int, performative: str, **kwargs\n"
+        cls_str += "        self,\n"
+        cls_str += "        dialogue_reference: Tuple[str, str],\n"
+        cls_str += "        message_id: int,\n"
+        cls_str += "        target: int,\n"
+        cls_str += "        performative: str,\n"
+        cls_str += "        **kwargs,\n"
         cls_str += "    ):\n"
         cls_str += '        """Initialise."""\n'
         cls_str += "        super().__init__(\n"
+        cls_str += "            dialogue_reference=dialogue_reference,\n"
         cls_str += "            message_id=message_id,\n"
         cls_str += "            target=target,\n"
         cls_str += "            performative=performative,\n"
@@ -204,36 +213,40 @@ class ProtocolGenerator:
         cls_str += "        assert self._check_consistency()\n\n"
 
         # Class properties
-        cls_str += '    @property\n'
-        cls_str += '    def speech_acts(self) -> Dict[str, Dict[str, str]]:\n'
-        cls_str += '        \"\"\"Get all speech acts.\"\"\"\n'
-        cls_str += '        return self._speech_acts\n\n'
-        cls_str += '    @property\n'
-        cls_str += '    def valid_performatives(self) -> Set[str]:\n'
-        cls_str += '        \"\"\"Get valid performatives.\"\"\"\n'
-        cls_str += '        return set(self._speech_acts.keys())\n\n'
+        cls_str += "    @property\n"
+        cls_str += "    def speech_acts(self) -> Dict[str, Dict[str, str]]:\n"
+        cls_str += '        """Get all speech acts."""\n'
+        cls_str += "        return self._speech_acts\n\n"
+        cls_str += "    @property\n"
+        cls_str += "    def valid_performatives(self) -> Set[str]:\n"
+        cls_str += '        """Get valid performatives."""\n'
+        cls_str += "        return set(self._speech_acts.keys())\n\n"
 
         # Instance properties
-        cls_str += '    @property\n'
-        cls_str += '    def dialogue_reference(self) -> Tuple[str, str]:\n'
-        cls_str += '        \"\"\"Get the dialogue_reference of the message.\"\"\"\n'
-        cls_str += '        assert self.is_set(\"dialogue_reference\"), \"dialogue_reference is not set\"\n'
-        cls_str += '        return cast(Tuple[str, str], self.get(\"dialogue_reference\"))\n\n'
-        cls_str += '    @property\n'
-        cls_str += '    def message_id(self) -> int:\n'
-        cls_str += '        \"\"\"Get the message_id of the message.\"\"\"\n'
-        cls_str += '        assert self.is_set(\"message_id\"), \"message_id is not set\"\n'
-        cls_str += '        return cast(int, self.get(\"message_id\"))\n\n'
-        cls_str += '    @property\n'
-        cls_str += '    def target(self) -> int:\n'
-        cls_str += '        \"\"\"Get the target of the message.\"\"\"\n'
-        cls_str += '        assert self.is_set(\"target\"), \"target is not set.\"\n'
-        cls_str += '        return cast(int, self.get(\"target\"))\n\n'
-        cls_str += '    @property\n'
-        cls_str += '    def performative(self) -> str:\n'
-        cls_str += '        \"\"\"Get the performative of the message.\"\"\"\n'
-        cls_str += '        assert self.is_set(\"performative\"), \"performative is not set\"\n'
-        cls_str += '        return cast(str, self.get(\"performative\"))\n\n'
+        cls_str += "    @property\n"
+        cls_str += "    def dialogue_reference(self) -> Tuple[str, str]:\n"
+        cls_str += '        """Get the dialogue_reference of the message."""\n'
+        cls_str += '        assert self.is_set("dialogue_reference"), "dialogue_reference is not set"\n'
+        cls_str += (
+            '        return cast(Tuple[str, str], self.get("dialogue_reference"))\n\n'
+        )
+        cls_str += "    @property\n"
+        cls_str += "    def message_id(self) -> int:\n"
+        cls_str += '        """Get the message_id of the message."""\n'
+        cls_str += '        assert self.is_set("message_id"), "message_id is not set"\n'
+        cls_str += '        return cast(int, self.get("message_id"))\n\n'
+        cls_str += "    @property\n"
+        cls_str += "    def target(self) -> int:\n"
+        cls_str += '        """Get the target of the message."""\n'
+        cls_str += '        assert self.is_set("target"), "target is not set."\n'
+        cls_str += '        return cast(int, self.get("target"))\n\n'
+        cls_str += "    @property\n"
+        cls_str += "    def performative(self) -> str:\n"
+        cls_str += '        """Get the performative of the message."""\n'
+        cls_str += (
+            '        assert self.is_set("performative"), "performative is not set"\n'
+        )
+        cls_str += '        return cast(str, self.get("performative"))\n\n'
 
         all_contents = self._extract_all_contents()
         covered = []  # type: List[str]
@@ -243,11 +256,19 @@ class ProtocolGenerator:
                     continue
                 else:
                     covered.append(content_name)
-                cls_str += '    @property\n'
-                cls_str += "    def {}(self) -> {}:\n".format(content_name, content_type)
-                cls_str += "        \"\"\"Get {} for performative {}.\"\"\"\n".format(content_name, performative)
-                cls_str += '        assert self.is_set(\"{}\"), \"{} is not set\"\n'.format(content_name, content_name)
-                cls_str += '        return cast({}, self.get(\"{}\"))\n\n'.format(content_type, content_name)
+                cls_str += "    @property\n"
+                cls_str += "    def {}(self) -> {}:\n".format(
+                    content_name, content_type
+                )
+                cls_str += '        """Get {} for performative {}."""\n'.format(
+                    content_name, performative
+                )
+                cls_str += '        assert self.is_set("{}"), "{} is not set"\n'.format(
+                    content_name, content_name
+                )
+                cls_str += '        return cast({}, self.get("{}"))\n\n'.format(
+                    content_type, content_name
+                )
 
         # check_consistency method
         cls_str += "    def _check_consistency(self) -> bool:\n"
@@ -257,9 +278,17 @@ class ProtocolGenerator:
         )
         cls_str += "        try:\n"
 
-        cls_str += '            assert isinstance(self.dialogue_reference, Tuple), \"dialogue_reference must be \'Tuple\' but it is not.\"\n'
-        cls_str += '            assert isinstance(self.dialogue_reference[0], str), \"The first element of dialogue_reference must be \'str\' but it is not.\"\n'
-        cls_str += '            assert isinstance(self.dialogue_reference[1], str), \"The second element of dialogue_reference must be \'str\' but it is not.\"\n'
+        cls_str += "            assert isinstance(\n"
+        cls_str += "                self.dialogue_reference, Tuple\n"
+        cls_str += (
+            "            ), \"dialogue_reference must be 'Tuple' but it is not.\"\n"
+        )
+        cls_str += "            assert isinstance(\n"
+        cls_str += "                self.dialogue_reference[0], str\n"
+        cls_str += "            ), \"The first element of dialogue_reference must be 'str' but it is not.\"\n"
+        cls_str += "            assert isinstance(\n"
+        cls_str += "                self.dialogue_reference[1], str\n"
+        cls_str += "            ), \"The second element of dialogue_reference must be 'str' but it is not.\"\n"
         cls_str += (
             '            assert type(self.message_id) == int, "message_id is not int"\n'
         )
@@ -270,31 +299,44 @@ class ProtocolGenerator:
         cls_str += "            # Check correct performative\n"
         cls_str += "            assert (\n"
         cls_str += "                self.performative in self.valid_performatives\n"
-        cls_str += '            ), \"\'{}\' is not in the list of valid performativs: {}\".format(self.performative, self.valid_performatives)\n\n'
-
+        cls_str += "            ), \"'{}' is not in the list of valid performativs: {}\".format(\n"
+        cls_str += "                self.performative, self.valid_performatives)\n\n"
         cls_str += "            # Check correct contents\n"
-        cls_str += "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
+        cls_str += (
+            "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
+        )
         for performative, contents in all_contents.items():
-            cls_str += '            if self.performative == "{}":\n'.format(performative)
-            cls_str += "                expexted_nb_of_contents = {}\n".format(len(contents))
+            cls_str += '            if self.performative == "{}":\n'.format(
+                performative
+            )
+            cls_str += "                expexted_nb_of_contents = {}\n".format(
+                len(contents)
+            )
             if len(contents) == 0:
                 continue
             for content_name, content_type in contents.items():
-                cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(content_name, content_type, content_name, content_type)
+                cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
+                    content_name, content_type, content_name, content_type
+                )
         cls_str += "\n            # Check body size\n"
         cls_str += "            assert (\n"
         cls_str += "                expexted_nb_of_contents == actual_nb_of_contents\n"
-        cls_str += '            ), \"Incorrect number of contents. Expected {} contents. Found {}\".format(expexted_nb_of_contents, actual_nb_of_contents)\n\n'
+        cls_str += '            ), "Incorrect number of contents. Expected {} contents. Found {}".format(\n'
+        cls_str += "                expexted_nb_of_contents, actual_nb_of_contents\n"
+        cls_str += "            )\n\n"
 
         cls_str += "            # Light Protocol 3\n"
         cls_str += "            if self.message_id == 1:\n"
-        cls_str += '                assert self.target == 0, "Expected target to be 0 when message_id is 1. Found {}.\".format(self.target)\n'
+        cls_str += "                assert (\n"
+        cls_str += "                    self.target == 0\n"
+        cls_str += '                ), "Expected target to be 0 when message_id is 1. Found {}.".format(\n'
+        cls_str += "                    self.target\n"
+        cls_str += "                )\n"
         cls_str += "            else:\n"
         cls_str += "                assert (\n"
         cls_str += "                    0 < self.target < self.message_id\n"
-        cls_str += (
-            '                ), "Expected target to be between 1 to (message_id -1) inclusive. Found {}\".format(self.target)\n'
-        )
+        cls_str += '                ), "Expected target to be between 1 to (message_id -1) inclusive. Found {}".format(\n'
+        cls_str += "                    self.target)\n"
         cls_str += "        except (AssertionError, ValueError, KeyError) as e:\n"
         cls_str += "            print(str(e))\n"
         cls_str += "            return False\n\n"

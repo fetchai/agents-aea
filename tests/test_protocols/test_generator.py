@@ -40,26 +40,21 @@ class TestGenerateProtocol:
     def setup_class(cls):
         """Set the test up."""
         # Specification
-        cls.protocol_name = 'two_party_negotiation'
+        cls.protocol_name = "two_party_negotiation"
         cls.specification_file_name = "spec.yaml"
         correct_specification = {
-            'name': cls.protocol_name,
-            'author': 'fetchai',
-            'version': '0.1.0',
-            'license': 'Apache 2.0',
-            'description': 'A protocol for negotiation over a fixed set of resources involving two parties.',
-            'speech_acts': {
-                'cfp': {
-                    'query': 'DataModel'
-                },
-                'propose': {
-                    'query': 'DataModel',
-                    'price': 'float'
-                },
-                'accept': {},
-                'decline': {},
-                'match_accept': {}
-            }
+            "name": cls.protocol_name,
+            "author": "fetchai",
+            "version": "0.1.0",
+            "license": "Apache 2.0",
+            "description": "A protocol for negotiation over a fixed set of resources involving two parties.",
+            "speech_acts": {
+                "cfp": {"query": "DataModel"},
+                "propose": {"query": "DataModel", "price": "float"},
+                "accept": {},
+                "decline": {},
+                "match_accept": {},
+            },
         }
 
         # Dump the config
@@ -73,8 +68,12 @@ class TestGenerateProtocol:
         yaml.safe_dump(correct_specification, open(cls.path_to_specification, "w"))
 
         # Load the config
-        cls.config_loader = ConfigLoader("protocol-specification_schema.json", ProtocolSpecification)
-        cls.protocol_specification = cls.config_loader.load(open(cls.path_to_specification))
+        cls.config_loader = ConfigLoader(
+            "protocol-specification_schema.json", ProtocolSpecification
+        )
+        cls.protocol_specification = cls.config_loader.load(
+            open(cls.path_to_specification)
+        )
 
         # Generate the protocol
         cls.protocol_generator = ProtocolGenerator(cls.protocol_specification, cls.t)
@@ -103,6 +102,7 @@ class TestGenerateProtocol:
             # os.remove(os.path.join(cls.t, cls.protocol_name))
         except (OSError, IOError):
             pass
+
 
 # class TestCases(TestCase):
 #     """Test class for the light protocol generator."""
