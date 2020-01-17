@@ -140,6 +140,7 @@ def gui(ctx: Context, port):
 @pass_ctx
 def generate_key(ctx: Context, type_):
     """Generate private keys."""
+
     def _can_write(path) -> bool:
         if Path(path).exists():
             value = click.confirm(

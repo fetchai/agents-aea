@@ -269,6 +269,7 @@ def _rm_tarfiles():
 
 def clean_tarfiles(func):
     """Decorate func to clean tarfiles after executing."""
+
     def wrapper(*args, **kwargs):
         try:
             result = func(*args, **kwargs)
