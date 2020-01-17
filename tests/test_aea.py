@@ -65,7 +65,13 @@ def test_initialise_AEA():
     my_AEA.resources = Resources(str(Path(CUR_PATH, "aea")))
     assert my_AEA.resources is not None,\
         "Resources must not be None after set"
+    assert my_AEA.context.shared_state is not None, \
+        "Shared state must not be None after set"
+    assert my_AEA.context.public_key is not None,\
+        "Public key must not be None after set."
     my_AEA.stop()
+    assert my_AEA.context.task_queue is not None, \
+        "Task queue must not be None after set."
 
 
 def test_act():
