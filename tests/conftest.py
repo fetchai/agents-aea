@@ -411,15 +411,16 @@ class OEFHealthCheck(object):
                 t.cancel()
             else:
                 print("A problem occurred. Exiting...")
+            return self._result
 
         except Exception as e:
             print(str(e))
+            return self._result
         finally:
             t.join(1.0)
             self.agent.stop()
             self.agent.disconnect()
             self._core.stop()
-            return self._result
 
 
 def _stop_oef_search_images():
