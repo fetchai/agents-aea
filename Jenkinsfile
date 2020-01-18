@@ -13,17 +13,17 @@ pipeline {
 
     stages {
 
-        stage('Black Reformatting') {
-
-            steps {
-                sh 'tox -e black'
-            }
-
-        } // black reformatting
-
         stage('Unit Tests & Code Style Check') {
 
             parallel {
+
+                stage('Black Reformatting') {
+
+                    steps {
+                        sh 'tox -e black-check'
+                    }
+
+                } // black reformatting check
 
                 stage('Code Style Check') {
 

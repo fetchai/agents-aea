@@ -238,7 +238,7 @@ def tx_hash_from_values(
             sender_supplied_quantities.append(0)
             counterparty_supplied_quantities.append(-quantity)
     assert len(tx_amount_by_currency_id) == 1
-    for currency_id, amount in tx_amount_by_currency_id.items():
+    for amount in tx_amount_by_currency_id.values():
         tx_amount = amount if amount >= 0 else 0
     tx_hash = _get_hash(
         tx_sender_addr=tx_sender_addr,

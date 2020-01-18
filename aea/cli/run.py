@@ -87,7 +87,7 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     fp = path.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
-    for identifier, value in aea_conf.private_key_paths.read_all():
+    for identifier, _value in aea_conf.private_key_paths.read_all():
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
 
@@ -177,7 +177,7 @@ def _verify_ledger_apis_access() -> None:
     fp = path.open(mode="r", encoding="utf-8")
     aea_conf = agent_loader.load(fp)
 
-    for identifier, value in aea_conf.ledger_apis.read_all():
+    for identifier, _value in aea_conf.ledger_apis.read_all():
         if identifier not in SUPPORTED_LEDGER_APIS:
             ValueError("Unsupported identifier in ledger apis.")
 

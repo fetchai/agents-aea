@@ -122,7 +122,7 @@ class TCPServerConnection(TCPConnection):
 
     async def teardown(self):
         """Tear the connection down."""
-        for pbk, (reader, _) in self.connections.items():
+        for (reader, _) in self.connections.values():
             reader.feed_eof()
 
         for t in self._read_tasks_to_address:

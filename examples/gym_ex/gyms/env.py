@@ -140,7 +140,7 @@ class BanditNArmedRandom(BanditEnv):
         np.random.seed(seed)
 
         reward_params = []  # type: List[Tuple[float, int]]
-        for i in range(nb_bandits):
+        for _i in range(nb_bandits):
             # Mean m is pulled from a uniform distribution over [0, bound). To induce a normal distribution with params
             # (m, 1).
             mean = np.random.uniform(0, nb_prices_per_bandit)

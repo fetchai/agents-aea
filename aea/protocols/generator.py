@@ -88,7 +88,7 @@ class ProtocolGenerator:
 
         # extract contents' types and separate custom types
         for (
-            performative,
+            _performative,
             speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
             for content_type in speech_act_content_config.args.values():
@@ -125,7 +125,7 @@ class ProtocolGenerator:
         performatives_set = set()
         for (
             performative,
-            speech_act_content_config,
+            _speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
             performatives_set.add(performative)
         return performatives_set
