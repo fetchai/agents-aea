@@ -415,6 +415,7 @@ class OEFHealthCheck(object):
 
         except Exception as e:
             print(str(e))
+            return self._result
         finally:
             t.join(1.0)
             self.agent.stop()
