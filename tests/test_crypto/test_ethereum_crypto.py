@@ -22,6 +22,7 @@
 import os
 
 from aea.crypto.ethereum import EthereumCrypto
+
 from ..conftest import ROOT_DIR
 
 PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/eth_private_key.txt")
@@ -47,19 +48,10 @@ def test_initialization():
     assert account.entity is not None, "After creation the entity must no be None"
 
 
-def test_sign_transaction():
+def test_sign_message():
     """Test the signing function for the eth_crypto."""
     account = EthereumCrypto(PRIVATE_KEY_PATH)
-<<<<<<< HEAD
-<<<<<<< HEAD
-    sign_bytes = account.sign_transaction(b'hello')
-=======
-    tx = Web3.solidityKeccak(["bytes"], [b"hello"])
-    sign_bytes = account.sign_transaction(tx)
->>>>>>> 8f0d357fbb9a5f883a322f890b77a24e5dbca950
-=======
-    sign_bytes = account.sign_transaction(b'hello')
->>>>>>> 01908a70c02f04c877b336ecce099222a974d084
+    sign_bytes = account.sign_message(b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
-    recovered_addr = account.recover_from_hash(b'hello', signature=sign_bytes)
+    recovered_addr = account.recover_from_hash(b"hello", signature=sign_bytes)
     assert recovered_addr == account.address, "Failed to recover the correct address."

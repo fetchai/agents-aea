@@ -773,7 +773,7 @@ class DecisionMaker:
         else:
             crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
         tx_hash = tx_message.signing_payload.get("tx_hash")
-        tx_signature = crypto_object.sign_transaction(tx_hash)
+        tx_signature = crypto_object.sign_message(tx_hash)
         return tx_signature
 
     def _handle_state_update_message(

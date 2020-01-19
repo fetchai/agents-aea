@@ -104,7 +104,7 @@ class EthereumCrypto(Crypto):
         except IOError as e:  # pragma: no cover
             logger.exception(str(e))
 
-    def sign_transaction(self, tx_hash: bytes) -> bytes:
+    def sign_message(self, tx_hash: bytes) -> bytes:
         """
         Sign a transaction hash.
 
@@ -113,7 +113,7 @@ class EthereumCrypto(Crypto):
         """
         tx = encode_defunct(primitive=tx_hash)
         signature = self.entity.sign_message(tx)
-        return signature['signature']
+        return signature["signature"]
 
     def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
         """

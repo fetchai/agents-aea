@@ -344,3 +344,12 @@ class DefaultCrypto(Crypto):
         :return: str
         """
         raise NotImplementedError  # pragma: no cover
+
+    def sign_message(self, tx_hash: bytes) -> bytes:
+        """
+        Sign a transaction hash.
+
+        :param tx_hash: the transaction hash
+        :return: Signed message in bytes
+        """
+        raise NotImplementedError  # pragma: no cover

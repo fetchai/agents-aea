@@ -68,6 +68,15 @@ class Crypto(ABC):
         :return: str
         """
 
+    @abstractmethod
+    def sign_message(self, tx_hash: bytes) -> bytes:
+        """
+        Sign a transaction hash.
+
+        :param tx_hash: the transaction hash
+        :return: Signed message in bytes
+        """
+
     @classmethod
     @abstractmethod
     def load(cls, fp: BinaryIO) -> "Crypto":

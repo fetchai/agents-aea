@@ -103,7 +103,7 @@ class FetchAICrypto(Crypto):
         entity = Entity()
         return entity
 
-    def sign_transaction(self, tx_hash: bytes) -> bytes:
+    def sign_message(self, tx_hash: bytes) -> bytes:
         """
         Sing a transaction hash.
 
