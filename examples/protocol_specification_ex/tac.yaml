@@ -1,0 +1,47 @@
+name: tac
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+description: 'A protocol for participating in a TAC.'
+speech_acts:
+  register:
+    agent_name: str
+  unregister: {}
+  transaction:
+    tx_id: str
+    tx_sender_addr: str
+    tx_counterparty_addr: str
+    amount_by_currency_id: dict[str, int]
+    tx_sender_fee: int
+    tx_counterparty_fee: int
+    quantities_by_good_id: dict[str, int]
+    tx_nonce: int
+    tx_sender_signature: bytes
+    tx_counterparty_signature: bytes
+  get_state_update: {}
+  cancelled: {}
+  game_data:
+    amount_by_currency_id: dict[str, int]
+    exchange_params_by_currency_id: dict[str, float]
+    quantities_by_good_id: dict[str, int]
+    utility_params_by_good_id: dict[str, float]
+    tx_fee: int
+    agent_addr_to_name: dict[Address, str]
+    good_id_to_name: dict[str, str]
+    version_id: str
+  transaction_confirmation:
+    tx_id: str
+    amount_by_currency_id: dict[str, int]
+    quantities_by_good_id: dict[str, int]
+  tac_error:
+    error_code: ErrorCode
+    info: dict[str, Any]
+
+  # Problems:
+  # info is of type dict[str, Any]. Any is problematic.
+  #
+  # Differences:
+  # Checks are in place in the current implementation (e.g. line 225) to verify keys in dictionaries are unique. This is not necessary given dictionary does not permit duplicate keys.
+  # Certain custom constraints were defined on types. e.g. tx_sender_fee>=0, tx_counterparty_fee>=0, amount_by_currency_id.keys() == exchange_params_by_currency_id.keys(), and quantities_by_good_id.keys == utility_params_by_good_id.keys
+  # game_data -> agent_addr_to_name and and good_id_to_name were defined as a Union[dict or defaultdict].
+  # tac_error -> info was defined as an optional content.

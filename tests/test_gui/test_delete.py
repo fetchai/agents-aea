@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -42,9 +41,8 @@ def test_delete_agent():
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
         response_delete = app.delete(
-            'api/agent/' + agent_name,
-            data=None,
-            content_type='application/json')
+            "api/agent/" + agent_name, data=None, content_type="application/json"
+        )
     assert response_delete.status_code == 200
     data = json.loads(response_delete.get_data(as_text=True))
     assert data == "Agent {} deleted".format(agent_name)
@@ -66,9 +64,10 @@ def test_delete_agent_fail():
     with unittest.mock.patch("aea.cli_gui._call_aea", _dummy_call_aea):
         # Ensure there is now one agent
         response_delete = app.delete(
-            'api/agent/' + agent_name,
-            data=None,
-            content_type='application/json')
+            "api/agent/" + agent_name, data=None, content_type="application/json"
+        )
     assert response_delete.status_code == 400
     data = json.loads(response_delete.get_data(as_text=True))
-    assert data['detail'] == 'Failed to delete Agent {} - it may not exist'.format(agent_name)
+    assert data["detail"] == "Failed to delete Agent {} - it may not exist".format(
+        agent_name
+    )

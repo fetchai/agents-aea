@@ -46,18 +46,25 @@ from aea.configurations.base import (
     ProtocolConfig,
     PublicId,
     SkillConfig,
-    _get_default_configuration_file_name_from_type
+    _get_default_configuration_file_name_from_type,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.crypto.fetchai import FETCHAI
-from aea.helpers.base import add_agent_component_module_to_sys_modules, load_agent_component_package
+from aea.helpers.base import (
+    add_agent_component_module_to_sys_modules,
+    load_agent_component_package,
+)
 
 logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_VERSION = "0.1.0"
-DEFAULT_CONNECTION = PublicId.from_string("fetchai/stub:" + DEFAULT_VERSION)  # type: PublicId
-DEFAULT_SKILL = PublicId.from_string("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
+DEFAULT_CONNECTION = PublicId.from_string(
+    "fetchai/stub:" + DEFAULT_VERSION
+)  # type: PublicId
+DEFAULT_SKILL = PublicId.from_string(
+    "fetchai/error:" + DEFAULT_VERSION
+)  # type: PublicId
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 
@@ -72,8 +79,12 @@ class Context(object):
         self.config = dict()  # type: Dict
         self.agent_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
         self.skill_loader = ConfigLoader("skill-config_schema.json", SkillConfig)
-        self.connection_loader = ConfigLoader("connection-config_schema.json", ConnectionConfig)
-        self.protocol_loader = ConfigLoader("protocol-config_schema.json", ProtocolConfig)
+        self.connection_loader = ConfigLoader(
+            "connection-config_schema.json", ConnectionConfig
+        )
+        self.protocol_loader = ConfigLoader(
+            "protocol-config_schema.json", ProtocolConfig
+        )
         self.cwd = cwd
 
     def set_config(self, key, value) -> None:
@@ -85,13 +96,21 @@ class Context(object):
         :return: None
         """
         self.config[key] = value
-        logger.debug('  config[%s] = %s' % (key, value))
+        logger.debug("  config[%s] = %s" % (key, value))
 
     def _get_item_dependencies(self, item_type, public_id: PublicId) -> Dependencies:
         """Get the dependencies from item type and public id."""
         item_type_plural = item_type + "s"
-        default_config_file_name = _get_default_configuration_file_name_from_type(item_type)
-        path = Path("vendor", public_id.author, item_type_plural, public_id.name, default_config_file_name)
+        default_config_file_name = _get_default_configuration_file_name_from_type(
+            item_type
+        )
+        path = Path(
+            "vendor",
+            public_id.author,
+            item_type_plural,
+            public_id.name,
+            default_config_file_name,
+        )
         if not path.exists():
             path = Path(item_type_plural, public_id.name, default_config_file_name)
         config_loader = ConfigLoader.from_configuration_type(item_type)
@@ -109,7 +128,9 @@ class Context(object):
             dependencies.update(self._get_item_dependencies("protocol", protocol_id))
 
         for connection_id in self.agent_config.connections:
-            dependencies.update(self._get_item_dependencies("connection", connection_id))
+            dependencies.update(
+                self._get_item_dependencies("connection", connection_id)
+            )
 
         for skill_id in self.agent_config.skills:
             dependencies.update(self._get_item_dependencies("skill", skill_id))
@@ -137,12 +158,18 @@ def try_to_load_agent_config(ctx: Context, exit_on_except: bool = True) -> None:
     except FileNotFoundError:
         if exit_on_except:
             logger.error(
-                "Agent configuration file '{}' not found in the current directory.".format(DEFAULT_AEA_CONFIG_FILE))
+                "Agent configuration file '{}' not found in the current directory.".format(
+                    DEFAULT_AEA_CONFIG_FILE
+                )
+            )
             sys.exit(1)
     except jsonschema.exceptions.ValidationError:
         if exit_on_except:
-            logger.error("Agent configuration file '{}' is invalid. Please check the documentation.".format(
-                DEFAULT_AEA_CONFIG_FILE))
+            logger.error(
+                "Agent configuration file '{}' is invalid. Please check the documentation.".format(
+                    DEFAULT_AEA_CONFIG_FILE
+                )
+            )
             sys.exit(1)
 
 
@@ -151,21 +178,35 @@ def _try_to_load_protocols(ctx: Context):
         protocol_name = protocol_public_id.name
         protocol_author = protocol_public_id.author
         logger.debug("Processing protocol {}".format(protocol_public_id))
-        protocol_dir = Path("vendor", protocol_public_id.author, "protocols", protocol_name)
+        protocol_dir = Path(
+            "vendor", protocol_public_id.author, "protocols", protocol_name
+        )
         if not protocol_dir.exists():
             protocol_dir = Path("protocols", protocol_name)
 
         try:
             ctx.protocol_loader.load(open(protocol_dir / DEFAULT_PROTOCOL_CONFIG_FILE))
         except FileNotFoundError:
-            logger.error("Protocol configuration file for protocol {} not found.".format(protocol_name))
+            logger.error(
+                "Protocol configuration file for protocol {} not found.".format(
+                    protocol_name
+                )
+            )
             sys.exit(1)
 
         try:
-            protocol_package = load_agent_component_package("protocol", protocol_name, protocol_author, protocol_dir)
-            add_agent_component_module_to_sys_modules("protocol", protocol_name, protocol_author, protocol_package)
+            protocol_package = load_agent_component_package(
+                "protocol", protocol_name, protocol_author, protocol_dir
+            )
+            add_agent_component_module_to_sys_modules(
+                "protocol", protocol_name, protocol_author, protocol_package
+            )
         except Exception:
-            logger.error("A problem occurred while processing protocol {}.".format(protocol_public_id))
+            logger.error(
+                "A problem occurred while processing protocol {}.".format(
+                    protocol_public_id
+                )
+            )
             sys.exit(1)
 
 
@@ -181,47 +222,47 @@ def _load_env_file(env_file: str):
 
 def format_items(items):
     """Format list of items (protocols/connections) to a string for CLI output."""
-    list_str = ''
+    list_str = ""
     for item in items:
         list_str += (
-            '{line}\n'
-            'Public ID: {public_id}\n'
-            'Name: {name}\n'
-            'Description: {description}\n'
-            'Author: {author}\n'
-            'Version: {version}\n'
-            '{line}\n'.format(
-                name=item['name'],
-                public_id=item['public_id'],
-                description=item['description'],
-                author=item['author'],
-                version=item['version'],
-                line='-' * 30
-            ))
+            "{line}\n"
+            "Public ID: {public_id}\n"
+            "Name: {name}\n"
+            "Description: {description}\n"
+            "Author: {author}\n"
+            "Version: {version}\n"
+            "{line}\n".format(
+                name=item["name"],
+                public_id=item["public_id"],
+                description=item["description"],
+                author=item["author"],
+                version=item["version"],
+                line="-" * 30,
+            )
+        )
     return list_str
 
 
 def format_skills(items):
     """Format list of skills to a string for CLI output."""
-    list_str = ''
+    list_str = ""
     for item in items:
         list_str += (
-            '{line}\n'
-            'Public ID: {public_id}\n'
-            'Name: {name}\n'
-            'Description: {description}\n'
-            'Protocols: {protocols}\n'
-            'Version: {version}\n'
-            '{line}\n'.format(
-                name=item['name'],
-                public_id=item['public_id'],
-                description=item['description'],
-                version=item['version'],
-                protocols=''.join(
-                    name + ' | ' for name in item['protocol_names']
-                ),
-                line='-' * 30
-            ))
+            "{line}\n"
+            "Public ID: {public_id}\n"
+            "Name: {name}\n"
+            "Description: {description}\n"
+            "Protocols: {protocols}\n"
+            "Version: {version}\n"
+            "{line}\n".format(
+                name=item["name"],
+                public_id=item["public_id"],
+                description=item["description"],
+                version=item["version"],
+                protocols="".join(name + " | " for name in item["protocol_names"]),
+                line="-" * 30,
+            )
+        )
     return list_str
 
 
@@ -230,8 +271,13 @@ def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> D
     config = loader.load(open(str(config_filepath)))
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
     assert item_name == name
-    return {"public_id": str(config.public_id), "name": item_name, "author": config.author,
-            "description": config.description, "version": config.version}
+    return {
+        "public_id": str(config.public_id),
+        "name": item_name,
+        "author": config.author,
+        "description": config.description,
+        "version": config.version,
+    }
 
 
 class AEAConfigException(Exception):
@@ -254,10 +300,13 @@ class ConnectionsOption(click.Option):
         if value is None:
             return None
         try:
+
             def arg_strip(s):
                 return s.strip(" '\"")
 
-            connection_names = set(arg_strip(s) for s in value.split(",") if arg_strip(s) != "")
+            connection_names = set(
+                arg_strip(s) for s in value.split(",") if arg_strip(s) != ""
+            )
             return list(connection_names)
         except Exception:  # pragma: no cover
             raise click.BadParameter(value)
@@ -358,12 +407,14 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     :return: path to the package directory (either in registry or in aea directory).
     :raises SystemExit: if the search fails.
     """
-    item_type_plural = item_type + 's'
+    item_type_plural = item_type + "s"
     item_name = item_public_id.name
 
     # check in registry
     registry_path = ctx.agent_config.registry_path
-    package_path = Path(registry_path, item_public_id.author, item_type_plural, item_name)
+    package_path = Path(
+        registry_path, item_public_id.author, item_type_plural, item_name
+    )
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
     if not item_configuration_filepath.exists():
@@ -377,17 +428,25 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
 
     # try to load the item configuration file
     try:
-        item_configuration_loader = ConfigLoader.from_configuration_type(ConfigurationType(item_type))
-        item_configuration = item_configuration_loader.load(item_configuration_filepath.open())
+        item_configuration_loader = ConfigLoader.from_configuration_type(
+            ConfigurationType(item_type)
+        )
+        item_configuration = item_configuration_loader.load(
+            item_configuration_filepath.open()
+        )
     except ValidationError as e:
-        logger.error("{} configuration file not valid: {}".format(item_type.capitalize(), str(e)))
+        logger.error(
+            "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
+        )
         sys.exit(1)
 
     # check that the configuration file of the found package matches the expected author and version.
     version = item_configuration.version
     author = item_configuration.author
     if item_public_id.author != author or item_public_id.version != version:
-        logger.error("Cannot find {} with author and version specified.".format(item_type))
+        logger.error(
+            "Cannot find {} with author and version specified.".format(item_type)
+        )
         sys.exit(1)
 
     return package_path

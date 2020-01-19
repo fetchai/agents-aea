@@ -40,8 +40,8 @@ class DummyPID:
     def __init__(self, return_code, stdout_str, stderr_str):
         """Initialise the class."""
         self.return_code = return_code
-        self.stdout = io.BytesIO(stdout_str.encode(encoding='UTF-8'))
-        self.stderr = io.BytesIO(stderr_str.encode(encoding='UTF-8'))
+        self.stdout = io.BytesIO(stdout_str.encode(encoding="UTF-8"))
+        self.stderr = io.BytesIO(stderr_str.encode(encoding="UTF-8"))
 
     def poll(self):
         """Mimic the process id poll function."""

@@ -23,9 +23,20 @@ import pytest
 
 import yaml
 
-from aea.configurations.base import AgentConfig, CRUDCollection, ConnectionConfig, ProtocolConfig, SkillConfig
+from aea.configurations.base import (
+    AgentConfig,
+    CRUDCollection,
+    ConnectionConfig,
+    ProtocolConfig,
+    SkillConfig,
+)
 
-from ..conftest import agent_config_files, connection_config_files, protocol_config_files, skill_config_files
+from ..conftest import (
+    agent_config_files,
+    connection_config_files,
+    protocol_config_files,
+    skill_config_files,
+)
 
 
 class TestCRUDCollection:

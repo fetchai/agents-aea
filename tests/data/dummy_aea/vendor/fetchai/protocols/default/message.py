@@ -49,8 +49,7 @@ class DefaultMessage(Message):
         UNSUPPORTED_SKILL = -10004
         INVALID_DIALOGUE = -10005
 
-    def __init__(self, type: Type,
-                 **kwargs):
+    def __init__(self, type: Type, **kwargs):
         """
         Initialize.
 
@@ -97,8 +96,12 @@ class DefaultMessage(Message):
                 assert isinstance(self.content, bytes), "Expect the content to be bytes"
                 assert len(self.body) == 2
             elif self.type == DefaultMessage.Type.ERROR:
-                assert self.error_code in DefaultMessage.ErrorCode, "ErrorCode is not valid"
-                assert isinstance(self.error_code, DefaultMessage.ErrorCode), "error_code has wrong type."
+                assert (
+                    self.error_code in DefaultMessage.ErrorCode
+                ), "ErrorCode is not valid"
+                assert isinstance(
+                    self.error_code, DefaultMessage.ErrorCode
+                ), "error_code has wrong type."
                 assert isinstance(self.error_msg, str), "error_msg should be str"
                 assert isinstance(self.error_data, dict), "error_data should be dict"
                 assert len(self.body) == 4

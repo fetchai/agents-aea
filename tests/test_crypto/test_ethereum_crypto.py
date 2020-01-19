@@ -38,15 +38,24 @@ def test_initialization():
     """Test the initialisation of the variables."""
     account = EthereumCrypto()
     assert account.entity is not None, "The property must return the account."
-    assert account.address is not None, "After creation the display address must not be None"
-    assert account.public_key is not None, "After creation the public key must no be None"
+    assert (
+        account.address is not None
+    ), "After creation the display address must not be None"
+    assert (
+        account.public_key is not None
+    ), "After creation the public key must no be None"
     assert account.entity is not None, "After creation the entity must no be None"
 
 
 def test_sign_transaction():
     """Test the signing function for the eth_crypto."""
     account = EthereumCrypto(PRIVATE_KEY_PATH)
+<<<<<<< HEAD
     sign_bytes = account.sign_transaction(b'hello')
+=======
+    tx = Web3.solidityKeccak(["bytes"], [b"hello"])
+    sign_bytes = account.sign_transaction(tx)
+>>>>>>> 8f0d357fbb9a5f883a322f890b77a24e5dbca950
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
     recovered_addr = account.recover_from_hash(b'hello', signature=sign_bytes)
     assert recovered_addr == account.address, "Failed to recover the correct address."

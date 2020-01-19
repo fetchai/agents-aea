@@ -58,13 +58,16 @@ class Liveness:
 class Agent(ABC):
     """This class implements a template agent."""
 
-    def __init__(self, name: str,
-                 connections: List[Connection],
-                 wallet: Wallet,
-                 loop: Optional[AbstractEventLoop] = None,
-                 timeout: float = 1.0,
-                 debug: bool = False,
-                 programmatic: bool = True) -> None:
+    def __init__(
+        self,
+        name: str,
+        connections: List[Connection],
+        wallet: Wallet,
+        loop: Optional[AbstractEventLoop] = None,
+        timeout: float = 1.0,
+        debug: bool = False,
+        programmatic: bool = True,
+    ) -> None:
         """
         Instantiate the agent.
 
@@ -134,11 +137,19 @@ class Agent(ABC):
         :return the agent state.
         :raises ValueError: if the state does not satisfy any of the foreseen conditions.
         """
-        if self.multiplexer is not None and not self.multiplexer.connection_status.is_connected:
+        if (
+            self.multiplexer is not None
+            and not self.multiplexer.connection_status.is_connected
+        ):
             return AgentState.INITIATED
-        elif self.multiplexer.connection_status.is_connected and self.liveness.is_stopped:
+        elif (
+            self.multiplexer.connection_status.is_connected and self.liveness.is_stopped
+        ):
             return AgentState.CONNECTED
-        elif self.multiplexer.connection_status.is_connected and not self.liveness.is_stopped:
+        elif (
+            self.multiplexer.connection_status.is_connected
+            and not self.liveness.is_stopped
+        ):
             return AgentState.RUNNING
         else:
             raise ValueError("Agent state not recognized.")  # pragma: no cover

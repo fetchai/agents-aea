@@ -34,12 +34,12 @@ class ColorFormatter(logging.Formatter):
     """The default formatter for cli output."""
 
     colors = {
-        'error': dict(fg='red'),
-        'exception': dict(fg='red'),
-        'critical': dict(fg='red'),
-        'debug': dict(fg='blue'),
-        'info': dict(fg='green'),
-        'warning': dict(fg='yellow')
+        "error": dict(fg="red"),
+        "exception": dict(fg="red"),
+        "critical": dict(fg="red"),
+        "debug": dict(fg="blue"),
+        "info": dict(fg="green"),
+        "warning": dict(fg="yellow"),
     }
 
     def format(self, record):
@@ -48,9 +48,8 @@ class ColorFormatter(logging.Formatter):
             level = record.levelname.lower()
             msg = record.getMessage()
             if level in self.colors:
-                prefix = click.style('{}: '.format(level),
-                                     **self.colors[level])
-                msg = '\n'.join(prefix + x for x in msg.splitlines())
+                prefix = click.style("{}: ".format(level), **self.colors[level])
+                msg = "\n".join(prefix + x for x in msg.splitlines())
             return msg
         return logging.Formatter.format(self, record)  # pragma: no cover
 
@@ -62,14 +61,14 @@ def simple_verbosity_option(logger=None, *names, **kwargs):
     the underlying `click.option` decorator.
     """
     if not names:
-        names = ['--verbosity', '-v']
+        names = ["--verbosity", "-v"]
 
-    kwargs.setdefault('default', 'INFO')
-    kwargs.setdefault('type', click.Choice(LOG_LEVELS, case_sensitive=False))
-    kwargs.setdefault('metavar', 'LVL')
-    kwargs.setdefault('expose_value', False)
-    kwargs.setdefault('help', 'One of {}'.format(", ".join(LOG_LEVELS)))
-    kwargs.setdefault('is_eager', True)
+    kwargs.setdefault("default", "INFO")
+    kwargs.setdefault("type", click.Choice(LOG_LEVELS, case_sensitive=False))
+    kwargs.setdefault("metavar", "LVL")
+    kwargs.setdefault("expose_value", False)
+    kwargs.setdefault("help", "One of {}".format(", ".join(LOG_LEVELS)))
+    kwargs.setdefault("is_eager", True)
 
     def decorator(f):
         def _set_level(ctx, param, value):
@@ -77,6 +76,7 @@ def simple_verbosity_option(logger=None, *names, **kwargs):
             logger.setLevel(level)
 
         return click.option(*names, callback=_set_level, **kwargs)(f)
+
     return decorator
 
 

@@ -30,10 +30,13 @@ ATTRIBUTE_TYPES = Union[float, str, bool, int]
 class Attribute:
     """Implements an attribute for an OEF data model."""
 
-    def __init__(self, name: str,
-                 type: Type[ATTRIBUTE_TYPES],
-                 is_required: bool,
-                 description: str = ""):
+    def __init__(
+        self,
+        name: str,
+        type: Type[ATTRIBUTE_TYPES],
+        is_required: bool,
+        description: str = "",
+    ):
         """
         Initialize an attribute.
 
@@ -49,10 +52,12 @@ class Attribute:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, Attribute) \
-            and self.name == other.name \
-            and self.type == other.type \
+        return (
+            isinstance(other, Attribute)
+            and self.name == other.name
+            and self.type == other.type
             and self.is_required == other.is_required
+        )
 
 
 class DataModel:
@@ -72,9 +77,11 @@ class DataModel:
 
     def __eq__(self, other) -> bool:
         """Compare with another object."""
-        return isinstance(other, DataModel) \
-            and self.name == other.name \
+        return (
+            isinstance(other, DataModel)
+            and self.name == other.name
             and self.attributes == other.attributes
+        )
 
 
 class Description:
@@ -92,9 +99,11 @@ class Description:
 
     def __eq__(self, other) -> bool:
         """Compare with another object."""
-        return isinstance(other, Description) \
-            and self.values == other.values \
+        return (
+            isinstance(other, Description)
+            and self.values == other.values
             and self.data_model == other.data_model
+        )
 
     def __iter__(self):
         """Create an iterator."""
@@ -230,7 +239,11 @@ class ConstraintType:
 
     def __eq__(self, other):
         """Check equality with another object."""
-        return isinstance(other, ConstraintType) and self.value == other.value and self.type == other.type
+        return (
+            isinstance(other, ConstraintType)
+            and self.value == other.value
+            and self.type == other.type
+        )
 
 
 class ConstraintExpr(ABC):
@@ -384,8 +397,9 @@ class Constraint(ConstraintExpr):
 
         # if the type of the value is different from the type of the attribute, return false.
         value = description.values[name]
-        if type(self.constraint_type.value) in {list, tuple, set} \
-                and not isinstance(value, type(next(iter(self.constraint_type.value)))):
+        if type(self.constraint_type.value) in {list, tuple, set} and not isinstance(
+            value, type(next(iter(self.constraint_type.value)))
+        ):
             return False
         if not isinstance(value, type(self.constraint_type.value)):
             return False
@@ -395,15 +409,19 @@ class Constraint(ConstraintExpr):
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, Constraint) \
-            and self.attribute_name == other.attribute_name \
+        return (
+            isinstance(other, Constraint)
+            and self.attribute_name == other.attribute_name
             and self.constraint_type == other.constraint_type
+        )
 
 
 class Query:
     """This class lets you build a query for the OEF."""
 
-    def __init__(self, constraints: List[ConstraintExpr], model: Optional[DataModel] = None) -> None:
+    def __init__(
+        self, constraints: List[ConstraintExpr], model: Optional[DataModel] = None
+    ) -> None:
         """
         Initialize a query.
 
@@ -426,6 +444,8 @@ class Query:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, Query) \
-            and self.constraints == other.constraints \
+        return (
+            isinstance(other, Query)
+            and self.constraints == other.constraints
             and self.model == other.model
+        )

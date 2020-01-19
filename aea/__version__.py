@@ -20,10 +20,10 @@
 
 """Specifies the version of the TAC package."""
 
-__title__ = 'aea'
-__description__ = 'Autonomous Economic Agent framework'
-__url__ = 'https://github.com/fetchai/agents-aea.git'
-__version__ = '0.1.16'
-__author__ = 'Fetch.AI Limited'
-__license__ = 'Apache 2.0'
-__copyright__ = '2019 Fetch.AI Limited'
+__title__ = "aea"
+__description__ = "Autonomous Economic Agent framework"
+__url__ = "https://github.com/fetchai/agents-aea.git"
+__version__ = "0.1.16"
+__author__ = "Fetch.AI Limited"
+__license__ = "Apache 2.0"
+__copyright__ = "2019 Fetch.AI Limited"

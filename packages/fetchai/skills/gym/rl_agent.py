@@ -75,8 +75,8 @@ class GoodPriceModel(object):
     def __init__(self, bound: int = 100):
         """Instantiate a good price model."""
         self.price_bandits = dict(
-            (price, PriceBandit(price))
-            for price in range(bound + 1))
+            (price, PriceBandit(price)) for price in range(bound + 1)
+        )
 
     def update(self, outcome: bool, price: int) -> None:
         """
@@ -116,7 +116,8 @@ class MyRLAgent(RLAgent):
         :return: None
         """
         self.good_price_models = dict(
-            (good_id, GoodPriceModel()) for good_id in range(nb_goods))  # type: Dict[int, GoodPriceModel]
+            (good_id, GoodPriceModel()) for good_id in range(nb_goods)
+        )  # type: Dict[int, GoodPriceModel]
 
     def _pick_an_action(self) -> Any:
         """
@@ -177,5 +178,9 @@ class MyRLAgent(RLAgent):
             self._update_model(obs, reward, done, info, action)
             action_counter += 1
             if action_counter % 10 == 0:
-                logger.info("Action: step_id='{}' action='{}' reward='{}'".format(action_counter, action, reward))
+                logger.info(
+                    "Action: step_id='{}' action='{}' reward='{}'".format(
+                        action_counter, action, reward
+                    )
+                )
         proxy_env.close()

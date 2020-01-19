@@ -29,7 +29,12 @@ from jsonschema import Draft4Validator
 from aea.cli import cli
 
 from ..common.click_testing import CliRunner
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, CLI_LOG_OPTION, CONFIGURATION_SCHEMA_DIR, CUR_PATH
+from ..conftest import (
+    AGENT_CONFIGURATION_SCHEMA,
+    CLI_LOG_OPTION,
+    CONFIGURATION_SCHEMA_DIR,
+    CUR_PATH,
+)
 
 
 class TestFreeze:
@@ -39,14 +44,18 @@ class TestFreeze:
     def setup_class(cls):
         """Set the test up."""
         cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.resolver = jsonschema.RefResolver(
+            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+        )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         os.chdir(Path(CUR_PATH, "data", "dummy_aea"))
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "freeze"], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "freeze"], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""

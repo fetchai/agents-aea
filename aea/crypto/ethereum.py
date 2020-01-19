@@ -39,8 +39,8 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 ETHEREUM = "ethereum"
-GAS_PRICE = '50'
-GAS_ID = 'gwei'
+GAS_PRICE = "50"
+GAS_ID = "gwei"
 
 
 class EthereumCrypto(Crypto):
@@ -54,7 +54,11 @@ class EthereumCrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        self._account = (
+            self._generate_private_key()
+            if private_key_path is None
+            else self._load_private_key_from_path(private_key_path)
+        )
         bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
 
@@ -97,7 +101,7 @@ class EthereumCrypto(Crypto):
             else:
                 account = self._generate_private_key()
             return account
-        except IOError as e:        # pragma: no cover
+        except IOError as e:  # pragma: no cover
             logger.exception(str(e))
 
     def sign_transaction(self, tx_hash: bytes) -> bytes:
@@ -180,13 +184,15 @@ class EthereumApi(LedgerApi):
         """Get the balance of a given account."""
         return self._api.eth.getBalance(address)
 
-    def send_transaction(self,
-                         crypto: Crypto,
-                         destination_address: AddressLike,
-                         amount: int,
-                         tx_fee: int,
-                         chain_id: int = 1,
-                         **kwargs) -> Optional[str]:
+    def send_transaction(
+        self,
+        crypto: Crypto,
+        destination_address: AddressLike,
+        amount: int,
+        tx_fee: int,
+        chain_id: int = 1,
+        **kwargs
+    ) -> Optional[str]:
         """
         Submit a transaction to the ledger.
 
@@ -197,15 +203,17 @@ class EthereumApi(LedgerApi):
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
         :return: the transaction digest, or None if not available.
         """
-        nonce = self._api.eth.getTransactionCount(self._api.toChecksumAddress(crypto.address))
+        nonce = self._api.eth.getTransactionCount(
+            self._api.toChecksumAddress(crypto.address)
+        )
         # TODO : handle misconfiguration
         transaction = {
-            'nonce': nonce,
-            'chainId': chain_id,
-            'to': destination_address,
-            'value': amount,
-            'gas': tx_fee,
-            'gasPrice': self._api.toWei(GAS_PRICE, GAS_ID)
+            "nonce": nonce,
+            "chainId": chain_id,
+            "to": destination_address,
+            "value": amount,
+            "gas": tx_fee,
+            "gasPrice": self._api.toWei(GAS_PRICE, GAS_ID),
         }
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)

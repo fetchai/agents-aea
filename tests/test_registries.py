@@ -46,7 +46,7 @@ class TestProtocolRegistry:
     @classmethod
     def setup_class(cls):
         """Set the tests up."""
-        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, 'exception')
+        cls.patch = unittest.mock.patch.object(aea.registries.base.logger, "exception")
         cls.mocked_logger = cls.patch.__enter__()
 
         cls.oldcwd = os.getcwd()
@@ -70,7 +70,9 @@ class TestProtocolRegistry:
 
     def test_not_able_to_add_bad_formatted_protocol_message(self):
         """Test that the protocol registry has not been able to add the protocol 'bad'."""
-        self.mocked_logger.assert_called_with("Not able to add protocol '{}'.".format(self.fake_protocol_id))
+        self.mocked_logger.assert_called_with(
+            "Not able to add protocol '{}'.".format(self.fake_protocol_id)
+        )
 
     def test_fetch_all(self):
         """Test that the 'fetch_all' method works as expected."""
@@ -104,9 +106,13 @@ class TestResources:
 
     @classmethod
     def _patch_logger(cls):
-        cls.patch_logger_exception = unittest.mock.patch.object(aea.registries.base.logger, 'exception')
+        cls.patch_logger_exception = unittest.mock.patch.object(
+            aea.registries.base.logger, "exception"
+        )
         cls.mocked_logger_exception = cls.patch_logger_exception.__enter__()
-        cls.patch_logger_warning = unittest.mock.patch.object(aea.registries.base.logger, 'warning')
+        cls.patch_logger_warning = unittest.mock.patch.object(
+            aea.registries.base.logger, "warning"
+        )
         cls.mocked_logger_warning = cls.patch_logger_warning.__enter__()
 
     @classmethod
@@ -137,10 +143,17 @@ class TestResources:
 
         connections = [DummyConnection()]
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path})
-        ledger_apis = LedgerApis({}, 'default')
+        wallet = Wallet({"default": private_key_pem_path})
+        ledger_apis = LedgerApis({}, "default")
         cls.resources = Resources(os.path.join(cls.agent_folder))
-        cls.aea = AEA(cls.agent_name, connections, wallet, ledger_apis, resources=cls.resources, programmatic=False)
+        cls.aea = AEA(
+            cls.agent_name,
+            connections,
+            wallet,
+            ledger_apis,
+            resources=cls.resources,
+            programmatic=False,
+        )
         cls.resources.load(cls.aea.context)
 
         cls.expected_skills = {"dummy", "error"}
@@ -148,16 +161,22 @@ class TestResources:
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
         assert len(self.resources.handler_registry.fetch_all()) == 3
-        error_handler = self.resources.handler_registry.fetch_by_skill("default", "error")
+        error_handler = self.resources.handler_registry.fetch_by_skill(
+            "default", "error"
+        )
         self.resources.handler_registry.unregister("error")
 
         # unregister the handler and test that it has been actually unregistered.
-        assert self.resources.handler_registry.fetch_by_skill("default", "error") is None
+        assert (
+            self.resources.handler_registry.fetch_by_skill("default", "error") is None
+        )
         handlers = self.resources.handler_registry.fetch_all()
         assert len(handlers) == 2
         assert handlers[0].__class__.__name__ == "DummyHandler"
 
-        dummy_handler = self.resources.handler_registry.fetch_by_skill("default", "dummy")
+        dummy_handler = self.resources.handler_registry.fetch_by_skill(
+            "default", "dummy"
+        )
         self.resources.handler_registry.unregister("dummy")
         assert len(self.resources.handler_registry.fetch_all()) == 0
 
@@ -170,7 +189,10 @@ class TestResources:
         """Test that when the skill is bad formatted, we print a log message."""
         s = "A problem occurred while parsing the skill directory {}. Exception: {}".format(
             os.path.join(self.agent_folder, "skills", "fake"),
-            "[Errno 2] No such file or directory: '" + os.path.join(self.agent_folder, "skills", "fake", "skill.yaml") + "'")
+            "[Errno 2] No such file or directory: '"
+            + os.path.join(self.agent_folder, "skills", "fake", "skill.yaml")
+            + "'",
+        )
         self.mocked_logger_warning.assert_called_once_with(s)
 
     def test_remove_skill(self):
@@ -184,7 +206,9 @@ class TestResources:
     def test_register_behaviour_with_already_existing_skill_id(self):
         """Test that registering a behaviour with an already existing skill id behaves as expected."""
         self.resources.behaviour_registry.register((None, "error"), [])
-        self.mocked_logger_warning.assert_called_with("Behaviours already registered with skill id 'error'")
+        self.mocked_logger_warning.assert_called_with(
+            "Behaviours already registered with skill id 'error'"
+        )
 
     def test_behaviour_registry(self):
         """Test that the behaviour registry behaves as expected."""
@@ -198,7 +222,9 @@ class TestResources:
     def test_register_task_with_already_existing_skill_id(self):
         """Test that registering a task with an already existing skill id behaves as expected."""
         self.resources.task_registry.register((None, "error"), [])
-        self.mocked_logger_warning.assert_called_with("Tasks already registered with skill id 'error'")
+        self.mocked_logger_warning.assert_called_with(
+            "Tasks already registered with skill id 'error'"
+        )
 
     def test_task_registry(self):
         """Test that the task registry behaves as expected."""
@@ -238,12 +264,11 @@ class TestResources:
         default_handlers = self.resources.handler_registry.fetch("default")
         assert len(default_handlers) == 2
         handler1, handler2 = default_handlers[0], default_handlers[1]
-        dummy_handler = handler1 if handler1.__class__.__name__ == "DummyHandler" else handler2
+        dummy_handler = (
+            handler1 if handler1.__class__.__name__ == "DummyHandler" else handler2
+        )
 
-        assert dummy_handler.config == {
-            "handler_arg_1": 1,
-            "handler_arg_2": "2"
-        }
+        assert dummy_handler.config == {"handler_arg_1": 1, "handler_arg_2": "2"}
 
     def test_behaviour_configuration_loading(self):
         """Test that the behaviour configurations are loaded correctly."""
@@ -251,10 +276,7 @@ class TestResources:
         assert len(dummy_behaviours) == 1
         dummy_behaviour = dummy_behaviours[0]
 
-        assert dummy_behaviour.config == {
-            "behaviour_arg_1": 1,
-            "behaviour_arg_2": "2"
-        }
+        assert dummy_behaviour.config == {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}
 
     def test_task_configuration_loading(self):
         """Test that the task configurations are loaded correctly."""
@@ -262,10 +284,7 @@ class TestResources:
         assert len(dummy_tasks) == 1
         dummy_task = dummy_tasks[0]
 
-        assert dummy_task.config == {
-            "task_arg_1": 1,
-            "task_arg_2": "2"
-        }
+        assert dummy_task.config == {"task_arg_1": 1, "task_arg_2": "2"}
 
     def test_shared_class_configuration_loading(self):
         """Test that the shared class configurations are loaded correctly."""
@@ -275,7 +294,7 @@ class TestResources:
 
         assert dummy_shared_class.config == {
             "shared_class_arg_1": 1,
-            "shared_class_arg_2": "2"
+            "shared_class_arg_2": "2",
         }
 
     @classmethod
@@ -302,29 +321,40 @@ class TestFilter:
 
         connections = [DummyConnection()]
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({'default': private_key_pem_path})
-        ledger_apis = LedgerApis({}, 'default')
-        cls.aea = AEA(cls.agent_name, connections, wallet, ledger_apis, resources=Resources(cls.agent_folder), programmatic=False)
+        wallet = Wallet({"default": private_key_pem_path})
+        ledger_apis = LedgerApis({}, "default")
+        cls.aea = AEA(
+            cls.agent_name,
+            connections,
+            wallet,
+            ledger_apis,
+            resources=Resources(cls.agent_folder),
+            programmatic=False,
+        )
 
     def test_handle_internal_messages(self):
         """Test that the internal messages are handled."""
         self.aea.setup()
-        t = TransactionMessage(performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-                               tx_id="transaction0",
-                               skill_callback_ids=["internal", "dummy"],
-                               tx_sender_addr="pk1",
-                               tx_counterparty_addr="pk2",
-                               tx_amount_by_currency_id={"FET": 2},
-                               tx_sender_fee=0,
-                               tx_counterparty_fee=0,
-                               tx_quantities_by_good_id={"Unknown": 10},
-                               ledger_id="fetchai",
-                               info={},
-                               tx_digest='some_tx_digest')
+        t = TransactionMessage(
+            performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
+            tx_id="transaction0",
+            skill_callback_ids=["internal", "dummy"],
+            tx_sender_addr="pk1",
+            tx_counterparty_addr="pk2",
+            tx_amount_by_currency_id={"FET": 2},
+            tx_sender_fee=0,
+            tx_counterparty_fee=0,
+            tx_quantities_by_good_id={"Unknown": 10},
+            ledger_id="fetchai",
+            info={},
+            tx_digest="some_tx_digest",
+        )
         self.aea.decision_maker.message_out_queue.put(t)
         self.aea.filter.handle_internal_messages()
 
-        internal_handler = self.aea.resources.handler_registry.fetch_by_skill("internal", "dummy")
+        internal_handler = self.aea.resources.handler_registry.fetch_by_skill(
+            "internal", "dummy"
+        )
         assert len(internal_handler.handled_internal_messages) == 1
         self.aea.teardown()
 
