@@ -26,6 +26,8 @@ from collections import defaultdict
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
+from eth_account.messages import SignableMessage, encode_defunct
+
 from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM
 from aea.helpers.preference_representations.base import (
@@ -344,20 +346,22 @@ class Transaction:
         return self._sender_addr if self.is_sender_buyer else self._counterparty_addr
 
     @property
-    def sender_hash(self) -> bytes:
+    def sender_hash(self) -> SignableMessage:
         """Get the sender hash."""
-        return tx_hash_from_values(
+        generate_hash = tx_hash_from_values(
             tx_sender_addr=self.sender_addr,
             tx_counterparty_addr=self.counterparty_addr,
             tx_quantities_by_good_id=self.quantities_by_good_id,
             tx_amount_by_currency_id=self.amount_by_currency_id,
             tx_nonce=self.nonce,
         )
+        singable_message = encode_defunct(primitive=generate_hash)
+        return singable_message
 
     @property
-    def counterparty_hash(self) -> bytes:
+    def counterparty_hash(self) -> SignableMessage:
         """Get the sender hash."""
-        return tx_hash_from_values(
+        generate_hash = tx_hash_from_values(
             tx_sender_addr=self.counterparty_addr,
             tx_counterparty_addr=self.sender_addr,
             tx_quantities_by_good_id={
@@ -370,6 +374,8 @@ class Transaction:
             },
             tx_nonce=self.nonce,
         )
+        singable_message = encode_defunct(primitive=generate_hash)
+        return singable_message
 
     @property
     def amount(self) -> int:
@@ -429,16 +435,17 @@ class Transaction:
 
         :return: True if the transaction has been signed by both parties
         """
+        # recoverHash is depricated in favor of Account.recover_message(message, signature=signature)
         result = (
-            api.api.eth.account.recoverHash(
-                self.sender_hash, signature=self.sender_signature
+            api.api.eth.account.recover_message(
+                message=self.sender_hash, signature=self.sender_signature
             )
             == self.sender_addr
         )
         result = (
             result
-            and api.api.eth.account.recoverHash(
-                self.counterparty_hash, signature=self.counterparty_signature
+            and api.api.eth.account.recover_message(
+                message=self.counterparty_hash, signature=self.counterparty_signature
             )
             == self.counterparty_addr
         )

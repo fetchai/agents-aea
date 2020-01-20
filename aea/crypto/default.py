@@ -37,6 +37,7 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from aea.crypto.base import Crypto
+from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
@@ -345,11 +346,21 @@ class DefaultCrypto(Crypto):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def sign_message(self, tx_hash: bytes) -> bytes:
+    def sign_message(self, message: bytes) -> bytes:
         """
-        Sign a transaction hash.
+        Sign a message in bytes string form.
 
-        :param tx_hash: the transaction hash
+        :param message: the transaction hash
         :return: Signed message in bytes
         """
         raise NotImplementedError  # pragma: no cover
+
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
+
+        :param message: the transaction hash
+        :param signature: the transaction signature
+        :return: the recovered address
+        """
+        raise NotImplementedError  # praggma: no cover

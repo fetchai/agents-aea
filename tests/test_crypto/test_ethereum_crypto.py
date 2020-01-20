@@ -48,10 +48,10 @@ def test_initialization():
     assert account.entity is not None, "After creation the entity must no be None"
 
 
-def test_sign_message():
-    """Test the signing function for the eth_crypto."""
+def test_sign_and_recover_message():
+    """Test the signing and the recovery function for the eth_crypto."""
     account = EthereumCrypto(PRIVATE_KEY_PATH)
-    sign_bytes = account.sign_message(b"hello")
+    sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
-    recovered_addr = account.recover_from_hash(b"hello", signature=sign_bytes)
+    recovered_addr = account.recover_message(message=b"hello", signature=sign_bytes)
     assert recovered_addr == account.address, "Failed to recover the correct address."

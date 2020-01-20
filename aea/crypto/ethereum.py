@@ -104,27 +104,27 @@ class EthereumCrypto(Crypto):
         except IOError as e:  # pragma: no cover
             logger.exception(str(e))
 
-    def sign_message(self, tx_hash: bytes) -> bytes:
+    def sign_message(self, message: bytes) -> bytes:
         """
-        Sign a transaction hash.
+        Sign a message in bytes string form.
 
-        :param tx_hash: the transaction hash
+        :param message: the transaction hash
         :return: Signed message in bytes
         """
-        tx = encode_defunct(primitive=tx_hash)
+        tx = encode_defunct(primitive=message)
         signature = self.entity.sign_message(tx)
         return signature["signature"]
 
-    def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
         """
         Recover the address from the hash.
 
-        :param tx_hash: the transaction hash
+        :param message: the transaction hash
         :param signature: the transaction signature
         :return: the recovered address
         """
-        tx = encode_defunct(primitive=tx_hash)
-        addr = Account.recover_message(signable_message=tx, signature=signature)
+        signable_message = encode_defunct(primitive=message)
+        addr = Account.recover_message(signable_message=signable_message, signature=signature)
         return addr
 
     def _generate_private_key(self) -> Account:
