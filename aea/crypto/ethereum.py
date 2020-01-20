@@ -108,7 +108,7 @@ class EthereumCrypto(Crypto):
         """
         Sign a message in bytes string form.
 
-        :param message: the transaction hash
+        :param message: the message we want to send
         :return: Signed message in bytes
         """
         signable_message = encode_defunct(primitive=message)
@@ -119,7 +119,7 @@ class EthereumCrypto(Crypto):
         """
         Recover the address from the hash.
 
-        :param message: the transaction hash
+        :param message: the message we expect
         :param signature: the transaction signature
         :return: the recovered address
         """
