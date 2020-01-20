@@ -33,7 +33,7 @@ import pytest
 
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG, FETCHAI, FetchAICrypto
-from aea.crypto.helpers import _generate_ethereum_random_message
+from aea.crypto.helpers import _generate_random_message
 from aea.crypto.ledger_apis import (
     LedgerApis,
     _try_to_instantiate_ethereum_ledger_api,
@@ -301,7 +301,7 @@ class TestLedgerApis:
             {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
             FETCHAI,
         )
-        random_message = _generate_ethereum_random_message(
+        random_message = _generate_random_message(
             nonce=1,
             seller=seller.address,
             client=client.address,

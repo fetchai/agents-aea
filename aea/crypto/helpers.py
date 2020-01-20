@@ -148,7 +148,7 @@ def _create_ethereum_private_key() -> None:
         file.write(account.key.hex())
 
 
-def _generate_ethereum_random_message(
+def _generate_random_message(
     nonce: int, seller: Address, client: Address, time_stamp: int
 ) -> str:
     """
