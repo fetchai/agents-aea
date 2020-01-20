@@ -22,8 +22,6 @@
 
 import logging
 import sys
-import time
-from datetime import datetime
 
 from eth_account import Account  # type: ignore
 
@@ -150,7 +148,9 @@ def _create_ethereum_private_key() -> None:
         file.write(account.key.hex())
 
 
-def _generate_ethereum_random_message(nonce: int, seller: Address, client: Address, time_stamp: int) -> str:
+def _generate_ethereum_random_message(
+    nonce: int, seller: Address, client: Address, time_stamp: int
+) -> str:
     """
     Generate a random str message in order to validate a transaction.
 
@@ -165,7 +165,7 @@ def _generate_ethereum_random_message(nonce: int, seller: Address, client: Addre
                 nonce.to_bytes(32, "big"),
                 seller.encode(),
                 client.encode(),
-                time_stamp.to_bytes(32, "big")
+                time_stamp.to_bytes(32, "big"),
             ]
         )
     )

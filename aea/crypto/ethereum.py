@@ -249,4 +249,4 @@ class EthereumApi(LedgerApi):
         :return: True if the random_message is equals to tx['input']
         """
         tx = self._api.eth.getTransaction(tx_digest)
-        return tx.get('input') == random_message
+        return tx.get("input") == random_message

@@ -20,26 +20,26 @@
 """This module contains the tests for the crypto/helpers module."""
 
 import logging
-import time
-from datetime import datetime
-
 import os
+import time
 from typing import Dict
 from unittest import mock
 
 from eth_account.datastructures import AttributeDict
+
 from hexbytes import HexBytes
 
 import pytest
 
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG, FETCHAI, FetchAICrypto
+from aea.crypto.helpers import _generate_ethereum_random_message
 from aea.crypto.ledger_apis import (
     LedgerApis,
     _try_to_instantiate_ethereum_ledger_api,
     _try_to_instantiate_fetchai_ledger_api,
 )
-from aea.crypto.helpers import _generate_ethereum_random_message
+
 
 from ..conftest import CUR_PATH
 
@@ -293,7 +293,7 @@ class TestLedgerApis:
             with pytest.raises(SystemExit):
                 _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1")
 
-    @mock.patch('time.time', mock.MagicMock(return_value=1579533928))
+    @mock.patch("time.time", mock.MagicMock(return_value=1579533928))
     def test_validate_ethereum_transaction(self):
         seller = EthereumCrypto()
         client = EthereumCrypto()
@@ -301,29 +301,45 @@ class TestLedgerApis:
             {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
             FETCHAI,
         )
-        random_message = _generate_ethereum_random_message(nonce=1,
-                                                           seller=seller.address,
-                                                           client=client.address,
-                                                           time_stamp=int(time.time()))
+        random_message = _generate_ethereum_random_message(
+            nonce=1,
+            seller=seller.address,
+            client=client.address,
+            time_stamp=int(time.time()),
+        )
 
         tx_digest = "0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4"
-        result = AttributeDict({'blockHash': HexBytes('0x0bfc237d2a17f719a3300a4822779391ec6e3a74832fe1b05b8c477902b0b59e'),
-                                'blockNumber': 7161932,
-                                'from': '0x801f845986209c3f8be54cE96744E8608032DEDc',
-                                'gas': 200000,
-                                'gasPrice': 50000000000,
-                                'hash': HexBytes('0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4'),
-                                'input': random_message,
-                                'nonce': 4,
-                                'r': HexBytes('0xb54ce8b9fa1d1be7be316c068af59a125d511e8dd51202b1a7e3002dee432b52'),
-                                's': HexBytes('0x4f44702b3812d3b4e4b76da0fd5b554b3ae76d1717db5b6b5faebd7b85ae0303'),
-                                'to': '0x5E6e0B35819E6e8775C2a2019AB8d684c21c45a2',
-                                'transactionIndex': 0,
-                                'v': 42,
-                                'value': 2})
+        result = AttributeDict(
+            {
+                "blockHash": HexBytes(
+                    "0x0bfc237d2a17f719a3300a4822779391ec6e3a74832fe1b05b8c477902b0b59e"
+                ),
+                "blockNumber": 7161932,
+                "from": "0x801f845986209c3f8be54cE96744E8608032DEDc",
+                "gas": 200000,
+                "gasPrice": 50000000000,
+                "hash": HexBytes(
+                    "0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4"
+                ),
+                "input": random_message,
+                "nonce": 4,
+                "r": HexBytes(
+                    "0xb54ce8b9fa1d1be7be316c068af59a125d511e8dd51202b1a7e3002dee432b52"
+                ),
+                "s": HexBytes(
+                    "0x4f44702b3812d3b4e4b76da0fd5b554b3ae76d1717db5b6b5faebd7b85ae0303"
+                ),
+                "to": "0x5E6e0B35819E6e8775C2a2019AB8d684c21c45a2",
+                "transactionIndex": 0,
+                "v": 42,
+                "value": 2,
+            }
+        )
         with mock.patch.object(
-                ledger_apis.apis.get(ETHEREUM).api.eth,
-                "getTransaction",
-                return_value=result,
+            ledger_apis.apis.get(ETHEREUM).api.eth,
+            "getTransaction",
+            return_value=result,
         ):
-            assert ledger_apis.apis.get(ETHEREUM).validate_transaction(tx_digest=tx_digest, random_message=random_message)
+            assert ledger_apis.apis.get(ETHEREUM).validate_transaction(
+                tx_digest=tx_digest, random_message=random_message
+            )
