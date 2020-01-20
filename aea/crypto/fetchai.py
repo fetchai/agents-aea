@@ -113,15 +113,15 @@ class FetchAICrypto(Crypto):
         signature = self.entity.sign(message)
         return signature
 
-    def recover_message(self, message: bytes, signature: bytes) -> Address:
+    def recover_message(self, message: bytes, signature: bytes) -> bool:
         """
         Recover the address from the hash.
 
-        :param message: the message we expect
+        :param message: the expected message
         :param signature: the transaction signature
         :return: the recovered address
         """
-        raise NotImplementedError  # praggma: no cover
+        return self.entity.verify(message=message, signature=signature)
 
     @classmethod
     def get_address_from_public_key(cls, public_key: str) -> Address:
