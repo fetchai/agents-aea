@@ -26,6 +26,8 @@ from collections import defaultdict
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
+from eth_account.messages import encode_defunct
+
 from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM
 from aea.helpers.preference_representations.base import (
@@ -429,16 +431,19 @@ class Transaction:
 
         :return: True if the transaction has been signed by both parties
         """
+        singable_message = encode_defunct(primitive=self.sender_hash)
         result = (
-            api.api.eth.account.recoverHash(
-                self.sender_hash, signature=self.sender_signature
+            api.api.eth.account.recover_message(
+                signable_message=singable_message, signature=self.sender_signature
             )
             == self.sender_addr
         )
+        counterparty_signable_message = encode_defunct(primitive=self.counterparty_hash)
         result = (
             result
-            and api.api.eth.account.recoverHash(
-                self.counterparty_hash, signature=self.counterparty_signature
+            and api.api.eth.account.recover_message(
+                signable_message=counterparty_signable_message,
+                signature=self.counterparty_signature,
             )
             == self.counterparty_addr
         )

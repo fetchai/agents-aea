@@ -103,26 +103,25 @@ class FetchAICrypto(Crypto):
         entity = Entity()
         return entity
 
-    def sign_transaction(self, tx_hash: bytes) -> bytes:
+    def sign_message(self, message: bytes) -> bytes:
         """
-        Sing a transaction hash.
+        Sign a message in bytes string form.
 
-        :param tx_hash: the transaction hash
+        :param message: the message we want to send
         :return: Signed message in bytes
         """
-        signature = self.entity.sign(tx_hash)
+        signature = self.entity.sign(message)
         return signature
 
-    # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
-    #     """
-    #     Recover the address from the hash.
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
 
-    #     :param tx_hash: the transaction hash
-    #     :param signature: the transaction signature
-    #     :return: the recovered address
-    #     """
-    #     address = 'STUB'
-    #     return address
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :return: the recovered address
+        """
+        raise NotImplementedError  # praggma: no cover
 
     @classmethod
     def get_address_from_public_key(cls, public_key: str) -> Address:

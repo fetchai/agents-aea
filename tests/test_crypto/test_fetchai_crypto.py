@@ -21,6 +21,8 @@
 
 import os
 
+import pytest
+
 from aea.crypto.fetchai import FetchAICrypto
 
 from ..conftest import ROOT_DIR
@@ -51,10 +53,10 @@ def test_get_address():
     ), "Get address must work"
 
 
-def test_sign_transaction():
+def test_sign_message():
     """Test the signing process."""
     fet_crypto = FetchAICrypto()
-    signature = fet_crypto.sign_transaction(tx_hash=b"HelloWorld")
+    signature = fet_crypto.sign_message(message=b"HelloWorld")
     assert len(signature) > 1, "The len(signature) must be more than 0"
 
 
@@ -63,3 +65,10 @@ def test_get_address_from_public_key():
     fet_crypto = FetchAICrypto()
     address = FetchAICrypto().get_address_from_public_key(fet_crypto.public_key)
     assert str(address) == str(fet_crypto.address), "The address must be the same."
+
+
+def test_recover_message():
+    """Test the recover message"""
+    fet_crypto = FetchAICrypto()
+    with pytest.raises(NotImplementedError):
+        fet_crypto.recover_message(message=b"hello", signature=b"signature")

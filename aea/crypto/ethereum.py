@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import BinaryIO, Optional
 
 from eth_account import Account
+from eth_account.messages import encode_defunct
 
 from eth_keys import keys
 
@@ -33,6 +34,7 @@ import web3
 from web3 import HTTPProvider, Web3
 
 from aea.crypto.base import AddressLike, Crypto, LedgerApi
+from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
@@ -102,26 +104,30 @@ class EthereumCrypto(Crypto):
         except IOError as e:  # pragma: no cover
             logger.exception(str(e))
 
-    def sign_transaction(self, tx_hash: bytes) -> bytes:
+    def sign_message(self, message: bytes) -> bytes:
         """
-        Sign a transaction hash.
+        Sign a message in bytes string form.
 
-        :param tx_hash: the transaction hash
+        :param message: the message we want to send
         :return: Signed message in bytes
         """
-        signature = self.entity.signHash(tx_hash)
+        signable_message = encode_defunct(primitive=message)
+        signature = self.entity.sign_message(signable_message=signable_message)
         return signature["signature"]
 
-    # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
-    #     """
-    #     Recover the address from the hash.
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
 
-    #     :param tx_hash: the transaction hash
-    #     :param signature: the transaction signature
-    #     :return: the recovered address
-    #     """
-    #     address = self.entity.recoverHash(tx_hash, signature=signature)
-    #     return address
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :return: the recovered address
+        """
+        signable_message = encode_defunct(primitive=message)
+        addr = Account.recover_message(
+            signable_message=signable_message, signature=signature
+        )
+        return addr
 
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""

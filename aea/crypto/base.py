@@ -23,6 +23,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, BinaryIO, Optional, Union
 
+from aea.mail.base import Address
+
 AddressLike = Union[str, bytes]
 
 
@@ -66,6 +68,25 @@ class Crypto(ABC):
 
         :param public_key: the public key
         :return: str
+        """
+
+    @abstractmethod
+    def sign_message(self, message: bytes) -> bytes:
+        """
+        Sign a message in bytes string form.
+
+        :param message: the message we want to send
+        :return: Signed message in bytes
+        """
+
+    @abstractmethod
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :return: the recovered address
         """
 
     @classmethod
