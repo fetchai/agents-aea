@@ -22,6 +22,7 @@
 import os
 from unittest import mock
 
+import pytest
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 import aea.crypto.default
@@ -89,3 +90,9 @@ def test_sign_data_failure():
     ), "The verification must be True"
     mocked_logger_exception.assert_called_with("")
     mocked_logger_exception.__exit__()
+
+def test_recover_message():
+    """Test the recover message"""
+    c = DefaultCrypto(private_key_pem_path=PRIVATE_KEY_PEM_PATH)
+    with pytest.raises(NotImplementedError):
+        c.recover_message(message=b"hello", signature=b"signature")

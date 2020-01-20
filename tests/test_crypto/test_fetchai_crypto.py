@@ -20,6 +20,7 @@
 """This module contains the tests of the ethereum module."""
 
 import os
+import pytest
 
 from aea.crypto.fetchai import FetchAICrypto
 
@@ -63,3 +64,11 @@ def test_get_address_from_public_key():
     fet_crypto = FetchAICrypto()
     address = FetchAICrypto().get_address_from_public_key(fet_crypto.public_key)
     assert str(address) == str(fet_crypto.address), "The address must be the same."
+
+
+def test_recover_message():
+    """Test the recover message"""
+    fet_crypto = FetchAICrypto()
+    with pytest.raises(NotImplementedError):
+        fet_crypto.recover_message(message=b"hello", signature=b"signature")
+
