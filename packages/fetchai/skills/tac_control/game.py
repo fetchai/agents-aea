@@ -346,22 +346,20 @@ class Transaction:
         return self._sender_addr if self.is_sender_buyer else self._counterparty_addr
 
     @property
-    def sender_hash(self) -> SignableMessage:
+    def sender_hash(self) -> bytes:
         """Get the sender hash."""
-        generate_hash = tx_hash_from_values(
+        return tx_hash_from_values(
             tx_sender_addr=self.sender_addr,
             tx_counterparty_addr=self.counterparty_addr,
             tx_quantities_by_good_id=self.quantities_by_good_id,
             tx_amount_by_currency_id=self.amount_by_currency_id,
             tx_nonce=self.nonce,
         )
-        singable_message = encode_defunct(primitive=generate_hash)
-        return singable_message
 
     @property
-    def counterparty_hash(self) -> SignableMessage:
+    def counterparty_hash(self) -> bytes:
         """Get the sender hash."""
-        generate_hash = tx_hash_from_values(
+        return tx_hash_from_values(
             tx_sender_addr=self.counterparty_addr,
             tx_counterparty_addr=self.sender_addr,
             tx_quantities_by_good_id={
@@ -374,8 +372,6 @@ class Transaction:
             },
             tx_nonce=self.nonce,
         )
-        singable_message = encode_defunct(primitive=generate_hash)
-        return singable_message
 
     @property
     def amount(self) -> int:
@@ -435,17 +431,18 @@ class Transaction:
 
         :return: True if the transaction has been signed by both parties
         """
-        # recoverHash is depricated in favor of Account.recover_message(message, signature=signature)
+        singable_message = encode_defunct(primitive=self.sender_hash)
         result = (
             api.api.eth.account.recover_message(
-                message=self.sender_hash, signature=self.sender_signature
+                signable_message=singable_message, signature=self.sender_signature
             )
             == self.sender_addr
         )
+        counterparty_signable_message = encode_defunct(primitive=self.counterparty_hash)
         result = (
             result
             and api.api.eth.account.recover_message(
-                message=self.counterparty_hash, signature=self.counterparty_signature
+                signable_message=counterparty_signable_message, signature=self.counterparty_signature
             )
             == self.counterparty_addr
         )

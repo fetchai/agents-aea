@@ -54,7 +54,7 @@ def test_get_address():
 def test_sign_message():
     """Test the signing process."""
     fet_crypto = FetchAICrypto()
-    signature = fet_crypto.sign_message(tx_hash=b"HelloWorld")
+    signature = fet_crypto.sign_message(message=b"HelloWorld")
     assert len(signature) > 1, "The len(signature) must be more than 0"
 
 
