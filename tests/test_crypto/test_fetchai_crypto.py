@@ -20,6 +20,7 @@
 """This module contains the tests of the ethereum module."""
 
 import os
+
 import pytest
 
 from aea.crypto.fetchai import FetchAICrypto
@@ -71,4 +72,3 @@ def test_recover_message():
     fet_crypto = FetchAICrypto()
     with pytest.raises(NotImplementedError):
         fet_crypto.recover_message(message=b"hello", signature=b"signature")
-
