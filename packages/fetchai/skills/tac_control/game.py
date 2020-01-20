@@ -26,7 +26,7 @@ from collections import defaultdict
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
-from eth_account.messages import SignableMessage, encode_defunct
+from eth_account.messages import encode_defunct
 
 from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import ETHEREUM
@@ -442,7 +442,8 @@ class Transaction:
         result = (
             result
             and api.api.eth.account.recover_message(
-                signable_message=counterparty_signable_message, signature=self.counterparty_signature
+                signable_message=counterparty_signable_message,
+                signature=self.counterparty_signature,
             )
             == self.counterparty_addr
         )
