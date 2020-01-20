@@ -22,12 +22,17 @@
 
 import logging
 import sys
+import time
+from datetime import datetime
 
 from eth_account import Account  # type: ignore
 
 from fetchai.ledger.crypto import Entity  # type: ignore
 
+from web3 import Web3
+
 from aea.crypto.default import DefaultCrypto
+from aea.mail.base import Address
 
 DEFAULT_PRIVATE_KEY_FILE = "default_private_key.pem"
 FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
@@ -143,3 +148,25 @@ def _create_ethereum_private_key() -> None:
     account = Account.create()
     with open(ETHEREUM_PRIVATE_KEY_FILE, "w+") as file:
         file.write(account.key.hex())
+
+
+def _generate_ethereum_random_message(nonce: int, seller: Address, client: Address, time_stamp: int) -> str:
+    """
+    Generate a random str message in order to validate a transaction.
+
+    :param nonce: A integer to use for the hash.
+    :param seller: the address of the seller.
+    :param client: the address of the client.
+    :return: return the hash in hex.
+    """
+    aggregate_hash = Web3.keccak(
+        b"".join(
+            [
+                nonce.to_bytes(32, "big"),
+                seller.encode(),
+                client.encode(),
+                time_stamp.to_bytes(32, "big")
+            ]
+        )
+    )
+    return aggregate_hash.hex()

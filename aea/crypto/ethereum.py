@@ -238,3 +238,15 @@ class EthereumApi(LedgerApi):
         if tx_status is not None:
             is_successful = True
         return is_successful
+
+    def validate_transaction(self, tx_digest: str, random_message: str) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param tx_digest: the transaction digest.
+        :param random_message: the generated message from the seller.
+
+        :return: True if the random_message is equals to tx['input']
+        """
+        tx = self._api.eth.getTransaction(tx_digest)
+        return tx.get('input') == random_message
