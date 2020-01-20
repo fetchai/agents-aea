@@ -111,8 +111,8 @@ class EthereumCrypto(Crypto):
         :param message: the transaction hash
         :return: Signed message in bytes
         """
-        tx = encode_defunct(primitive=message)
-        signature = self.entity.sign_message(tx)
+        signable_message = encode_defunct(primitive=message)
+        signature = self.entity.sign_message(signable_message=signable_message)
         return signature["signature"]
 
     def recover_message(self, message: bytes, signature: bytes) -> Address:
@@ -124,7 +124,9 @@ class EthereumCrypto(Crypto):
         :return: the recovered address
         """
         signable_message = encode_defunct(primitive=message)
-        addr = Account.recover_message(signable_message=signable_message, signature=signature)
+        addr = Account.recover_message(
+            signable_message=signable_message, signature=signature
+        )
         return addr
 
     def _generate_private_key(self) -> Account:
