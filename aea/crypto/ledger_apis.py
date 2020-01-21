@@ -77,7 +77,7 @@ class LedgerApis(object):
         self._apis = apis
         self._configs = configs
         self._default_ledger_id = default_ledger_id
-        self.random_message = ''
+        self.random_message = ""
 
     @property
     def configs(self) -> Dict[str, List[Union[str, int]]]:

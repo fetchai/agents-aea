@@ -710,7 +710,7 @@ class DecisionMaker:
                 tx_message.tx_counterparty_addr,
                 tx_message.counterparty_amount,
                 tx_message.fees,
-                info=tx_message.info
+                info=tx_message.info,
             )
         return tx_digest
 
