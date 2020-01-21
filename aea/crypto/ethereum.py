@@ -210,7 +210,11 @@ class EthereumApi(LedgerApi):
         )
         # TODO : handle misconfiguration
         logger.info(kwargs.keys())
-        info = cast(Dict[str, Any], kwargs.get("info")) if "info" in kwargs.keys() else {'random_message': None}
+        info = (
+            cast(Dict[str, Any], kwargs.get("info"))
+            if "info" in kwargs.keys()
+            else {"random_message": None}
+        )
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,
