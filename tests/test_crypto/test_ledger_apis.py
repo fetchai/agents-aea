@@ -301,7 +301,7 @@ class TestLedgerApis:
             {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
             FETCHAI,
         )
-        random_message = _generate_random_message(
+        ledger_apis.random_message = _generate_random_message(
             nonce=1,
             seller=seller.address,
             client=client.address,
@@ -321,7 +321,7 @@ class TestLedgerApis:
                 "hash": HexBytes(
                     "0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4"
                 ),
-                "input": random_message,
+                "input": ledger_apis.random_message,
                 "nonce": 4,
                 "r": HexBytes(
                     "0xb54ce8b9fa1d1be7be316c068af59a125d511e8dd51202b1a7e3002dee432b52"
@@ -341,5 +341,5 @@ class TestLedgerApis:
             return_value=result,
         ):
             assert ledger_apis.validate_transaction(
-                identifier=ETHEREUM, tx_digest=tx_digest, random_message=random_message
+                identifier=ETHEREUM, tx_digest=tx_digest
             )

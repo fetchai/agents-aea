@@ -20,9 +20,11 @@
 """This package contains a scaffold of a handler."""
 
 import logging
+import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
+from aea.crypto.helpers import _generate_random_message
 from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -234,7 +236,15 @@ class FIPAHandler(Handler):
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=new_target,
             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            info={"address": self.context.agent_addresses[identifier]},
+            info={
+                "address": self.context.agent_addresses[identifier],
+                "random_message": _generate_random_message(
+                    nonce=new_message_id,
+                    seller=self.context.agent_address,
+                    client=msg.counterparty,
+                    time_stamp=int(time.time()),
+                ),
+            },
         )
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(
@@ -274,8 +284,11 @@ class FIPAHandler(Handler):
             proposal = cast(Description, dialogue.proposal)
             ledger_id = cast(str, proposal.values.get("ledger_id"))
             is_settled = self.context.ledger_apis.is_tx_settled(ledger_id, tx_digest)
+            is_valid = self.context.ledger_apis.validate_transaction(
+                ledger_id, tx_digest
+            )
             # TODO: check the tx_digest references a transaction with the correct terms
-            if is_settled:
+            if is_settled and is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
                 )

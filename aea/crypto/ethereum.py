@@ -23,7 +23,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import BinaryIO, Optional
+from typing import BinaryIO, Optional, cast, Dict, Any
 
 from eth_account import Account
 from eth_account.messages import encode_defunct
@@ -192,7 +192,7 @@ class EthereumApi(LedgerApi):
         destination_address: AddressLike,
         amount: int,
         tx_fee: int,
-        chain_id: int = 1,
+        chain_id: int = 3,
         **kwargs
     ) -> Optional[str]:
         """
@@ -209,16 +209,21 @@ class EthereumApi(LedgerApi):
             self._api.toChecksumAddress(crypto.address)
         )
         # TODO : handle misconfiguration
+        logger.info(kwargs.keys())
+        info = cast(Dict[str,Any],kwargs.get('info'))
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,
             "to": destination_address,
             "value": amount,
-            "gas": tx_fee,
+            "gas": tx_fee + 100000,
             "gasPrice": self._api.toWei(GAS_PRICE, GAS_ID),
+            "data": info.get('random_message')
         }
+        logger.info(transaction)
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
+
         logger.info("TX Hash: {}".format(str(hex_value.hex())))
         while True:
             try:

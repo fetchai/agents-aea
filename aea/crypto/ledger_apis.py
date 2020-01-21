@@ -77,6 +77,7 @@ class LedgerApis(object):
         self._apis = apis
         self._configs = configs
         self._default_ledger_id = default_ledger_id
+        self.random_message = ''
 
     @property
     def configs(self) -> Dict[str, List[Union[str, int]]]:
@@ -162,6 +163,7 @@ class LedgerApis(object):
             tx_digest = api.send_transaction(
                 crypto_object, destination_address, amount, tx_fee, **kwargs
             )
+            logger.info(tx_digest)
             logger.info("transaction validated. TX digest: {}".format(tx_digest))
             self._last_tx_statuses[crypto_object.identifier] = OK
         except Exception:
@@ -191,13 +193,12 @@ class LedgerApis(object):
             self._last_tx_statuses[identifier] = ERROR
         return is_successful
 
-    def validate_transaction(self, identifier: str, tx_digest: str, random_message: str) -> bool:
+    def validate_transaction(self, identifier: str, tx_digest: str) -> bool:
         """
         Check whether a transaction is valid or not.
 
         :param identifier:
         :param tx_digest: the transaction digest.
-        :param random_message: the generated message from the seller.
 
         :return: True if the random_message is equals to tx['input']
         """
@@ -205,9 +206,10 @@ class LedgerApis(object):
         api = self.apis[identifier].api
         if identifier == ETHEREUM:
             tx = api.eth.getTransaction(tx_digest)
-            return tx.get("input") == random_message
+            return tx.get("input") == self.random_message
         else:
-            return False
+            logger.info("Cannot verify the transaction. I assume that it is.")
+            return True
 
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
