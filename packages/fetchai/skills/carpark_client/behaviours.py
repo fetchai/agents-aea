@@ -22,6 +22,8 @@
 import logging
 from typing import cast
 
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
@@ -41,21 +43,40 @@ class MySearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
-        balance = self.context.ledger_apis.token_balance(
-            "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
-        )
-        if balance > 0:
-            logger.info(
-                "[{}]: starting balance on fetchai ledger={}.".format(
-                    self.context.agent_name, balance
-                )
+        if self.context.ledger_apis.has_fetchai:
+            fet_balance = self.context.ledger_apis.token_balance(
+                FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
-        else:
-            logger.warning(
-                "[{}]: you have no starting balance on fetchai ledger!".format(
-                    self.context.agent_name
+            if fet_balance > 0:
+                logger.info(
+                    "[{}]: starting balance on fetchai ledger={}.".format(
+                        self.context.agent_name, fet_balance
+                    )
                 )
+            else:
+                logger.warning(
+                    "[{}]: you have no starting balance on fetchai ledger!".format(
+                        self.context.agent_name
+                    )
+                )
+                # TODO: deregister skill from filter
+
+        if self.context.ledger_apis.has_ethereum:
+            eth_balance = self.context.ledger_apis.token_balance(
+                ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
             )
+            if eth_balance > 0:
+                logger.info(
+                    "[{}]: starting balance on ethereum ledger={}.".format(
+                        self.context.agent_name, eth_balance
+                    )
+                )
+            else:
+                logger.warning(
+                    "[{}]: you have no starting balance on ethereum ledger!".format(
+                        self.context.agent_name
+                    )
+                )
             # TODO: deregister skill from filter
 
     def act(self) -> None:
@@ -85,11 +106,22 @@ class MySearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        balance = self.context.ledger_apis.token_balance(
-            "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
-        )
-        logger.info(
-            "[{}]: ending balance on fetchai ledger={}.".format(
-                self.context.agent_name, balance
+        if self.context.ledger_apis.has_fetchai:
+            balance = self.context.ledger_apis.token_balance(
+                FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
-        )
+            logger.info(
+                "[{}]: ending balance on fetchai ledger={}.".format(
+                    self.context.agent_name, balance
+                )
+            )
+
+        if self.context.ledger_apis.has_ethereum:
+            balance = self.context.ledger_apis.token_balance(
+                ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
+            )
+            logger.info(
+                "[{}]: ending balance on ethereum ledger={}.".format(
+                    self.context.agent_name, balance
+                )
+            )

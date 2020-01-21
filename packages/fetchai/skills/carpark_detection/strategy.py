@@ -37,8 +37,8 @@ from packages.fetchai.skills.carpark_detection.detection_database import (
 DEFAULT_PRICE = 2000
 DEFAULT_DB_IS_REL_TO_CWD = False
 DEFAULT_DB_REL_DIR = "temp_files_placeholder"
-DEFAULT_CURRENCY_ID = "FET"
-DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_CURRENCY_ID = "ETH"
+DEFAULT_LEDGER_ID = "ethereum"
 
 logger = logging.getLogger("aea.carpark_detection_skill")
 
@@ -71,10 +71,8 @@ class Strategy(SharedClass):
         else:
             db_dir = os.path.join(os.path.dirname(__file__), DEFAULT_DB_REL_DIR)
 
-        self.data_price_fet = (
-            kwargs.pop("data_price_fet")
-            if "data_price_fet" in kwargs.keys()
-            else DEFAULT_PRICE
+        self.data_price = (
+            kwargs.pop("data_price") if "data_price" in kwargs.keys() else DEFAULT_PRICE
         )
         self.currency_id = (
             kwargs.pop("currency_id")
@@ -91,10 +89,10 @@ class Strategy(SharedClass):
         self.db = DetectionDatabase(db_dir, False)
 
         balance = self.context.ledger_apis.token_balance(
-            "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
+            self.ledger_id, cast(str, self.context.agent_addresses.get(self.ledger_id))
         )
         self.db.set_system_status(
-            "ledger-status", self.context.ledger_apis.last_tx_statuses["fetchai"]
+            "ledger-status", self.context.ledger_apis.last_tx_statuses[self.ledger_id]
         )
 
         if not os.path.isdir(db_dir):
@@ -179,7 +177,7 @@ class Strategy(SharedClass):
             {
                 "lat": data[0]["lat"],
                 "lon": data[0]["lon"],
-                "price": self.data_price_fet,
+                "price": self.data_price,
                 "currency_id": self.currency_id,
                 "ledger_id": self.ledger_id,
                 "last_detection_time": last_detection_time,
@@ -187,7 +185,7 @@ class Strategy(SharedClass):
             }
         )
 
-        data[0]["price_fet"] = self.data_price_fet
+        data[0]["price_fet"] = self.data_price
         data[0]["message_type"] = "car_park_data"
 
         return proposal, data[0]

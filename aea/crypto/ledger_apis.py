@@ -122,6 +122,7 @@ class LedgerApis(object):
         :param address: the address to check for
         :return: the token balance
         """
+        logger.info(identifier)
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         api = self.apis[identifier]
         try:

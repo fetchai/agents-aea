@@ -31,6 +31,9 @@ DEFAULT_SEARCH_INTERVAL = 5.0
 DEFAULT_MAX_PRICE = 4000
 DEFAULT_MAX_DETECTION_AGE = 60 * 60  # 1 hour
 DEFAULT_NO_FINDSEARCH_INTERVAL = 5
+DEFAULT_CURRENCY_PBK = "FET"
+DEFAULT_LEDGER_ID = "fetchai"
+DEFAULT_IS_LEDGER_TX = True
 
 
 class Strategy(SharedClass):
@@ -65,6 +68,11 @@ class Strategy(SharedClass):
             if "max_detection_age" in kwargs.keys()
             else DEFAULT_MAX_DETECTION_AGE
         )
+
+        self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
+        self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+        self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
+
         super().__init__(**kwargs)
 
         self.is_searching = True
@@ -102,4 +110,20 @@ class Strategy(SharedClass):
             > int(time.time()) - self._max_detection_age
         )
 
+        return result
+
+    def is_affordable_proposal(self, proposal: Description) -> bool:
+        """
+        Check whether it is an affordable proposal.
+
+        :return: whether it is affordable
+        """
+        if self.is_ledger_tx:
+            payable = proposal.values["price"] + self._max_price
+            ledger_id = proposal.values["ledger_id"]
+            address = cast(str, self.context.agent_addresses.get(ledger_id))
+            balance = self.context.ledger_apis.token_balance(ledger_id, address)
+            result = balance >= payable
+        else:
+            result = True
         return result

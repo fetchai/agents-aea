@@ -231,6 +231,12 @@ class FIPAHandler(Handler):
         )
         proposal = cast(Description, dialogue.proposal)
         identifier = cast(str, proposal.values.get("ledger_id"))
+        self.context.ledger_apis.random_message = _generate_random_message(
+            nonce=new_message_id,
+            seller=self.context.agent_address,
+            client=msg.counterparty,
+            time_stamp=int(time.time()),
+        )
         match_accept_msg = FIPAMessage(
             message_id=new_message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
@@ -238,12 +244,7 @@ class FIPAHandler(Handler):
             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
             info={
                 "address": self.context.agent_addresses[identifier],
-                "random_message": _generate_random_message(
-                    nonce=new_message_id,
-                    seller=self.context.agent_address,
-                    client=msg.counterparty,
-                    time_stamp=int(time.time()),
-                ),
+                "random_message": self.context.ledger_apis.random_message,
             },
         )
         dialogue.outgoing_extend(match_accept_msg)

@@ -29,6 +29,9 @@ shared_classes:
       no_find_search_interval: 5
       max_price: 400000000
       max_detection_age: 36000000
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: False
   dialogues:
     class_name: Dialogues
     args: {}
