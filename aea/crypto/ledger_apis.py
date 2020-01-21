@@ -191,6 +191,24 @@ class LedgerApis(object):
             self._last_tx_statuses[identifier] = ERROR
         return is_successful
 
+    def validate_transaction(self, identifier: str, tx_digest: str, random_message: str) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param identifier:
+        :param tx_digest: the transaction digest.
+        :param random_message: the generated message from the seller.
+
+        :return: True if the random_message is equals to tx['input']
+        """
+        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
+        api = self.apis[identifier].api
+        if identifier == ETHEREUM:
+            tx = api.eth.getTransaction(tx_digest)
+            return tx.get("input") == random_message
+        else:
+            return False
+
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
     """

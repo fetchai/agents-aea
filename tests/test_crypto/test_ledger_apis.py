@@ -340,6 +340,6 @@ class TestLedgerApis:
             "getTransaction",
             return_value=result,
         ):
-            assert ledger_apis.apis.get(ETHEREUM).validate_transaction(
-                tx_digest=tx_digest, random_message=random_message
+            assert ledger_apis.validate_transaction(
+                identifier=ETHEREUM, tx_digest=tx_digest, random_message=random_message
             )
