@@ -98,10 +98,12 @@ class TrainHandler(Handler):
 
         if strategy.is_ledger_tx:
             # propose the transaction to the decision maker for settlement on the ledger
-            self.context.ledger_apis.random_message = _generate_random_message(nonce=1,
-                                                                               seller=self.context.agent_address,
-                                                                               client=ml_trade_msg.counterparty,
-                                                                               time_stamp=int(time.time()))
+            self.context.ledger_apis.random_message = _generate_random_message(
+                nonce=1,
+                seller=self.context.agent_address,
+                client=ml_trade_msg.counterparty,
+                time_stamp=int(time.time()),
+            )
             tx_msg = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
                 skill_callback_ids=["ml_train"],
@@ -115,8 +117,11 @@ class TrainHandler(Handler):
                 tx_counterparty_fee=terms.values["seller_tx_fee"],
                 tx_quantities_by_good_id={},
                 ledger_id=terms.values["ledger_id"],
-                info={"terms": terms, "counterparty_addr": ml_trade_msg.counterparty,
-                      "random_message": self.context.ledger_apis.random_message},
+                info={
+                    "terms": terms,
+                    "counterparty_addr": ml_trade_msg.counterparty,
+                    "random_message": self.context.ledger_apis.random_message,
+                },
             )  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info(
