@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Lock, Thread
-from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, cast, Union, Sequence
+from typing import Dict, List, Optional, Sequence, TYPE_CHECKING, Tuple, Union, cast
 from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId
@@ -648,13 +648,13 @@ class Multiplexer:
             envelope_context.connection_id if envelope_context is not None else None
         )
 
-        if connection_id is None or connection_id not in self._id_to_connection:
+        if connection_id is not None and connection_id not in self._id_to_connection:
             raise AEAConnectionError(
                 "No connection registered with id: {}.".format(connection_id)
             )
 
-        connection = self._id_to_connection.get(connection_id, None)
-        if connection is None:
+        connection = self._id_to_connection.get(connection_id, None)  # type: ignore
+        if connection_id is None:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
 

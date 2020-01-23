@@ -28,14 +28,14 @@ import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
-from typing import Dict, List, Optional, Tuple, Union, cast, TypeVar, Generic
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
 from aea.configurations.base import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     ProtocolConfig,
     ProtocolId,
-    SkillId,
     PublicId,
+    SkillId,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.transaction import TransactionMessage
