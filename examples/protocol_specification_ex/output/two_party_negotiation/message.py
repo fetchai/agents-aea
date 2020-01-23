@@ -1,7 +1,7 @@
 """This module contains two_party_negotiation's message definition."""
 
-from typing import Set, Tuple, cast
 from enum import Enum
+from typing import Set, Tuple, cast
 
 from aea.protocols.base import Message
 

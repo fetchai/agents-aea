@@ -21,7 +21,7 @@
 import os
 from os import path
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List
 
 from aea.configurations.base import ProtocolSpecification
 
@@ -183,8 +183,8 @@ class ProtocolGenerator:
         )
 
         # Imports
-        cls_str += "from typing import Set, Tuple, cast\n"
-        cls_str += "from enum import Enum\n\n"
+        cls_str += "from enum import Enum\n"
+        cls_str += "from typing import Set, Tuple, cast\n\n"
         cls_str += MESSAGE_IMPORT
         cls_str += "\n\nDEFAULT_BODY_SIZE = 4\n\n\n"
 
@@ -267,7 +267,7 @@ class ProtocolGenerator:
 
         all_contents = self._extract_all_contents()
         covered = []  # type: List[str]
-        for performative, contents in all_contents.items():
+        for contents in all_contents.values():
             for content_name, content_type in contents.items():
                 if content_name in covered:
                     continue
