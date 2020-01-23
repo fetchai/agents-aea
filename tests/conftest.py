@@ -28,7 +28,7 @@ import sys
 import time
 from asyncio import CancelledError
 from threading import Timer
-from typing import Optional, Set
+from typing import Optional
 
 import docker as docker
 from docker.models.containers import Container

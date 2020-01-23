@@ -31,6 +31,7 @@ from aea.configurations.base import ConnectionConfig, ProtocolId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
+
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 

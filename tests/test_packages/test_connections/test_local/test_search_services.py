@@ -31,6 +31,7 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.mail.base import AEAConnectionError, Envelope, InBox, Multiplexer
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer

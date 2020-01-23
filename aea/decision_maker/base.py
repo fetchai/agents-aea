@@ -37,7 +37,6 @@ from aea.helpers.preference_representations.base import (
     logarithmic_utility,
 )
 from aea.mail.base import OutBox
-from aea.protocols.base import Message
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
 GoodHoldings = Dict[str, int]  # a map from identifier to quantity

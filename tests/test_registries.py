@@ -26,6 +26,7 @@ import unittest.mock
 from pathlib import Path
 
 import pytest
+
 import yaml
 
 import aea

@@ -23,6 +23,7 @@ from queue import Queue
 from unittest import mock
 
 import pytest
+
 from web3.auto import Web3
 
 import aea
@@ -39,6 +40,7 @@ from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
+
 from ..conftest import CUR_PATH, DummyConnection
 
 MAX_REACTIONS = 10

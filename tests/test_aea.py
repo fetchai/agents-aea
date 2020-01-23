@@ -48,7 +48,7 @@ from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from .conftest import CUR_PATH
 
 
-def test_initialise_AEA():
+def test_initialise_aea():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
     address_1 = "address"
