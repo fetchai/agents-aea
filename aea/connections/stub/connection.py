@@ -23,7 +23,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Set, Union
+from typing import Optional, Union
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
@@ -103,15 +103,12 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    restricted_to_protocols = set()  # type: Set[str]
-
     def __init__(
         self,
         input_file_path: Union[str, Path],
         output_file_path: Union[str, Path],
-        connection_id: str = "stub",
-        restricted_to_protocols: Optional[Set[str]] = None,
-        excluded_protocols: Optional[Set[str]] = None,
+        *args,
+        **kwargs
     ):
         """
         Initialize a stub connection.
@@ -122,9 +119,7 @@ class StubConnection(Connection):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        super().__init__(
-            connection_id=connection_id, restricted_to_protocols=restricted_to_protocols
-        )
+        super().__init__(*args, **kwargs)
 
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -253,7 +248,7 @@ class StubConnection(Connection):
         return StubConnection(
             input_file,
             output_file,
-            connection_id=connection_configuration.name,
+            connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
         )

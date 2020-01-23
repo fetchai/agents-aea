@@ -25,6 +25,7 @@ import unittest.mock
 import pytest
 
 import aea
+from aea.configurations.base import PublicId
 from aea.mail.base import Envelope, InBox, Multiplexer, OutBox, URI
 from aea.protocols.base import Message
 from aea.protocols.base import ProtobufSerializer
@@ -60,14 +61,14 @@ def test_envelope_initialisation():
     assert Envelope(
         to="Agent1",
         sender="Agent0",
-        protocol_id="my_own_protocol",
+        protocol_id="author_example/my_own_protocol:0.1.0",
         message=message_bytes,
     ), "Cannot generate a new envelope"
 
     envelope = Envelope(
         to="Agent1",
         sender="Agent0",
-        protocol_id="my_own_protocol",
+        protocol_id="author_example/my_own_protocol:0.1.0",
         message=message_bytes,
     )
 
@@ -86,7 +87,9 @@ def test_envelope_initialisation():
 
 def test_inbox_empty():
     """Tests if the inbox is empty."""
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+    )
     _inbox = InBox(multiplexer)
     assert _inbox.empty(), "Inbox is not empty"
 
@@ -95,11 +98,13 @@ def test_inbox_nowait():
     """Tests the inbox without waiting."""
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+    )
     envelope = Envelope(
         to="Agent1",
         sender="Agent0",
-        protocol_id="my_own_protocol",
+        protocol_id="author_example/my_own_protocol:0.1.0",
         message=message_bytes,
     )
     multiplexer.in_queue.put(envelope)
@@ -113,11 +118,13 @@ def test_inbox_get():
     """Tests for a envelope on the in queue."""
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+    )
     envelope = Envelope(
         to="Agent1",
         sender="Agent0",
-        protocol_id="my_own_protocol",
+        protocol_id="author_example/my_own_protocol:0.1.0",
         message=message_bytes,
     )
     multiplexer.in_queue.put(envelope)
@@ -130,7 +137,9 @@ def test_inbox_get():
 
 def test_inbox_get_raises_exception_when_empty():
     """Test that getting an envelope from an empty inbox raises an exception."""
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+    )
     inbox = InBox(multiplexer)
 
     with pytest.raises(aea.mail.base.Empty):
@@ -141,7 +150,9 @@ def test_inbox_get_raises_exception_when_empty():
 def test_inbox_get_nowait_returns_none():
     """Test that getting an envelope from an empty inbox returns None."""
     # TODO get_nowait in this case should raise an exception, like it's done in queue.Queue
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+    )
     inbox = InBox(multiplexer)
     assert inbox.get_nowait() is None
 
@@ -150,7 +161,9 @@ def test_outbox_put():
     """Tests that an envelope is putted into the queue."""
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     message_bytes = DefaultSerializer().encode(msg)
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+    )
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
@@ -170,7 +183,9 @@ def test_outbox_put_message():
     """Tests that an envelope is created from the message is in the queue."""
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     message_bytes = DefaultSerializer().encode(msg)
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+    )
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
@@ -182,7 +197,9 @@ def test_outbox_put_message():
 
 def test_outbox_empty():
     """Test thet the outbox queue is empty."""
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+    )
     multiplexer.connect()
     outbox = OutBox(multiplexer)
     assert outbox.empty(), "The outbox is not empty"
@@ -193,7 +210,13 @@ def test_multiplexer():
     """Tests if the multiplexer is connected."""
     with LocalNode() as node:
         address_1 = "address_1"
-        multiplexer = Multiplexer([OEFLocalConnection(address_1, node)])
+        multiplexer = Multiplexer(
+            [
+                OEFLocalConnection(
+                    address_1, node, connection_id=PublicId("fetchai", "local", "0.1.0")
+                )
+            ]
+        )
         multiplexer.connect()
         assert (
             multiplexer.is_connected

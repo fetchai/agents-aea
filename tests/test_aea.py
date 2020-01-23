@@ -52,7 +52,11 @@ def test_initialise_AEA():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
     address_1 = "address"
-    connections1 = [OEFLocalConnection(address_1, node, PublicId("fetchai", "local", "0.1.0"))]
+    connections1 = [
+        OEFLocalConnection(
+            address_1, node, connection_id=PublicId("fetchai", "local", "0.1.0")
+        )
+    ]
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({"default": private_key_pem_path})
     ledger_apis = LedgerApis({}, "default")
@@ -91,7 +95,11 @@ def test_act():
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
         address = wallet.addresses["default"]
-        connections = [OEFLocalConnection(address, node)]
+        connections = [
+            OEFLocalConnection(
+                address, node, connection_id=PublicId("fetchai", "local", "0.1.0")
+            )
+        ]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         agent = AEA(
@@ -102,8 +110,10 @@ def test_act():
             t.start()
             time.sleep(1.0)
 
-            behaviour = agent.resources.behaviour_registry.fetch(PublicId.from_string("dummy_author/dummy:0.1.0"))
-            assert behaviour[0].nb_act_called > 0, "Act() wasn't called"
+            behaviour = agent.resources.behaviour_registry.fetch(
+                (PublicId.from_string("dummy_author/dummy:0.1.0"), "dummy")
+            )
+            assert behaviour.nb_act_called > 0, "Act() wasn't called"
         finally:
             agent.stop()
             t.join()
@@ -117,7 +127,9 @@ def test_react():
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
         address = wallet.addresses["default"]
-        connection = OEFLocalConnection(address, node, PublicId.from_string("fetchai/local:0.1.0"))
+        connection = OEFLocalConnection(
+            address, node, PublicId.from_string("fetchai/local:0.1.0")
+        )
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
@@ -126,7 +138,10 @@ def test_react():
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
-            to=address, sender=address, protocol_id="fetchai/default:0.1.0", message=message_bytes
+            to=address,
+            sender=address,
+            protocol_id="fetchai/default:0.1.0",
+            message=message_bytes,
         )
 
         agent = AEA(
@@ -138,11 +153,11 @@ def test_react():
             time.sleep(1.0)
             agent.outbox.put(envelope)
             time.sleep(2.0)
-            default_protocol_public_id = PublicId.from_string('fetchai/default:0.1.0')
+            default_protocol_public_id = PublicId.from_string("fetchai/default:0.1.0")
             dummy_skill_public_id = PublicId.from_string("dummy_author/dummy:0.1.0")
             handler = agent.resources.handler_registry.fetch_by_protocol_and_skill(
-                default_protocol_public_id,
-                dummy_skill_public_id)
+                default_protocol_public_id, dummy_skill_public_id
+            )
             assert handler is not None, "Handler is not set."
             assert (
                 msg in handler.handled_messages
@@ -163,7 +178,9 @@ async def test_handle():
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
         address = wallet.addresses["default"]
-        connection = OEFLocalConnection(address, node)
+        connection = OEFLocalConnection(
+            address, node, connection_id=PublicId("fetchai", "local", "0.1.0")
+        )
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
@@ -174,7 +191,7 @@ async def test_handle():
         envelope = Envelope(
             to=address,
             sender=address,
-            protocol_id="unknown_author/unknown_protocol:0.1.0",
+            protocol_id=PublicId.from_string("unknown_author/unknown_protocol:0.1.0"),
             message=message_bytes,
         )
 
@@ -185,7 +202,9 @@ async def test_handle():
         try:
             t.start()
             time.sleep(2.0)
-            dummy_skill = agent.resources.get_skill(PublicId.from_string("fetchai/dummy:0.1.0"))
+            dummy_skill = agent.resources.get_skill(
+                PublicId.from_string("dummy_author/dummy:0.1.0")
+            )
             dummy_handler = dummy_skill.handlers["dummy"]
 
             expected_envelope = envelope
@@ -196,7 +215,10 @@ async def test_handle():
             #   DECODING ERROR
             msg = "hello".encode("utf-8")
             envelope = Envelope(
-                to=address, sender=address, protocol_id="default", message=msg
+                to=address,
+                sender=address,
+                protocol_id=DefaultMessage.protocol_id,
+                message=msg,
             )
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
@@ -213,7 +235,10 @@ async def test_handle():
                 )
             )
             envelope = Envelope(
-                to=address, sender=address, protocol_id="fipa", message=msg
+                to=address,
+                sender=address,
+                protocol_id=FIPAMessage.protocol_id,
+                message=msg,
             )
             expected_envelope = envelope
             agent.outbox.put(expected_envelope)
@@ -237,7 +262,11 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({DEFAULT: cls.private_key_pem_path})
         cls.ledger_apis = LedgerApis({}, DEFAULT)
-        cls.connection = OEFLocalConnection(cls.agent_name, cls.node)
+        cls.connection = OEFLocalConnection(
+            cls.agent_name,
+            cls.node,
+            connection_id=PublicId("fetchai", "local", "0.1.0"),
+        )
         cls.connections = [cls.connection]
 
         cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
@@ -257,7 +286,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         envelope = Envelope(
             to=cls.agent_name,
             sender=cls.agent_name,
-            protocol_id="default",
+            protocol_id="fetchai/default:0.1.0",
             message=DefaultSerializer().encode(cls.expected_message),
         )
 
@@ -270,33 +299,28 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
 
     def test_initialize_aea_programmatically(self):
         """Test that we can initialize an AEA programmatically."""
-        dummy_behaviour = next(
-            filter(
-                lambda x: x.__class__.__name__ == "DummyBehaviour",
-                self.aea.resources.behaviour_registry.fetch("dummy"),
-            ),
-            None,
+        dummy_skill_id = PublicId("dummy_author", "dummy", "0.1.0")
+        dummy_behaviour_name = "dummy"
+        dummy_behaviour = self.aea.resources.behaviour_registry.fetch(
+            (dummy_skill_id, dummy_behaviour_name)
         )
         assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
 
-        dummy_task = next(
-            filter(
-                lambda x: x.__class__.__name__ == "DummyTask",
-                self.aea.resources.task_registry.fetch("dummy"),
-            ),
-            None,
+        dummy_task_name = "dummy"
+        dummy_task = self.aea.resources.task_registry.fetch(
+            (dummy_skill_id, dummy_task_name)
         )
         assert dummy_task is not None
         assert dummy_task.nb_execute_called > 0
 
-        dummy_handler = next(
-            filter(
-                lambda x: x.__class__.__name__ == "DummyHandler",
-                self.aea.resources.handler_registry.fetch("default"),
-            ),
-            None,
+        dummy_handler = self.aea.resources.handler_registry.fetch_by_protocol_and_skill(
+            PublicId("fetchai", "default", "0.1.0"), dummy_skill_id
         )
+        dummy_handler_alt = self.aea.resources.handler_registry.fetch(
+            (dummy_skill_id, "dummy")
+        )
+        assert dummy_handler == dummy_handler_alt
         assert dummy_handler is not None
         assert len(dummy_handler.handled_messages) == 1
         assert dummy_handler.handled_messages[0] == self.expected_message
@@ -321,7 +345,9 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({"default": cls.private_key_pem_path})
         cls.ledger_apis = LedgerApis({}, "default")
-        cls.connection = OEFLocalConnection(cls.agent_name, cls.node, PublicId("fetchai", "local", "0.1.0"))
+        cls.connection = OEFLocalConnection(
+            cls.agent_name, cls.node, PublicId("fetchai", "local", "0.1.0")
+        )
         cls.connections = [cls.connection]
 
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
@@ -334,14 +360,16 @@ class TestInitializeAEAProgrammaticallyBuildResources:
             resources=cls.resources,
         )
 
+        default_protocol_id = DefaultMessage.protocol_id
+
         cls.default_protocol_configuration = ProtocolConfig.from_json(
             yaml.safe_load(open(Path(AEA_DIR, "protocols", "default", "protocol.yaml")))
         )
         cls.default_protocol = Protocol(
-            "default", DefaultSerializer(), cls.default_protocol_configuration
+            default_protocol_id, DefaultSerializer(), cls.default_protocol_configuration
         )
         cls.resources.protocol_registry.register(
-            ("default", None), cls.default_protocol
+            default_protocol_id, cls.default_protocol
         )
 
         cls.error_skill = Skill.from_dir(
@@ -366,7 +394,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
             Envelope(
                 to=cls.agent_name,
                 sender=cls.agent_name,
-                protocol_id=PublicId.from_string("fetchai/default:0.1.0"),
+                protocol_id=default_protocol_id,
                 message=DefaultSerializer().encode(cls.expected_message),
             )
         )
@@ -375,33 +403,29 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         """Test that we can initialize an AEA programmatically."""
         time.sleep(0.5)
 
-        dummy_behaviour = next(
-            filter(
-                lambda x: x.__class__.__name__ == "DummyBehaviour",
-                self.aea.resources.behaviour_registry.fetch("dummy"),
-            ),
-            None,
+        dummy_skill_id = PublicId("dummy_author", "dummy", "0.1.0")
+        dummy_behaviour_name = "dummy"
+        dummy_behaviour = self.aea.resources.behaviour_registry.fetch(
+            (dummy_skill_id, dummy_behaviour_name)
         )
         assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
 
-        dummy_task = next(
-            filter(
-                lambda x: x.__class__.__name__ == "DummyTask",
-                self.aea.resources.task_registry.fetch("dummy"),
-            ),
-            None,
+        dummy_task_name = "dummy"
+        dummy_task = self.aea.resources.task_registry.fetch(
+            (dummy_skill_id, dummy_task_name)
         )
         assert dummy_task is not None
         assert dummy_task.nb_execute_called > 0
 
-        dummy_handler = next(
-            filter(
-                lambda x: x.__class__.__name__ == "DummyHandler",
-                self.aea.resources.handler_registry.fetch("default"),
-            ),
-            None,
+        dummy_handler_name = "dummy"
+        dummy_handler = self.aea.resources.handler_registry.fetch(
+            (dummy_skill_id, dummy_handler_name)
         )
+        dummy_handler_alt = self.aea.resources.handler_registry.fetch_by_protocol_and_skill(
+            PublicId("fetchai", "default", "0.1.0"), dummy_skill_id
+        )
+        assert dummy_handler == dummy_handler_alt
         assert dummy_handler is not None
         assert len(dummy_handler.handled_messages) == 1
         assert dummy_handler.handled_messages[0] == self.expected_message

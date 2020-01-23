@@ -29,6 +29,7 @@ from typing import Dict, List, Optional, cast
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
+from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.state_update import StateUpdateMessage
 from aea.decision_maker.messages.transaction import OFF_CHAIN, TransactionMessage
 from aea.helpers.preference_representations.base import (
@@ -511,7 +512,9 @@ class DecisionMaker:
         :return: None
         """
         while not self.message_in_queue.empty():
-            message = self.message_in_queue.get_nowait()  # type: Optional[Message]
+            message = (
+                self.message_in_queue.get_nowait()
+            )  # type: Optional[InternalMessage]
             if message is not None:
                 if message.protocol_id == INTERNAL_PROTOCOL_ID:
                     self.handle(message)
@@ -522,7 +525,7 @@ class DecisionMaker:
                         )
                     )
 
-    def handle(self, message: Message) -> None:
+    def handle(self, message: InternalMessage) -> None:
         """
         Handle a message.
 

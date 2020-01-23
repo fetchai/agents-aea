@@ -179,7 +179,7 @@ class AEA(Agent):
         # TODO make this working for different skill/protocol versions.
         error_handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
             PublicId.from_string("fetchai/default:0.1.0"),
-            PublicId.from_string("fetchai/error:0.1.0")
+            PublicId.from_string("fetchai/error:0.1.0"),
         )
 
         assert error_handler is not None, "ErrorHandler not initialized"
@@ -202,7 +202,7 @@ class AEA(Agent):
             return  # pragma: no cover
 
         handlers = self.filter.get_active_handlers(protocol.id)
-        if handlers is None:
+        if len(handlers) == 0:
             if error_handler is not None:
                 error_handler.send_unsupported_skill(envelope)
             return

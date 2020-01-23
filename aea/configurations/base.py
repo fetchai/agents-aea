@@ -150,7 +150,7 @@ class CRUDCollection(Generic[T]):
         return [(k, v) for k, v in self._items_by_id.items()]
 
 
-class PublicId(object):
+class PublicId(JSONSerializable):
     """This class implement a public identifier.
 
     A public identifier is composed of three elements:
@@ -226,6 +226,16 @@ class PublicId(object):
                 cls.PUBLIC_ID_REGEX, public_id_string
             )[0][:3]
             return PublicId(username, package_name, version)
+
+    @property
+    def json(self) -> Dict:
+        """Compute the JSON representation."""
+        return {"author": self.author, "name": self.name, "version": self.version}
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Build from a JSON object."""
+        return PublicId(obj["author"], obj["name"], obj["version"],)
 
     def __hash__(self):
         """Get the hash."""
