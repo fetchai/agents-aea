@@ -76,6 +76,29 @@ class ProtocolGenerator:
                 all_contents[performative][content_name] = content_type
         return all_contents
 
+    def _speech_acts_str(self) -> str:
+        """
+        Generate the speech-act dictionary where content types are actual types (not strings).
+
+        :return: the speech-act dictionary string
+        """
+        speech_act_str = "{\n"
+        for (
+            performative,
+            speech_act_content_config,
+        ) in self.protocol_specification.speech_acts.read_all():
+            speech_act_str += '        \"{}\": {{'.format(performative)
+            if len(speech_act_content_config.args.items()) > 0:
+                speech_act_str += '\n'
+                for key, value in speech_act_content_config.args.items():
+                    speech_act_str += '            \"{}\": {},\n'.format(key, value)
+                speech_act_str = speech_act_str[:-2]
+                speech_act_str += "\n"
+                speech_act_str += "        "
+            speech_act_str += "},\n"
+        speech_act_str += "    }"
+        return speech_act_str
+
     def _custom_types_classes_str(self) -> str:
         """
         Generate classes for every custom type.
@@ -107,7 +130,7 @@ class ProtocolGenerator:
             cls_str += "        raise NotImplementedError\n\n"
             cls_str += "    def __eq__(self, other):\n"
             cls_str += str.format(
-                '        """Compare two instances of this class."""\n', custom_type
+                '        """Compare two {} instances."""\n', custom_type
             )
             cls_str += "        if type(other) is type(self):\n"
             cls_str += "            raise NotImplementedError\n"
@@ -116,48 +139,35 @@ class ProtocolGenerator:
 
         return cls_str
 
-    def _performatives_set(self) -> Set:
+    def _performatives_enum_str(self) -> str:
         """
-        Generate the performatives set.
+        Generate the performatives Enum class.
 
-        :return: the performatives set string
+        :return: the performatives Enum class set string
         """
-        performatives_set = set()
+        # performatives_set = set()
+        # for (
+        #     performative,
+        #     _speech_act_content_config,
+        # ) in self.protocol_specification.speech_acts.read_all():
+        #     performatives_set.add(performative)
+        enum_str = ""
+        enum_str += '    class Performative(Enum):\n'
+        enum_str += str.format(
+            '        """Performatives for the {} protocol."""\n\n', self.protocol_specification.name
+        )
         for (
-            performative,
-            _speech_act_content_config,
+                performative,
+                _speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
-            performatives_set.add(performative)
-        return performatives_set
+            enum_str += '        {} = "{}"\n'.format(performative.upper(), performative)
+        enum_str += '\n'
+        enum_str += '        def __str__(self):\n'
+        enum_str += '            """Get string representation."""\n'
+        enum_str += '            return self.value\n'
+        enum_str += '\n'
 
-    def _speech_acts_str(self) -> str:
-        """
-        Generate the speech-act dictionary where content types are actual types (not strings).
-
-        :return: the speech-act dictionary string
-        """
-        speech_act_str = "{\n"
-        for (
-            performative,
-            speech_act_content_config,
-        ) in self.protocol_specification.speech_acts.read_all():
-            speech_act_str += "        "
-            speech_act_str += '"'
-            speech_act_str += performative
-            speech_act_str += '": {'
-            if len(speech_act_content_config.args.items()) > 0:
-                for key, value in speech_act_content_config.args.items():
-                    speech_act_str += '"'
-                    speech_act_str += key
-                    speech_act_str += '"'
-                    speech_act_str += ": "
-                    speech_act_str += value
-                    speech_act_str += ", "
-                speech_act_str = speech_act_str[:-2]
-            speech_act_str += "},\n"
-        speech_act_str = speech_act_str[:-1]
-        speech_act_str += "\n    }"
-        return speech_act_str
+        return enum_str
 
     def _message_class_str(self) -> str:
         """
@@ -173,7 +183,8 @@ class ProtocolGenerator:
         )
 
         # Imports
-        cls_str += "from typing import Dict, Set, Tuple, cast\n\n"
+        cls_str += "from typing import Set, Tuple, cast\n"
+        cls_str += "from enum import Enum\n\n"
         cls_str += MESSAGE_IMPORT
         cls_str += "\n\nDEFAULT_BODY_SIZE = 4\n\n\n"
 
@@ -190,8 +201,13 @@ class ProtocolGenerator:
             '    """{}"""\n\n', self.protocol_specification.description
         )
 
+        cls_str += '    protocol_id = "{}"\n\n'.format(self.protocol_specification.name)
+
         # Class attribute
         cls_str += str.format("    _speech_acts = {}\n\n", self._speech_acts_str())
+
+        # Performatives Enum
+        cls_str += self._performatives_enum_str()
 
         # __init__
         cls_str += "    def __init__(\n"
@@ -210,19 +226,13 @@ class ProtocolGenerator:
         cls_str += "            performative=performative,\n"
         cls_str += "            **kwargs,\n"
         cls_str += "        )\n"
-        cls_str += "        assert self._check_consistency()\n\n"
+        cls_str += "        assert self._check_consistency(), \"This message is invalid according to the \'{}\' protocol\"\n\n".format(self.protocol_specification.name)
 
-        # Class properties
-        cls_str += "    @property\n"
-        cls_str += "    def speech_acts(self) -> Dict[str, Dict[str, str]]:\n"
-        cls_str += '        """Get all speech acts."""\n'
-        cls_str += "        return self._speech_acts\n\n"
+        # Instance properties
         cls_str += "    @property\n"
         cls_str += "    def valid_performatives(self) -> Set[str]:\n"
         cls_str += '        """Get valid performatives."""\n'
         cls_str += "        return set(self._speech_acts.keys())\n\n"
-
-        # Instance properties
         cls_str += "    @property\n"
         cls_str += "    def dialogue_reference(self) -> Tuple[str, str]:\n"
         cls_str += '        """Get the dialogue_reference of the message."""\n'
@@ -241,12 +251,19 @@ class ProtocolGenerator:
         cls_str += '        assert self.is_set("target"), "target is not set."\n'
         cls_str += '        return cast(int, self.get("target"))\n\n'
         cls_str += "    @property\n"
-        cls_str += "    def performative(self) -> str:\n"
+        cls_str += "    def performative_raw(self) -> str:\n"
         cls_str += '        """Get the performative of the message."""\n'
         cls_str += (
             '        assert self.is_set("performative"), "performative is not set"\n'
         )
         cls_str += '        return cast(str, self.get("performative"))\n\n'
+        cls_str += "    @property\n"
+        cls_str += "    def performative(self) -> Performative:\n"
+        cls_str += '        """Get the performative of the message."""\n'
+        cls_str += (
+            '        assert self.is_set("performative"), "performative is not set"\n'
+        )
+        cls_str += '        return {}Message.Performative(self.get("performative"))\n\n'.format(to_camel_case(self.protocol_specification.name))
 
         all_contents = self._extract_all_contents()
         covered = []  # type: List[str]
@@ -260,8 +277,8 @@ class ProtocolGenerator:
                 cls_str += "    def {}(self) -> {}:\n".format(
                     content_name, content_type
                 )
-                cls_str += '        """Get {} for performative {}."""\n'.format(
-                    content_name, performative
+                cls_str += '        """Get the {} from the message."""\n'.format(
+                    content_name
                 )
                 cls_str += '        assert self.is_set("{}"), "{} is not set"\n'.format(
                     content_name, content_name
@@ -278,52 +295,60 @@ class ProtocolGenerator:
         )
         cls_str += "        try:\n"
 
-        cls_str += "            assert isinstance(\n"
-        cls_str += "                self.dialogue_reference, Tuple\n"
-        cls_str += (
-            "            ), \"dialogue_reference must be 'Tuple' but it is not.\"\n"
-        )
-        cls_str += "            assert isinstance(\n"
-        cls_str += "                self.dialogue_reference[0], str\n"
-        cls_str += "            ), \"The first element of dialogue_reference must be 'str' but it is not.\"\n"
-        cls_str += "            assert isinstance(\n"
-        cls_str += "                self.dialogue_reference[1], str\n"
-        cls_str += "            ), \"The second element of dialogue_reference must be 'str' but it is not.\"\n"
+        cls_str += '            assert type(self.dialogue_reference) == tuple, "dialogue_reference must be \'tuple\' but it is not."\n'
+        cls_str += '            assert type(self.dialogue_reference[0]) == str, "The first element of dialogue_reference must be \'str\' but it is not."\n'
+        cls_str += '            assert type(self.dialogue_reference[1]) == str, "The second element of dialogue_reference must be \'str\' but it is not."\n'
         cls_str += (
             '            assert type(self.message_id) == int, "message_id is not int"\n'
         )
         cls_str += '            assert type(self.target) == int, "target is not int"\n'
-        cls_str += '            assert type(self.performative) == str, "performative is not str"\n\n'
+        cls_str += '            assert type(self.performative_raw) == str, "performative is not str"\n\n'
 
         cls_str += "            # Light Protocol 2\n"
         cls_str += "            # Check correct performative\n"
         cls_str += "            assert (\n"
-        cls_str += "                self.performative in self.valid_performatives\n"
-        cls_str += "            ), \"'{}' is not in the list of valid performativs: {}\".format(\n"
-        cls_str += "                self.performative, self.valid_performatives\n"
+        cls_str += "                self.performative_raw in self.valid_performatives\n"
+        cls_str += "            ), \"'{}' is not in the list of valid performatives: {}\".format(\n"
+        cls_str += "                self.performative_raw, self.valid_performatives\n"
         cls_str += "            )\n\n"
         cls_str += "            # Check correct contents\n"
         cls_str += (
             "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
         )
+        counter = 1
         for performative, contents in all_contents.items():
-            cls_str += '            if self.performative == "{}":\n'.format(
-                performative
-            )
-            cls_str += "                expexted_nb_of_contents = {}\n".format(
-                len(contents)
-            )
-            if len(contents) == 0:
-                continue
-            for content_name, content_type in contents.items():
-                cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
-                    content_name, content_type, content_name, content_type
+            if counter == 1:
+                cls_str += '            if self.performative == {}Message.Performative.{}:\n'.format(
+                    to_camel_case(self.protocol_specification.name), performative.upper()
                 )
+                cls_str += "                expected_nb_of_contents = {}\n".format(
+                    len(contents)
+                )
+                if len(contents) == 0:
+                    continue
+                for content_name, content_type in contents.items():
+                    cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
+                        content_name, content_type, content_name, content_type
+                    )
+            else:
+                cls_str += '            elif self.performative == {}Message.Performative.{}:\n'.format(
+                    to_camel_case(self.protocol_specification.name), performative.upper()
+                )
+                cls_str += "                expected_nb_of_contents = {}\n".format(
+                    len(contents)
+                )
+                if len(contents) == 0:
+                    continue
+                for content_name, content_type in contents.items():
+                    cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
+                        content_name, content_type, content_name, content_type
+                    )
+            counter += 1
         cls_str += "\n            # Check body size\n"
         cls_str += "            assert (\n"
-        cls_str += "                expexted_nb_of_contents == actual_nb_of_contents\n"
+        cls_str += "                expected_nb_of_contents == actual_nb_of_contents\n"
         cls_str += '            ), "Incorrect number of contents. Expected {} contents. Found {}".format(\n'
-        cls_str += "                expexted_nb_of_contents, actual_nb_of_contents\n"
+        cls_str += "                expected_nb_of_contents, actual_nb_of_contents\n"
         cls_str += "            )\n\n"
 
         cls_str += "            # Light Protocol 3\n"
