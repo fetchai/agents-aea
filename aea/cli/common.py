@@ -24,6 +24,7 @@ import logging.config
 import os
 import shutil
 import sys
+from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, List, Optional, cast
 
@@ -287,7 +288,7 @@ class AEAConfigException(Exception):
 class ConnectionsOption(click.Option):
     """Click option for the --connections option in 'aea run'."""
 
-    def type_cast_value(self, ctx, value) -> Optional[List[str]]:
+    def type_cast_value(self, ctx, value) -> Optional[List[PublicId]]:
         """
         Parse the list of string passed through command line.
 
@@ -304,10 +305,14 @@ class ConnectionsOption(click.Option):
             def arg_strip(s):
                 return s.strip(" '\"")
 
-            connection_names = set(
-                arg_strip(s) for s in value.split(",") if arg_strip(s) != ""
-            )
-            return list(connection_names)
+            input_connection_ids = [arg_strip(s) for s in value.split(",") if arg_strip(s) != ""]
+
+            # remove duplicates, while preserving the order
+            result = OrderedDict()  # type: OrderedDict[PublicId, None]
+            for connection_id_string in input_connection_ids:
+                connection_public_id = PublicId.from_string(connection_id_string)
+                result[connection_public_id] = None
+            return list(result.keys())
         except Exception:  # pragma: no cover
             raise click.BadParameter(value)
 

@@ -658,6 +658,7 @@ class Multiplexer:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
 
+        connection = cast(Connection, connection)
         if (
             len(connection.restricted_to_protocols) > 0
             and envelope.protocol_id not in connection.restricted_to_protocols
