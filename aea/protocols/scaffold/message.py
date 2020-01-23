@@ -22,13 +22,14 @@
 
 from enum import Enum
 
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 
 
 class MyScaffoldMessage(Message):
     """The scaffold message class."""
 
-    protocol_id = "my_scaffold_protocol"
+    protocol_id = PublicId("my_author_name", "my_scaffold_protocol", "0.1.0")
 
     class Performative(Enum):
         """Scaffold Message types."""

@@ -68,7 +68,7 @@ class Registry(Generic[ItemId, Item], ABC):
         :param item_id: the public id of the item.
         :param item: the item.
         :return: None
-        :raises: ValueError if the public id is already registered.
+        :raises: ValueError if an item is already registered with that item id.
         """
 
     @abstractmethod
@@ -244,7 +244,9 @@ class ProtocolRegistry(Registry[PublicId, Protocol]):
         self.register(protocol_public_id, protocol)
 
 
-class ComponentRegistry(Registry[Tuple[SkillId, str], SkillComponentType], Generic[SkillComponentType]):
+class ComponentRegistry(
+    Registry[Tuple[SkillId, str], SkillComponentType], Generic[SkillComponentType]
+):
     """This class implements a generic registry for skill components."""
 
     def __init__(self) -> None:
@@ -262,13 +264,13 @@ class ComponentRegistry(Registry[Tuple[SkillId, str], SkillComponentType], Gener
         :param item_id: a pair (skill id, item name).
         :param item: the item to register.
         :return: None
-        :raises: ValueError if the public id is already registered.
+        :raises: ValueError if an item is already registered with that item id.
         """
         skill_id = item_id[0]
         item_name = item_id[1]
-        if item_id in self._items.keys():
+        if item_name in self._items.get(skill_id, {}).keys():
             raise ValueError(
-                "Items already registered with skill id '{}' and name '{}'".format(
+                "Item already registered with skill id '{}' and name '{}'".format(
                     skill_id, item_name
                 )
             )
@@ -302,14 +304,12 @@ class ComponentRegistry(Registry[Tuple[SkillId, str], SkillComponentType], Gener
 
     def fetch_by_skill(self, skill_id: SkillId) -> List[Item]:
         """Fetch all the items of a given skill."""
-        return list(self._items.get(skill_id, {}).values())
+        return list(*self._items.get(skill_id, {}).values())
 
     def fetch_all(self) -> List[SkillComponentType]:
         """Fetch all the items."""
         return [
-            item
-            for skill_id, items in self._items.items()
-            for item in items.values()
+            item for skill_id, items in self._items.items() for item in items.values()
         ]
 
     def unregister_by_skill(self, skill_id: SkillId) -> None:
@@ -354,9 +354,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         """
         super().__init__()
 
-    def fetch_by_protocol(
-        self, protocol_id: ProtocolId
-    ) -> List[Handler]:
+    def fetch_by_protocol(self, protocol_id: ProtocolId) -> List[Handler]:
         """
         Fetch the handler by the pair protocol id and skill id.
 
@@ -366,7 +364,12 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         # TODO this could be optimized by having an index by protocol
         #      however that requires extending the superclass methods.
         handlers = self.fetch_all()
-        return list(filter(lambda handler: handler.SUPPORTED_PROTOCOL != protocol_id, handlers))
+        return [
+            handler
+            for handler in filter(
+                lambda handler: handler.SUPPORTED_PROTOCOL == protocol_id, handlers
+            )
+        ]
 
     def fetch_by_protocol_and_skill(
         self, protocol_id: ProtocolId, skill_id: SkillId
@@ -534,7 +537,7 @@ class Filter(object):
         """Get decision maker (out) queue."""
         return self._decision_maker_out_queue
 
-    def get_active_handlers(self, protocol_id: PublicId) -> Optional[List[Handler]]:
+    def get_active_handlers(self, protocol_id: PublicId) -> List[Handler]:
         """
         Get active handlers.
 

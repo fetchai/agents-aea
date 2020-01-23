@@ -37,6 +37,7 @@ from aea.configurations.base import (
     SharedClassConfig,
     SkillConfig,
     TaskConfig,
+    Configuration,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import ConnectionStatus
@@ -181,11 +182,12 @@ class SkillComponent(ABC):
         self._config = kwargs
         if "name" not in self._config:
             raise ValueError("Missing name of skill component.")
+        self._name = self._config.pop("name")
 
     @property
     def name(self) -> str:
         """Get the name of the skill component."""
-        return self._config.get("name")
+        return self._name
 
     @property
     def context(self) -> SkillContext:
@@ -215,7 +217,9 @@ class SkillComponent(ABC):
 
     @classmethod
     @abstractmethod
-    def parse_module(cls, *args, **kwargs):
+    def parse_module(
+        cls, path: str, configs: Dict[str, Any], skill_context: SkillContext
+    ):
         """Parse the component module."""
 
 

@@ -21,7 +21,7 @@
 """The transaction message module."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, cast, Union
+from typing import Any, Dict, List, Optional, cast, Union, Sequence
 
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import SUPPORTED_CURRENCIES, SUPPORTED_LEDGER_APIS
@@ -51,7 +51,7 @@ class TransactionMessage(InternalMessage):
     def __init__(
         self,
         performative: Performative,
-        skill_callback_ids: List[Union[PublicId, str]],
+        skill_callback_ids: Sequence[Union[PublicId, str]],
         tx_id: TransactionId,
         tx_sender_addr: Address,
         tx_counterparty_addr: Address,

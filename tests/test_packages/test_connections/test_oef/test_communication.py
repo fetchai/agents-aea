@@ -33,7 +33,7 @@ from oef.query import ConstraintExpr
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.crypto.default import DefaultCrypto
 from aea.crypto.wallet import Wallet
 from aea.helpers.search.models import (
@@ -77,7 +77,10 @@ class TestDefault:
         """Set the test up."""
         cls.crypto1 = DefaultCrypto()
         cls.connection = OEFConnection(
-            cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000
+            cls.crypto1.address,
+            oef_addr="127.0.0.1",
+            oef_port=10000,
+            connection_id=PublicId("fetchai", "oef", "0.1.0"),
         )
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
@@ -117,7 +120,10 @@ class TestOEF:
             """Set the test up."""
             cls.crypto1 = DefaultCrypto()
             cls.connection = OEFConnection(
-                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000
+                cls.crypto1.address,
+                oef_addr="127.0.0.1",
+                oef_port=10000,
+                connection_id=PublicId("fetchai", "oef", "0.1.0"),
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -192,7 +198,10 @@ class TestOEF:
             """Set the test up."""
             cls.crypto1 = DefaultCrypto()
             cls.connection = OEFConnection(
-                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000
+                cls.crypto1.address,
+                oef_addr="127.0.0.1",
+                oef_port=10000,
+                connection_id=PublicId("fetchai", "oef", "0.1.0"),
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -263,7 +272,10 @@ class TestOEF:
             """
             cls.crypto1 = DefaultCrypto()
             cls.connection = OEFConnection(
-                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000
+                cls.crypto1.address,
+                oef_addr="127.0.0.1",
+                oef_port=10000,
+                connection_id=PublicId("fetchai", "oef", "0.1.0"),
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -381,7 +393,10 @@ class TestOEF:
             """Set the tests up."""
             cls.crypto1 = DefaultCrypto()
             cls.connection = OEFConnection(
-                cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000
+                cls.crypto1.address,
+                oef_addr="127.0.0.1",
+                oef_port=10000,
+                connection_id=PublicId("fetchai", "oef", "0.1.0"),
             )
             cls.multiplexer = Multiplexer([cls.connection])
             cls.multiplexer.connect()
@@ -434,10 +449,16 @@ class TestFIPA:
         cls.crypto1 = DefaultCrypto()
         cls.crypto2 = DefaultCrypto()
         cls.connection1 = OEFConnection(
-            cls.crypto1.address, oef_addr="127.0.0.1", oef_port=10000
+            cls.crypto1.address,
+            oef_addr="127.0.0.1",
+            oef_port=10000,
+            connection_id=PublicId("fetchai", "oef", "0.1.0"),
         )
         cls.connection2 = OEFConnection(
-            cls.crypto2.address, oef_addr="127.0.0.1", oef_port=10000
+            cls.crypto2.address,
+            oef_addr="127.0.0.1",
+            oef_port=10000,
+            connection_id=PublicId("fetchai", "oef", "0.1.0"),
         )
         cls.multiplexer1 = Multiplexer([cls.connection1])
         cls.multiplexer2 = Multiplexer([cls.connection2])
@@ -757,6 +778,7 @@ class TestFIPA:
     def test_on_dialogue_error(self):
         """Test the dialogue error."""
         oef_connection = self.multiplexer1.connections[0]
+        oef_connection = cast(OEFConnection, oef_connection)
         oef_channel = oef_connection.channel
 
         oef_channel.on_dialogue_error(answer_id=0, dialogue_id=0, origin="me")
@@ -769,7 +791,10 @@ class TestFIPA:
     def test_send(self):
         """Test the send method."""
         envelope = Envelope(
-            to=DEFAULT_OEF, sender="me", protocol_id="tac", message=b"Hello"
+            to=DEFAULT_OEF,
+            sender="me",
+            protocol_id="fetchai/default:0.1.0",
+            message=b"Hello",
         )
         self.multiplexer1.put(envelope)
         received_envelope = self.multiplexer1.get(block=True, timeout=5.0)
@@ -792,7 +817,12 @@ class TestOefConnection:
     def test_connection(self):
         """Test that an OEF connection can be established to the OEF."""
         crypto = DefaultCrypto()
-        connection = OEFConnection(crypto.address, oef_addr="127.0.0.1", oef_port=10000)
+        connection = OEFConnection(
+            crypto.address,
+            oef_addr="127.0.0.1",
+            oef_port=10000,
+            connection_id=PublicId("fetchai", "oef", "0.1.0"),
+        )
         multiplexer = Multiplexer([connection])
         multiplexer.connect()
         multiplexer.disconnect()
@@ -947,7 +977,10 @@ async def test_send_oef_message(network_node):
     wallet = Wallet({"default": private_key_pem_path})
     address = wallet.addresses["default"]
     oef_connection = OEFConnection(
-        address=address, oef_addr="127.0.0.1", oef_port=10000
+        address=address,
+        oef_addr="127.0.0.1",
+        oef_port=10000,
+        connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
@@ -987,7 +1020,10 @@ async def test_cancelled_receive(network_node):
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({"default": private_key_pem_path})
     oef_connection = OEFConnection(
-        address=wallet.addresses["default"], oef_addr="127.0.0.1", oef_port=10000
+        address=wallet.addresses["default"],
+        oef_addr="127.0.0.1",
+        oef_port=10000,
+        connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
@@ -1015,7 +1051,10 @@ async def test_exception_during_receive(network_node):
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({"default": private_key_pem_path})
     oef_connection = OEFConnection(
-        address=wallet.addresses["default"], oef_addr="127.0.0.1", oef_port=10000
+        address=wallet.addresses["default"],
+        oef_addr="127.0.0.1",
+        oef_port=10000,
+        connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
     oef_connection.loop = asyncio.get_event_loop()
     await oef_connection.connect()
@@ -1038,7 +1077,10 @@ async def test_cannot_connect_to_oef():
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({"default": private_key_pem_path})
     oef_connection = OEFConnection(
-        address=wallet.addresses["default"], oef_addr="a_fake_address", oef_port=10000
+        address=wallet.addresses["default"],
+        oef_addr="a_fake_address",
+        oef_port=10000,
+        connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
     oef_connection.loop = asyncio.get_event_loop()
 
@@ -1065,7 +1107,10 @@ async def test_connecting_twice_is_ok(network_node):
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({"default": private_key_pem_path})
     oef_connection = OEFConnection(
-        address=wallet.addresses["default"], oef_addr="127.0.0.1", oef_port=10000
+        address=wallet.addresses["default"],
+        oef_addr="127.0.0.1",
+        oef_port=10000,
+        connection_id=PublicId("fetchai", "oef", "0.1.0"),
     )
     oef_connection.loop = asyncio.get_event_loop()
 

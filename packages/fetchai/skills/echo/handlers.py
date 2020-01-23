@@ -23,6 +23,7 @@ import logging
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
+from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
@@ -56,7 +57,7 @@ class EchoHandler(Handler):
         self.context.outbox.put_message(
             to=message.counterparty,
             sender=self.context.agent_name,
-            protocol_id="default",
+            protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(message),
         )
 

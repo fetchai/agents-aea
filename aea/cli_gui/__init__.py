@@ -403,7 +403,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
                     "aea.cli",
                     "run",
                     "--connections",
-                    connection_id,
+                    str(connection_id),
                 ],
                 agent_dir,
             )

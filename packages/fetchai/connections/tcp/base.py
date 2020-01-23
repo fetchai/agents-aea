@@ -23,7 +23,7 @@ import logging
 import struct
 from abc import ABC, abstractmethod
 from asyncio import CancelledError, StreamReader, StreamWriter
-from typing import Optional, Set
+from typing import Optional
 
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
@@ -34,32 +34,15 @@ logger = logging.getLogger(__name__)
 class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
 
-    restricted_to_protocols = set()  # type: Set[str]
-
-    def __init__(
-        self,
-        address: Address,
-        host: str,
-        port: int,
-        connection_id: str,
-        restricted_to_protocols: Optional[Set[str]] = None,
-        excluded_protocols: Optional[Set[str]] = None,
-    ):
+    def __init__(self, address: Address, host: str, port: int, **kwargs):
         """
         Initialize the TCP connection.
 
         :param address: the address used for identification.
         :param host: the host to connect to.
         :param port: the port to connect to.
-        :param connection_id: the identifier of the connection object.
-        :param restricted_to_protocols: the only supported protocols for this connection.
-        :param excluded_protocols: the excluded protocols for this connection.
         """
-        super().__init__(
-            connection_id=connection_id,
-            restricted_to_protocols=restricted_to_protocols,
-            excluded_protocols=excluded_protocols,
-        )
+        super().__init__(**kwargs)
         self.address = address
 
         self.host = host

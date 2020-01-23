@@ -35,7 +35,9 @@ logger = logging.getLogger(__name__)
 class ErrorHandler(Handler):
     """This class implements the error handler."""
 
-    SUPPORTED_PROTOCOL = PublicId("fetchai", "default", "0.1.0")  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = PublicId(
+        "fetchai", "default", "0.1.0"
+    )  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """
@@ -70,7 +72,7 @@ class ErrorHandler(Handler):
             type=DefaultMessage.Type.ERROR,
             error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
             error_msg="Unsupported protocol.",
-            error_data={"protocol_id": envelope.protocol_id},
+            error_data={"protocol_id": envelope.protocol_id.json},
         )
         self.context.outbox.put_message(
             to=envelope.sender,

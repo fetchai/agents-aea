@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Lock, Thread
-from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, cast, Union
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, cast, Union, Sequence
 from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId
@@ -147,7 +147,9 @@ class URI:
 class EnvelopeContext:
     """Extra information for the handling of an envelope."""
 
-    def __init__(self, connection_id: Optional[str] = None, uri: Optional[URI] = None):
+    def __init__(
+        self, connection_id: Optional[PublicId] = None, uri: Optional[URI] = None
+    ):
         """Initialize the envelope context."""
         self.connection_id = connection_id
         self.uri = uri  # must follow: https://tools.ietf.org/html/rfc3986.html
@@ -220,7 +222,7 @@ class Envelope:
         self,
         to: Address,
         sender: Address,
-        protocol_id: Union[ProtocolId, str],
+        protocol_id: Union[ProtocolId, str, Dict],
         message: bytes,
         context: Optional[EnvelopeContext] = None,
     ):
@@ -232,7 +234,13 @@ class Envelope:
         :param protocol_id: the protocol id.
         :param message: the protocol-specific message
         """
-        protocol_id = PublicId.from_string(protocol_id) if isinstance(protocol_id, str) else protocol_id
+        protocol_id = (
+            PublicId.from_string(protocol_id)
+            if isinstance(protocol_id, str)
+            else PublicId.from_json(protocol_id)
+            if isinstance(protocol_id, dict)
+            else protocol_id
+        )
         self._to = to
         self._sender = sender
         self._protocol_id = protocol_id
@@ -340,14 +348,14 @@ class Multiplexer:
 
     def __init__(
         self,
-        connections: List["Connection"],
+        connections: Sequence["Connection"],
         default_connection_index: int = 0,
         loop: Optional[AbstractEventLoop] = None,
     ):
         """
         Initialize the connection multiplexer.
 
-        :param connections: the connections.
+        :param connections: a sequence of connections.
         :param default_connection_index: the index of the connection to use as default.
                                        | this information is used for envelopes which
                                        | don't specify any routing context.
@@ -360,10 +368,10 @@ class Multiplexer:
         assert len(set(c.connection_id for c in connections)) == len(
             connections
         ), "Connection names must be unique."
-        self._connections = connections  # type: List['Connection']
-        self._name_to_connection = {
-            c.connection_id.name: c for c in connections
-        }  # type: Dict[str, Connection]
+        self._connections = connections  # type: Sequence[Connection]
+        self._id_to_connection = {
+            c.connection_id: c for c in connections
+        }  # type: Dict[PublicId, Connection]
         self.default_connection = self._connections[
             default_connection_index
         ]  # type: Connection
@@ -491,8 +499,8 @@ class Multiplexer:
     async def _connect_all(self):
         """Set all the connection up."""
         logger.debug("Start multiplexer connections.")
-        connected = []  # type: List[str]
-        for connection_id, connection in self._name_to_connection.items():
+        connected = []  # type: List[PublicId]
+        for connection_id, connection in self._id_to_connection.items():
             try:
                 await self._connect_one(connection_id)
                 connected.append(connection_id)
@@ -506,14 +514,14 @@ class Multiplexer:
                     await self._disconnect_one(c)
                 break
 
-    async def _connect_one(self, connection_id: str) -> None:
+    async def _connect_one(self, connection_id: PublicId) -> None:
         """
         Set a connection up.
 
         :param connection_id: the id of the connection.
         :return: None
         """
-        connection = self._name_to_connection[connection_id]
+        connection = self._id_to_connection[connection_id]
         logger.debug("Processing connection {}".format(connection.connection_id))
         if connection.connection_status.is_connected:
             logger.debug(
@@ -531,7 +539,7 @@ class Multiplexer:
     async def _disconnect_all(self):
         """Tear all the connections down."""
         logger.debug("Tear the multiplexer connections down.")
-        for connection_id, connection in self._name_to_connection.items():
+        for connection_id, connection in self._id_to_connection.items():
             try:
                 await self._disconnect_one(connection_id)
             except Exception as e:
@@ -541,14 +549,14 @@ class Multiplexer:
                     )
                 )
 
-    async def _disconnect_one(self, connection_id: str) -> None:
+    async def _disconnect_one(self, connection_id: PublicId) -> None:
         """
         Tear a connection down.
 
         :param connection_id: the id of the connection.
         :return: None
         """
-        connection = self._name_to_connection[connection_id]
+        connection = self._id_to_connection[connection_id]
         logger.debug("Processing connection {}".format(connection.connection_id))
         if not connection.connection_status.is_connected:
             logger.debug(
@@ -640,13 +648,12 @@ class Multiplexer:
             envelope_context.connection_id if envelope_context is not None else None
         )
 
-        if connection_id is not None and connection_id not in self._name_to_connection:
+        if connection_id is None or connection_id not in self._id_to_connection:
             raise AEAConnectionError(
                 "No connection registered with id: {}.".format(connection_id)
             )
 
-        connection_id = cast(str, connection_id)
-        connection = self._name_to_connection.get(connection_id, None)
+        connection = self._id_to_connection.get(connection_id, None)
         if connection is None:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection

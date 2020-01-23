@@ -29,7 +29,7 @@ from pathlib import Path
 import pytest
 
 import aea
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
@@ -48,7 +48,10 @@ class TestStubConnection:
         cls.input_file_path = d / "input_file.csv"
         cls.output_file_path = d / "input_file.csv"
 
-        cls.connection = StubConnection(cls.input_file_path, cls.output_file_path)
+        connection_id = PublicId("fetchai", "stub", "0.1.0")
+        cls.connection = StubConnection(
+            cls.input_file_path, cls.output_file_path, connection_id=connection_id
+        )
         cls.multiplexer = Multiplexer([cls.connection])
         cls.multiplexer.connect()
 
@@ -177,7 +180,11 @@ async def test_disconnection_when_already_disconnected():
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
-    stub_con = StubConnection(input_file_path, output_file_path)
+    stub_con = StubConnection(
+        input_file_path,
+        output_file_path,
+        connection_id=PublicId("fetchai", "stub", "0.1.0"),
+    )
 
     assert not stub_con.connection_status.is_connected
     await stub_con.disconnect()
@@ -192,7 +199,11 @@ async def test_connection_when_already_connected():
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
-    stub_con = StubConnection(input_file_path, output_file_path)
+    stub_con = StubConnection(
+        input_file_path,
+        output_file_path,
+        connection_id=PublicId("fetchai", "stub", "0.1.0"),
+    )
 
     assert not stub_con.connection_status.is_connected
     await stub_con.connect()
@@ -209,7 +220,11 @@ async def test_receiving_returns_none_when_error_occurs():
     d.mkdir(parents=True)
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
-    stub_con = StubConnection(input_file_path, output_file_path)
+    stub_con = StubConnection(
+        input_file_path,
+        output_file_path,
+        connection_id=PublicId("fetchai", "stub", "0.1.0"),
+    )
 
     await stub_con.connect()
     with unittest.mock.patch.object(stub_con.in_queue, "get", side_effect=Exception):

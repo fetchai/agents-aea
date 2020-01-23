@@ -46,7 +46,7 @@ class Connection(ABC):
 
     def __init__(
         self,
-        connection_id: PublicId,
+        connection_id: Optional[PublicId] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
     ):
@@ -57,6 +57,8 @@ class Connection(ABC):
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
+        if connection_id is None:
+            raise ValueError("Connection public id is a mandatory argument.")
         self._connection_id = connection_id
         self._restricted_to_protocols = self._get_restricted_to_protocols(
             restricted_to_protocols

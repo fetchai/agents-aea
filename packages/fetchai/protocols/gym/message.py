@@ -23,13 +23,14 @@
 from enum import Enum
 from typing import Any, Dict, cast
 
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 
 
 class GymMessage(Message):
     """The Gym message class."""
 
-    protocol_id = "gym"
+    protocol_id = PublicId("fetchai", "gym", "0.1.0")
 
     class Performative(Enum):
         """Gym performatives."""

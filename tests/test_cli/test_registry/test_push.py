@@ -40,9 +40,7 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
         "author": "some-author",
     },
 )
-@mock.patch(
-    "aea.cli.registry.push.request_api", return_value={"item_id": "public-id"}
-)
+@mock.patch("aea.cli.registry.push.request_api", return_value={"item_id": "public-id"})
 class PushItemTestCase(TestCase):
     """Test case for push_item method."""
 
