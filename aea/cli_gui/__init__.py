@@ -111,8 +111,8 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
     output = []
     err = ""
     for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
-        if line[:6] == "Name: ":
-            item_ids.append(line[6:-1])
+        if line[:11] == "Public ID: ":
+            item_ids.append(line[11:-1])
 
         if line[:13] == "Description: ":
             item_descs.append(line[13:-1])

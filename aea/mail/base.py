@@ -26,15 +26,12 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Lock, Thread
-from typing import Dict, List, Optional, Sequence, TYPE_CHECKING, Tuple, Union, cast
+from typing import Dict, List, Optional, Sequence, Tuple, Union, cast
 from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId
-from aea.connections.base import ConnectionStatus
+from aea.connections.base import Connection, ConnectionStatus
 from aea.mail import base_pb2
-
-if TYPE_CHECKING:
-    from aea.connections.base import Connection  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 

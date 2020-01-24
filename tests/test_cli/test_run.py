@@ -38,7 +38,8 @@ from aea.cli import cli
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
-    PublicId)
+    PublicId,
+)
 
 from ..common.click_testing import CliRunner
 from ..conftest import CLI_LOG_OPTION, CUR_PATH
@@ -68,7 +69,14 @@ def test_run(pytestconfig):
     assert result.exit_code == 0
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "aea.cli", "run", "--connections", "fetchai/local:0.1.0"],
+        [
+            sys.executable,
+            "-m",
+            "aea.cli",
+            "run",
+            "--connections",
+            "fetchai/local:0.1.0",
+        ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )
@@ -140,7 +148,7 @@ def test_run_with_default_connection(pytestconfig):
     argvalues=[
         ["fetchai/local:0.1.0,fetchai/stub:0.1.0"],
         ["'fetchai/local:0.1.0, fetchai/stub:0.1.0'"],
-        ["fetchai/local:0.1.0,,fetchai/stub:0.1.0,"]
+        ["fetchai/local:0.1.0,,fetchai/stub:0.1.0,"],
     ],
 )
 def test_run_multiple_connections(pytestconfig, connection_ids):
@@ -540,7 +548,14 @@ def test_run_ledger_apis(pytestconfig):
         f.write(whole_file)
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "aea.cli", "run", "--connections", "fetchai/local:0.1.0"],
+        [
+            sys.executable,
+            "-m",
+            "aea.cli",
+            "run",
+            "--connections",
+            "fetchai/local:0.1.0",
+        ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )
@@ -610,7 +625,14 @@ def test_run_fet_ledger_apis(pytestconfig):
         f.write(whole_file)
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "aea.cli", "run", "--connections", "fetchai/local:0.1.0"],
+        [
+            sys.executable,
+            "-m",
+            "aea.cli",
+            "run",
+            "--connections",
+            "fetchai/local:0.1.0",
+        ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )

@@ -332,7 +332,7 @@ class ComponentRegistry(
         :return: None
         """
         for skill_id, items in self._items.items():
-            for item_name, item in items.items():
+            for _, item in items.items():
                 try:
                     item.teardown()
                 except Exception as e:
@@ -382,7 +382,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         :return: the handlers registered for the protocol_id and skill_id
         """
         result = []
-        for name, handler in self._items.get(skill_id, {}).items():
+        for _, handler in self._items.get(skill_id, {}).items():
             if handler.SUPPORTED_PROTOCOL == protocol_id:
                 result.append(handler)
         assert len(result) <= 1, "at most one handler allowed per (skill, protocol)"

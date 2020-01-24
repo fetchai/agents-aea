@@ -305,7 +305,9 @@ class ConnectionsOption(click.Option):
             def arg_strip(s):
                 return s.strip(" '\"")
 
-            input_connection_ids = [arg_strip(s) for s in value.split(",") if arg_strip(s) != ""]
+            input_connection_ids = [
+                arg_strip(s) for s in value.split(",") if arg_strip(s) != ""
+            ]
 
             # remove duplicates, while preserving the order
             result = OrderedDict()  # type: OrderedDict[PublicId, None]

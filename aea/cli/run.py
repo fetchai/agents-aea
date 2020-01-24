@@ -199,7 +199,9 @@ def _verify_ledger_apis_access() -> None:
         )
 
 
-def _setup_connection(connection_public_id: PublicId, address: str, ctx: Context) -> Connection:
+def _setup_connection(
+    connection_public_id: PublicId, address: str, ctx: Context
+) -> Connection:
     """
     Set up a connection.
 
@@ -234,17 +236,25 @@ def _setup_connection(connection_public_id: PublicId, address: str, ctx: Context
         )
 
     connection_package = load_agent_component_package(
-        "connection", connection_public_id.name, connection_config.author, connection_dir
+        "connection",
+        connection_public_id.name,
+        connection_config.author,
+        connection_dir,
     )
     add_agent_component_module_to_sys_modules(
-        "connection", connection_public_id.name, connection_config.author, connection_package
+        "connection",
+        connection_public_id.name,
+        connection_config.author,
+        connection_package,
     )
     try:
         connection_module = load_module(
             "connection_module", connection_dir / "connection.py"
         )
     except FileNotFoundError:
-        raise AEAConfigException("Connection '{}' not found.".format(connection_public_id))
+        raise AEAConfigException(
+            "Connection '{}' not found.".format(connection_public_id)
+        )
 
     classes = inspect.getmembers(connection_module, inspect.isclass)
     connection_classes = list(
@@ -289,7 +299,9 @@ def _setup_connection(connection_public_id: PublicId, address: str, ctx: Context
     help="Install all the dependencies before running the agent.",
 )
 @pass_context
-def run(click_context, connection_ids: List[PublicId], env_file: str, install_deps: bool):
+def run(
+    click_context, connection_ids: List[PublicId], env_file: str, install_deps: bool
+):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     try_to_load_agent_config(ctx)
@@ -314,9 +326,7 @@ def run(click_context, connection_ids: List[PublicId], env_file: str, install_de
     wallet = Wallet(private_key_paths)
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
-    default_connection_id = PublicId.from_string(
-        ctx.agent_config.default_connection
-    )
+    default_connection_id = PublicId.from_string(ctx.agent_config.default_connection)
     connection_ids = (
         [default_connection_id] if connection_ids is None else connection_ids
     )
