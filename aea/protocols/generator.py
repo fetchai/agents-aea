@@ -250,7 +250,7 @@ class ProtocolGenerator:
         cls_str += '        assert self.is_set("target"), "target is not set."\n'
         cls_str += '        return cast(int, self.get("target"))\n\n'
         cls_str += "    @property\n"
-        cls_str += "    def performative(self) -> Performative:\n"
+        cls_str += "    def performative(self) -> Performative:  # noqa: F821\n"
         cls_str += '        """Get the performative of the message."""\n'
         cls_str += (
             '        assert self.is_set("performative"), "performative is not set"\n'

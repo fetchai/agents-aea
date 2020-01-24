@@ -91,7 +91,7 @@ class TwoPartyNegotiationMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def performative(self) -> Performative:
+    def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set"
         return cast(TwoPartyNegotiationMessage.Performative, self.get("performative"))
