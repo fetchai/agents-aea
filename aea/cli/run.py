@@ -255,7 +255,6 @@ def _setup_connection(
         raise AEAConfigException(
             "Connection '{}' not found.".format(connection_public_id)
         )
-
     classes = inspect.getmembers(connection_module, inspect.isclass)
     connection_classes = list(
         filter(lambda x: re.match("\\w+Connection", x[0]), classes)
