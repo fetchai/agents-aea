@@ -130,7 +130,6 @@ def test_communication():
             0,
             FIPAMessage.Performative.PROPOSE,
             proposal=[],
-            tx_nonce="this_is_a_nonce",
         )
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(

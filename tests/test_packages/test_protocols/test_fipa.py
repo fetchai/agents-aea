@@ -114,7 +114,6 @@ def test_fipa_propose_serialization():
         target=0,
         performative=FIPAMessage.Performative.PROPOSE,
         proposal=proposal,
-        tx_nonce="this_is_a_tx_nonce",
     )
     msg_bytes = FIPASerializer().encode(msg)
     envelope = Envelope(
@@ -470,7 +469,6 @@ class Test_dialogues:
             target=target,
             performative=FIPAMessage.Performative.PROPOSE,
             proposal=proposal,
-            tx_nonce="This_is_a_tx_nonce",
         )
         proposal_msg.counterparty = self.seller_addr
 
@@ -591,7 +589,6 @@ class Test_dialogues:
             target=target,
             performative=FIPAMessage.Performative.PROPOSE,
             proposal=proposal,
-            tx_nonce="This_is_a_tx_nonce",
         )
         proposal_msg.counterparty = self.client_addr
 

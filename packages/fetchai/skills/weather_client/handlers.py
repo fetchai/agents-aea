@@ -238,7 +238,6 @@ class FIPAHandler(Handler):
                 ledger_id=proposal.values["ledger_id"],
                 info={
                     "dialogue_label": dialogue.dialogue_label.json,
-                    "random_message": info.get("random_message"),
                 },
             )
             self.context.decision_maker_message_queue.put_nowait(tx_msg)

@@ -15,7 +15,6 @@ message FIPAMessage{
     }
     message Propose{
         repeated bytes proposal = 1;
-        bytes tx_nonce=2;
     }
     message Accept{}
 

@@ -35,9 +35,6 @@ from web3 import HTTPProvider, Web3
 
 from aea.crypto.base import AddressLike, Crypto, LedgerApi
 from aea.mail.base import Address
-from aea.protocols.base import Message
-
-from packages.fetchai.protocols.fipa.message import FIPAMessage
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +136,7 @@ class EthereumCrypto(Crypto):
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
-        Generate a random str message in order to validate a transaction.
+        Generate a random str message.
 
         :param seller: the address of the seller.
         :param client: the address of the client.
@@ -148,7 +145,7 @@ class EthereumCrypto(Crypto):
         time_stamp = int(time.time())
         aggregate_hash = Web3.keccak(
             b"".join(
-                [seller.encode(), client.encode(), time_stamp.to_bytes(32, "big"),]
+                [seller.encode(), client.encode(), time_stamp.to_bytes(32, "big"), ]
             )
         )
         return aggregate_hash.hex()
@@ -265,16 +262,15 @@ class EthereumApi(LedgerApi):
             is_successful = True
         return is_successful
 
-    def validate_transaction(self, tx_digest: str, proposal_msg: Message) -> bool:
+    def validate_transaction(self, tx_digest: str, proposal: Dict[str, Any]) -> bool:
         """
         Check whether a transaction is valid or not.
 
-        :param proposal_msg:
-        :param identifier: the ledger identifier.
+        :param proposal: the proposal we did to the counterparty
         :param tx_digest: the transaction digest.
 
         :return: True if the random_message is equals to tx['input']
         """
-        msg = cast(FIPAMessage, proposal_msg)
+
         tx = self._api.eth.getTransaction(tx_digest)
-        return tx.get("input") == msg.tx_nonce
+        return tx.get("input") == proposal.get("tx_nonce")

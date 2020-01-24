@@ -218,7 +218,6 @@ class FIPAHandler(Handler):
                 )
             )
             info = msg.info
-            logger.info(info.get("random_message"))
             address = cast(str, info.get("address"))
             proposal = cast(Description, dialogue.proposal)
             tx_msg = TransactionMessage(
@@ -238,7 +237,6 @@ class FIPAHandler(Handler):
                 ledger_id=proposal.values["ledger_id"],
                 info={
                     "dialogue_label": dialogue.dialogue_label.json,
-                    "random_message": info.get("random_message"),
                 },
             )
             logger.info(tx_msg)

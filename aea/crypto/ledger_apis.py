@@ -22,12 +22,11 @@
 
 import logging
 import sys
-from typing import Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.crypto.fetchai import FETCHAI, FetchAIApi
-from aea.protocols.base import Message
 
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
@@ -193,19 +192,21 @@ class LedgerApis(object):
         return is_successful
 
     def is_tx_valid(
-        self, identifier: str, tx_digest: str, proposal_msg: Message
+        self, identifier: str, tx_digest: str, proposal: Dict[str, Any]
     ) -> bool:
         """
         Check whether the transaction is valid
+
+
         :param identifier: Ledger identifier
         :param tx_digest:  the transaction digest
-        :param proposal_msg: The proposal msg.
+        :param proposal: the proposal we made to the counterparty
         :return: True if is valide , False otherwise
         """
         assert identifier in self.apis.keys()
         api = self.apis[identifier]
         try:
-            is_valid = api.validate_transaction(tx_digest, proposal_msg)
+            is_valid = api.validate_transaction(tx_digest, proposal)
         except Exception:
             logger.warning(
                 "An error occured while attempting to validate the transaction."

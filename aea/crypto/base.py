@@ -21,10 +21,9 @@
 """Abstract module wrapping the public and private key cryptography and ledger api."""
 
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Optional, Union
+from typing import Any, BinaryIO, Dict, Optional, Union
 
 from aea.mail.base import Address
-from aea.protocols.base import Message
 
 AddressLike = Union[str, bytes]
 
@@ -168,11 +167,11 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def validate_transaction(self, tx_digest: str, proposal_msg: Message) -> bool:
+    def validate_transaction(self, tx_digest: str, proposal: Dict[str, Any]) -> bool:
         """
         Check whether a transaction is valid or not.
 
-        :param proposal_msg:
+        :param proposal: the proposal we made to the counterparty.
         :param tx_digest: the transaction digest.
 
         :return: True if the random_message is equals to tx['input']

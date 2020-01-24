@@ -39,8 +39,6 @@ from aea.crypto.ledger_apis import (
 )
 from aea.helpers.search.models import Description
 
-from packages.fetchai.protocols.fipa.message import FIPAMessage
-
 from ..conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
@@ -304,18 +302,9 @@ class TestLedgerApis:
         tx_nonce = seller.generate_tx_nonce(seller.address, client.address)
 
         proposal = [
-            Description({"foo1": 1, "bar1": 2}),
-            Description({"foo2": 1, "bar2": 2}),
+            Description({"foo1": 1, "bar1": 2, "tx_nonce": "This is a tx_nonce"}),
+            Description({"foo2": 1, "bar2": 2, "tx_nonce": "This is a tx_nonce"}),
         ]
-
-        msg = FIPAMessage(
-            message_id=0,
-            dialogue_reference=(str(0), ""),
-            target=0,
-            performative=FIPAMessage.Performative.PROPOSE,
-            proposal=proposal,
-            tx_nonce=tx_nonce,
-        )
 
         tx_digest = "0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4"
         result = AttributeDict(
@@ -350,5 +339,5 @@ class TestLedgerApis:
             return_value=result,
         ):
             assert ledger_apis.is_tx_valid(
-                identifier=ETHEREUM, tx_digest=tx_digest, proposal_msg=msg,
+                identifier=ETHEREUM, tx_digest=tx_digest, proposal=proposal[0].values,
             )

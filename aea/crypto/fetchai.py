@@ -22,13 +22,12 @@
 
 import logging
 from pathlib import Path
-from typing import BinaryIO, Optional, cast
+from typing import Any, BinaryIO, Dict, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.crypto import Address, Entity, Identity  # type: ignore
 
 from aea.crypto.base import AddressLike, Crypto, LedgerApi
-from aea.protocols.base import Message
 
 logger = logging.getLogger(__name__)
 
@@ -204,11 +203,11 @@ class FetchAIApi(LedgerApi):
             is_successful = True
         return is_successful
 
-    def validate_transaction(self, tx_digest: str, proposal_msg: Message) -> bool:
+    def validate_transaction(self, tx_digest: str, proposal: Dict[str, Any]) -> bool:
         """
         Check whether a transaction is valid or not.
 
-        :param proposal_msg:
+        :param proposal: the proposal we did to the counterparty.
         :param tx_digest: the transaction digest.
 
         :return: True if the random_message is equals to tx['input']

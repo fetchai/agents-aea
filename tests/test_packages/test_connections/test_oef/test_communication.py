@@ -497,7 +497,6 @@ class TestFIPA:
             target=0,
             performative=FIPAMessage.Performative.PROPOSE,
             proposal=[],
-            tx_nonce="this_is_a_nonce",
         )
         propose_empty.counterparty = self.crypto2.address
         self.multiplexer1.put(
@@ -523,7 +522,6 @@ class TestFIPA:
                     {"foo": "bar"}, DataModel("foobar", [Attribute("foo", str, True)])
                 )
             ],
-            tx_nonce="this_is_a_nonce",
         )
 
         propose_descriptions.counterparty = self.crypto2.address
