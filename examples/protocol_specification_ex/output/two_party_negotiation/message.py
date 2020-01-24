@@ -65,7 +65,9 @@ class TwoPartyNegotiationMessage(Message):
             performative=performative,
             **kwargs,
         )
-        assert self._check_consistency(), "This message is invalid according to the 'two_party_negotiation' protocol"
+        assert (
+            self._check_consistency()
+        ), "This message is invalid according to the 'two_party_negotiation' protocol"
 
     @property
     def valid_performatives(self) -> Set[str]:
@@ -111,9 +113,15 @@ class TwoPartyNegotiationMessage(Message):
     def _check_consistency(self) -> bool:
         """Check that the message follows the two_party_negotiation protocol."""
         try:
-            assert type(self.dialogue_reference) == tuple, "dialogue_reference must be 'tuple' but it is not."
-            assert type(self.dialogue_reference[0]) == str, "The first element of dialogue_reference must be 'str' but it is not."
-            assert type(self.dialogue_reference[1]) == str, "The second element of dialogue_reference must be 'str' but it is not."
+            assert (
+                type(self.dialogue_reference) == tuple
+            ), "dialogue_reference must be 'tuple' but it is not."
+            assert (
+                type(self.dialogue_reference[0]) == str
+            ), "The first element of dialogue_reference must be 'str' but it is not."
+            assert (
+                type(self.dialogue_reference[1]) == str
+            ), "The second element of dialogue_reference must be 'str' but it is not."
             assert type(self.message_id) == int, "message_id is not int"
             assert type(self.target) == int, "target is not int"
 
@@ -138,7 +146,10 @@ class TwoPartyNegotiationMessage(Message):
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
-            elif self.performative == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
+            elif (
+                self.performative
+                == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT
+            ):
                 expected_nb_of_contents = 0
 
             # # Check correct content count
