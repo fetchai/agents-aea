@@ -29,13 +29,8 @@ class TwoPartyNegotiationMessage(Message):
     protocol_id = "two_party_negotiation"
 
     _speech_acts = {
-        "cfp": {
-            "query": DataModel
-        },
-        "propose": {
-            "query": DataModel,
-            "price": float
-        },
+        "cfp": {"query": DataModel},
+        "propose": {"query": DataModel, "price": float},
         "accept": {},
         "decline": {},
         "match_accept": {},
@@ -96,16 +91,10 @@ class TwoPartyNegotiationMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def performative_raw(self) -> str:
-        """Get the performative of the message."""
-        assert self.is_set("performative"), "performative is not set"
-        return cast(str, self.get("performative"))
-
-    @property
     def performative(self) -> Performative:
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set"
-        return TwoPartyNegotiationMessage.Performative(self.get("performative"))
+        return cast(TwoPartyNegotiationMessage.Performative, self.get("performative"))
 
     @property
     def query(self) -> DataModel:
@@ -127,17 +116,16 @@ class TwoPartyNegotiationMessage(Message):
             assert type(self.dialogue_reference[1]) == str, "The second element of dialogue_reference must be 'str' but it is not."
             assert type(self.message_id) == int, "message_id is not int"
             assert type(self.target) == int, "target is not int"
-            assert type(self.performative_raw) == str, "performative is not str"
 
             # Light Protocol 2
-            # Check correct performative
+            # # Check correct performative
             assert (
-                self.performative_raw in self.valid_performatives
+                type(self.performative) == TwoPartyNegotiationMessage.Performative
             ), "'{}' is not in the list of valid performatives: {}".format(
-                self.performative_raw, self.valid_performatives
+                self.performative, self.valid_performatives
             )
 
-            # Check correct contents
+            # # Check correct contents
             actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE
             if self.performative == TwoPartyNegotiationMessage.Performative.CFP:
                 expected_nb_of_contents = 1
@@ -153,7 +141,7 @@ class TwoPartyNegotiationMessage(Message):
             elif self.performative == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
                 expected_nb_of_contents = 0
 
-            # Check body size
+            # # Check correct content count
             assert (
                 expected_nb_of_contents == actual_nb_of_contents
             ), "Incorrect number of contents. Expected {} contents. Found {}".format(

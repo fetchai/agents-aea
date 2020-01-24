@@ -84,19 +84,17 @@ class ProtocolGenerator:
         """
         speech_act_str = "{\n"
         for (
-            performative,
-            speech_act_content_config,
+                performative,
+                speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
             speech_act_str += '        \"{}\": {{'.format(performative)
             if len(speech_act_content_config.args.items()) > 0:
-                speech_act_str += '\n'
                 for key, value in speech_act_content_config.args.items():
-                    speech_act_str += '            \"{}\": {},\n'.format(key, value)
+                    speech_act_str += '\"{}\": {}, '.format(key, value)
                 speech_act_str = speech_act_str[:-2]
-                speech_act_str += "\n"
-                speech_act_str += "        "
             speech_act_str += "},\n"
-        speech_act_str += "    }"
+        speech_act_str = speech_act_str[:-1]
+        speech_act_str += "\n    }"
         return speech_act_str
 
     def _custom_types_classes_str(self) -> str:
@@ -118,7 +116,9 @@ class ProtocolGenerator:
                 type_set.add(content_type)
                 if content_type not in DEFAULT_TYPES:
                     custom_types_set.add(content_type)
-
+        # If no custom class, avoid extra spaces after last custom class
+        if len(custom_types_set)==0:
+            return cls_str
         # class code per custom type
         for custom_type in custom_types_set:
             cls_str += str.format("class {}:\n", custom_type)
@@ -135,8 +135,7 @@ class ProtocolGenerator:
             cls_str += "        if type(other) is type(self):\n"
             cls_str += "            raise NotImplementedError\n"
             cls_str += "        else:\n"
-            cls_str += "            return False"
-
+            cls_str += "            return False\n\n\n"
         return cls_str
 
     def _performatives_enum_str(self) -> str:
@@ -190,7 +189,7 @@ class ProtocolGenerator:
 
         # Custom classes
         cls_str += self._custom_types_classes_str()
-        cls_str += "\n\n\n"
+        # cls_str += "\n\n\n"
 
         # Class Header
         cls_str += str.format(
@@ -251,19 +250,12 @@ class ProtocolGenerator:
         cls_str += '        assert self.is_set("target"), "target is not set."\n'
         cls_str += '        return cast(int, self.get("target"))\n\n'
         cls_str += "    @property\n"
-        cls_str += "    def performative_raw(self) -> str:\n"
-        cls_str += '        """Get the performative of the message."""\n'
-        cls_str += (
-            '        assert self.is_set("performative"), "performative is not set"\n'
-        )
-        cls_str += '        return cast(str, self.get("performative"))\n\n'
-        cls_str += "    @property\n"
         cls_str += "    def performative(self) -> Performative:\n"
         cls_str += '        """Get the performative of the message."""\n'
         cls_str += (
             '        assert self.is_set("performative"), "performative is not set"\n'
         )
-        cls_str += '        return {}Message.Performative(self.get("performative"))\n\n'.format(to_camel_case(self.protocol_specification.name))
+        cls_str += '        return cast({}Message.Performative, self.get("performative"))\n\n'.format(to_camel_case(self.protocol_specification.name))
 
         all_contents = self._extract_all_contents()
         covered = []  # type: List[str]
@@ -295,23 +287,22 @@ class ProtocolGenerator:
         )
         cls_str += "        try:\n"
 
-        cls_str += '            assert type(self.dialogue_reference) == tuple, "dialogue_reference must be \'tuple\' but it is not."\n'
-        cls_str += '            assert type(self.dialogue_reference[0]) == str, "The first element of dialogue_reference must be \'str\' but it is not."\n'
-        cls_str += '            assert type(self.dialogue_reference[1]) == str, "The second element of dialogue_reference must be \'str\' but it is not."\n'
+        cls_str += "            assert type(self.dialogue_reference) == tuple, \"dialogue_reference must be 'tuple' but it is not.\"\n"
+        cls_str += "            assert type(self.dialogue_reference[0]) == str, \"The first element of dialogue_reference must be 'str' but it is not.\"\n"
+        cls_str += "            assert type(self.dialogue_reference[1]) == str, \"The second element of dialogue_reference must be 'str' but it is not.\"\n"
         cls_str += (
             '            assert type(self.message_id) == int, "message_id is not int"\n'
         )
-        cls_str += '            assert type(self.target) == int, "target is not int"\n'
-        cls_str += '            assert type(self.performative_raw) == str, "performative is not str"\n\n'
+        cls_str += '            assert type(self.target) == int, "target is not int"\n\n'
 
         cls_str += "            # Light Protocol 2\n"
-        cls_str += "            # Check correct performative\n"
-        cls_str += "            assert (\n"
-        cls_str += "                self.performative_raw in self.valid_performatives\n"
-        cls_str += "            ), \"'{}' is not in the list of valid performatives: {}\".format(\n"
-        cls_str += "                self.performative_raw, self.valid_performatives\n"
-        cls_str += "            )\n\n"
-        cls_str += "            # Check correct contents\n"
+        cls_str += "            # # Check correct performative\n"
+        cls_str += '            assert (\n'
+        cls_str += '                type(self.performative) == {}Message.Performative\n'.format(to_camel_case(self.protocol_specification.name))
+        cls_str += '            ), "\'{}\' is not in the list of valid performatives: {}".format(\n'
+        cls_str += '                self.performative, self.valid_performatives\n'
+        cls_str += '            )\n\n'
+        cls_str += "            # # Check correct contents\n"
         cls_str += (
             "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
         )
@@ -321,30 +312,21 @@ class ProtocolGenerator:
                 cls_str += '            if self.performative == {}Message.Performative.{}:\n'.format(
                     to_camel_case(self.protocol_specification.name), performative.upper()
                 )
-                cls_str += "                expected_nb_of_contents = {}\n".format(
-                    len(contents)
-                )
-                if len(contents) == 0:
-                    continue
-                for content_name, content_type in contents.items():
-                    cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
-                        content_name, content_type, content_name, content_type
-                    )
             else:
                 cls_str += '            elif self.performative == {}Message.Performative.{}:\n'.format(
                     to_camel_case(self.protocol_specification.name), performative.upper()
                 )
-                cls_str += "                expected_nb_of_contents = {}\n".format(
-                    len(contents)
+            cls_str += "                expected_nb_of_contents = {}\n".format(
+                len(contents)
+            )
+            if len(contents) == 0:
+                continue
+            for content_name, content_type in contents.items():
+                cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
+                    content_name, content_type, content_name, content_type
                 )
-                if len(contents) == 0:
-                    continue
-                for content_name, content_type in contents.items():
-                    cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
-                        content_name, content_type, content_name, content_type
-                    )
             counter += 1
-        cls_str += "\n            # Check body size\n"
+        cls_str += "\n            # # Check correct content count\n"
         cls_str += "            assert (\n"
         cls_str += "                expected_nb_of_contents == actual_nb_of_contents\n"
         cls_str += '            ), "Incorrect number of contents. Expected {} contents. Found {}".format(\n'
