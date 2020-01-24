@@ -38,8 +38,7 @@ Second, add the ledger info to the aea config:
 ``` bash
 ledger_apis:
   fetchai:
-    address: testnet.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 Alternatively to the previous two steps, simply run:
@@ -64,8 +63,7 @@ Second, add the ledger info to the aea config:
 ``` bash
 ledger_apis:
   fetchai:
-    address: testnet.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 Alternatively to the previous two steps, simply run:

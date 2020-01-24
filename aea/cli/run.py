@@ -186,7 +186,7 @@ def _verify_ledger_apis_access() -> None:
         logger.debug("No fetchai ledger api config specified.")
     else:
         network = cast(str, fetchai_ledger_api_config.get("network"))
-        addr = cast(str, fetchai_ledger_api_config.get("addr"))
+        addr = cast(str, fetchai_ledger_api_config.get("address"))
         port = cast(int, fetchai_ledger_api_config.get("port"))
         if network is not None:
             _try_to_instantiate_fetchai_ledger_api(network=network)

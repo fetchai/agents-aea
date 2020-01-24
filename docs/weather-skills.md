@@ -156,8 +156,7 @@ Both in `my_weather_station/aea-config.yaml` and
 ``` yaml
 ledger_apis:
   fetchai:
-    address: testnet.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 ### Fund the weather client AEA

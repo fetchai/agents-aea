@@ -221,7 +221,7 @@ def get_address(ctx: Context, type_):
     try:
         wallet = Wallet(private_key_paths)
         address = wallet.addresses[type_]
-        logger.info("Your address is: {}".format(address))
+        logger.info("{}".format(address))
     except ValueError as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
 
@@ -258,7 +258,7 @@ def get_wealth(ctx: Context, type_):
 
         address = wallet.addresses[type_]
         balance = ledger_apis.token_balance(type_, address)
-        logger.info("Your wealth for address {} is: {}".format(address, balance))
+        logger.info("The wealth for address {} is: {}".format(address, balance))
     except (AssertionError, ValueError) as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
 
@@ -272,7 +272,7 @@ def get_wealth(ctx: Context, type_):
 )
 @pass_ctx
 def generate_wealth(ctx: Context, type_):
-    """For the specified test network generate wealth for address."""
+    """Generate wealth for address on test network."""
     try_to_load_agent_config(ctx)
 
     _verify_or_create_private_keys(ctx)
