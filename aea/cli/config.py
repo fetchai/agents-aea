@@ -29,7 +29,6 @@ import yaml
 
 from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
 from aea.configurations.base import (
-    ConfigurationType,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -37,7 +36,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.loader import ConfigLoader
 
-ALLOWED_PATH_ROOTS = ["agent", "skills", "protocols", "connections"]
+ALLOWED_PATH_ROOTS = ["agent", "skills", "protocols", "connections", "vendor"]
 RESOURCE_TYPE_TO_CONFIG_FILE = {
     "skills": DEFAULT_SKILL_CONFIG_FILE,
     "protocols": DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -58,6 +57,7 @@ class AEAJsonPathType(click.ParamType):
             'protocols.my_protocol.an_attribute_name'
             'connections.my_connection.an_attribute_name'
             'skills.my_skill.an_attribute_name'
+            'vendor.author.[protocols|connections|skills].package_name.attribute_name
         """
         parts = value.split(".")
 
@@ -73,6 +73,8 @@ class AEAJsonPathType(click.ParamType):
             len(parts) < 1
             or parts[0] == "agent"
             and len(parts) < 2
+            or parts[0] == "vendor"
+            and len(parts) < 5
             or parts[0] != "agent"
             and len(parts) < 3
         ):
@@ -82,37 +84,54 @@ class AEAJsonPathType(click.ParamType):
 
         # if the root is 'agent', stop.
         if root == "agent":
-            config_loader = ConfigLoader.from_configuration_type(
-                ConfigurationType.AGENT
-            )
+            resource_type_plural = "agents"
             path_to_resource_configuration = DEFAULT_AEA_CONFIG_FILE
-            ctx.obj.set_config(
-                "configuration_file_path", path_to_resource_configuration
+            json_path = parts[1:]
+        elif root == "vendor":
+            resource_author = parts[1]
+            resource_type_plural = parts[2]
+            resource_name = parts[3]
+            path_to_resource_directory = (
+                Path(".")
+                / "vendor"
+                / resource_author
+                / resource_type_plural
+                / resource_name
             )
-            ctx.obj.set_config("configuration_loader", config_loader)
-            return parts[1:]
+            path_to_resource_configuration = (
+                path_to_resource_directory
+                / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
+            )
+            json_path = parts[4:]
+            if not path_to_resource_directory.exists():
+                self.fail(
+                    "Resource vendor/{}/{}/{} does not exist.".format(
+                        resource_author, resource_type_plural, resource_name
+                    )
+                )
         else:
             # navigate the resources of the agent to reach the target configuration file.
-            resource_type = root
+            resource_type_plural = root
             resource_name = parts[1]
-            path_to_resource_directory = Path(".") / resource_type / resource_name
+            path_to_resource_directory = (
+                Path(".") / resource_type_plural / resource_name
+            )
+            path_to_resource_configuration = (
+                path_to_resource_directory
+                / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
+            )
+            json_path = parts[2:]
             if not path_to_resource_directory.exists():
                 self.fail(
                     "Resource {}/{} does not exist.".format(
-                        resource_type, resource_name
+                        resource_type_plural, resource_name
                     )
                 )
-            path_to_resource_configuration = (
-                path_to_resource_directory / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type]
-            )
-            config_loader = ConfigLoader.from_configuration_type(
-                ConfigurationType(root[:-1])
-            )
-            ctx.obj.set_config(
-                "configuration_file_path", path_to_resource_configuration
-            )
-            ctx.obj.set_config("configuration_loader", config_loader)
-            return parts[2:]
+
+        config_loader = ConfigLoader.from_configuration_type(resource_type_plural[:-1])
+        ctx.obj.set_config("configuration_file_path", path_to_resource_configuration)
+        ctx.obj.set_config("configuration_loader", config_loader)
+        return json_path
 
 
 def _get_parent_object(obj: dict, dotted_path: List[str]):
