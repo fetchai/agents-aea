@@ -46,10 +46,10 @@ flask = "*"
 connexion = ">=2.4.0"
 watchdog = "*"
 python-dotenv = "*"
-fetchai-ledger-api = "==0.8.1"
 web3 = "==5.2.2"
 eth-account = "==0.4.0"
-fetch-p2p-api = {index = "https://test.pypi.org/simple/",version = "==0.0.1"}
+fetchai-ledger-api = "==1.0.0rc1"
+fetch-p2p-api = {index = "https://test.pypi.org/simple/",version = "==0.0.2"}
 
 [requires]
 python_version = "3.7"

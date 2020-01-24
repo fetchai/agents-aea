@@ -61,9 +61,11 @@ class LedgerApis(object):
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
             if identifier == FETCHAI:
-                addr = cast(str, config[0])
-                port = cast(int, config[1])
-                api = FetchAIApi(addr, port)  # type: LedgerApi
+                if len(config) == 1:
+                    kwargs = {"network": config[0]}
+                elif len(config) == 2:
+                    kwargs = {"host": config[1], "port": config[0]}
+                api = FetchAIApi(**kwargs)  # type: LedgerApi
                 apis[identifier] = api
                 configs[identifier] = config
             elif identifier == ETHEREUM:
@@ -192,19 +194,20 @@ class LedgerApis(object):
         return is_successful
 
 
-def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
+def _try_to_instantiate_fetchai_ledger_api(**kwargs) -> None:
     """
     Try to instantiate the fetchai ledger api.
 
-    :param addr: the address
-    :param port: the port
+    :param kwargs: the keyword arguments
     """
     try:
         from fetchai.ledger.api import LedgerApi
 
-        LedgerApi(addr, port)
-    except Exception:
-        logger.error("Cannot connect to fetchai ledger with provided config.")
+        LedgerApi(**kwargs)
+    except Exception as e:
+        logger.error(
+            "Cannot connect to fetchai ledger with provided config:\n{}".format(e)
+        )
         sys.exit(1)
 
 

@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 FETCHAI = "fetchai"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
-DEFAULT_FETCHAI_CONFIG = ("alpha.fetch-ai.com", 80)
+DEFAULT_FETCHAI_CONFIG = ("testnet.fetch-ai.com", 80)
 
 
 class FetchAICrypto(Crypto):
@@ -159,14 +159,13 @@ class FetchAIApi(LedgerApi):
 
     identifier = FETCHAI
 
-    def __init__(self, host: str, port: int):
+    def __init__(self, **kwargs):
         """
         Initialize the Fetch.AI ledger APIs.
 
-        :param host: URL to the server.
-        :param port: the listening port.
+        :param kwargs: key word arguments (expects either a pair of 'address' and 'port' or a 'network')
         """
-        self._api = FetchaiLedgerApi(host, port)
+        self._api = FetchaiLedgerApi(**kwargs)
 
     @property
     def api(self) -> FetchaiLedgerApi:

@@ -156,7 +156,7 @@ Both in `my_weather_station/aea-config.yaml` and
 ``` yaml
 ledger_apis:
   fetchai:
-    address: alpha.fetch-ai.com
+    address: testnet.fetch-ai.com
     port: 80
 ```
 
@@ -164,9 +164,7 @@ ledger_apis:
 
 Create some wealth for your weather client on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
-cd ..
-python scripts/fetchai_wealth_generation.py --private-key my_weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
-cd my_weather_client
+aea generate-wealth fetchai
 ```
 
 ### Update the skill configs
