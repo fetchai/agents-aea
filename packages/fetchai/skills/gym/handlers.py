@@ -22,7 +22,6 @@
 import logging
 from typing import cast
 
-from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -35,7 +34,7 @@ logger = logging.getLogger("aea.gym_skill")
 class GymHandler(Handler):
     """Gym handler."""
 
-    SUPPORTED_PROTOCOL = PublicId("fetchai", "gym", "0.1.0")
+    SUPPORTED_PROTOCOL = GymMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

@@ -22,7 +22,7 @@ import base64
 import logging
 from typing import Optional
 
-from aea.configurations.base import ProtocolId, PublicId
+from aea.configurations.base import ProtocolId
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -35,9 +35,7 @@ logger = logging.getLogger(__name__)
 class ErrorHandler(Handler):
     """This class implements the error handler."""
 
-    SUPPORTED_PROTOCOL = PublicId(
-        "fetchai", "default", "0.1.0"
-    )  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """

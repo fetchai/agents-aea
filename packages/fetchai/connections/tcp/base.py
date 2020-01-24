@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class TCPConnection(Connection, ABC):
     """Abstract TCP connection."""
 
-    def __init__(self, address: Address, host: str, port: int, **kwargs):
+    def __init__(self, address: Address, host: str, port: int, *args, **kwargs):
         """
         Initialize the TCP connection.
 
@@ -42,7 +42,7 @@ class TCPConnection(Connection, ABC):
         :param host: the host to connect to.
         :param port: the port to connect to.
         """
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self.address = address
 
         self.host = host

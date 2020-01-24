@@ -24,14 +24,15 @@ from concurrent.futures import Executor
 from typing import List, Optional, cast
 
 from aea.agent import Agent
-from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import Filter, Resources
+from aea.skills.error import ERROR_SKILL_ID
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
 
@@ -178,8 +179,7 @@ class AEA(Agent):
 
         # TODO make this working for different skill/protocol versions.
         error_handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
-            PublicId.from_string("fetchai/default:0.1.0"),
-            PublicId.from_string("fetchai/error:0.1.0"),
+            DefaultMessage.protocol_id, ERROR_SKILL_ID,
         )
 
         assert error_handler is not None, "ErrorHandler not initialized"

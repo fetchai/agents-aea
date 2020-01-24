@@ -77,7 +77,7 @@ class ErrorHandler(Handler):
         self.context.outbox.put_message(
             to=envelope.sender,
             sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id.json,
+            protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(reply),
         )
 
@@ -99,7 +99,7 @@ class ErrorHandler(Handler):
         self.context.outbox.put_message(
             to=envelope.sender,
             sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id.json,
+            protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(reply),
         )
 
@@ -121,7 +121,7 @@ class ErrorHandler(Handler):
         self.context.outbox.put_message(
             to=envelope.sender,
             sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id.json,
+            protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(reply),
         )
 
@@ -147,6 +147,6 @@ class ErrorHandler(Handler):
         self.context.outbox.put_message(
             to=envelope.sender,
             sender=self.context.agent_address,
-            protocol_id=DefaultMessage.protocol_id.json,
+            protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(reply),
         )

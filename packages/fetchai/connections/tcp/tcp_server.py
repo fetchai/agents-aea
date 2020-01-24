@@ -39,14 +39,14 @@ STUB_DIALOGUE_ID = 0
 class TCPServerConnection(TCPConnection):
     """This class implements a TCP server."""
 
-    def __init__(self, address: Address, host: str, port: int, **kwargs):
+    def __init__(self, address: Address, host: str, port: int, *args, **kwargs):
         """
         Initialize a TCP channel.
 
         :param address: address.
         :param host: the socket bind address.
         """
-        super().__init__(address, host, port, **kwargs)
+        super().__init__(address, host, port, *args, **kwargs)
 
         self._server = None  # type: Optional[AbstractServer]
         self.connections = {}  # type: Dict[str, Tuple[StreamReader, StreamWriter]]

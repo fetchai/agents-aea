@@ -31,10 +31,12 @@ from fetchai.ledger.crypto import entity
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
 
 from packages.fetchai.connections.p2p.connection import PeerToPeerConnection
+
+from ...conftest import P2P_CONNECTION_PUBLIC_ID, UNKNOWN_PROTOCOL_PUBLIC_ID
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +56,7 @@ class TestP2p:
             address=cls.ent.public_key_hex,
             provider_addr=cls.address,
             provider_port=cls.port,
-            connection_id=PublicId("fetchai", "p2p", "0.1.0"),
+            connection_id=P2P_CONNECTION_PUBLIC_ID,
         )
         cls.p2p_connection.loop = asyncio.get_event_loop()
 
@@ -79,7 +81,7 @@ class TestP2p:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id="author/protocol:0.1.0",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=b"Hello",
         )
         with mock.patch.object(
@@ -116,7 +118,7 @@ async def test_p2p_receive():
         address=ent.public_key_hex,
         provider_addr=address,
         provider_port=port,
-        connection_id=PublicId("fetchai", "p2p", "0.1.0"),
+        connection_id=P2P_CONNECTION_PUBLIC_ID,
     )
     p2p_connection.loop = asyncio.get_event_loop()
 

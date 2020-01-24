@@ -24,7 +24,6 @@ from pathlib import Path
 from threading import Thread
 
 from aea.aea import AEA
-from aea.configurations.base import PublicId
 from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -42,7 +41,7 @@ from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
 
-from ..conftest import CUR_PATH, DummyConnection
+from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
 
 class TestSkillError:
@@ -58,9 +57,7 @@ class TestSkillError:
         cls.agent_name = "Agent0"
         cls.address = cls.wallet.addresses["default"]
 
-        cls.connection = DummyConnection(
-            connection_id=PublicId("dummy_author", "dummy", "0.1.0")
-        )
+        cls.connection = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
         cls.connections = [cls.connection]
         cls.my_aea = AEA(
             cls.agent_name,

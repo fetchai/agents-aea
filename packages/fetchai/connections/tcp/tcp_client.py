@@ -39,7 +39,7 @@ STUB_DIALOGUE_ID = 0
 class TCPClientConnection(TCPConnection):
     """This class implements a TCP client."""
 
-    def __init__(self, address: Address, host: str, port: int, **kwargs):
+    def __init__(self, address: Address, host: str, port: int, *args, **kwargs):
         """
         Initialize a TCP channel.
 
@@ -48,7 +48,7 @@ class TCPClientConnection(TCPConnection):
         :param port: the socket bind port.
         :param connection_id: the identifier for the connection object.
         """
-        super().__init__(address, host, port, **kwargs)
+        super().__init__(address, host, port, *args, **kwargs)
 
         self._reader, self._writer = (
             None,

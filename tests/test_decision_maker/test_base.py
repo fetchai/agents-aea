@@ -41,7 +41,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
-from ..conftest import CUR_PATH, DummyConnection
+from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
 MAX_REACTIONS = 10
 
@@ -448,7 +448,7 @@ class TestDecisionMaker:
         """Initialise the decision maker."""
         cls._patch_logger()
         cls.multiplexer = Multiplexer(
-            [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+            [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
         )
         cls.outbox = OutBox(cls.multiplexer)
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")

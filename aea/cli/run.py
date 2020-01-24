@@ -325,7 +325,7 @@ def run(
     wallet = Wallet(private_key_paths)
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
-    default_connection_id = PublicId.from_string(ctx.agent_config.default_connection)
+    default_connection_id = PublicId.from_str(ctx.agent_config.default_connection)
     connection_ids = (
         [default_connection_id] if connection_ids is None else connection_ids
     )

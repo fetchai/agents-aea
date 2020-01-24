@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
 from threading import Lock, Thread
-from typing import Dict, List, Optional, Sequence, Tuple, Union, cast
+from typing import Dict, List, Optional, Sequence, Tuple, cast
 from urllib.parse import urlparse
 
 from aea.configurations.base import ProtocolId, PublicId
@@ -198,7 +198,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
 
         to = envelope_pb.to
         sender = envelope_pb.sender
-        protocol_id = envelope_pb.protocol_id
+        protocol_id = PublicId.from_str(envelope_pb.protocol_id)
         message = envelope_pb.message
 
         envelope = Envelope(
@@ -219,7 +219,7 @@ class Envelope:
         self,
         to: Address,
         sender: Address,
-        protocol_id: Union[ProtocolId, str, Dict],
+        protocol_id: ProtocolId,
         message: bytes,
         context: Optional[EnvelopeContext] = None,
     ):
@@ -231,13 +231,6 @@ class Envelope:
         :param protocol_id: the protocol id.
         :param message: the protocol-specific message
         """
-        protocol_id = (
-            PublicId.from_string(protocol_id)
-            if isinstance(protocol_id, str)
-            else PublicId.from_json(protocol_id)
-            if isinstance(protocol_id, dict)
-            else protocol_id
-        )
         self._to = to
         self._sender = sender
         self._protocol_id = protocol_id

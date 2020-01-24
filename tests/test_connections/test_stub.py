@@ -141,7 +141,7 @@ class TestStubConnection:
         to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
-        protocol_id = protocol_id.decode("utf-8")
+        protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
 
         actual_envelope = Envelope(
             to=to, sender=sender, protocol_id=protocol_id, message=message

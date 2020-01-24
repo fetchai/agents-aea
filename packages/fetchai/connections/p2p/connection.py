@@ -131,7 +131,7 @@ class PeerToPeerChannel:
                 envelope = Envelope(
                     to=message["TO"]["RECEIVER_ADDRESS"],
                     sender=message["FROM"]["SENDER_ADDRESS"],
-                    protocol_id=PublicId.from_string(message["PROTOCOL"]),
+                    protocol_id=PublicId.from_str(message["PROTOCOL"]),
                     message=message["PAYLOAD"],
                 )
                 self.loop.call_soon_threadsafe(self.in_queue.put_nowait, envelope)

@@ -21,7 +21,6 @@
 
 import logging
 
-from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -33,7 +32,7 @@ logger = logging.getLogger("aea.echo_skill")
 class EchoHandler(Handler):
     """Echo handler."""
 
-    SUPPORTED_PROTOCOL = PublicId("fetchai", "default", "0.1.0")
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

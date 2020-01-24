@@ -81,7 +81,7 @@ class TransactionMessage(InternalMessage):
         skill_callback_ids = [
             public_id
             if isinstance(public_id, PublicId)
-            else PublicId.from_string(public_id)
+            else PublicId.from_str(public_id)
             for public_id in skill_callback_ids
         ]
         super().__init__(

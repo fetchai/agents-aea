@@ -40,7 +40,7 @@ from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import ProtocolRegistry, Resources
 
-from .conftest import CUR_PATH, DummyConnection
+from .conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
 
 class TestProtocolRegistry:
@@ -60,7 +60,7 @@ class TestProtocolRegistry:
         os.chdir(cls.agent_folder)
 
         # make fake protocol
-        cls.fake_protocol_id = PublicId.from_string("fake_author/fake:0.1.0")
+        cls.fake_protocol_id = PublicId.from_str("fake_author/fake:0.1.0")
         agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
         agent_config = yaml.safe_load(agent_config_path.read_text())
         agent_config.get("protocols").append(str(cls.fake_protocol_id))
@@ -88,7 +88,7 @@ class TestProtocolRegistry:
 
     def test_unregister(self):
         """Test that the 'unregister' method works as expected."""
-        protocol_id_removed = PublicId.from_string("fetchai/default:0.1.0")
+        protocol_id_removed = PublicId.from_str("fetchai/default:0.1.0")
         protocol_removed = self.registry.fetch(protocol_id_removed)
         self.registry.unregister(protocol_id_removed)
         expected_protocols_ids = set(self.expected_protocol_ids)
@@ -140,19 +140,17 @@ class TestResources:
         os.chdir(cls.agent_folder)
 
         cls.error_skill_public_id = PublicId("fetchai", "error", "0.1.0")
-        cls.dummy_skill_public_id = PublicId.from_string("dummy_author/dummy:0.1.0")
+        cls.dummy_skill_public_id = PublicId.from_str("dummy_author/dummy:0.1.0")
 
         # # make fake skill
-        cls.fake_skill_id = PublicId.from_string("fake_author/fake:0.1.0")
+        cls.fake_skill_id = PublicId.from_str("fake_author/fake:0.1.0")
         agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
         agent_config = yaml.safe_load(agent_config_path.read_text())
         agent_config.get("skills").append(str(cls.fake_skill_id))
         yaml.safe_dump(agent_config, open(agent_config_path, "w"))
         Path(cls.agent_folder, "skills", cls.fake_skill_id.name).mkdir()
 
-        connections = [
-            DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))
-        ]
+        connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
@@ -380,9 +378,7 @@ class TestFilter:
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
         os.chdir(cls.agent_folder)
 
-        connections = [
-            DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))
-        ]
+        connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")

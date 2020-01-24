@@ -987,7 +987,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = PublicId.from_string("fetchai/local:0.1.0")
+        cls.connection_id = PublicId.from_str("fetchai/local:0.1.0")
         cls.connection_name = cls.connection_id.name
         cls.connection_author = cls.connection_id.author
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
@@ -1052,7 +1052,7 @@ class TestRunFailsWhenConnectionNotComplete:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = PublicId.from_string("fetchai/local:0.1.0")
+        cls.connection_id = PublicId.from_str("fetchai/local:0.1.0")
         cls.connection_author = cls.connection_id.author
         cls.connection_name = cls.connection_id.name
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")

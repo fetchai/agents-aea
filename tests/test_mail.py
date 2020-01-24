@@ -34,7 +34,11 @@ from aea.protocols.default.serialization import DefaultSerializer
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 
-from .conftest import DummyConnection
+from .conftest import (
+    DUMMY_CONNECTION_PUBLIC_ID,
+    DummyConnection,
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
+)
 
 
 def test_uri():
@@ -61,14 +65,14 @@ def test_envelope_initialisation():
     assert Envelope(
         to="Agent1",
         sender="Agent0",
-        protocol_id="author_example/my_own_protocol:0.1.0",
+        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
         message=message_bytes,
     ), "Cannot generate a new envelope"
 
     envelope = Envelope(
         to="Agent1",
         sender="Agent0",
-        protocol_id="author_example/my_own_protocol:0.1.0",
+        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
         message=message_bytes,
     )
 
@@ -88,7 +92,7 @@ def test_envelope_initialisation():
 def test_inbox_empty():
     """Tests if the inbox is empty."""
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     )
     _inbox = InBox(multiplexer)
     assert _inbox.empty(), "Inbox is not empty"
@@ -99,12 +103,12 @@ def test_inbox_nowait():
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     )
     envelope = Envelope(
         to="Agent1",
         sender="Agent0",
-        protocol_id="author_example/my_own_protocol:0.1.0",
+        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
         message=message_bytes,
     )
     multiplexer.in_queue.put(envelope)
@@ -119,12 +123,12 @@ def test_inbox_get():
     msg = Message(content="hello")
     message_bytes = ProtobufSerializer().encode(msg)
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     )
     envelope = Envelope(
         to="Agent1",
         sender="Agent0",
-        protocol_id="author_example/my_own_protocol:0.1.0",
+        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
         message=message_bytes,
     )
     multiplexer.in_queue.put(envelope)
@@ -138,7 +142,7 @@ def test_inbox_get():
 def test_inbox_get_raises_exception_when_empty():
     """Test that getting an envelope from an empty inbox raises an exception."""
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     )
     inbox = InBox(multiplexer)
 
@@ -151,7 +155,7 @@ def test_inbox_get_nowait_returns_none():
     """Test that getting an envelope from an empty inbox returns None."""
     # TODO get_nowait in this case should raise an exception, like it's done in queue.Queue
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     )
     inbox = InBox(multiplexer)
     assert inbox.get_nowait() is None
@@ -162,7 +166,7 @@ def test_outbox_put():
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     message_bytes = DefaultSerializer().encode(msg)
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     )
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
@@ -184,7 +188,7 @@ def test_outbox_put_message():
     msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     message_bytes = DefaultSerializer().encode(msg)
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     )
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
@@ -198,7 +202,7 @@ def test_outbox_put_message():
 def test_outbox_empty():
     """Test thet the outbox queue is empty."""
     multiplexer = Multiplexer(
-        [DummyConnection(connection_id=PublicId("dummy_author", "dummy", "0.1.0"))]
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     )
     multiplexer.connect()
     outbox = OutBox(multiplexer)

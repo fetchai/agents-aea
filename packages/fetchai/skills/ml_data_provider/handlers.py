@@ -22,7 +22,6 @@
 import logging
 from typing import cast
 
-from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -36,7 +35,7 @@ logger = logging.getLogger("aea.ml_data_provider")
 class MLTradeHandler(Handler):
     """ML trade handler."""
 
-    SUPPORTED_PROTOCOL = PublicId("fetchai", "ml_trade", "0.1.0")
+    SUPPORTED_PROTOCOL = MLTradeMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

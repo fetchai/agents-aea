@@ -28,7 +28,7 @@ from typing import Optional, Union
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
@@ -69,7 +69,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 
     to = split[0].decode("utf-8").strip()
     sender = split[1].decode("utf-8").strip()
-    protocol_id = split[2].decode("utf-8").strip()
+    protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
     message = split[3]
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)

@@ -31,6 +31,8 @@ from aea.protocols.base import (
     Serializer,
 )
 
+from ..conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
+
 
 class TestBaseSerializations:
     """Test that the base serializations work."""
@@ -47,7 +49,7 @@ class TestBaseSerializations:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id="author/my_own_protocol:0.1.0",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -66,7 +68,7 @@ class TestBaseSerializations:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id="author/my_own_protocol:0.1.0",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -104,7 +106,7 @@ class TestBaseSerializations:
     def test_protocols_config(self):
         """Test the protocol config."""
         protocol = Protocol(
-            protocol_id=PublicId.from_string("author/my_own_protocol:0.1.0"),
+            protocol_id=PublicId.from_str("author/my_own_protocol:0.1.0"),
             serializer=cast(Serializer, ProtobufSerializer),
             config=ProtocolConfig(),
         )

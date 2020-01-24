@@ -60,12 +60,10 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_VERSION = "0.1.0"
-DEFAULT_CONNECTION = PublicId.from_string(
+DEFAULT_CONNECTION = PublicId.from_str(
     "fetchai/stub:" + DEFAULT_VERSION
 )  # type: PublicId
-DEFAULT_SKILL = PublicId.from_string(
-    "fetchai/error:" + DEFAULT_VERSION
-)  # type: PublicId
+DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 
@@ -312,7 +310,7 @@ class ConnectionsOption(click.Option):
             # remove duplicates, while preserving the order
             result = OrderedDict()  # type: OrderedDict[PublicId, None]
             for connection_id_string in input_connection_ids:
-                connection_public_id = PublicId.from_string(connection_id_string)
+                connection_public_id = PublicId.from_str(connection_id_string)
                 result[connection_public_id] = None
             return list(result.keys())
         except Exception:  # pragma: no cover
@@ -337,7 +335,7 @@ class PublicIdParameter(click.ParamType):
     def convert(self, value, param, ctx):
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""
         try:
-            return PublicId.from_string(value)
+            return PublicId.from_str(value)
         except ValueError:
             raise click.BadParameter(value)
 
