@@ -27,7 +27,13 @@ import click
 
 import yaml
 
-from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config, from_string_to_type
+from aea.cli.common import (
+    Context,
+    from_string_to_type,
+    logger,
+    pass_ctx,
+    try_to_load_agent_config,
+)
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
@@ -199,8 +205,12 @@ def get(ctx: Context, json_path: List[str]):
 
 
 @config.command()
-@click.option("--type", default="str", type=click.Choice(["str", "int", "bool", "float"]),
-              help="Specify the type of the value.")
+@click.option(
+    "--type",
+    default="str",
+    type=click.Choice(["str", "int", "bool", "float"]),
+    help="Specify the type of the value.",
+)
 @click.argument("JSON_PATH", required=True, type=AEAJsonPathType())
 @click.argument("VALUE", required=True, type=str)
 @pass_ctx

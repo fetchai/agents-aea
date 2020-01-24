@@ -69,12 +69,7 @@ DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 
 
-from_string_to_type = dict(
-    str=str,
-    int=int,
-    bool=bool,
-    float=float
-)
+from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
 
 class Context(object):
