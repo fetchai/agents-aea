@@ -130,7 +130,7 @@ class TestCreate:
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""
-        assert self.agent_config["license"] == ""
+        assert self.agent_config["license"] == aea.cli.common.DEFAULT_LICENSE
 
     # def test_private_key_pem_path_field_is_empty_string(self):
     #     """Check that the 'private_key_pem_path' is the empty string."""
