@@ -23,7 +23,7 @@
 import logging
 import time
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, cast
+from typing import BinaryIO, Optional
 
 from eth_account import Account
 from eth_account.messages import encode_defunct
@@ -254,13 +254,19 @@ class EthereumApi(LedgerApi):
         time_stamp = int(time.time())
         aggregate_hash = Web3.keccak(
             b"".join(
-                [seller.encode(), client.encode(), time_stamp.to_bytes(32, "big"), ]
+                [seller.encode(), client.encode(), time_stamp.to_bytes(32, "big"),]
             )
         )
         return aggregate_hash.hex()
 
-    def validate_transaction(self, tx_digest: str, seller: Address, client: Address, tx_nonce: str,
-                             amount: int) -> bool:
+    def validate_transaction(
+        self,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
         """
         Check whether a transaction is valid or not.
 
@@ -274,9 +280,9 @@ class EthereumApi(LedgerApi):
         """
 
         tx = self._api.eth.getTransaction(tx_digest)
-        return tx.get("input") == tx_nonce \
-            and tx.get("value") == amount \
-            and tx.get("from") == client \
+        return (
+            tx.get("input") == tx_nonce
+            and tx.get("value") == amount
+            and tx.get("from") == client
             and tx.get("to") == seller
-
-
+        )

@@ -125,11 +125,7 @@ def test_communication():
         multiplexer1.put(envelope)
 
         msg = FIPAMessage(
-            (str(0), str(1)),
-            0,
-            0,
-            FIPAMessage.Performative.PROPOSE,
-            proposal=[],
+            (str(0), str(1)), 0, 0, FIPAMessage.Performative.PROPOSE, proposal=[],
         )
         msg_bytes = FIPASerializer().encode(msg)
         envelope = Envelope(

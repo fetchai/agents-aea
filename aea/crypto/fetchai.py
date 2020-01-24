@@ -22,7 +22,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Optional, cast
+from typing import BinaryIO, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.crypto import Address, Entity, Identity  # type: ignore
@@ -203,8 +203,14 @@ class FetchAIApi(LedgerApi):
             is_successful = True
         return is_successful
 
-    def validate_transaction(self, tx_digest: str, seller: Address, client: Address, tx_nonce: str,
-                             amount: int) -> bool:
+    def validate_transaction(
+        self,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
         """
         Check whether a transaction is valid or not.
 

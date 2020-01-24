@@ -22,7 +22,7 @@
 
 import logging
 import sys
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
@@ -193,7 +193,13 @@ class LedgerApis(object):
         return is_successful
 
     def is_tx_valid(
-        self, identifier: str, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int
+        self,
+        identifier: str,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether the transaction is valid
@@ -209,7 +215,9 @@ class LedgerApis(object):
         assert identifier in self.apis.keys()
         api = self.apis[identifier]
         try:
-            is_valid = api.validate_transaction(tx_digest, seller, client, tx_nonce, amount)
+            is_valid = api.validate_transaction(
+                tx_digest, seller, client, tx_nonce, amount
+            )
         except Exception:
             logger.warning(
                 "An error occurred while attempting to validate the transaction."
@@ -217,7 +225,9 @@ class LedgerApis(object):
             is_valid = False
         return is_valid
 
-    def generate_tx_nonce(self, identifier: str,  seller: Address, client: Address ) -> str:
+    def generate_tx_nonce(
+        self, identifier: str, seller: Address, client: Address
+    ) -> str:
         """
         Generate a random str message.
 
@@ -234,8 +244,9 @@ class LedgerApis(object):
             logger.warning(
                 "An error occurred while attempting to generate the tx_nonce"
             )
-            tx_nonce = None
+            tx_nonce = ""
         return tx_nonce
+
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
     """

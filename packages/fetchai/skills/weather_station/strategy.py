@@ -101,9 +101,11 @@ class Strategy(SharedClass):
         :param query: the query
         :return: a tuple of proposal and the weather data
         """
-        tx_nonce = self.context.ledger_apis.generate_tx_nonce(identifier=self._ledger_id,
-                                                              seller=self.context.agent_addresses[self._ledger_id],
-                                                              client=counterparty)
+        tx_nonce = self.context.ledger_apis.generate_tx_nonce(
+            identifier=self._ledger_id,
+            seller=self.context.agent_addresses[self._ledger_id],
+            client=counterparty,
+        )
         fetched_data = self.db.get_data_for_specific_dates(
             self._date_one, self._date_two
         )  # TODO: fetch real data
