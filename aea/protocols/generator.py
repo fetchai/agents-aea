@@ -117,7 +117,7 @@ class ProtocolGenerator:
                 if content_type not in DEFAULT_TYPES:
                     custom_types_set.add(content_type)
         # If no custom class, avoid extra spaces after last custom class
-        if len(custom_types_set)==0:
+        if len(custom_types_set) == 0:
             return cls_str
         # class code per custom type
         for custom_type in custom_types_set:
