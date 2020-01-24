@@ -1,7 +1,4 @@
-#AEA-Setup on a Raspberry Pi.
-
-
-### Prerequisites:
+## Prerequisites:
 
 Raspberry Pi 4  <a href="https://thepihut.com/products/raspberry-pi-4-model-b?gclid=EAIaIQobChMImcuwvcfh4wIVirHtCh3szg2EEAAYASAAEgJQ_fD_BwE">link</a> (You can also use Raspberry Pi3 b or Raspberry Pi3 b+)
 
@@ -10,7 +7,8 @@ I use a wireless network because, once your Raspberry Pi is set up, you want as 
 ## Preparing the Raspberry Pi
 If you have got a brand-new Raspberry Pi, you can simply insert the SD card, connect the power and boot up.
 If you do not have a new Rasperry Pi SD card, you will need to make one. To do this follow the NOOBS instructions below.
-####NOOBS
+
+##NOOBS
 NOOBS is a way to get an SD card like it was when you got your Raspberry Pi new from the shop.
 Go to the following link https://www.raspberrypi.org/downloads/ to download noobs. 
 You can follow this guide to set up your sd card : https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up 
@@ -28,14 +26,10 @@ Even if your Raspberry Pi updated itself, I recommend making sure it is complete
     sudo apt-get dist-upgrade 
    ```
 
-##Creating a virtual environment
+##Install a virtual environment
 You will need to install pipenv. This is a virtual environment for python. Open a terminal and write the following command:
 
 sudo apt-get install pipenv
-
-The next step is to download the framework from github you can follow the full guide here. To do that write in the terminal the following command :
-
-git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
 
 ##Create and launch a virtual environment:
 
