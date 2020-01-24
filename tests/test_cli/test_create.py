@@ -118,7 +118,7 @@ class TestCreate:
 
     def test_authors_field_is_empty_string(self):
         """Check that the 'authors' field in the config file is the empty string."""
-        assert self.agent_config["author"] == ""
+        assert self.agent_config["author"] == aea.cli.common.DEFAULT_AUTHOR
 
     def test_connections_contains_only_stub(self):
         """Check that the 'connections' list contains only the 'stub' connection."""

@@ -33,6 +33,7 @@ import aea
 from aea.cli.add import connection, skill
 from aea.cli.common import (
     Context,
+    DEFAULT_AUTHOR,
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_REGISTRY_PATH,
@@ -99,7 +100,7 @@ def create(click_context, agent_name):
         agent_config = AgentConfig(
             agent_name=agent_name,
             aea_version=aea.__version__,
-            author="",
+            author=DEFAULT_AUTHOR,
             version=DEFAULT_VERSION,
             license="",
             fingerprint="",

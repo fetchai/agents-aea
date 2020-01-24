@@ -59,6 +59,7 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_VERSION = "0.1.0"
+DEFAULT_AUTHOR = "author"
 DEFAULT_CONNECTION = PublicId.from_string(
     "fetchai/stub:" + DEFAULT_VERSION
 )  # type: PublicId
