@@ -235,7 +235,7 @@ class FIPAHandler(Handler):
                 tx_counterparty_fee=0,
                 tx_quantities_by_good_id={},
                 ledger_id=proposal.values["ledger_id"],
-                info={"dialogue_label": dialogue.dialogue_label.json,},
+                info={"dialogue_label": dialogue.dialogue_label.json, },
             )
             logger.info(tx_msg)
             self.context.decision_maker_message_queue.put_nowait(tx_msg)

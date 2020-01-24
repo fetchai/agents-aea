@@ -37,7 +37,6 @@ from aea.crypto.ledger_apis import (
     _try_to_instantiate_ethereum_ledger_api,
     _try_to_instantiate_fetchai_ledger_api,
 )
-from aea.helpers.search.models import Description
 
 from ..conftest import CUR_PATH
 
