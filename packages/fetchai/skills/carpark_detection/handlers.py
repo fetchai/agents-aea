@@ -20,11 +20,9 @@
 """This package contains a scaffold of a handler."""
 
 import logging
-import time
 from typing import Optional, cast
 
 from aea.configurations.base import ProtocolId
-from aea.crypto.helpers import _generate_random_message
 from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 from aea.protocols.default.message import DefaultMessage
@@ -248,21 +246,12 @@ class FIPAHandler(Handler):
         )
         proposal = cast(Description, dialogue.proposal)
         identifier = cast(str, proposal.values.get("ledger_id"))
-        self.context.ledger_apis.random_message = _generate_random_message(
-            nonce=new_message_id,
-            seller=self.context.agent_address,
-            client=msg.counterparty,
-            time_stamp=int(time.time()),
-        )
         match_accept_msg = FIPAMessage(
             message_id=new_message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=new_target,
             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            info={
-                "address": self.context.agent_addresses[identifier],
-                "random_message": self.context.ledger_apis.random_message,
-            },
+            info={"address": self.context.agent_addresses[identifier],},
         )
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(

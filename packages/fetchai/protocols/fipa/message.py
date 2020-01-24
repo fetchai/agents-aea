@@ -112,6 +112,12 @@ class FIPAMessage(Message):
         return cast(List[Description], self.get("proposal"))
 
     @property
+    def tx_nonce(self) -> str:
+        """Get the tx_nonce from the message."""
+        assert self.is_set("tx_nonce"), "tx_nonce is not set."
+        return cast(str, self.get("tx_nonce"))
+
+    @property
     def info(self) -> Dict[str, Any]:
         """Get hte info from the message."""
         assert self.is_set("info"), "info is not set."
@@ -138,7 +144,8 @@ class FIPAMessage(Message):
                 assert isinstance(self.proposal, list) and all(
                     isinstance(d, Description) for d in self.proposal
                 )
-                assert len(self.body) == 5
+                assert isinstance(self.tx_nonce, str)
+                assert len(self.body) == 6
             elif (
                 self.performative == FIPAMessage.Performative.ACCEPT
                 or self.performative == FIPAMessage.Performative.MATCH_ACCEPT

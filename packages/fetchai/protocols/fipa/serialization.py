@@ -64,6 +64,8 @@ class FIPASerializer(Serializer):
             proposal = msg.proposal
             p_array_bytes = [pickle.dumps(p) for p in proposal]
             performative.proposal.extend(p_array_bytes)
+            tx_nonce = pickle.dumps(msg.tx_nonce)
+            performative.tx_nonce = tx_nonce
             fipa_msg.propose.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.ACCEPT:
             performative = fipa_pb2.FIPAMessage.Accept()  # type: ignore
@@ -129,6 +131,7 @@ class FIPASerializer(Serializer):
                 p = pickle.loads(p_bytes)  # type: Description
                 descriptions.append(p)
             performative_content["proposal"] = descriptions
+            performative_content["tx_nonce"] = pickle.loads(fipa_pb.propose.tx_nonce)
         elif performative_id == FIPAMessage.Performative.ACCEPT:
             pass
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:

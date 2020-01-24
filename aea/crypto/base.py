@@ -24,6 +24,7 @@ from abc import ABC, abstractmethod
 from typing import Any, BinaryIO, Optional, Union
 
 from aea.mail.base import Address
+from aea.protocols.base import Message
 
 AddressLike = Union[str, bytes]
 
@@ -164,4 +165,15 @@ class LedgerApi(ABC):
 
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
+        """
+
+    @abstractmethod
+    def validate_transaction(self, tx_digest: str, proposal_msg: Message) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param proposal_msg:
+        :param tx_digest: the transaction digest.
+
+        :return: True if the random_message is equals to tx['input']
         """

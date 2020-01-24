@@ -27,6 +27,7 @@ from typing import Dict, List, Optional, Union, cast
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.crypto.fetchai import FETCHAI, FetchAIApi
+from aea.protocols.base import Message
 
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
@@ -77,7 +78,6 @@ class LedgerApis(object):
         self._apis = apis
         self._configs = configs
         self._default_ledger_id = default_ledger_id
-        self.random_message = ""
 
     @property
     def configs(self) -> Dict[str, List[Union[str, int]]]:
@@ -122,7 +122,6 @@ class LedgerApis(object):
         :param address: the address to check for
         :return: the token balance
         """
-        logger.info(identifier)
         assert identifier in self.apis.keys(), "Unsupported ledger identifier."
         api = self.apis[identifier]
         try:
@@ -164,7 +163,6 @@ class LedgerApis(object):
             tx_digest = api.send_transaction(
                 crypto_object, destination_address, amount, tx_fee, **kwargs
             )
-            logger.info(tx_digest)
             logger.info("transaction validated. TX digest: {}".format(tx_digest))
             self._last_tx_statuses[crypto_object.identifier] = OK
         except Exception:
@@ -194,23 +192,26 @@ class LedgerApis(object):
             self._last_tx_statuses[identifier] = ERROR
         return is_successful
 
-    def validate_transaction(self, identifier: str, tx_digest: str) -> bool:
+    def is_tx_valid(
+        self, identifier: str, tx_digest: str, proposal_msg: Message
+    ) -> bool:
         """
-        Check whether a transaction is valid or not.
-
-        :param identifier:
-        :param tx_digest: the transaction digest.
-
-        :return: True if the random_message is equals to tx['input']
+        Check whether the transaction is valid
+        :param identifier: Ledger identifier
+        :param tx_digest:  the transaction digest
+        :param proposal_msg: The proposal msg.
+        :return: True if is valide , False otherwise
         """
-        assert identifier in self.apis.keys(), "Unsupported ledger identifier."
-        api = self.apis[identifier].api
-        if identifier == ETHEREUM:
-            tx = api.eth.getTransaction(tx_digest)
-            return tx.get("input") == self.random_message
-        else:
-            logger.info("Cannot verify the transaction. I assume that it is.")
-            return True
+        assert identifier in self.apis.keys()
+        api = self.apis[identifier]
+        try:
+            is_valid = api.validate_transaction(tx_digest, proposal_msg)
+        except Exception:
+            logger.warning(
+                "An error occured while attempting to validate the transaction."
+            )
+            is_valid = False
+        return is_valid
 
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:

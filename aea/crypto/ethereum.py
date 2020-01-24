@@ -35,6 +35,9 @@ from web3 import HTTPProvider, Web3
 
 from aea.crypto.base import AddressLike, Crypto, LedgerApi
 from aea.mail.base import Address
+from aea.protocols.base import Message
+
+from packages.fetchai.protocols.fipa.message import FIPAMessage
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +137,22 @@ class EthereumCrypto(Crypto):
         account = Account.create()
         return account
 
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message in order to validate a transaction.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        time_stamp = int(time.time())
+        aggregate_hash = Web3.keccak(
+            b"".join(
+                [seller.encode(), client.encode(), time_stamp.to_bytes(32, "big"),]
+            )
+        )
+        return aggregate_hash.hex()
+
     @classmethod
     def get_address_from_public_key(cls, public_key: str) -> str:
         """
@@ -209,7 +228,6 @@ class EthereumApi(LedgerApi):
             self._api.toChecksumAddress(crypto.address)
         )
         # TODO : handle misconfiguration
-        logger.info(kwargs.keys())
         info = (
             cast(Dict[str, Any], kwargs.get("info"))
             if "info" in kwargs.keys()
@@ -220,11 +238,10 @@ class EthereumApi(LedgerApi):
             "chainId": chain_id,
             "to": destination_address,
             "value": amount,
-            "gas": tx_fee + 100000,
+            "gas": tx_fee,
             "gasPrice": self._api.toWei(GAS_PRICE, GAS_ID),
-            "data": info.get("random_message"),
+            "data": info.get("tx_nonce"),
         }
-        logger.info(transaction)
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
 
@@ -247,3 +264,17 @@ class EthereumApi(LedgerApi):
         if tx_status is not None:
             is_successful = True
         return is_successful
+
+    def validate_transaction(self, tx_digest: str, proposal_msg: Message) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param proposal_msg:
+        :param identifier: the ledger identifier.
+        :param tx_digest: the transaction digest.
+
+        :return: True if the random_message is equals to tx['input']
+        """
+        msg = cast(FIPAMessage, proposal_msg)
+        tx = self._api.eth.getTransaction(tx_digest)
+        return tx.get("input") == msg.tx_nonce

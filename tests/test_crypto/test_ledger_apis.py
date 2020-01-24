@@ -21,7 +21,6 @@
 
 import logging
 import os
-import time
 from typing import Dict
 from unittest import mock
 
@@ -33,13 +32,14 @@ import pytest
 
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG, FETCHAI, FetchAICrypto
-from aea.crypto.helpers import _generate_random_message
 from aea.crypto.ledger_apis import (
     LedgerApis,
     _try_to_instantiate_ethereum_ledger_api,
     _try_to_instantiate_fetchai_ledger_api,
 )
+from aea.helpers.search.models import Description
 
+from packages.fetchai.protocols.fipa.message import FIPAMessage
 
 from ..conftest import CUR_PATH
 
@@ -301,11 +301,20 @@ class TestLedgerApis:
             {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
             FETCHAI,
         )
-        ledger_apis.random_message = _generate_random_message(
-            nonce=1,
-            seller=seller.address,
-            client=client.address,
-            time_stamp=int(time.time()),
+        tx_nonce = seller.generate_tx_nonce(seller.address, client.address)
+
+        proposal = [
+            Description({"foo1": 1, "bar1": 2}),
+            Description({"foo2": 1, "bar2": 2}),
+        ]
+
+        msg = FIPAMessage(
+            message_id=0,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=FIPAMessage.Performative.PROPOSE,
+            proposal=proposal,
+            tx_nonce=tx_nonce,
         )
 
         tx_digest = "0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4"
@@ -321,7 +330,7 @@ class TestLedgerApis:
                 "hash": HexBytes(
                     "0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4"
                 ),
-                "input": ledger_apis.random_message,
+                "input": tx_nonce,
                 "nonce": 4,
                 "r": HexBytes(
                     "0xb54ce8b9fa1d1be7be316c068af59a125d511e8dd51202b1a7e3002dee432b52"
@@ -340,6 +349,6 @@ class TestLedgerApis:
             "getTransaction",
             return_value=result,
         ):
-            assert ledger_apis.validate_transaction(
-                identifier=ETHEREUM, tx_digest=tx_digest
+            assert ledger_apis.is_tx_valid(
+                identifier=ETHEREUM, tx_digest=tx_digest, proposal_msg=msg,
             )
