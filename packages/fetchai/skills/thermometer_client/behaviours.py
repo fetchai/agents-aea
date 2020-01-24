@@ -20,40 +20,33 @@
 """This package contains a scaffold of a behaviour."""
 
 import logging
-from typing import Optional, cast
+from typing import cast
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
-from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
-from packages.fetchai.skills.thermometer.strategy import Strategy
+from packages.fetchai.skills.thermometer_client.strategy import Strategy
 
-logger = logging.getLogger("aea.thermometer_skill")
+logger = logging.getLogger("aea.thermometer_client_skill")
 
-SERVICE_ID = ""
-DEFAULT_SERVICES_INTERVAL = 30.0
+DEFAULT_SEARCH_INTERVAL = 5.0
 
 
-class ServiceRegistrationBehaviour(TickerBehaviour):
-    """This class implements a behaviour."""
+class MySearchBehaviour(TickerBehaviour):
+    """This class implements a search behaviour."""
 
     def __init__(self, **kwargs):
-        """Initialise the behaviour."""
-        services_interval = kwargs.pop(
-            "services_interval", DEFAULT_SERVICES_INTERVAL
-        )  # type: int
-        super().__init__(tick_interval=services_interval, **kwargs)
-        self._registered_service_description = None  # type: Optional[Description]
+        """Initialize the search behaviour."""
+        search_interval = cast(
+            float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
+        )
+        super().__init__(tick_interval=search_interval, **kwargs)
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup for the behaviour."""
         if self.context.ledger_apis.has_fetchai:
             fet_balance = self.context.ledger_apis.token_balance(
                 FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
@@ -70,6 +63,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                         self.context.agent_name
                     )
                 )
+                # TODO: deregister skill from filter
 
         if self.context.ledger_apis.has_ethereum:
             eth_balance = self.context.ledger_apis.token_balance(
@@ -87,8 +81,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                         self.context.agent_name
                     )
                 )
-
-        self._register_service()
+                # TODO: deregister skill from filter
 
     def act(self) -> None:
         """
@@ -96,8 +89,19 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        self._unregister_service()
-        self._register_service()
+        strategy = cast(Strategy, self.context.strategy)
+        if strategy.is_searching:
+            query = strategy.get_service_query()
+            search_id = strategy.get_next_search_id()
+            oef_msg = OEFMessage(
+                type=OEFMessage.Type.SEARCH_SERVICES, id=search_id, query=query
+            )
+            self.context.outbox.put_message(
+                to=DEFAULT_OEF,
+                sender=self.context.agent_address,
+                protocol_id=OEFMessage.protocol_id,
+                message=OEFSerializer().encode(oef_msg),
+            )
 
     def teardown(self) -> None:
         """
@@ -124,60 +128,3 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                     self.context.agent_name, balance
                 )
             )
-
-        self._unregister_service()
-
-    def _register_service(self) -> None:
-        """
-        Register to the OEF Service Directory.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        desc = strategy.get_service_description()
-        self._registered_service_description = desc
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(
-            type=OEFMessage.Type.REGISTER_SERVICE,
-            id=oef_msg_id,
-            service_description=desc,
-            service_id=SERVICE_ID,
-        )
-        self.context.outbox.put_message(
-            to=DEFAULT_OEF,
-            sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
-        )
-        logger.info(
-            "[{}]: updating thermometer services on OEF.".format(
-                self.context.agent_name
-            )
-        )
-
-    def _unregister_service(self) -> None:
-        """
-        Unregister service from OEF Service Directory.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        oef_msg_id = strategy.get_next_oef_msg_id()
-        msg = OEFMessage(
-            type=OEFMessage.Type.UNREGISTER_SERVICE,
-            id=oef_msg_id,
-            service_description=self._registered_service_description,
-            service_id=SERVICE_ID,
-        )
-        self.context.outbox.put_message(
-            to=DEFAULT_OEF,
-            sender=self.context.agent_address,
-            protocol_id=OEFMessage.protocol_id,
-            message=OEFSerializer().encode(msg),
-        )
-        logger.info(
-            "[{}]: unregistering thermometer station services from OEF.".format(
-                self.context.agent_name
-            )
-        )
-        self._registered_service_description = None

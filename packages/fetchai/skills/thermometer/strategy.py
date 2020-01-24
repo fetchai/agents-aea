@@ -32,11 +32,11 @@ from packages.fetchai.skills.thermometer.thermometer_data_model import (
 
 DEFAULT_PRICE_PER_ROW = 2
 DEFAULT_SELLER_TX_FEE = 0
-DEFAULT_CURRENCY_PBK = "FET"
-DEFAULT_LEDGER_ID = "fetchai"
-DEFAULT_DATE_ONE = "3/10/2019"
-DEFAULT_DATE_TWO = "15/10/2019"
-DEFAULT_IS_LEDGER_TX = False
+DEFAULT_CURRENCY_PBK = "ETH"
+DEFAULT_LEDGER_ID = "ethereum"
+DEFAULT_DATE_ONE = "23/01/2020"
+DEFAULT_DATE_TWO = "24/01/2020"
+DEFAULT_IS_LEDGER_TX = True
 
 
 class Strategy(SharedClass):
@@ -97,12 +97,12 @@ class Strategy(SharedClass):
         Generate a proposal matching the query.
 
         :param query: the query
-        :return: a tuple of proposal and the weather data
+        :return: a tuple of proposal and the temprature data
         """
         fetched_data = self.db.get_data_for_specific_dates(
             self._date_one, self._date_two
         )  # TODO: fetch real data
-        weather_data, rows = self._build_data_payload(fetched_data)
+        temp_data, rows = self._build_data_payload(fetched_data)
         total_price = self._price_per_row * rows
         assert (
             total_price - self._seller_tx_fee > 0
@@ -116,7 +116,7 @@ class Strategy(SharedClass):
                 "ledger_id": self._ledger_id,
             }
         )
-        return (proposal, weather_data)
+        return proposal, temp_data
 
     def _build_data_payload(
         self, fetched_data: Dict[str, int]
@@ -135,8 +135,8 @@ class Strategy(SharedClass):
                 break  # TODO: fix OEF so more data can be sent
             counter += 1
             dict_of_data = {
-                "temprature": items[0],
+                "internal_temp": items[0],
                 "idx": time.ctime(int(items[1])),
             }
-            degrees["weather_data"].append(dict_of_data)
+            degrees["degrees"].append(dict_of_data)
         return degrees, counter

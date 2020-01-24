@@ -31,10 +31,10 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
-from packages.fetchai.skills.weather_station.dialogues import Dialogue, Dialogues
-from packages.fetchai.skills.weather_station.strategy import Strategy
+from packages.fetchai.skills.thermometer.dialogues import Dialogue, Dialogues
+from packages.fetchai.skills.thermometer.strategy import Strategy
 
-logger = logging.getLogger("aea.weather_station_skill")
+logger = logging.getLogger("aea.thermometer_skill")
 
 
 class FIPAHandler(Handler):
@@ -143,8 +143,8 @@ class FIPAHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_matching_supply(query):
-            proposal, weather_data = strategy.generate_proposal_and_data(query)
-            dialogue.weather_data = weather_data
+            proposal, temp_data = strategy.generate_proposal_and_data(query)
+            dialogue.temp_data = temp_data
             dialogue.proposal = proposal
             logger.info(
                 "[{}]: sending sender={} a PROPOSE with proposal={}".format(
@@ -249,7 +249,7 @@ class FIPAHandler(Handler):
         Handle the INFORM.
 
         If the INFORM message contains the transaction_digest then verify that it is settled, otherwise do nothing.
-        If the transaction is settled send the weather data, otherwise do nothing.
+        If the transaction is settled send the temperature data, otherwise do nothing.
 
         :param msg: the message
         :param dialogue: the dialogue object
@@ -292,7 +292,7 @@ class FIPAHandler(Handler):
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                     target=new_target,
                     performative=FIPAMessage.Performative.INFORM,
-                    info=dialogue.weather_data,
+                    info=dialogue.temp_data,
                 )
                 dialogue.outgoing_extend(inform_msg)
                 self.context.outbox.put_message(
@@ -317,7 +317,7 @@ class FIPAHandler(Handler):
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=new_target,
                 performative=FIPAMessage.Performative.INFORM,
-                info=dialogue.weather_data,
+                info=dialogue.temp_data,
             )
             dialogue.outgoing_extend(inform_msg)
             self.context.outbox.put_message(

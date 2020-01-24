@@ -1,6 +1,6 @@
 import sqlite3
 import datetime
-from typing import Dict, Union
+from typing import Dict, Union, cast
 import logging
 import os.path
 
@@ -37,13 +37,13 @@ class TemperData():
         """
         con = sqlite3.connect(DB_SOURCE)
         cur = con.cursor()
-        cur.execute(""" INSERT INTO data ( internal_temp, idx) VALUES (?,?)""",(temprature, datetime.datetime.now().strftime("%s")),)
-        logger.info("Theremometer: I added data in the db!")
+        cur.execute(""" INSERT INTO data ( internal_temp, idx) VALUES (?,?)""", (temprature, datetime.datetime.now().strftime("%s")),)
+        logger.info("Thermometer: I added data in the db!")
         cur.close()
         con.commit()
         con.close()
 
-    def get_data_for_specific_dates(self, start_date:str, end_date: str) -> Dict[str, int]:
+    def get_data_for_specific_dates(self, start_date: str, end_date: str) -> Dict[str, int]:
         con = sqlite3.connect(DB_SOURCE)
         cur = con.cursor()
         start_dt = datetime.datetime.strptime(start_date,"%d/%m/%Y")
@@ -51,7 +51,7 @@ class TemperData():
         end_dt = datetime.datetime.strptime(end_date,"%d/%m/%Y")
         end = end_dt.strftime("%s")
         cur.execute("SELECT * FROM data WHERE idx BETWEEN ? and ?", (str(start),str(end)))
-        data = cast(Dict[str, int], cur.fetchaill())
+        data = cast(Dict[str, int], cur.fetchall())
         cur.close()
         con.commit()
         con.close()

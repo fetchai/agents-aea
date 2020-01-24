@@ -30,7 +30,7 @@ import select
 import struct
 import sys
 import time
-import temper_data
+from packages.fetchai.skills.thermometer.temper.temper_data import TemperData
 
 # Non-standard modules
 try:
@@ -266,8 +266,7 @@ class Temper(object):
     self.verbose = verbose
 
   def _is_known_id(self, vendorid, productid):
-    '''Returns True if the vendorid and product id are valid.
-    '''
+    """Returns True if the vendorid and product id are valid."""
     if self.forced_vendor_id is not None and \
        self.forced_product_id is not None:
       if self.forced_vendor_id == vendorid and \
@@ -286,9 +285,10 @@ class Temper(object):
     return False
 
   def list(self, use_json=False):
-    '''Print out a list all of the USB devices on the system. If 'use_json' is
+    """
+    Print out a list all of the USB devices on the system. If 'use_json' is
     True, then JSON formatting will be used.
-    '''
+    """
     if use_json:
       print(json.dumps(self.usb_devices, indent=4))
       return
@@ -306,12 +306,13 @@ class Temper(object):
         list(info['devices']) if len(info['devices']) > 0 else ''))
 
   def read(self, verbose=False):
-    '''Read all of the known devices on the system and return a list of
+    """
+    Read all of the known devices on the system and return a list of
     dictionaries which contain the device information, firmware information,
     and environmental information obtained. If there is an error, then the
     'error' field in the dictionary will contain a string explaining the
     error.
-    '''
+    """
     results = []
     for _, info in sorted(self.usb_devices.items(),
                           key=lambda x: x[1]['busnum'] * 1000 + \
@@ -327,9 +328,10 @@ class Temper(object):
     return results
 
   def _add_temperature(self, name, info):
-    '''Helper method to add the temperature to a string in both Celsius and
+    """
+    Helper method to add the temperature to a string in both Celsius and
     Fahrenheit. If no sensor data is available, then '- -' will be returned.
-    '''
+    """
     if name not in info:
       return '- -'
     degC = info[name]
@@ -337,18 +339,20 @@ class Temper(object):
     return '%.1fC %.1fF' % (degC, degF)
 
   def _add_humidity(self, name, info):
-    '''Helper method to add the humidity to a string. If no sensor data is
+    """
+    Helper method to add the humidity to a string. If no sensor data is
     available, then '-' will be returned.
-    '''
+    """
 
     if name not in info:
       return '-'
     return '%d%%' % int(info[name])
 
   def print(self, results, use_json=False):
-    '''Print out a list of all of the known USB sensor devices on the system.
+    """
+    Print out a list of all of the known USB sensor devices on the system.
     If 'use_json' is True, then JSON formatting will be used.
-    '''
+    """
 
     if use_json:
       print(json.dumps(results, indent=4))
@@ -370,9 +374,10 @@ class Temper(object):
       print(s)
 
   def main(self):
-    '''An example 'main' entry point that can be used to make temper.py a
+    """
+    An example 'main' entry point that can be used to make temper.py a
     standalone program.
-    '''
+    """
 
     parser = argparse.ArgumentParser(description='temper')
     parser.add_argument('-l', '--list', action='store_true',
@@ -410,8 +415,8 @@ class Temper(object):
     #print(type(results[0]))
     results = results[0]
     #print(results)
-    db_com = temper_data.TemperData()
-    print (results.get('internal temperature'))
+    db_com = TemperData()
+    print(results.get('internal temperature'))
     if "internal temperature" in results.keys():
         db_com.add_data(results.get("internal temperature"))
     return 0
