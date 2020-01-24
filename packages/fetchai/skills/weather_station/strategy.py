@@ -23,6 +23,7 @@ import time
 from typing import Any, Dict, List, Tuple
 
 from aea.helpers.search.models import Description, Query
+from aea.mail.base import Address
 from aea.skills.base import SharedClass
 
 from packages.fetchai.skills.weather_station.db_communication import DBCommunication
@@ -92,7 +93,7 @@ class Strategy(SharedClass):
         return True
 
     def generate_proposal_and_data(
-        self, query: Query
+        self, query: Query, counterparty: Address
     ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
         """
         Generate a proposal matching the query.
@@ -100,6 +101,9 @@ class Strategy(SharedClass):
         :param query: the query
         :return: a tuple of proposal and the weather data
         """
+        tx_nonce = self.context.ledger_apis.generate_tx_nonce(identifier=self._ledger_id,
+                                                              seller=self.context.agent_addresses[self._ledger_id],
+                                                              client=counterparty)
         fetched_data = self.db.get_data_for_specific_dates(
             self._date_one, self._date_two
         )  # TODO: fetch real data
@@ -115,9 +119,10 @@ class Strategy(SharedClass):
                 "seller_tx_fee": self._seller_tx_fee,
                 "currency_id": self._currency_id,
                 "ledger_id": self._ledger_id,
+                "tx_nonce": tx_nonce if tx_nonce is not None else "",
             }
         )
-        return (proposal, weather_data)
+        return proposal, weather_data
 
     def _build_data_payload(
         self, fetched_data: Dict[str, int]

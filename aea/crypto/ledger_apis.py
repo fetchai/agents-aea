@@ -27,6 +27,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.crypto.fetchai import FETCHAI, FetchAIApi
+from aea.mail.base import Address
 
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
@@ -192,28 +193,49 @@ class LedgerApis(object):
         return is_successful
 
     def is_tx_valid(
-        self, identifier: str, tx_digest: str, proposal: Dict[str, Any]
+        self, identifier: str, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int
     ) -> bool:
         """
         Check whether the transaction is valid
 
-
         :param identifier: Ledger identifier
         :param tx_digest:  the transaction digest
-        :param proposal: the proposal we made to the counterparty
-        :return: True if is valide , False otherwise
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :return: True if is valid , False otherwise
         """
         assert identifier in self.apis.keys()
         api = self.apis[identifier]
         try:
-            is_valid = api.validate_transaction(tx_digest, proposal)
+            is_valid = api.validate_transaction(tx_digest, seller, client, tx_nonce, amount)
         except Exception:
             logger.warning(
-                "An error occured while attempting to validate the transaction."
+                "An error occurred while attempting to validate the transaction."
             )
             is_valid = False
         return is_valid
 
+    def generate_tx_nonce(self, identifier: str,  seller: Address, client: Address ) -> str:
+        """
+        Generate a random str message.
+
+        :param identifier: ledger identifier.
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        assert identifier in self.apis.keys()
+        api = self.apis[identifier]
+        try:
+            tx_nonce = api.generate_tx_nonce(seller=seller, client=client)
+        except Exception:
+            logger.warning(
+                "An error occurred while attempting to generate the tx_nonce"
+            )
+            tx_nonce = None
+        return tx_nonce
 
 def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
     """

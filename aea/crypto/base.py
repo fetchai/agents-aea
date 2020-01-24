@@ -167,12 +167,24 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def validate_transaction(self, tx_digest: str, proposal: Dict[str, Any]) -> bool:
+    def validate_transaction(self, tx_digest: str, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool:
         """
         Check whether a transaction is valid or not.
 
-        :param proposal: the proposal we made to the counterparty.
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
         :param tx_digest: the transaction digest.
 
         :return: True if the random_message is equals to tx['input']
+        """
+    @abstractmethod
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
         """

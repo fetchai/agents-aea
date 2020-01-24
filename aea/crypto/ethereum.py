@@ -134,22 +134,6 @@ class EthereumCrypto(Crypto):
         account = Account.create()
         return account
 
-    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
-        """
-        Generate a random str message.
-
-        :param seller: the address of the seller.
-        :param client: the address of the client.
-        :return: return the hash in hex.
-        """
-        time_stamp = int(time.time())
-        aggregate_hash = Web3.keccak(
-            b"".join(
-                [seller.encode(), client.encode(), time_stamp.to_bytes(32, "big"), ]
-            )
-        )
-        return aggregate_hash.hex()
-
     @classmethod
     def get_address_from_public_key(cls, public_key: str) -> str:
         """
@@ -224,12 +208,8 @@ class EthereumApi(LedgerApi):
         nonce = self._api.eth.getTransactionCount(
             self._api.toChecksumAddress(crypto.address)
         )
+
         # TODO : handle misconfiguration
-        info = (
-            cast(Dict[str, Any], kwargs.get("info"))
-            if "info" in kwargs.keys()
-            else {"random_message": None}
-        )
         transaction = {
             "nonce": nonce,
             "chainId": chain_id,
@@ -237,9 +217,10 @@ class EthereumApi(LedgerApi):
             "value": amount,
             "gas": tx_fee,
             "gasPrice": self._api.toWei(GAS_PRICE, GAS_ID),
-            "data": info.get("tx_nonce"),
+            "data": kwargs.get("tx_nonce"),
         }
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
+
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
 
         logger.info("TX Hash: {}".format(str(hex_value.hex())))
@@ -262,15 +243,40 @@ class EthereumApi(LedgerApi):
             is_successful = True
         return is_successful
 
-    def validate_transaction(self, tx_digest: str, proposal: Dict[str, Any]) -> bool:
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        time_stamp = int(time.time())
+        aggregate_hash = Web3.keccak(
+            b"".join(
+                [seller.encode(), client.encode(), time_stamp.to_bytes(32, "big"), ]
+            )
+        )
+        return aggregate_hash.hex()
+
+    def validate_transaction(self, tx_digest: str, seller: Address, client: Address, tx_nonce: str,
+                             amount: int) -> bool:
         """
         Check whether a transaction is valid or not.
 
-        :param proposal: the proposal we did to the counterparty
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
         :param tx_digest: the transaction digest.
 
         :return: True if the random_message is equals to tx['input']
         """
 
         tx = self._api.eth.getTransaction(tx_digest)
-        return tx.get("input") == proposal.get("tx_nonce")
+        return tx.get("input") == tx_nonce \
+            and tx.get("value") == amount \
+            and tx.get("from") == client \
+            and tx.get("to") == seller
+
+
