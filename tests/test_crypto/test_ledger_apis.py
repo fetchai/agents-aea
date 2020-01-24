@@ -299,12 +299,7 @@ class TestLedgerApis:
             {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
             FETCHAI,
         )
-        tx_nonce = seller.generate_tx_nonce(seller.address, client.address)
-
-        proposal = [
-            Description({"foo1": 1, "bar1": 2, "tx_nonce": "This is a tx_nonce"}),
-            Description({"foo2": 1, "bar2": 2, "tx_nonce": "This is a tx_nonce"}),
-        ]
+        tx_nonce = ledger_apis.generate_tx_nonce(ETHEREUM, seller.address, client.address)
 
         tx_digest = "0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4"
         result = AttributeDict(
@@ -313,7 +308,7 @@ class TestLedgerApis:
                     "0x0bfc237d2a17f719a3300a4822779391ec6e3a74832fe1b05b8c477902b0b59e"
                 ),
                 "blockNumber": 7161932,
-                "from": "0x801f845986209c3f8be54cE96744E8608032DEDc",
+                "from": client.address,
                 "gas": 200000,
                 "gasPrice": 50000000000,
                 "hash": HexBytes(
@@ -327,7 +322,7 @@ class TestLedgerApis:
                 "s": HexBytes(
                     "0x4f44702b3812d3b4e4b76da0fd5b554b3ae76d1717db5b6b5faebd7b85ae0303"
                 ),
-                "to": "0x5E6e0B35819E6e8775C2a2019AB8d684c21c45a2",
+                "to": seller.address,
                 "transactionIndex": 0,
                 "v": 42,
                 "value": 2,
@@ -339,5 +334,6 @@ class TestLedgerApis:
             return_value=result,
         ):
             assert ledger_apis.is_tx_valid(
-                identifier=ETHEREUM, tx_digest=tx_digest, proposal=proposal[0].values,
+                identifier=ETHEREUM, tx_digest=tx_digest, seller=seller.address, client=client.address,
+                tx_nonce=tx_nonce, amount=2,
             )

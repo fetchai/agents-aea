@@ -77,7 +77,6 @@ class MySearchBehaviour(TickerBehaviour):
                         self.context.agent_name
                     )
                 )
-            # TODO: deregister skill from filter
 
     def act(self) -> None:
         """

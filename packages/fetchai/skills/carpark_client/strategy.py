@@ -119,7 +119,7 @@ class Strategy(SharedClass):
         :return: whether it is affordable
         """
         if self.is_ledger_tx:
-            payable = proposal.values["price"] + self._max_price
+            payable = proposal.values["price"]
             ledger_id = proposal.values["ledger_id"]
             address = cast(str, self.context.agent_addresses.get(ledger_id))
             balance = self.context.ledger_apis.token_balance(ledger_id, address)
