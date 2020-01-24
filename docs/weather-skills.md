@@ -284,6 +284,15 @@ Create some wealth for your weather client on the Ethereum Ropsten test net.
 Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_weather_client/eth_private_key.txt`.
 
 ### Run the AEAs
+You can change the end point's address and port by modifying the connection's yaml file (my_weather_station/connection/oef/connection.yaml)
+
+Under config locate :
+
+```bash
+addr: ${OEF_ADDR: 127.0.0.1}
+```
+ and replace it with your ip (The ip of the machine that runs the oef image.)
+
 
 Run both AEAs, from their respective terminals.
 ``` bash
