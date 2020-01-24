@@ -299,7 +299,9 @@ class TestLedgerApis:
             {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
             FETCHAI,
         )
-        tx_nonce = ledger_apis.generate_tx_nonce(ETHEREUM, seller.address, client.address)
+        tx_nonce = ledger_apis.generate_tx_nonce(
+            ETHEREUM, seller.address, client.address
+        )
 
         tx_digest = "0xbefa7768c313ff49bf274eefed001042a0ff9e3cfbe75ff1a9c2baf18001cec4"
         result = AttributeDict(
@@ -334,6 +336,10 @@ class TestLedgerApis:
             return_value=result,
         ):
             assert ledger_apis.is_tx_valid(
-                identifier=ETHEREUM, tx_digest=tx_digest, seller=seller.address, client=client.address,
-                tx_nonce=tx_nonce, amount=2,
+                identifier=ETHEREUM,
+                tx_digest=tx_digest,
+                seller=seller.address,
+                client=client.address,
+                tx_nonce=tx_nonce,
+                amount=2,
             )
