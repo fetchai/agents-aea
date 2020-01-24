@@ -27,7 +27,7 @@ import click
 
 import yaml
 
-from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
+from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config, from_string_to_type
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
@@ -199,11 +199,14 @@ def get(ctx: Context, json_path: List[str]):
 
 
 @config.command()
+@click.option("--type", default="str", type=click.Choice(["str", "int", "bool", "float"]),
+              help="Specify the type of the value.")
 @click.argument("JSON_PATH", required=True, type=AEAJsonPathType())
 @click.argument("VALUE", required=True, type=str)
 @pass_ctx
-def set(ctx: Context, json_path: List[str], value):
+def set(ctx: Context, json_path: List[str], value, type):
     """Set a field."""
+    type_ = from_string_to_type[type]
     config_loader = cast(ConfigLoader, ctx.config.get("configuration_loader"))
     configuration_file_path = cast(str, ctx.config.get("configuration_file_path"))
 
@@ -225,7 +228,10 @@ def set(ctx: Context, json_path: List[str], value):
         logger.error("Attribute '{}' is not of primitive type.".format(attribute_name))
         sys.exit(1)
 
-    parent_object[attribute_name] = value
+    try:
+        parent_object[attribute_name] = type_(value)
+    except ValueError:
+        logger.error("Cannot convert {} to type {}".format(value, type_))
 
     try:
         configuration_obj = config_loader.configuration_type.from_json(
