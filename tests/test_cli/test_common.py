@@ -38,7 +38,7 @@ class FormatItemsTestCase(TestCase):
         """Test format_items positive result."""
         items = [
             {
-                "item_id": "author/name:version",
+                "public_id": "author/name:version",
                 "name": "obj-name",
                 "description": "Some description",
                 "author": "author",
@@ -65,7 +65,7 @@ class FormatSkillsTestCase(TestCase):
         """Test format_skills positive result."""
         items = [
             {
-                "item_id": "author/name:version",
+                "public_id": "author/name:version",
                 "name": "obj-name",
                 "description": "Some description",
                 "version": "1.0",

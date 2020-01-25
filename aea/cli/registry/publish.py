@@ -74,6 +74,6 @@ def publish_agent(ctx: Context):
     resp = request_api("POST", path, data=data, auth=True, filepath=output_tar)
     click.echo(
         "Successfully published agent {} to the Registry. Public ID: {}".format(
-            name, resp["item_id"]
+            name, resp["public_id"]
         )
     )

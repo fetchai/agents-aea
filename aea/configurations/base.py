@@ -162,13 +162,13 @@ class PublicId(JSONSerializable):
 
         author/name:version
 
-    >>> item_id = PublicId("author", "my_package", "0.1.0")
-    >>> assert item_id.author == "author"
-    >>> assert item_id.name == "my_package"
-    >>> assert item_id.version == "0.1.0"
+    >>> public_id = PublicId("author", "my_package", "0.1.0")
+    >>> assert public_id.author == "author"
+    >>> assert public_id.name == "my_package"
+    >>> assert public_id.version == "0.1.0"
     >>> another_public_id = PublicId("author", "my_package", "0.1.0")
-    >>> assert hash(item_id) == hash(another_public_id)
-    >>> assert item_id == another_public_id
+    >>> assert hash(public_id) == hash(another_public_id)
+    >>> assert public_id == another_public_id
     """
 
     AUTHOR_REGEX = r"[a-zA-Z0-9_]*"
