@@ -8,13 +8,13 @@ speech_acts:
     query: Query
   propose:
     proposal: Proposal
-    price: float
+    price: pt:float
   accept_w_inform:
-    info: dict[str, Any]
+    info: pt:dict[pt:str, AcceptInfo]
   match_accept_w_inform:
-    info: dict[str, Any]
+    info: pt:dict[pt:str, MatchAcceptInfo]
   inform:
-    info: dict[str, Any]
+    info: pt:dict[pt:str, InformInfo]
   accept: {}
   decline: {}
   match_accept: {}

@@ -6,24 +6,24 @@ description: 'A protocol for interacting with an OEF service.'
 speech_acts:
   register_service:
     service_description: Description
-    service_id: str
+    service_id: pt:str
   register_agent:
     agent_description: Description
-    agent_id: str
+    agent_id: pt:str
   unregister_service:
     service_description: Description
-    service_id: str
+    service_id: pt:str
   unregister_agent:
     agent_description: Description
-    agent_id: str
+    agent_id: pt:str
   search_services:
     query: Query
   search_agents:
     query: Query
   search_result:
-    agents: list[str]
+    agents: pt:list[pt:str]
   oef_error:
     operation: OEFErrorOperation
   dialogue_error:
-    dialogue_id: int
-    origin: str
+    dialogue_id: pt:int
+    origin: pt:str
