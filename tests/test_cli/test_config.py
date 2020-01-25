@@ -92,7 +92,7 @@ class TestConfigGet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections']"
+            == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections', 'vendor']"
         )
 
     def test_too_short_path_but_root_correct(self):
@@ -282,7 +282,7 @@ class TestConfigSet:
         assert result.exit_code == 1
         assert (
             result.exception.message
-            == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections']"
+            == "The root of the dotted path must be one of: ['agent', 'skills', 'protocols', 'connections', 'vendor']"
         )
 
     def test_too_short_path_but_root_correct(self):

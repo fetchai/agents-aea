@@ -60,12 +60,17 @@ logger = logging.getLogger("aea")
 logger = default_logging_config(logger)
 
 DEFAULT_VERSION = "0.1.0"
+DEFAULT_AUTHOR = "author"
 DEFAULT_CONNECTION = PublicId.from_str(
     "fetchai/stub:" + DEFAULT_VERSION
 )  # type: PublicId
 DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
+DEFAULT_LICENSE = "Apache-2.0"
+
+
+from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
 
 
 class Context(object):
