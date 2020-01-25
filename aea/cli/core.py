@@ -221,7 +221,7 @@ def get_address(ctx: Context, type_):
     try:
         wallet = Wallet(private_key_paths)
         address = wallet.addresses[type_]
-        logger.info("{}".format(address))
+        print(address)
     except ValueError as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
 
@@ -258,7 +258,7 @@ def get_wealth(ctx: Context, type_):
 
         address = wallet.addresses[type_]
         balance = ledger_apis.token_balance(type_, address)
-        logger.info("The wealth for address {} is: {}".format(address, balance))
+        print(balance)
     except (AssertionError, ValueError) as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
 
