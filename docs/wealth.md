@@ -22,7 +22,7 @@ for fetchai or
 ``` bash
 ledger_apis:
   fetchai:
-    address: testnet.fetch-ai.com
+    host: testnet.fetch-ai.com
     port: 80
 ```
 or 

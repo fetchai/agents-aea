@@ -22,7 +22,7 @@
 
 import logging
 import sys
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
@@ -46,7 +46,7 @@ class LedgerApis(object):
 
     def __init__(
         self,
-        ledger_api_configs: Dict[str, List[Union[str, int]]],
+        ledger_api_configs: Dict[str, Dict[str, Union[str, int]]],
         default_ledger_id: str,
     ):
         """
@@ -56,21 +56,16 @@ class LedgerApis(object):
         :param default_ledger_id: the default ledger id.
         """
         apis = {}  # type: Dict[str, LedgerApi]
-        configs = {}  # type: Dict[str, List[Union[str, int]]]
+        configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
             if identifier == FETCHAI:
-                if len(config) == 1:
-                    kwargs = {"network": config[0]}
-                elif len(config) == 2:
-                    kwargs = {"host": config[1], "port": config[0]}
-                api = FetchAIApi(**kwargs)  # type: LedgerApi
+                api = FetchAIApi(**config)  # type: LedgerApi
                 apis[identifier] = api
                 configs[identifier] = config
             elif identifier == ETHEREUM:
-                address = cast(str, config[0])
-                api = EthereumApi(address)
+                api = EthereumApi(cast(str, config["address"]))
                 apis[identifier] = api
                 configs[identifier] = config
             else:
@@ -81,7 +76,7 @@ class LedgerApis(object):
         self._default_ledger_id = default_ledger_id
 
     @property
-    def configs(self) -> Dict[str, List[Union[str, int]]]:
+    def configs(self) -> Dict[str, Dict[str, Union[str, int]]]:
         """Get the configs."""
         return self._configs
 
@@ -211,7 +206,7 @@ def _try_to_instantiate_fetchai_ledger_api(**kwargs) -> None:
         sys.exit(1)
 
 
-def _try_to_instantiate_ethereum_ledger_api(addr: str) -> None:
+def _try_to_instantiate_ethereum_ledger_api(address: str) -> None:
     """
     Try to instantiate the ethereum ledger api.
 
@@ -220,7 +215,7 @@ def _try_to_instantiate_ethereum_ledger_api(addr: str) -> None:
     try:
         from web3 import Web3, HTTPProvider
 
-        Web3(HTTPProvider(addr))
+        Web3(HTTPProvider(address))
     except Exception:
         logger.error("Cannot connect to ethereum ledger with provided config.")
         sys.exit(1)

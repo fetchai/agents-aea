@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 FETCHAI = "fetchai"
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
-DEFAULT_FETCHAI_CONFIG = ("testnet.fetch-ai.com", 80)
+DEFAULT_FETCHAI_CONFIG = {"network": "testnet"}
 
 
 class FetchAICrypto(Crypto):

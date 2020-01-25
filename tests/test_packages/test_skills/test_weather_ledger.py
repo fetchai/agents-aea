@@ -153,8 +153,7 @@ class TestWeatherSkillsFetchaiLedger:
         find_text = "ledger_apis: {}"
         replace_text = """ledger_apis:
         fetchai:
-            address: alpha.fetch-ai.com
-            port: 80"""
+            network: testnet"""
 
         whole_file = whole_file.replace(find_text, replace_text)
 
@@ -170,23 +169,19 @@ class TestWeatherSkillsFetchaiLedger:
         )
         assert result.exit_code == 0
 
-        # Add some funds to the weather station
-        os.chdir(os.path.join(scripts_dst, "../"))
-        result = subprocess.call(
-            [
-                "python",
-                "./scripts/fetchai_wealth_generation.py",
-                "--private-key",
-                os.path.join("./", self.agent_name_two, "fet_private_key.txt"),
-                "--amount",
-                "10000000",
-                "--addr",
-                "alpha.fetch-ai.com",
-                "--port",
-                "80",
-            ]
+        # Add the private key
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add-key", "fetchai", "fet_private_key.txt"],
+            standalone_mode=False,
         )
-        assert result == 0
+        assert result.exit_code == 0
+
+        # Add some funds to the weather station
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-wealth", "fetchai"], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
         os.chdir(agent_two_dir_path)
         process_two = subprocess.Popen(

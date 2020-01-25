@@ -23,7 +23,7 @@ import inspect
 import re
 import sys
 from pathlib import Path
-from typing import List, Union, cast
+from typing import Dict, List, Union, cast
 
 import click
 from click import pass_context
@@ -199,7 +199,7 @@ def _verify_ledger_apis_access() -> None:
         logger.debug("No ethereum ledger api config specified.")
     else:
         _try_to_instantiate_ethereum_ledger_api(
-            cast(str, ethereum_ledger_config.get("addr"))
+            cast(str, ethereum_ledger_config.get("address"))
         )
 
 
@@ -314,7 +314,7 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
     )
     ledger_api_configs = dict(
         [
-            (identifier, cast(List[Union[str, int]], list(config.values())))
+            (identifier, cast(Dict[str, Union[str, int]], config))
             for identifier, config in ctx.agent_config.ledger_apis.read_all()
         ]
     )

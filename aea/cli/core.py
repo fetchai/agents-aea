@@ -24,7 +24,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import List, Union, cast
+from typing import Dict, Union, cast
 
 import click
 
@@ -250,7 +250,7 @@ def get_wealth(ctx: Context, type_):
         _verify_ledger_apis_access()
         ledger_api_configs = dict(
             [
-                (identifier, cast(List[Union[str, int]], list(config.values())))
+                (identifier, cast(Dict[str, Union[str, int]], config))
                 for identifier, config in ctx.agent_config.ledger_apis.read_all()
             ]
         )

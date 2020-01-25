@@ -19,7 +19,7 @@
 
 """Implementation of the 'aea list' subcommand."""
 
-from collections import Set
+from collections.abc import Set
 from pathlib import Path
 from typing import Dict, List
 
