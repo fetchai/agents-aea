@@ -68,6 +68,7 @@ DEFAULT_SKILL = PublicId.from_string(
 )  # type: PublicId
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
+DEFAULT_LICENSE = "Apache-2.0"
 
 
 from_string_to_type = dict(str=str, int=int, bool=bool, float=float)
