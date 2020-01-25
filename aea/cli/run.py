@@ -186,21 +186,23 @@ def _verify_ledger_apis_access() -> None:
         logger.debug("No fetchai ledger api config specified.")
     else:
         network = cast(str, fetchai_ledger_api_config.get("network"))
-        addr = cast(str, fetchai_ledger_api_config.get("address"))
+        host = cast(str, fetchai_ledger_api_config.get("host"))
         port = cast(int, fetchai_ledger_api_config.get("port"))
         if network is not None:
             _try_to_instantiate_fetchai_ledger_api(network=network)
-        elif addr is not None and port is not None:
-            _try_to_instantiate_fetchai_ledger_api(host=addr, port=port)
+        elif host is not None and port is not None:
+            _try_to_instantiate_fetchai_ledger_api(host=host, port=port)
         else:
-            raise ValueError("Either network or addr and port must be specified.")
+            raise ValueError("Either network or host and port must be specified.")
     ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
     if ethereum_ledger_config is None:
         logger.debug("No ethereum ledger api config specified.")
     else:
-        _try_to_instantiate_ethereum_ledger_api(
-            cast(str, ethereum_ledger_config.get("address"))
-        )
+        address = cast(str, ethereum_ledger_config.get("address"))
+        if address is not None:
+            _try_to_instantiate_ethereum_ledger_api(address)
+        else:
+            raise ValueError("Address must be specified.")
 
 
 def _setup_connection(connection_name: str, address: str, ctx: Context) -> Connection:

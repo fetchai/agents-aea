@@ -163,7 +163,7 @@ class FetchAIApi(LedgerApi):
         """
         Initialize the Fetch.AI ledger APIs.
 
-        :param kwargs: key word arguments (expects either a pair of 'address' and 'port' or a 'network')
+        :param kwargs: key word arguments (expects either a pair of 'host' and 'port' or a 'network')
         """
         self._api = FetchaiLedgerApi(**kwargs)
 
