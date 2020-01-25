@@ -248,7 +248,7 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 We can then launch our agent.
 
 ```bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 We can see that the agent sends search requests to the OEF and receives search responses from the OEF. Since our agent is only searching on the OEF - and not registered on the OEF - the search response returns an empty list of agents.

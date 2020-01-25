@@ -137,7 +137,7 @@ aea run
 or 
 
 ``` bash
-aea run --connections stub
+aea run --connections fetchai/stub:0.1.0
 ```
 
 You will see the echo task running in the terminal window.

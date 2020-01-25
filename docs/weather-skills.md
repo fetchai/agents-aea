@@ -40,7 +40,7 @@ aea install
 
 ### Run the weather station AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 
@@ -62,7 +62,7 @@ aea install
 
 ### Run the weather client AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 
@@ -182,7 +182,7 @@ aea config set skills.weather_station.shared_classes.strategy.args.is_ledger_tx 
 
 Run both AEAs from their respective terminals.
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Fetch.ai `testnet`.
@@ -293,7 +293,7 @@ addr: ${OEF_ADDR: 127.0.0.1}
 
 Run both AEAs, from their respective terminals.
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 You will see that the AEAs negotiate and then transact using the Ethereum `testnet`.
 
