@@ -536,8 +536,7 @@ def test_run_ledger_apis(pytestconfig):
         address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
         chain_id: 3
     fetchai:
-        address: alpha.fetch-ai.com
-        port: 80"""
+        network: testnet"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -613,8 +612,7 @@ def test_run_fet_ledger_apis(pytestconfig):
     find_text = "ledger_apis: {}"
     replace_text = """ledger_apis:
     fetchai:
-        address: alpha.fetch-ai.com
-        port: 80"""
+        network: testnet"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 

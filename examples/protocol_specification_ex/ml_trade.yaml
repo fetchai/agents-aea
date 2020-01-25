@@ -10,10 +10,10 @@ speech_acts:
     terms: Descrition
   accept:
     terms: Descrition
-    tx_digest: str
+    tx_digest: pt:str
   data:
     terms: Descrition
-    data: Tuple[Array, Array]
+    data: pt:list[Array]
 
   # Differences:
   # data -> data was of type Tuple[np.ndarrays, np.ndarrays]. Now Array as a custom type is used instead of np.ndarrays.

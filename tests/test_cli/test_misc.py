@@ -55,24 +55,27 @@ Options:
   --help               Show this message and exit.
 
 Commands:
-  add           Add a resource to the agent.
-  add-key       Add a private key to the wallet.
-  config        Read or modify a configuration.
-  create        Create an agent.
-  delete        Delete an agent.
-  fetch         Fetch Agent from Registry.
-  freeze        Get the dependencies.
-  generate      Generate a resource for the agent.
-  generate-key  Generate private keys.
-  gui           Run the CLI GUI.
-  install       Install the dependencies.
-  list          List the installed resources.
-  login         Login to Registry account
-  publish       Publish Agent to Registry.
-  push          Push item to Registry or save it in local packages.
-  remove        Remove a resource from the agent.
-  run           Run the agent.
-  scaffold      Scaffold a resource for the agent.
-  search        Search for components in the registry.
+  add              Add a resource to the agent.
+  add-key          Add a private key to the wallet.
+  config           Read or modify a configuration.
+  create           Create an agent.
+  delete           Delete an agent.
+  fetch            Fetch Agent from Registry.
+  freeze           Get the dependencies.
+  generate         Generate a resource for the agent.
+  generate-key     Generate private keys.
+  generate-wealth  Generate wealth for address on test network.
+  get-address      Get the address associated with the private key.
+  get-wealth       Get the wealth associated with the private key.
+  gui              Run the CLI GUI.
+  install          Install the dependencies.
+  list             List the installed resources.
+  login            Login to Registry account
+  publish          Publish Agent to Registry.
+  push             Push item to Registry or save it in local packages.
+  remove           Remove a resource from the agent.
+  run              Run the agent.
+  scaffold         Scaffold a resource for the agent.
+  search           Search for components in the registry.
 """
     )

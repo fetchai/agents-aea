@@ -23,7 +23,7 @@ import inspect
 import re
 import sys
 from pathlib import Path
-from typing import List, Union, cast
+from typing import Dict, List, Union, cast
 
 import click
 from click import pass_context
@@ -185,18 +185,24 @@ def _verify_ledger_apis_access() -> None:
     if fetchai_ledger_api_config is None:
         logger.debug("No fetchai ledger api config specified.")
     else:
-        _try_to_instantiate_fetchai_ledger_api(
-            cast(str, fetchai_ledger_api_config.get("addr")),
-            cast(int, fetchai_ledger_api_config.get("port")),
-        )
-
+        network = cast(str, fetchai_ledger_api_config.get("network"))
+        host = cast(str, fetchai_ledger_api_config.get("host"))
+        port = cast(int, fetchai_ledger_api_config.get("port"))
+        if network is not None:
+            _try_to_instantiate_fetchai_ledger_api(network=network)
+        elif host is not None and port is not None:
+            _try_to_instantiate_fetchai_ledger_api(host=host, port=port)
+        else:
+            raise ValueError("Either network or host and port must be specified.")
     ethereum_ledger_config = aea_conf.ledger_apis.read(ETHEREUM)
     if ethereum_ledger_config is None:
         logger.debug("No ethereum ledger api config specified.")
     else:
-        _try_to_instantiate_ethereum_ledger_api(
-            cast(str, ethereum_ledger_config.get("addr"))
-        )
+        address = cast(str, ethereum_ledger_config.get("address"))
+        if address is not None:
+            _try_to_instantiate_ethereum_ledger_api(address)
+        else:
+            raise ValueError("Address must be specified.")
 
 
 def _setup_connection(
@@ -317,7 +323,7 @@ def run(
     )
     ledger_api_configs = dict(
         [
-            (identifier, cast(List[Union[str, int]], list(config.values())))
+            (identifier, cast(Dict[str, Union[str, int]], config))
             for identifier, config in ctx.agent_config.ledger_apis.read_all()
         ]
     )

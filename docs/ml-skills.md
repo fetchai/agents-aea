@@ -110,9 +110,7 @@ ledger_apis:
 
 Create some wealth for your ml model trainer on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
-cd ..
-python scripts/fetchai_wealth_generation.py --private-key ml_model_trainer/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
-cd ml_model_trainer
+aea generate-wealth fetchai
 ```
 
 ### Update the ml model trainer AEA skills config

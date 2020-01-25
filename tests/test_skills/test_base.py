@@ -42,7 +42,7 @@ def test_agent_context_ledger_apis():
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({"default": private_key_pem_path})
     connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
-    ledger_apis = LedgerApis({"fetchai": ["alpha.fetch-ai.com", 80]}, FETCHAI)
+    ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, FETCHAI)
     my_aea = AEA(
         "Agent0",
         connections,
@@ -53,9 +53,6 @@ def test_agent_context_ledger_apis():
     )
 
     assert set(my_aea.context.ledger_apis.apis.keys()) == {"fetchai"}
-    fetchai_ledger_api_obj = my_aea.context.ledger_apis.apis["fetchai"]
-    assert fetchai_ledger_api_obj.api.tokens.host == "alpha.fetch-ai.com"
-    assert fetchai_ledger_api_obj.api.tokens.port == 80
 
 
 class TestSkillContext:
@@ -69,7 +66,7 @@ class TestSkillContext:
         cls.wallet = Wallet(
             {"default": private_key_pem_path, FETCHAI: private_key_txt_path}
         )
-        cls.ledger_apis = LedgerApis({FETCHAI: ["alpha.fetch-ai.com", 80]}, FETCHAI)
+        cls.ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
         cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
         cls.my_aea = AEA(
             "Agent0",
@@ -127,11 +124,6 @@ class TestSkillContext:
         """Test the 'ledger_apis' property."""
         assert isinstance(self.skill_context.ledger_apis, LedgerApis)
         assert set(self.skill_context.ledger_apis.apis.keys()) == {"fetchai"}
-        assert (
-            self.skill_context.ledger_apis.apis.get("fetchai").api.tokens.host
-            == "alpha.fetch-ai.com"
-        )
-        assert self.skill_context.ledger_apis.apis.get("fetchai").api.tokens.port == 80
 
     @classmethod
     def teardown(cls):
