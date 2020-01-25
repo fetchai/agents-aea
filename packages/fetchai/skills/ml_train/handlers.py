@@ -41,7 +41,7 @@ DUMMY_DIGEST = "dummy_digest"
 class TrainHandler(Handler):
     """Train handler."""
 
-    SUPPORTED_PROTOCOL = "ml_trade"
+    SUPPORTED_PROTOCOL = MLTradeMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

@@ -205,11 +205,13 @@ def _verify_ledger_apis_access() -> None:
             raise ValueError("Address must be specified.")
 
 
-def _setup_connection(connection_name: str, address: str, ctx: Context) -> Connection:
+def _setup_connection(
+    connection_public_id: PublicId, address: str, ctx: Context
+) -> Connection:
     """
     Set up a connection.
 
-    :param connection_name: the name of the connection.
+    :param connection_public_id: the public id of the connection.
     :param ctx: the CLI context object.
     :param address: the address.
     :return: a Connection object.
@@ -217,17 +219,13 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
                               | or if the connection type is not supported by the framework.
     """
     # TODO handle the case when there are multiple connections with the same name
-    supported_connection_names = dict(
-        map(lambda x: (x.name, x), ctx.agent_config.connections)
-    )
-    if connection_name not in supported_connection_names:
+    supported_connection_ids = ctx.agent_config.connections
+    if connection_public_id not in supported_connection_ids:
         raise AEAConfigException(
-            "Connection name '{}' not declared in the configuration file.".format(
-                connection_name
+            "Connection id '{}' not declared in the configuration file.".format(
+                connection_public_id
             )
         )
-
-    connection_public_id = supported_connection_names[connection_name]
     connection_dir = Path(
         "vendor", connection_public_id.author, "connections", connection_public_id.name
     )
@@ -240,22 +238,29 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
         )
     except FileNotFoundError:
         raise AEAConfigException(
-            "Connection config for '{}' not found.".format(connection_name)
+            "Connection config for '{}' not found.".format(connection_public_id)
         )
 
     connection_package = load_agent_component_package(
-        "connection", connection_name, connection_config.author, connection_dir
+        "connection",
+        connection_public_id.name,
+        connection_config.author,
+        connection_dir,
     )
     add_agent_component_module_to_sys_modules(
-        "connection", connection_name, connection_config.author, connection_package
+        "connection",
+        connection_public_id.name,
+        connection_config.author,
+        connection_package,
     )
     try:
         connection_module = load_module(
             "connection_module", connection_dir / "connection.py"
         )
     except FileNotFoundError:
-        raise AEAConfigException("Connection '{}' not found.".format(connection_name))
-
+        raise AEAConfigException(
+            "Connection '{}' not found.".format(connection_public_id)
+        )
     classes = inspect.getmembers(connection_module, inspect.isclass)
     connection_classes = list(
         filter(lambda x: re.match("\\w+Connection", x[0]), classes)
@@ -276,7 +281,7 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
 @click.command()
 @click.option(
     "--connections",
-    "connection_names",
+    "connection_ids",
     cls=ConnectionsOption,
     required=False,
     default=None,
@@ -299,7 +304,9 @@ def _setup_connection(connection_name: str, address: str, ctx: Context) -> Conne
     help="Install all the dependencies before running the agent.",
 )
 @pass_context
-def run(click_context, connection_names: List[str], env_file: str, install_deps: bool):
+def run(
+    click_context, connection_ids: List[PublicId], env_file: str, install_deps: bool
+):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     try_to_load_agent_config(ctx)
@@ -324,18 +331,16 @@ def run(click_context, connection_names: List[str], env_file: str, install_deps:
     wallet = Wallet(private_key_paths)
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
-    default_connection_name = PublicId.from_string(
-        ctx.agent_config.default_connection
-    ).name
-    connection_names = (
-        [default_connection_name] if connection_names is None else connection_names
+    default_connection_id = PublicId.from_str(ctx.agent_config.default_connection)
+    connection_ids = (
+        [default_connection_id] if connection_ids is None else connection_ids
     )
     connections = []
     _try_to_load_protocols(ctx)
     try:
-        for connection_name in connection_names:
+        for connection_id in connection_ids:
             connection = _setup_connection(
-                connection_name, wallet.addresses[ctx.agent_config.default_ledger], ctx
+                connection_id, wallet.addresses[ctx.agent_config.default_ledger], ctx
             )
             connections.append(connection)
     except AEAConfigException as e:

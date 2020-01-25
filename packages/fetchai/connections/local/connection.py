@@ -25,9 +25,9 @@ import logging
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
 from threading import Thread
-from typing import Dict, List, Optional, Set, cast
+from typing import Dict, List, Optional, cast
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, ProtocolId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
@@ -134,7 +134,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == "oef":
+        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef:0.1.0"):
             await self._handle_oef_message(envelope)
         else:
             await self._handle_agent_message(envelope)
@@ -388,27 +388,17 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    def __init__(
-        self,
-        address: Address,
-        local_node: LocalNode,
-        connection_id: str = "local",
-        restricted_to_protocols: Optional[Set[str]] = None,
-        excluded_protocols: Optional[Set[str]] = None,
-    ):
+    def __init__(self, address: Address, local_node: LocalNode, *args, **kwargs):
         """
         Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
 
         :param address: the address used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
+        :param connection_id: the connection id.
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the excluded protocols for this connection.
         """
-        super().__init__(
-            connection_id=connection_id,
-            restricted_to_protocols=restricted_to_protocols,
-            excluded_protocols=excluded_protocols,
-        )
+        super().__init__(*args, **kwargs)
         self._address = address
         self._local_node = local_node
 
@@ -485,7 +475,7 @@ class OEFLocalConnection(Connection):
         return OEFLocalConnection(
             address,
             local_node,
-            connection_id=connection_configuration.name,
+            connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
         )

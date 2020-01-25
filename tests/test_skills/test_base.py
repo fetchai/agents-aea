@@ -34,14 +34,14 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.skills.base import Skill, SkillContext
 
-from ..conftest import CUR_PATH, DummyConnection
+from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
 
 def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
     private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
     wallet = Wallet({"default": private_key_pem_path})
-    connections = [DummyConnection()]
+    connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, FETCHAI)
     my_aea = AEA(
         "Agent0",
@@ -67,7 +67,7 @@ class TestSkillContext:
             {"default": private_key_pem_path, FETCHAI: private_key_txt_path}
         )
         cls.ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
-        cls.connections = [DummyConnection()]
+        cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
         cls.my_aea = AEA(
             "Agent0",
             cls.connections,
@@ -158,7 +158,7 @@ class TestSkillFromDir:
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, FETCHAI)
-        cls.connections = [DummyConnection()]
+        cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
         cls.my_aea = AEA(
             "agent_name",
             cls.connections,

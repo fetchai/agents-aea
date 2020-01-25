@@ -24,6 +24,7 @@ import logging.config
 import os
 import shutil
 import sys
+from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, List, Optional, cast
 
@@ -60,12 +61,10 @@ logger = default_logging_config(logger)
 
 DEFAULT_VERSION = "0.1.0"
 DEFAULT_AUTHOR = "author"
-DEFAULT_CONNECTION = PublicId.from_string(
+DEFAULT_CONNECTION = PublicId.from_str(
     "fetchai/stub:" + DEFAULT_VERSION
 )  # type: PublicId
-DEFAULT_SKILL = PublicId.from_string(
-    "fetchai/error:" + DEFAULT_VERSION
-)  # type: PublicId
+DEFAULT_SKILL = PublicId.from_str("fetchai/error:" + DEFAULT_VERSION)  # type: PublicId
 DEFAULT_LEDGER = FETCHAI
 DEFAULT_REGISTRY_PATH = str(Path("./", "packages"))
 DEFAULT_LICENSE = "Apache-2.0"
@@ -292,7 +291,7 @@ class AEAConfigException(Exception):
 class ConnectionsOption(click.Option):
     """Click option for the --connections option in 'aea run'."""
 
-    def type_cast_value(self, ctx, value) -> Optional[List[str]]:
+    def type_cast_value(self, ctx, value) -> Optional[List[PublicId]]:
         """
         Parse the list of string passed through command line.
 
@@ -309,10 +308,16 @@ class ConnectionsOption(click.Option):
             def arg_strip(s):
                 return s.strip(" '\"")
 
-            connection_names = set(
+            input_connection_ids = [
                 arg_strip(s) for s in value.split(",") if arg_strip(s) != ""
-            )
-            return list(connection_names)
+            ]
+
+            # remove duplicates, while preserving the order
+            result = OrderedDict()  # type: OrderedDict[PublicId, None]
+            for connection_id_string in input_connection_ids:
+                connection_public_id = PublicId.from_str(connection_id_string)
+                result[connection_public_id] = None
+            return list(result.keys())
         except Exception:  # pragma: no cover
             raise click.BadParameter(value)
 
@@ -335,7 +340,7 @@ class PublicIdParameter(click.ParamType):
     def convert(self, value, param, ctx):
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""
         try:
-            return PublicId.from_string(value)
+            return PublicId.from_str(value)
         except ValueError:
             raise click.BadParameter(value)
 

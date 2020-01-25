@@ -28,7 +28,7 @@ from typing import Dict, Optional, cast
 
 import gym
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers.base import locate
 from aea.mail.base import Address, Envelope
@@ -85,7 +85,7 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == "gym":
+        if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
             self.handle_gym_message(envelope)
         else:
             raise ValueError("This protocol is not valid for gym.")
@@ -146,11 +146,7 @@ class GymChannel:
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    restricted_to_protocols = {"gym"}
-
-    def __init__(
-        self, address: Address, gym_env: gym.Env, connection_id: str = "gym", **kwargs
-    ):
+    def __init__(self, address: Address, gym_env: gym.Env, *args, **kwargs):
         """
         Initialize a connection to a local gym environment.
 
@@ -158,7 +154,7 @@ class GymConnection(Connection):
         :param gym_env: the gym environment.
         :param connection_id: the connection id.
         """
-        super().__init__(connection_id=connection_id, **kwargs)
+        super().__init__(*args, **kwargs)
         self.address = address
         self.channel = GymChannel(address, gym_env)
 
@@ -246,7 +242,7 @@ class GymConnection(Connection):
         return GymConnection(
             address,
             gym_env(),
-            connection_id=connection_configuration.name,
+            connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
         )

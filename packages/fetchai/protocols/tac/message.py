@@ -24,6 +24,7 @@ from collections import defaultdict
 from enum import Enum
 from typing import Any, Dict, cast
 
+from aea.configurations.base import PublicId
 from aea.mail.base import Address
 from aea.protocols.base import Message
 
@@ -31,7 +32,7 @@ from aea.protocols.base import Message
 class TACMessage(Message):
     """The TAC message class."""
 
-    protocol_id = "tac"
+    protocol_id = PublicId("fetchai", "tac", "0.1.0")
 
     class Type(Enum):
         """TAC Message types."""

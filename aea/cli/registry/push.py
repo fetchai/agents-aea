@@ -51,7 +51,7 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     Push item to the Registry.
 
     :param item_type: str type of item (connection/protocol/skill).
-    :param item_name: str item name.
+    :param item_id: str item name.
 
     :return: None
     """

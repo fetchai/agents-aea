@@ -56,7 +56,7 @@ from oef.schema import (
     Description as OEFDescription,
 )
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import (
     And,
@@ -534,7 +534,7 @@ class OEFChannel(OEFAgent):
                     )
                 )
                 raise ValueError("Cannot send message.")
-        if envelope.protocol_id == "oef":
+        if envelope.protocol_id == PublicId.from_str("fetchai/oef:0.1.0"):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)
@@ -585,17 +585,8 @@ class OEFChannel(OEFAgent):
 class OEFConnection(Connection):
     """The OEFConnection connects the to the mailbox."""
 
-    restricted_to_protocols = set()  # type: Set[str]
-    excluded_protocols = set()  # type: Set[str]
-
     def __init__(
-        self,
-        address: Address,
-        oef_addr: str,
-        oef_port: int = 10000,
-        connection_id: str = "oef",
-        restricted_to_protocols: Optional[Set[str]] = None,
-        excluded_protocols: Optional[Set[str]] = None,
+        self, address: Address, oef_addr: str, oef_port: int = 10000, *args, **kwargs
     ):
         """
         Initialize.
@@ -607,19 +598,11 @@ class OEFConnection(Connection):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the excluded protocols for this connection.
         """
-        super().__init__(
-            connection_id=connection_id,
-            restricted_to_protocols=restricted_to_protocols,
-            excluded_protocols=excluded_protocols,
-        )
+        super().__init__(*args, **kwargs)
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self.channel = OEFChannel(
-            address,
-            oef_addr,
-            oef_port,
-            core=self._core,
-            excluded_protocols=excluded_protocols,
+            address, oef_addr, oef_port, core=self._core,
         )  # type: ignore
 
         self._connection_check_thread = None  # type: Optional[Thread]
@@ -754,7 +737,7 @@ class OEFConnection(Connection):
             address,
             oef_addr,
             oef_port,
-            connection_id=connection_configuration.name,
+            connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
         )

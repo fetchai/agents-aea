@@ -23,11 +23,13 @@
 from copy import copy
 from typing import Any, Dict, Optional
 
+from aea.configurations.base import PublicId
+
 
 class InternalMessage:
     """This class implements a message."""
 
-    protocol_id = "internal"
+    protocol_id = PublicId("fetchai", "internal", "0.1.0")
 
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """

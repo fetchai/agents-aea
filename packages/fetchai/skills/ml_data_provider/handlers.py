@@ -35,7 +35,7 @@ logger = logging.getLogger("aea.ml_data_provider")
 class MLTradeHandler(Handler):
     """ML trade handler."""
 
-    SUPPORTED_PROTOCOL = "ml_trade"
+    SUPPORTED_PROTOCOL = MLTradeMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

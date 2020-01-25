@@ -18,15 +18,16 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'dummy' skill."""
-
+from aea.decision_maker.messages.base import InternalMessage
 from aea.protocols.base import Message
+from aea.protocols.default.message import DefaultMessage
 from aea.skills.base import Handler
 
 
 class DummyHandler(Handler):
     """Dummy handler."""
 
-    SUPPORTED_PROTOCOL = "default"
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -64,7 +65,7 @@ class DummyHandler(Handler):
 class DummyInternalHandler(Handler):
     """Dummy internal handler."""
 
-    SUPPORTED_PROTOCOL = "internal"
+    SUPPORTED_PROTOCOL = InternalMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

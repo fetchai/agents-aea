@@ -21,7 +21,7 @@
 
 from typing import cast
 
-from aea.configurations.base import ProtocolConfig
+from aea.configurations.base import ProtocolConfig, PublicId
 from aea.mail.base import Envelope
 from aea.protocols.base import (
     JSONSerializer,
@@ -30,6 +30,8 @@ from aea.protocols.base import (
     Protocol,
     Serializer,
 )
+
+from ..conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 
 class TestBaseSerializations:
@@ -47,7 +49,7 @@ class TestBaseSerializations:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id="my_own_protocol",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -66,7 +68,7 @@ class TestBaseSerializations:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id="my_own_protocol",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -104,7 +106,7 @@ class TestBaseSerializations:
     def test_protocols_config(self):
         """Test the protocol config."""
         protocol = Protocol(
-            id="test",
+            protocol_id=PublicId.from_str("author/my_own_protocol:0.1.0"),
             serializer=cast(Serializer, ProtobufSerializer),
             config=ProtocolConfig(),
         )

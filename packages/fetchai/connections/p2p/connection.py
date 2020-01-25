@@ -30,7 +30,7 @@ from typing import Any, Dict, List, Optional, Set, cast
 
 from fetch.p2p.api.http_calls import HTTPCalls
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import AEAConnectionError, Address, Envelope
 
@@ -45,7 +45,7 @@ class PeerToPeerChannel:
         address: Address,
         provider_addr: str,
         provider_port: int,
-        excluded_protocols: Optional[List[str]] = None,
+        excluded_protocols: Optional[Set[PublicId]] = None,
     ):
         """
         Initialize a channel.
@@ -112,7 +112,7 @@ class PeerToPeerChannel:
         self._httpCall.send_message(
             sender_address=envelope.sender,
             receiver_address=envelope.to,
-            protocol=envelope.protocol_id,
+            protocol=str(envelope.protocol_id),
             context=b"None",
             payload=envelope.message,
         )
@@ -131,7 +131,7 @@ class PeerToPeerChannel:
                 envelope = Envelope(
                     to=message["TO"]["RECEIVER_ADDRESS"],
                     sender=message["FROM"]["SENDER_ADDRESS"],
-                    protocol_id=message["PROTOCOL"],
+                    protocol_id=PublicId.from_str(message["PROTOCOL"]),
                     message=message["PAYLOAD"],
                 )
                 self.loop.call_soon_threadsafe(self.in_queue.put_nowait, envelope)
@@ -156,28 +156,21 @@ class PeerToPeerChannel:
 class PeerToPeerConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    restricted_to_protocols = set()  # type: Set[str]
-
     def __init__(
         self,
         address: Address,
         provider_addr: str,
         provider_port: int = 8000,
-        connection_id: str = "p2p",
-        restricted_to_protocols: Optional[Set[str]] = None,
-        excluded_protocols: Optional[Set[str]] = None,
+        *args,
+        **kwargs
     ):
         """
         Initialize a connection to an SDK or API.
 
         :param address: the address used in the protocols.
         """
-        super().__init__(
-            connection_id=connection_id,
-            restricted_to_protocols=restricted_to_protocols,
-            excluded_protocols=excluded_protocols,
-        )
-        self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=excluded_protocols)  # type: ignore
+        super().__init__(*args, **kwargs)
+        self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=self.excluded_protocols)  # type: ignore
         self.address = address
 
     async def connect(self) -> None:
@@ -258,6 +251,7 @@ class PeerToPeerConnection(Connection):
             address,
             addr,
             port,
+            connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
         )

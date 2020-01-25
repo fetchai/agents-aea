@@ -28,7 +28,7 @@ import sys
 import time
 from asyncio import CancelledError
 from threading import Timer
-from typing import Optional, Set
+from typing import Optional
 
 import docker as docker
 from docker.models.containers import Container
@@ -46,6 +46,7 @@ from aea.configurations.base import (
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+    PublicId,
 )
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
@@ -71,6 +72,18 @@ PROTOCOL_CONFIGURATION_SCHEMA = os.path.join(
 )
 
 DUMMY_ENV = gym.GoalEnv
+
+# common public ids used in the tests
+UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
+UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
+UNKNOWN_SKILL_PUBLIC_ID = PublicId("unknown_author", "unknown_skill", "0.1.0")
+LOCAL_CONNECTION_PUBLIC_ID = PublicId("fetchai", "local", "0.1.0")
+P2P_CONNECTION_PUBLIC_ID = PublicId("fetchai", "p2p", "0.1.0")
+STUB_CONNECTION_PUBLIC_ID = PublicId("fetchai", "stub", "0.1.0")
+DUMMY_PROTOCOL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
+DUMMY_CONNECTION_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
+DUMMY_SKILL_PUBLIC_ID = PublicId("dummy_author", "dummy", "0.1.0")
+
 
 protocol_config_files = [
     os.path.join(ROOT_DIR, "aea", "protocols", "default", DEFAULT_PROTOCOL_CONFIG_FILE),
@@ -282,17 +295,9 @@ def tcpping(ip, port) -> bool:
 class DummyConnection(Connection):
     """A dummy connection that just stores the messages."""
 
-    restricted_to_protocols = set()  # type: Set[str]
-
-    def __init__(
-        self,
-        connection_id: str = "dummy",
-        restricted_to_protocols: Optional[Set[str]] = None,
-    ):
+    def __init__(self, *args, **kwargs):
         """Initialize."""
-        super().__init__(
-            connection_id=connection_id, restricted_to_protocols=restricted_to_protocols
-        )
+        super().__init__(*args, **kwargs)
         self.connection_status.is_connected = False
         self._queue = None
 

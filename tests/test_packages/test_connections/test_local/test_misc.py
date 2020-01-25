@@ -23,6 +23,7 @@ import unittest.mock
 
 import pytest
 
+from aea.configurations.base import PublicId
 from aea.mail.base import AEAConnectionError, Envelope, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -36,8 +37,14 @@ def test_connection():
     """Test that two OEF local connection can connect to a local node."""
     with LocalNode() as node:
 
-        multiplexer1 = Multiplexer([OEFLocalConnection("multiplexer1", node)])
-        multiplexer2 = Multiplexer([OEFLocalConnection("multiplexer2", node)])
+        local_id_1 = PublicId("fetchai", "local1", "0.1.0")
+        local_id_2 = PublicId("fetchai", "local2", "0.1.0")
+        multiplexer1 = Multiplexer(
+            [OEFLocalConnection("multiplexer1", node, connection_id=local_id_1)]
+        )
+        multiplexer2 = Multiplexer(
+            [OEFLocalConnection("multiplexer2", node, connection_id=local_id_2)]
+        )
 
         multiplexer1.connect()
         multiplexer2.connect()
@@ -51,13 +58,18 @@ async def test_connection_twice_return_none():
     """Test that connecting twice works."""
     with LocalNode() as node:
         address = "address"
-        connection = OEFLocalConnection(address, node)
+        connection = OEFLocalConnection(
+            address, node, connection_id=PublicId("fetchai", "local", "0.1.0")
+        )
         await connection.connect()
         await node.connect(address, connection._reader)
         message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
         message_bytes = DefaultSerializer().encode(message)
         expected_envelope = Envelope(
-            to=address, sender=address, protocol_id="default", message=message_bytes
+            to=address,
+            sender=address,
+            protocol_id="fetchai/default:0.1.0",
+            message=message_bytes,
         )
         await connection.send(expected_envelope)
         actual_envelope = await connection.receive()
@@ -73,7 +85,9 @@ async def test_receiving_when_not_connected_raise_exception():
     with pytest.raises(AEAConnectionError, match="Connection not established yet."):
         with LocalNode() as node:
             address = "address"
-            connection = OEFLocalConnection(address, node)
+            connection = OEFLocalConnection(
+                address, node, connection_id=PublicId("fetchai", "local", "0.1.0")
+            )
             await connection.receive()
 
 
@@ -82,7 +96,9 @@ async def test_receiving_returns_none_when_error_occurs():
     """Test that when we try to receive an envelope and an error occurs we return None."""
     with LocalNode() as node:
         address = "address"
-        connection = OEFLocalConnection(address, node)
+        connection = OEFLocalConnection(
+            address, node, connection_id=PublicId("fetchai", "local", "0.1.0")
+        )
         await connection.connect()
 
         with unittest.mock.patch.object(
@@ -98,8 +114,13 @@ def test_communication():
     """Test that two multiplexer can communicate through the node."""
     with LocalNode() as node:
 
-        multiplexer1 = Multiplexer([OEFLocalConnection("multiplexer1", node)])
-        multiplexer2 = Multiplexer([OEFLocalConnection("multiplexer2", node)])
+        local_public_id = PublicId("fetchai", "local", "0.1.0")
+        multiplexer1 = Multiplexer(
+            [OEFLocalConnection("multiplexer1", node, local_public_id)]
+        )
+        multiplexer2 = Multiplexer(
+            [OEFLocalConnection("multiplexer2", node, local_public_id)]
+        )
 
         multiplexer1.connect()
         multiplexer2.connect()
@@ -158,23 +179,23 @@ def test_communication():
 
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = DefaultSerializer().decode(envelope.message)
-        assert envelope.protocol_id == "default"
+        assert envelope.protocol_id == DefaultMessage.protocol_id
         assert msg.get("content") == b"hello"
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
-        assert envelope.protocol_id == "fipa"
+        assert envelope.protocol_id == FIPAMessage.protocol_id
         assert msg.get("performative") == FIPAMessage.Performative.CFP
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
-        assert envelope.protocol_id == "fipa"
+        assert envelope.protocol_id == FIPAMessage.protocol_id
         assert msg.get("performative") == FIPAMessage.Performative.PROPOSE
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
-        assert envelope.protocol_id == "fipa"
+        assert envelope.protocol_id == FIPAMessage.protocol_id
         assert msg.get("performative") == FIPAMessage.Performative.ACCEPT
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = FIPASerializer().decode(envelope.message)
-        assert envelope.protocol_id == "fipa"
+        assert envelope.protocol_id == FIPAMessage.protocol_id
         assert msg.get("performative") == FIPAMessage.Performative.DECLINE
         multiplexer1.disconnect()
         multiplexer2.disconnect()

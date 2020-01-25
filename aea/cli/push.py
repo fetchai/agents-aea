@@ -85,8 +85,6 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
     :param item_type: str type of item (connection/protocol/skill).
     :param item_id: the public id of the item.
-    :param packages_path: path to packages dir
-
     :return: None
     """
     item_type_plural = item_type + "s"

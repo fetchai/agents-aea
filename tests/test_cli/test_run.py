@@ -38,6 +38,7 @@ from aea.cli import cli
 from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
+    PublicId,
 )
 
 from ..common.click_testing import CliRunner
@@ -68,7 +69,14 @@ def test_run(pytestconfig):
     assert result.exit_code == 0
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "aea.cli", "run", "--connections", "local"],
+        [
+            sys.executable,
+            "-m",
+            "aea.cli",
+            "run",
+            "--connections",
+            "fetchai/local:0.1.0",
+        ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )
@@ -136,10 +144,14 @@ def test_run_with_default_connection(pytestconfig):
 
 
 @pytest.mark.parametrize(
-    argnames=["connection_names"],
-    argvalues=[["local,stub"], ["'local, stub'"], ["local,,stub,"]],
+    argnames=["connection_ids"],
+    argvalues=[
+        ["fetchai/local:0.1.0,fetchai/stub:0.1.0"],
+        ["'fetchai/local:0.1.0, fetchai/stub:0.1.0'"],
+        ["fetchai/local:0.1.0,,fetchai/stub:0.1.0,"],
+    ],
 )
-def test_run_multiple_connections(pytestconfig, connection_names):
+def test_run_multiple_connections(pytestconfig, connection_ids):
     """Test that the command 'aea run' works as expected when specifying multiple connections."""
     if pytestconfig.getoption("ci"):
         pytest.skip("Skipping the test since it doesn't work in CI.")
@@ -169,7 +181,7 @@ def test_run_multiple_connections(pytestconfig, connection_names):
     assert result.exit_code == 1
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "aea.cli", "run", "--connections", connection_names],
+        [sys.executable, "-m", "aea.cli", "run", "--connections", connection_ids],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )
@@ -242,7 +254,7 @@ def test_run_unknown_private_key(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
     except Exception as e:
         error_msg = str(e)
 
@@ -301,7 +313,7 @@ def test_run_unknown_ledger(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
     except Exception as e:
         error_msg = str(e)
 
@@ -359,7 +371,7 @@ def test_run_default_private_key_config(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
     except SystemExit as e:
         error_msg = str(e)
 
@@ -417,7 +429,7 @@ def test_run_fet_private_key_config(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
     except SystemExit as e:
         error_msg = str(e)
 
@@ -475,7 +487,7 @@ def test_run_ethereum_private_key_config(pytestconfig):
 
     error_msg = ""
     try:
-        cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+        cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
     except SystemExit as e:
         error_msg = str(e)
 
@@ -535,7 +547,14 @@ def test_run_ledger_apis(pytestconfig):
         f.write(whole_file)
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "aea.cli", "run", "--connections", "local"],
+        [
+            sys.executable,
+            "-m",
+            "aea.cli",
+            "run",
+            "--connections",
+            "fetchai/local:0.1.0",
+        ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )
@@ -604,7 +623,14 @@ def test_run_fet_ledger_apis(pytestconfig):
         f.write(whole_file)
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "aea.cli", "run", "--connections", "local"],
+        [
+            sys.executable,
+            "-m",
+            "aea.cli",
+            "run",
+            "--connections",
+            "fetchai/local:0.1.0",
+        ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )
@@ -658,7 +684,7 @@ def test_run_with_install_deps(pytestconfig):
             "run",
             "--install-deps",
             "--connections",
-            "local",
+            "fetchai/local:0.1.0",
         ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
@@ -716,7 +742,7 @@ def test_run_with_install_deps_and_requirement_file(pytestconfig):
             "run",
             "--install-deps",
             "--connections",
-            "local",
+            "fetchai/local:0.1.0",
         ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
@@ -778,7 +804,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         yaml.safe_dump(config, open(config_path, "w"))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", "local"])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", "fetchai/local:0.1.0"])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -907,6 +933,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
+        cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -924,7 +951,7 @@ class TestRunFailsWhenConnectionNotDeclared:
         os.chdir(Path(cls.t, cls.agent_name))
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -934,8 +961,8 @@ class TestRunFailsWhenConnectionNotDeclared:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection name '{}' not declared in the configuration file.".format(
-            self.connection_name
+        s = "Connection id '{}' not declared in the configuration file.".format(
+            self.connection_id
         )
         self.mocked_logger_error.assert_called_once_with(s)
 
@@ -958,7 +985,9 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_name = "myconnection"
+        cls.connection_id = PublicId.from_str("fetchai/local:0.1.0")
+        cls.connection_name = cls.connection_id.name
+        cls.connection_author = cls.connection_id.author
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
@@ -974,20 +1003,22 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "scaffold", "connection", cls.connection_name],
+            [*CLI_LOG_OPTION, "add", "connection", str(cls.connection_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
         Path(
             cls.t,
             cls.agent_name,
+            "vendor",
+            cls.connection_author,
             "connections",
             cls.connection_name,
             DEFAULT_CONNECTION_CONFIG_FILE,
         ).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", str(cls.connection_id)])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -997,7 +1028,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection config for '{}' not found.".format(self.connection_name)
+        s = "Connection config for '{}' not found.".format(self.connection_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -1019,8 +1050,9 @@ class TestRunFailsWhenConnectionNotComplete:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.connection_id = "fetchai/local:0.1.0"
-        cls.connection_name = "local"
+        cls.connection_id = PublicId.from_str("fetchai/local:0.1.0")
+        cls.connection_author = cls.connection_id.author
+        cls.connection_name = cls.connection_id.name
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
         cls.cwd = os.getcwd()
@@ -1036,7 +1068,7 @@ class TestRunFailsWhenConnectionNotComplete:
         os.chdir(Path(cls.t, cls.agent_name))
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            [*CLI_LOG_OPTION, "add", "connection", str(cls.connection_id)],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -1051,7 +1083,7 @@ class TestRunFailsWhenConnectionNotComplete:
         ).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", str(cls.connection_id)])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1061,7 +1093,7 @@ class TestRunFailsWhenConnectionNotComplete:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Connection '{}' not found.".format(self.connection_name)
+        s = "Connection '{}' not found.".format(self.connection_id)
         self.mocked_logger_error.assert_called_once_with(s)
 
     @classmethod
@@ -1115,7 +1147,7 @@ class TestRunFailsWhenConnectionClassNotPresent:
         ).write_text("")
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1147,6 +1179,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
+        cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -1173,7 +1206,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         ).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
         except SystemExit as e:
             cls.exit_code = e.code
 
@@ -1205,6 +1238,7 @@ class TestRunFailsWhenProtocolNotComplete:
         """Set the test up."""
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
+        cls.connection_id = "fetchai/local:0.1.0"
         cls.connection_name = "local"
         cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
@@ -1231,7 +1265,7 @@ class TestRunFailsWhenProtocolNotComplete:
         ).unlink()
 
         try:
-            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_name])
+            cli.main([*CLI_LOG_OPTION, "run", "--connections", cls.connection_id])
         except SystemExit as e:
             cls.exit_code = e.code
 
