@@ -12,6 +12,9 @@
 | `freeze`                                    | Get all the dependencies needed for the aea project and its components.      |
 | `gui`                                       | Run the GUI.                                                                 |
 | `generate-key default/fetchai/ethereum/all` | Generate private keys.                                                       |
+| `generate-wealth fetchai/ethereum`          | Generate wealth for address on test network.                                 |
+| `get-address fetchai/ethereum`              | Get the address associated with the private key.                             |
+| `get-wealth fetchai/ethereum`               | Get the wealth associated with the private key.                              |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
 | `list protocols/connections/skills`         | List the installed resources.                                                |
 | `publish`                                   | Publish agent to registry. Needs to be executed from an agent project.		 |

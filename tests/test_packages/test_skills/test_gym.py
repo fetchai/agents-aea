@@ -99,7 +99,9 @@ class TestGymSkill:
         shutil.copyfile(file_src, file_dst)
 
         # change number of training steps
-        skill_config_path = Path(self.t, self.agent_name, "skills", "gym", "skill.yaml")
+        skill_config_path = Path(
+            self.t, self.agent_name, "vendors", "fetchai", "skills", "gym", "skill.yaml"
+        )
         skill_config = SkillConfig.from_json(yaml.safe_load(open(skill_config_path)))
         skill_config.tasks.read("gym").args["nb_steps"] = 100
         yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))

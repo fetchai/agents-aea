@@ -112,7 +112,9 @@ class TestCarPark:
         assert result.exit_code == 0
 
         # Load the agent yaml file and manually insert the things we need
-        yaml_path = os.path.join("skills", "carpark_detection", "skill.yaml")
+        yaml_path = os.path.join(
+            "vendors", "fetchai", "skills", "carpark_detection", "skill.yaml"
+        )
         file = open(yaml_path, mode="r")
 
         # read all lines at once
@@ -173,8 +175,7 @@ class TestCarPark:
         find_text = "ledger_apis: {}"
         replace_text = """ledger_apis:
         fetchai:
-            address: alpha.fetch-ai.com
-            port: 80"""
+            network: testnet"""
 
         whole_file = whole_file.replace(find_text, replace_text)
 
@@ -190,23 +191,19 @@ class TestCarPark:
         )
         assert result.exit_code == 0
 
-        # Add some funds to the weather station
-        os.chdir(os.path.join(scripts_dst, "../"))
-        result = subprocess.call(
-            [
-                "python",
-                "./scripts/fetchai_wealth_generation.py",
-                "--private-key",
-                os.path.join("./", self.agent_name_two, "fet_private_key.txt"),
-                "--amount",
-                "1000000000",
-                "--addr",
-                "alpha.fetch-ai.com",
-                "--port",
-                "80",
-            ]
+        # Add the private key
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add-key", "fetchai", "fet_private_key.txt"],
+            standalone_mode=False,
         )
-        assert result == 0
+        assert result.exit_code == 0
+
+        # Add some funds to the car park client
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-wealth", "fetchai"], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
         os.chdir(agent_two_dir_path)
         process_two = subprocess.Popen(

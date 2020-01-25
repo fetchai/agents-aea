@@ -54,6 +54,7 @@ nav:
          - "CLI tool": 'cli-how-to.md'
          - "Commands": 'cli-commands.md'
          - "GUI": 'cli-gui.md'
+         - "Generating wealth": 'wealth.md'
       - "Build an AEA using code API": 'hacking-an-agent.md'
       - "Build an AEA on a Raspberry Pi": 'raspberry-set-up.md'
       - "Integrate with third parties": 'integration.md'

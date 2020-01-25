@@ -38,8 +38,7 @@ Second, add the ledger info to the aea config:
 ``` bash
 ledger_apis:
   fetchai:
-    address: alpha.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 Alternatively to the previous two steps, simply run:
@@ -64,8 +63,7 @@ Second, add the ledger info to the aea config:
 ``` bash
 ledger_apis:
   fetchai:
-    address: alpha.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 Alternatively to the previous two steps, simply run:
@@ -83,10 +81,23 @@ aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
-And, fund the carpark client agent:
+To fund the carpark client agent on test-net you need to request some test tokens from a faucet.
+
+First, print the address:
 ``` bash
-cd ..
-python scripts/fetchai_wealth_generation.py --private-key car_data_buyer/fet_private_key.txt --amount 10000000000 --addr alpha.fetch-ai.com --port 80
+aea get-address fetchai
+```
+
+This will print the address to the console. Copy the address into the clipboard and request test tokens from the faucet [here](https://explore-testnet.fetch.ai/tokentap). It will take a while for the tokens to become available.
+
+Second, after some time, check the wealth associated with the address:
+``` bash
+aea get-wealth fetchai
+```
+
+Alternatively, to the previous steps, simply run:
+``` bash
+aea generate-wealth fetchai
 ```
 
 ### Update skill configurations
