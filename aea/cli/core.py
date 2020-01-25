@@ -93,7 +93,7 @@ def delete(ctx: Context, agent_name):
     finally:
         os.chdir(cwd)
 
-    logger.info("Deleting AEA project directory '/{}'...".format(path))
+    logger.info("Deleting AEA project directory './{}'...".format(path))
 
     # delete the agent's directory
     try:
