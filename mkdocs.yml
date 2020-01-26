@@ -16,7 +16,6 @@ theme:
 
 
 nav:
-
   - Autonomous Economic Agent Framework:
     - Welcome: 'index.md'
     - Agent-oriented development: 'agent-oriented-development.md'
@@ -24,7 +23,7 @@ nav:
       - AEA quick start: 'quickstart.md'
       - Build an AEA step by step: 'steps.md'
       - Build a skill for an AEA: 'skill-guide.md'
-      - Build an AEA programmatically: 'hacking-an-agent.md'
+      - Build an AEA programmatically: 'build-aea-programmatically.md'
       - AEAs vs Agents: 'agent-vs-aea.md'
     - Version: 'version.md'
     - The AEA universe:
