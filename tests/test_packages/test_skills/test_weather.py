@@ -95,7 +95,14 @@ class TestWeatherSkills:
         assert result.exit_code == 0
 
         process_one = subprocess.Popen(
-            [sys.executable, "-m", "aea.cli", "run", "--connections", "fetchai/oef:0.1.0"],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
         )
@@ -126,7 +133,14 @@ class TestWeatherSkills:
         assert result.exit_code == 0
 
         process_two = subprocess.Popen(
-            [sys.executable, "-m", "aea.cli", "run", "--connections", "fetchai/oef:0.1.0"],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
         )
