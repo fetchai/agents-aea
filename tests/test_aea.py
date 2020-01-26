@@ -130,7 +130,7 @@ def test_react():
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
         address = wallet.addresses["default"]
-        connection = OEFLocalConnection(address, node, LOCAL_CONNECTION_PUBLIC_ID)
+        connection = OEFLocalConnection(address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID)
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
@@ -343,7 +343,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.wallet = Wallet({"default": cls.private_key_pem_path})
         cls.ledger_apis = LedgerApis({}, "default")
         cls.connection = OEFLocalConnection(
-            cls.agent_name, cls.node, LOCAL_CONNECTION_PUBLIC_ID
+            cls.agent_name, cls.node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
         )
         cls.connections = [cls.connection]
 
