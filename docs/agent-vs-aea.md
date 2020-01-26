@@ -1,6 +1,6 @@
 AEAs are more than just agents. In this guide we show some of the differences in terms of code.
 
-The <a href="../hacking-an-agent">Build an AEA using code API</a> guide shows how to programmatically build an AEA. We can build an agent of the `Agent` class programmatically as well.
+The <a href="../build-aea-programmatically">Build an AEA programmatically</a> guide shows how to programmatically build an AEA. We can build an agent of the `Agent` class programmatically as well.
 
 First, import the python and application specific libraries.
 ``` python

@@ -7,7 +7,7 @@ This guide assumes you have already followed the Preliminaries and Installation 
 
 
 ## Create private key
-Before we make our agent we make a private key to be used in the wallet. Open a terminal and type:
+Before we make our AEA we make a private key to be used in the wallet. Open a terminal and type:
     
 ``` bash
 python scripts/generate_private_key.py my_key.txt
@@ -53,14 +53,14 @@ OUTPUT_FILE = "output.txt"
 ```
 
 ## Create a private key
-We need a private key to populate the agent's wallet.
+We need a private key to populate the AEA's wallet.
 ``` python
 # Create a private key
 _create_default_private_key()
 ```
 
 ## Clearing the input and output files
-We will use the stub connection to pass envelopes in and out of the agent. Ensure that any input and output text files are removed before we start.
+We will use the stub connection to pass envelopes in and out of the AEA. Ensure that any input and output text files are removed before we start.
 ``` python
 # Ensure the input and output files do not exist initially
 if os.path.isfile(INPUT_FILE):
@@ -69,10 +69,10 @@ if os.path.isfile(OUTPUT_FILE):
     os.remove(OUTPUT_FILE)
 ```
 
-## Initialise the agent
+## Initialise the AEA
 We use the private key file we created to initialise a wallet, we also create the stub connection, tell it what Ledger APIs we are going to use (none in this example) and create a resources object containing skills, protocols and connections (this is initially empty). 
 
-Then we pass all of this into the AEA constructor to create our agent.
+Then we pass all of this into the AEA constructor to create our AEA.
 ``` python
 # Set up the wallet, stub connection, ledger and (empty) resources
 wallet = Wallet({DEFAULT: DEFAULT_PRIVATE_KEY_FILE})
@@ -83,10 +83,10 @@ ledger_apis = LedgerApis({}, DEFAULT)
 resources = Resources()
 
 # Create our AEA
-my_agent = AEA("my_agent", [stub_connection], wallet, ledger_apis, resources)
+my_aea = AEA("my_aea", [stub_connection], wallet, ledger_apis, resources)
 ```
 
-Create the default protocol and add it to the agent.
+Create the default protocol and add it to the AEA.
 ``` python
 # Add the default protocol (which is part of the AEA distribution)
 default_protocol_configuration = ProtocolConfig.from_json(
@@ -104,25 +104,25 @@ resources.protocol_registry.register(
 )
 ```
 
-Create the error skill (needed by all agents) and the echo skill which will bounce our messages back to us, and add them both to the agent.
+Create the error skill (needed by all AEAs) and the echo skill which will bounce our messages back to us, and add them both to the AEA.
 ``` python
 # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
 echo_skill = Skill.from_dir(
     os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"),
-    my_agent.context,
+    my_aea.context,
 )
 resources.add_skill(echo_skill)
 error_skill = Skill.from_dir(
-    os.path.join(AEA_DIR, "skills", "error"), my_agent.context
+    os.path.join(AEA_DIR, "skills", "error"), my_aea.context
 )
 resources.add_skill(error_skill)
 ```
 
-## Start the agent
-We run the agent from a different thread so that we can still use the main thread to pass it messages.
+## Start the AEA
+We run the AEA from a different thread so that we can still use the main thread to pass it messages.
 ``` python
-# Set the agent running in a different thread
-t = Thread(target=my_agent.start)
+# Set the AEA running in a different thread
+t = Thread(target=my_aea.start)
 t.start()
 
 # Wait for everything to start up
@@ -130,10 +130,10 @@ time.sleep(4)
 ```
 
 ## Send and receive an envelope
-We use the input and output text files to send an envelope to our agent and receive a response (from the echo skill)
+We use the input and output text files to send an envelope to our AEA and receive a response (from the echo skill)
 ``` python
 # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-message_text = 'my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
 with open(INPUT_FILE, "w") as f:
     f.write(message_text)
     print("input message: " + message_text)
@@ -147,18 +147,18 @@ with open(OUTPUT_FILE, "r") as f:
 ```
 
 ## Shutdown
-Finally stop our agent and wait for it to finish
+Finally stop our AEA and wait for it to finish
 ``` python
-# Shut down the agent
-my_agent.stop()
+# Shut down the AEA
+my_aea.stop()
 t.join()
 ```
 
-## Running the agent
+## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
-    output message: other_agent,my_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
+    input message: my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
+    output message: other_agent,my_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
 
 
 ## Entire code listing
@@ -211,7 +211,7 @@ def run():
     resources = Resources()
 
     # Create our AEA
-    my_agent = AEA("my_agent", [stub_connection], wallet, ledger_apis, resources)
+    my_aea = AEA("my_aea", [stub_connection], wallet, ledger_apis, resources)
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol_configuration = ProtocolConfig.from_json(
@@ -231,23 +231,23 @@ def run():
     # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
     echo_skill = Skill.from_dir(
         os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"),
-        my_agent.context,
+        my_aea.context,
     )
     resources.add_skill(echo_skill)
     error_skill = Skill.from_dir(
-        os.path.join(AEA_DIR, "skills", "error"), my_agent.context
+        os.path.join(AEA_DIR, "skills", "error"), my_aea.context
     )
     resources.add_skill(error_skill)
 
-    # Set the agent running in a different thread
-    t = Thread(target=my_agent.start)
+    # Set the AEA running in a different thread
+    t = Thread(target=my_aea.start)
     t.start()
 
     # Wait for everything to start up
     time.sleep(4)
 
     # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-    message_text = 'my_agent,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
+    message_text = 'my_aea,other_agent,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}'
     with open(INPUT_FILE, "w") as f:
         f.write(message_text)
         print("input message: " + message_text)
@@ -259,8 +259,8 @@ def run():
     with open(OUTPUT_FILE, "r") as f:
         print("output message: " + f.readline())
 
-    # Shut down the agent
-    my_agent.stop()
+    # Shut down the AEA
+    my_aea.stop()
     t.join()
     t = None
 
