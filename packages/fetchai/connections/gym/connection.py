@@ -154,6 +154,8 @@ class GymConnection(Connection):
         :param gym_env: the gym environment.
         :param connection_id: the connection id.
         """
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "gym", "0.1.0")
         super().__init__(*args, **kwargs)
         self.address = address
         self.channel = GymChannel(address, gym_env)

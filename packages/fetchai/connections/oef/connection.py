@@ -598,6 +598,8 @@ class OEFConnection(Connection):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the excluded protocols for this connection.
         """
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "oef", "0.1.0")
         super().__init__(*args, **kwargs)
         self._core = AsyncioCore(logger=logger)  # type: AsyncioCore
         self.in_queue = None  # type: Optional[asyncio.Queue]

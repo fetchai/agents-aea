@@ -25,6 +25,7 @@ from abc import ABC, abstractmethod
 from asyncio import CancelledError, StreamReader, StreamWriter
 from typing import Optional
 
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
@@ -42,6 +43,8 @@ class TCPConnection(Connection, ABC):
         :param host: the host to connect to.
         :param port: the port to connect to.
         """
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "tcp", "0.1.0")
         super().__init__(*args, **kwargs)
         self.address = address
 
