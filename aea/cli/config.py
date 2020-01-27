@@ -48,6 +48,7 @@ RESOURCE_TYPE_TO_CONFIG_FILE = {
     "protocols": DEFAULT_PROTOCOL_CONFIG_FILE,
     "connections": DEFAULT_CONNECTION_CONFIG_FILE,
 }  # type: Dict[str, str]
+FALSE_EQUIVALENTS = ["f", "false", "False"]
 
 
 class AEAJsonPathType(click.ParamType):
@@ -239,7 +240,12 @@ def set(ctx: Context, json_path: List[str], value, type):
         sys.exit(1)
 
     try:
-        parent_object[attribute_name] = type_(value)
+        if type_ != bool:
+            parent_object[attribute_name] = type_(value)
+        else:
+            parent_object[attribute_name] = (
+                False if value in FALSE_EQUIVALENTS else True
+            )
     except ValueError:
         logger.error("Cannot convert {} to type {}".format(value, type_))
 

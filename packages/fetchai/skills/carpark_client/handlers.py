@@ -219,17 +219,18 @@ class FIPAHandler(Handler):
         info = msg.info
         address = cast(str, info.get("address"))
         proposal = cast(Description, dialogue.proposal)
+        strategy = cast(Strategy, self.context.strategy)
         tx_msg = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["carpark_client"],
+            skill_callback_ids=["fetchai/carpark_client:0.1.0"],
             tx_id="transaction0",
             tx_sender_addr=self.context.agent_addresses["fetchai"],
             tx_counterparty_addr=address,
             tx_amount_by_currency_id={
                 proposal.values["currency_id"]: -proposal.values["price"]
             },
-            tx_sender_fee=0,
-            tx_counterparty_fee=0,
+            tx_sender_fee=strategy.max_buyer_tx_fee,
+            tx_counterparty_fee=proposal.values["seller_tx_fee"],
             tx_quantities_by_good_id={},
             ledger_id=proposal.values["ledger_id"],
             info={"dialogue_label": dialogue.dialogue_label.json},

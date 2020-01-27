@@ -31,6 +31,7 @@ DEFAULT_SEARCH_INTERVAL = 5.0
 DEFAULT_MAX_PRICE = 4000
 DEFAULT_MAX_DETECTION_AGE = 60 * 60  # 1 hour
 DEFAULT_NO_FINDSEARCH_INTERVAL = 5
+DEFAULT_MAX_TX_FEE = 2
 
 
 class Strategy(SharedClass):
@@ -65,6 +66,7 @@ class Strategy(SharedClass):
             if "max_detection_age" in kwargs.keys()
             else DEFAULT_MAX_DETECTION_AGE
         )
+        self.max_buyer_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
         super().__init__(**kwargs)
 
         self.is_searching = True

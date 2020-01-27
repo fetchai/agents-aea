@@ -26,6 +26,7 @@ from enum import Enum
 from queue import Queue
 from typing import Dict, List, Optional, cast
 
+from aea.configurations.base import PublicId
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
@@ -45,7 +46,7 @@ ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
 SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
-INTERNAL_PROTOCOL_ID = "internal"
+INTERNAL_PROTOCOL_ID = PublicId("fetchai", "internal", "0.1.0")
 OFF_CHAIN_SETTLEMENT_DIGEST = cast(Optional[str], "off_chain_settlement")
 
 logger = logging.getLogger(__name__)
