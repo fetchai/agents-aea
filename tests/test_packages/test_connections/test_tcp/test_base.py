@@ -27,6 +27,7 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
 
 import packages
 from packages.fetchai.connections.tcp.connection import (
@@ -106,7 +107,7 @@ async def test_send_to_unknown_destination():
     envelope = Envelope(
         to="non_existing_destination",
         sender="address",
-        protocol_id="fetchai/default:0.1.0",
+        protocol_id=DefaultMessage.protocol_id,
         message=b"",
     )
     with unittest.mock.patch.object(
@@ -144,7 +145,7 @@ async def test_send_cancelled():
         envelope = Envelope(
             to="address_client",
             sender="address_server",
-            protocol_id="fetchai/default:0.1.0",
+            protocol_id=DefaultMessage.protocol_id,
             message=b"",
         )
         await tcp_client.send(envelope)
