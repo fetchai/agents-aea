@@ -51,7 +51,7 @@ class SaveItemLocallyTestCase(TestCase):
             "cwd", item_id.author, "skills", item_id.name
         )
         try_get_item_target_path_mock.assert_called_once_with(
-            ContextMock.agent_config.registry_path, item_type + "s", item_id.name,
+            ContextMock.agent_config.registry_path, item_id.author, item_type + "s", item_id.name,
         )
         _check_package_public_id_mock.assert_called_once_with(
             "source", item_type, item_id
