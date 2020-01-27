@@ -92,14 +92,10 @@ class TryGetItemSourcePathTestCase(TestCase):
     @mock.patch("aea.cli.common.os.path.exists", return_value=True)
     def test_get_item_source_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_source_path(
-            "cwd", "author", "skills", "skill-name"
-        )
+        result = try_get_item_source_path("cwd", "author", "skills", "skill-name")
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with(
-            "cwd", "author", "skills", "skill-name"
-        )
+        join_mock.assert_called_once_with("cwd", "author", "skills", "skill-name")
         exists_mock.assert_called_once_with("some-path")
 
     @mock.patch("aea.cli.common.os.path.exists", return_value=False)
