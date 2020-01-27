@@ -34,6 +34,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     HandlerConfig,
     ProtocolId,
+    PublicId,
     SharedClassConfig,
     SkillConfig,
     TaskConfig,
@@ -67,6 +68,8 @@ class SkillContext:
         self._in_queue = Queue()  # type: Queue
         self._skill = None  # type: Optional[Skill]
 
+        self._is_active = True  # type: bool
+
     @property
     def shared_state(self) -> Dict[str, Any]:
         """Get the shared state dictionary."""
@@ -76,6 +79,26 @@ class SkillContext:
     def agent_name(self) -> str:
         """Get agent name."""
         return self._agent_context.agent_name
+
+    @property
+    def skill_id(self):
+        """Get the skill id of the skill context."""
+        return self._skill.config.public_id
+
+    @property
+    def is_active(self):
+        """Get the status of the skill (active/not active)."""
+        return self._is_active
+
+    @is_active.setter
+    def is_active(self, value: bool):
+        """Set the status of the skill (active/not active)."""
+        self._is_active = value
+        logger.debug(
+            "New status of skill {}: is_active={}".format(
+                self.skill_id, self._is_active
+            )
+        )
 
     @property
     def agent_public_key(self) -> str:
@@ -142,6 +165,7 @@ class SkillContext:
         """Get the task queue."""
         # TODO this is potentially dangerous - it exposes the task queue to other skills
         #      such that other skills can modify it.
+        #      -> that suggests a task queue per skill, handled by the agent.
         return self._agent_context.task_queue
 
     @property
@@ -192,6 +216,11 @@ class SkillComponent(ABC):
     def context(self) -> SkillContext:
         """Get the context of the behaviour."""
         return self._context
+
+    @property
+    def skill_id(self) -> PublicId:
+        """Get the skill id of the skill component."""
+        return self.context.skill_id
 
     @property
     def config(self) -> Dict[Any, Any]:

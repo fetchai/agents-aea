@@ -355,6 +355,8 @@ class TACHandler(Handler):
         )
         game = cast(Game, self.context.game)
         game.update_game_phase(Phase.POST_GAME)
+        self.context.is_active = False
+        self.context.shared_state["is_game_finished"] = True
 
     def _on_transaction_confirmed(self, message: TACMessage) -> None:
         """

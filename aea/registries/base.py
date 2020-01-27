@@ -24,6 +24,7 @@ import inspect
 import logging
 import os
 import pprint
+import queue
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -38,6 +39,7 @@ from aea.configurations.base import (
     SkillId,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message, Protocol
 from aea.skills.base import AgentContext, Behaviour, Handler, Skill, Task
@@ -644,9 +646,6 @@ class Filter(object):
         """
         self._resources = resources
         self._decision_maker_out_queue = decision_maker_out_queue
-        # TODO: self._inactive_handlers = {}  # type: Dict[SkillId, List[HandlerId]]
-        # TODO: self._inactive_behaviours = {}  # type: Dict[SkillId, List[BehaviourId]]
-        # TODO: self._inactive_tasks = {}  # type: Dict[SkillId, List[TaskId]]
 
     @property
     def resources(self) -> Resources:
@@ -663,11 +662,12 @@ class Filter(object):
         Get active handlers.
 
         :param protocol_id: the protocol id
-        :return: list of handlers
+        :return: the list of handlers currently active
         """
+        # TODO naive implementation
         handlers = self.resources.handler_registry.fetch_by_protocol(protocol_id)
-        # TODO: add option for advanced filtering, currently each handler independently acts on the message
-        return handlers
+        active_handlers = list(filter(lambda h: h.context.is_active, handlers))
+        return active_handlers
 
     def get_active_tasks(self) -> List[Task]:
         """
@@ -675,9 +675,10 @@ class Filter(object):
 
         :return: the list of tasks currently active
         """
+        # TODO naive implementation
         tasks = self.resources.task_registry.fetch_all()
-        # TODO: add filtering, remove inactive tasks
-        return tasks
+        active_tasks = list(filter(lambda t: t.context.is_active, tasks))
+        return active_tasks
 
     def get_active_behaviours(self) -> List[Behaviour]:
         """
@@ -685,8 +686,12 @@ class Filter(object):
 
         :return: the list of behaviours currently active
         """
+        # TODO naive implementation
         behaviours = self.resources.behaviour_registry.fetch_all()
-        return [b for b in behaviours if not b.done()]
+        active_behaviour = list(
+            filter(lambda b: b.context.is_active and not b.done(), behaviours,)
+        )
+        return active_behaviour
 
     def handle_internal_messages(self) -> None:
         """
@@ -695,25 +700,34 @@ class Filter(object):
         :return: None
         """
         while not self.decision_maker_out_queue.empty():
-            tx_message = (
-                self.decision_maker_out_queue.get_nowait()
-            )  # type: Optional[TransactionMessage]
-            if tx_message is not None:
-                skill_callback_ids = tx_message.skill_callback_ids
-                for skill_id in skill_callback_ids:
-                    handler = self.resources.handler_registry.fetch_internal_handler(
-                        skill_id
-                    )
-                    if handler is not None:
-                        logger.debug(
-                            "Calling handler {} of skill {}".format(
-                                type(handler), skill_id
-                            )
-                        )
-                        handler.handle(cast(Message, tx_message))
-                    else:
-                        logger.warning(
-                            "No internal handler fetched for skill_id={}".format(
-                                skill_id
-                            )
-                        )
+            try:
+                internal_message = (
+                    self.decision_maker_out_queue.get_nowait()
+                )  # type: Optional[InternalMessage]
+            except queue.Empty:
+                logger.warning("The decision maker out queue is unexpectedly empty.")
+                continue
+            if internal_message is None:
+                logger.warning("Got 'None' while processing internal messages.")
+            elif isinstance(internal_message, TransactionMessage):
+                internal_message = cast(TransactionMessage, internal_message)
+                self._handle_tx_message(internal_message)
+            else:
+                logger.warning(
+                    "Cannot handle a {} message.".format(type(internal_message))
+                )
+
+    def _handle_tx_message(self, tx_message: TransactionMessage):
+        """Handle transaction message from the Decision Maker."""
+        skill_callback_ids = tx_message.skill_callback_ids
+        for skill_id in skill_callback_ids:
+            handler = self.resources.handler_registry.fetch_internal_handler(skill_id)
+            if handler is not None:
+                logger.debug(
+                    "Calling handler {} of skill {}".format(type(handler), skill_id)
+                )
+                handler.handle(cast(Message, tx_message))
+            else:
+                logger.warning(
+                    "No internal handler fetched for skill_id={}".format(skill_id)
+                )
