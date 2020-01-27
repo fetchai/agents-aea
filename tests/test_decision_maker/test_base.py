@@ -506,6 +506,9 @@ class TestDecisionMaker:
         # test that after a while the queue has been consumed.
         time.sleep(0.5)
         assert self.decision_maker.message_in_queue.empty()
+        assert not self.decision_maker.message_out_queue.empty()
+        # TODO test the content of the response.
+        response = self.decision_maker.message_out_queue.get()  # noqa
 
     def test_decision_maker_handle_state_update_initialize(self):
         """Test the handle method for a stateUpdate message with Initialize performative."""
@@ -563,7 +566,6 @@ class TestDecisionMaker:
     def test_decision_maker_handle_tx_message(self):
         """Test the handle tx message method."""
         assert self.decision_maker.message_out_queue.empty()
-
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
             skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
