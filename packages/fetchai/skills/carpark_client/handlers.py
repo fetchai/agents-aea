@@ -23,7 +23,7 @@ import logging
 import pprint
 from typing import Dict, List, Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
@@ -221,7 +221,7 @@ class FIPAHandler(Handler):
         proposal = cast(Description, dialogue.proposal)
         tx_msg = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["carpark_client"],
+            skill_callback_ids=[PublicId("fetchai", "carpark_client", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr=self.context.agent_addresses["fetchai"],
             tx_counterparty_addr=address,
