@@ -24,6 +24,7 @@ import inspect
 import logging
 import os
 import pprint
+import queue
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -699,14 +700,13 @@ class Filter(object):
         :return: None
         """
         while not self.decision_maker_out_queue.empty():
-            # TODO get_nowait in this context works only if the queue is accessed only here
-            #      - it might happen that another thread accesses concurrently to that queue
-            #        and the decision_maker_out_queue.empty() evaluation becomes obsolete.
-            #        Please have also a look at the docstring of queue.Queue.empty()!!!
-            #      I propose to handle explicitly the queue.Empty exception.
-            internal_message = (
-                self.decision_maker_out_queue.get_nowait()
-            )  # type: Optional[InternalMessage]
+            try:
+                internal_message = (
+                    self.decision_maker_out_queue.get_nowait()
+                )  # type: Optional[InternalMessage]
+            except queue.Empty:
+                logger.warning("The decision maker out queue is unexpectedly empty.")
+                continue
             if internal_message is None:
                 logger.warning("Got 'None' while processing internal messages.")
             elif isinstance(internal_message, TransactionMessage):
