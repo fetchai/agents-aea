@@ -140,7 +140,9 @@ class FIPAHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_matching_supply(query) and strategy.has_data():
-            proposal, carpark_data = strategy.generate_proposal_and_data(query)
+            proposal, carpark_data = strategy.generate_proposal_and_data(
+                query, msg.counterparty
+            )
             dialogue.carpark_data = carpark_data
             dialogue.proposal = proposal
             logger.info(
@@ -298,8 +300,15 @@ class FIPAHandler(Handler):
             proposal = cast(Description, dialogue.proposal)
             ledger_id = cast(str, proposal.values.get("ledger_id"))
             total_price = cast(int, proposal.values.get("price"))
-            is_settled = self.context.ledger_apis.is_tx_settled(ledger_id, tx_digest)
-            if is_settled:
+            is_valid = self.context.ledger_apis.is_tx_valid(
+                ledger_id,
+                tx_digest,
+                self.context.agent_addresses[ledger_id],
+                msg.counterparty,
+                cast(str, proposal.values.get("tx_nonce")),
+                cast(int, proposal.values.get("price")),
+            )
+            if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
                 )

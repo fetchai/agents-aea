@@ -168,7 +168,7 @@ class LedgerApis(object):
             self._last_tx_statuses[crypto_object.identifier] = ERROR
         return tx_digest
 
-    def is_tx_settled(self, identifier: str, tx_digest: str) -> bool:
+    def _is_tx_settled(self, identifier: str, tx_digest: str) -> bool:
         """
         Check whether the transaction is settled and correct.
 
@@ -210,16 +210,18 @@ class LedgerApis(object):
         :return: True if is valid , False otherwise
         """
         assert identifier in self.apis.keys()
+        is_settled = self._is_tx_settled(identifier=identifier, tx_digest=tx_digest)
         api = self.apis[identifier]
         try:
-            is_valid = api.validate_transaction(
+            tx_valid = api.validate_transaction(
                 tx_digest, seller, client, tx_nonce, amount
             )
         except Exception:
             logger.warning(
                 "An error occurred while attempting to validate the transaction."
             )
-            is_valid = False
+            tx_valid = False
+        is_valid = is_settled and tx_valid
         return is_valid
 
     def generate_tx_nonce(

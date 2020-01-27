@@ -25,6 +25,7 @@ import time
 from typing import Any, Dict, List, Tuple, cast
 
 from aea.helpers.search.models import Description, Query
+from aea.mail.base import Address
 from aea.skills.base import SharedClass
 
 from packages.fetchai.skills.carpark_detection.carpark_detection_data_model import (
@@ -148,14 +149,21 @@ class Strategy(SharedClass):
         return len(data) > 0
 
     def generate_proposal_and_data(
-        self, query: Query
+        self, query: Query, counterparty: Address
     ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
         """
         Generate a proposal matching the query.
 
+        :param counterparty: the counterparty of the proposal.
         :param query: the query
         :return: a tuple of proposal and the bytes of carpark data
         """
+        tx_nonce = self.context.ledger_apis.generate_tx_nonce(
+            identifier=self.ledger_id,
+            seller=self.context.agent_addresses[self.ledger_id],
+            client=counterparty,
+        )
+
         assert self.db.is_db_exits()
 
         data = self.db.get_latest_detection_data(1)
@@ -175,6 +183,7 @@ class Strategy(SharedClass):
                 "ledger_id": self.ledger_id,
                 "last_detection_time": last_detection_time,
                 "max_spaces": max_spaces,
+                "tx_nonce": tx_nonce if tx_nonce is not None else "",
             }
         )
 
