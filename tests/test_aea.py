@@ -130,7 +130,9 @@ def test_react():
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
         address = wallet.addresses["default"]
-        connection = OEFLocalConnection(address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID)
+        connection = OEFLocalConnection(
+            address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
+        )
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
