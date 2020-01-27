@@ -793,7 +793,7 @@ class TestFIPA:
         envelope = Envelope(
             to=DEFAULT_OEF,
             sender="me",
-            protocol_id="fetchai/default:0.1.0",
+            protocol_id=DefaultMessage.protocol_id,
             message=b"Hello",
         )
         self.multiplexer1.put(envelope)

@@ -68,7 +68,7 @@ async def test_connection_twice_return_none():
         expected_envelope = Envelope(
             to=address,
             sender=address,
-            protocol_id="fetchai/default:0.1.0",
+            protocol_id=DefaultMessage.protocol_id,
             message=message_bytes,
         )
         await connection.send(expected_envelope)
