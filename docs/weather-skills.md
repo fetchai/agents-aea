@@ -72,7 +72,7 @@ aea run --connections fetchai/oef:0.1.0
 
 <center>![Weather client logs](assets/weather-client-logs.png)</center>
 
-To stop an agent use `CTRL + C`.
+To stop an AEA use `CTRL + C`.
 
 ### Delete the AEAs
 
@@ -85,7 +85,7 @@ aea delete my_weather_client
 ```
 
 ## Communication
-This diagram shows the communication between the various entities as data is successfully sold by the car park agent to the client. 
+This diagram shows the communication between the various entities as data is successfully sold by the car park AEA to the client. 
 
 <div class="mermaid">
     sequenceDiagram
@@ -170,12 +170,12 @@ aea generate-wealth fetchai
 
 Tell the weather client skill of the weather client that we want to settle the transaction on the ledger:
 ``` bash
-aea config set skills.weather_client.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 Similarly, for the weather station skill of the weather station:
 ``` bash
-aea config set skills.weather_station.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.weather_station.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 ### Run the AEAs
@@ -253,9 +253,9 @@ is_ledger_tx: True
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set skills.weather_station.shared_classes.strategy.args.currency_id ETH
-aea config set skills.weather_station.shared_classes.strategy.args.ledger_id ethereum
-aea config set skills.weather_station.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.weather_station.shared_classes.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.weather_station.shared_classes.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.weather_station.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 
@@ -268,10 +268,10 @@ is_ledger_tx: True
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set skills.weather_client.shared_classes.strategy.args.max_buyer_tx_fee 10000
-aea config set skills.weather_client.shared_classes.strategy.args.currency_id ETH
-aea config set skills.weather_client.shared_classes.strategy.args.ledger_id ethereum
-aea config set skills.weather_client.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.max_buyer_tx_fee 10000 --type int
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 ### Fund the weather client AEA
@@ -308,7 +308,7 @@ aea delete my_weather_client
 ```
 
 ## Communication
-This diagram shows the communication between the various entities as data is successfully sold by the weather station agent to the client. 
+This diagram shows the communication between the various entities as data is successfully sold by the weather station AEA to the client. 
 
 <div class="mermaid">
     sequenceDiagram
@@ -331,6 +331,7 @@ This diagram shows the communication between the various entities as data is suc
         Weather_AEA->>Client_AEA: match_accept
         Client_AEA->>Blockchain: transfer_funds
         Client_AEA->>Weather_AEA: send_transaction_hash
+        Weather_AEA->>Blockchain: check_transaction_status
         Weather_AEA->>Client_AEA: send_data
         
         deactivate Client_AEA

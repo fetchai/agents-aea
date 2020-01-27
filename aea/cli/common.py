@@ -366,17 +366,18 @@ def try_get_item_source_path(
     return source_path
 
 
-def try_get_item_target_path(path: str, item_type_plural: str, item_name: str) -> str:
+def try_get_item_target_path(path: str, author_name: str, item_type_plural: str, item_name: str) -> str:
     """
     Get the item target path.
 
     :param path: the target path root
+    :param author_name the author name
     :param item_type_plural: the item type (plural)
     :param item_name: the item name
 
     :return: the item target path
     """
-    target_path = os.path.join(path, item_type_plural, item_name)
+    target_path = os.path.join(path, author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(item_name)
