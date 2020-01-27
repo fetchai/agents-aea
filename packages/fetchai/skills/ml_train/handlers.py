@@ -109,7 +109,7 @@ class TrainHandler(Handler):
                 tx_counterparty_fee=terms.values["seller_tx_fee"],
                 tx_quantities_by_good_id={},
                 ledger_id=terms.values["ledger_id"],
-                info={"terms": terms, "counterparty_addr": ml_trade_msg.counterparty,},
+                info={"terms": terms, "counterparty_addr": ml_trade_msg.counterparty},
             )  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info(
