@@ -28,7 +28,7 @@ import re
 from abc import ABC, abstractmethod
 from pathlib import Path
 from queue import Queue
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, Union, cast
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
 from aea.configurations.base import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -665,9 +665,7 @@ class Filter(object):
         """
         # TODO naive implementation
         handlers = self.resources.handler_registry.fetch_by_protocol(protocol_id)
-        active_handlers = list(
-            filter(lambda h: h.context.is_active, handlers)
-        )
+        active_handlers = list(filter(lambda h: h.context.is_active, handlers))
         return active_handlers
 
     def get_active_tasks(self) -> List[Task]:
@@ -678,9 +676,7 @@ class Filter(object):
         """
         # TODO naive implementation
         tasks = self.resources.task_registry.fetch_all()
-        active_tasks = list(
-            filter(lambda t: t.context.is_active, tasks)
-        )
+        active_tasks = list(filter(lambda t: t.context.is_active, tasks))
         return active_tasks
 
     def get_active_behaviours(self) -> List[Behaviour]:
@@ -692,10 +688,7 @@ class Filter(object):
         # TODO naive implementation
         behaviours = self.resources.behaviour_registry.fetch_all()
         active_behaviour = list(
-            filter(
-                lambda b: b.context.is_active and not b.done(),
-                behaviours,
-            )
+            filter(lambda b: b.context.is_active and not b.done(), behaviours,)
         )
         return active_behaviour
 
