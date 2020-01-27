@@ -1,13 +1,13 @@
-An agent developer writes skills that the framework can call.
+An AEA developer writes skills that the framework can call.
 
 When you add a skill with the CLI, a directory is created which includes modules for the `Behaviour,` `Task`, and `Handler` classes as well as a configuration file `skill.yaml`.
 
 
 ## Context
 
-The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context also has a link to the agent context. The agent context provides read access to agent specific information like the public key and address of the agent, its preferences and ownership state. It also provides access to the `OutBox`.
+The skill has a `SkillContext` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context also has a link to the `AgentContext`. The `AgentContext` provides read access to AEA specific information like the public key and address of the AEA, its preferences and ownership state. It also provides access to the `OutBox`.
 
-This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill and the agent.
+This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill and the AEA.
 
 For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
 
@@ -39,7 +39,7 @@ There can be none, one or more `Handler` class per skill.
 
 ### `behaviours.py`
 
-Conceptually, a `Behaviour`  class contains the business logic specific to initial actions initiated by the agent rather than reactions to other events.
+Conceptually, a `Behaviour`  class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
 
 There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
@@ -51,7 +51,7 @@ There can be one or more `Behaviour` classes per skill. The developer must creat
 
 ### `tasks.py`
 
-Conceptually, a `Task` is where the developer codes any internal tasks the agent requires.
+Conceptually, a `Task` is where the developer codes any internal tasks the AEA requires.
 
 There can be one or more `Task` classes per skill. The developer subclasses abstract class `Task` to create a new `Task`.
 
