@@ -26,6 +26,7 @@ import logging
 from collections import defaultdict, deque
 from typing import Deque, Dict, Tuple
 
+from aea.configurations.base import PublicId
 from aea.decision_maker.base import OwnershipState
 from aea.decision_maker.messages.transaction import (
     OFF_CHAIN,
@@ -154,9 +155,9 @@ class Transactions(SharedClass):
             tx_nonce=proposal_description.values["tx_nonce"],
         )
         skill_callback_ids = (
-            ["fetchai/tac_participation:0.1.0"]
+            [PublicId("fetchai", "tac_participation", "0.1.0")]
             if performative == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT
-            else ["fetchai/tac_negotiation:0.1.0"]
+            else [PublicId("fetchai", "tac_negotiation", "0.1.0")]
         )
         transaction_msg = TransactionMessage(
             performative=performative,

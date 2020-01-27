@@ -21,7 +21,7 @@
 import logging
 from typing import List, Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
@@ -98,7 +98,7 @@ class TrainHandler(Handler):
             # propose the transaction to the decision maker for settlement on the ledger
             tx_msg = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=["fetchai/ml_train:0.1.0"],
+                skill_callback_ids=[PublicId("fetchai", "ml_train", "0.1.0")],
                 tx_id=strategy.get_next_transition_id(),
                 tx_sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
                 tx_counterparty_addr=terms.values["address"],

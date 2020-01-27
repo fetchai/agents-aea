@@ -48,7 +48,6 @@ ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
 SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
-INTERNAL_PROTOCOL_ID = PublicId("fetchai", "internal", "0.1.0")
 OFF_CHAIN_SETTLEMENT_DIGEST = cast(Optional[str], "off_chain_settlement")
 
 logger = logging.getLogger(__name__)
@@ -540,13 +539,14 @@ class DecisionMaker:
             message = self.message_in_queue.get(
                 block=True
             )  # type: Optional[InternalMessage]
+
             if message is None:
                 logger.debug(
                     "Decision Maker: Received empty message. Quitting the processing loop..."
                 )
                 continue
 
-            if message.protocol_id == INTERNAL_PROTOCOL_ID:
+            if message.protocol_id == InternalMessage.protocol_id:
                 self.handle(message)
             else:
                 logger.warning(
