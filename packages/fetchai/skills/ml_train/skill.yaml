@@ -19,12 +19,7 @@ handlers:
   transaction:
     class_name: MyTransactionHandler
     args: {}
-tasks:
-  train:
-    class_name: MLTrainTask
-    args:
-      epochs_per_batch: 10
-      batch_size: 32
+tasks: {}
 shared_classes:
   strategy:
     class_name: Strategy

@@ -58,7 +58,10 @@ def _save_agent_locally(ctx: Context) -> None:
     item_type_plural = "agents"
 
     target_dir = try_get_item_target_path(
-        ctx.agent_config.registry_path, item_type_plural, ctx.agent_config.name
+        ctx.agent_config.registry_path,
+        ctx.agent_config.author,
+        item_type_plural,
+        ctx.agent_config.name,
     )
     if not os.path.exists(target_dir):
         os.makedirs(target_dir, exist_ok=True)

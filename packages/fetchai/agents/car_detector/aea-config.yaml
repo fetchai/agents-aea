@@ -10,8 +10,7 @@ description: 'An agent which sells car park data to instances of `car_data_buyer
 fingerprint: ''
 ledger_apis:
   fetchai:
-    address: alpha.fetch-ai.com
-    port: 80
+    network: testnet
 license: Apache 2.0
 logging_config:
   disable_existing_loggers: False

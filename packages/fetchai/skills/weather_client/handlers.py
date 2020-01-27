@@ -223,7 +223,7 @@ class FIPAHandler(Handler):
             proposal = cast(Description, dialogue.proposal)
             tx_msg = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=["weather_client"],
+                skill_callback_ids=["fetchai/weather_client:0.1.0"],
                 tx_id="transaction0",
                 tx_sender_addr=self.context.agent_addresses[
                     proposal.values["ledger_id"]

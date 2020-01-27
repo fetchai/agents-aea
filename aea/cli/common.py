@@ -345,17 +345,20 @@ class PublicIdParameter(click.ParamType):
             raise click.BadParameter(value)
 
 
-def try_get_item_source_path(path: str, item_type_plural: str, item_name: str) -> str:
+def try_get_item_source_path(
+    path: str, author_name: str, item_type_plural: str, item_name: str
+) -> str:
     """
     Get the item source path.
 
     :param path: the source path root
+    :param author_name: the name of the author of the item
     :param item_type_plural: the item type (plural)
     :param item_name: the item name
 
     :return: the item source path
     """
-    source_path = os.path.join(path, item_type_plural, item_name)
+    source_path = os.path.join(path, author_name, item_type_plural, item_name)
     if not os.path.exists(source_path):
         raise click.ClickException(
             'Item "{}" not found in source folder.'.format(item_name)
@@ -363,17 +366,20 @@ def try_get_item_source_path(path: str, item_type_plural: str, item_name: str) -
     return source_path
 
 
-def try_get_item_target_path(path: str, item_type_plural: str, item_name: str) -> str:
+def try_get_item_target_path(
+    path: str, author_name: str, item_type_plural: str, item_name: str
+) -> str:
     """
     Get the item target path.
 
     :param path: the target path root
+    :param author_name the author name
     :param item_type_plural: the item type (plural)
     :param item_name: the item name
 
     :return: the item target path
     """
-    target_path = os.path.join(path, item_type_plural, item_name)
+    target_path = os.path.join(path, author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(item_name)
@@ -421,7 +427,7 @@ def _find_item_locally(ctx, item_type, item_public_id) -> Path:
     item_name = item_public_id.name
 
     # check in registry
-    registry_path = ctx.agent_config.registry_path
+    registry_path = os.path.join(ctx.cwd, ctx.agent_config.registry_path)
     package_path = Path(
         registry_path, item_public_id.author, item_type_plural, item_name
     )
