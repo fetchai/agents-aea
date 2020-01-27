@@ -27,11 +27,11 @@ shared_classes:
       country: UK
       max_row_price: 4
       max_buyer_tx_fee: 20
-      currency_id: 'ETH'
-      ledger_id: 'ethereum'
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
       is_ledger_tx: False
   dialogues:
     class_name: Dialogues
     args: {}
 protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
-ledgers: ['ethereum']
+ledgers: ['fetchai']
