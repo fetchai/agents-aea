@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -19,9 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+
 import os
 
+import pytest
+
 from aea.crypto.fetchai import FetchAICrypto
+
 from ..conftest import ROOT_DIR
 
 PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/fet_private_key.txt")
@@ -30,22 +33,30 @@ PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/fet_private_key.txt")
 def test_initialisation():
     """Test the initialisation of the the fet crypto."""
     fet_crypto = FetchAICrypto()
-    assert fet_crypto.public_key is not None, "Public key must not be None after Initialisation"
-    assert fet_crypto.address is not None, "Address must not be None after Initialisation"
-    assert FetchAICrypto(PRIVATE_KEY_PATH), "Couldn't load the fet private_key from the path!"
+    assert (
+        fet_crypto.public_key is not None
+    ), "Public key must not be None after Initialisation"
+    assert (
+        fet_crypto.address is not None
+    ), "Address must not be None after Initialisation"
+    assert FetchAICrypto(
+        PRIVATE_KEY_PATH
+    ), "Couldn't load the fet private_key from the path!"
     assert FetchAICrypto("./"), "Couldn't create a new entity for the given path!"
 
 
 def test_get_address():
     """Test the get address."""
     fet_crypto = FetchAICrypto()
-    assert fet_crypto.get_address_from_public_key(fet_crypto.public_key) is not None, "Get address must work"
+    assert (
+        fet_crypto.get_address_from_public_key(fet_crypto.public_key) is not None
+    ), "Get address must work"
 
 
-def test_sign_transaction():
+def test_sign_message():
     """Test the signing process."""
     fet_crypto = FetchAICrypto()
-    signature = fet_crypto.sign_transaction(tx_hash=b'HelloWorld')
+    signature = fet_crypto.sign_message(message=b"HelloWorld")
     assert len(signature) > 1, "The len(signature) must be more than 0"
 
 
@@ -54,3 +65,10 @@ def test_get_address_from_public_key():
     fet_crypto = FetchAICrypto()
     address = FetchAICrypto().get_address_from_public_key(fet_crypto.public_key)
     assert str(address) == str(fet_crypto.address), "The address must be the same."
+
+
+def test_recover_message():
+    """Test the recover message"""
+    fet_crypto = FetchAICrypto()
+    with pytest.raises(NotImplementedError):
+        fet_crypto.recover_message(message=b"hello", signature=b"signature")

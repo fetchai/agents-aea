@@ -1,0 +1,28 @@
+name: fipa
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+description: 'A protocol for FIPA ACL.'
+speech_acts:
+  cfp:
+    query: Query
+  propose:
+    proposal: Proposal
+    price: pt:float
+  accept_w_inform:
+    info: pt:dict[pt:str, AcceptInfo]
+  match_accept_w_inform:
+    info: pt:dict[pt:str, MatchAcceptInfo]
+  inform:
+    info: pt:dict[pt:str, InformInfo]
+  accept: {}
+  decline: {}
+  match_accept: {}
+
+  # Problems:
+  # info is of type dict[str, Any]. Any is problematic.
+  #
+  # Differences:
+  # propose -> proposal was a list of Descriptions.
+  # cfp -> query was a union of Query, byte, or None.
+  # dialogue_reference is missing

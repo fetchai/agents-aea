@@ -19,8 +19,11 @@
 # ------------------------------------------------------------------------------
 
 """Abstract module wrapping the public and private key cryptography and ledger api."""
+
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Union, Optional
+from typing import Any, BinaryIO, Optional, Union
+
+from aea.mail.base import Address
 
 AddressLike = Union[str, bytes]
 
@@ -28,7 +31,7 @@ AddressLike = Union[str, bytes]
 class Crypto(ABC):
     """Base class for a crypto object."""
 
-    identifier = 'base'
+    identifier = "base"
 
     @property
     @abstractmethod
@@ -67,9 +70,28 @@ class Crypto(ABC):
         :return: str
         """
 
+    @abstractmethod
+    def sign_message(self, message: bytes) -> bytes:
+        """
+        Sign a message in bytes string form.
+
+        :param message: the message we want to send
+        :return: Signed message in bytes
+        """
+
+    @abstractmethod
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :return: the recovered address
+        """
+
     @classmethod
     @abstractmethod
-    def load(cls, fp: BinaryIO) -> 'Crypto':
+    def load(cls, fp: BinaryIO) -> "Crypto":
         """
         Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
 
@@ -114,12 +136,14 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def send_transaction(self,
-                         crypto: Crypto,
-                         destination_address: AddressLike,
-                         amount: int,
-                         tx_fee: int,
-                         **kwargs) -> Optional[str]:
+    def send_transaction(
+        self,
+        crypto: Crypto,
+        destination_address: AddressLike,
+        amount: int,
+        tx_fee: int,
+        **kwargs
+    ) -> Optional[str]:
         """
         Submit a transaction to the ledger.
 

@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Gym connector and gym channel."""
+
 import asyncio
 import logging
 import threading
@@ -27,10 +28,11 @@ from typing import Dict, Optional, cast
 
 import gym
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.helpers.base import locate
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
+
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
 
@@ -83,10 +85,10 @@ class GymChannel:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == "gym":
+        if envelope.protocol_id == PublicId.from_str("fetchai/gym:0.1.0"):
             self.handle_gym_message(envelope)
         else:
-            raise ValueError('This protocol is not valid for gym.')
+            raise ValueError("This protocol is not valid for gym.")
 
     def handle_gym_message(self, envelope: Envelope) -> None:
         """
@@ -101,9 +103,21 @@ class GymChannel:
             action = gym_message.get("action")
             step_id = gym_message.get("step_id")
             observation, reward, done, info = self.gym_env.step(action)  # type: ignore
-            msg = GymMessage(performative=GymMessage.Performative.PERCEPT, observation=observation, reward=reward, done=done, info=info, step_id=step_id)
+            msg = GymMessage(
+                performative=GymMessage.Performative.PERCEPT,
+                observation=observation,
+                reward=reward,
+                done=done,
+                info=info,
+                step_id=step_id,
+            )
             msg_bytes = GymSerializer().encode(msg)
-            envelope = Envelope(to=envelope.sender, sender=DEFAULT_GYM, protocol_id=GymMessage.protocol_id, message=msg_bytes)
+            envelope = Envelope(
+                to=envelope.sender,
+                sender=DEFAULT_GYM,
+                protocol_id=GymMessage.protocol_id,
+                message=msg_bytes,
+            )
             self._send(envelope)
         elif GymMessage.Performative(performative) == GymMessage.Performative.RESET:
             self.gym_env.reset()  # type: ignore
@@ -132,9 +146,7 @@ class GymChannel:
 class GymConnection(Connection):
     """Proxy to the functionality of the gym."""
 
-    restricted_to_protocols = {"gym"}
-
-    def __init__(self, address: Address, gym_env: gym.Env, connection_id: str = "gym", **kwargs):
+    def __init__(self, address: Address, gym_env: gym.Env, *args, **kwargs):
         """
         Initialize a connection to a local gym environment.
 
@@ -142,7 +154,9 @@ class GymConnection(Connection):
         :param gym_env: the gym environment.
         :param connection_id: the connection id.
         """
-        super().__init__(connection_id=connection_id, **kwargs)
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "gym", "0.1.0")
+        super().__init__(*args, **kwargs)
         self.address = address
         self.channel = GymChannel(address, gym_env)
 
@@ -180,13 +194,17 @@ class GymConnection(Connection):
         :return: None
         """
         if not self.connection_status.is_connected:
-            raise ConnectionError("Connection not established yet. Please use 'connect()'.")
+            raise ConnectionError(
+                "Connection not established yet. Please use 'connect()'."
+            )
         self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
         if not self.connection_status.is_connected:
-            raise ConnectionError("Connection not established yet. Please use 'connect()'.")
+            raise ConnectionError(
+                "Connection not established yet. Please use 'connect()'."
+            )
         try:
             assert self._connection is not None
             envelope = await self._connection.get()
@@ -205,7 +223,9 @@ class GymConnection(Connection):
         self._connection = None
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """
         Get the Gym connection from the connection configuration.
 
@@ -213,11 +233,12 @@ class GymConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        gym_env_package = cast(str, connection_configuration.config.get('env'))
+        gym_env_package = cast(str, connection_configuration.config.get("env"))
         gym_env = locate(gym_env_package)
-        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
-        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
-        return GymConnection(address, gym_env(),
-                             connection_id=connection_configuration.name,
-                             restricted_to_protocols=restricted_to_protocols_names,
-                             excluded_protocols=excluded_protocols_names)
+        return GymConnection(
+            address,
+            gym_env(),
+            connection_id=connection_configuration.public_id,
+            restricted_to_protocols=connection_configuration.restricted_to_protocols,
+            excluded_protocols=connection_configuration.excluded_protocols,
+        )

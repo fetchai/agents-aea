@@ -19,13 +19,14 @@
 
 """This module contains the handler for the 'ml_train' skill."""
 import logging
-from typing import cast, Optional, List
+from typing import List, Optional, cast
 
-from aea.configurations.base import ProtocolId
+from aea.configurations.base import ProtocolId, PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description
 from aea.protocols.base import Message
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
 from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
@@ -34,13 +35,13 @@ from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 
 logger = logging.getLogger("aea.ml_train_skill")
 
-DUMMY_DIGEST = 'dummy_digest'
+DUMMY_DIGEST = "dummy_digest"
 
 
 class TrainHandler(Handler):
     """Train handler."""
 
-    SUPPORTED_PROTOCOL = "ml_trade"
+    SUPPORTED_PROTOCOL = MLTradeMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -76,40 +77,64 @@ class TrainHandler(Handler):
         :return: None
         """
         terms = ml_trade_msg.terms
-        logger.info("Received terms message from {}: terms={}".format(ml_trade_msg.counterparty[-5:], terms.values))
+        logger.info(
+            "Received terms message from {}: terms={}".format(
+                ml_trade_msg.counterparty[-5:], terms.values
+            )
+        )
 
         strategy = cast(Strategy, self.context.strategy)
         acceptable = strategy.is_acceptable_terms(terms)
         affordable = strategy.is_affordable_terms(terms)
         if not acceptable and affordable:
-            logger.info("[{}]: rejecting, terms are not acceptable and/or affordable".format(self.context.agent_name))
+            logger.info(
+                "[{}]: rejecting, terms are not acceptable and/or affordable".format(
+                    self.context.agent_name
+                )
+            )
             return
 
         if strategy.is_ledger_tx:
             # propose the transaction to the decision maker for settlement on the ledger
-            tx_msg = TransactionMessage(performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                                        skill_callback_ids=['ml_train'],
-                                        tx_id=strategy.get_next_transition_id(),
-                                        tx_sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
-                                        tx_counterparty_addr=terms.values["address"],
-                                        tx_amount_by_currency_id={terms.values['currency_id']: - terms.values["price"]},
-                                        tx_sender_fee=terms.values["buyer_tx_fee"],
-                                        tx_counterparty_fee=terms.values["seller_tx_fee"],
-                                        tx_quantities_by_good_id={},
-                                        ledger_id=terms.values["ledger_id"],
-                                        info={'terms': terms, 'counterparty_addr': ml_trade_msg.counterparty})  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
+            tx_msg = TransactionMessage(
+                performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
+                skill_callback_ids=[PublicId("fetchai", "ml_train", "0.1.0")],
+                tx_id=strategy.get_next_transition_id(),
+                tx_sender_addr=self.context.agent_addresses[terms.values["ledger_id"]],
+                tx_counterparty_addr=terms.values["address"],
+                tx_amount_by_currency_id={
+                    terms.values["currency_id"]: -terms.values["price"]
+                },
+                tx_sender_fee=terms.values["buyer_tx_fee"],
+                tx_counterparty_fee=terms.values["seller_tx_fee"],
+                tx_quantities_by_good_id={},
+                ledger_id=terms.values["ledger_id"],
+                info={"terms": terms, "counterparty_addr": ml_trade_msg.counterparty},
+            )  # this is used to send the terms later - because the seller is stateless and must know what terms have been accepted
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
-            logger.info("[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(self.context.agent_name))
+            logger.info(
+                "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(
+                    self.context.agent_name
+                )
+            )
         else:
             # accept directly with a dummy transaction digest, no settlement
-            ml_accept = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT,
-                                       tx_digest=DUMMY_DIGEST,
-                                       terms=terms)
-            self.context.outbox.put_message(to=ml_trade_msg.counterparty,
-                                            sender=self.context.agent_address,
-                                            protocol_id=MLTradeMessage.protocol_id,
-                                            message=MLTradeSerializer().encode(ml_accept))
-            logger.info("[{}]: sending dummy transaction digest ...".format(self.context.agent_name))
+            ml_accept = MLTradeMessage(
+                performative=MLTradeMessage.Performative.ACCEPT,
+                tx_digest=DUMMY_DIGEST,
+                terms=terms,
+            )
+            self.context.outbox.put_message(
+                to=ml_trade_msg.counterparty,
+                sender=self.context.agent_address,
+                protocol_id=MLTradeMessage.protocol_id,
+                message=MLTradeSerializer().encode(ml_accept),
+            )
+            logger.info(
+                "[{}]: sending dummy transaction digest ...".format(
+                    self.context.agent_name
+                )
+            )
 
     def _handle_data(self, ml_trade_msg: MLTradeMessage) -> None:
         """
@@ -121,11 +146,20 @@ class TrainHandler(Handler):
         terms = ml_trade_msg.terms
         data = ml_trade_msg.data
         if data is None:
-            logger.info("Received data message with no data from {}".format(ml_trade_msg.counterparty[-5:]))
+            logger.info(
+                "Received data message with no data from {}".format(
+                    ml_trade_msg.counterparty[-5:]
+                )
+            )
         else:
-            logger.info("Received data message from {}: data shape={}, terms={}".format(ml_trade_msg.counterparty[-5:],
-                                                                                        data[0].shape, terms.values))
-            training_task = MLTrainTask(data, skill_context=self.context)
+            logger.info(
+                "Received data message from {}: data shape={}, terms={}".format(
+                    ml_trade_msg.counterparty[-5:], data[0].shape, terms.values
+                )
+            )
+            training_task = MLTrainTask(
+                data, name="ml_train_task", skill_context=self.context
+            )
             self.context.task_queue.put(training_task)
 
     def teardown(self) -> None:
@@ -176,20 +210,36 @@ class OEFHandler(Handler):
         :return: None
         """
         if len(agents) == 0:
-            logger.info("[{}]: found no agents, continue searching.".format(self.context.agent_name))
+            logger.info(
+                "[{}]: found no agents, continue searching.".format(
+                    self.context.agent_name
+                )
+            )
             return
 
-        logger.info("[{}]: found agents={}, stopping search.".format(self.context.agent_name, list(map(lambda x: x[-5:], agents))))
+        logger.info(
+            "[{}]: found agents={}, stopping search.".format(
+                self.context.agent_name, list(map(lambda x: x[-5:], agents))
+            )
+        )
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_searching = False
         query = strategy.get_service_query()
         for opponent_address in agents:
-            logger.info("[{}]: sending CFT to agent={}".format(self.context.agent_name, opponent_address[-5:]))
-            cft_msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
-            self.context.outbox.put_message(to=opponent_address,
-                                            sender=self.context.agent_address,
-                                            protocol_id=MLTradeMessage.protocol_id,
-                                            message=MLTradeSerializer().encode(cft_msg))
+            logger.info(
+                "[{}]: sending CFT to agent={}".format(
+                    self.context.agent_name, opponent_address[-5:]
+                )
+            )
+            cft_msg = MLTradeMessage(
+                performative=MLTradeMessage.Performative.CFT, query=query
+            )
+            self.context.outbox.put_message(
+                to=opponent_address,
+                sender=self.context.agent_address,
+                protocol_id=MLTradeMessage.protocol_id,
+                message=MLTradeSerializer().encode(cft_msg),
+            )
 
 
 class MyTransactionHandler(Handler):
@@ -210,21 +260,38 @@ class MyTransactionHandler(Handler):
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
-        if tx_msg_response.performative == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT:
-            logger.info("[{}]: transaction was successful.".format(self.context.agent_name))
+        if (
+            tx_msg_response.performative
+            == TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT
+        ):
+            logger.info(
+                "[{}]: transaction was successful.".format(self.context.agent_name)
+            )
             info = tx_msg_response.info
             terms = cast(Description, info.get("terms"))
-            ml_accept = MLTradeMessage(performative=MLTradeMessage.Performative.ACCEPT,
-                                       tx_digest=tx_msg_response.tx_digest,
-                                       terms=terms)
-            self.context.outbox.put_message(to=tx_msg_response.tx_counterparty_addr,
-                                            sender=self.context.agent_address,
-                                            protocol_id=MLTradeMessage.protocol_id,
-                                            message=MLTradeSerializer().encode(ml_accept))
-            logger.info("[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}."
-                        .format(self.context.agent_name, tx_msg_response.tx_counterparty_addr[-5:], tx_msg_response.tx_digest, terms.values))
+            ml_accept = MLTradeMessage(
+                performative=MLTradeMessage.Performative.ACCEPT,
+                tx_digest=tx_msg_response.tx_digest,
+                terms=terms,
+            )
+            self.context.outbox.put_message(
+                to=tx_msg_response.tx_counterparty_addr,
+                sender=self.context.agent_address,
+                protocol_id=MLTradeMessage.protocol_id,
+                message=MLTradeSerializer().encode(ml_accept),
+            )
+            logger.info(
+                "[{}]: Sending accept to counterparty={} with transaction digest={} and terms={}.".format(
+                    self.context.agent_name,
+                    tx_msg_response.tx_counterparty_addr[-5:],
+                    tx_msg_response.tx_digest,
+                    terms.values,
+                )
+            )
         else:
-            logger.info("[{}]: transaction was not successful.".format(self.context.agent_name))
+            logger.info(
+                "[{}]: transaction was not successful.".format(self.context.agent_name)
+            )
 
     def teardown(self) -> None:
         """

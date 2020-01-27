@@ -22,30 +22,32 @@
 
 from enum import Enum
 
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 
 
 class MyScaffoldMessage(Message):
     """The scaffold message class."""
 
-    protocol_id = "my_scaffold_protocol"
+    protocol_id = PublicId("my_author_name", "my_scaffold_protocol", "0.1.0")
 
     class Performative(Enum):
         """Scaffold Message types."""
 
         def __str__(self):
             """Get string representation."""
-            return self.value   # pragma: no cover
+            return self.value  # pragma: no cover
 
-    def __init__(self, performative: Performative,
-                 **kwargs):
+    def __init__(self, performative: Performative, **kwargs):
         """
         Initialize.
 
         :param performative: the type of message.
         """
         super().__init__(performative=performative, **kwargs)
-        assert self.check_consistency(), "MyScaffoldMessage initialization inconsistent."
+        assert (
+            self.check_consistency()
+        ), "MyScaffoldMessage initialization inconsistent."
 
     def check_consistency(self) -> bool:
         """Check that the data is consistent."""
@@ -54,4 +56,4 @@ class MyScaffoldMessage(Message):
         except (AssertionError, ValueError):
             return False  # pragma: no cover
 
-        return True     # pragma: no cover
+        return True  # pragma: no cover

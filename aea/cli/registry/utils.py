@@ -24,17 +24,13 @@ import tarfile
 from typing import Dict
 
 import click
+
 import requests
+
 import yaml
 
-from aea.cli.common import (
-    logger, AEAConfigException
-)
-from aea.cli.registry.settings import (
-    REGISTRY_API_URL,
-    CLI_CONFIG_PATH,
-    AUTH_TOKEN_KEY
-)
+from aea.cli.common import AEAConfigException, logger
+from aea.cli.registry.settings import AUTH_TOKEN_KEY, CLI_CONFIG_PATH, REGISTRY_API_URL
 from aea.configurations.base import PublicId
 
 
@@ -59,21 +55,19 @@ def request_api(
             token = read_cli_config()[AUTH_TOKEN_KEY]
         except AEAConfigException:
             raise click.ClickException(
-                'Unable to read authentication config. '
+                "Unable to read authentication config. "
                 'Please sign in with "aea login" command.'
             )
         else:
-            headers.update({
-                'Authorization': 'Token {}'.format(token)
-            })
+            headers.update({"Authorization": "Token {}".format(token)})
 
     files = None
     if filepath:
-        files = {'file': open(filepath, 'rb')}
+        files = {"file": open(filepath, "rb")}
 
     request_kwargs = dict(
         method=method,
-        url='{}{}'.format(REGISTRY_API_URL, path),
+        url="{}{}".format(REGISTRY_API_URL, path),
         params=params,
         files=files,
         data=data,
@@ -82,30 +76,29 @@ def request_api(
     try:
         resp = requests.request(**request_kwargs)
     except requests.exceptions.ConnectionError:
-        raise click.ClickException('Registry server is not responding.')
+        raise click.ClickException("Registry server is not responding.")
 
     resp_json = resp.json()
 
     if resp.status_code == 200:
         pass
     elif resp.status_code == 201:
-        logger.debug('Successfully created!')
+        logger.debug("Successfully created!")
     elif resp.status_code == 403:
         raise click.ClickException(
-            'You are not authenticated. '
-            'Please sign in with "aea login" command.'
+            "You are not authenticated. " 'Please sign in with "aea login" command.'
         )
     elif resp.status_code == 404:
-        raise click.ClickException('Not found in Registry.')
+        raise click.ClickException("Not found in Registry.")
     elif resp.status_code == 409:
         raise click.ClickException(
-            'Conflict in Registry. {}'.format(resp_json['detail'])
+            "Conflict in Registry. {}".format(resp_json["detail"])
         )
     elif resp.status_code == 400:
         raise click.ClickException(resp.json())
     else:
         raise click.ClickException(
-            'Wrong server response. Status code: {}'.format(resp.status_code)
+            "Wrong server response. Status code: {}".format(resp.status_code)
         )
     return resp_json
 
@@ -119,16 +112,16 @@ def download_file(url: str, cwd: str) -> str:
 
     :return: str path to downloaded file
     """
-    local_filename = url.split('/')[-1]
+    local_filename = url.split("/")[-1]
     filepath = os.path.join(cwd, local_filename)
     # NOTE the stream=True parameter below
     response = requests.get(url, stream=True)
     if response.status_code == 200:
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             f.write(response.raw.read())
     else:
         raise click.ClickException(
-            'Wrong response from server when downloading package.'
+            "Wrong response from server when downloading package."
         )
     return filepath
 
@@ -142,12 +135,12 @@ def extract(source: str, target: str) -> None:
 
     :return: None
     """
-    if (source.endswith("tar.gz")):
+    if source.endswith("tar.gz"):
         tar = tarfile.open(source, "r:gz")
         tar.extractall(path=target)
         tar.close()
     else:
-        raise Exception('Unknown file type: {}'.format(source))
+        raise Exception("Unknown file type: {}".format(source))
 
     os.remove(source)
 
@@ -163,33 +156,37 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
 
     :return: None
     """
-    click.echo('Fetching {obj_type} {public_id} from Registry...'.format(
-        public_id=public_id,
-        obj_type=obj_type
-    ))
+    click.echo(
+        "Fetching {obj_type} {public_id} from Registry...".format(
+            public_id=public_id, obj_type=obj_type
+        )
+    )
     author, name, version = public_id.author, public_id.name, public_id.version
-    plural_obj_type = obj_type + 's'  # used for API and folder paths
+    plural_obj_type = obj_type + "s"  # used for API and folder paths
 
-    api_path = '/{}/{}/{}/{}'.format(plural_obj_type, author, name, version)
-    resp = request_api('GET', api_path)
-    file_url = resp['file']
+    api_path = "/{}/{}/{}/{}".format(plural_obj_type, author, name, version)
+    resp = request_api("GET", api_path)
+    file_url = resp["file"]
 
-    click.echo('Downloading {obj_type} {public_id}...'.format(
-        public_id=public_id,
-        obj_type=obj_type
-    ))
+    click.echo(
+        "Downloading {obj_type} {public_id}...".format(
+            public_id=public_id, obj_type=obj_type
+        )
+    )
     filepath = download_file(file_url, cwd)
     target_folder = os.path.join(cwd, plural_obj_type)
 
-    click.echo('Extracting {obj_type} {public_id}...'.format(
-        public_id=public_id,
-        obj_type=obj_type
-    ))
+    click.echo(
+        "Extracting {obj_type} {public_id}...".format(
+            public_id=public_id, obj_type=obj_type
+        )
+    )
     extract(filepath, target_folder)
-    click.echo('Successfully fetched {obj_type}: {public_id}.'.format(
-        public_id=public_id,
-        obj_type=obj_type
-    ))
+    click.echo(
+        "Successfully fetched {obj_type}: {public_id}.".format(
+            public_id=public_id, obj_type=obj_type
+        )
+    )
 
 
 def registry_login(username: str, password: str) -> str:
@@ -202,10 +199,9 @@ def registry_login(username: str, password: str) -> str:
     :return: str token
     """
     resp = request_api(
-        'POST', '/rest-auth/login/',
-        data={'username': username, 'password': password}
+        "POST", "/rest-auth/login/", data={"username": username, "password": password}
     )
-    return resp['key']
+    return resp["key"]
 
 
 def _init_config_folder() -> None:
@@ -228,7 +224,7 @@ def write_cli_config(dict_conf: Dict) -> None:
     :return: None
     """
     _init_config_folder()
-    with open(CLI_CONFIG_PATH, 'w') as f:
+    with open(CLI_CONFIG_PATH, "w") as f:
         yaml.dump(dict_conf, f, default_flow_style=False)
 
 
@@ -240,14 +236,12 @@ def load_yaml(filepath: str) -> Dict:
 
     :return: dict YAML content
     """
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         try:
             return yaml.safe_load(f)
         except yaml.YAMLError as e:
             raise click.ClickException(
-                'Loading yaml config from {} failed: {}'.format(
-                    filepath, e
-                )
+                "Loading yaml config from {} failed: {}".format(filepath, e)
             )
 
 
@@ -261,8 +255,7 @@ def read_cli_config() -> Dict:
         return load_yaml(CLI_CONFIG_PATH)
     except FileNotFoundError:
         raise AEAConfigException(
-            'Unable to read config from {} - file not found.'
-            .format(CLI_CONFIG_PATH)
+            "Unable to read config from {} - file not found.".format(CLI_CONFIG_PATH)
         )
 
 
@@ -270,12 +263,13 @@ def _rm_tarfiles():
     cwd = os.getcwd()
     for filename in os.listdir(cwd):
         filepath = os.path.join(cwd, filename)
-        if filepath.endswith('.tar.gz'):
+        if filepath.endswith(".tar.gz"):
             os.remove(filepath)
 
 
 def clean_tarfiles(func):
     """Decorate func to clean tarfiles after executing."""
+
     def wrapper(*args, **kwargs):
         try:
             result = func(*args, **kwargs)
@@ -287,3 +281,23 @@ def clean_tarfiles(func):
             return result
 
     return wrapper
+
+
+def check_is_author_logged_in(author_name: str) -> None:
+    """
+    Check if current user's name equals to item's author.
+
+    :param author_name: str item author username.
+
+    :raise ClickException: if username and author's name are not equal.
+    :return: None.
+    """
+    resp = request_api("GET", "/rest-auth/user/", auth=True)
+    if not author_name == resp["username"]:
+        raise click.ClickException(
+            "Author username is not equal to current logged in username "
+            "(logged in: {}, author: {}). "
+            "You are allowed to push only items of your authorship.".format(
+                resp["username"], author_name
+            )
+        )

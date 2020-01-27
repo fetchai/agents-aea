@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'ml_data_provider' skill."""
+
 import logging
 from typing import cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
+
 from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
 from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
 from packages.fetchai.skills.ml_data_provider.strategy import Strategy
@@ -33,7 +35,7 @@ logger = logging.getLogger("aea.ml_data_provider")
 class MLTradeHandler(Handler):
     """ML trade handler."""
 
-    SUPPORTED_PROTOCOL = "ml_trade"
+    SUPPORTED_PROTOCOL = MLTradeMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -64,18 +66,29 @@ class MLTradeHandler(Handler):
         :return: None
         """
         query = ml_trade_msg.query
-        logger.info("Got a Call for Terms from {}: query={}".format(ml_trade_msg.counterparty[-5:], query))
+        logger.info(
+            "Got a Call for Terms from {}: query={}".format(
+                ml_trade_msg.counterparty[-5:], query
+            )
+        )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_matching_supply(query):
             return
         terms = strategy.generate_terms()
-        logger.info("[{}]: sending to the address={} a Terms message: {}"
-                    .format(self.context.agent_name, ml_trade_msg.counterparty[-5:], terms.values))
-        terms_msg = MLTradeMessage(performative=MLTradeMessage.Performative.TERMS, terms=terms)
-        self.context.outbox.put_message(to=ml_trade_msg.counterparty,
-                                        sender=self.context.agent_address,
-                                        protocol_id=MLTradeMessage.protocol_id,
-                                        message=MLTradeSerializer().encode(terms_msg))
+        logger.info(
+            "[{}]: sending to the address={} a Terms message: {}".format(
+                self.context.agent_name, ml_trade_msg.counterparty[-5:], terms.values
+            )
+        )
+        terms_msg = MLTradeMessage(
+            performative=MLTradeMessage.Performative.TERMS, terms=terms
+        )
+        self.context.outbox.put_message(
+            to=ml_trade_msg.counterparty,
+            sender=self.context.agent_address,
+            protocol_id=MLTradeMessage.protocol_id,
+            message=MLTradeSerializer().encode(terms_msg),
+        )
 
     def _handle_accept(self, ml_trade_msg: MLTradeMessage) -> None:
         """
@@ -85,19 +98,30 @@ class MLTradeHandler(Handler):
         :return: None
         """
         terms = ml_trade_msg.terms
-        logger.info("Got an Accept from {}: {}".format(ml_trade_msg.counterparty[-5:], terms.values))
+        logger.info(
+            "Got an Accept from {}: {}".format(
+                ml_trade_msg.counterparty[-5:], terms.values
+            )
+        )
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_valid_terms(terms):
             return
         batch_size = terms.values["batch_size"]
         data = strategy.sample_data(batch_size)
-        logger.info("[{}]: sending to address={} a Data message: shape={}"
-                    .format(self.context.agent_name, ml_trade_msg.counterparty[-5:], data[0].shape))
-        data_msg = MLTradeMessage(performative=MLTradeMessage.Performative.DATA, terms=terms, data=data)
-        self.context.outbox.put_message(to=ml_trade_msg.counterparty,
-                                        sender=self.context.agent_address,
-                                        protocol_id=MLTradeMessage.protocol_id,
-                                        message=MLTradeSerializer().encode(data_msg))
+        logger.info(
+            "[{}]: sending to address={} a Data message: shape={}".format(
+                self.context.agent_name, ml_trade_msg.counterparty[-5:], data[0].shape
+            )
+        )
+        data_msg = MLTradeMessage(
+            performative=MLTradeMessage.Performative.DATA, terms=terms, data=data
+        )
+        self.context.outbox.put_message(
+            to=ml_trade_msg.counterparty,
+            sender=self.context.agent_address,
+            protocol_id=MLTradeMessage.protocol_id,
+            message=MLTradeSerializer().encode(data_msg),
+        )
 
     def teardown(self) -> None:
         """

@@ -1,0 +1,15 @@
+name: default
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+description: 'A protocol for exchanging any bytes message.'
+speech_acts:
+  bytes:
+    content: pt:bytes
+  error:
+    error_code: ErrorCode
+    error_msg: pt:str
+    error_data: pt:dict[pt:str, ErrorData]
+
+  # Problems:
+  # error -> error_data is of type dict[str, Any]. Any is problematic.

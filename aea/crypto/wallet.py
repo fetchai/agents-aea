@@ -19,12 +19,13 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping all the public and private keys cryptography."""
+
 from typing import Dict, cast
 
 from aea.crypto.base import Crypto
-from aea.crypto.default import DefaultCrypto, DEFAULT
-from aea.crypto.ethereum import EthereumCrypto, ETHEREUM
-from aea.crypto.fetchai import FetchAICrypto, FETCHAI
+from aea.crypto.default import DEFAULT, DefaultCrypto
+from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
+from aea.crypto.fetchai import FETCHAI, FetchAICrypto
 
 SUPPORTED_CRYPTOS = [DEFAULT, ETHEREUM, FETCHAI]
 

@@ -19,19 +19,21 @@
 # ------------------------------------------------------------------------------
 
 """Extension to the Local Node."""
+
 import asyncio
 import logging
-from asyncio import Queue, AbstractEventLoop
+from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
 from threading import Thread
-from typing import Dict, List, Optional, Set, cast
+from typing import Dict, List, Optional, cast
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
-from aea.mail.base import Envelope, AEAConnectionError, Address
+from aea.mail.base import AEAConnectionError, Address, Envelope
+
 from packages.fetchai.protocols.oef.message import OEFMessage
-from packages.fetchai.protocols.oef.serialization import OEFSerializer, DEFAULT_OEF
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +80,9 @@ class LocalNode:
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
 
-    async def connect(self, address: Address, writer: asyncio.Queue) -> Optional[asyncio.Queue]:
+    async def connect(
+        self, address: Address, writer: asyncio.Queue
+    ) -> Optional[asyncio.Queue]:
         """
         Connect an address to the node.
 
@@ -99,7 +103,9 @@ class LocalNode:
         """Start the node."""
         if not self._loop.is_running() and not self._thread.is_alive():
             self._thread.start()
-        self._receiving_loop_task = asyncio.run_coroutine_threadsafe(self.receiving_loop(), loop=self._loop)
+        self._receiving_loop_task = asyncio.run_coroutine_threadsafe(
+            self.receiving_loop(), loop=self._loop
+        )
         logger.debug("Local node has been started.")
 
     def stop(self):
@@ -128,7 +134,7 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == "oef":
+        if envelope.protocol_id == ProtocolId.from_str("fetchai/oef:0.1.0"):
             await self._handle_oef_message(envelope)
         else:
             await self._handle_agent_message(envelope)
@@ -149,9 +155,13 @@ class LocalNode:
         elif oef_type == OEFMessage.Type.REGISTER_AGENT:
             await self._register_agent(sender, oef_message.agent_description)
         elif oef_type == OEFMessage.Type.UNREGISTER_SERVICE:
-            await self._unregister_service(sender, request_id, oef_message.service_description)
+            await self._unregister_service(
+                sender, request_id, oef_message.service_description
+            )
         elif oef_type == OEFMessage.Type.UNREGISTER_AGENT:
-            await self._unregister_agent(sender, request_id, oef_message.agent_description)
+            await self._unregister_agent(
+                sender, request_id, oef_message.agent_description
+            )
         elif oef_type == OEFMessage.Type.SEARCH_AGENTS:
             await self._search_agents(sender, request_id, oef_message.query)
         elif oef_type == OEFMessage.Type.SEARCH_SERVICES:
@@ -170,15 +180,27 @@ class LocalNode:
         destination = envelope.to
 
         if destination not in self._out_queues.keys():
-            msg = OEFMessage(type=OEFMessage.Type.DIALOGUE_ERROR, id=STUB_DIALOGUE_ID, dialogue_id=STUB_DIALOGUE_ID, origin=destination)
+            msg = OEFMessage(
+                type=OEFMessage.Type.DIALOGUE_ERROR,
+                id=STUB_DIALOGUE_ID,
+                dialogue_id=STUB_DIALOGUE_ID,
+                origin=destination,
+            )
             msg_bytes = OEFSerializer().encode(msg)
-            error_envelope = Envelope(to=envelope.sender, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+            error_envelope = Envelope(
+                to=envelope.sender,
+                sender=DEFAULT_OEF,
+                protocol_id=OEFMessage.protocol_id,
+                message=msg_bytes,
+            )
             await self._send(error_envelope)
             return
         else:
             await self._send(envelope)
 
-    async def _register_service(self, address: Address, service_description: Description):
+    async def _register_service(
+        self, address: Address, service_description: Description
+    ):
         """
         Register a service agent in the service directory of the node.
 
@@ -200,11 +222,15 @@ class LocalNode:
         async with self._lock:
             self.agents[address].append(agent_description)
 
-    async def _register_service_wide(self, address: Address, service_description: Description):
+    async def _register_service_wide(
+        self, address: Address, service_description: Description
+    ):
         """Register service wide."""
         raise NotImplementedError  # pragma: no cover
 
-    async def _unregister_service(self, address: Address, msg_id: int, service_description: Description) -> None:
+    async def _unregister_service(
+        self, address: Address, msg_id: int, service_description: Description
+    ) -> None:
         """
         Unregister a service agent.
 
@@ -215,16 +241,27 @@ class LocalNode:
         """
         async with self._lock:
             if address not in self.services:
-                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE)
+                msg = OEFMessage(
+                    type=OEFMessage.Type.OEF_ERROR,
+                    id=msg_id,
+                    operation=OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE,
+                )
                 msg_bytes = OEFSerializer().encode(msg)
-                envelope = Envelope(to=address, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                envelope = Envelope(
+                    to=address,
+                    sender=DEFAULT_OEF,
+                    protocol_id=OEFMessage.protocol_id,
+                    message=msg_bytes,
+                )
                 await self._send(envelope)
             else:
                 self.services[address].remove(service_description)
                 if len(self.services[address]) == 0:
                     self.services.pop(address)
 
-    async def _unregister_agent(self, address: Address, msg_id: int, agent_description: Description) -> None:
+    async def _unregister_agent(
+        self, address: Address, msg_id: int, agent_description: Description
+    ) -> None:
         """
         Unregister an agent.
 
@@ -235,16 +272,27 @@ class LocalNode:
         """
         async with self._lock:
             if address not in self.agents:
-                msg = OEFMessage(type=OEFMessage.Type.OEF_ERROR, id=msg_id, operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT)
+                msg = OEFMessage(
+                    type=OEFMessage.Type.OEF_ERROR,
+                    id=msg_id,
+                    operation=OEFMessage.OEFErrorOperation.UNREGISTER_AGENT,
+                )
                 msg_bytes = OEFSerializer().encode(msg)
-                envelope = Envelope(to=address, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+                envelope = Envelope(
+                    to=address,
+                    sender=DEFAULT_OEF,
+                    protocol_id=OEFMessage.protocol_id,
+                    message=msg_bytes,
+                )
                 await self._send(envelope)
             else:
                 self.agents[address].remove(agent_description)
                 if len(self.agents[address]) == 0:
                     self.agents.pop(address)
 
-    async def _search_agents(self, address: Address, search_id: int, query: Query) -> None:
+    async def _search_agents(
+        self, address: Address, search_id: int, query: Query
+    ) -> None:
         """
         Search the agents in the local Agent Directory, and send back the result.
 
@@ -265,12 +313,21 @@ class LocalNode:
                     if query.model == description.data_model:
                         result.append(agent_address)
 
-        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
+        msg = OEFMessage(
+            type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result))
+        )
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=address, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(
+            to=address,
+            sender=DEFAULT_OEF,
+            protocol_id=OEFMessage.protocol_id,
+            message=msg_bytes,
+        )
         await self._send(envelope)
 
-    async def _search_services(self, address: Address, search_id: int, query: Query) -> None:
+    async def _search_services(
+        self, address: Address, search_id: int, query: Query
+    ) -> None:
         """
         Search the agents in the local Service Directory, and send back the result.
 
@@ -291,9 +348,16 @@ class LocalNode:
                     if description.data_model == query.model:
                         result.append(agent_address)
 
-        msg = OEFMessage(type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result)))
+        msg = OEFMessage(
+            type=OEFMessage.Type.SEARCH_RESULT, id=search_id, agents=sorted(set(result))
+        )
         msg_bytes = OEFSerializer().encode(msg)
-        envelope = Envelope(to=address, sender=DEFAULT_OEF, protocol_id=OEFMessage.protocol_id, message=msg_bytes)
+        envelope = Envelope(
+            to=address,
+            sender=DEFAULT_OEF,
+            protocol_id=OEFMessage.protocol_id,
+            message=msg_bytes,
+        )
         await self._send(envelope)
 
     async def _send(self, envelope: Envelope):
@@ -324,18 +388,19 @@ class OEFLocalConnection(Connection):
     It is useful for local testing.
     """
 
-    def __init__(self, address: Address, local_node: LocalNode, connection_id: str = "local",
-                 restricted_to_protocols: Optional[Set[str]] = None, excluded_protocols: Optional[Set[str]] = None):
+    def __init__(self, address: Address, local_node: LocalNode, *args, **kwargs):
         """
         Initialize a OEF proxy for a local OEF Node (that is, :class:`~oef.proxy.OEFLocalProxy.LocalNode`.
 
         :param address: the address used in the protocols.
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest.
+        :param connection_id: the connection id.
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the excluded protocols for this connection.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols,
-                         excluded_protocols=excluded_protocols)
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "local", "0.1.0")
+        super().__init__(*args, **kwargs)
         self._address = address
         self._local_node = local_node
 
@@ -366,17 +431,21 @@ class OEFLocalConnection(Connection):
     async def send(self, envelope: Envelope):
         """Send a message."""
         if not self.connection_status.is_connected:
-            raise AEAConnectionError("Connection not established yet. Please use 'connect()'.")
+            raise AEAConnectionError(
+                "Connection not established yet. Please use 'connect()'."
+            )
         self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 
         :return: the envelope received, or None.
         """
         if not self.connection_status.is_connected:
-            raise AEAConnectionError("Connection not established yet. Please use 'connect()'.")
+            raise AEAConnectionError(
+                "Connection not established yet. Please use 'connect()'."
+            )
         try:
             assert self._reader is not None
             envelope = await self._reader.get()
@@ -389,7 +458,9 @@ class OEFLocalConnection(Connection):
             return None
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """Get the Local OEF connection from the connection configuration.
 
         :param address: the address of the agent.
@@ -397,9 +468,16 @@ class OEFLocalConnection(Connection):
         :return: the connection object
         """
         local_node = LocalNode()
-        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
-        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
-        return OEFLocalConnection(address, local_node,
-                                  connection_id=connection_configuration.name,
-                                  restricted_to_protocols=restricted_to_protocols_names,
-                                  excluded_protocols=excluded_protocols_names)
+        restricted_to_protocols_names = {
+            p.name for p in connection_configuration.restricted_to_protocols
+        }
+        excluded_protocols_names = {
+            p.name for p in connection_configuration.excluded_protocols
+        }
+        return OEFLocalConnection(
+            address,
+            local_node,
+            connection_id=connection_configuration.public_id,
+            restricted_to_protocols=restricted_to_protocols_names,
+            excluded_protocols=excluded_protocols_names,
+        )

@@ -1,10 +1,9 @@
-
 """This package contains the dataModel for the carpark detection agent."""
 
-from aea.helpers.search.models import DataModel, Attribute
+from aea.helpers.search.models import Attribute, DataModel
 
 
-class CarParkDataModel (DataModel):
+class CarParkDataModel(DataModel):
     """Data model for the Carpark Agent."""
 
     def __init__(self):
@@ -13,7 +12,11 @@ class CarParkDataModel (DataModel):
         self.ATTRIBUTE_LONGITUDE = Attribute("longitude", float, True)
         self.ATTRIBUTE_UNIQUE_ID = Attribute("unique_id", str, True)
 
-        super().__init__("carpark_detection_datamodel", [
-            self.ATTRIBUTE_LATITUDE,
-            self.ATTRIBUTE_LONGITUDE,
-            self.ATTRIBUTE_UNIQUE_ID])
+        super().__init__(
+            "carpark_detection_datamodel",
+            [
+                self.ATTRIBUTE_LATITUDE,
+                self.ATTRIBUTE_LONGITUDE,
+                self.ATTRIBUTE_UNIQUE_ID,
+            ],
+        )

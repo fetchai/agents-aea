@@ -20,7 +20,6 @@
 """This test module contains the integration test for the weather skills."""
 
 import os
-import pytest
 import shutil
 import signal
 import subprocess
@@ -28,10 +27,11 @@ import sys
 import tempfile
 import time
 
-from ...common.click_testing import CliRunner
+import pytest
 
 from aea.cli import cli
 
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION
 
 
@@ -57,39 +57,55 @@ class TestWeatherSkills:
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
-        packages_src = os.path.join(self.cwd, 'packages')
-        packages_dst = os.path.join(os.getcwd(), 'packages')
+        packages_src = os.path.join(self.cwd, "packages")
+        packages_dst = os.path.join(os.getcwd(), "packages")
         shutil.copytree(packages_src, packages_dst)
 
         # create agent one and agent two
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False
+        )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # add packages for agent one and run it
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_station:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_station:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
         assert result.exit_code == 0
 
-        process_one = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            '--connections',
-            'oef'
-        ],
+        process_one = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
-            env=os.environ.copy())
+            env=os.environ.copy(),
+        )
 
         os.chdir(self.t)
 
@@ -97,25 +113,37 @@ class TestWeatherSkills:
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
         os.chdir(agent_two_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_client:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "skill", "fetchai/weather_client:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
         assert result.exit_code == 0
 
-        process_two = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            '--connections',
-            'oef'
-        ],
+        process_two = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
-            env=os.environ.copy())
+            env=os.environ.copy(),
+        )
 
         # check the gym run ends
 
@@ -139,9 +167,13 @@ class TestWeatherSkills:
             process_two.wait(2)
 
         os.chdir(self.t)
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False
+        )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False
+        )
         assert result.exit_code == 0
 
     @classmethod

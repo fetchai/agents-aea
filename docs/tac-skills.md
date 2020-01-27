@@ -1,9 +1,9 @@
 The AEA TAC - trading agent competition - skills demonstrate an interaction between multiple AEAs in a game.
 
-There are two types of agents:
+There are two types of AEAs:
 
 * The tac controller which coordinates the game.
-* The participant agents which compete in the game.
+* The participant AEAs which compete in the game.
 
 ## Preparation instructions
 
@@ -21,7 +21,7 @@ Keep it running for all the following demos.
 
 ## Demo instructions 1: no ledger transactions
 
-This demo uses another agent - a controller agent - to take the role of running the competition and validating the transactions negotiated by the agents. 
+This demo uses another AEA - a controller AEA - to take the role of running the competition and validating the transactions negotiated by the AEAs. 
 
 ### Create the TAC controller AEA
 In the root directory, create the tac controller AEA and enter the project.
@@ -64,7 +64,7 @@ aea config set skills.tac_control.shared_classes.parameters.args.start_time '21 
 
 ### Run the TAC controller AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 ### Create the TAC participants AEA
@@ -104,7 +104,7 @@ aea config set agent.default_ledger ethereum
 
 ### Run both the TAC participant AEAs
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 	
 ## Communication
@@ -145,7 +145,7 @@ This diagram shows the communication between the various entities during the reg
 </div>
 
 ### Transaction communication
-This diagram shows the communication between the two agents and the controller. In this case, we have a Seller_Agent which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the Searching_Agent which is set up to search for sellers. 
+This diagram shows the communication between the two AEAs and the controller. In this case, we have a Seller_Agent which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the Searching_Agent which is set up to search for sellers. 
 
 <div class="mermaid">
     sequenceDiagram
@@ -178,9 +178,9 @@ This diagram shows the communication between the two agents and the controller. 
 
 </div>
 
-In the above case, the proposal received contains a set of good which the seller wishes to sell and a cost of them. The buyer agent needs to determine if this is a good deal for them and if so, it accepts.
+In the above case, the proposal received contains a set of good which the seller wishes to sell and a cost of them. The buyer AEA needs to determine if this is a good deal for them and if so, it accepts.
 
-There is an equivalent diagram for seller agents set up to search for buyers and their interaction with agents which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
+There is an equivalent diagram for seller AEAs set up to search for buyers and their interaction with AEAs which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
 
 
 ## Negotiation skill - deep dive
@@ -246,7 +246,7 @@ The `TransactionHandler` deals with `TransactionMessage`s received from the deci
 
 The `OEFSearchHandler` deals with `OEFMessage` types returned from the OEF search nodes.
 
-The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller agent.
+The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
 
 ### Shared classes
 
@@ -254,24 +254,24 @@ The `shared_classes` element in the configuration `yaml` lists a number of impor
 
 #### Search
 
-This class abstracts the logic required by agents performing searches for other buying/selling agents according to strategy (see below).
+This class abstracts the logic required by AEAs performing searches for other buying/selling AEAs according to strategy (see below).
 
 #### Registration
 
-This class abstracts the logic required by agents performing service registrations on the OEF.
+This class abstracts the logic required by AEAs performing service registrations on the OEF.
 
 #### Strategy
 
-This class defines the strategy behind an agent's activities.
+This class defines the strategy behind an AEA's activities.
 
-The class is instantiated with the agent's goals, for example whether the agent intends to buy/sell something, and is therefore looking for other sellers, buyers, or both.
+The class is instantiated with the AEA's goals, for example whether the AEA intends to buy/sell something, and is therefore looking for other sellers, buyers, or both.
 
-It also provides methods for defining what goods agents are looking for and what goods they may have to sell, for generating proposal queries, and checking whether a proposal is profitable or not.
+It also provides methods for defining what goods AEAs are looking for and what goods they may have to sell, for generating proposal queries, and checking whether a proposal is profitable or not.
 
 #### Dialogue
 
-`Dialogues` abstract the negotiations that take place between agents including all negotiation end states, such as accepted, declined, etc. and all the negotiation states in between.
+`Dialogues` abstract the negotiations that take place between AEAs including all negotiation end states, such as accepted, declined, etc. and all the negotiation states in between.
 
 #### Transactions
 
-This class deals with representing potential transactions between agents.
+This class deals with representing potential transactions between AEAs.

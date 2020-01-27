@@ -18,16 +18,21 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the gym connection module."""
+
 import logging
 
 import gym
+
 import pytest
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.mail.base import Envelope
+
 from packages.fetchai.connections.gym.connection import GymConnection
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
+
+from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 logger = logging.getLogger(__name__)
 
@@ -39,27 +44,41 @@ class TestGymConnection:
     def setup_class(cls):
         """Initialise the class."""
         cls.env = gym.GoalEnv()
-        cls.gym_con = GymConnection(address="my_key", gym_env=cls.env)
+        cls.gym_con = GymConnection(
+            address="my_key",
+            gym_env=cls.env,
+            connection_id=PublicId("fetchai", "gym", "0.1.0"),
+        )
 
     def test_gym_connection_initialization(self):
         """Test the connection None return value after connect()."""
-        self.gym_con.channel._queues['my_key'] = None
+        self.gym_con.channel._queues["my_key"] = None
         assert self.gym_con.channel.connect() is None
 
     def test_decode_envelope_error(self):
         """Test the decoding error for the envelopes."""
-        envelope = Envelope(to="_to_key", sender="_from_key", protocol_id="unknown_protocol",
-                            message=b'hello')
+        envelope = Envelope(
+            to="_to_key",
+            sender="_from_key",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            message=b"hello",
+        )
         with pytest.raises(ValueError):
             self.gym_con.channel._decode_envelope(envelope)
 
     @pytest.mark.asyncio
     async def test_send_connection_error(self):
         """Test send connection error."""
-        msg = GymMessage(performative=GymMessage.Performative.ACT, action='any_action', step_id=1)
+        msg = GymMessage(
+            performative=GymMessage.Performative.ACT, action="any_action", step_id=1
+        )
         msg_bytes = GymSerializer().encode(msg)
-        envelope = Envelope(to="_to_key", sender="_from_key", protocol_id=GymMessage.protocol_id,
-                            message=msg_bytes)
+        envelope = Envelope(
+            to="_to_key",
+            sender="_from_key",
+            protocol_id=GymMessage.protocol_id,
+            message=msg_bytes,
+        )
 
         self.gym_con.connection_status.is_connected = False
         with pytest.raises(ConnectionError):
@@ -75,6 +94,6 @@ class TestGymConnection:
 def test_gym_from_config():
     """Test the Connection from config File."""
     conf = ConnectionConfig()
-    conf.config['env'] = "tests.conftest.DUMMY_ENV"
+    conf.config["env"] = "tests.conftest.DUMMY_ENV"
     con = GymConnection.from_config(address="pk", connection_configuration=conf)
     assert con is not None

@@ -23,25 +23,28 @@ from queue import Queue
 from typing import Any, Dict
 
 from aea.connections.base import ConnectionStatus
-from aea.decision_maker.base import OwnershipState, Preferences, GoalPursuitReadiness
-from aea.mail.base import OutBox
 from aea.crypto.ledger_apis import LedgerApis
+from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.mail.base import OutBox
 
 
 class AgentContext:
     """Provide read access to relevant data of the agent for the skills."""
 
-    def __init__(self, agent_name: str,
-                 public_keys: Dict[str, str],
-                 addresses: Dict[str, str],
-                 ledger_apis: LedgerApis,
-                 connection_status: ConnectionStatus,
-                 outbox: OutBox,
-                 decision_maker_message_queue: Queue,
-                 ownership_state: OwnershipState,
-                 preferences: Preferences,
-                 goal_pursuit_readiness: GoalPursuitReadiness,
-                 task_queue: Queue):
+    def __init__(
+        self,
+        agent_name: str,
+        public_keys: Dict[str, str],
+        addresses: Dict[str, str],
+        ledger_apis: LedgerApis,
+        connection_status: ConnectionStatus,
+        outbox: OutBox,
+        decision_maker_message_queue: Queue,
+        ownership_state: OwnershipState,
+        preferences: Preferences,
+        goal_pursuit_readiness: GoalPursuitReadiness,
+        task_queue: Queue,
+    ):
         """
         Initialize an agent context.
 

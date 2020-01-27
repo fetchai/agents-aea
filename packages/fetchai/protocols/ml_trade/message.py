@@ -19,10 +19,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the FIPA message definition."""
+
 from enum import Enum
-from typing import cast, Tuple
+from typing import Tuple, cast
+
 import numpy as np
 
+from aea.configurations.base import PublicId
 from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 
@@ -30,15 +33,15 @@ from aea.protocols.base import Message
 class MLTradeMessage(Message):
     """The ML trade message class."""
 
-    protocol_id = "ml_trade"
+    protocol_id = PublicId("fetchai", "ml_trade", "0.1.0")
 
     class Performative(Enum):
         """ML trade performatives."""
 
-        CFT = 'cft'
-        TERMS = 'terms'
-        ACCEPT = 'accept'
-        DATA = 'data'
+        CFT = "cft"
+        TERMS = "terms"
+        ACCEPT = "accept"
+        DATA = "data"
 
         def __str__(self):
             """Get string representation."""
@@ -51,7 +54,7 @@ class MLTradeMessage(Message):
         :param type: the type.
         """
         super().__init__(performative=performative, **kwargs)
-        assert self.check_consistency(), "MLTradeMessage initialization inconsistent."
+        assert self._check_consistency(), "MLTradeMessage initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
@@ -83,10 +86,12 @@ class MLTradeMessage(Message):
         assert self.is_set("data"), "Data is not set."
         return cast(Tuple[np.ndarray, np.ndarray], self.get("data"))
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
-            assert isinstance(self.performative, MLTradeMessage.Performative), "Performative is invalid type."
+            assert isinstance(
+                self.performative, MLTradeMessage.Performative
+            ), "Performative is invalid type."
             if self.performative == MLTradeMessage.Performative.CFT:
                 assert isinstance(self.query, Query)
                 assert len(self.body) == 2

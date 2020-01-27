@@ -19,17 +19,23 @@
 # ------------------------------------------------------------------------------
 
 """Module wrapping the helpers of public and private key cryptography."""
-import sys
-import logging
 
-from fetchai.ledger.crypto import Entity  # type: ignore
+import logging
+import sys
+
 from eth_account import Account  # type: ignore
 
-from aea.crypto.default import DefaultCrypto
+from fetchai.ledger.crypto import Entity  # type: ignore
 
-DEFAULT_PRIVATE_KEY_FILE = 'default_private_key.pem'
-FETCHAI_PRIVATE_KEY_FILE = 'fet_private_key.txt'
-ETHEREUM_PRIVATE_KEY_FILE = 'eth_private_key.txt'
+from aea.crypto.default import DefaultCrypto
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
+
+DEFAULT_PRIVATE_KEY_FILE = "default_private_key.pem"
+FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
+ETHEREUM_PRIVATE_KEY_FILE = "eth_private_key.txt"
+FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
+ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +51,9 @@ def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
     try:
         DefaultCrypto(private_key_pem_path=private_key_pem_path)
     except ValueError:
-        logger.error("This is not a valid private key file: '{}'".format(private_key_pem_path))
+        logger.error(
+            "This is not a valid private key file: '{}'".format(private_key_pem_path)
+        )
         sys.exit(1)
 
 
@@ -62,7 +70,9 @@ def _try_validate_fet_private_key_path(private_key_path: str) -> None:
             data = key.read()
             Entity.from_hex(data)
     except ValueError:
-        logger.error("This is not a valid private key file: '{}'".format(private_key_path))
+        logger.error(
+            "This is not a valid private key file: '{}'".format(private_key_path)
+        )
         sys.exit(1)
 
 
@@ -79,7 +89,9 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
             data = key.read()
             Account.from_key(data)
     except ValueError:
-        logger.error("This is not a valid private key file: '{}'".format(private_key_path))
+        logger.error(
+            "This is not a valid private key file: '{}'".format(private_key_path)
+        )
         sys.exit(1)
 
 
@@ -99,7 +111,9 @@ def _validate_private_key_path(private_key_path: str, ledger_id: str):
     elif ledger_id == "ethereum":
         _try_validate_ethereum_private_key_path(private_key_path)
     else:
-        raise ValueError("Ledger id {} is not valid.".format(repr(ledger_id)))  # pragma: no cover
+        raise ValueError(
+            "Ledger id {} is not valid.".format(repr(ledger_id))
+        )  # pragma: no cover
 
 
 def _create_default_private_key() -> None:
@@ -133,3 +147,61 @@ def _create_ethereum_private_key() -> None:
     account = Account.create()
     with open(ETHEREUM_PRIVATE_KEY_FILE, "w+") as file:
         file.write(account.key.hex())
+
+
+def _try_generate_testnet_wealth(identifier: str, address: str) -> None:
+    """
+    Generate wealth on a testnet.
+
+    :param identifier: the identifier of the ledger
+    :param address: the address to check for
+    :return: None
+    """
+    try:
+        import requests
+        import json
+
+        if identifier == FETCHAI:
+            payload = json.dumps({"address": address})
+            response = requests.post(FETCHAI_TESTNET_FAUCET_URL, data=payload)
+            if response.status_code // 100 == 5:
+                logger.error("Response: {}".format(response.status_code))
+            else:
+                response_dict = json.loads(response.text)
+                if response_dict.get("error_message") is not None:
+                    logger.warning(
+                        "Response: {}\nMessage: {}".format(
+                            response.status_code, response_dict.get("error_message")
+                        )
+                    )
+                else:
+                    logger.info(
+                        "Response: {}\nMessage: {}\nDigest: {}".format(
+                            response.status_code,
+                            response_dict.get("message"),
+                            response_dict.get("digest"),
+                        )
+                    )
+        elif identifier == ETHEREUM:
+            response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
+            if response.status_code // 100 == 5:
+                logger.error("Response: {}".format(response.status_code))
+            elif response.status_code // 100 in [3, 4]:
+                response_dict = json.loads(response.text)
+                logger.warning(
+                    "Response: {}\nMessage: {}".format(
+                        response.status_code, response_dict.get("message")
+                    )
+                )
+            elif response.status_code // 100 == 2:
+                response_dict = json.loads(response.text)
+                logger.info(
+                    "Response: {}\nMessage: {}".format(
+                        response.status_code, response_dict.get("message")
+                    )
+                )
+    except Exception as e:
+        logger.warning(
+            "An error occured while attempting to generate wealth:\n{}".format(e)
+        )
+        sys.exit(1)

@@ -23,9 +23,10 @@
 
 import collections
 import math
-import numpy as np
 import random
 from typing import Dict, List, Tuple, cast
+
+import numpy as np
 
 from web3 import Web3
 
@@ -42,8 +43,11 @@ def generate_good_id_to_name(nb_goods: int) -> Dict[str, str]:
     :return: a dictionary mapping goods' ids to names.
     """
     max_number_of_digits = math.ceil(math.log10(nb_goods))
-    string_format = 'tac_good_{:0' + str(max_number_of_digits) + '}'
-    return {string_format.format(i) + '_id': string_format.format(i) for i in range(nb_goods)}
+    string_format = "tac_good_{:0" + str(max_number_of_digits) + "}"
+    return {
+        string_format.format(i) + "_id": string_format.format(i)
+        for i in range(nb_goods)
+    }
 
 
 def determine_scaling_factor(money_endowment: int) -> float:
@@ -57,7 +61,13 @@ def determine_scaling_factor(money_endowment: int) -> float:
     return scaling_factor
 
 
-def generate_good_endowments(agent_addresses: List[str], good_ids: List[str], base_amount: int, uniform_lower_bound_factor: int, uniform_upper_bound_factor: int) -> Dict[str, Dict[str, int]]:
+def generate_good_endowments(
+    agent_addresses: List[str],
+    good_ids: List[str],
+    base_amount: int,
+    uniform_lower_bound_factor: int,
+    uniform_upper_bound_factor: int,
+) -> Dict[str, Dict[str, int]]:
     """
     Compute good endowments per agent. That is, a matrix of shape (nb_agents, nb_goods).
 
@@ -70,8 +80,13 @@ def generate_good_endowments(agent_addresses: List[str], good_ids: List[str], ba
     """
     # sample good instances
     nb_agents = len(agent_addresses)
-    instances_per_good = _sample_good_instances(nb_agents, good_ids, base_amount,
-                                                uniform_lower_bound_factor, uniform_upper_bound_factor)
+    instances_per_good = _sample_good_instances(
+        nb_agents,
+        good_ids,
+        base_amount,
+        uniform_lower_bound_factor,
+        uniform_upper_bound_factor,
+    )
     # each agent receives at least base amount of each good
     base_assignment = {good_id: base_amount for good_id in good_ids}
     endowments = {agent_addr: base_assignment for agent_addr in agent_addresses}
@@ -84,7 +99,9 @@ def generate_good_endowments(agent_addresses: List[str], good_ids: List[str], ba
     return endowments
 
 
-def generate_utility_params(agent_addresses: List[str], good_ids: List[str], scaling_factor: float) -> Dict[str, Dict[str, float]]:
+def generate_utility_params(
+    agent_addresses: List[str], good_ids: List[str], scaling_factor: float
+) -> Dict[str, Dict[str, float]]:
     """
     Compute the preference matrix. That is, a generic element e_ij is the utility of good j for agent i.
 
@@ -98,18 +115,30 @@ def generate_utility_params(agent_addresses: List[str], good_ids: List[str], sca
     for agent_addr in agent_addresses:
         random_integers = [random.randint(1, 101) for _ in range(len(good_ids))]
         total = sum(random_integers)
-        normalized_fractions = [round(i / float(total), decimals) for i in random_integers]
+        normalized_fractions = [
+            round(i / float(total), decimals) for i in random_integers
+        ]
         if not sum(normalized_fractions) == 1.0:
-            normalized_fractions[-1] = round(1.0 - sum(normalized_fractions[0:-1]), decimals)
+            normalized_fractions[-1] = round(
+                1.0 - sum(normalized_fractions[0:-1]), decimals
+            )
         # scale the utility params
-        params = {good_id: param * scaling_factor for good_id, param in zip(good_ids, normalized_fractions)}
+        params = {
+            good_id: param * scaling_factor
+            for good_id, param in zip(good_ids, normalized_fractions)
+        }
         utility_function_params[agent_addr] = params
 
     return utility_function_params
 
 
-def _sample_good_instances(nb_agents: int, good_ids: List[str], base_amount: int,
-                           uniform_lower_bound_factor: int, uniform_upper_bound_factor: int) -> Dict[str, int]:
+def _sample_good_instances(
+    nb_agents: int,
+    good_ids: List[str],
+    base_amount: int,
+    uniform_lower_bound_factor: int,
+    uniform_upper_bound_factor: int,
+) -> Dict[str, int]:
     """
     Sample the number of instances for a good.
 
@@ -127,7 +156,9 @@ def _sample_good_instances(nb_agents: int, good_ids: List[str], base_amount: int
     return nb_instances
 
 
-def generate_money_endowments(agent_addresses: List[str], money_endowment: int) -> Dict[str, int]:
+def generate_money_endowments(
+    agent_addresses: List[str], money_endowment: int
+) -> Dict[str, int]:
     """
     Compute the initial money amounts for each agent.
 
@@ -138,7 +169,13 @@ def generate_money_endowments(agent_addresses: List[str], money_endowment: int) 
     return {agent_addr: money_endowment for agent_addr in agent_addresses}
 
 
-def generate_equilibrium_prices_and_holdings(endowments: Dict[str, Dict[str, int]], utility_function_params: Dict[str, Dict[str, float]], money_endowment: Dict[str, int], scaling_factor: float, quantity_shift: int = QUANTITY_SHIFT) -> Tuple[Dict[str, float], Dict[str, Dict[str, float]], Dict[str, float]]:
+def generate_equilibrium_prices_and_holdings(
+    endowments: Dict[str, Dict[str, int]],
+    utility_function_params: Dict[str, Dict[str, float]],
+    money_endowment: Dict[str, int],
+    scaling_factor: float,
+    quantity_shift: int = QUANTITY_SHIFT,
+) -> Tuple[Dict[str, float], Dict[str, Dict[str, float]], Dict[str, float]]:
     """
     Compute the competitive equilibrium prices and allocation.
 
@@ -169,24 +206,47 @@ def generate_equilibrium_prices_and_holdings(endowments: Dict[str, Dict[str, int
                 good_ids_to_idx[good_id] = idx
                 idx += 1
             temp_e[good_ids_to_idx[good_id]] = quantity
-            temp_u[good_ids_to_idx[good_id]] = utility_function_params[agent_addr][good_id]
+            temp_u[good_ids_to_idx[good_id]] = utility_function_params[agent_addr][
+                good_id
+            ]
         count += 1
         endowments_l.append(temp_e)
         utility_function_params_l.append(temp_u)
 
     # maths
     endowments_a = np.array(endowments_l, dtype=np.int)
-    scaled_utility_function_params_a = np.array(utility_function_params_l, dtype=np.float)  # note, they are already scaled
+    scaled_utility_function_params_a = np.array(
+        utility_function_params_l, dtype=np.float
+    )  # note, they are already scaled
     endowments_by_good = np.sum(endowments_a, axis=0)
     scaled_params_by_good = np.sum(scaled_utility_function_params_a, axis=0)
-    eq_prices = np.divide(scaled_params_by_good, quantity_shift * len(endowments) + endowments_by_good)
-    eq_good_holdings = np.divide(scaled_utility_function_params_a, eq_prices) - quantity_shift
-    eq_money_holdings = np.transpose(np.dot(eq_prices, np.transpose(endowments_a + quantity_shift))) + money_endowment_l - scaling_factor
+    eq_prices = np.divide(
+        scaled_params_by_good, quantity_shift * len(endowments) + endowments_by_good
+    )
+    eq_good_holdings = (
+        np.divide(scaled_utility_function_params_a, eq_prices) - quantity_shift
+    )
+    eq_money_holdings = (
+        np.transpose(np.dot(eq_prices, np.transpose(endowments_a + quantity_shift)))
+        + money_endowment_l
+        - scaling_factor
+    )
 
     # back to dicts
-    eq_prices_dict = {good_id: cast(float, eq_price) for good_id, eq_price in zip(good_ids, eq_prices.tolist())}
-    eq_good_holdings_dict = {agent_addr: {good_id: cast(float, v) for good_id, v in zip(good_ids, egh)} for agent_addr, egh in zip(agent_addresses, eq_good_holdings.tolist())}
-    eq_money_holdings_dict = {agent_addr: cast(float, eq_money_holding) for agent_addr, eq_money_holding in zip(agent_addresses, eq_money_holdings.tolist())}
+    eq_prices_dict = {
+        good_id: cast(float, eq_price)
+        for good_id, eq_price in zip(good_ids, eq_prices.tolist())
+    }
+    eq_good_holdings_dict = {
+        agent_addr: {good_id: cast(float, v) for good_id, v in zip(good_ids, egh)}
+        for agent_addr, egh in zip(agent_addresses, eq_good_holdings.tolist())
+    }
+    eq_money_holdings_dict = {
+        agent_addr: cast(float, eq_money_holding)
+        for agent_addr, eq_money_holding in zip(
+            agent_addresses, eq_money_holdings.tolist()
+        )
+    }
     return eq_prices_dict, eq_good_holdings_dict, eq_money_holdings_dict
 
 
@@ -197,17 +257,19 @@ def _recover_uid(good_id) -> int:
     :param int good_id: the good id
     :return: the uid
     """
-    uid = int(good_id.split('_')[-2])
+    uid = int(good_id.split("_")[-2])
     return uid
 
 
-def _get_hash(tx_sender_addr: Address,
-              tx_counterparty_addr: Address,
-              good_ids: List[int],
-              sender_supplied_quantities: List[int],
-              counterparty_supplied_quantities: List[int],
-              tx_amount: int,
-              tx_nonce: int) -> bytes:
+def _get_hash(
+    tx_sender_addr: Address,
+    tx_counterparty_addr: Address,
+    good_ids: List[int],
+    sender_supplied_quantities: List[int],
+    counterparty_supplied_quantities: List[int],
+    tx_amount: int,
+    tx_nonce: int,
+) -> bytes:
     """
     Generate a hash from transaction information.
 
@@ -220,35 +282,54 @@ def _get_hash(tx_sender_addr: Address,
     :param tx_nonce: the nonce of the transaction
     :return: the hash
     """
-    aggregate_hash = Web3.keccak(b''.join(
-        [good_ids[0].to_bytes(32, 'big'), sender_supplied_quantities[0].to_bytes(32, 'big'), counterparty_supplied_quantities[0].to_bytes(32, 'big')]))
+    aggregate_hash = Web3.keccak(
+        b"".join(
+            [
+                good_ids[0].to_bytes(32, "big"),
+                sender_supplied_quantities[0].to_bytes(32, "big"),
+                counterparty_supplied_quantities[0].to_bytes(32, "big"),
+            ]
+        )
+    )
     for i in range(len(good_ids)):
         if not i == 0:
-            aggregate_hash = Web3.keccak(b''.join(
-                [aggregate_hash, good_ids[i].to_bytes(32, 'big'), sender_supplied_quantities[i].to_bytes(32, 'big'),
-                 counterparty_supplied_quantities[i].to_bytes(32, 'big')]))
+            aggregate_hash = Web3.keccak(
+                b"".join(
+                    [
+                        aggregate_hash,
+                        good_ids[i].to_bytes(32, "big"),
+                        sender_supplied_quantities[i].to_bytes(32, "big"),
+                        counterparty_supplied_quantities[i].to_bytes(32, "big"),
+                    ]
+                )
+            )
 
     m_list = []  # type: List[bytes]
-    m_list.append(tx_sender_addr.encode('utf-8'))
-    m_list.append(tx_counterparty_addr.encode('utf-8'))
+    m_list.append(tx_sender_addr.encode("utf-8"))
+    m_list.append(tx_counterparty_addr.encode("utf-8"))
     m_list.append(aggregate_hash)
-    m_list.append(tx_amount.to_bytes(32, 'big'))
-    m_list.append(tx_nonce.to_bytes(32, 'big'))
-    return Web3.keccak(b''.join(m_list))
+    m_list.append(tx_amount.to_bytes(32, "big"))
+    m_list.append(tx_nonce.to_bytes(32, "big"))
+    return Web3.keccak(b"".join(m_list))
 
 
-def tx_hash_from_values(tx_sender_addr: str,
-                        tx_counterparty_addr: str,
-                        tx_quantities_by_good_id: Dict[str, int],
-                        tx_amount_by_currency_id: Dict[str, int],
-                        tx_nonce: int) -> bytes:
+def tx_hash_from_values(
+    tx_sender_addr: str,
+    tx_counterparty_addr: str,
+    tx_quantities_by_good_id: Dict[str, int],
+    tx_amount_by_currency_id: Dict[str, int],
+    tx_nonce: int,
+) -> bytes:
     """
     Get the hash for a transaction based on the transaction message.
 
     :param tx_message: the transaction message
     :return: the hash
     """
-    converted = {_recover_uid(good_id): quantity for good_id, quantity in tx_quantities_by_good_id.items()}
+    converted = {
+        _recover_uid(good_id): quantity
+        for good_id, quantity in tx_quantities_by_good_id.items()
+    }
     ordered = collections.OrderedDict(sorted(converted.items()))
     good_uids = []  # type: List[int]
     sender_supplied_quantities = []  # type: List[int]
@@ -262,13 +343,15 @@ def tx_hash_from_values(tx_sender_addr: str,
             sender_supplied_quantities.append(0)
             counterparty_supplied_quantities.append(-quantity)
     assert len(tx_amount_by_currency_id) == 1
-    for currency_id, amount in tx_amount_by_currency_id.items():
+    for amount in tx_amount_by_currency_id.values():
         tx_amount = amount if amount >= 0 else 0
-    tx_hash = _get_hash(tx_sender_addr=tx_sender_addr,
-                        tx_counterparty_addr=tx_counterparty_addr,
-                        good_ids=good_uids,
-                        sender_supplied_quantities=sender_supplied_quantities,
-                        counterparty_supplied_quantities=counterparty_supplied_quantities,
-                        tx_amount=tx_amount,
-                        tx_nonce=tx_nonce)
+    tx_hash = _get_hash(
+        tx_sender_addr=tx_sender_addr,
+        tx_counterparty_addr=tx_counterparty_addr,
+        good_ids=good_uids,
+        sender_supplied_quantities=sender_supplied_quantities,
+        counterparty_supplied_quantities=counterparty_supplied_quantities,
+        tx_amount=tx_amount,
+        tx_nonce=tx_nonce,
+    )
     return tx_hash

@@ -22,20 +22,20 @@
 
 import logging
 import sys
-from typing import Dict, Optional, List, Union, cast
+from typing import Dict, Optional, Union, cast
 
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.crypto.fetchai import FETCHAI, FetchAIApi
 
-SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
+SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
-SUPPORTED_CURRENCIES = {ETHEREUM: 'ETH', FETCHAI: 'FET'}
+SUPPORTED_CURRENCIES = {ETHEREUM: "ETH", FETCHAI: "FET"}
 
 logger = logging.getLogger(__name__)
 
-GAS_PRICE = '50'
-GAS_ID = 'gwei'
+GAS_PRICE = "50"
+GAS_ID = "gwei"
 UNKNOWN = "UNKNOWN"
 OK = "OK"
 ERROR = "ERROR"
@@ -44,7 +44,11 @@ ERROR = "ERROR"
 class LedgerApis(object):
     """Store all the ledger apis we initialise."""
 
-    def __init__(self, ledger_api_configs: Dict[str, List[Union[str, int]]], default_ledger_id: str):
+    def __init__(
+        self,
+        ledger_api_configs: Dict[str, Dict[str, Union[str, int]]],
+        default_ledger_id: str,
+    ):
         """
         Instantiate a wallet object.
 
@@ -52,19 +56,16 @@ class LedgerApis(object):
         :param default_ledger_id: the default ledger id.
         """
         apis = {}  # type: Dict[str, LedgerApi]
-        configs = {}  # type: Dict[str, List[Union[str, int]]]
+        configs = {}  # type: Dict[str, Dict[str, Union[str, int]]]
         self._last_tx_statuses = {}  # type: Dict[str, str]
         for identifier, config in ledger_api_configs.items():
             self._last_tx_statuses[identifier] = UNKNOWN
             if identifier == FETCHAI:
-                addr = cast(str, config[0])
-                port = cast(int, config[1])
-                api = FetchAIApi(addr, port)  # type: LedgerApi
+                api = FetchAIApi(**config)  # type: LedgerApi
                 apis[identifier] = api
                 configs[identifier] = config
             elif identifier == ETHEREUM:
-                address = cast(str, config[0])
-                api = EthereumApi(address)
+                api = EthereumApi(cast(str, config["address"]))
                 apis[identifier] = api
                 configs[identifier] = config
             else:
@@ -75,7 +76,7 @@ class LedgerApis(object):
         self._default_ledger_id = default_ledger_id
 
     @property
-    def configs(self) -> Dict[str, List[Union[str, int]]]:
+    def configs(self) -> Dict[str, Dict[str, Union[str, int]]]:
         """Get the configs."""
         return self._configs
 
@@ -123,13 +124,22 @@ class LedgerApis(object):
             balance = api.get_balance(address)
             self._last_tx_statuses[identifier] = OK
         except Exception:
-            logger.warning("An error occurred while attempting to get the current balance.")
+            logger.warning(
+                "An error occurred while attempting to get the current balance."
+            )
             self._last_tx_statuses[identifier] = ERROR
             # TODO raise exception instead of returning zero.
             balance = 0
         return balance
 
-    def transfer(self, crypto_object: Crypto, destination_address: str, amount: int, tx_fee: int, **kwargs) -> Optional[str]:
+    def transfer(
+        self,
+        crypto_object: Crypto,
+        destination_address: str,
+        amount: int,
+        tx_fee: int,
+        **kwargs
+    ) -> Optional[str]:
         """
         Transfer from self to destination.
 
@@ -140,11 +150,15 @@ class LedgerApis(object):
 
         :return: tx digest if successful, otherwise None
         """
-        assert crypto_object.identifier in self.apis.keys(), "Unsupported ledger identifier."
+        assert (
+            crypto_object.identifier in self.apis.keys()
+        ), "Unsupported ledger identifier."
         api = self.apis[crypto_object.identifier]
         logger.info("Waiting for the validation of the transaction ...")
         try:
-            tx_digest = api.send_transaction(crypto_object, destination_address, amount, tx_fee, **kwargs)
+            tx_digest = api.send_transaction(
+                crypto_object, destination_address, amount, tx_fee, **kwargs
+            )
             logger.info("transaction validated. TX digest: {}".format(tx_digest))
             self._last_tx_statuses[crypto_object.identifier] = OK
         except Exception:
@@ -167,28 +181,32 @@ class LedgerApis(object):
             is_successful = api.is_transaction_settled(tx_digest)
             self._last_tx_statuses[identifier] = OK
         except Exception:
-            logger.warning("An error occured while attempting to check the transaction!")
+            logger.warning(
+                "An error occured while attempting to check the transaction!"
+            )
             is_successful = False
             self._last_tx_statuses[identifier] = ERROR
         return is_successful
 
 
-def _try_to_instantiate_fetchai_ledger_api(addr: str, port: int) -> None:
+def _try_to_instantiate_fetchai_ledger_api(**kwargs) -> None:
     """
     Try to instantiate the fetchai ledger api.
 
-    :param addr: the address
-    :param port: the port
+    :param kwargs: the keyword arguments
     """
     try:
         from fetchai.ledger.api import LedgerApi
-        LedgerApi(addr, port)
-    except Exception:
-        logger.error("Cannot connect to fetchai ledger with provided config.")
+
+        LedgerApi(**kwargs)
+    except Exception as e:
+        logger.error(
+            "Cannot connect to fetchai ledger with provided config:\n{}".format(e)
+        )
         sys.exit(1)
 
 
-def _try_to_instantiate_ethereum_ledger_api(addr: str) -> None:
+def _try_to_instantiate_ethereum_ledger_api(address: str) -> None:
     """
     Try to instantiate the ethereum ledger api.
 
@@ -196,7 +214,8 @@ def _try_to_instantiate_ethereum_ledger_api(addr: str) -> None:
     """
     try:
         from web3 import Web3, HTTPProvider
-        Web3(HTTPProvider(addr))
+
+        Web3(HTTPProvider(address))
     except Exception:
         logger.error("Cannot connect to ethereum ledger with provided config.")
         sys.exit(1)

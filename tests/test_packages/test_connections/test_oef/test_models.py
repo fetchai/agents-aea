@@ -18,12 +18,24 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the OEF models."""
+
 import pickle
 from unittest import mock
 
 import pytest
 
-from aea.helpers.search.models import Attribute, DataModel, Description, Query, And, Or, Not, Constraint, ConstraintType
+from aea.helpers.search.models import (
+    And,
+    Attribute,
+    Constraint,
+    ConstraintType,
+    DataModel,
+    Description,
+    Not,
+    Or,
+    Query,
+)
+
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 
 
@@ -42,7 +54,9 @@ class TestTranslator:
         """Test that the translation for the DataModel class works."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
         oef_data_model = OEFObjectTranslator.to_oef_data_model(data_model_foobar)
         expected_data_model = OEFObjectTranslator.from_oef_data_model(oef_data_model)
         actual_data_model = data_model_foobar
@@ -52,8 +66,12 @@ class TestTranslator:
         """Test that the translation for the Description class works."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
-        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
+        description_foobar = Description(
+            {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
+        )
         oef_description = OEFObjectTranslator.to_oef_description(description_foobar)
         expected_description = OEFObjectTranslator.from_oef_description(oef_description)
         actual_description = description_foobar
@@ -66,17 +84,26 @@ class TestTranslator:
         """Test that the translation for the Query class works."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
 
-        query = Query([
-            And([
-                Or([
-                    Not(Constraint("foo", ConstraintType("==", 1))),
-                    Not(Constraint("bar", ConstraintType("==", "baz")))
-                ]),
-                Constraint("foo", ConstraintType("<", 2)),
-            ])
-        ], data_model_foobar)
+        query = Query(
+            [
+                And(
+                    [
+                        Or(
+                            [
+                                Not(Constraint("foo", ConstraintType("==", 1))),
+                                Not(Constraint("bar", ConstraintType("==", "baz"))),
+                            ]
+                        ),
+                        Constraint("foo", ConstraintType("<", 2)),
+                    ]
+                )
+            ],
+            data_model_foobar,
+        )
 
         oef_query = OEFObjectTranslator.to_oef_query(query)
         expected_query = OEFObjectTranslator.from_oef_query(oef_query)
@@ -99,7 +126,9 @@ class TestPickable:
         """Test that an istance of the DataModel class is pickable."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
         try:
             pickle.dumps(data_model_foobar)
         except Exception:
@@ -109,8 +138,12 @@ class TestPickable:
         """Test that an istance of the Description class is pickable."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
-        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
+        description_foobar = Description(
+            {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
+        )
         try:
             pickle.dumps(description_foobar)
         except Exception:
@@ -120,18 +153,26 @@ class TestPickable:
         """Test that an istance of the Query class is pickable."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
 
-        query = Query([
-            And([
-                Or([
-                    Not(Constraint("foo", ConstraintType("==", 1))),
-                    Not(Constraint("bar", ConstraintType("==", "baz")))
-                ]),
-                Constraint("foo", ConstraintType("<", 2)),
-            ])
-        ],
-            data_model_foobar)
+        query = Query(
+            [
+                And(
+                    [
+                        Or(
+                            [
+                                Not(Constraint("foo", ConstraintType("==", 1))),
+                                Not(Constraint("bar", ConstraintType("==", "baz"))),
+                            ]
+                        ),
+                        Constraint("foo", ConstraintType("<", 2)),
+                    ]
+                )
+            ],
+            data_model_foobar,
+        )
         try:
             pickle.dumps(query)
         except Exception:
@@ -184,8 +225,12 @@ class TestCheckValidity:
         """Test the not().check function."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
-        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
+        description_foobar = Description(
+            {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
+        )
         no_constraint = Not(Constraint("foo", ConstraintType("==", 5)))
         assert no_constraint.check(description_foobar)
 
@@ -193,38 +238,62 @@ class TestCheckValidity:
         """Test the or().check function."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
-        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
-        constraint = Or([(Constraint("foo", ConstraintType("==", 1))),
-                         (Constraint("bar", ConstraintType("==", "baz")))
-                         ])
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
+        description_foobar = Description(
+            {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
+        )
+        constraint = Or(
+            [
+                (Constraint("foo", ConstraintType("==", 1))),
+                (Constraint("bar", ConstraintType("==", "baz"))),
+            ]
+        )
         assert constraint.check(description_foobar)
 
     def test_and_check(self):
         """Test the and().check function."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
-        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
-        constraint = And([(Constraint("foo", ConstraintType("==", 1))),
-                          (Constraint("bar", ConstraintType("==", "baz")))
-                          ])
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
+        description_foobar = Description(
+            {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
+        )
+        constraint = And(
+            [
+                (Constraint("foo", ConstraintType("==", 1))),
+                (Constraint("bar", ConstraintType("==", "baz"))),
+            ]
+        )
         assert constraint.check(description_foobar)
 
     def test_query_check(self):
         """Test that the query.check() method works."""
         attribute_foo = Attribute("foo", int, True, "a foo attribute.")
         attribute_bar = Attribute("bar", str, True, "a bar attribute.")
-        data_model_foobar = DataModel("foobar", [attribute_foo, attribute_bar], "A foobar data model.")
-        description_foobar = Description({"foo": 1, "bar": "baz"}, data_model=data_model_foobar)
-        query = Query([
-            And([
-                Or([
-                    Not(Constraint("foo", ConstraintType("==", 1))),
-                    Not(Constraint("bar", ConstraintType("==", "baz")))
-                ]),
-                Constraint("foo", ConstraintType("<", 2)),
-            ])
-        ],
-            data_model_foobar)
+        data_model_foobar = DataModel(
+            "foobar", [attribute_foo, attribute_bar], "A foobar data model."
+        )
+        description_foobar = Description(
+            {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
+        )
+        query = Query(
+            [
+                And(
+                    [
+                        Or(
+                            [
+                                Not(Constraint("foo", ConstraintType("==", 1))),
+                                Not(Constraint("bar", ConstraintType("==", "baz"))),
+                            ]
+                        ),
+                        Constraint("foo", ConstraintType("<", 2)),
+                    ]
+                )
+            ],
+            data_model_foobar,
+        )
         assert not query.check(description=description_foobar)

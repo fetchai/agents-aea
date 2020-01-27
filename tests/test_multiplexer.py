@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the Multiplexer."""
+
 import asyncio
 import shutil
 import tempfile
@@ -30,18 +31,28 @@ from unittest import mock
 import pytest
 
 import aea
+from aea.configurations.base import PublicId
 from aea.connections.stub.connection import StubConnection
-from aea.mail.base import Multiplexer, AEAConnectionError, Envelope, EnvelopeContext
+from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext, Multiplexer
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
+
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-from .conftest import DummyConnection
+
+from .conftest import (
+    DUMMY_CONNECTION_PUBLIC_ID,
+    DummyConnection,
+    UNKNOWN_CONNECTION_PUBLIC_ID,
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
+)
 
 
 @pytest.mark.asyncio
 async def test_receiving_loop_terminated():
     """Test that connecting twice the multiplexer behaves correctly."""
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+    )
     multiplexer.connect()
 
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
@@ -54,7 +65,9 @@ async def test_receiving_loop_terminated():
 
 def test_connect_twice():
     """Test that connecting twice the multiplexer behaves correctly."""
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+    )
 
     assert not multiplexer.connection_status.is_connected
     multiplexer.connect()
@@ -71,7 +84,9 @@ def test_connect_twice_with_loop():
     thread_loop = Thread(target=running_loop.run_forever)
     thread_loop.start()
 
-    multiplexer = Multiplexer([DummyConnection()], loop=running_loop)
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)], loop=running_loop,
+    )
 
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
         assert not multiplexer.connection_status.is_connected
@@ -89,22 +104,29 @@ def test_connect_twice_with_loop():
 @pytest.mark.asyncio
 async def test_connect_twice_a_single_connection():
     """Test that connecting twice a single connection behaves correctly."""
-    multiplexer = Multiplexer([DummyConnection()])
+    dummy_connection_id = PublicId("dummy_author", "dummy", "0.1.0")
+    multiplexer = Multiplexer([DummyConnection(connection_id=dummy_connection_id)])
 
     assert not multiplexer.connection_status.is_connected
-    await multiplexer._connect_one("dummy")
+    await multiplexer._connect_one(dummy_connection_id)
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        await multiplexer._connect_one("dummy")
-        mock_logger_debug.assert_called_with("Connection dummy already established.")
-        await multiplexer._disconnect_one("dummy")
+        await multiplexer._connect_one(dummy_connection_id)
+        mock_logger_debug.assert_called_with(
+            "Connection dummy_author/dummy:0.1.0 already established."
+        )
+        await multiplexer._disconnect_one(dummy_connection_id)
 
 
 def test_multiplexer_connect_all_raises_error():
     """Test the case when the multiplexer raises an exception while connecting."""
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+    )
 
     with unittest.mock.patch.object(multiplexer, "_connect_all", side_effect=Exception):
-        with pytest.raises(AEAConnectionError, match="Failed to connect the multiplexer."):
+        with pytest.raises(
+            AEAConnectionError, match="Failed to connect the multiplexer."
+        ):
             multiplexer.connect()
 
 
@@ -117,9 +139,15 @@ def test_multiplexer_connect_one_raises_error_many_connections():
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
 
-    connection_1 = OEFLocalConnection("my_addr", node)
-    connection_2 = StubConnection(input_file_path, output_file_path)
-    connection_3 = DummyConnection()
+    connection_1 = OEFLocalConnection(
+        "my_addr", node, connection_id=PublicId("fetchai", "local", "0.1.0")
+    )
+    connection_2 = StubConnection(
+        input_file_path,
+        output_file_path,
+        connection_id=PublicId("fetchai", "stub", "0.1.0"),
+    )
+    connection_3 = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
     multiplexer = Multiplexer([connection_1, connection_2, connection_3])
 
     assert not connection_1.connection_status.is_connected
@@ -127,7 +155,9 @@ def test_multiplexer_connect_one_raises_error_many_connections():
     assert not connection_3.connection_status.is_connected
 
     with unittest.mock.patch.object(connection_3, "connect", side_effect=Exception):
-        with pytest.raises(AEAConnectionError, match="Failed to connect the multiplexer."):
+        with pytest.raises(
+            AEAConnectionError, match="Failed to connect the multiplexer."
+        ):
             multiplexer.connect()
 
     assert not connection_1.connection_status.is_connected
@@ -140,26 +170,34 @@ def test_multiplexer_connect_one_raises_error_many_connections():
 @pytest.mark.asyncio
 async def test_disconnect_twice_a_single_connection():
     """Test that connecting twice a single connection behaves correctly."""
-    multiplexer = Multiplexer([DummyConnection()])
+    dummy_connection_id = PublicId("dummy_author", "dummy", "0.1.0")
+    multiplexer = Multiplexer([DummyConnection(connection_id=dummy_connection_id)])
 
     assert not multiplexer.connection_status.is_connected
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
-        await multiplexer._disconnect_one("dummy")
-        mock_logger_debug.assert_called_with("Connection dummy already disconnected.")
+        await multiplexer._disconnect_one(dummy_connection_id)
+        mock_logger_debug.assert_called_with(
+            "Connection dummy_author/dummy:0.1.0 already disconnected."
+        )
 
 
 def test_multiplexer_disconnect_all_raises_error():
     """Test the case when the multiplexer raises an exception while disconnecting."""
-    multiplexer = Multiplexer([DummyConnection()])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+    )
     multiplexer.connect()
 
     assert multiplexer.connection_status.is_connected
 
-    with unittest.mock.patch.object(multiplexer, "_disconnect_all", side_effect=Exception):
-        with pytest.raises(AEAConnectionError, match="Failed to disconnect the multiplexer."):
+    with unittest.mock.patch.object(
+        multiplexer, "_disconnect_all", side_effect=Exception
+    ):
+        with pytest.raises(
+            AEAConnectionError, match="Failed to disconnect the multiplexer."
+        ):
             multiplexer.disconnect()
 
-    # TODO is this what we want?
     assert multiplexer.connection_status.is_connected
 
 
@@ -172,9 +210,15 @@ def test_multiplexer_disconnect_one_raises_error_many_connections():
         input_file_path = d / "input_file.csv"
         output_file_path = d / "input_file.csv"
 
-        connection_1 = OEFLocalConnection("my_addr", node)
-        connection_2 = StubConnection(input_file_path, output_file_path)
-        connection_3 = DummyConnection()
+        connection_1 = OEFLocalConnection(
+            "my_addr", node, connection_id=PublicId("fetchai", "local", "0.1.0")
+        )
+        connection_2 = StubConnection(
+            input_file_path,
+            output_file_path,
+            connection_id=PublicId("fetchai", "stub", "0.1.0"),
+        )
+        connection_3 = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
         multiplexer = Multiplexer([connection_1, connection_2, connection_3])
 
         assert not connection_1.connection_status.is_connected
@@ -187,11 +231,12 @@ def test_multiplexer_disconnect_one_raises_error_many_connections():
         assert connection_2.connection_status.is_connected
         assert connection_3.connection_status.is_connected
 
-        with unittest.mock.patch.object(connection_3, "disconnect", side_effect=Exception):
+        with unittest.mock.patch.object(
+            connection_3, "disconnect", side_effect=Exception
+        ):
             # with pytest.raises(AEAConnectionError, match="Failed to disconnect the multiplexer."):
             multiplexer.disconnect()
 
-        # TODO is this what we want?
         assert not connection_1.connection_status.is_connected
         assert not connection_2.connection_status.is_connected
         assert connection_3.connection_status.is_connected
@@ -202,17 +247,23 @@ def test_multiplexer_disconnect_one_raises_error_many_connections():
 @pytest.mark.asyncio
 async def test_sending_loop_does_not_start_if_multiplexer_not_connected():
     """Test that the sending loop is stopped does not start if the multiplexer is not connected."""
-    multiplexer = Multiplexer([DummyConnection(connection_id="dummy")])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+    )
 
     with unittest.mock.patch.object(aea.mail.base.logger, "debug") as mock_logger_debug:
         await multiplexer._send_loop()
-        mock_logger_debug.assert_called_with("Sending loop not started. The multiplexer is not connected.")
+        mock_logger_debug.assert_called_with(
+            "Sending loop not started. The multiplexer is not connected."
+        )
 
 
 @pytest.mark.asyncio
 async def test_sending_loop_cancelled():
     """Test the case when the sending loop is cancelled."""
-    multiplexer = Multiplexer([DummyConnection(connection_id="dummy")])
+    multiplexer = Multiplexer(
+        [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+    )
 
     multiplexer.connect()
 
@@ -227,14 +278,18 @@ async def test_sending_loop_cancelled():
 @pytest.mark.asyncio
 async def test_receiving_loop_raises_exception():
     """Test the case when an error occurs when a receive is started."""
-    connection = DummyConnection(connection_id="dummy")
+    connection = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
     multiplexer = Multiplexer([connection])
 
     with unittest.mock.patch("asyncio.wait", side_effect=Exception("a weird error.")):
-        with unittest.mock.patch.object(aea.mail.base.logger, "error") as mock_logger_error:
+        with unittest.mock.patch.object(
+            aea.mail.base.logger, "error"
+        ) as mock_logger_error:
             multiplexer.connect()
             time.sleep(0.1)
-            mock_logger_error.assert_called_with("Error in the receiving loop: a weird error.")
+            mock_logger_error.assert_called_with(
+                "Error in the receiving loop: a weird error."
+            )
 
     multiplexer.disconnect()
 
@@ -242,12 +297,17 @@ async def test_receiving_loop_raises_exception():
 @pytest.mark.asyncio
 async def test_send_envelope_with_non_registered_connection():
     """Test that sending an envelope with an unregistered connection raises an exception."""
-    connection = DummyConnection(connection_id="dummy")
+    connection = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
     multiplexer = Multiplexer([connection])
     multiplexer.connect()
 
-    envelope = Envelope(to="", sender="", protocol_id="default", message=b"",
-                        context=EnvelopeContext(connection_id="this_is_an_unexisting_connection_id"))
+    envelope = Envelope(
+        to="",
+        sender="",
+        protocol_id=DefaultMessage.protocol_id,
+        message=b"",
+        context=EnvelopeContext(connection_id=UNKNOWN_CONNECTION_PUBLIC_ID),
+    )
 
     with pytest.raises(AEAConnectionError, match="No connection registered with id:.*"):
         await multiplexer._send(envelope)
@@ -257,24 +317,32 @@ async def test_send_envelope_with_non_registered_connection():
 
 def test_send_envelope_error_is_logged_by_send_loop():
     """Test that the AEAConnectionError in the '_send' method is logged by the '_send_loop'."""
-    connection = DummyConnection(connection_id="dummy")
+    connection = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
     multiplexer = Multiplexer([connection])
     multiplexer.connect()
+    fake_connection_id = UNKNOWN_CONNECTION_PUBLIC_ID
 
-    envelope = Envelope(to="", sender="", protocol_id="default", message=b"",
-                        context=EnvelopeContext(connection_id="this_is_an_unexisting_connection_id"))
+    envelope = Envelope(
+        to="",
+        sender="",
+        protocol_id=DefaultMessage.protocol_id,
+        message=b"",
+        context=EnvelopeContext(connection_id=fake_connection_id),
+    )
 
     with unittest.mock.patch.object(aea.mail.base.logger, "error") as mock_logger_error:
         multiplexer.put(envelope)
         time.sleep(0.1)
-        mock_logger_error.assert_called_with("No connection registered with id: this_is_an_unexisting_connection_id.")
+        mock_logger_error.assert_called_with(
+            "No connection registered with id: {}.".format(fake_connection_id)
+        )
 
     multiplexer.disconnect()
 
 
 def test_get_from_multiplexer_when_empty():
     """Test that getting an envelope from the multiplexer when the input queue is empty raises an exception."""
-    connection = DummyConnection(connection_id="dummy")
+    connection = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
     multiplexer = Multiplexer([connection])
 
     with pytest.raises(aea.mail.base.Empty):
@@ -286,11 +354,15 @@ def test_multiple_connection():
     with LocalNode() as node:
         address_1 = "address_1"
         address_2 = "address_2"
-        connection_1_id = "local_1"
-        connection_2_id = "local_2"
+        connection_1_id = PublicId.from_str("author/local_1:0.1.0")
+        connection_2_id = PublicId.from_str("author/local_2:0.1.0")
 
-        connection_1 = OEFLocalConnection(address_1, node, connection_id=connection_1_id)
-        connection_2 = OEFLocalConnection(address_2, node, connection_id=connection_2_id)
+        connection_1 = OEFLocalConnection(
+            address_1, node, connection_id=connection_1_id
+        )
+        connection_2 = OEFLocalConnection(
+            address_2, node, connection_id=connection_2_id
+        )
         multiplexer = Multiplexer([connection_1, connection_2])
 
         assert not connection_1.connection_status.is_connected
@@ -302,17 +374,25 @@ def test_multiple_connection():
         assert connection_2.connection_status.is_connected
 
         message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        envelope_from_1_to_2 = Envelope(to=address_2, sender=address_1, protocol_id=DefaultMessage.protocol_id,
-                                        message=DefaultSerializer().encode(message),
-                                        context=EnvelopeContext(connection_id=connection_1_id))
+        envelope_from_1_to_2 = Envelope(
+            to=address_2,
+            sender=address_1,
+            protocol_id=DefaultMessage.protocol_id,
+            message=DefaultSerializer().encode(message),
+            context=EnvelopeContext(connection_id=connection_1_id),
+        )
         multiplexer.put(envelope_from_1_to_2)
 
         actual_envelope = multiplexer.get(block=True, timeout=2.0)
         assert envelope_from_1_to_2 == actual_envelope
 
-        envelope_from_2_to_1 = Envelope(to=address_1, sender=address_2, protocol_id=DefaultMessage.protocol_id,
-                                        message=DefaultSerializer().encode(message),
-                                        context=EnvelopeContext(connection_id=connection_2_id))
+        envelope_from_2_to_1 = Envelope(
+            to=address_1,
+            sender=address_2,
+            protocol_id=DefaultMessage.protocol_id,
+            message=DefaultSerializer().encode(message),
+            context=EnvelopeContext(connection_id=connection_2_id),
+        )
         multiplexer.put(envelope_from_2_to_1)
 
         actual_envelope = multiplexer.get(block=True, timeout=2.0)
@@ -325,22 +405,32 @@ def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
         address_1 = "address_1"
-        connection_1_id = "local_1"
-        connection_1 = OEFLocalConnection(address_1, node, connection_id=connection_1_id,
-                                          restricted_to_protocols={"my_private_protocol"},
-                                          excluded_protocols={"my_other_protocol"})
+        connection_1_id = PublicId.from_str("author/local_1:0.1.0")
+        connection_1 = OEFLocalConnection(
+            address_1,
+            node,
+            connection_id=connection_1_id,
+            restricted_to_protocols={"my_private_protocol"},
+            excluded_protocols={"my_other_protocol"},
+        )
         multiplexer = Multiplexer([connection_1])
 
         multiplexer.connect()
 
         with mock.patch.object(aea.mail.base.logger, "warning") as mock_logger_warning:
-            protocol_id = "this_is_a_non_existing_protocol_id"
-            envelope = Envelope(to=address_1, sender=address_1,
-                                protocol_id=protocol_id,
-                                message=b"some bytes")
+            protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
+            envelope = Envelope(
+                to=address_1,
+                sender=address_1,
+                protocol_id=protocol_id,
+                message=b"some bytes",
+            )
             multiplexer.put(envelope)
             time.sleep(0.5)
-            mock_logger_warning.assert_called_with("Connection {} cannot handle protocol {}. Cannot send the message."
-                                                   .format(connection_1_id, protocol_id))
+            mock_logger_warning.assert_called_with(
+                "Connection {} cannot handle protocol {}. Cannot send the message.".format(
+                    connection_1_id, protocol_id
+                )
+            )
 
         multiplexer.disconnect()

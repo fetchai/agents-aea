@@ -19,22 +19,21 @@
 
 """This test module contains the integration test for the weather skills."""
 
+import io
 import os
-import pytest
 import shutil
 import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
-import io
-import threading
-
-from ...common.click_testing import CliRunner
+import pytest
 
 from aea.cli import cli
 
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION
 
 
@@ -65,51 +64,70 @@ class TestMLSkills:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    @pytest.mark.skipif(sys.version_info == (3, 8), reason="cannot run on 3.8 as tensorflow not installable")
+    @pytest.mark.skipif(
+        sys.version_info == (3, 8),
+        reason="cannot run on 3.8 as tensorflow not installable",
+    )
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
-        packages_src = os.path.join(self.cwd, 'packages')
-        packages_dst = os.path.join(os.getcwd(), 'packages')
+        packages_src = os.path.join(self.cwd, "packages")
+        packages_dst = os.path.join(os.getcwd(), "packages")
         shutil.copytree(packages_src, packages_dst)
 
         # Add scripts folder
-        scripts_src = os.path.join(self.cwd, 'scripts')
-        scripts_dst = os.path.join(os.getcwd(), 'scripts')
+        scripts_src = os.path.join(self.cwd, "scripts")
+        scripts_dst = os.path.join(os.getcwd(), "scripts")
         shutil.copytree(scripts_src, scripts_dst)
 
         # create agent one and agent two
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False
+        )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # add packages for agent one and run it
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/ml_data_provider:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "skill", "fetchai/ml_data_provider:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
         assert result.exit_code == 0
 
-        process_one = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            '--connections',
-            'oef'
-        ],
+        process_one = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            env=os.environ.copy())
+            env=os.environ.copy(),
+        )
 
         os.chdir(self.t)
 
@@ -117,13 +135,23 @@ class TestMLSkills:
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
         os.chdir(agent_two_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/ml_train:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "skill", "fetchai/ml_train:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # # Load the agent yaml file and manually insert the things we need
@@ -158,28 +186,30 @@ class TestMLSkills:
         # assert result == 0
 
         os.chdir(agent_two_dir_path)
-        process_two = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            '--connections',
-            'oef'
-        ],
+        process_two = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            env=os.environ.copy())
+            env=os.environ.copy(),
+        )
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(process_one, ))
+        tty_read_thread = threading.Thread(target=_read_tty, args=(process_one,))
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=_read_error, args=(process_one, ))
+        error_read_thread = threading.Thread(target=_read_error, args=(process_one,))
         error_read_thread.start()
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(process_two, ))
+        tty_read_thread = threading.Thread(target=_read_tty, args=(process_two,))
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=_read_error, args=(process_two, ))
+        error_read_thread = threading.Thread(target=_read_error, args=(process_two,))
         error_read_thread.start()
 
         time.sleep(60)
@@ -203,9 +233,13 @@ class TestMLSkills:
             process_two.wait(2)
 
         os.chdir(self.t)
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False
+        )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False
+        )
         assert result.exit_code == 0
 
     @classmethod

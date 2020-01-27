@@ -40,7 +40,7 @@ aea install
 
 ### Run the weather station AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 
@@ -62,7 +62,7 @@ aea install
 
 ### Run the weather client AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 
@@ -72,7 +72,7 @@ aea run --connections oef
 
 <center>![Weather client logs](assets/weather-client-logs.png)</center>
 
-To stop an agent use `CTRL + C`.
+To stop an AEA use `CTRL + C`.
 
 ### Delete the AEAs
 
@@ -85,7 +85,7 @@ aea delete my_weather_client
 ```
 
 ## Communication
-This diagram shows the communication between the various entities as data is successfully sold by the car park agent to the client. 
+This diagram shows the communication between the various entities as data is successfully sold by the car park AEA to the client. 
 
 <div class="mermaid">
     sequenceDiagram
@@ -156,36 +156,33 @@ Both in `my_weather_station/aea-config.yaml` and
 ``` yaml
 ledger_apis:
   fetchai:
-    address: alpha.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 ### Fund the weather client AEA
 
 Create some wealth for your weather client on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
-cd ..
-python scripts/fetchai_wealth_generation.py --private-key my_weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
-cd my_weather_client
+aea generate-wealth fetchai
 ```
 
 ### Update the skill configs
 
 Tell the weather client skill of the weather client that we want to settle the transaction on the ledger:
 ``` bash
-aea config set skills.weather_client.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 Similarly, for the weather station skill of the weather station:
 ``` bash
-aea config set skills.weather_station.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.weather_station.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 ### Run the AEAs
 
 Run both AEAs from their respective terminals.
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Fetch.ai `testnet`.
@@ -256,9 +253,9 @@ is_ledger_tx: True
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set skills.weather_station.shared_classes.strategy.args.currency_id ETH
-aea config set skills.weather_station.shared_classes.strategy.args.ledger_id ethereum
-aea config set skills.weather_station.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.weather_station.shared_classes.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.weather_station.shared_classes.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.weather_station.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 
@@ -271,10 +268,10 @@ is_ledger_tx: True
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set skills.weather_client.shared_classes.strategy.args.max_buyer_tx_fee 10000
-aea config set skills.weather_client.shared_classes.strategy.args.currency_id ETH
-aea config set skills.weather_client.shared_classes.strategy.args.ledger_id ethereum
-aea config set skills.weather_client.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.max_buyer_tx_fee 10000 --type int
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 ### Fund the weather client AEA
@@ -284,10 +281,19 @@ Create some wealth for your weather client on the Ethereum Ropsten test net.
 Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_weather_client/eth_private_key.txt`.
 
 ### Run the AEAs
+You can change the end point's address and port by modifying the connection's yaml file (my_weather_station/connection/oef/connection.yaml)
+
+Under config locate :
+
+```bash
+addr: ${OEF_ADDR: 127.0.0.1}
+```
+ and replace it with your ip (The ip of the machine that runs the oef image.)
+
 
 Run both AEAs, from their respective terminals.
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 You will see that the AEAs negotiate and then transact using the Ethereum `testnet`.
 
@@ -302,7 +308,7 @@ aea delete my_weather_client
 ```
 
 ## Communication
-This diagram shows the communication between the various entities as data is successfully sold by the weather station agent to the client. 
+This diagram shows the communication between the various entities as data is successfully sold by the weather station AEA to the client. 
 
 <div class="mermaid">
     sequenceDiagram
@@ -325,6 +331,7 @@ This diagram shows the communication between the various entities as data is suc
         Weather_AEA->>Client_AEA: match_accept
         Client_AEA->>Blockchain: transfer_funds
         Client_AEA->>Weather_AEA: send_transaction_hash
+        Weather_AEA->>Blockchain: check_transaction_status
         Weather_AEA->>Client_AEA: send_data
         
         deactivate Client_AEA

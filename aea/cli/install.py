@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea install' subcommand."""
+
 import pprint
 import subprocess
 import sys
@@ -25,7 +26,7 @@ from typing import Optional
 
 import click
 
-from aea.cli.common import Context, pass_ctx, logger, try_to_load_agent_config
+from aea.cli.common import Context, logger, pass_ctx, try_to_load_agent_config
 from aea.configurations.base import Dependency
 
 
@@ -48,7 +49,9 @@ def _install_dependency(dependency_name: str, dependency: Dependency):
         subp.wait(30.0)
         assert subp.returncode == 0
     except Exception as e:
-        logger.error("An error occurred while installing {}: {}".format(dependency, str(e)))
+        logger.error(
+            "An error occurred while installing {}: {}".format(dependency, str(e))
+        )
         sys.exit(1)
 
 
@@ -58,13 +61,23 @@ def _install_from_requirement(file: str):
         subp.wait(30.0)
         assert subp.returncode == 0
     except Exception:
-        logger.error("An error occurred while installing requirement file {}. Stopping...".format(file))
+        logger.error(
+            "An error occurred while installing requirement file {}. Stopping...".format(
+                file
+            )
+        )
         sys.exit(1)
 
 
 @click.command()
-@click.option('-r', '--requirement', type=str, required=False, default=None,
-              help="Install from the given requirements file.")
+@click.option(
+    "-r",
+    "--requirement",
+    type=str,
+    required=False,
+    default=None,
+    help="Install from the given requirements file.",
+)
 @pass_ctx
 def install(ctx: Context, requirement: Optional[str]):
     """Install the dependencies."""

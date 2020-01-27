@@ -3,8 +3,8 @@
 Create and enter into a new working directory.
 
 ``` bash
-mkdir my_aea/
-cd my_aea/
+mkdir my_aea_projects/
+cd my_aea_projects/
 ```
 
 We highly recommend using a virtual environment to ensure consistency across dependencies.
@@ -51,12 +51,6 @@ The following installs the entire AEA package which also includes a command-line
 pip install aea[all]
 ```
 
-However, you can run this demo by installing the base AEA, including the CLI extension, alone.
-
-``` bash
-pip install aea[cli]
-```
-
 
 ### Known issues
 
@@ -78,33 +72,32 @@ The echo skill is a simple demo that introduces you to the main business logic c
 
 ## Option 1 - Step-by-step
 
-### Create a new agent
+### Create a new AEA
 
-First create a new agent project and enter it.
+First, create a new AEA project and enter it.
 ``` bash
-aea create my_first_agent
-cd my_first_agent
+aea create my_first_aea
+cd my_first_aea
 ```
 
 ### Add the echo skill 
 
+Second, add the echo skill to the project.
 ``` bash
 aea add skill fetchai/echo:0.1.0
 ```
 
-This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The full identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.
 
 ### Add a stub connection
 
 AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.
 
-The stub conection is already added to the agent by default.
+The stub connection is already added to the AEA by default.
 
-A stub connection provides an I/O reader and writer. 
+A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.
 
-It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.
-
-The AEA waits for new messages posted to the file `my_first_agent/input_file`, and adds a response to the file `my_first_agent/output_file`.
+The AEA waits for new messages posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.
 
 The format of each line is the following:
 
@@ -115,20 +108,20 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
 For example:
 
 ``` bash
-recipient_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}
+recipient_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
 ```
 
-## Option 2 - Fetch the entire agent
+## Option 2 - Fetch the entire AEA
 
 The preceding three steps can be executed at once with the command
 ``` bash
-aea fetch fetchai/my_first_agent:0.1.0
-cd my_first_agent
+aea fetch fetchai/my_first_aea:0.1.0
+cd my_first_aea
 ```
 
-## Run the agent
+## Run the AEA
 
-Run the agent with the default `stub` connection.
+Run the AEA with the default `stub` connection.
 
 ``` bash
 aea run
@@ -137,12 +130,19 @@ aea run
 or 
 
 ``` bash
-aea run --connections stub
+aea run --connections fetchai/stub:0.1.0
 ```
 
 You will see the echo task running in the terminal window.
 
-<center>![The echo call and response log](assets/echo.png)</center>
+``` bash
+info: Echo Behaviour: act method called.
+info: Echo Task: execute method called.
+info: Echo Behaviour: act method called.
+info: Echo Task: execute method called.
+info: Echo Behaviour: act method called.
+info: Echo Task: execute method called.
+```
 
 The framework first calls the `setup` method on the `Handler`, `Behaviour`, and `Task` code in that order; after which it repeatedly calls the `Behaviour` and `Task` methods, `act` and `execute`. This is the main agent loop in action.
 
@@ -153,7 +153,7 @@ Let's look at the `Handler` in more depth.
 From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_agent,sender_agent,default,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
@@ -161,7 +161,7 @@ You will see the `Echo Handler` dealing with the envelope and responding with th
 ``` bash
 info: Echo Task: execute method called.
 info: Echo Behaviour: act method called.
-info: Echo Handler: message=Message(type=bytes content=b'hello'), sender=sender_agent
+info: Echo Handler: message=Message(type=bytes content=b'hello'), sender=sender_aea
 info: Echo Task: execute method called.
 info: Echo Behaviour: act method called.
 info: Echo Task: execute method called.
@@ -169,18 +169,16 @@ info: Echo Behaviour: act method called.
 info: Echo Task: execute method called.
 ```
 
-<center>![Stub connection input and output](assets/input-output.png)</center>
+## Stop the AEA
 
-## Stop the agent
+Stop the AEA by pressing `CTRL C`
 
-Stop the agent by pressing `CTRL C`
+## Delete the AEA
 
-## Delete the agent
-
-Delete the agent from the parent directory (`cd ..` to go to the parent directory).
+Delete the AEA from the parent directory (`cd ..` to go to the parent directory).
 
 ``` bash
-aea delete my_first_agent
+aea delete my_first_aea
 ```
 
 

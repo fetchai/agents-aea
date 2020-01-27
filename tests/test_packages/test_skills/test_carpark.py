@@ -19,22 +19,21 @@
 
 """This test module contains the integration test for the weather skills."""
 
+import io
 import os
-import pytest
 import shutil
 import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
-import io
-import threading
-
-from ...common.click_testing import CliRunner
+import pytest
 
 from aea.cli import cli
 
+from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION
 
 
@@ -70,61 +69,83 @@ class TestCarPark:
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
-        packages_src = os.path.join(self.cwd, 'packages')
-        packages_dst = os.path.join(os.getcwd(), 'packages')
+        packages_src = os.path.join(self.cwd, "packages")
+        packages_dst = os.path.join(os.getcwd(), "packages")
         shutil.copytree(packages_src, packages_dst)
 
         # Add scripts folder
-        scripts_src = os.path.join(self.cwd, 'scripts')
-        scripts_dst = os.path.join(os.getcwd(), 'scripts')
+        scripts_src = os.path.join(self.cwd, "scripts")
+        scripts_dst = os.path.join(os.getcwd(), "scripts")
         shutil.copytree(scripts_src, scripts_dst)
 
         # create agent one and agent two
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", self.agent_name_one], standalone_mode=False
+        )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", self.agent_name_two], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # add packages for agent one and run it
         agent_one_dir_path = os.path.join(self.t, self.agent_name_one)
         os.chdir(agent_one_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/carpark_detection:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "skill", "fetchai/carpark_detection:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # Load the agent yaml file and manually insert the things we need
-        yaml_path = os.path.join("skills", "carpark_detection", "skill.yaml")
-        file = open(yaml_path, mode='r')
+        yaml_path = os.path.join(
+            "vendor", "fetchai", "skills", "carpark_detection", "skill.yaml"
+        )
+        file = open(yaml_path, mode="r")
 
         # read all lines at once
         whole_file = file.read()
 
-        whole_file = whole_file.replace("db_is_rel_to_cwd: true", "# db_is_rel_to_cwd: true")
-        whole_file = whole_file.replace("db_rel_dir: ../temp_files", "# db_rel_dir: ../temp_files")
+        whole_file = whole_file.replace(
+            "db_is_rel_to_cwd: true", "# db_is_rel_to_cwd: true"
+        )
+        whole_file = whole_file.replace(
+            "db_rel_dir: ../temp_files", "# db_rel_dir: ../temp_files"
+        )
 
         # close the file
         file.close()
 
-        with open(yaml_path, 'w') as f:
+        with open(yaml_path, "w") as f:
             f.write(whole_file)
 
-        process_one = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            '--connections',
-            'oef'
-        ],
+        process_one = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            env=os.environ.copy())
+            env=os.environ.copy(),
+        )
 
         os.chdir(self.t)
 
@@ -132,17 +153,27 @@ class TestCarPark:
         agent_two_dir_path = os.path.join(self.t, self.agent_name_two)
         os.chdir(agent_two_dir_path)
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", "fetchai/oef:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add", "skill", "fetchai/carpark_client:0.1.0"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "skill", "fetchai/carpark_client:0.1.0"],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # Load the agent yaml file and manually insert the things we need
-        file = open("aea-config.yaml", mode='r')
+        file = open("aea-config.yaml", mode="r")
 
         # read all lines at once
         whole_file = file.read()
@@ -151,49 +182,61 @@ class TestCarPark:
         find_text = "ledger_apis: {}"
         replace_text = """ledger_apis:
         fetchai:
-            address: alpha.fetch-ai.com
-            port: 80"""
+            network: testnet"""
 
         whole_file = whole_file.replace(find_text, replace_text)
 
         # close the file
         file.close()
 
-        with open("aea-config.yaml", 'w') as f:
+        with open("aea-config.yaml", "w") as f:
             f.write(whole_file)
 
         # Generate the private keys
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"], standalone_mode=False
+        )
         assert result.exit_code == 0
 
-        # Add some funds to the weather station
-        os.chdir(os.path.join(scripts_dst, "../"))
-        result = subprocess.call(["python", "./scripts/fetchai_wealth_generation.py", "--private-key", os.path.join("./", self.agent_name_two, "fet_private_key.txt"), "--amount", "1000000000", "--addr", "alpha.fetch-ai.com", "--port", "80"])
-        assert result == 0
+        # Add the private key
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add-key", "fetchai", "fet_private_key.txt"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        # Add some funds to the car park client
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-wealth", "fetchai"], standalone_mode=False
+        )
+        assert result.exit_code == 0
 
         os.chdir(agent_two_dir_path)
-        process_two = subprocess.Popen([
-            sys.executable,
-            '-m',
-            'aea.cli',
-            "run",
-            '--connections',
-            'oef'
-        ],
+        process_two = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            env=os.environ.copy())
+            env=os.environ.copy(),
+        )
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(process_one, ))
+        tty_read_thread = threading.Thread(target=_read_tty, args=(process_one,))
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=_read_error, args=(process_one, ))
+        error_read_thread = threading.Thread(target=_read_error, args=(process_one,))
         error_read_thread.start()
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(process_two, ))
+        tty_read_thread = threading.Thread(target=_read_tty, args=(process_two,))
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=_read_error, args=(process_two, ))
+        error_read_thread = threading.Thread(target=_read_error, args=(process_two,))
         error_read_thread.start()
 
         time.sleep(60)
@@ -220,9 +263,13 @@ class TestCarPark:
             process_two.wait(2)
 
         os.chdir(self.t)
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_one], standalone_mode=False
+        )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "delete", self.agent_name_two], standalone_mode=False
+        )
         assert result.exit_code == 0
 
     @classmethod

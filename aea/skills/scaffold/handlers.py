@@ -29,7 +29,7 @@ from aea.skills.base import Handler
 class MyScaffoldHandler(Handler):
     """This class scaffolds a handler."""
 
-    SUPPORTED_PROTOCOL = ''  # type: Optional[ProtocolId]
+    SUPPORTED_PROTOCOL = None  # type: Optional[ProtocolId]
 
     def setup(self) -> None:
         """

@@ -18,13 +18,25 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the aea.configurations.base module."""
-import os
 
 import pytest
+
 import yaml
 
-from aea.configurations.base import CRUDCollection, ConnectionConfig, ProtocolConfig, SkillConfig, AgentConfig
-from ..conftest import CUR_PATH
+from aea.configurations.base import (
+    AgentConfig,
+    CRUDCollection,
+    ConnectionConfig,
+    ProtocolConfig,
+    SkillConfig,
+)
+
+from ..conftest import (
+    agent_config_files,
+    connection_config_files,
+    protocol_config_files,
+    skill_config_files,
+)
 
 
 class TestCRUDCollection:
@@ -82,28 +94,34 @@ class TestCRUDCollection:
 class TestConnectionConfig:
     """Test the connection configuration class."""
 
-    def test_from_json_and_to_json(self):
+    @pytest.mark.parametrize("connection_path", connection_config_files)
+    def test_from_json_and_to_json(self, connection_path):
         """Test the 'from_json' method and 'to_json' work correctly."""
-        f = open(os.path.join(CUR_PATH, "data", "dummy_connection", "connection.yaml"))
-        expected_json = yaml.safe_load(f)
-        config = ConnectionConfig.from_json(expected_json)
+        f = open(connection_path)
+        original_json = yaml.safe_load(f)
 
-        assert isinstance(config, ConnectionConfig)
-        actual_json = config.json
+        expected_config = ConnectionConfig.from_json(original_json)
+        assert isinstance(expected_config, ConnectionConfig)
+        expected_json = expected_config.json
+        actual_config = ConnectionConfig.from_json(expected_json)
+        actual_json = actual_config.json
         assert expected_json == actual_json
 
 
 class TestProtocolConfig:
     """Test the protocol configuration class."""
 
-    def test_from_json_and_to_json(self):
+    @pytest.mark.parametrize("protocol_path", protocol_config_files)
+    def test_from_json_and_to_json(self, protocol_path):
         """Test the 'from_json' method and 'to_json' work correctly."""
-        f = open(os.path.join(CUR_PATH, "data", "dummy_aea", "protocols", "default", "protocol.yaml"))
-        expected_json = yaml.safe_load(f)
-        config = ProtocolConfig.from_json(expected_json)
+        f = open(protocol_path)
+        original_json = yaml.safe_load(f)
 
-        assert isinstance(config, ProtocolConfig)
-        actual_json = config.json
+        expected_config = ProtocolConfig.from_json(original_json)
+        assert isinstance(expected_config, ProtocolConfig)
+        expected_json = expected_config.json
+        actual_config = ProtocolConfig.from_json(expected_json)
+        actual_json = actual_config.json
         assert expected_json == actual_json
 
 
@@ -114,30 +132,32 @@ class TestSkillConfig:
     This suite tests also the handlers/tasks/behaviours/shared classes configuration classes.
     """
 
-    def test_from_json_and_to_json(self):
+    @pytest.mark.parametrize("skill_path", skill_config_files)
+    def test_from_json_and_to_json(self, skill_path):
         """Test the 'from_json' method and 'to_json' work correctly."""
-        f = open(os.path.join(CUR_PATH, "data", "dummy_skill", "skill.yaml"))
-        expected_json = yaml.safe_load(f)
-        config = SkillConfig.from_json(expected_json)
+        f = open(skill_path)
+        original_json = yaml.safe_load(f)
 
-        assert isinstance(config, SkillConfig)
-        actual_json = config.json
+        expected_config = SkillConfig.from_json(original_json)
+        assert isinstance(expected_config, SkillConfig)
+        expected_json = expected_config.json
+        actual_config = SkillConfig.from_json(expected_json)
+        actual_json = actual_config.json
         assert expected_json == actual_json
 
 
 class TestAgentConfig:
     """Test the agent configuration class."""
 
-    def test_from_json_and_to_json(self):
+    @pytest.mark.parametrize("agent_path", agent_config_files)
+    def test_from_json_and_to_json(self, agent_path):
         """Test the 'from_json' method and 'to_json' work correctly."""
-        f = open(os.path.join(CUR_PATH, "data", "aea-config.example.yaml"))
-        expected_json = yaml.safe_load(f)
-        config = AgentConfig.from_json(expected_json)
+        f = open(agent_path)
+        original_json = yaml.safe_load(f)
 
-        assert isinstance(config, AgentConfig)
-        actual_json = config.json
-
-        expected_protocols = expected_json.pop("protocols")
-        actual_protocols = actual_json.pop("protocols")
-        assert set(expected_protocols) == set(actual_protocols)
-        assert actual_json == expected_json
+        expected_config = AgentConfig.from_json(original_json)
+        assert isinstance(expected_config, AgentConfig)
+        expected_json = expected_config.json
+        actual_config = AgentConfig.from_json(expected_json)
+        actual_json = actual_config.json
+        assert expected_json == actual_json

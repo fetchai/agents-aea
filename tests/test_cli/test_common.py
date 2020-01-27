@@ -18,10 +18,17 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for cli.common module."""
+
 from unittest import TestCase, mock
+
 from click import ClickException
 
-from aea.cli.common import format_items, format_skills, try_get_item_source_path, try_get_item_target_path
+from aea.cli.common import (
+    format_items,
+    format_skills,
+    try_get_item_source_path,
+    try_get_item_target_path,
+)
 
 
 class FormatItemsTestCase(TestCase):
@@ -31,22 +38,22 @@ class FormatItemsTestCase(TestCase):
         """Test format_items positive result."""
         items = [
             {
-                'public_id': 'author/name:version',
-                'name': 'obj-name',
-                'description': 'Some description',
-                'author': 'author',
-                'version': '1.0'
+                "public_id": "author/name:version",
+                "name": "obj-name",
+                "description": "Some description",
+                "author": "author",
+                "version": "1.0",
             }
         ]
         result = format_items(items)
         expected_result = (
-            '------------------------------\n'
-            'Public ID: author/name:version\n'
-            'Name: obj-name\n'
-            'Description: Some description\n'
-            'Author: author\n'
-            'Version: 1.0\n'
-            '------------------------------\n'
+            "------------------------------\n"
+            "Public ID: author/name:version\n"
+            "Name: obj-name\n"
+            "Description: Some description\n"
+            "Author: author\n"
+            "Version: 1.0\n"
+            "------------------------------\n"
         )
         self.assertEqual(result, expected_result)
 
@@ -58,61 +65,61 @@ class FormatSkillsTestCase(TestCase):
         """Test format_skills positive result."""
         items = [
             {
-                'public_id': 'author/name:version',
-                'name': 'obj-name',
-                'description': 'Some description',
-                'version': '1.0',
-                'protocol_names': ['p1', 'p2', 'p3']
+                "public_id": "author/name:version",
+                "name": "obj-name",
+                "description": "Some description",
+                "version": "1.0",
+                "protocol_names": ["p1", "p2", "p3"],
             }
         ]
         result = format_skills(items)
         expected_result = (
-            '------------------------------\n'
-            'Public ID: author/name:version\n'
-            'Name: obj-name\n'
-            'Description: Some description\n'
-            'Protocols: p1 | p2 | p3 | \n'
-            'Version: 1.0\n'
-            '------------------------------\n'
+            "------------------------------\n"
+            "Public ID: author/name:version\n"
+            "Name: obj-name\n"
+            "Description: Some description\n"
+            "Protocols: p1 | p2 | p3 | \n"
+            "Version: 1.0\n"
+            "------------------------------\n"
         )
         self.assertEqual(result, expected_result)
 
 
-@mock.patch('aea.cli.common.os.path.join', return_value='some-path')
+@mock.patch("aea.cli.common.os.path.join", return_value="some-path")
 class TryGetItemSourcePathTestCase(TestCase):
     """Test case for try_get_item_source_path method."""
 
-    @mock.patch('aea.cli.common.os.path.exists', return_value=True)
+    @mock.patch("aea.cli.common.os.path.exists", return_value=True)
     def test_get_item_source_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_source_path('cwd', 'skills', 'skill-name')
-        expected_result = 'some-path'
+        result = try_get_item_source_path("cwd", "author", "skills", "skill-name")
+        expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with('cwd', 'skills', 'skill-name')
-        exists_mock.assert_called_once_with('some-path')
+        join_mock.assert_called_once_with("cwd", "author", "skills", "skill-name")
+        exists_mock.assert_called_once_with("some-path")
 
-    @mock.patch('aea.cli.common.os.path.exists', return_value=False)
+    @mock.patch("aea.cli.common.os.path.exists", return_value=False)
     def test_get_item_source_path_not_exists(self, exists_mock, join_mock):
         """Test for get_item_source_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_item_source_path('cwd', 'skills', 'skill-name')
+            try_get_item_source_path("cwd", "author", "skills", "skill-name")
 
 
-@mock.patch('aea.cli.common.os.path.join', return_value='some-path')
+@mock.patch("aea.cli.common.os.path.join", return_value="some-path")
 class TryGetItemTargetPathTestCase(TestCase):
     """Test case for try_get_item_target_path method."""
 
-    @mock.patch('aea.cli.common.os.path.exists', return_value=False)
+    @mock.patch("aea.cli.common.os.path.exists", return_value=False)
     def test_get_item_target_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_target_path('packages', 'skills', 'skill-name')
-        expected_result = 'some-path'
+        result = try_get_item_target_path("packages", "author", "skills", "skill-name")
+        expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with('packages', 'skills', 'skill-name')
-        exists_mock.assert_called_once_with('some-path')
+        join_mock.assert_called_once_with("packages", "author", "skills", "skill-name")
+        exists_mock.assert_called_once_with("some-path")
 
-    @mock.patch('aea.cli.common.os.path.exists', return_value=True)
+    @mock.patch("aea.cli.common.os.path.exists", return_value=True)
     def test_get_item_target_path_already_exists(self, exists_mock, join_mock):
         """Test for get_item_target_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_item_target_path('skills', 'skill-name', 'packages_path')
+            try_get_item_target_path("skills", "author", "skill-name", "packages_path")

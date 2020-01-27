@@ -1,12 +1,15 @@
 """Serialization for two_party_negotiation protocol."""
 
+import base64
+import json
+import pickle
+
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
-from packages.fetchai.protocols.two_party_negotiation.message import TwoPartyNegotiationMessage
 
-import json
-import base64
-import pickle
+from packages.fetchai.protocols.two_party_negotiation.message import (
+    TwoPartyNegotiationMessage,
+)
 
 
 class TwoPartyNegotiationSerializer(Serializer):
@@ -20,7 +23,9 @@ class TwoPartyNegotiationSerializer(Serializer):
         body["performative"] = msg.get("performative")
 
         contents_dict = msg.get("contents")
-        contents_dict_bytes = base64.b64encode(pickle.dumps(contents_dict)).decode("utf-8")
+        contents_dict_bytes = base64.b64encode(pickle.dumps(contents_dict)).decode(
+            "utf-8"
+        )
         body["contents"] = contents_dict_bytes
 
         bytes_msg = json.dumps(body).encode("utf-8")
@@ -36,4 +41,9 @@ class TwoPartyNegotiationSerializer(Serializer):
         contents_dict_bytes = base64.b64decode(json_body["contents"])
         contents_dict = pickle.loads(contents_dict_bytes)
 
-        return TwoPartyNegotiationMessage(message_id=message_id, target=target, performative=performative, contents=contents_dict)
+        return TwoPartyNegotiationMessage(
+            message_id=message_id,
+            target=target,
+            performative=performative,
+            contents=contents_dict,
+        )
