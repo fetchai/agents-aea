@@ -27,14 +27,14 @@ from typing import Any, Dict, Optional
 
 from google.protobuf.struct_pb2 import Struct
 
-from aea.configurations.base import ProtocolConfig
+from aea.configurations.base import ProtocolConfig, ProtocolId, PublicId
 from aea.mail.base import Address
 
 
 class Message:
     """This class implements a message."""
 
-    protocol_id = "base"
+    protocol_id = None  # type: PublicId
 
     def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
@@ -221,22 +221,24 @@ class Protocol(ABC):
     - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
     """
 
-    def __init__(self, id: str, serializer: Serializer, config: ProtocolConfig):
+    def __init__(
+        self, protocol_id: ProtocolId, serializer: Serializer, config: ProtocolConfig
+    ):
         """
         Initialize the protocol manager.
 
-        :param id: the protocol id.
+        :param protocol_id: the protocol id.
         :param serializer: the serializer.
         :param config: the protocol configurations.
         """
-        self._id = id
+        self._protocol_id = protocol_id
         self._serializer = serializer
         self._config = config
 
     @property
-    def id(self):
+    def id(self) -> ProtocolId:
         """Get the name."""
-        return self._id
+        return self._protocol_id
 
     @property
     def serializer(self) -> Serializer:

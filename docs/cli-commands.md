@@ -6,12 +6,15 @@
 | `add-key default/fetchai/ethereum file`     | Add a private key from a file.	                                             |
 | `create NAME`                               | Create a new aea project called `[name]`.                                    |
 | `config get [path]`                         | Reads the config specified in `[path]` and prints its target.                |
-| `config set [path]`                         | Sets a new value for the target of the `[path]`.                             |
+| `config set [path] [--type TYPE]`           | Sets a new value for the target of the `[path]`. Optionally cast to type.    |
 | `delete NAME`                               | Delete an aea project. See below for disabling a resource.                   |
 | `fetch NAME`                                | Fetch an aea project called `[name]`.                                        |
 | `freeze`                                    | Get all the dependencies needed for the aea project and its components.      |
 | `gui`                                       | Run the GUI.                                                                 |
 | `generate-key default/fetchai/ethereum/all` | Generate private keys.                                                       |
+| `generate-wealth fetchai/ethereum`          | Generate wealth for address on test network.                                 |
+| `get-address fetchai/ethereum`              | Get the address associated with the private key.                             |
+| `get-wealth fetchai/ethereum`               | Get the wealth associated with the private key.                              |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
 | `list protocols/connections/skills`         | List the installed resources.                                                |
 | `publish`                                   | Publish agent to registry. Needs to be executed from an agent project.		 |

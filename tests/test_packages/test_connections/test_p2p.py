@@ -36,6 +36,8 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.connections.p2p.connection import PeerToPeerConnection
 
+from ...conftest import P2P_CONNECTION_PUBLIC_ID, UNKNOWN_PROTOCOL_PUBLIC_ID
+
 logger = logging.getLogger(__name__)
 
 
@@ -54,6 +56,7 @@ class TestP2p:
             address=cls.ent.public_key_hex,
             provider_addr=cls.address,
             provider_port=cls.port,
+            connection_id=P2P_CONNECTION_PUBLIC_ID,
         )
         cls.p2p_connection.loop = asyncio.get_event_loop()
 
@@ -76,7 +79,10 @@ class TestP2p:
     async def test_send(self):
         """Test the send functionality of the p2p connection."""
         envelope = Envelope(
-            to="receiver", sender="sender", protocol_id="protocol", message=b"Hello"
+            to="receiver",
+            sender="sender",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            message=b"Hello",
         )
         with mock.patch.object(
             fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=[]
@@ -109,7 +115,10 @@ async def test_p2p_receive():
     m_fet_key = "6d56fd47e98465824aa85dfe620ad3dbf092b772abc6c6a182e458b5c56ad13b"
     ent = entity.Entity.from_hex(m_fet_key)
     p2p_connection = PeerToPeerConnection(
-        address=ent.public_key_hex, provider_addr=address, provider_port=port
+        address=ent.public_key_hex,
+        provider_addr=address,
+        provider_port=port,
+        connection_id=P2P_CONNECTION_PUBLIC_ID,
     )
     p2p_connection.loop = asyncio.get_event_loop()
 
@@ -118,7 +127,7 @@ async def test_p2p_receive():
     s_msg = {
         "FROM": {"NODE_ADDRESS": "node_address", "SENDER_ADDRESS": "sender_address"},
         "TO": {"NODE_ADDRESS": "node_address", "RECEIVER_ADDRESS": "receiver_address"},
-        "PROTOCOL": "protocol",
+        "PROTOCOL": "author/protocol_name:0.1.0",
         "CONTEXT": "context",
         "PAYLOAD": "payload",
     }
@@ -139,7 +148,7 @@ async def test_p2p_receive():
         fetch.p2p.api.http_calls.HTTPCalls, "get_messages", return_value=messages
     ) as mock_receive:
         p2p_connection.channel._httpCall.get_messages = mock_receive
-        await asyncio.sleep(1.0)
+        await asyncio.sleep(2.0)
         envelope = await p2p_connection.receive()
         assert envelope is not None
 

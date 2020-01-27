@@ -5,37 +5,37 @@ license: Apache 2.0
 description: 'A protocol for participating in a TAC.'
 speech_acts:
   register:
-    agent_name: str
+    agent_name: pt:str
   unregister: {}
   transaction:
-    tx_id: str
-    tx_sender_addr: str
-    tx_counterparty_addr: str
-    amount_by_currency_id: dict[str, int]
-    tx_sender_fee: int
-    tx_counterparty_fee: int
-    quantities_by_good_id: dict[str, int]
-    tx_nonce: int
-    tx_sender_signature: bytes
-    tx_counterparty_signature: bytes
+    tx_id: pt:str
+    tx_sender_addr: pt:str
+    tx_counterparty_addr: pt:str
+    amount_by_currency_id: pt:dict[pt:str, pt:int]
+    tx_sender_fee: pt:int
+    tx_counterparty_fee: pt:int
+    quantities_by_good_id: pt:dict[pt:str, pt:int]
+    tx_nonce: pt:int
+    tx_sender_signature: pt:bytes
+    tx_counterparty_signature: pt:bytes
   get_state_update: {}
   cancelled: {}
   game_data:
-    amount_by_currency_id: dict[str, int]
-    exchange_params_by_currency_id: dict[str, float]
-    quantities_by_good_id: dict[str, int]
-    utility_params_by_good_id: dict[str, float]
-    tx_fee: int
-    agent_addr_to_name: dict[Address, str]
-    good_id_to_name: dict[str, str]
-    version_id: str
+    amount_by_currency_id: pt:dict[pt:str, pt:int]
+    exchange_params_by_currency_id: pt:dict[pt:str, pt:float]
+    quantities_by_good_id: pt:dict[pt:str, pt:int]
+    utility_params_by_good_id: pt:dict[pt:str, pt:float]
+    tx_fee: pt:int
+    agent_addr_to_name: pt:dict[Address, pt:str]
+    good_id_to_name: pt:dict[pt:str, pt:str]
+    version_id: pt:str
   transaction_confirmation:
-    tx_id: str
-    amount_by_currency_id: dict[str, int]
-    quantities_by_good_id: dict[str, int]
+    tx_id: pt:str
+    amount_by_currency_id: pt:dict[pt:str, pt:int]
+    quantities_by_good_id: pt:dict[pt:str, pt:int]
   tac_error:
     error_code: ErrorCode
-    info: dict[str, Any]
+    info: pt:dict[pt:str, ErrorInfo]
 
   # Problems:
   # info is of type dict[str, Any]. Any is problematic.

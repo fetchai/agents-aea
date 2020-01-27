@@ -24,6 +24,7 @@ import time
 from threading import Thread
 
 from aea.agent import Agent, AgentState
+from aea.configurations.base import PublicId
 from aea.crypto.wallet import Wallet
 from aea.mail.base import InBox, OutBox
 
@@ -66,7 +67,15 @@ def test_run_agent():
         agent_name = "dummyagent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         wallet = Wallet({"default": private_key_pem_path})
-        agent = DummyAgent(agent_name, [OEFLocalConnection("mypbk", node)], wallet)
+        agent = DummyAgent(
+            agent_name,
+            [
+                OEFLocalConnection(
+                    "mypbk", node, connection_id=PublicId("fetchai", "oef", "0.1.0")
+                )
+            ],
+            wallet,
+        )
         assert agent.name == agent_name
         assert isinstance(agent.wallet, Wallet)
         assert (

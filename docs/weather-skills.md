@@ -40,7 +40,7 @@ aea install
 
 ### Run the weather station AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 
@@ -62,7 +62,7 @@ aea install
 
 ### Run the weather client AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 
@@ -156,17 +156,14 @@ Both in `my_weather_station/aea-config.yaml` and
 ``` yaml
 ledger_apis:
   fetchai:
-    address: alpha.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 ### Fund the weather client AEA
 
 Create some wealth for your weather client on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
-cd ..
-python scripts/fetchai_wealth_generation.py --private-key my_weather_client/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
-cd my_weather_client
+aea generate-wealth fetchai
 ```
 
 ### Update the skill configs
@@ -185,7 +182,7 @@ aea config set skills.weather_station.shared_classes.strategy.args.is_ledger_tx 
 
 Run both AEAs from their respective terminals.
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 You will see that the AEAs negotiate and then transact using the Fetch.ai `testnet`.
@@ -284,10 +281,19 @@ Create some wealth for your weather client on the Ethereum Ropsten test net.
 Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your weather client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_weather_client/eth_private_key.txt`.
 
 ### Run the AEAs
+You can change the end point's address and port by modifying the connection's yaml file (my_weather_station/connection/oef/connection.yaml)
+
+Under config locate :
+
+```bash
+addr: ${OEF_ADDR: 127.0.0.1}
+```
+ and replace it with your ip (The ip of the machine that runs the oef image.)
+
 
 Run both AEAs, from their respective terminals.
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 You will see that the AEAs negotiate and then transact using the Ethereum `testnet`.
 

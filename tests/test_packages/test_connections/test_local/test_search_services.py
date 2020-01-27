@@ -22,7 +22,7 @@ import time
 
 import pytest
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.helpers.search.models import (
     Constraint,
     ConstraintType,
@@ -49,7 +49,15 @@ class TestEmptySearch:
         cls.node.start()
 
         cls.address_1 = "address_1"
-        cls.multiplexer = Multiplexer([OEFLocalConnection(cls.address_1, cls.node)])
+        cls.multiplexer = Multiplexer(
+            [
+                OEFLocalConnection(
+                    cls.address_1,
+                    cls.node,
+                    connection_id=PublicId("fetchai", "local", "0.1.0"),
+                )
+            ]
+        )
 
         cls.multiplexer.connect()
 
@@ -118,7 +126,15 @@ class TestSimpleSearchResult:
         cls.node.start()
 
         cls.address_1 = "address"
-        cls.multiplexer = Multiplexer([OEFLocalConnection(cls.address_1, cls.node)])
+        cls.multiplexer = Multiplexer(
+            [
+                OEFLocalConnection(
+                    cls.address_1,
+                    cls.node,
+                    connection_id=PublicId("fetchai", "local", "0.1.0"),
+                )
+            ]
+        )
 
         cls.multiplexer.connect()
 
@@ -188,9 +204,25 @@ class TestUnregister:
         cls.node.start()
 
         cls.address_1 = "address_1"
-        cls.multiplexer1 = Multiplexer([OEFLocalConnection(cls.address_1, cls.node)])
+        cls.multiplexer1 = Multiplexer(
+            [
+                OEFLocalConnection(
+                    cls.address_1,
+                    cls.node,
+                    connection_id=PublicId("fetchai", "local", "0.1.0"),
+                )
+            ]
+        )
         cls.address_2 = "address_2"
-        cls.multiplexer2 = Multiplexer([OEFLocalConnection(cls.address_2, cls.node)])
+        cls.multiplexer2 = Multiplexer(
+            [
+                OEFLocalConnection(
+                    cls.address_2,
+                    cls.node,
+                    connection_id=PublicId("fetchai", "local", "0.1.0"),
+                )
+            ]
+        )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()
 
@@ -403,7 +435,15 @@ class TestAgentMessage:
         cls.node.start()
 
         cls.address_1 = "address_1"
-        cls.multiplexer1 = Multiplexer([OEFLocalConnection(cls.address_1, cls.node)])
+        cls.multiplexer1 = Multiplexer(
+            [
+                OEFLocalConnection(
+                    cls.address_1,
+                    cls.node,
+                    connection_id=PublicId("fetchai", "local", "0.1.0"),
+                )
+            ]
+        )
 
     @pytest.mark.asyncio
     async def test_messages(self):
@@ -417,7 +457,11 @@ class TestAgentMessage:
             message=msg_bytes,
         )
         with pytest.raises(AEAConnectionError):
-            await OEFLocalConnection(self.address_1, self.node).send(envelope)
+            await OEFLocalConnection(
+                self.address_1,
+                self.node,
+                connection_id=PublicId("fetchai", "local", "0.1.0"),
+            ).send(envelope)
 
         self.multiplexer1.connect()
         msg = FIPAMessage(
@@ -459,7 +503,7 @@ class TestOEFConnectionFromJson:
     def test_from_config(self):
         """Test the configuration loading."""
         con = OEFLocalConnection.from_config(
-            address="pk", connection_configuration=ConnectionConfig()
+            address="pk", connection_configuration=ConnectionConfig(),
         )
         assert not con.connection_status.is_connected, "We are connected..."
 
@@ -480,8 +524,24 @@ class TestFilteredSearchResult:
 
         cls.address_1 = "multiplexer1"
         cls.address_2 = "multiplexer2"
-        cls.multiplexer1 = Multiplexer([OEFLocalConnection(cls.address_1, cls.node)])
-        cls.multiplexer2 = Multiplexer([OEFLocalConnection(cls.address_2, cls.node)])
+        cls.multiplexer1 = Multiplexer(
+            [
+                OEFLocalConnection(
+                    cls.address_1,
+                    cls.node,
+                    connection_id=PublicId("fetchai", "local", "0.1.0"),
+                )
+            ]
+        )
+        cls.multiplexer2 = Multiplexer(
+            [
+                OEFLocalConnection(
+                    cls.address_2,
+                    cls.node,
+                    connection_id=PublicId("fetchai", "local", "0.1.0"),
+                )
+            ]
+        )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()
 

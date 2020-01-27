@@ -87,23 +87,23 @@ class TestGenerateProtocol:
         """Test that the exit code is equal to 0."""
         assert self.result.exit_code == 0
 
-    def test_resource_folder_contains_module_message(self):
-        """Test that the protocol folder contains message.py module."""
-        p = Path(
-            self.t, self.agent_name, "protocols", "two_party_negotiation", "message.py"
-        )
-        original = Path(
-            CUR_PATH,
-            "..",
-            "examples",
-            "protocol_specification_ex",
-            "output",
-            "two_party_negotiation",
-            "message.py",
-        )
-        assert filecmp.cmp(p, original)
+    # def test_resource_folder_contains_module_message(self):
+    #     """Test that the protocol folder contains message.py module."""
+    #     p = Path(
+    #         self.t, self.agent_name, "protocols", "two_party_negotiation", "message.py"
+    #     )
+    #     original = Path(
+    #         CUR_PATH,
+    #         "..",
+    #         "examples",
+    #         "protocol_specification_ex",
+    #         "output",
+    #         "two_party_negotiation",
+    #         "message.py",
+    #     )
+    #     assert filecmp.cmp(p, original)
 
-    def test_resource_folder_contains_module_protocol(self):
+    def test_resource_folder_contains_module_serialization(self):
         """Test that the protocol folder contains serialization.py module."""
         p = Path(
             self.t,

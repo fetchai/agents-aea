@@ -42,10 +42,11 @@ from ..conftest import CUR_PATH
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_ETHEREUM_CONFIG = (
-    "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
-    3,
-)
+DEFAULT_ETHEREUM_CONFIG = {
+    "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
+    "chain_id": 3,
+}
+ALT_FETCHAI_CONFIG = {"host": "127.0.0.1", "port": 80}
 fet_address = "B3t9pv4rYccWqCjeuoXsDoeXLiKxVAQh6Q3CLAiNZZQ2mtqF1"
 eth_address = "0x21795D753752ccC1AC728002D23Ba33cbF13b8b0"
 GAS_PRICE = "50"
@@ -274,16 +275,16 @@ class TestLedgerApis:
 
     def test_try_to_instantiate_fetchai_ledger_api(self):
         """Test the instantiation of the fetchai ledger api."""
-        _try_to_instantiate_fetchai_ledger_api(addr="127.0.0.1", port=80)
+        _try_to_instantiate_fetchai_ledger_api(**DEFAULT_FETCHAI_CONFIG)
         from fetchai.ledger.api import LedgerApi
 
         with mock.patch.object(LedgerApi, "__init__", side_effect=Exception):
             with pytest.raises(SystemExit):
-                _try_to_instantiate_fetchai_ledger_api(addr="127.0.0.1", port=80)
+                _try_to_instantiate_fetchai_ledger_api(**ALT_FETCHAI_CONFIG)
 
     def test_try_to_instantiate_ethereum_ledger_api(self):
         """Test the instantiation of the ethereum ledger api."""
-        _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1")
+        _try_to_instantiate_ethereum_ledger_api(address="127.0.0.1")
         from web3 import Web3
 
         with mock.patch.object(Web3, "__init__", side_effect=Exception):

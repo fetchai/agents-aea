@@ -23,6 +23,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Tuple, Union, cast
 
+from aea.configurations.base import PublicId
 from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 
@@ -30,7 +31,7 @@ from aea.protocols.base import Message
 class FIPAMessage(Message):
     """The FIPA message class."""
 
-    protocol_id = "fipa"
+    protocol_id = PublicId("fetchai", "fipa", "0.1.0")
 
     STARTING_MESSAGE_ID = 1
     STARTING_TARGET = 0

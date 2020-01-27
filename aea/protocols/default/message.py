@@ -23,13 +23,14 @@
 from enum import Enum
 from typing import Any, Dict, cast
 
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 
 
 class DefaultMessage(Message):
     """The Default message class."""
 
-    protocol_id = "default"
+    protocol_id = PublicId("fetchai", "default", "0.1.0")
 
     class Type(Enum):
         """Default message types."""

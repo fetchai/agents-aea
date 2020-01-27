@@ -34,6 +34,7 @@ import connexion
 
 import flask
 
+from aea.configurations.base import PublicId
 
 elements = [
     ["local", "agent", "localAgents"],
@@ -110,8 +111,8 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
     output = []
     err = ""
     for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
-        if line[:6] == "Name: ":
-            item_ids.append(line[6:-1])
+        if line[:11] == "Public ID: ":
+            item_ids.append(line[11:-1])
 
         if line[:13] == "Description: ":
             item_descs.append(line[13:-1])
@@ -366,7 +367,7 @@ def stop_oef_node():
     return "All fine", 200  # 200 (OK)
 
 
-def start_agent(agent_id: str, connection_id: str):
+def start_agent(agent_id: str, connection_id: PublicId):
     """Start a local agent running."""
     # Test if it is already running in some form
     if agent_id in app_context.agent_processes:
@@ -402,7 +403,7 @@ def start_agent(agent_id: str, connection_id: str):
                     "aea.cli",
                     "run",
                     "--connections",
-                    connection_id,
+                    str(connection_id),
                 ],
                 agent_dir,
             )
