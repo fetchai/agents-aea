@@ -28,7 +28,6 @@ from queue import Queue
 from threading import Thread
 from typing import Dict, List, Optional, cast
 
-from aea.configurations.base import PublicId
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.ledger_apis import LedgerApis, SUPPORTED_LEDGER_APIS
 from aea.crypto.wallet import Wallet
