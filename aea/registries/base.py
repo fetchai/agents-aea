@@ -328,7 +328,7 @@ class ComponentRegistry(
 
     def fetch_by_skill(self, skill_id: SkillId) -> List[Item]:
         """Fetch all the items of a given skill."""
-        return list(*self._items.get(skill_id, {}).values())
+        return [*self._items.get(skill_id, {}).values()]
 
     def fetch_all(self) -> List[SkillComponentType]:
         """Fetch all the items."""
