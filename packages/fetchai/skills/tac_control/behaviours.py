@@ -222,3 +222,5 @@ class TACBehaviour(Behaviour):
                     self.context.agent_name, game.equilibrium_summary
                 )
             )
+
+            self.context.is_active = False
