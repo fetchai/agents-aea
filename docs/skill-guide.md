@@ -27,10 +27,11 @@ In this example, we implement a simple search behaviour. Each time, `act()` gets
 ```python
 import logging
 
-from aea.helpers.search.models import Query, Constraint, ConstraintType
+from aea.helpers.search.models import Constraint, ConstraintType, Query
 from aea.skills.behaviours import TickerBehaviour
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
+
+from packages.fetchai.protocols.oef.message import OEFMessage
+from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 
 logger = logging.getLogger("aea.my_search_skill")
 
@@ -49,7 +50,9 @@ class MySearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        logger.info("[{}]: setting up MySearchBehaviour".format(self.context.agent_name))
+        logger.info(
+            "[{}]: setting up MySearchBehaviour".format(self.context.agent_name)
+        )
 
     def act(self) -> None:
         """
@@ -58,17 +61,24 @@ class MySearchBehaviour(TickerBehaviour):
         :return: None
         """
         self.sent_search_count += 1
-        search_constraints = [Constraint("country",
-                              ConstraintType("==", "UK"))]
+        search_constraints = [Constraint("country", ConstraintType("==", "UK"))]
         search_query_w_empty_model = Query(search_constraints, model=None)
-        search_request = OEFMessage(type=OEFMessage.Type.SEARCH_SERVICES,
-                                    id=self.sent_search_count,
-                                    query=search_query_w_empty_model)
-        logger.info("[{}]: sending search request to OEF, search_count={}".format(self.context.agent_name, self.sent_search_count))
-        self.context.outbox.put_message(to=DEFAULT_OEF,
-                                        sender=self.context.agent_address,
-                                        protocol_id=OEFMessage.protocol_id,
-                                        message=OEFSerializer().encode(search_request))
+        search_request = OEFMessage(
+            type=OEFMessage.Type.SEARCH_SERVICES,
+            id=self.sent_search_count,
+            query=search_query_w_empty_model,
+        )
+        logger.info(
+            "[{}]: sending search request to OEF, search_count={}".format(
+                self.context.agent_name, self.sent_search_count
+            )
+        )
+        self.context.outbox.put_message(
+            to=DEFAULT_OEF,
+            sender=self.context.agent_address,
+            protocol_id=OEFMessage.protocol_id,
+            message=OEFSerializer().encode(search_request),
+        )
 
     def teardown(self) -> None:
         """
@@ -76,7 +86,9 @@ class MySearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        logger.info("[{}]: tearing down MySearchBehaviour".format(self.context.agent_name))
+        logger.info(
+            "[{}]: tearing down MySearchBehaviour".format(self.context.agent_name)
+        )
 ```
 
 Searches are proactive and, as such, well placed in a `Behaviour`. Specifically, we subclass the `TickerBehaviour` as it allows us to repeatedly search at a defined tick interval.
@@ -93,8 +105,8 @@ Let us now implement a handler to deal with the incoming search responses.
 import logging
 
 from aea.skills.base import Handler
-from packages.protocols.oef.message import OEFMessage
-from packages.protocols.oef.serialization import OEFSerializer
+
+from packages.fetchai.protocols.oef.message import OEFMessage
 
 logger = logging.getLogger("aea.my_search_skill")
 
@@ -125,7 +137,11 @@ class MySearchHandler(Handler):
         if msg_type is OEFMessage.Type.SEARCH_RESULT:
             self.received_search_count += 1
             nb_agents_found = len(message.get("agents"))
-            logger.info("[{}]: found number of agents={}, received search count={}".format(self.context.agent_name, nb_agents_found, self.received_search_count))
+            logger.info(
+                "[{}]: found number of agents={}, received search count={}".format(
+                    self.context.agent_name, nb_agents_found, self.received_search_count
+                )
+            )
 
     def teardown(self) -> None:
         """
@@ -133,7 +149,9 @@ class MySearchHandler(Handler):
 
         :return: None
         """
-        logger.info("[{}]: tearing down MySearchHandler".format(self.context.agent_name))
+        logger.info(
+            "[{}]: tearing down MySearchHandler".format(self.context.agent_name)
+        )
 ```
 
 We create a handler which is registered for the `oef` protocol. Whenever it receives a search result, we log the number of agents returned in the search - the agents matching the search query - and update the counter of received searches.
@@ -173,9 +191,12 @@ class MySearchTask(Task):
         :return: None
         """
         time.sleep(1)  # to slow down the AEA
-        logger.info("[{}]: number of search requests sent={} vs. number of search responses received={}".format(self.context.agent_name,
-                                self.context.behaviours.my_search_behaviour.sent_search_count,
-                                self.context.handlers.my_search_handler.received_search_count)
+        logger.info(
+            "[{}]: number of search requests sent={} vs. number of search responses received={}".format(
+                self.context.agent_name,
+                self.context.behaviours.my_search_behaviour.sent_search_count,
+                self.context.handlers.my_search_handler.received_search_count,
+            )
         )
 
     def teardown(self) -> None:
@@ -230,7 +251,7 @@ Our AEA does not have the oef protocol yet so let's add it.
 aea add protocol fetchai/oef:0.1.0
 ```
 
-This adds the protocol to our AEA and makes it available on the path `packages.protocols...`.
+This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 We also need to add the oef connection:
 ```bash

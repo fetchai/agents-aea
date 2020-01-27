@@ -74,7 +74,7 @@ The echo skill is a simple demo that introduces you to the main business logic c
 
 ### Create a new AEA
 
-First create a new AEA project and enter it.
+First, create a new AEA project and enter it.
 ``` bash
 aea create my_first_aea
 cd my_first_aea
@@ -82,21 +82,20 @@ cd my_first_aea
 
 ### Add the echo skill 
 
+Second, add the echo skill to the project.
 ``` bash
 aea add skill fetchai/echo:0.1.0
 ```
 
-This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The full identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `echo` skill code containing the "behaviours", "handlers", and "tasks" into the skill, ready to run. The identifier of the skill `fetchai/echo:0.1.0` consists of the name of the author of the skill, followed by the skill name and its version.
 
 ### Add a stub connection
 
 AEAs use messages for communication. We use a stub connection to send messages to and receive messages from the AEA.
 
-The stub conection is already added to the AEA by default.
+The stub connection is already added to the AEA by default.
 
-A stub connection provides an I/O reader and writer. 
-
-It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.
+A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming messages and the other for outgoing messages. Each line contains an encoded envelope.
 
 The AEA waits for new messages posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.
 
@@ -109,7 +108,7 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE
 For example:
 
 ``` bash
-recipient_aea,sender_aea,default,{"type": "bytes", "content": "aGVsbG8="}
+recipient_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}
 ```
 
 ## Option 2 - Fetch the entire AEA
@@ -154,7 +153,7 @@ Let's look at the `Handler` in more depth.
 From a different terminal and same directory, we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,default,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,{"type": "bytes", "content": "aGVsbG8="}' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
