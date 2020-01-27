@@ -1,8 +1,8 @@
-The full Fetch.ai car park agent demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
+The full Fetch.ai car park AEA demo is documented in its own repo [here](https://github.com/fetchai/carpark_agent).
 
-This demo allows you to test the AEA functionality of the car park agent demo without the detection logic.
+This demo allows you to test the AEA functionality of the car park AEA demo without the detection logic.
 
-It demonstrates how the agents trade car park information.
+It demonstrates how the AEAs trade car park information.
 
 
 ## Preparation instructions
@@ -23,9 +23,9 @@ Keep it running for all the following.
 
 ## Demo instructions
 
-### Create carpark detection agent
+### Create car detector AEA
 
-First, create the carpark detection agent:
+First, create the car detector AEA:
 ``` bash
 aea create car_detector
 cd car_detector
@@ -34,7 +34,7 @@ aea add skill fetchai/carpark_detection:0.1.0
 aea install
 ```
 
-Second, add the ledger info to the aea config:
+Second, add the ledger info to the aea config (`car_detector/aea-config.yaml`):
 ``` bash
 ledger_apis:
   fetchai:
@@ -48,9 +48,9 @@ cd car_detector
 aea install
 ```
 
-### Create carpark client agent
+### Create car data buyer AEA
 
-Then, create the carpark client agent:
+Then, create the car data client AEA:
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
@@ -59,7 +59,7 @@ aea add skill fetchai/carpark_client:0.1.0
 aea install
 ```
 
-Second, add the ledger info to the aea config:
+Second, add the ledger info to the aea config (`car_data_buyer/aea-config.yaml`):
 ``` bash
 ledger_apis:
   fetchai:
@@ -73,15 +73,15 @@ cd car_data_buyer
 aea install
 ```
 
-### Generate wealth for the client agent
+### Generate wealth for the car data buyer AEA
 
-Add a private key to the carpark client agent:
+Add a private key to the car data buyer AEA:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
-To fund the carpark client agent on test-net you need to request some test tokens from a faucet.
+To fund the car data buyer AEA on test-net you need to request some test tokens from a faucet.
 
 First, print the address:
 ``` bash
@@ -102,23 +102,23 @@ aea generate-wealth fetchai
 
 ### Update skill configurations
 
-Then, in the detection agent we disable the detection logic:
+Then, in the car detector AEA we disable the detection logic:
 ``` bash
-aea config set skills.carpark_detection.shared_classes.strategy.args.db_is_rel_to_cwd False
+aea config set vendor.fetchai.skills.carpark_detection.shared_classes.strategy.args.db_is_rel_to_cwd False --type bool
 ```
 
-### Run both agents
+### Run both AEAs
 
-Finally, run both agents from their respective directories:
+Finally, run both AEAs from their respective directories:
 ``` bash
 aea run --connections fetchai/oef:0.1.0
 ```
 
-You can see that the agents find each other, negotiate and eventually trade.
+You can see that the AEAs find each other, negotiate and eventually trade.
 
 ### Cleaning up
 
-When you're finished, delete your agents:
+When you're finished, delete your AEAs:
 ``` bash
 cd ..
 aea delete car_detector
@@ -126,7 +126,7 @@ aea delete car_data_buyer
 ```
 
 ## Communication
-This diagram shows the communication between the various entities as data is successfully sold by the car park agent to the client. 
+This diagram shows the communication between the various entities as data is successfully sold by the car park AEA to the client. 
 
 <div class="mermaid">
     sequenceDiagram
