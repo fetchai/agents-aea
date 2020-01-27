@@ -57,7 +57,7 @@ class TestProtocolRegistry:
         os.chdir(cls.agent_folder)
 
         # make fake protocol
-        cls.fake_protocol_id = "fake"
+        cls.fake_protocol_id = "fipa"
         agent_config_path = Path(cls.agent_folder, DEFAULT_AEA_CONFIG_FILE)
         agent_config = yaml.safe_load(agent_config_path.read_text())
         agent_config.get("protocols").append(cls.fake_protocol_id)

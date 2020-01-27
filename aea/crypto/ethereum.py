@@ -245,7 +245,7 @@ class EthereumApi(LedgerApi):
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
-        Generate a random str message.
+        Generate a unique hash to distinguish txs with the same terms.
 
         :param seller: the address of the seller.
         :param client: the address of the client.
@@ -280,9 +280,10 @@ class EthereumApi(LedgerApi):
         """
 
         tx = self._api.eth.getTransaction(tx_digest)
-        return (
+        is_valid = (
             tx.get("input") == tx_nonce
             and tx.get("value") == amount
             and tx.get("from") == client
             and tx.get("to") == seller
         )
+        return is_valid

@@ -279,7 +279,7 @@ class TransactionMessage(InternalMessage):
                 self.Performative.REJECTED_SETTLEMENT,
                 self.Performative.FAILED_SETTLEMENT,
             }:
-                assert len(self.body) == 11 or len(self.body) == 12
+                assert len(self.body) == 11
             elif self.performative == self.Performative.SUCCESSFUL_SETTLEMENT:
                 assert isinstance(self.tx_digest, str), "Tx_digest must be of type str."
                 assert len(self.body) == 12

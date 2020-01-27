@@ -184,7 +184,7 @@ class LedgerApi(ABC):
         :param amount: the amount we expect to get from the transaction.
         :param tx_digest: the transaction digest.
 
-        :return: True if the random_message is equals to tx['input']
+        :return: True if the transaction referenced by the tx_digest matches the terms.
         """
 
     @abstractmethod

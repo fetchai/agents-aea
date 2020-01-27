@@ -59,7 +59,6 @@ class MySearchBehaviour(TickerBehaviour):
                         self.context.agent_name
                     )
                 )
-                # TODO: deregister skill from filter
 
         if self.context.ledger_apis.has_ethereum:
             eth_balance = self.context.ledger_apis.token_balance(
@@ -77,6 +76,8 @@ class MySearchBehaviour(TickerBehaviour):
                         self.context.agent_name
                     )
                 )
+
+        # TODO: deregister skill from filter
 
     def act(self) -> None:
         """

@@ -98,6 +98,7 @@ class Strategy(SharedClass):
         """
         Generate a proposal matching the query.
 
+        :param counterparty: the counterparty of the proposal.
         :param query: the query
         :return: a tuple of proposal and the weather data
         """

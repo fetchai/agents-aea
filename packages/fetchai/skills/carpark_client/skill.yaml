@@ -31,7 +31,7 @@ shared_classes:
       max_detection_age: 36000000
       currency_id: 'FET'
       ledger_id: 'fetchai'
-      is_ledger_tx: False
+      is_ledger_tx: True
   dialogues:
     class_name: Dialogues
     args: {}
