@@ -82,7 +82,7 @@ class Strategy(SharedClass):
             (proposal.values["price"] - proposal.values["seller_tx_fee"] > 0)
             and (
                 proposal.values["price"]
-                <= self._max_row_price * proposal.values["rows"]
+                <= self._max_row_price
             )
             and (proposal.values["currency_id"] == self._currency_id)
             and (proposal.values["ledger_id"] == self._ledger_id)

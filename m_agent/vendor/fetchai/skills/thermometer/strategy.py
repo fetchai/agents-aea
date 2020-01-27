@@ -18,25 +18,27 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
+import logging
+from random import randrange
+from typing import Tuple
 
-import time
-from typing import Any, Dict, List, Tuple
+from temper import Temper
 
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
-from packages.fetchai.skills.thermometer.temper.temper_data import TemperData
 from packages.fetchai.skills.thermometer.thermometer_data_model import (
     SCHEME,
     THERMOMETER_DATAMODEL,
 )
 
-DEFAULT_PRICE_PER_ROW = 2
+DEFAULT_PRICE_PER_ROW = 1
 DEFAULT_SELLER_TX_FEE = 0
-DEFAULT_CURRENCY_PBK = "ETH"
-DEFAULT_LEDGER_ID = "ethereum"
-DEFAULT_DATE_ONE = "23/01/2020"
-DEFAULT_DATE_TWO = "24/01/2020"
+DEFAULT_CURRENCY_PBK = "FET"
+DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
+DEFAULT_HAS_SENSOR = True
+
+logger = logging.getLogger(__name__)
 
 
 class Strategy(SharedClass):
@@ -55,12 +57,10 @@ class Strategy(SharedClass):
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
-        self._date_one = kwargs.pop("date_one", DEFAULT_DATE_ONE)
-        self._date_two = kwargs.pop("date_two", DEFAULT_DATE_TWO)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
+        self._has_sensor = kwargs.pop("has_sensor", DEFAULT_HAS_SENSOR)
         super().__init__(**kwargs)
         self._oef_msg_id = 0
-        self.db = TemperData()
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -92,24 +92,21 @@ class Strategy(SharedClass):
 
     def generate_proposal_and_data(
         self, query: Query
-    ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
+    ) -> Tuple[Description, int]:
         """
         Generate a proposal matching the query.
 
         :param query: the query
         :return: a tuple of proposal and the temprature data
         """
-        fetched_data = self.db.get_data_for_specific_dates(
-            self._date_one, self._date_two
-        )  # TODO: fetch real data
-        temp_data, rows = self._build_data_payload(fetched_data)
-        total_price = self._price_per_row * rows
+
+        temp_data = self._build_data_payload()
+        total_price = self._price_per_row
         assert (
             total_price - self._seller_tx_fee > 0
         ), "This sale would generate a loss, change the configs!"
         proposal = Description(
             {
-                "rows": rows,
                 "price": total_price,
                 "seller_tx_fee": self._seller_tx_fee,
                 "currency_id": self._currency_id,
@@ -119,24 +116,23 @@ class Strategy(SharedClass):
         return proposal, temp_data
 
     def _build_data_payload(
-        self, fetched_data: Dict[str, int]
-    ) -> Tuple[Dict[str, List[Dict[str, Any]]], int]:
+        self
+    ) -> int:
         """
         Build the data payload.
 
         :param fetched_data: the fetched data
         :return: a tuple of the data and the rows
         """
-        degrees = {}  # type: Dict[str, List[Dict[str, Any]]]
-        degrees["degrees"] = []
-        counter = 0
-        for items in fetched_data:
-            if counter > 10:
-                break  # TODO: fix OEF so more data can be sent
-            counter += 1
-            dict_of_data = {
-                "internal_temp": items[0],
-                "idx": time.ctime(int(items[1])),
-            }
-            degrees["degrees"].append(dict_of_data)
-        return degrees, counter
+        if self._has_sensor:
+            temper = Temper()
+            while True:
+                results = temper.read()
+                if "internal temperature" in results.keys():
+                    degrees = results.get('internal temperature')
+                else:
+                    logger.debug("Couldn't read the sensor I am re-trying.")
+        else:
+            degrees = randrange(10, 25)
+
+        return degrees
