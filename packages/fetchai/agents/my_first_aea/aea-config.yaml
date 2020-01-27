@@ -1,5 +1,5 @@
 aea_version: 0.1.16
-agent_name: my_first_agent
+agent_name: my_first_aea
 author: fetchai
 connections:
 - fetchai/stub:0.1.0

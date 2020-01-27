@@ -154,6 +154,8 @@ class GymConnection(Connection):
         :param gym_env: the gym environment.
         :param connection_id: the connection id.
         """
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "gym", "0.1.0")
         super().__init__(*args, **kwargs)
         self.address = address
         self.channel = GymChannel(address, gym_env)
@@ -233,16 +235,10 @@ class GymConnection(Connection):
         """
         gym_env_package = cast(str, connection_configuration.config.get("env"))
         gym_env = locate(gym_env_package)
-        restricted_to_protocols_names = {
-            p.name for p in connection_configuration.restricted_to_protocols
-        }
-        excluded_protocols_names = {
-            p.name for p in connection_configuration.excluded_protocols
-        }
         return GymConnection(
             address,
             gym_env(),
             connection_id=connection_configuration.public_id,
-            restricted_to_protocols=restricted_to_protocols_names,
-            excluded_protocols=excluded_protocols_names,
+            restricted_to_protocols=connection_configuration.restricted_to_protocols,
+            excluded_protocols=connection_configuration.excluded_protocols,
         )

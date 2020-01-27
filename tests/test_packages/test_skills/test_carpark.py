@@ -113,7 +113,7 @@ class TestCarPark:
 
         # Load the agent yaml file and manually insert the things we need
         yaml_path = os.path.join(
-            "vendors", "fetchai", "skills", "carpark_detection", "skill.yaml"
+            "vendor", "fetchai", "skills", "carpark_detection", "skill.yaml"
         )
         file = open(yaml_path, mode="r")
 
@@ -134,7 +134,14 @@ class TestCarPark:
             f.write(whole_file)
 
         process_one = subprocess.Popen(
-            [sys.executable, "-m", "aea.cli", "run", "--connections", "oef"],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=os.environ.copy(),
@@ -207,7 +214,14 @@ class TestCarPark:
 
         os.chdir(agent_two_dir_path)
         process_two = subprocess.Popen(
-            [sys.executable, "-m", "aea.cli", "run", "--connections", "oef"],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=os.environ.copy(),

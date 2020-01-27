@@ -94,20 +94,33 @@ class TestGymSkill:
         # change config file of gym connection
         file_src = os.path.join(ROOT_DIR, "tests", "data", "gym-connection.yaml")
         file_dst = os.path.join(
-            self.t, self.agent_name, "connections", "gym", "connection.yaml"
+            self.t,
+            self.agent_name,
+            "vendor",
+            "fetchai",
+            "connections",
+            "gym",
+            "connection.yaml",
         )
         shutil.copyfile(file_src, file_dst)
 
         # change number of training steps
         skill_config_path = Path(
-            self.t, self.agent_name, "vendors", "fetchai", "skills", "gym", "skill.yaml"
+            self.t, self.agent_name, "vendor", "fetchai", "skills", "gym", "skill.yaml"
         )
         skill_config = SkillConfig.from_json(yaml.safe_load(open(skill_config_path)))
-        skill_config.tasks.read("gym").args["nb_steps"] = 100
+        skill_config.tasks.read("gym").args["nb_steps"] = 20
         yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
 
         process = subprocess.Popen(
-            [sys.executable, "-m", "aea.cli", "run", "--connections", "gym"],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/gym:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
         )

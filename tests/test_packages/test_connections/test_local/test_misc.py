@@ -116,10 +116,10 @@ def test_communication():
 
         local_public_id = PublicId("fetchai", "local", "0.1.0")
         multiplexer1 = Multiplexer(
-            [OEFLocalConnection("multiplexer1", node, local_public_id)]
+            [OEFLocalConnection("multiplexer1", node, connection_id=local_public_id)]
         )
         multiplexer2 = Multiplexer(
-            [OEFLocalConnection("multiplexer2", node, local_public_id)]
+            [OEFLocalConnection("multiplexer2", node, connection_id=local_public_id)]
         )
 
         multiplexer1.connect()

@@ -119,6 +119,8 @@ class StubConnection(Connection):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "stub", "0.1.0")
         super().__init__(*args, **kwargs)
 
         input_file_path = Path(input_file_path)

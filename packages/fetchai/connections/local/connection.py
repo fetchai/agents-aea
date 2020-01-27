@@ -27,7 +27,7 @@ from collections import defaultdict
 from threading import Thread
 from typing import Dict, List, Optional, cast
 
-from aea.configurations.base import ConnectionConfig, ProtocolId
+from aea.configurations.base import ConnectionConfig, ProtocolId, PublicId
 from aea.connections.base import Connection
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import AEAConnectionError, Address, Envelope
@@ -398,6 +398,8 @@ class OEFLocalConnection(Connection):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the excluded protocols for this connection.
         """
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "local", "0.1.0")
         super().__init__(*args, **kwargs)
         self._address = address
         self._local_node = local_node

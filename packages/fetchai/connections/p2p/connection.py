@@ -169,6 +169,8 @@ class PeerToPeerConnection(Connection):
 
         :param address: the address used in the protocols.
         """
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "p2p", "0.1.0")
         super().__init__(*args, **kwargs)
         self.channel = PeerToPeerChannel(address, provider_addr, provider_port, excluded_protocols=self.excluded_protocols)  # type: ignore
         self.address = address

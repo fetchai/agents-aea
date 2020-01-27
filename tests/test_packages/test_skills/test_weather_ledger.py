@@ -112,7 +112,14 @@ class TestWeatherSkillsFetchaiLedger:
         assert result.exit_code == 0
 
         process_one = subprocess.Popen(
-            [sys.executable, "-m", "aea.cli", "run", "--connections", "oef"],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=os.environ.copy(),
@@ -185,7 +192,14 @@ class TestWeatherSkillsFetchaiLedger:
 
         os.chdir(agent_two_dir_path)
         process_two = subprocess.Popen(
-            [sys.executable, "-m", "aea.cli", "run", "--connections", "oef"],
+            [
+                sys.executable,
+                "-m",
+                "aea.cli",
+                "run",
+                "--connections",
+                "fetchai/oef:0.1.0",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=os.environ.copy(),

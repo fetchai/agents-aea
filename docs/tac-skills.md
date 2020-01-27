@@ -64,7 +64,7 @@ aea config set skills.tac_control.shared_classes.parameters.args.start_time '21 
 
 ### Run the TAC controller AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 ### Create the TAC participants AEA
@@ -104,7 +104,7 @@ aea config set agent.default_ledger ethereum
 
 ### Run both the TAC participant AEAs
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 	
 ## Communication

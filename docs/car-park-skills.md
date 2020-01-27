@@ -111,7 +111,7 @@ aea config set skills.carpark_detection.shared_classes.strategy.args.db_is_rel_t
 
 Finally, run both agents from their respective directories:
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 You can see that the agents find each other, negotiate and eventually trade.
