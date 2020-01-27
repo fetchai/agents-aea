@@ -244,6 +244,28 @@ class FIPAHandler(Handler):
                     self.context.agent_name
                 )
             )
+        else:
+            new_message_id = msg.message_id + 1
+            new_target = msg.message_id
+            inform_msg = FIPAMessage(
+                message_id=new_message_id,
+                dialogue_reference=dialogue.dialogue_label.dialogue_reference,
+                target=new_target,
+                performative=FIPAMessage.Performative.INFORM,
+                info={"Done": "Sending payment via bank transfer"},
+            )
+            dialogue.outgoing_extend(inform_msg)
+            self.context.outbox.put_message(
+                to=msg.counterparty,
+                sender=self.context.agent_address,
+                protocol_id=FIPAMessage.protocol_id,
+                message=FIPASerializer().encode(inform_msg),
+            )
+            logger.info(
+                "[{}]: informing counterparty={} of payment.".format(
+                    self.context.agent_name, msg.counterparty[-5:]
+                )
+            )
 
     def _handle_inform(self, msg: FIPAMessage, dialogue: Dialogue) -> None:
         """

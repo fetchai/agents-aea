@@ -289,7 +289,7 @@ class TestLedgerApis:
 
         with mock.patch.object(Web3, "__init__", side_effect=Exception):
             with pytest.raises(SystemExit):
-                _try_to_instantiate_ethereum_ledger_api(addr="127.0.0.1")
+                _try_to_instantiate_ethereum_ledger_api(address="127.0.0.1")
 
     @mock.patch("time.time", mock.MagicMock(return_value=1579533928))
     def test_validate_ethereum_transaction(self):
