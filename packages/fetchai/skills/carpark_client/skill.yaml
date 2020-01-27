@@ -29,6 +29,7 @@ shared_classes:
       no_find_search_interval: 5
       max_price: 400000000
       max_detection_age: 36000000
+      max_buyer_tx_fee: 1
   dialogues:
     class_name: Dialogues
     args: {}

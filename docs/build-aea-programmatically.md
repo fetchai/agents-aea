@@ -6,16 +6,7 @@ These instructions detail the Python code you need for running an AEA outside th
 This guide assumes you have already followed the Preliminaries and Installation section in the [quick start](quickstart.md) guide and so have the framework installed and the packages and scripts directory downloaded into the directory you are working in.
 
 
-## Create private key
-Before we make our AEA we make a private key to be used in the wallet. Open a terminal and type:
-    
-``` bash
-python scripts/generate_private_key.py my_key.txt
-```
-
 ## Imports
-
-Now we can start to write our python script. 
 
 First, import the necessary common Python libraries and classes.
 
@@ -25,7 +16,6 @@ import time
 from threading import Thread
 
 import yaml
-
 ```
 
 Then, import the application specific libraries.
@@ -45,7 +35,7 @@ from aea.registries.base import Resources
 from aea.skills.base import Skill
 ```
 
-Set up a variable pointing to where the packages directory is located - this should be our current directory. 
+Set up a variable pointing to where the packages directory is located - this should be our current directory - and where the input and output files are located.
 ``` python
 ROOT_DIR = "./"
 INPUT_FILE = "input.txt"
