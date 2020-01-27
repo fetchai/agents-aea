@@ -345,7 +345,9 @@ class PublicIdParameter(click.ParamType):
             raise click.BadParameter(value)
 
 
-def try_get_item_source_path(path: str, author_name: str, item_type_plural: str, item_name: str) -> str:
+def try_get_item_source_path(
+    path: str, author_name: str, item_type_plural: str, item_name: str
+) -> str:
     """
     Get the item source path.
 

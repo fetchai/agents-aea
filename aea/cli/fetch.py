@@ -65,7 +65,9 @@ def _fetch_agent_locally(ctx: Context, public_id: PublicId, click_context) -> No
     :return: None
     """
     packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
-    source_path = try_get_item_source_path(packages_path, public_id.author, "agents", public_id.name)
+    source_path = try_get_item_source_path(
+        packages_path, public_id.author, "agents", public_id.name
+    )
     target_path = os.path.join(ctx.cwd, public_id.name)
     if os.path.exists(target_path):
         raise click.ClickException(
