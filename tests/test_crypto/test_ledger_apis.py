@@ -260,7 +260,7 @@ class TestLedgerApis:
             "getTransactionReceipt",
             return_value=result,
         ):
-            is_successful = ledger_apis.is_tx_settled(ETHEREUM, tx_digest=tx_digest)
+            is_successful = ledger_apis._is_tx_settled(ETHEREUM, tx_digest=tx_digest)
             assert is_successful
             assert ledger_apis.last_tx_statuses[ETHEREUM] == "OK"
 
@@ -269,7 +269,7 @@ class TestLedgerApis:
             "getTransactionReceipt",
             side_effect=Exception,
         ):
-            is_successful = ledger_apis.is_tx_settled(ETHEREUM, tx_digest=tx_digest)
+            is_successful = ledger_apis._is_tx_settled(ETHEREUM, tx_digest=tx_digest)
             assert not is_successful
             assert ledger_apis.last_tx_statuses[ETHEREUM] == "ERROR"
 
