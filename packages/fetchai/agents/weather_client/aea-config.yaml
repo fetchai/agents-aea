@@ -1,4 +1,4 @@
-aea_version: 0.1.16
+aea_version: 0.1.17
 agent_name: weather_client
 author: fetchai
 connections:
@@ -13,16 +13,7 @@ license: Apache-2.0
 logging_config:
   disable_existing_loggers: false
   version: 1
-private_key_paths:
-- private_key_path:
-    ledger: default
-    path: default_private_key.pem
-- private_key_path:
-    ledger: fetchai
-    path: fet_private_key.txt
-- private_key_path:
-    ledger: ethereum
-    path: eth_private_key.txt
+private_key_paths: []
 protocols:
 - fetchai/default:0.1.0
 - fetchai/fipa:0.1.0

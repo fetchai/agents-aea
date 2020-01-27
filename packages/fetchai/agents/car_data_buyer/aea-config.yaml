@@ -1,4 +1,4 @@
-aea_version: 0.1.16
+aea_version: 0.1.17
 agent_name: car_data_buyer
 author: fetchai
 connections:
