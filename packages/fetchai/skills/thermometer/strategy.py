@@ -26,6 +26,7 @@ from temper import Temper
 
 from aea.helpers.search.models import Description, Query
 from aea.skills.base import SharedClass
+
 from packages.fetchai.skills.thermometer.thermometer_data_model import (
     SCHEME,
     THERMOMETER_DATAMODEL,
@@ -90,9 +91,7 @@ class Strategy(SharedClass):
         # TODO, this is a stub
         return True
 
-    def generate_proposal_and_data(
-        self, query: Query
-    ) -> Tuple[Description, int]:
+    def generate_proposal_and_data(self, query: Query) -> Tuple[Description, int]:
         """
         Generate a proposal matching the query.
 
@@ -115,9 +114,7 @@ class Strategy(SharedClass):
         )
         return proposal, temp_data
 
-    def _build_data_payload(
-        self
-    ) -> int:
+    def _build_data_payload(self) -> int:
         """
         Build the data payload.
 
@@ -129,7 +126,7 @@ class Strategy(SharedClass):
             while True:
                 results = temper.read()
                 if "internal temperature" in results.keys():
-                    degrees = results.get('internal temperature')
+                    degrees = results.get("internal temperature")
                 else:
                     logger.debug("Couldn't read the sensor I am re-trying.")
         else:
