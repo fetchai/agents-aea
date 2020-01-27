@@ -253,7 +253,7 @@ class FIPAHandler(Handler):
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=new_target,
             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            info={"address": self.context.agent_addresses[identifier], },
+            info={"address": self.context.agent_addresses[identifier],},
         )
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(
