@@ -366,7 +366,9 @@ def try_get_item_source_path(
     return source_path
 
 
-def try_get_item_target_path(path: str, author_name: str, item_type_plural: str, item_name: str) -> str:
+def try_get_item_target_path(
+    path: str, author_name: str, item_type_plural: str, item_name: str
+) -> str:
     """
     Get the item target path.
 

@@ -1,14 +1,14 @@
-The file structure of an agent is fixed.
+The file structure of an AEA is fixed.
 
-The top level directory has the agent's name. Below is a `yaml` configuration file, then directories containing the connections, protocols, and skills developed by the developer. The connections, protocols and skills from other authors are located in `vendor` and sorted by author. Finally, there are files containing the private keys of the agent.
+The top level directory has the AEA's name. Below is a `yaml` configuration file, then directories containing the connections, protocols, and skills developed by the developer. The connections, protocols and skills from other authors are located in `vendor` and sorted by author. Finally, there are files containing the private keys of the AEA.
 
 The developer can create new directories where necessary but the core structure must remain the same.
 
-The CLI tool provides a way to scaffold new connections, protocols and skills in the required directory structure for agents. See the instructions for that <a href="../scaffolding/">here</a>.
+The CLI tool provides a way to scaffold new connections, protocols and skills in the required directory structure for AEAs. See the instructions for that <a href="../scaffolding/">here</a>.
 
 ``` bash
-agent_name/
-  aea-config.yaml       YAML configuration of the agent
+aea_name/
+  aea-config.yaml       YAML configuration of the AEA
   private_key.pem       The private key file
   connections/          Directory containing all the own connections
     connection_1/       First connection

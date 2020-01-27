@@ -51,19 +51,19 @@ Additional protocols can be added as packages, including:
 
 ### Skill
 
-Skills are a result of the framework's extensibility. They are self-contained capabilities that agents can dynamically take on board, 
+Skills are a result of the framework's extensibility. They are self-contained capabilities that AEAs can dynamically take on board, 
 in order to expand their effectiveness in different situations. 
-A skill can be given permission to read the internal state of the the agent, and suggest action(s) to the agent according to its specific logic. 
-As such, more than one skill could exist per protocol, competing with each other in suggesting to the agent the best course of actions to take. 
+A skill can be given permission to read the internal state of the the AEA, and suggest action(s) to the AEA according to its specific logic. 
+As such, more than one skill could exist per protocol, competing with each other in suggesting to the AEA the best course of actions to take. 
 
-For instance, an agent who is trading goods, could subscribe to more than one skill, where each skill corresponds to a different trading strategy. 
-The skills could then read the internal state of the agent, and independently suggest profitable transactions. 
+For instance, an AEA who is trading goods, could subscribe to more than one skill, where each skill corresponds to a different trading strategy. 
+The skills could then read the internal state of the AEA, and independently suggest profitable transactions. 
 
 A skill encapsulates implementations of the abstract base classes `Handler`, `Behaviour`, and `Task`:
 
-* `Handler`: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement agents' reactive behaviour. If the agent understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages.
-* `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the agent. Behaviours implement agents' pro-activeness.
-* `Task`: none, one or more `Tasks` encapsulate background work internal to the agent.
+* `Handler`: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement AEAs' reactive behaviour. If the AEA understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages.
+* `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the AEA. Behaviours implement AEAs' pro-activeness.
+* `Task`: none, one or more `Tasks` encapsulate background work internal to the AEA.
 
 Skills further allow for `SharedClasses`. Classes sub-classed from the `SharedClass` can be accessed via the `SkillContext`.
 
@@ -83,7 +83,7 @@ The `_run_main_loop()` function in the `Agent` class performs a series of activi
 
 The `DecisionMaker` component manages global agent state updates proposed by the skills and processes the resulting ledger transactions.
 
-It is responsible for the agent's crypto-economic security and goal management, and it contains the preference and ownership representation of the agent.
+It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA.
 
 ### TransactionMessage and StateUpdateMessage
 

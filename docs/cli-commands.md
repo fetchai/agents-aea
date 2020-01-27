@@ -2,7 +2,7 @@
 
 | Command                                     | Description                                                                  |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
-| `add connection/protocol/skill [name]`      | Add connection, protocol, or skill, called `[name]`, to the agent.           |
+| `add connection/protocol/skill [name]`      | Add connection, protocol, or skill, called `[name]`, to the AEA.             |
 | `add-key default/fetchai/ethereum file`     | Add a private key from a file.	                                             |
 | `create NAME`                               | Create a new aea project called `[name]`.                                    |
 | `config get [path]`                         | Reads the config specified in `[path]` and prints its target.                |
@@ -17,10 +17,10 @@
 | `get-wealth fetchai/ethereum`               | Get the wealth associated with the private key.                              |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
 | `list protocols/connections/skills`         | List the installed resources.                                                |
-| `publish`                                   | Publish agent to registry. Needs to be executed from an agent project.		 |
+| `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.		 |
 | `push connection/protocol/skill [name]`     | Push connection, protocol, or skill called `[name]` to registry.		     |
-| `remove connection/protocol/skill [name]`   | Remove connection, protocol, or skill, called `[name]`, from agent.          |
-| `run {using [connections, ...]}`            | Run the agent on the Fetch.ai network with default or specified connections. |
+| `remove connection/protocol/skill [name]`   | Remove connection, protocol, or skill, called `[name]`, from AEA.            |
+| `run {using [connections, ...]}`            | Run the AEA on the Fetch.ai network with default or specified connections.   |
 | `search protocols/connections/skills`       | Search for components in the registry.                                       |
 | `scaffold connection/protocol/skill [name]` | Scaffold a new connection, protocol, or skill called `[name]`.               |
 | `-v DEBUG run`                              | Run with debugging.                                                          |
@@ -28,7 +28,7 @@
 <!--
 Command  | Description
 ---------| -----------------------------------------------------------------
-`deploy {using [connection, ...]}`  | Deploy the agent to a server and run it on the Fetch.ai network with default or specified connections.
+`deploy {using [connection, ...]}`  | Deploy the AEA to a server and run it on the Fetch.ai network with default or specified connections.
  -->
 
 <div class="admonition tip">

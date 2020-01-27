@@ -93,7 +93,10 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
         ctx.cwd, item_id.author, item_type_plural, item_id.name
     )
     target_path = try_get_item_target_path(
-        ctx.agent_config.registry_path, ctx.agent_config.author, item_type_plural, item_id.name
+        ctx.agent_config.registry_path,
+        ctx.agent_config.author,
+        item_type_plural,
+        item_id.name,
     )
     _check_package_public_id(source_path, item_type, item_id)
     copytree(source_path, target_path)
