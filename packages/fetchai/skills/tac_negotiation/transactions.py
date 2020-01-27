@@ -154,9 +154,9 @@ class Transactions(SharedClass):
             tx_nonce=proposal_description.values["tx_nonce"],
         )
         skill_callback_ids = (
-            ["tac_participation"]
+            ["fetchai/tac_participation:0.1.0"]
             if performative == TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT
-            else ["tac_negotiation"]
+            else ["fetchai/tac_negotiation:0.1.0"]
         )
         transaction_msg = TransactionMessage(
             performative=performative,

@@ -102,8 +102,7 @@ Both in `ml_model_trainer/aea-config.yaml` and
 ``` yaml
 ledger_apis:
   fetchai:
-    addr: alpha.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 ### Fund the ml model trainer AEA
@@ -117,7 +116,7 @@ aea generate-wealth fetchai
 
 We tell the ml model trainer skill to use the ledger, by using the following command:
 ``` bash
-aea config set skills.ml_train.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.ml_train.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 ### Run both AEAs
