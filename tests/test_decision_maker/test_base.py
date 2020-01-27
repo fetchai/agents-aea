@@ -19,6 +19,7 @@
 
 """This module contains tests for decision_maker."""
 import os
+import time
 from queue import Queue
 from unittest import mock
 
@@ -475,6 +476,8 @@ class TestDecisionMaker:
         cls.info = {"some_info_key": "some_info_value"}
         cls.ledger_id = "fetchai"
 
+        cls.decision_maker.start()
+
     def test_properties(self):
         """Test the properties of the decision maker."""
         assert self.decision_maker.outbox.empty()
@@ -500,8 +503,8 @@ class TestDecisionMaker:
         )
 
         self.decision_maker.message_in_queue.put_nowait(tx_message)
-        with mock.patch.object(self.decision_maker, "handle"):
-            self.decision_maker.execute()
+        # test that after a while the queue has been consumed.
+        time.sleep(0.5)
         assert self.decision_maker.message_in_queue.empty()
 
     def test_decision_maker_handle_state_update_initialize(self):
@@ -735,8 +738,7 @@ class TestDecisionMaker:
         )
 
         self.decision_maker.message_in_queue.put_nowait(default_message)
-        self.decision_maker.execute()
-
+        time.sleep(0.5)
         self.mocked_logger_warning.assert_called_with(
             "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
                 self.agent_name
@@ -937,6 +939,7 @@ class TestDecisionMaker:
         """Tear the tests down."""
         cls._unpatch_logger()
         cls.multiplexer.disconnect()
+        cls.decision_maker.stop()
 
 
 class TestLedgerStateProxy:
