@@ -23,6 +23,7 @@
 from enum import Enum
 from typing import List, cast
 
+from aea.configurations.base import PublicId
 from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 
@@ -30,7 +31,7 @@ from aea.protocols.base import Message
 class OEFMessage(Message):
     """The OEF message class."""
 
-    protocol_id = "oef"
+    protocol_id = PublicId("fetchai", "oef", "0.1.0")
 
     class Type(Enum):
         """OEF Message types."""

@@ -24,6 +24,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from typing import Dict, Union, cast
 
 import click
 
@@ -41,7 +42,7 @@ from aea.cli.login import login
 from aea.cli.publish import publish
 from aea.cli.push import push
 from aea.cli.remove import remove
-from aea.cli.run import run
+from aea.cli.run import _verify_ledger_apis_access, _verify_or_create_private_keys, run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig
@@ -52,8 +53,11 @@ from aea.crypto.helpers import (
     DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
+    _try_generate_testnet_wealth,
     _validate_private_key_path,
 )
+from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.wallet import Wallet
 
 
 @click.group(name="aea")
@@ -89,7 +93,7 @@ def delete(ctx: Context, agent_name):
     finally:
         os.chdir(cwd)
 
-    logger.info("Deleting AEA project directory '/{}'...".format(path))
+    logger.info("Deleting AEA project directory './{}'...".format(path))
 
     # delete the agent's directory
     try:
@@ -191,6 +195,100 @@ def add_key(ctx: Context, type_, file):
     ctx.agent_loader.dump(
         ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
     )
+
+
+@cli.command()
+@click.argument(
+    "type_",
+    metavar="TYPE",
+    type=click.Choice(
+        [DefaultCrypto.identifier, FetchAICrypto.identifier, EthereumCrypto.identifier]
+    ),
+    required=True,
+)
+@pass_ctx
+def get_address(ctx: Context, type_):
+    """Get the address associated with the private key."""
+    try_to_load_agent_config(ctx)
+
+    _verify_or_create_private_keys(ctx)
+    private_key_paths = dict(
+        [
+            (identifier, config.path)
+            for identifier, config in ctx.agent_config.private_key_paths.read_all()
+        ]
+    )
+    try:
+        wallet = Wallet(private_key_paths)
+        address = wallet.addresses[type_]
+        print(address)
+    except ValueError as e:  # pragma: no cover
+        logger.error(str(e))  # pragma: no cover
+
+
+@cli.command()
+@click.argument(
+    "type_",
+    metavar="TYPE",
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
+    required=True,
+)
+@pass_ctx
+def get_wealth(ctx: Context, type_):
+    """Get the wealth associated with the private key."""
+    try_to_load_agent_config(ctx)
+
+    _verify_or_create_private_keys(ctx)
+    private_key_paths = dict(
+        [
+            (identifier, config.path)
+            for identifier, config in ctx.agent_config.private_key_paths.read_all()
+        ]
+    )
+    wallet = Wallet(private_key_paths)
+    try:
+        _verify_ledger_apis_access()
+        ledger_api_configs = dict(
+            [
+                (identifier, cast(Dict[str, Union[str, int]], config))
+                for identifier, config in ctx.agent_config.ledger_apis.read_all()
+            ]
+        )
+        ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
+
+        address = wallet.addresses[type_]
+        balance = ledger_apis.token_balance(type_, address)
+        print(balance)
+    except (AssertionError, ValueError) as e:  # pragma: no cover
+        logger.error(str(e))  # pragma: no cover
+
+
+@cli.command()
+@click.argument(
+    "type_",
+    metavar="TYPE",
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
+    required=True,
+)
+@pass_ctx
+def generate_wealth(ctx: Context, type_):
+    """Generate wealth for address on test network."""
+    try_to_load_agent_config(ctx)
+
+    _verify_or_create_private_keys(ctx)
+    private_key_paths = dict(
+        [
+            (identifier, config.path)
+            for identifier, config in ctx.agent_config.private_key_paths.read_all()
+        ]
+    )
+    wallet = Wallet(private_key_paths)
+    try:
+        address = wallet.addresses[type_]
+        logger.info("Requesting funds for address {}".format(address))
+        _try_generate_testnet_wealth(type_, address)
+    except (AssertionError, ValueError) as e:  # pragma: no cover
+        logger.error(str(e))  # pragma: no cover
 
 
 cli.add_command(_list)

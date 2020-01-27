@@ -23,12 +23,12 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Set, Union
+from typing import Optional, Union
 
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
 from aea.mail.base import Address, Envelope
 
@@ -54,7 +54,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += e.sender.encode("utf-8")
     result += separator
-    result += e.protocol_id.encode("utf-8")
+    result += str(e.protocol_id).encode("utf-8")
     result += separator
     result += e.message
 
@@ -69,7 +69,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 
     to = split[0].decode("utf-8").strip()
     sender = split[1].decode("utf-8").strip()
-    protocol_id = split[2].decode("utf-8").strip()
+    protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
     message = split[3]
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
@@ -103,15 +103,12 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    restricted_to_protocols = set()  # type: Set[str]
-
     def __init__(
         self,
         input_file_path: Union[str, Path],
         output_file_path: Union[str, Path],
-        connection_id: str = "stub",
-        restricted_to_protocols: Optional[Set[str]] = None,
-        excluded_protocols: Optional[Set[str]] = None,
+        *args,
+        **kwargs
     ):
         """
         Initialize a stub connection.
@@ -122,9 +119,9 @@ class StubConnection(Connection):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        super().__init__(
-            connection_id=connection_id, restricted_to_protocols=restricted_to_protocols
-        )
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "stub", "0.1.0")
+        super().__init__(*args, **kwargs)
 
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -253,7 +250,7 @@ class StubConnection(Connection):
         return StubConnection(
             input_file,
             output_file,
-            connection_id=connection_configuration.name,
+            connection_id=connection_configuration.public_id,
             restricted_to_protocols=restricted_to_protocols_names,
             excluded_protocols=excluded_protocols_names,
         )

@@ -52,7 +52,7 @@ aea install
 
 ### Run the data provider AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 ### Create the model trainer AEA
@@ -83,7 +83,7 @@ aea install
 
 ### Run the model trainer AEA
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 After some time, you should see the AEAs transact and the model trainer train its model.
@@ -110,9 +110,7 @@ ledger_apis:
 
 Create some wealth for your ml model trainer on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
-cd ..
-python scripts/fetchai_wealth_generation.py --private-key ml_model_trainer/fet_private_key.txt --amount 10000000 --addr alpha.fetch-ai.com --port 80
-cd ml_model_trainer
+aea generate-wealth fetchai
 ```
 
 ### Update the ml model trainer AEA skills config
@@ -126,7 +124,7 @@ aea config set skills.ml_train.shared_classes.strategy.args.is_ledger_tx True
 
 From their respective directories, run both AEAs
 ``` bash
-aea run --connections oef
+aea run --connections fetchai/oef:0.1.0
 ```
 
 ### Clean up

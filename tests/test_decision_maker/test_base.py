@@ -28,6 +28,7 @@ from web3.auto import Web3
 
 import aea
 import aea.decision_maker.base
+from aea.configurations.base import PublicId
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import DEFAULT_FETCHAI_CONFIG
 from aea.crypto.ledger_apis import LedgerApis
@@ -40,7 +41,7 @@ from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.mail.base import Multiplexer, OutBox
 from aea.protocols.default.message import DefaultMessage
 
-from ..conftest import CUR_PATH, DummyConnection
+from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
 MAX_REACTIONS = 10
 
@@ -102,7 +103,7 @@ class TestOwnershipState:
         )
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -128,7 +129,7 @@ class TestOwnershipState:
         )
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -154,7 +155,7 @@ class TestOwnershipState:
         )
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -180,7 +181,7 @@ class TestOwnershipState:
         )
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -206,7 +207,7 @@ class TestOwnershipState:
         )
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -239,7 +240,7 @@ class TestOwnershipState:
         assert self.ownership_state.quantities_by_good_id == good_endowment
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -272,7 +273,7 @@ class TestOwnershipState:
         assert self.ownership_state.quantities_by_good_id == good_endowment
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -395,7 +396,7 @@ class TestPreferencesDecisionMaker:
         )
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -446,7 +447,9 @@ class TestDecisionMaker:
     def setup_class(cls):
         """Initialise the decision maker."""
         cls._patch_logger()
-        cls.multiplexer = Multiplexer([DummyConnection()])
+        cls.multiplexer = Multiplexer(
+            [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
+        )
         cls.outbox = OutBox(cls.multiplexer)
         private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         eth_private_key_pem_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
@@ -484,7 +487,7 @@ class TestDecisionMaker:
         """Test the execute method."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -553,13 +556,14 @@ class TestDecisionMaker:
             == expected_quantities_by_good_id
         )
 
+    # TODO this used to work with the testnet
     def test_decision_maker_handle_tx_message(self):
         """Test the handle tx message method."""
         assert self.decision_maker.message_out_queue.empty()
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -593,7 +597,7 @@ class TestDecisionMaker:
         ):
             tx_message = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=["default"],
+                skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
                 tx_id=self.tx_id,
                 tx_sender_addr=self.tx_sender_addr,
                 tx_counterparty_addr=self.tx_counterparty_addr,
@@ -613,7 +617,7 @@ class TestDecisionMaker:
         """Test that the decision maker is not ready to pursuit the goals.Cannot handle the message."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -642,7 +646,7 @@ class TestDecisionMaker:
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -660,7 +664,7 @@ class TestDecisionMaker:
         """Test that the decision maker can handle a message that is ready for signing."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -679,7 +683,7 @@ class TestDecisionMaker:
         """Test that a tx_message is acceptable for settlement."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -703,7 +707,7 @@ class TestDecisionMaker:
         """Test that a tx_message is not acceptable for settlement."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -743,7 +747,7 @@ class TestDecisionMaker:
         """Test the off_chain message."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -765,7 +769,7 @@ class TestDecisionMaker:
         ):
             tx_message = TransactionMessage(
                 performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-                skill_callback_ids=["default"],
+                skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
                 tx_id=self.tx_id,
                 tx_sender_addr=self.tx_sender_addr,
                 tx_counterparty_addr=self.tx_counterparty_addr,
@@ -783,7 +787,7 @@ class TestDecisionMaker:
         """Test that the tx_message is affordable with initialized ledger_state_proxy."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -808,7 +812,7 @@ class TestDecisionMaker:
         """Test the off_chain message."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -827,7 +831,7 @@ class TestDecisionMaker:
         """Test the off_chain message."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -849,7 +853,7 @@ class TestDecisionMaker:
         """Test the utility enhancing for off_chain message."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -869,7 +873,7 @@ class TestDecisionMaker:
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -891,7 +895,7 @@ class TestDecisionMaker:
 
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -912,7 +916,7 @@ class TestDecisionMaker:
         tx_hash = Web3.keccak(text="some_bytes")
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SIGNING,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id=self.tx_id,
             tx_sender_addr=self.tx_sender_addr,
             tx_counterparty_addr=self.tx_counterparty_addr,
@@ -952,7 +956,7 @@ class TestLedgerStateProxy:
         """Test if the transaction is affordable on the ledger."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",
@@ -976,7 +980,7 @@ class TestLedgerStateProxy:
         """Test if the transaction is affordable on the ledger."""
         tx_message = TransactionMessage(
             performative=TransactionMessage.Performative.PROPOSE_FOR_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId("author", "a_skill", "0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="agent_1",
             tx_counterparty_addr="pk",

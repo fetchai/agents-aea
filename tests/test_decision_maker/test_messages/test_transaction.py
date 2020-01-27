@@ -21,6 +21,7 @@
 
 import pytest
 
+from aea.configurations.base import PublicId
 from aea.decision_maker.messages.transaction import TransactionMessage
 
 
@@ -31,7 +32,7 @@ class TestTransaction:
         """Test for an error in consistency of a message."""
         assert TransactionMessage(
             performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-            skill_callback_ids=["default"],
+            skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
             tx_id="transaction0",
             tx_sender_addr="pk1",
             tx_counterparty_addr="pk2",
@@ -46,7 +47,7 @@ class TestTransaction:
         with pytest.raises(AssertionError):
             TransactionMessage(
                 performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-                skill_callback_ids=["default"],
+                skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
                 tx_id="transaction0",
                 tx_sender_addr="pk1",
                 tx_counterparty_addr="pk2",
@@ -61,7 +62,7 @@ class TestTransaction:
         with pytest.raises(AssertionError):
             TransactionMessage(
                 performative=TransactionMessage.Performative.SUCCESSFUL_SETTLEMENT,
-                skill_callback_ids=["default"],
+                skill_callback_ids=[PublicId.from_str("author/skill:0.1.0")],
                 tx_id="transaction0",
                 tx_sender_addr="pk",
                 tx_counterparty_addr="pk",

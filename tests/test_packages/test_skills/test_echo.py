@@ -33,7 +33,7 @@ import pytest
 import yaml
 
 from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PublicId
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
@@ -102,7 +102,7 @@ class TestEchoSkill:
         expected_envelope = Envelope(
             to=self.agent_name,
             sender="sender",
-            protocol_id="default",
+            protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(message),
         )
         encoded_envelope = "{},{},{},{}".format(
@@ -125,7 +125,7 @@ class TestEchoSkill:
         to, sender, protocol_id, message = line.strip().split(b",", maxsplit=3)
         to = to.decode("utf-8")
         sender = sender.decode("utf-8")
-        protocol_id = protocol_id.decode("utf-8")
+        protocol_id = PublicId.from_str(protocol_id.decode("utf-8"))
 
         actual_envelope = Envelope(
             to=to, sender=sender, protocol_id=protocol_id, message=message

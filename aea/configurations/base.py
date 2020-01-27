@@ -32,8 +32,6 @@ DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
 DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
 T = TypeVar("T")
 
-ProtocolId = str
-SkillId = str
 """
 A dependency is a dictionary with the following (optional) keys:
     - version: a version specifier(s) (e.g. '==0.1.0').
@@ -152,7 +150,7 @@ class CRUDCollection(Generic[T]):
         return [(k, v) for k, v in self._items_by_id.items()]
 
 
-class PublicId(object):
+class PublicId(JSONSerializable):
     """This class implement a public identifier.
 
     A public identifier is composed of three elements:
@@ -202,15 +200,15 @@ class PublicId(object):
         return self._version
 
     @classmethod
-    def from_string(cls, public_id_string: str) -> "PublicId":
+    def from_str(cls, public_id_string: str) -> "PublicId":
         """
         Initialize the public id from the string.
 
-        >>> str(PublicId.from_string("author/package_name:0.1.0"))
+        >>> str(PublicId.from_str("author/package_name:0.1.0"))
         'author/package_name:0.1.0'
 
         A bad formatted input raises value error:
-        >>> PublicId.from_string("bad/formatted:input")
+        >>> PublicId.from_str("bad/formatted:input")
         Traceback (most recent call last):
         ...
         ValueError: Input 'bad/formatted:input' is not well formatted.
@@ -228,6 +226,16 @@ class PublicId(object):
                 cls.PUBLIC_ID_REGEX, public_id_string
             )[0][:3]
             return PublicId(username, package_name, version)
+
+    @property
+    def json(self) -> Dict:
+        """Compute the JSON representation."""
+        return {"author": self.author, "name": self.name, "version": self.version}
+
+    @classmethod
+    def from_json(cls, obj: Dict):
+        """Build from a JSON object."""
+        return PublicId(obj["author"], obj["name"], obj["version"],)
 
     def __hash__(self):
         """Get the hash."""
@@ -251,6 +259,10 @@ class PublicId(object):
     def __lt__(self, other):
         """Compare two public ids."""
         return str(self) < str(other)
+
+
+ProtocolId = PublicId
+SkillId = PublicId
 
 
 class PackageConfiguration(Configuration, ABC):
@@ -345,12 +357,12 @@ class ConnectionConfig(PackageConfiguration):
         """Initialize from a JSON object."""
         restricted_to_protocols = obj.get("restricted_to_protocols", set())
         restricted_to_protocols = {
-            PublicId.from_string(id_) for id_ in restricted_to_protocols
+            PublicId.from_str(id_) for id_ in restricted_to_protocols
         }
         excluded_protocols = obj.get("excluded_protocols", set())
-        excluded_protocols = {PublicId.from_string(id_) for id_ in excluded_protocols}
+        excluded_protocols = {PublicId.from_str(id_) for id_ in excluded_protocols}
         dependencies = obj.get("dependencies", {})
-        protocols = {PublicId.from_string(id_) for id_ in obj.get("protocols", set())}
+        protocols = {PublicId.from_str(id_) for id_ in obj.get("protocols", set())}
         return ConnectionConfig(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -548,7 +560,7 @@ class SkillConfig(PackageConfiguration):
         license = cast(str, obj.get("license"))
         protocols = cast(
             List[PublicId],
-            [PublicId.from_string(id_) for id_ in obj.get("protocols", [])],
+            [PublicId.from_str(id_) for id_ in obj.get("protocols", [])],
         )
         dependencies = cast(Dependencies, obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
@@ -640,7 +652,7 @@ class AgentConfig(PackageConfiguration):
         if connection_id is None:
             self._default_connection = None
         elif isinstance(connection_id, str):
-            self._default_connection = PublicId.from_string(connection_id)
+            self._default_connection = PublicId.from_str(connection_id)
         else:
             self._default_connection = connection_id
 
@@ -710,18 +722,16 @@ class AgentConfig(PackageConfiguration):
 
         # parse connection public ids
         connections = set(
-            map(lambda x: PublicId.from_string(x), obj.get("connections", []))
+            map(lambda x: PublicId.from_str(x), obj.get("connections", []))
         )
         agent_config.connections = cast(Set[PublicId], connections)
 
         # parse protocol public ids
-        protocols = set(
-            map(lambda x: PublicId.from_string(x), obj.get("protocols", []))
-        )
+        protocols = set(map(lambda x: PublicId.from_str(x), obj.get("protocols", [])))
         agent_config.protocols = cast(Set[PublicId], protocols)
 
         # parse skills public ids
-        skills = set(map(lambda x: PublicId.from_string(x), obj.get("skills", [])))
+        skills = set(map(lambda x: PublicId.from_str(x), obj.get("skills", [])))
         agent_config.skills = cast(Set[PublicId], skills)
 
         # set default connection

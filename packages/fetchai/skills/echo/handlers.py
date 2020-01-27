@@ -22,6 +22,7 @@
 import logging
 
 from aea.protocols.base import Message
+from aea.protocols.default.message import DefaultMessage
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.skills.base import Handler
 
@@ -31,7 +32,7 @@ logger = logging.getLogger("aea.echo_skill")
 class EchoHandler(Handler):
     """Echo handler."""
 
-    SUPPORTED_PROTOCOL = "default"
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""
@@ -55,7 +56,7 @@ class EchoHandler(Handler):
         self.context.outbox.put_message(
             to=message.counterparty,
             sender=self.context.agent_name,
-            protocol_id="default",
+            protocol_id=DefaultMessage.protocol_id,
             message=DefaultSerializer().encode(message),
         )
 

@@ -25,6 +25,7 @@ from typing import Tuple, cast
 
 import numpy as np
 
+from aea.configurations.base import PublicId
 from aea.helpers.search.models import Description, Query
 from aea.protocols.base import Message
 
@@ -32,7 +33,7 @@ from aea.protocols.base import Message
 class MLTradeMessage(Message):
     """The ML trade message class."""
 
-    protocol_id = "ml_trade"
+    protocol_id = PublicId("fetchai", "ml_trade", "0.1.0")
 
     class Performative(Enum):
         """ML trade performatives."""

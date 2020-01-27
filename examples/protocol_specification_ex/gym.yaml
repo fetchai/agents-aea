@@ -6,13 +6,13 @@ description: 'A protocol for interacting with a gym connection.'
 speech_acts:
   act:
     action: Action
-    step_id: int
+    step_id: pt:int
   percept:
-    step_id: int
+    step_id: pt:int
     observation: Observation
-    reward: float
-    done: bool
-    info: dict[str, Any]
+    reward: pt:float
+    done: pt:bool
+    info: pt:dict[pt:str, PerceptInfo]
   reset: {}
   close: {}
 

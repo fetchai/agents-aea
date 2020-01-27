@@ -30,7 +30,9 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.mail.base import Envelope
+from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import Filter, Resources
+from aea.skills.error import ERROR_SKILL_ID
 from aea.skills.error.handlers import ErrorHandler
 from aea.skills.tasks import TaskManager
 
@@ -175,9 +177,11 @@ class AEA(Agent):
         logger.debug("Handling envelope: {}".format(envelope))
         protocol = self.resources.protocol_registry.fetch(envelope.protocol_id)
 
-        error_handler = self.resources.handler_registry.fetch_by_skill(
-            "default", "error"
+        # TODO make this working for different skill/protocol versions.
+        error_handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
+            DefaultMessage.protocol_id, ERROR_SKILL_ID,
         )
+
         assert error_handler is not None, "ErrorHandler not initialized"
         error_handler = cast(ErrorHandler, error_handler)
 
@@ -198,7 +202,7 @@ class AEA(Agent):
             return  # pragma: no cover
 
         handlers = self.filter.get_active_handlers(protocol.id)
-        if handlers is None:
+        if len(handlers) == 0:
             if error_handler is not None:
                 error_handler.send_unsupported_skill(envelope)
             return

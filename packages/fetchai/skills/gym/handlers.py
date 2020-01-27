@@ -34,7 +34,7 @@ logger = logging.getLogger("aea.gym_skill")
 class GymHandler(Handler):
     """Gym handler."""
 
-    SUPPORTED_PROTOCOL = "gym"
+    SUPPORTED_PROTOCOL = GymMessage.protocol_id
 
     def __init__(self, **kwargs):
         """Initialize the handler."""

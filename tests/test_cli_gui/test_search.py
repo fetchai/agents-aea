@@ -25,11 +25,13 @@ from .test_base import DummyPID, create_app
 
 dummy_output = """Available items:
 ------------------------------
+Public ID: fetchai/default:0.1.0
 Name: default
 Description: The default item allows for any byte logic.
 Version: 0.1.0
 ------------------------------
 ------------------------------
+Public ID: fetchai/oef:0.1.0
 Name: oef
 Description: The oef item implements the OEF specific logic.
 Version: 0.1.0
@@ -56,12 +58,12 @@ def _test_search_items_with_query(item_type: str, query: str):
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
     assert len(data["search_result"]) == 2
-    assert data["search_result"][0]["id"] == "default"
+    assert data["search_result"][0]["id"] == "fetchai/default:0.1.0"
     assert (
         data["search_result"][0]["description"]
         == "The default item allows for any byte logic."
     )
-    assert data["search_result"][1]["id"] == "oef"
+    assert data["search_result"][1]["id"] == "fetchai/oef:0.1.0"
     assert (
         data["search_result"][1]["description"]
         == "The oef item implements the OEF specific logic."
@@ -84,9 +86,9 @@ def _test_search_items(item_type: str):
     assert response_list.status_code == 200
     data = json.loads(response_list.get_data(as_text=True))
     assert len(data) == 2
-    assert data[0]["id"] == "default"
+    assert data[0]["id"] == "fetchai/default:0.1.0"
     assert data[0]["description"] == "The default item allows for any byte logic."
-    assert data[1]["id"] == "oef"
+    assert data[1]["id"] == "fetchai/oef:0.1.0"
     assert data[1]["description"] == "The oef item implements the OEF specific logic."
 
 
@@ -140,34 +142,34 @@ def test_real_search():
     assert len(data) == 6
     i = 0
 
-    assert data[i]["id"] == "gym"
+    assert data[i]["id"] == "fetchai/gym:0.1.0"
     assert data[i]["description"] == "The gym connection wraps an OpenAI gym."
     i += 1
-    assert data[i]["id"] == "local"
+    assert data[i]["id"] == "fetchai/local:0.1.0"
     assert (
         data[i]["description"]
         == "The local connection provides a stub for an OEF node."
     )
     i += 1
-    assert data[i]["id"] == "oef"
+    assert data[i]["id"] == "fetchai/oef:0.1.0"
     assert (
         data[i]["description"]
         == "The oef connection provides a wrapper around the OEF sdk."
     )
     i += 1
-    assert data[i]["id"] == "p2p"
+    assert data[i]["id"] == "fetchai/p2p:0.1.0"
     assert (
         data[i]["description"]
         == "The p2p connection provides a connection with the fetch.ai mail provider."
     )
     i += 1
-    assert data[i]["id"] == "stub"
+    assert data[i]["id"] == "fetchai/stub:0.1.0"
     assert (
         data[i]["description"]
         == "The stub connection implements a connection stub which reads/writes messages from/to file."
     )
     i += 1
-    assert data[i]["id"] == "tcp"
+    assert data[i]["id"] == "fetchai/tcp:0.1.0"
     assert (
         data[i]["description"]
         == "The tcp connection implements a tcp server and client."

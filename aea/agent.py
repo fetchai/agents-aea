@@ -91,6 +91,8 @@ class Agent(ABC):
         self._liveness = Liveness()
         self._timeout = timeout
 
+        self._tick = 0
+
         self.debug = debug
         self.programmatic = programmatic
 
@@ -123,6 +125,11 @@ class Agent(ABC):
     def liveness(self) -> Liveness:
         """Get the liveness."""
         return self._liveness
+
+    @property
+    def tick(self) -> int:
+        """Get the tick."""
+        return self._tick
 
     @property
     def agent_state(self) -> AgentState:
@@ -177,6 +184,7 @@ class Agent(ABC):
         """
         logger.debug("[{}]: Start processing messages...".format(self.name))
         while not self.liveness.is_stopped:
+            self._tick += 1
             self.act()
             time.sleep(self._timeout)
             self.react()

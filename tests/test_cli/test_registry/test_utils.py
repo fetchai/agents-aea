@@ -54,7 +54,7 @@ class TestFetchPackage:
     ):
         """Test for fetch_package method positive result."""
         obj_type = "connection"
-        public_id = PublicId.from_string("author/name:0.1.0")
+        public_id = PublicId.from_str("author/name:0.1.0")
         cwd = "cwd"
 
         fetch_package(obj_type, public_id, cwd)

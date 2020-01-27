@@ -41,7 +41,7 @@ from packages.fetchai.protocols.fipa.message import FIPAMessage
 from packages.fetchai.protocols.fipa.serialization import FIPASerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
 
-from ..conftest import CUR_PATH, DummyConnection
+from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
 
 class TestSkillError:
@@ -57,7 +57,7 @@ class TestSkillError:
         cls.agent_name = "Agent0"
         cls.address = cls.wallet.addresses["default"]
 
-        cls.connection = DummyConnection()
+        cls.connection = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
         cls.connections = [cls.connection]
         cls.my_aea = AEA(
             cls.agent_name,
@@ -73,7 +73,9 @@ class TestSkillError:
         time.sleep(0.5)
 
         cls.skill_context = SkillContext(cls.my_aea._context)
-        cls.my_error_handler = ErrorHandler(skill_context=cls.skill_context)
+        cls.my_error_handler = ErrorHandler(
+            name="error", skill_context=cls.skill_context
+        )
 
     def test_error_handler_handle(self):
         """Test the handle function."""
@@ -180,11 +182,11 @@ class TestSkillError:
 
     def test_error_behaviour_instantiation(self):
         """Test that we can instantiate the 'ErrorBehaviour' class."""
-        ErrorBehaviour(skill_context=self.skill_context)
+        ErrorBehaviour(name="error", skill_context=self.skill_context)
 
     def test_error_task_instantiation(self):
         """Test that we can instantiate the 'ErrorTask' class."""
-        ErrorTask(skill_context=self.skill_context)
+        ErrorTask(name="error", skill_context=self.skill_context)
 
     @classmethod
     def teardown_class(cls):

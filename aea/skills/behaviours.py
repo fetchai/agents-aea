@@ -214,7 +214,7 @@ class State(OneShotBehaviour, ABC):
         self._next_state = state_name
 
 
-class FSMBehaviour(CompositeBehaviour):
+class FSMBehaviour(CompositeBehaviour, ABC):
     """This class implements a finite-state machine behaviour."""
 
     def __init__(self, **kwargs):
