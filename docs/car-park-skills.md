@@ -131,25 +131,26 @@ This diagram shows the communication between the various entities as data is suc
 <div class="mermaid">
     sequenceDiagram
         participant Search
-        participant Client_AEA
+        participant Car_Data_Buyer_AEA
         participant Car_Park_AEA
         participant Blockchain
     
-        activate Client_AEA
+        activate Car_Data_Buyer_AEA
         activate Search
         activate Car_Park_AEA
         activate Blockchain
         
         Car_Park_AEA->>Search: register_service
-        Client_AEA->>Search: search
-        Search-->>Client_AEA: list_of_agents
-        Client_AEA->>Car_Park_AEA: call_for_proposal
-        Car_Park_AEA->>Client_AEA: propose
-        Client_AEA->>Car_Park_AEA: accept
-        Car_Park_AEA->>Client_AEA: match_accept
-        Client_AEA->>Blockchain: transfer_funds
-        Client_AEA->>Car_Park_AEA: send_transaction_hash
-        Car_Park_AEA->>Client_AEA: send_data
+        Car_Data_Buyer_AEA->>Search: search
+        Search-->>Car_Data_Buyer_AEA: list_of_agents
+        Car_Data_Buyer_AEA->>Car_Park_AEA: call_for_proposal
+        Car_Park_AEA->>Car_Data_Buyer_AEA: propose
+        Car_Data_Buyer_AEA->>Car_Park_AEA: accept
+        Car_Park_AEA->>Car_Data_Buyer_AEA: match_accept
+        Car_Data_Buyer_AEA->>Blockchain: transfer_funds
+        Car_Data_Buyer_AEA->>Car_Park_AEA: send_transaction_hash
+        Car_Park_AEA->>Blockchain: check_transaction_status
+        Car_Park_AEA->>Car_Data_Buyer_AEA: send_data
         
         deactivate Client_AEA
         deactivate Search

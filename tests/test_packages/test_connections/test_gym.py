@@ -32,6 +32,8 @@ from packages.fetchai.connections.gym.connection import GymConnection
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.serialization import GymSerializer
 
+from tests.conftest import UNKNOWN_PROTOCOL_PUBLIC_ID
+
 logger = logging.getLogger(__name__)
 
 
@@ -58,7 +60,7 @@ class TestGymConnection:
         envelope = Envelope(
             to="_to_key",
             sender="_from_key",
-            protocol_id="author/unknown_protocol:0.1.0",
+            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=b"hello",
         )
         with pytest.raises(ValueError):
