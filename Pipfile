@@ -30,7 +30,7 @@ gym = "*"
 numpy = "*"
 tensorflow = "*"
 scikit-image = "*"
-mkdocs-mermaid-plugin = {editable = true,git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
+mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.git",editable = true}
 
 [packages]
 cryptography = "*"
@@ -50,6 +50,7 @@ web3 = "==5.2.2"
 eth-account = "==0.4.0"
 fetchai-ledger-api = "==1.0.0rc1"
 fetch-p2p-api = {index = "https://test.pypi.org/simple/",version = "==0.0.2"}
+pytest = "*"
 
 [requires]
 python_version = "3.7"

@@ -253,9 +253,7 @@ class EthereumApi(LedgerApi):
         """
         time_stamp = int(time.time())
         aggregate_hash = Web3.keccak(
-            b"".join(
-                [seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")]
-            )
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
         )
         return aggregate_hash.hex()
 

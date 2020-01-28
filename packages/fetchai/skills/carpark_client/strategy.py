@@ -40,7 +40,6 @@ logger = logging.getLogger(__name__)
 DEFAULT_MAX_TX_FEE = 2
 
 
-
 class Strategy(SharedClass):
     """This class defines a strategy for the agent."""
 
