@@ -18,21 +18,20 @@ theme:
 nav:
   - Autonomous Economic Agent Framework:
     - Welcome: 'index.md'
-    - Agent-oriented development: 'agent-oriented-development.md'
     - Getting started:
       - AEA quick start: 'quickstart.md'
       - Build an AEA step by step: 'steps.md'
       - Build a skill for an AEA: 'skill-guide.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
       - AEAs vs Agents: 'agent-vs-aea.md'
-    - Version: 'version.md'
     - The AEA universe:
-      - "Vision": 'vision.md'
-      - "Application areas": 'app-areas.md'
-      - "Relation to OEF and Ledger": 'oef-ledger.md'
-      - "Trust issues": 'trust.md'
+      - Agent-oriented development: 'agent-oriented-development.md'
+      - Vision: 'vision.md'
+      - Application areas: 'app-areas.md'
+      - Relation to OEF and Ledger: 'oef-ledger.md'
+      - Trust issues: 'trust.md'
       # - "Two-layered machine learning": 'two-layer.md'
-    - Demos:
+    - Demo guides:
       - "Car park agent": 'car-park-skills.md'
       - "Gym example": 'gym-example.md'
       - "Gym skill": 'gym-skill.md'
@@ -45,7 +44,8 @@ nav:
       - "Architectural diagram": 'diagram.md'
       - "Core components": 'core-components.md'
       - "File structure": 'file-structure.md'
-    - Developer guide:
+    - Developer guides:
+      - Version: 'version.md'
       - "Skill": 'skill.md'
       - "Protocol": 'protocol.md'
       - "Connection": 'connection.md'

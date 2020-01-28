@@ -1,6 +1,6 @@
 The AEA ml skills demonstrate an interaction between two AEAs trading data.
 
-There are two types of agents:
+There are two types of AEAs:
 
 * The ml data provider which sells training data.
 * The ml model trainer which trains a model
@@ -36,13 +36,13 @@ aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/ml_data_provider:0.1.0
 ```
 
-### Alternatively, install the agent directly
+### Alternatively, install the AEA directly
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
 aea fetch fetchai/ml_data_provider:0.1.0
 cd ml_data_provider
 ```
-The `aea fetch` command creates the entire agent, including its dependencies for you.
+The `aea fetch` command creates the entire AEA, including its dependencies for you.
 
 ### Install the dependencies
 The ml data provider uses `tensorflow` and `numpy`.
@@ -68,7 +68,7 @@ aea add connection fetchai/oef:0.1.0
 aea add skill fetchai/ml_train:0.1.0
 ```
 
-### Alternatively, install the agent directly
+### Alternatively, install the AEA directly
 In the root directory, fetch the data provider AEA and enter the project.
 ``` bash
 aea fetch fetchai/ml_model_trainer:0.1.0
@@ -102,8 +102,7 @@ Both in `ml_model_trainer/aea-config.yaml` and
 ``` yaml
 ledger_apis:
   fetchai:
-    addr: alpha.fetch-ai.com
-    port: 80
+    network: testnet
 ```
 
 ### Fund the ml model trainer AEA
@@ -117,7 +116,7 @@ aea generate-wealth fetchai
 
 We tell the ml model trainer skill to use the ledger, by using the following command:
 ``` bash
-aea config set skills.ml_train.shared_classes.strategy.args.is_ledger_tx True
+aea config set vendor.fetchai.skills.ml_train.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 ### Run both AEAs
@@ -135,7 +134,7 @@ aea delete ml_model_trainer
 ```
 
 ## Communication
-This diagram shows the communication between the two agents.
+This diagram shows the communication between the two AEAs.
 
 <div class="mermaid">
     sequenceDiagram

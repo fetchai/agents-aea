@@ -22,8 +22,10 @@
 import copy
 import logging
 import math
+import threading
 from enum import Enum
 from queue import Queue
+from threading import Thread
 from typing import Dict, List, Optional, cast
 
 from aea.crypto.ethereum import ETHEREUM
@@ -45,7 +47,6 @@ ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
 SENDER_TX_SHARE = 0.5
 QUANTITY_SHIFT = 100
-INTERNAL_PROTOCOL_ID = "internal"
 OFF_CHAIN_SETTLEMENT_DIGEST = cast(Optional[str], "off_chain_settlement")
 
 logger = logging.getLogger(__name__)
@@ -464,6 +465,10 @@ class DecisionMaker:
         self._preferences = Preferences()
         self._goal_pursuit_readiness = GoalPursuitReadiness()
 
+        self._thread = None  # type: Optional[Thread]
+        self._lock = threading.Lock()
+        self._stopped = True
+
     @property
     def message_in_queue(self) -> Queue:
         """Get (in) queue."""
@@ -504,25 +509,50 @@ class DecisionMaker:
         """Get readiness of agent to pursuit its goals."""
         return self._goal_pursuit_readiness
 
+    def start(self):
+        """Start the decision maker."""
+        with self._lock:
+            if not self._stopped:
+                logger.debug("Decision maker already started.")
+                return
+
+            self._stopped = False
+            self._thread = Thread(target=self.execute)
+            self._thread.start()
+
+    def stop(self):
+        with self._lock:
+            self._stopped = True
+            self.message_in_queue.put(None)
+            self._thread.join()
+            logger.debug("Decision Maker stopped.")
+            self._thread = None
+
     def execute(self) -> None:
         """
         Execute the decision maker.
 
         :return: None
         """
-        while not self.message_in_queue.empty():
-            message = (
-                self.message_in_queue.get_nowait()
+        while not self._stopped:
+            message = self.message_in_queue.get(
+                block=True
             )  # type: Optional[InternalMessage]
-            if message is not None:
-                if message.protocol_id == INTERNAL_PROTOCOL_ID:
-                    self.handle(message)
-                else:
-                    logger.warning(
-                        "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
-                            self._agent_name
-                        )
+
+            if message is None:
+                logger.debug(
+                    "Decision Maker: Received empty message. Quitting the processing loop..."
+                )
+                continue
+
+            if message.protocol_id == InternalMessage.protocol_id:
+                self.handle(message)
+            else:
+                logger.warning(
+                    "[{}]: Message received by the decision maker is not of protocol_id=internal.".format(
+                        self._agent_name
                     )
+                )
 
     def handle(self, message: InternalMessage) -> None:
         """

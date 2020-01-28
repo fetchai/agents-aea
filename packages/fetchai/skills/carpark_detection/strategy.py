@@ -35,6 +35,7 @@ from packages.fetchai.skills.carpark_detection.detection_database import (
     DetectionDatabase,
 )
 
+DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_PRICE = 2000
 DEFAULT_DB_IS_REL_TO_CWD = False
 DEFAULT_DB_REL_DIR = "temp_files_placeholder"
@@ -77,6 +78,23 @@ class Strategy(SharedClass):
         self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
 
         self.ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+
+        self.data_price_fet = (
+            kwargs.pop("data_price_fet")
+            if "data_price_fet" in kwargs.keys()
+            else DEFAULT_PRICE
+        )
+        self.currency_id = (
+            kwargs.pop("currency_id")
+            if "currency_id" in kwargs.keys()
+            else DEFAULT_CURRENCY_ID
+        )
+        self.ledger_id = (
+            kwargs.pop("ledger_id")
+            if "ledger_id" in kwargs.keys()
+            else DEFAULT_LEDGER_ID
+        )
+        self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
 
         super().__init__(**kwargs)
 
@@ -172,6 +190,10 @@ class Strategy(SharedClass):
         del data[0]["raw_image_path"]
         del data[0]["processed_image_path"]
 
+        assert (
+            self.data_price_fet - self._seller_tx_fee > 0
+        ), "This sale would generate a loss, change the configs!"
+
         last_detection_time = data[0]["epoch"]
         max_spaces = data[0]["free_spaces"] + data[0]["total_count"]
         proposal = Description(
@@ -180,6 +202,7 @@ class Strategy(SharedClass):
                 "lon": data[0]["lon"],
                 "price": self.data_price,
                 "currency_id": self.currency_id,
+                "seller_tx_fee": self._seller_tx_fee,
                 "ledger_id": self.ledger_id,
                 "last_detection_time": last_detection_time,
                 "max_spaces": max_spaces,

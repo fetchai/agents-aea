@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import BinaryIO, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
+from fetchai.ledger.api.tx import TxStatus
 from fetchai.ledger.crypto import Address, Entity, Identity  # type: ignore
 
 from aea.crypto.base import AddressLike, Crypto, LedgerApi
@@ -193,9 +194,9 @@ class FetchAIApi(LedgerApi):
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """Check whether a transaction is settled or not."""
-        tx_status = cast(str, self._api.tx.status(tx_digest))
+        tx_status = cast(TxStatus, self._api.tx.status(tx_digest))
         is_successful = False
-        if tx_status in SUCCESSFUL_TERMINAL_STATES:
+        if tx_status.status in SUCCESSFUL_TERMINAL_STATES:
             # tx_contents = cast(TxContents, api.tx.contents(tx_digest))
             # tx_contents.transfers_to()
             # TODO: check the amount of the transaction is correct

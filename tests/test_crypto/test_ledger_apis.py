@@ -231,12 +231,22 @@ class TestLedgerApis:
         with pytest.raises(AssertionError):
             ledger_apis._is_tx_settled("Unknown", tx_digest=tx_digest)
 
+<<<<<<< HEAD
         with mock.patch.object(
             ledger_apis.apis[FETCHAI].api.tx, "status", return_value="Submitted"
         ):
             is_successful = ledger_apis._is_tx_settled(FETCHAI, tx_digest=tx_digest)
             assert is_successful
             assert ledger_apis.last_tx_statuses[FETCHAI] == "OK"
+=======
+        # tx_status = mock.Mock()
+        # with mock.patch.object(
+        #     ledger_apis.apis[FETCHAI].api.tx, "status", return_value=tx_status
+        # ):
+        #     is_successful = ledger_apis.is_tx_settled(FETCHAI, tx_digest=tx_digest)
+        #     assert is_successful
+        #     assert ledger_apis.last_tx_statuses[FETCHAI] == "OK"
+>>>>>>> 00ccf4ffc35b66ed535a7707f918a8592a151cd9
 
         with mock.patch.object(
             ledger_apis.apis[FETCHAI].api.tx, "status", side_effect=Exception

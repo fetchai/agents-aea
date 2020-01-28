@@ -1,22 +1,25 @@
 aea_version: 0.1.17
-agent_name: my_first_aea
+agent_name: weather_client
 author: fetchai
 connections:
+- fetchai/oef:0.1.0
 - fetchai/stub:0.1.0
 default_connection: fetchai/stub:0.1.0
 default_ledger: fetchai
-description: 'A simple agent to demo the echo skill.'
+description: ''
 fingerprint: ''
 ledger_apis: {}
-license: Apache 2.0
+license: Apache-2.0
 logging_config:
-  disable_existing_loggers: False
+  disable_existing_loggers: false
   version: 1
 private_key_paths: []
 protocols:
 - fetchai/default:0.1.0
+- fetchai/fipa:0.1.0
+- fetchai/oef:0.1.0
 registry_path: ../packages
 skills:
-- fetchai/echo:0.1.0
 - fetchai/error:0.1.0
+- fetchai/weather_client:0.1.0
 version: 0.1.0

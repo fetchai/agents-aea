@@ -1,20 +1,20 @@
 The AEA framework supports flexible logging capabilities with the standard <a href="https://docs.python.org/3/library/logging.html" target=_blank>Python logging library</a>.
 
-In this tutorial, we configure logging for an agent.
+In this tutorial, we configure logging for an AEA.
 
-First of all, create your agent.
+First of all, create your AEA.
 
 
 ``` bash
-aea create my_agent
-cd my_agent
+aea create my_aea
+cd my_aea
 ```
 
 The `aea-config.yaml` file should look like this.
 
 ``` yaml
-aea_version: 0.1.16
-agent_name: my_agent
+aea_version: 0.1.17
+agent_name: my_aea
 author: ''
 connections:
 - fetchai/stub:0.1.0

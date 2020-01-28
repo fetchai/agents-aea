@@ -37,6 +37,8 @@ DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
 
 logger = logging.getLogger(__name__)
+DEFAULT_MAX_TX_FEE = 2
+
 
 
 class Strategy(SharedClass):
@@ -75,6 +77,7 @@ class Strategy(SharedClass):
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
+        self.max_buyer_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
 
         super().__init__(**kwargs)
 

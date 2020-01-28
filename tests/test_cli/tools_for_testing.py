@@ -28,6 +28,7 @@ class AgentConfigMock:
 
     registry_path = "registry"
     name = "name"
+    author = "author"
 
     connections: List[str] = []
     protocols: List[str] = []

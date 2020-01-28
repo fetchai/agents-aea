@@ -32,6 +32,8 @@ shared_classes:
       currency_id: 'FET'
       ledger_id: 'fetchai'
       is_ledger_tx: True
+      max_buyer_tx_fee: 1
+
   dialogues:
     class_name: Dialogues
     args: {}

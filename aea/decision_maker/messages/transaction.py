@@ -21,7 +21,7 @@
 """The transaction message module."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Sequence, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import SUPPORTED_CURRENCIES, SUPPORTED_LEDGER_APIS
@@ -51,7 +51,7 @@ class TransactionMessage(InternalMessage):
     def __init__(
         self,
         performative: Performative,
-        skill_callback_ids: Sequence[Union[PublicId, str]],
+        skill_callback_ids: Sequence[PublicId],
         tx_id: TransactionId,
         tx_sender_addr: Address,
         tx_counterparty_addr: Address,
@@ -67,7 +67,7 @@ class TransactionMessage(InternalMessage):
         Instantiate transaction message.
 
         :param performative: the performative
-        :param skill_callback_ids: the skills to receive the transaction message response
+        :param skill_callback_ids: the list public ids of skills to receive the transaction message response
         :param tx_id: the id of the transaction.
         :param tx_sender: the sender of the transaction.
         :param tx_counterparty: the counterparty of the transaction.
@@ -78,12 +78,6 @@ class TransactionMessage(InternalMessage):
         :param ledger_id: the ledger id
         :param info: a dictionary for arbitrary information
         """
-        skill_callback_ids = [
-            public_id
-            if isinstance(public_id, PublicId)
-            else PublicId.from_str(public_id)
-            for public_id in skill_callback_ids
-        ]
         super().__init__(
             performative=performative,
             skill_callback_ids=skill_callback_ids,

@@ -162,3 +162,23 @@ Release History
 - Updates docs to align with recent changes
 - Adds additional tests on CLI
 - Multiple additional minor fixes and changes
+
+0.1.17 (2020-01-27)
+-------------------
+
+- Add programmatic mode flag to AEA
+- Introduces vendorized project structure
+- Adds further tests for decision maker
+- Upgrades sign transaction function for ethereum api proxy
+- Adds black and bugbear to linters
+- Applies public id usage throughout AEA business logic
+- Adds guide on how to deploy an AEA on a raspberry pi
+- Addresses multiple issues in the protocol generator
+- Fixes aea config
+- Adds CLI commands to create wealth and get wealth and address
+- Change default author and license
+- Adds guide on agent vs AEAs
+- Updates docs and improves guides
+- Adds support for inactivating skills programmatically
+- Makes decision maker run in separate thread
+- Multiple additional minor fixes and changes
