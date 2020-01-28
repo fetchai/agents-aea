@@ -22,10 +22,7 @@ from unittest import TestCase, mock
 
 from click import ClickException
 
-from aea.cli.publish import (
-    _check_is_item_in_local_registry,
-    _save_agent_locally
-)
+from aea.cli.publish import _check_is_item_in_local_registry, _save_agent_locally
 
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
@@ -46,7 +43,7 @@ class SaveAgentLocallyTestCase(TestCase):
         path_exists_mock,
         makedirs_mock,
         copyfile_mock,
-        _check_is_item_in_local_registry_mock
+        _check_is_item_in_local_registry_mock,
     ):
         """Test for save_agent_locally positive result."""
         _save_agent_locally(ContextMock())
@@ -55,7 +52,7 @@ class SaveAgentLocallyTestCase(TestCase):
 
 
 def _raise_click_exception(*args):
-    raise ClickException('Message')
+    raise ClickException("Message")
 
 
 class CheckIsItemInLocalRegistryTestCase(TestCase):
@@ -64,25 +61,19 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
     @mock.patch("aea.cli.publish.try_get_item_source_path")
     def test__check_is_item_in_local_registry_positive(self, get_path_mock):
         """Test for _check_is_item_in_local_registry positive result."""
-        public_id = PublicIdMock.from_str('author/name:version')
-        registry_path = 'some-registry-path'
-        item_type_plural = 'items'
-        _check_is_item_in_local_registry(
-            public_id, item_type_plural, registry_path
-        )
+        public_id = PublicIdMock.from_str("author/name:version")
+        registry_path = "some-registry-path"
+        item_type_plural = "items"
+        _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
         get_path_mock.assert_called_once_with(
             registry_path, public_id.author, item_type_plural, public_id.name
         )
 
-    @mock.patch(
-        "aea.cli.publish.try_get_item_source_path", _raise_click_exception
-    )
+    @mock.patch("aea.cli.publish.try_get_item_source_path", _raise_click_exception)
     def test__check_is_item_in_local_registry_negative(self):
         """Test for _check_is_item_in_local_registry negative result."""
-        public_id = PublicIdMock.from_str('author/name:version')
-        registry_path = 'some-registry-path'
-        item_type_plural = 'items'
+        public_id = PublicIdMock.from_str("author/name:version")
+        registry_path = "some-registry-path"
+        item_type_plural = "items"
         with self.assertRaises(ClickException):
-            _check_is_item_in_local_registry(
-                public_id, item_type_plural, registry_path
-            )
+            _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
