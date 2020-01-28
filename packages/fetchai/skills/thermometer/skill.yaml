@@ -22,7 +22,7 @@ shared_classes:
       seller_tx_fee: 0
       currency_id: 'FET'
       ledger_id: 'fetchai'
-      has_sensor: False
+      has_sensor: True
       is_ledger_tx: True
   dialogues:
     class_name: Dialogues

@@ -238,7 +238,6 @@ class FIPAHandler(Handler):
                 ledger_id=proposal.values["ledger_id"],
                 info={"dialogue_label": dialogue.dialogue_label.json},
             )
-            tx_msg.protocol_id = "internal"
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info(
                 "[{}]: proposing the transaction to the decision maker. Waiting for confirmation ...".format(

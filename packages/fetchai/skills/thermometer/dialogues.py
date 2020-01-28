@@ -47,7 +47,7 @@ class Dialogue(FIPADialogue):
         :return: None
         """
         FIPADialogue.__init__(self, dialogue_label=dialogue_label, is_seller=is_seller)
-        self.temp_data = None  # type: Optional[int]
+        self.temp_data = None  # type: Optional[Dict[str, Any]]
         self.proposal = None  # type: Optional[Description]
 
 

@@ -738,10 +738,10 @@ class DecisionMaker:
             logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
             crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
             tx_digest = self.ledger_apis.transfer(
-                crypto_object,
-                tx_message.tx_counterparty_addr,
-                tx_message.counterparty_amount,
-                tx_message.fees,
+                crypto_object=crypto_object,
+                destination_address=tx_message.tx_counterparty_addr,
+                amount=tx_message.counterparty_amount,
+                tx_fee=tx_message.fees,
             )
         return tx_digest
 

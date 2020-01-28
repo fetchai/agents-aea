@@ -20,7 +20,7 @@
 """This module contains the strategy class."""
 import logging
 from random import randrange
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 from temper import Temper
 
@@ -91,7 +91,9 @@ class Strategy(SharedClass):
         # TODO, this is a stub
         return True
 
-    def generate_proposal_and_data(self, query: Query) -> Tuple[Description, int]:
+    def generate_proposal_and_data(
+        self, query: Query
+    ) -> Tuple[Description, Dict[str, Any]]:
         """
         Generate a proposal matching the query.
 
@@ -114,11 +116,10 @@ class Strategy(SharedClass):
         )
         return proposal, temp_data
 
-    def _build_data_payload(self) -> int:
+    def _build_data_payload(self) -> Dict[str, Any]:
         """
         Build the data payload.
 
-        :param fetched_data: the fetched data
         :return: a tuple of the data and the rows
         """
         if self._has_sensor:
@@ -126,10 +127,11 @@ class Strategy(SharedClass):
             while True:
                 results = temper.read()
                 if "internal temperature" in results.keys():
-                    degrees = results.get("internal temperature")
+                    degrees = {"thermometer_data": results}
                 else:
                     logger.debug("Couldn't read the sensor I am re-trying.")
         else:
-            degrees = randrange(10, 25)
+            degrees = {"thermometer_data": randrange(10, 25)}
+            logger.info(degrees)
 
         return degrees

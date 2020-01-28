@@ -192,7 +192,7 @@ class EthereumApi(LedgerApi):
         destination_address: AddressLike,
         amount: int,
         tx_fee: int,
-        chain_id: int = 1,
+        chain_id: int = 3,
         **kwargs
     ) -> Optional[str]:
         """

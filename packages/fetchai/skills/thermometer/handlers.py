@@ -312,9 +312,6 @@ class FIPAHandler(Handler):
                     )
                 )
         elif "Done" in msg.info.keys():
-            import pdb
-
-            pdb.set_trace()
             inform_msg = FIPAMessage(
                 message_id=new_message_id,
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
