@@ -24,6 +24,8 @@ import os
 import subprocess
 from typing import Optional, cast
 
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
 from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
 from aea.skills.behaviours import TickerBehaviour
@@ -163,17 +165,45 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         self._record_oef_status()
-        balance = self.context.ledger_apis.token_balance(
-            "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
-        )
-        strategy.db.set_system_status(
-            "ledger-status", self.context.ledger_apis.last_tx_statuses["fetchai"]
-        )
-        logger.info(
-            "[{}]: starting balance on fetchai ledger={}.".format(
-                self.context.agent_name, balance
+
+        if self.context.ledger_apis.has_fetchai:
+            fet_balance = self.context.ledger_apis.token_balance(
+                FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
+            if fet_balance > 0:
+                logger.info(
+                    "[{}]: starting balance on fetchai ledger={}.".format(
+                        self.context.agent_name, fet_balance
+                    )
+                )
+            else:
+                logger.warning(
+                    "[{}]: you have no starting balance on fetchai ledger!".format(
+                        self.context.agent_name
+                    )
+                )
+
+        if self.context.ledger_apis.has_ethereum:
+            eth_balance = self.context.ledger_apis.token_balance(
+                ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
+            )
+            if eth_balance > 0:
+                logger.info(
+                    "[{}]: starting balance on ethereum ledger={}.".format(
+                        self.context.agent_name, eth_balance
+                    )
+                )
+            else:
+                logger.warning(
+                    "[{}]: you have no starting balance on ethereum ledger!".format(
+                        self.context.agent_name
+                    )
+                )
+        strategy.db.set_system_status(
+            "ledger-status",
+            self.context.ledger_apis.last_tx_statuses[strategy.ledger_id],
         )
+
         self._register_service()
 
     def act(self) -> None:
@@ -265,12 +295,24 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        self._unregister_service()
-        balance = self.context.ledger_apis.token_balance(
-            "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
-        )
-        logger.info(
-            "[{}]: ending balance on fetchai ledger={}.".format(
-                self.context.agent_name, balance
+        if self.context.ledger_apis.has_fetchai:
+            balance = self.context.ledger_apis.token_balance(
+                FETCHAI, cast(str, self.context.agent_addresses.get(FETCHAI))
             )
-        )
+            logger.info(
+                "[{}]: ending balance on fetchai ledger={}.".format(
+                    self.context.agent_name, balance
+                )
+            )
+
+        if self.context.ledger_apis.has_ethereum:
+            balance = self.context.ledger_apis.token_balance(
+                ETHEREUM, cast(str, self.context.agent_addresses.get(ETHEREUM))
+            )
+            logger.info(
+                "[{}]: ending balance on ethereum ledger={}.".format(
+                    self.context.agent_name, balance
+                )
+            )
+
+        self._unregister_service()

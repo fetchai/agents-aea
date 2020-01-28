@@ -142,6 +142,7 @@ class LedgerApi(ABC):
         destination_address: AddressLike,
         amount: int,
         tx_fee: int,
+        tx_nonce: str,
         **kwargs
     ) -> Optional[str]:
         """
@@ -150,6 +151,7 @@ class LedgerApi(ABC):
         If the mandatory arguments are not enough for specifying a transaction
         in the concrete ledger API, use keyword arguments for the additional parameters.
 
+        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
@@ -164,4 +166,35 @@ class LedgerApi(ABC):
 
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
+        """
+
+    @abstractmethod
+    def validate_transaction(
+        self,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :param tx_digest: the transaction digest.
+
+        :return: True if the transaction referenced by the tx_digest matches the terms.
+        """
+
+    @abstractmethod
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
         """
