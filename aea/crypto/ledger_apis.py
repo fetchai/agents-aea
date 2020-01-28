@@ -27,6 +27,7 @@ from typing import Dict, Optional, Union, cast
 from aea.crypto.base import Crypto, LedgerApi
 from aea.crypto.ethereum import ETHEREUM, EthereumApi
 from aea.crypto.fetchai import FETCHAI, FetchAIApi
+from aea.mail.base import Address
 
 SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
 SUPPORTED_LEDGER_APIS = [ETHEREUM, FETCHAI]
@@ -138,11 +139,13 @@ class LedgerApis(object):
         destination_address: str,
         amount: int,
         tx_fee: int,
+        tx_nonce: str,
         **kwargs
     ) -> Optional[str]:
         """
         Transfer from self to destination.
 
+        :param tx_nonce: verifies the authenticity of the tx
         :param crypto_object: the crypto object that contains the fucntions for signing transactions.
         :param destination_address: the address of the receive
         :param amount: the amount
@@ -157,7 +160,7 @@ class LedgerApis(object):
         logger.info("Waiting for the validation of the transaction ...")
         try:
             tx_digest = api.send_transaction(
-                crypto_object, destination_address, amount, tx_fee, **kwargs
+                crypto_object, destination_address, amount, tx_fee, tx_nonce, **kwargs
             )
             logger.info("transaction validated. TX digest: {}".format(tx_digest))
             self._last_tx_statuses[crypto_object.identifier] = OK
@@ -167,7 +170,7 @@ class LedgerApis(object):
             self._last_tx_statuses[crypto_object.identifier] = ERROR
         return tx_digest
 
-    def is_tx_settled(self, identifier: str, tx_digest: str) -> bool:
+    def _is_tx_settled(self, identifier: str, tx_digest: str) -> bool:
         """
         Check whether the transaction is settled and correct.
 
@@ -187,6 +190,63 @@ class LedgerApis(object):
             is_successful = False
             self._last_tx_statuses[identifier] = ERROR
         return is_successful
+
+    def is_tx_valid(
+        self,
+        identifier: str,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
+        """
+        Check whether the transaction is valid
+
+        :param identifier: Ledger identifier
+        :param tx_digest:  the transaction digest
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :return: True if is valid , False otherwise
+        """
+        assert identifier in self.apis.keys()
+        is_settled = self._is_tx_settled(identifier=identifier, tx_digest=tx_digest)
+        api = self.apis[identifier]
+        try:
+            tx_valid = api.validate_transaction(
+                tx_digest, seller, client, tx_nonce, amount
+            )
+        except Exception:
+            logger.warning(
+                "An error occurred while attempting to validate the transaction."
+            )
+            tx_valid = False
+        is_valid = is_settled and tx_valid
+        return is_valid
+
+    def generate_tx_nonce(
+        self, identifier: str, seller: Address, client: Address
+    ) -> str:
+        """
+        Generate a random str message.
+
+        :param identifier: ledger identifier.
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        assert identifier in self.apis.keys()
+        api = self.apis[identifier]
+        try:
+            tx_nonce = api.generate_tx_nonce(seller=seller, client=client)
+        except Exception:
+            logger.warning(
+                "An error occurred while attempting to generate the tx_nonce"
+            )
+            tx_nonce = ""
+        return tx_nonce
 
 
 def _try_to_instantiate_fetchai_ledger_api(**kwargs) -> None:

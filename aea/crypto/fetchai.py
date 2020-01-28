@@ -183,6 +183,7 @@ class FetchAIApi(LedgerApi):
         destination_address: AddressLike,
         amount: int,
         tx_fee: int,
+        tx_nonce: str,
         **kwargs
     ) -> Optional[str]:
         """Submit a transaction to the ledger."""
@@ -202,3 +203,36 @@ class FetchAIApi(LedgerApi):
             # TODO: check the amount of the transaction is correct
             is_successful = True
         return is_successful
+
+    def validate_transaction(
+        self,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :param tx_digest: the transaction digest.
+
+        :return: True if the random_message is equals to tx['input']
+        """
+
+        raise NotImplementedError
+
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+
+        raise NotImplementedError

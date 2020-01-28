@@ -140,7 +140,9 @@ class FIPAHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_matching_supply(query) and strategy.has_data():
-            proposal, carpark_data = strategy.generate_proposal_and_data(query)
+            proposal, carpark_data = strategy.generate_proposal_and_data(
+                query, msg.counterparty
+            )
             dialogue.carpark_data = carpark_data
             dialogue.proposal = proposal
             logger.info(
@@ -244,12 +246,14 @@ class FIPAHandler(Handler):
                 self.context.agent_name, msg.counterparty[-5:]
             )
         )
+        proposal = cast(Description, dialogue.proposal)
+        identifier = cast(str, proposal.values.get("ledger_id"))
         match_accept_msg = FIPAMessage(
             message_id=new_message_id,
             dialogue_reference=dialogue.dialogue_label.dialogue_reference,
             target=new_target,
             performative=FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM,
-            info={"address": self.context.agent_addresses["fetchai"]},
+            info={"address": self.context.agent_addresses[identifier]},
         )
         dialogue.outgoing_extend(match_accept_msg)
         self.context.outbox.put_message(
@@ -294,11 +298,19 @@ class FIPAHandler(Handler):
                 )
             )
             proposal = cast(Description, dialogue.proposal)
+            ledger_id = cast(str, proposal.values.get("ledger_id"))
             total_price = cast(int, proposal.values.get("price"))
-            is_settled = self.context.ledger_apis.is_tx_settled("fetchai", tx_digest)
-            if is_settled:
+            is_valid = self.context.ledger_apis.is_tx_valid(
+                ledger_id,
+                tx_digest,
+                self.context.agent_addresses[ledger_id],
+                msg.counterparty,
+                cast(str, proposal.values.get("tx_nonce")),
+                cast(int, proposal.values.get("price")),
+            )
+            if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
-                    "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
+                    ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
                 )
 
                 strategy = cast(Strategy, self.context.strategy)

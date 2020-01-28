@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization for the FIPA protocol."""
-import json
+
 import pickle
 from typing import cast
 
@@ -74,13 +74,13 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.ACCEPT_W_INFORM:
             performative = fipa_pb2.FIPAMessage.AcceptWInform()  # type: ignore
             data = msg.info
-            data_bytes = json.dumps(data).encode("utf-8")
+            data_bytes = pickle.dumps(data)  # json.dumps(data).encode("utf-8")
             performative.bytes = data_bytes
             fipa_msg.accept_w_inform.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
             performative = fipa_pb2.FIPAMessage.MatchAcceptWInform()  # type: ignore
             data = msg.info
-            data_bytes = json.dumps(data).encode("utf-8")
+            data_bytes = pickle.dumps(data)  # json.dumps(data).encode("utf-8")
             performative.bytes = data_bytes
             fipa_msg.match_accept_w_inform.CopyFrom(performative)
         elif performative_id == FIPAMessage.Performative.DECLINE:
@@ -89,7 +89,7 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.INFORM:
             performative = fipa_pb2.FIPAMessage.Inform()  # type: ignore
             data = msg.info
-            data_bytes = json.dumps(data).encode("utf-8")
+            data_bytes = pickle.dumps(data)  # json.dumps(data).encode("utf-8")
             performative.bytes = data_bytes
             fipa_msg.inform.CopyFrom(performative)
         else:
@@ -134,15 +134,15 @@ class FIPASerializer(Serializer):
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT:
             pass
         elif performative_id == FIPAMessage.Performative.ACCEPT_W_INFORM:
-            info = json.loads(fipa_pb.accept_w_inform.bytes)
+            info = pickle.loads(fipa_pb.accept_w_inform.bytes)
             performative_content["info"] = info
         elif performative_id == FIPAMessage.Performative.MATCH_ACCEPT_W_INFORM:
-            info = json.loads(fipa_pb.match_accept_w_inform.bytes)
+            info = pickle.loads(fipa_pb.match_accept_w_inform.bytes)
             performative_content["info"] = info
         elif performative_id == FIPAMessage.Performative.DECLINE:
             pass
         elif performative_id == FIPAMessage.Performative.INFORM:
-            info = json.loads(fipa_pb.inform.bytes)
+            info = pickle.loads(fipa_pb.inform.bytes)
             performative_content["info"] = info
         else:
             raise ValueError("Performative not valid: {}.".format(performative))

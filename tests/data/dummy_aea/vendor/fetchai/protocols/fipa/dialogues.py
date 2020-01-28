@@ -297,6 +297,7 @@ class FIPADialogues(Dialogues):
 
         :return: the dialogue
         """
+        result = None
         fipa_msg = cast(FIPAMessage, fipa_msg)
         dialogue_reference = fipa_msg.dialogue_reference
         self_initiated_dialogue_label = DialogueLabel(

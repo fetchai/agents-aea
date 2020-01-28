@@ -28,7 +28,9 @@ shared_classes:
       db_rel_dir: ../temp_files
       currency_id: 'FET'
       ledger_id: 'fetchai'
+      is_ledger_tx: True
       seller_tx_fee: 0
+
   dialogues:
     class_name: Dialogues
     args: {}
