@@ -1,6 +1,6 @@
 A `Protocol` manages message representation, encoding, and serialisation. It also defines the rules to which messages must adhere.
 
-An agent can have one or more protocols. The AEA framework supplies three: `oef`, `fipa`, and a `default` protocol.
+An AEA can have one or more protocols. The AEA framework supplies three: `oef`, `fipa`, and a `default` protocol.
 
 ## Custom protocol
 
@@ -27,7 +27,7 @@ This method decodes the byte representation of a message object.
 !!! TODO
 For example.
 
-Outside of these, the developer is free to implement the agent protocols in any way they see fit.
+Outside of these, the developer is free to implement the AEA protocols in any way they see fit.
 
 ### `rules.py`
 
@@ -38,7 +38,7 @@ Outside of these, the developer is free to implement the agent protocols in any 
 
 ## `oef` protocol
 
-The `oef` helps agents to search for and find other agents and (for now) talk to them via different protocols.
+The `oef` helps AEAs to search for and find other agents and (for now) talk to them via different protocols.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

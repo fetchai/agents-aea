@@ -144,6 +144,7 @@ class AEA(Agent):
             self.resources.load(self.context)
         self.resources.setup()
         self.task_manager.start()
+        self.decision_maker.start()
 
     def act(self) -> None:
         """
@@ -219,7 +220,6 @@ class AEA(Agent):
         # TODO: task should be submitted by the behaviours and handlers
         for task in self.filter.get_active_tasks():
             task.execute()
-        self.decision_maker.execute()
         self.filter.handle_internal_messages()
 
     def teardown(self) -> None:
@@ -228,6 +228,7 @@ class AEA(Agent):
 
         :return: None
         """
+        self.decision_maker.stop()
         self.task_manager.stop()
         if self._resources is not None:
             self._resources.teardown()

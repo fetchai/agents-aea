@@ -14,18 +14,18 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 ## Demo instructions
 
-First, create a new agent project:
+First, create a new AEA project:
 
 ``` bash
-aea create my_agent
-cd my_agent
+aea create my_aea
+cd my_aea
 ```
 
 Second, run the generator on the sample specification.
 ``` bash
 aea generate protocol ../examples/protocol_specification_ex/sample.yaml
 ```
-This will generate the protocol and place it in your agent project.
+This will generate the protocol and place it in your AEA project.
 
 Third, try generating other protocols by first defining a specification, then running the generator.
 

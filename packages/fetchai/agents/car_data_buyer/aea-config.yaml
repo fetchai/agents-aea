@@ -1,4 +1,4 @@
-aea_version: 0.1.16
+aea_version: 0.1.17
 agent_name: car_data_buyer
 author: fetchai
 connections:
@@ -10,8 +10,7 @@ description: 'An agent which searches for an instance of a `car_detector` agent 
 fingerprint: ''
 ledger_apis:
   fetchai:
-    address: alpha.fetch-ai.com
-    port: 80
+    network: testnet
 license: Apache 2.0
 logging_config:
   disable_existing_loggers: False

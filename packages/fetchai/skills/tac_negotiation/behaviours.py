@@ -50,6 +50,12 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
 
         :return: None
         """
+        # the flag "is_game_finished" is set by the 'tac_participation'
+        # skill to notify the other skill that the TAC game is finished.
+        if self.context.shared_state.get("is_game_finished", False):
+            self.context.is_active = False
+            return
+
         if self.context.agent_goal_pursuit_readiness.is_ready:
 
             registration = cast(Registration, self.context.registration)
