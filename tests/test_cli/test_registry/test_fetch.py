@@ -31,6 +31,7 @@ def _raise_exception():
     raise Exception()
 
 
+@mock.patch("aea.cli.registry.fetch.PublicId", PublicIdMock)
 @mock.patch("aea.cli.registry.fetch.download_file", return_value="filepath")
 @mock.patch("aea.cli.registry.fetch.extract")
 class TestFetchAgent(TestCase):
