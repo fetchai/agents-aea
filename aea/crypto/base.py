@@ -142,6 +142,7 @@ class LedgerApi(ABC):
         destination_address: AddressLike,
         amount: int,
         tx_fee: int,
+        tx_nonce: str,
         **kwargs
     ) -> Optional[str]:
         """
@@ -150,6 +151,7 @@ class LedgerApi(ABC):
         If the mandatory arguments are not enough for specifying a transaction
         in the concrete ledger API, use keyword arguments for the additional parameters.
 
+        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.

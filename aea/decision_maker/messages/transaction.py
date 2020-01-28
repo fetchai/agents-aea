@@ -167,6 +167,12 @@ class TransactionMessage(InternalMessage):
         return cast(Dict[str, Any], self.get("info"))
 
     @property
+    def tx_nonce(self) -> str:
+        """Get the tx_nonce from the message."""
+        assert self.is_set("tx_nonce"), "Tx_nonce is not set."
+        return cast(str, self.get("tx_nonce"))
+
+    @property
     def tx_digest(self) -> str:
         """Get the transaction digest."""
         assert self.is_set("tx_digest"), "Tx_digest is not set."
@@ -280,7 +286,8 @@ class TransactionMessage(InternalMessage):
                 self.Performative.REJECTED_SETTLEMENT,
                 self.Performative.FAILED_SETTLEMENT,
             }:
-                assert len(self.body) == 11
+                assert isinstance(self.tx_nonce, str), "Tx_nonce must be of type str."
+                assert len(self.body) == 12
             elif self.performative == self.Performative.SUCCESSFUL_SETTLEMENT:
                 assert isinstance(self.tx_digest, str), "Tx_digest must be of type str."
                 assert len(self.body) == 12

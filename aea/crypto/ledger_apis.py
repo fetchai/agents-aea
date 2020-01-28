@@ -139,11 +139,13 @@ class LedgerApis(object):
         destination_address: str,
         amount: int,
         tx_fee: int,
+        tx_nonce: str,
         **kwargs
     ) -> Optional[str]:
         """
         Transfer from self to destination.
 
+        :param tx_nonce: verifies the authenticity of the tx
         :param crypto_object: the crypto object that contains the fucntions for signing transactions.
         :param destination_address: the address of the receive
         :param amount: the amount
@@ -158,7 +160,7 @@ class LedgerApis(object):
         logger.info("Waiting for the validation of the transaction ...")
         try:
             tx_digest = api.send_transaction(
-                crypto_object, destination_address, amount, tx_fee, **kwargs
+                crypto_object, destination_address, amount, tx_fee, tx_nonce, **kwargs
             )
             logger.info("transaction validated. TX digest: {}".format(tx_digest))
             self._last_tx_statuses[crypto_object.identifier] = OK

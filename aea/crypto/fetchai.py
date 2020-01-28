@@ -183,6 +183,7 @@ class FetchAIApi(LedgerApi):
         destination_address: AddressLike,
         amount: int,
         tx_fee: int,
+        tx_nonce: str,
         **kwargs
     ) -> Optional[str]:
         """Submit a transaction to the ledger."""
