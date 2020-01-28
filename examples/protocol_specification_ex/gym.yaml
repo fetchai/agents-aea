@@ -5,14 +5,14 @@ license: Apache 2.0
 description: 'A protocol for interacting with a gym connection.'
 speech_acts:
   act:
-    action: Action
+    action: ct:Action
     step_id: pt:int
   percept:
     step_id: pt:int
-    observation: Observation
+    observation: ct:Observation
     reward: pt:float
     done: pt:bool
-    info: pt:dict[pt:str, PerceptInfo]
+    info: pt:dict[pt:str, ct:PerceptInfo]
   reset: {}
   close: {}
 

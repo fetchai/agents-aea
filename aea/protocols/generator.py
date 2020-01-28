@@ -22,11 +22,11 @@ import os
 import re
 from os import path
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, Set
 
 from aea.configurations.base import ProtocolSpecification
 
-CUSTOM_TYPE_PATTERN = "[A-Z_][a-zA-Z0-9]*"
+CUSTOM_TYPE_PATTERN = "ct:[A-Z_][a-zA-Z0-9]*"
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
@@ -66,21 +66,46 @@ class ProtocolGenerator:
         self.protocol_specification = protocol_specification
         self.output_folder_path = os.path.join(output_path, protocol_specification.name)
 
-    def _extract_all_contents(self) -> Dict[str, Dict[str, str]]:
-        """
-        Extract all performatives, content names and content types.
+        self._imports = {
+            "Set": True,
+            "Tuple": True,
+            "cast": True,
+            "Dict": False,
+            "Union": False,
+            "Optional": False,
+            "FrozenSet": False,
+        }
 
-        :return: Performatives -> [content names -> content types]
+        self._speech_acts = dict()  # type: Dict[str, Dict[str, str]]
+        self._all_performatives = set()  # type: Set[str]
+        self._all_unique_contents = dict()  # type: Dict[str, str]
+        self._all_custom_types = set()  # type: Set[str]
+
+        self._setup()
+
+    def _setup(self) -> None:
         """
-        all_contents = {}  # type: Dict[str, Dict[str, str]]
+        Extract all relevant data structures from the specification.
+
+        :return: Dict[performatives, Dict[content names, content types]]
+        """
         for (
             performative,
             speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
-            all_contents[performative] = {}
+            self._all_performatives.add(performative)
+            self._speech_acts[performative] = {}
             for content_name, content_type in speech_act_content_config.args.items():
-                all_contents[performative][content_name] = content_type
-        return all_contents
+                custom_types = set(re.findall(CUSTOM_TYPE_PATTERN, content_type))
+                for ct in custom_types:
+                    self._all_custom_types.add(
+                        self._specification_type_to_python_type(ct)
+                    )
+                pythonic_content_type = self._specification_type_to_python_type(
+                    content_type
+                )
+                self._all_unique_contents[content_name] = pythonic_content_type
+                self._speech_acts[performative][content_name] = pythonic_content_type
 
     def _specification_type_to_python_type(self, specification_type: str) -> str:
         """
@@ -91,6 +116,7 @@ class ProtocolGenerator:
         """
         python_type = ""
         if specification_type.startswith("pt:optional"):
+            self._imports["Optional"] = True
             element_type = specification_type[
                 specification_type.index("[") + 1 : specification_type.rindex("]")
             ]
@@ -101,16 +127,16 @@ class ProtocolGenerator:
         else:
             specification_types = set(specification_type.split(" or "))
             if len(specification_types) == 1:  # just one type (not a Union[])
-                if specification_type == "pt:bytes":
-                    python_type = "bytes"
-                elif specification_type == "pt:int":
-                    python_type = "int"
-                elif specification_type == "pt:float":
-                    python_type = "float"
-                elif specification_type == "pt:bool":
-                    python_type = "bool"
-                elif specification_type == "pt:str":
-                    python_type = "str"
+                if specification_type.startswith("ct:"):
+                    python_type = specification_type[3:]
+                elif specification_type in [
+                    "pt:bytes",
+                    "pt:int",
+                    "pt:float",
+                    "pt:bool",
+                    "pt:str",
+                ]:
+                    python_type = specification_type[3:]
                 elif specification_type.startswith(
                     "pt:set"
                 ) or specification_type.startswith("pt:list"):
@@ -122,10 +148,13 @@ class ProtocolGenerator:
                         element_type
                     )
                     if specification_type.startswith("pt:set"):
+                        self._imports["FrozenSet"] = True
                         python_type = "FrozenSet[{}]".format(element_type_in_python)
                     else:
+                        self._imports["Tuple"] = True
                         python_type = "Tuple[{}]".format(element_type_in_python)
                 elif specification_type.startswith("pt:dict"):
+                    self._imports["Dict"] = True
                     element1_type = specification_type[
                         specification_type.index("[")
                         + 1 : specification_type.index(",")
@@ -144,8 +173,9 @@ class ProtocolGenerator:
                         element1_type_in_python, element2_type_in_python
                     )
                 else:
-                    python_type = specification_type
+                    raise TypeError("Unsupported type: '{}'".format(specification_type))
             elif len(specification_types) > 1:  # has more than one type 'or' separated
+                self._imports["Union"] = True
                 python_type = "Union["
                 for t in specification_types:
                     python_type += "{}, ".format(
@@ -155,6 +185,28 @@ class ProtocolGenerator:
                 python_type += "]"
         return python_type
 
+    def _import_from_typing_str(self) -> str:
+        """
+        Manage import statement for the typing package.
+
+        :return: import statement for the typing package
+        """
+        ordered_packages = [
+            "Dict",
+            "FrozenSet",
+            "Optional",
+            "Set",
+            "Tuple",
+            "Union",
+            "cast",
+        ]
+        import_str = "from typing import "
+        for package in ordered_packages:
+            if self._imports[package]:
+                import_str += "{}, ".format(package)
+        import_str = import_str[:-2]
+        return import_str
+
     def _speech_acts_str(self) -> str:
         """
         Generate the speech-act dictionary where content types are actual types (not strings).
@@ -162,20 +214,11 @@ class ProtocolGenerator:
         :return: the speech-act dictionary string
         """
         speech_act_str = "{\n"
-        for (
-            performative,
-            speech_act_content_config,
-        ) in self.protocol_specification.speech_acts.read_all():
+        for (performative, contents,) in self._speech_acts.items():
             speech_act_str += '        "{}": {{'.format(performative)
-            if len(speech_act_content_config.args.items()) > 0:
-                for (
-                    content_name,
-                    content_type,
-                ) in speech_act_content_config.args.items():
-                    speech_act_str += '"{}": {}, '.format(
-                        content_name,
-                        self._specification_type_to_python_type(content_type),
-                    )
+            if len(contents.items()) > 0:
+                for (content_name, content_type,) in contents.items():
+                    speech_act_str += '"{}": {}, '.format(content_name, content_type,)
                 speech_act_str = speech_act_str[:-2]
             speech_act_str += "},\n"
         speech_act_str = speech_act_str[:-1]
@@ -189,22 +232,12 @@ class ProtocolGenerator:
         :return: the string containing class signatures and NotImplemented for every custom type
         """
         cls_str = ""
-        custom_types_set = set()
 
-        # extract contents' types and separate custom types
-        for (
-            _performative,
-            speech_act_content_config,
-        ) in self.protocol_specification.speech_acts.read_all():
-            for content_type in speech_act_content_config.args.values():
-                custom_types_set.update(re.findall(CUSTOM_TYPE_PATTERN, content_type))
-                # if content_type not in DEFAULT_TYPES:
-                #     custom_types_set.add(content_type)
-        # If no custom class, avoid extra spaces after last custom class
-        if len(custom_types_set) == 0:
+        if len(self._all_custom_types) == 0:
             return cls_str
+
         # class code per custom type
-        for custom_type in custom_types_set:
+        for custom_type in self._all_custom_types:
             cls_str += str.format("class {}:\n", custom_type)
             cls_str += str.format(
                 '    """This class represents an instance of {}."""\n\n', custom_type
@@ -230,22 +263,13 @@ class ProtocolGenerator:
 
         :return: the performatives Enum class set string
         """
-        # performatives_set = set()
-        # for (
-        #     performative,
-        #     _speech_act_content_config,
-        # ) in self.protocol_specification.speech_acts.read_all():
-        #     performatives_set.add(performative)
         enum_str = ""
         enum_str += "    class Performative(Enum):\n"
         enum_str += str.format(
             '        """Performatives for the {} protocol."""\n\n',
             self.protocol_specification.name,
         )
-        for (
-            performative,
-            _speech_act_content_config,
-        ) in self.protocol_specification.speech_acts.read_all():
+        for performative in self._all_performatives:
             enum_str += '        {} = "{}"\n'.format(performative.upper(), performative)
         enum_str += "\n"
         enum_str += "        def __str__(self):\n"
@@ -261,6 +285,7 @@ class ProtocolGenerator:
 
         :return: the message class string
         """
+        # Module docstring
         cls_str = str.format(
             '"""This module contains {}\'s message definition."""\n\n'.format(
                 self.protocol_specification.name
@@ -269,9 +294,7 @@ class ProtocolGenerator:
 
         # Imports
         cls_str += "from enum import Enum\n"
-        cls_str += (
-            "from typing import Set, Tuple, cast, Union, Dict, Optional, FrozenSet\n\n"
-        )
+        cls_str += "{}\n\n".format(self._import_from_typing_str())
         cls_str += MESSAGE_IMPORT
         cls_str += "\n\nDEFAULT_BODY_SIZE = 4\n\n\n"
 
@@ -348,27 +371,18 @@ class ProtocolGenerator:
         cls_str += '        return cast({}Message.Performative, self.get("performative"))\n\n'.format(
             to_camel_case(self.protocol_specification.name)
         )
-        all_contents = self._extract_all_contents()
-        covered = []  # type: List[str]
-        for contents in all_contents.values():
-            for content_name, content_type in contents.items():
-                if content_name in covered:
-                    continue
-                else:
-                    covered.append(content_name)
-                cls_str += "    @property\n"
-                cls_str += "    def {}(self) -> {}:\n".format(
-                    content_name, self._specification_type_to_python_type(content_type)
-                )
-                cls_str += '        """Get the {} from the message."""\n'.format(
-                    content_name
-                )
-                cls_str += '        assert self.is_set("{}"), "{} is not set"\n'.format(
-                    content_name, content_name
-                )
-                cls_str += '        return cast({}, self.get("{}"))\n\n'.format(
-                    self._specification_type_to_python_type(content_type), content_name
-                )
+        for content_name, content_type in self._all_unique_contents.items():
+            cls_str += "    @property\n"
+            cls_str += "    def {}(self) -> {}:\n".format(content_name, content_type)
+            cls_str += '        """Get the {} from the message."""\n'.format(
+                content_name
+            )
+            cls_str += '        assert self.is_set("{}"), "{} is not set"\n'.format(
+                content_name, content_name
+            )
+            cls_str += '        return cast({}, self.get("{}"))\n\n'.format(
+                content_type, content_name
+            )
 
         # check_consistency method
         cls_str += "    def _check_consistency(self) -> bool:\n"
@@ -410,7 +424,7 @@ class ProtocolGenerator:
             "            actual_nb_of_contents = len(self.body) - DEFAULT_BODY_SIZE\n"
         )
         counter = 1
-        for performative, contents in all_contents.items():
+        for performative, contents in self._speech_acts.items():
             if counter == 1:
                 cls_str += "            if self.performative == {}Message.Performative.{}:\n".format(
                     to_camel_case(self.protocol_specification.name),
@@ -428,10 +442,7 @@ class ProtocolGenerator:
                 continue
             for content_name, content_type in contents.items():
                 cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
-                    content_name,
-                    self._specification_type_to_python_type(content_type),
-                    content_name,
-                    self._specification_type_to_python_type(content_type),
+                    content_name, content_type, content_name, content_type,
                 )
             counter += 1
         cls_str += "\n            # # Check correct content count\n"

@@ -1,22 +1,67 @@
 """This module contains two_party_negotiation's message definition."""
 
 from enum import Enum
-from typing import Set, Tuple, cast
+from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
 from aea.protocols.base import Message
 
 DEFAULT_BODY_SIZE = 4
 
 
-class DataModel:
-    """This class represents a DataModel."""
+class Unit:
+    """This class represents an instance of Unit."""
 
     def __init__(self):
-        """Initialise a DataModel."""
+        """Initialise an instance of Unit."""
+        raise NotImplementedError
+
+    def __eq__(self, other):
+        """Compare two Unit instances."""
+        if type(other) is type(self):
+            raise NotImplementedError
+        else:
+            return False
+
+
+class DataModel:
+    """This class represents an instance of DataModel."""
+
+    def __init__(self):
+        """Initialise an instance of DataModel."""
         raise NotImplementedError
 
     def __eq__(self, other):
         """Compare two DataModel instances."""
+        if type(other) is type(self):
+            raise NotImplementedError
+        else:
+            return False
+
+
+class Ali:
+    """This class represents an instance of Ali."""
+
+    def __init__(self):
+        """Initialise an instance of Ali."""
+        raise NotImplementedError
+
+    def __eq__(self, other):
+        """Compare two Ali instances."""
+        if type(other) is type(self):
+            raise NotImplementedError
+        else:
+            return False
+
+
+class _IOTApp:
+    """This class represents an instance of _IOTApp."""
+
+    def __init__(self):
+        """Initialise an instance of _IOTApp."""
+        raise NotImplementedError
+
+    def __eq__(self, other):
+        """Compare two _IOTApp instances."""
         if type(other) is type(self):
             raise NotImplementedError
         else:
@@ -30,7 +75,20 @@ class TwoPartyNegotiationMessage(Message):
 
     _speech_acts = {
         "cfp": {"query": DataModel},
-        "propose": {"query": DataModel, "price": float},
+        "propose": {
+            "query": DataModel,
+            "price": Optional[
+                Union[
+                    Dict[int, Unit],
+                    FrozenSet[int],
+                    Tuple[Ali],
+                    bool,
+                    str,
+                    Dict[_IOTApp, bytes],
+                    Dict[DataModel, bool],
+                ]
+            ],
+        },
         "accept": {},
         "decline": {},
         "match_accept": {},
@@ -39,10 +97,10 @@ class TwoPartyNegotiationMessage(Message):
     class Performative(Enum):
         """Performatives for the two_party_negotiation protocol."""
 
-        CFP = "cfp"
         PROPOSE = "propose"
-        ACCEPT = "accept"
         DECLINE = "decline"
+        CFP = "cfp"
+        ACCEPT = "accept"
         MATCH_ACCEPT = "match_accept"
 
         def __str__(self):
@@ -105,10 +163,35 @@ class TwoPartyNegotiationMessage(Message):
         return cast(DataModel, self.get("query"))
 
     @property
-    def price(self) -> float:
+    def price(
+        self,
+    ) -> Optional[
+        Union[
+            Dict[int, Unit],
+            FrozenSet[int],
+            Tuple[Ali],
+            bool,
+            str,
+            Dict[_IOTApp, bytes],
+            Dict[DataModel, bool],
+        ]
+    ]:
         """Get the price from the message."""
         assert self.is_set("price"), "price is not set"
-        return cast(float, self.get("price"))
+        return cast(
+            Optional[
+                Union[
+                    Dict[int, Unit],
+                    FrozenSet[int],
+                    Tuple[Ali],
+                    bool,
+                    str,
+                    Dict[_IOTApp, bytes],
+                    Dict[DataModel, bool],
+                ]
+            ],
+            self.get("price"),
+        )
 
     def _check_consistency(self) -> bool:
         """Check that the message follows the two_party_negotiation protocol."""
@@ -141,7 +224,20 @@ class TwoPartyNegotiationMessage(Message):
             elif self.performative == TwoPartyNegotiationMessage.Performative.PROPOSE:
                 expected_nb_of_contents = 2
                 assert type(self.query) == DataModel, "query is not DataModel"
-                assert type(self.price) == float, "price is not float"
+                assert (
+                    type(self.price)
+                    == Optional[
+                        Union[
+                            Dict[int, Unit],
+                            FrozenSet[int],
+                            Tuple[Ali],
+                            bool,
+                            str,
+                            Dict[_IOTApp, bytes],
+                            Dict[DataModel, bool],
+                        ]
+                    ]
+                ), "price is not Optional[Union[Dict[int, Unit], FrozenSet[int], Tuple[Ali], bool, str, Dict[_IOTApp, bytes], Dict[DataModel, bool]]]"
             elif self.performative == TwoPartyNegotiationMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
