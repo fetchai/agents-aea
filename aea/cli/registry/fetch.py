@@ -42,10 +42,12 @@ def fetch_agent(ctx: Context, public_id: PublicId) -> None:
     file_url = resp["file"]
 
     target_folder = os.path.join(ctx.cwd, name)
+    os.makedirs(target_folder, exist_ok=True)
 
     for item_type in ("connection", "skill", "protocol"):
         item_type_plural = item_type + "s"
         for item_public_id in resp[item_type_plural]:
+            item_public_id = PublicId.from_str(item_public_id)
             try:
                 fetch_package(item_type, item_public_id, target_folder)
             except Exception as e:
