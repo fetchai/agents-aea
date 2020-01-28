@@ -136,7 +136,11 @@ class TestLedgerApis:
         ):
             with mock.patch.object(ledger_apis.apis.get(FETCHAI).api, "sync"):
                 tx_digest = ledger_apis.transfer(
-                    fet_obj, fet_address, amount=10, tx_fee=10
+                    fet_obj,
+                    fet_address,
+                    amount=10,
+                    tx_fee=10,
+                    tx_nonce="transaction nonce",
                 )
                 assert tx_digest is not None
                 assert ledger_apis.last_tx_statuses[FETCHAI] == "OK"
@@ -159,7 +163,11 @@ class TestLedgerApis:
                 ledger_apis.apis.get(FETCHAI).api, "sync", side_effect=Exception
             ):
                 tx_digest = ledger_apis.transfer(
-                    fet_obj, fet_address, amount=10, tx_fee=10
+                    fet_obj,
+                    fet_address,
+                    amount=10,
+                    tx_fee=10,
+                    tx_nonce="transaction nonce",
                 )
                 assert tx_digest is None
                 assert ledger_apis.last_tx_statuses[FETCHAI] == "ERROR"
@@ -196,7 +204,11 @@ class TestLedgerApis:
                         return_value=b"0xa13f2f926233bc4638a20deeb8aaa7e8d6a96e487392fa55823f925220f6efed",
                     ):
                         tx_digest = ledger_apis.transfer(
-                            eth_obj, eth_address, amount=10, tx_fee=200000
+                            eth_obj,
+                            eth_address,
+                            amount=10,
+                            tx_fee=200000,
+                            tx_nonce="transaction nonce",
                         )
                         assert tx_digest is not None
                         assert ledger_apis.last_tx_statuses[ETHEREUM] == "OK"
@@ -216,7 +228,11 @@ class TestLedgerApis:
             side_effect=Exception,
         ):
             tx_digest = ledger_apis.transfer(
-                eth_obj, eth_address, amount=10, tx_fee=200000
+                eth_obj,
+                eth_address,
+                amount=10,
+                tx_fee=200000,
+                tx_nonce="transaction nonce",
             )
             assert tx_digest is None
             assert ledger_apis.last_tx_statuses[ETHEREUM] == "ERROR"

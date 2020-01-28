@@ -114,7 +114,7 @@ class TestOwnershipState:
             tx_quantities_by_good_id={"good_id": 10},
             info={"some_info_key": "some_info_value"},
             ledger_id="fetchai",
-            tx_nonce="transaction nonce"
+            tx_nonce="transaction nonce",
         )
 
         assert self.ownership_state.check_transaction_is_affordable(
@@ -141,7 +141,7 @@ class TestOwnershipState:
             tx_quantities_by_good_id={"good_id": 0},
             info={"some_info_key": "some_info_value"},
             ledger_id="fetchai",
-            tx_nonce="transaction nonce"
+            tx_nonce="transaction nonce",
         )
 
         assert not self.ownership_state.check_transaction_is_affordable(
@@ -168,7 +168,7 @@ class TestOwnershipState:
             tx_quantities_by_good_id={"good_id": 0},
             info={"some_info_key": "some_info_value"},
             ledger_id="fetchai",
-            tx_nonce="transaction nonce"
+            tx_nonce="transaction nonce",
         )
 
         assert self.ownership_state.check_transaction_is_affordable(
@@ -195,7 +195,7 @@ class TestOwnershipState:
             tx_quantities_by_good_id={"good_id": 50},
             info={"some_info_key": "some_info_value"},
             ledger_id="fetchai",
-            tx_nonce="transaction nonce"
+            tx_nonce="transaction nonce",
         )
 
         assert not self.ownership_state.check_transaction_is_affordable(
@@ -222,7 +222,7 @@ class TestOwnershipState:
             tx_quantities_by_good_id={"good_id": 10},
             info={"some_info_key": "some_info_value"},
             ledger_id="fetchai",
-            tx_nonce="transaction nonce"
+            tx_nonce="transaction nonce",
         )
         list_of_transactions = [tx_message]
         state = self.ownership_state
@@ -256,7 +256,7 @@ class TestOwnershipState:
             tx_quantities_by_good_id={"good_id": 10},
             info={"some_info_key": "some_info_value"},
             ledger_id="fetchai",
-            tx_nonce="transaction nonce"
+            tx_nonce="transaction nonce",
         )
         self.ownership_state._update(tx_message=tx_message)
         expected_amount_by_currency_id = {"FET": 75}
@@ -290,7 +290,7 @@ class TestOwnershipState:
             tx_quantities_by_good_id={"good_id": -10},
             info={"some_info_key": "some_info_value"},
             ledger_id="fetchai",
-            tx_nonce="transaction nonce"
+            tx_nonce="transaction nonce",
         )
         self.ownership_state._update(tx_message=tx_message)
         expected_amount_by_currency_id = {"FET": 90}
@@ -414,7 +414,7 @@ class TestPreferencesDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             info={"some_info_key": "some_info_value"},
             ledger_id="fetchai",
-            tx_nonce="transaction nonce"
+            tx_nonce="transaction nonce",
         )
 
         cur_score = self.preferences.get_score(
@@ -508,7 +508,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             info=self.info,
             ledger_id=self.ledger_id,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         self.decision_maker.message_in_queue.put_nowait(tx_message)
@@ -588,7 +588,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             info=self.info,
             ledger_id=self.ledger_id,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         with mock.patch.object(
@@ -643,7 +643,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             info=self.info,
             ledger_id=self.ledger_id,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         with mock.patch.object(
@@ -673,6 +673,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             info=self.info,
             ledger_id=self.ledger_id,
+            tx_nonce="transaction nonce",
         )
         self.decision_maker.handle(tx_message)
         assert not self.decision_maker.message_out_queue.empty()
@@ -710,7 +711,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             info=self.info,
             ledger_id=self.ledger_id,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
         with mock.patch.object(
             self.decision_maker, "_is_acceptable_for_settlement", return_value=True
@@ -735,7 +736,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             ledger_id=self.ledger_id,
             info=self.info,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         with mock.patch.object(
@@ -775,7 +776,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             ledger_id="off_chain",
             info=self.info,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         assert self.decision_maker._is_affordable(tx_message)
@@ -816,7 +817,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             ledger_id=self.ledger_id,
             info=self.info,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         with mock.patch.object(
@@ -842,7 +843,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             ledger_id="off_chain",
             info=self.info,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         tx_digest = self.decision_maker._settle_tx(tx_message)
@@ -862,7 +863,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             ledger_id=self.ledger_id,
             info=self.info,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         with mock.patch.object(
@@ -885,7 +886,7 @@ class TestDecisionMaker:
             tx_quantities_by_good_id={"good_id": 10},
             ledger_id="off_chain",
             info=self.info,
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
         self.decision_maker.ownership_state._quantities_by_good_id = None
         assert self.decision_maker._is_utility_enhancing(tx_message)
@@ -990,7 +991,7 @@ class TestLedgerStateProxy:
             tx_quantities_by_good_id={"good_id": 10},
             ledger_id="off_chain",
             info={"some_info_key": "some_info_value"},
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
 
         with mock.patch.object(
@@ -1015,7 +1016,7 @@ class TestLedgerStateProxy:
             tx_quantities_by_good_id={"good_id": 10},
             ledger_id="off_chain",
             info={"some_info_key": "some_info_value"},
-            tx_nonce="Transaction nonce"
+            tx_nonce="Transaction nonce",
         )
         with mock.patch.object(
             self.ledger_state_proxy.ledger_apis, "token_balance", return_value=0

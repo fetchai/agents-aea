@@ -342,6 +342,7 @@ class TransactionMessage(InternalMessage):
                 tx_quantities_by_good_id=other.tx_quantities_by_good_id,
                 ledger_id=other.ledger_id,
                 info=other.info,
+                tx_nonce=other.tx_nonce,
             )
         else:
             tx_msg = TransactionMessage(
