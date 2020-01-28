@@ -161,14 +161,6 @@ class SkillContext:
         return self._agent_context.ledger_apis
 
     @property
-    def task_queue(self) -> Queue:
-        """Get the task queue."""
-        # TODO this is potentially dangerous - it exposes the task queue to other skills
-        #      such that other skills can modify it.
-        #      -> that suggests a task queue per skill, handled by the agent.
-        return self._agent_context.task_queue
-
-    @property
     def handlers(self) -> SimpleNamespace:
         """Get handlers of the skill."""
         assert self._skill is not None, "Skill not initialized."
@@ -201,11 +193,19 @@ class SkillComponent(ABC):
         :param skill_context: the skill context
         :param kwargs: keyword arguments
         """
-        self._context = kwargs.pop("skill_context")  # type: SkillContext
-        self._config = kwargs
-        if "name" not in self._config:
+        try:
+            self._context = kwargs.pop("skill_context")  # type: SkillContext
+            assert self._context is not None
+        except Exception:
+            raise ValueError("Skill context not provided.")
+
+        try:
+            self._name = kwargs.pop("name")
+            assert self._name is not None
+        except Exception:
             raise ValueError("Missing name of skill component.")
-        self._name = self._config.pop("name")
+
+        self._config = kwargs
 
     @property
     def name(self) -> str:
@@ -389,18 +389,70 @@ class Handler(SkillComponent):
 class Task(SkillComponent):
     """This class implements an abstract task."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        skill_context: Optional[SkillContext] = None,
+        **kwargs
+    ):
         """
         Initialize a task.
 
-        :param skill_context: the skill context
+        :param name: the name of the task (mandatory)
+        :param skill_context: the skill context (mandatory)
         :param kwargs: keyword arguments.
         """
-        super().__init__(**kwargs)
-        self.completed = False
+        super().__init__(name=name, skill_context=skill_context, **kwargs)
+
+        self._executed = False
+        # this is where we store the result.
+        self._result = None
+
+    def __call__(self, *args, **kwargs):
+        """
+        Execute the task.
+
+        :param args: positional arguments forwarded to the 'execute' method.
+        :param kwargs: keyword arguments forwarded to the 'execute' method.
+        :return the task instance
+        :raises ValueError: if the task has already been executed.
+        """
+        if self._executed:
+            raise ValueError("Task already executed.")
+
+        self.setup()
+        try:
+            self._result = self.execute(*args, **kwargs)
+            return self
+        except Exception as e:
+            logger.debug(
+                "Got exception of type {} with message '{}' while executing task {}.".format(
+                    type(e), str(e), self.name
+                )
+            )
+        finally:
+            self._executed = True
+            self.teardown()
+
+    @property
+    def executed(self) -> bool:
+        """Check if the task has already been executed."""
+        return self._executed
+
+    @property
+    def result(self) -> Any:
+        """
+        Get the result.
+
+        :return the result from the execute method.
+        :raises ValueError: if the task has not been executed yet.
+        """
+        if not self._executed:
+            raise ValueError("Task not executed yet.")
+        return self._result
 
     @abstractmethod
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """
         Run the task logic.
 

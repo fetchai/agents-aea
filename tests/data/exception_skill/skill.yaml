@@ -3,12 +3,12 @@ author: fetchai
 version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
-behaviours: {}
-handlers: {}
-tasks:
+behaviours:
   exception:
-    class_name: ExceptionTask
+    class_name: ExceptionBehaviour
     args: {}
+handlers: {}
+tasks: {}
 shared_classes: {}
 protocols: []
 dependencies: {}

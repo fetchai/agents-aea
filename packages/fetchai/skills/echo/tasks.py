@@ -39,7 +39,7 @@ class EchoTask(Task):
         """Set up the task."""
         logger.info("Echo Task: setup method called.")
 
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """Execute the task."""
         logger.info("Echo Task: execute method called.")
         time.sleep(1.0)

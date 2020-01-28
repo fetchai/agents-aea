@@ -51,6 +51,7 @@ from .conftest import (
     LOCAL_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
 )
+from .data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 
 
 def test_initialise_aea():
@@ -87,9 +88,6 @@ def test_initialise_aea():
         my_AEA.context.public_key is not None
     ), "Public key must not be None after set."
     my_AEA.stop()
-    assert (
-        my_AEA.context.task_queue is not None
-    ), "Task queue must not be None after set."
 
 
 def test_act():
@@ -306,12 +304,12 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
 
-        dummy_task_name = "dummy"
-        dummy_task = self.aea.resources.task_registry.fetch(
-            (dummy_skill_id, dummy_task_name)
-        )
-        assert dummy_task is not None
-        assert dummy_task.nb_execute_called > 0
+        # TODO the previous code caused an error:
+        #      _pickle.PicklingError: Can't pickle <class 'tasks.DummyTask'>: import of module 'tasks' failed
+        dummy_task = DummyTask(name="dummy", skill_context=object())
+        async_result = self.aea.task_manager.enqueue_task(dummy_task)
+        expected_dummy_task = async_result.get(2.0)
+        assert expected_dummy_task.nb_execute_called > 0
 
         dummy_handler = self.aea.resources.handler_registry.fetch_by_protocol_and_skill(
             DefaultMessage.protocol_id, dummy_skill_id
@@ -410,12 +408,10 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         assert dummy_behaviour is not None
         assert dummy_behaviour.nb_act_called > 0
 
-        dummy_task_name = "dummy"
-        dummy_task = self.aea.resources.task_registry.fetch(
-            (dummy_skill_id, dummy_task_name)
-        )
-        assert dummy_task is not None
-        assert dummy_task.nb_execute_called > 0
+        dummy_task = DummyTask(name="dummy", skill_context=object())
+        async_result = self.aea.task_manager.enqueue_task(dummy_task)
+        expected_dummy_task = async_result.get(2.0)
+        assert expected_dummy_task.nb_execute_called > 0
 
         dummy_handler_name = "dummy"
         dummy_handler = self.aea.resources.handler_registry.fetch(

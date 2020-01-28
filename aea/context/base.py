@@ -43,7 +43,6 @@ class AgentContext:
         ownership_state: OwnershipState,
         preferences: Preferences,
         goal_pursuit_readiness: GoalPursuitReadiness,
-        task_queue: Queue,
     ):
         """
         Initialize an agent context.
@@ -57,7 +56,6 @@ class AgentContext:
         :param ownership_state: the ownership state of the agent
         :param preferences: the preferences of the agent
         :param goal_pursuit_readiness: ready to pursuit its goals
-        :param task_queue: the queue for the task to be processed enqueued by the agent.
         """
         self._shared_state = {}  # type: Dict[str, Any]
         self._agent_name = agent_name
@@ -70,7 +68,6 @@ class AgentContext:
         self._ownership_state = ownership_state
         self._preferences = preferences
         self._goal_pursuit_readiness = goal_pursuit_readiness
-        self._task_queue = task_queue
 
     @property
     def shared_state(self) -> Dict[str, Any]:
@@ -136,8 +133,3 @@ class AgentContext:
     def ledger_apis(self) -> LedgerApis:
         """Get the ledger APIs."""
         return self._ledger_apis
-
-    @property
-    def task_queue(self) -> Queue:
-        """Get the task queue."""
-        return self._task_queue

@@ -55,7 +55,7 @@ class GymTask(Task):
         """Set up the task."""
         logger.info("Gym task: setup method called.")
 
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """Execute the task."""
         if not self._proxy_env.is_rl_agent_trained and not self.is_rl_agent_training:
             self._start_training()

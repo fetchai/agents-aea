@@ -518,7 +518,9 @@ class Resources(object):
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = ComponentRegistry[Behaviour]()
-        self.task_registry = ComponentRegistry[Task]()
+        self.task_registry = ComponentRegistry[
+            Task
+        ]()  # TODO obsolete? task are now scheduled on demand.
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [

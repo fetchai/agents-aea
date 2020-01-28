@@ -33,11 +33,10 @@ class MyScaffoldTask(Task):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """
         Implement the task execution.
 
-        :param envelope: the envelope
         :return: None
         """
         raise NotImplementedError  # pragma: no cover

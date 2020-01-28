@@ -33,11 +33,10 @@ class ErrorTask(Task):
         """
         pass  # pragma: no cover
 
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """
         Implement the task execution.
 
-        :param envelope: the envelope
         :return: None
         """
         pass  # pragma: no cover

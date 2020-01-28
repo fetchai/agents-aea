@@ -37,7 +37,7 @@ class TransactionCleanUpTask(Task):
         """
         pass
 
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """
         Implement the task execution.
 
