@@ -52,3 +52,8 @@ class PublicIdMock:
         self.name = name
         self.author = author
         self.version = version
+
+    @classmethod
+    def from_str(cls, public_id):
+        author, name, version = public_id.replace(':', '/').split('/')
+        return cls(author, name, version)

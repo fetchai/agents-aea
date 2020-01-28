@@ -19,15 +19,16 @@
 
 """Implementation of the 'aea publish' subcommand."""
 
+import click
 import os
 from shutil import copyfile
 
-import click
-
+from aea.configurations.base import PublicId
 from aea.cli.common import (
     Context,
     DEFAULT_AEA_CONFIG_FILE,
     pass_ctx,
+    try_get_item_source_path,
     try_get_item_target_path,
     try_to_load_agent_config,
 )
@@ -47,6 +48,20 @@ def publish(ctx: Context, registry):
         publish_agent(ctx)
 
 
+def _check_is_item_in_local_registry(
+    public_id, item_type_plural, registry_path
+):
+    try:
+        try_get_item_source_path(
+            registry_path,
+            public_id.author,
+            item_type_plural,
+            public_id.name
+        )
+    except click.ClickException as e:
+        raise click.ClickException('Dependency is missing. {}'.format(e))
+
+
 def _save_agent_locally(ctx: Context) -> None:
     """
     Save agent to local packages.
@@ -55,6 +70,15 @@ def _save_agent_locally(ctx: Context) -> None:
 
     :return: None
     """
+    for item_type_plural in ('connections', 'protocols', 'skills'):
+        dependencies = getattr(ctx.agent_config, item_type_plural)
+        for public_id in dependencies:
+            _check_is_item_in_local_registry(
+                PublicId.from_str(str(public_id)),
+                item_type_plural,
+                ctx.agent_config.registry_path
+            )
+
     item_type_plural = "agents"
 
     target_dir = try_get_item_target_path(
