@@ -43,6 +43,13 @@ Conceptually, a `Behaviour`  class contains the business logic specific to initi
 
 There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
+A behaviour can be registered in two ways:
+
+- By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
+- In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
+
+
+
 * `act(self)`: is how the framework calls the `Behaviour` code.
 
 !!!	Todo
