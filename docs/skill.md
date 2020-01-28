@@ -49,12 +49,36 @@ A behaviour can be registered in two ways:
 - In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
 
 
-
 * `act(self)`: is how the framework calls the `Behaviour` code.
 
-!!!	Todo
-	For example.
+Follows an example of a custom behaviour:
 
+```python
+
+from aea.skills.base import Behaviour
+
+class MyBehaviour(Behaviour):
+            
+    def setup(self):
+        """This method is called once, when the behaviour gets loaded."""
+
+    def act(self): 
+        """This methods is called in every iteration of the agent main loop."""
+
+    def teardown(self): 
+        """This method is called once, when the behaviour is teared down."""
+
+```
+
+If we want to register this behaviour dynamically, in any part of the skill code
+(i.e. wherever the skill context is available), we can write:
+
+```python
+self.context.new_behaviours.put(MyBehaviour())
+```
+
+The framework is then in charge of registering the behaviour and scheduling it 
+for execution.
 
 ### `tasks.py`
 
@@ -64,8 +88,6 @@ There can be one or more `Task` classes per skill. The developer subclasses abst
 
 * `execute(self)`: is how the framework calls a `Task`. 
 
-!!!	Todo
-	For example.
 
 ### Shared classes
 
