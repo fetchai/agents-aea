@@ -19,11 +19,12 @@
 """Test module for Registry publish methods."""
 
 from unittest import TestCase, mock
+
 from click import ClickException
 
 from aea.cli.publish import (
-    _save_agent_locally,
-    _check_is_item_in_local_registry
+    _check_is_item_in_local_registry,
+    _save_agent_locally
 )
 
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock

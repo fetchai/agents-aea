@@ -19,11 +19,11 @@
 
 """Implementation of the 'aea publish' subcommand."""
 
-import click
 import os
 from shutil import copyfile
 
-from aea.configurations.base import PublicId
+import click
+
 from aea.cli.common import (
     Context,
     DEFAULT_AEA_CONFIG_FILE,
@@ -33,6 +33,7 @@ from aea.cli.common import (
     try_to_load_agent_config,
 )
 from aea.cli.registry.publish import publish_agent
+from aea.configurations.base import PublicId
 
 
 @click.command(name="publish")
