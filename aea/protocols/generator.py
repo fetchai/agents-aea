@@ -26,7 +26,7 @@ from typing import Dict, Set
 
 from aea.configurations.base import ProtocolSpecification
 
-CUSTOM_TYPE_PATTERN = "ct:[A-Z_][a-zA-Z0-9]*"
+CUSTOM_TYPE_PATTERN = "ct:[A-Z][a-zA-Z0-9]*"
 
 MESSAGE_IMPORT = "from aea.protocols.base import Message"
 SERIALIZER_IMPORT = "from aea.protocols.base import Serializer"
@@ -97,9 +97,9 @@ class ProtocolGenerator:
             self._speech_acts[performative] = {}
             for content_name, content_type in speech_act_content_config.args.items():
                 custom_types = set(re.findall(CUSTOM_TYPE_PATTERN, content_type))
-                for ct in custom_types:
+                for custom_type in custom_types:
                     self._all_custom_types.add(
-                        self._specification_type_to_python_type(ct)
+                        self._specification_type_to_python_type(custom_type)
                     )
                 pythonic_content_type = self._specification_type_to_python_type(
                     content_type
@@ -246,15 +246,7 @@ class ProtocolGenerator:
             cls_str += str.format(
                 '        """Initialise an instance of {}."""\n', custom_type
             )
-            cls_str += "        raise NotImplementedError\n\n"
-            cls_str += "    def __eq__(self, other):\n"
-            cls_str += str.format(
-                '        """Compare two {} instances."""\n', custom_type
-            )
-            cls_str += "        if type(other) is type(self):\n"
-            cls_str += "            raise NotImplementedError\n"
-            cls_str += "        else:\n"
-            cls_str += "            return False\n\n\n"
+            cls_str += "        raise NotImplementedError\n\n\n"
         return cls_str
 
     def _performatives_enum_str(self) -> str:
@@ -295,6 +287,7 @@ class ProtocolGenerator:
         # Imports
         cls_str += "from enum import Enum\n"
         cls_str += "{}\n\n".format(self._import_from_typing_str())
+        cls_str += "from aea.configurations.base import ProtocolId\n"
         cls_str += MESSAGE_IMPORT
         cls_str += "\n\nDEFAULT_BODY_SIZE = 4\n\n\n"
 
@@ -311,7 +304,8 @@ class ProtocolGenerator:
         )
 
         # Class attribute
-        cls_str += '    protocol_id = "{}"\n\n'.format(self.protocol_specification.name)
+        cls_str += '    protocol_id = ProtocolId(\"{}\", \"{}\", \"{}\")\n\n'.format(self.protocol_specification.author, self.protocol_specification.name,
+                                                                                     self.protocol_specification.version)
         cls_str += str.format("    _speech_acts = {}\n\n", self._speech_acts_str())
 
         # Performatives Enum

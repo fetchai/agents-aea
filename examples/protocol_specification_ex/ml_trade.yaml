@@ -7,12 +7,12 @@ speech_acts:
   cfp:
     query: ct:Query
   terms:
-    terms: ct:Descrition
+    terms: ct:Description
   accept:
-    terms: ct:Descrition
+    terms: ct:Description
     tx_digest: pt:str
   data:
-    terms: ct:Descrition
+    terms: ct:Description
     data: pt:list[ct:Array]
 
   # Differences:
