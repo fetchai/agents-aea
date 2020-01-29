@@ -22,6 +22,7 @@ import importlib.util
 import inspect
 import logging
 import os
+import queue
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -69,6 +70,7 @@ class SkillContext:
         self._skill = None  # type: Optional[Skill]
 
         self._is_active = True  # type: bool
+        self._new_behaviours_queue = queue.Queue()  # type: Queue
 
     @property
     def shared_state(self) -> Dict[str, Any]:
@@ -99,6 +101,18 @@ class SkillContext:
                 self.skill_id, self._is_active
             )
         )
+
+    @property
+    def new_behaviours(self) -> Queue:
+        """
+        The queue for the new behaviours.
+
+        This queue can be used to send messages to the framework
+        to request the registration of a behaviour.
+
+        :return the queue of new behaviours.
+        """
+        return self._new_behaviours_queue
 
     @property
     def agent_public_key(self) -> str:

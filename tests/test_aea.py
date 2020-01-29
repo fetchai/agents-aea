@@ -30,7 +30,8 @@ import yaml
 
 from aea import AEA_DIR
 from aea.aea import AEA
-from aea.configurations.base import ProtocolConfig
+from aea.configurations.base import ProtocolConfig, PublicId
+from aea.connections.stub.connection import StubConnection
 from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -51,6 +52,7 @@ from .conftest import (
     LOCAL_CONNECTION_PUBLIC_ID,
     UNKNOWN_PROTOCOL_PUBLIC_ID,
 )
+from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 
 
 def test_initialise_aea():
@@ -436,3 +438,53 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.t.join()
         cls.node.stop()
         Path(cls.temp).rmdir()
+
+
+class TestAddBehaviourDynamically:
+    """Test that we can add a behaviour dynamically."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        agent_name = "MyAgent"
+        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+        wallet = Wallet({"default": private_key_pem_path})
+        ledger_apis = LedgerApis({}, "default")
+        resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
+
+        input_file = tempfile.mktemp()
+        output_file = tempfile.mktemp()
+        cls.agent = AEA(
+            agent_name,
+            [StubConnection(input_file, output_file)],
+            wallet,
+            ledger_apis,
+            resources,
+            programmatic=False,
+        )
+
+        cls.t = Thread(target=cls.agent.start)
+        cls.t.start()
+        time.sleep(1.0)
+
+    def test_add_behaviour_dynamically(self):
+        """Test the dynamic registration of a behaviour."""
+        dummy_skill_id = PublicId("dummy_author", "dummy", "0.1.0")
+        dummy_skill = self.agent.resources.get_skill(dummy_skill_id)
+        assert dummy_skill is not None
+        new_behaviour = DummyBehaviour(
+            name="dummy2", skill_context=dummy_skill.skill_context
+        )
+        dummy_skill.skill_context.new_behaviours.put(new_behaviour)
+        time.sleep(1.0)
+        assert new_behaviour.nb_act_called > 0
+        assert (
+            len(self.agent.resources.behaviour_registry.fetch_by_skill(dummy_skill_id))
+            == 2
+        )
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the class down."""
+        cls.agent.stop()
+        cls.t.join()
