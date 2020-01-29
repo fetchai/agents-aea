@@ -226,7 +226,8 @@ class FetchAIApi(LedgerApi):
         transfers = tx_contents.transfers
         seller_address = Address(seller)
         is_valid = (
-            str(tx_contents.from_address) == client and amount == transfers[seller_address]
+            str(tx_contents.from_address) == client
+            and amount == transfers[seller_address]
         )
         # TODO: Add the tx_nonce check here when the ledger supports extra data to the tx.
         is_settled = self.is_transaction_settled(tx_digest=tx_digest)
