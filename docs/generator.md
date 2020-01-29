@@ -82,184 +82,20 @@ Primitive types have a compositional format. For example, consider sets under &l
 Multi types are an "or" separated set of sub-types. A multi type `pt:int or pt:float` means the type is either `pt:int` or `pt:float`.
 
 An optional type for a content indicates that the content is optional, but if it is present, its type must match what is described in the square brackets. 
-
-<table>
-<tr>
-<td valign="top">
-<strong>Type</strong>
-</td>
-<td valign="top">
-<strong>Code</strong>
-</td>
-<td valign="top">
-<strong>Format</strong>
-</td>
-<td valign="top">
-<strong>Example</strong>
-</td>
-<td valign="top">
-<strong>In Python</strong>
-</td>
-</tr>
-<tr>
-<td valign="top">
-<strong>Custom types</strong>
-</td>
-<td valign="top">
-&lt;CT&gt;
-</td>
-<td valign="top">
-ct:RegExp(^[A-Z][a-zA-Z0-9_]*[a-zA-Z0-9]$)
-</td>
-<td valign="top">
-ct:DataModel
-</td>
-<td valign="top">
-Custom Class
-</td>
-</tr>
-<tr>
-<td rowspan="5" valign="top">
-<strong>Primitive types</strong>
-</td>
-<td rowspan="5" valign="top">
-&lt;PT&gt;
-</td>
-<td valign="top">
-pt:byte
-</td>
-<td valign="top">
-pt:byte
-</td>
-<td valign="top">
-bytes
-</td>
-</tr>
-<tr>
-<td valign="top">
-pt:int
-</td>
-<td valign="top">
-pt:int
-</td>
-<td valign="top">
-int
-</td>
-</tr>
-<tr>
-<td valign="top">
-pt:float
-</td>
-<td valign="top">
-pt:float
-</td>
-<td valign="top">
-float
-</td>
-</tr>
-<tr>
-<td valign="top">
-pt:bool
-</td>
-<td valign="top">
-pt:bool
-</td>
-<td valign="top">
-bool
-</td>
-</tr>
-<tr>
-<td valign="top">
-pt:str
-</td>
-<td valign="top">
-pt:str
-</td>
-<td valign="top">
-str
-</td>
-</tr>
-<tr>
-<td rowspan="2" valign="top">
-<strong>Primitive collection types</strong>
-</td>
-<td rowspan="2" valign="top">
-&lt;PCT&gt;
-</td>
-<td valign="top">
-pt:set[&lt;PT&gt;/&lt;CT&gt;]
-</td>
-<td valign="top">
-pt:set[pt:int]
-</td>
-<td valign="top">
-FrozenSet
-</td>
-</tr>
-<tr>
-<td valign="top">
-pt:list[&lt;PT&gt;/&lt;CT&gt;]
-</td>
-<td valign="top">
-pt:list[ct:DataModel]
-</td>
-<td valign="top">
-Tuple
-</td>
-</tr>
-<tr>
-<td valign="top">
-<strong>Primitive mapping types</strong>
-</td>
-<td valign="top">
-&lt;PMT&gt;
-</td>
-<td valign="top">
-pt:dict[&lt;PT&gt;/&lt;CT&gt;,&nbsp; &lt;PT&gt;/&lt;CT&gt;]
-</td>
-<td valign="top">
-pt:dict[pt:str, ct:Error]
-</td>
-<td valign="top">
-Dict
-</td>
-</tr>
-<tr>
-<td valign="top">
-<strong>Multi types</strong>
-</td>
-<td valign="top">
-&lt;MT&gt;
-</td>
-<td valign="top">
-&lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt; or ... or &lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt;
-</td>
-<td valign="top">
-pt:str or pt:list[p:bool]
-</td>
-<td valign="top">
-Union
-</td>
-</tr>
-<tr>
-<td valign="top">
-<strong>Optional types</strong>
-</td>
-<td valign="top">
-&lt;O&gt;
-</td>
-<td valign="top">
-pt:optional[&lt;MT&gt;/&lt;PMT&gt;/&lt;PCT&gt;/&lt;PT&gt;/&lt;CT&gt;]
-</td>
-<td valign="top">
-pt:optional[pt:list[pt:int]]
-</td>
-<td valign="top">
-Optional
-</td>
-</tr>
-</table>
-
+                                                                                                                                                                 
+| Type                       | Code        | Format                                                                                                | Example                        | In Python    |
+| ---------------------------| ------------| ------------------------------------------------------------------------------------------------------|--------------------------------|--------------|
+| Custom types               | &lt;CT&gt;  | ct:RegExp(^[A-Z][a-zA-Z0-9_]*[a-zA-Z0-9]$)                                                            | ct:DataModel                   | Custom Class |
+| Primitive types            | &lt;PT&gt;  | pt:bytes                                                                                              | pt:bytes                       | bytes        |
+|                            |             | pt:int                                                                                                | pt:int                         | int          |
+|                            |             | pt:float                                                                                              | pt:float                       | float        |
+|                            |             | pt:bool                                                                                               | pt:bool                        | bool         |
+|                            |             | pt:str                                                                                                | pt:str                         | str          |
+| Primitive collection types | &lt;PCT&gt; | pt:set[&lt;PT&gt;/&lt;CT&gt;]                                                                         | pt:set[pt:int]                 | FrozenSet    |
+|                            |             | pt:list[&lt;PT&gt;/&lt;CT&gt;]                                                                        | pt:list[ct:DataModel]          | Tuple        |
+| Primitive mapping types    | &lt;PMT&gt; | pt:dict[&lt;PT&gt;/&lt;CT&gt;, &lt;PT&gt;/&lt;CT&gt;]                                                 | pt:dict[pt:bool, ct:DataModel] | Dict         |
+| Multi types                | &lt;MT&gt;  | &lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt; or ... or &lt;PT&gt;/&lt;CT&gt;/&lt;PCT&gt;/&lt;PMT&gt; | pt:str or pt:list[ct:Error]    | Union        |
+| Optional types             | &lt;O&gt;   | pt:optional[&lt;MT&gt;/&lt;PMT&gt;/&lt;PCT&gt;/&lt;PT&gt;/&lt;CT&gt;]                                 | pt:optional[pt:list[pt:int]]   | Optional     |
 
 ## Demo instructions
 
