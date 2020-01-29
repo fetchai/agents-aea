@@ -222,10 +222,16 @@ class FetchAIApi(LedgerApi):
 
         :return: True if the random_message is equals to tx['input']
         """
-        tx_contents = cast(TxContents, self._api.tx.contents(tx_digest))
-        is_valid = tx_contents.from_address.to_hex() == client
+        import pdb
 
-        # TODO: Figure out the analogy of the amount and the tx_contents.fees
+        pdb.set_trace()
+        tx_contents = cast(TxContents, self._api.tx.contents(tx_digest))
+        transfers = tx_contents.transfers
+        transfers_result = False
+        for k in transfers.keys():
+            transfers_result = amount == transfers[k]
+        is_valid = str(tx_contents.from_address) == client and transfers_result
+
         # TODO: Add the tx_nonce check here when the ledger supports extra data to the tx.
 
         is_settled = self.is_transaction_settled(tx_digest=tx_digest)
