@@ -60,7 +60,7 @@ class TestFetchPackage:
         fetch_package(obj_type, public_id, cwd)
         request_api_mock.assert_called_with("GET", "/connections/author/name/0.1.0")
         download_file_mock.assert_called_once_with("url", "cwd")
-        extract_mock.assert_called_once_with("filepath", "cwd/connections")
+        extract_mock.assert_called_once_with("filepath", "cwd/vendor/author/connections")
 
 
 def _raise_connection_error(*args):

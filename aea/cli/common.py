@@ -379,7 +379,7 @@ def try_get_item_target_path(
 
     :return: the item target path
     """
-    target_path = os.path.join(path, author_name, item_type_plural, item_name)
+    target_path = os.path.join(path, "vendor", author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
         raise click.ClickException(
             'Item "{}" already exists in target folder.'.format(item_name)

@@ -44,6 +44,7 @@ def fetch_agent(ctx: Context, public_id: PublicId) -> None:
     target_folder = os.path.join(ctx.cwd, name)
     os.makedirs(target_folder, exist_ok=True)
 
+    click.echo('Fetching dependencies...')
     for item_type in ("connection", "skill", "protocol"):
         item_type_plural = item_type + "s"
         for item_public_id in resp[item_type_plural]:
@@ -57,6 +58,7 @@ def fetch_agent(ctx: Context, public_id: PublicId) -> None:
                         name, e
                     )
                 )
+    click.echo('Dependencies successfully fetched.')
 
     filepath = download_file(file_url, ctx.cwd)
     extract(filepath, target_folder)
