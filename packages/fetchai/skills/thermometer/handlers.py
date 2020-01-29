@@ -143,7 +143,9 @@ class FIPAHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_matching_supply(query):
-            proposal, temp_data = strategy.generate_proposal_and_data(query)
+            proposal, temp_data = strategy.generate_proposal_and_data(
+                query, msg.counterparty
+            )
             dialogue.temp_data = temp_data
             dialogue.proposal = proposal
             logger.info(
@@ -273,9 +275,16 @@ class FIPAHandler(Handler):
             )
             proposal = cast(Description, dialogue.proposal)
             ledger_id = cast(str, proposal.values.get("ledger_id"))
-            is_settled = self.context.ledger_apis.is_tx_settled(ledger_id, tx_digest)
+            is_valid = self.context.ledger_apis.is_tx_valid(
+                ledger_id,
+                tx_digest,
+                self.context.agent_addresses[ledger_id],
+                msg.counterparty,
+                cast(str, proposal.values.get("tx_nonce")),
+                cast(int, proposal.values.get("price")),
+            )
             # TODO: check the tx_digest references a transaction with the correct terms
-            if is_settled:
+            if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))
                 )

@@ -237,6 +237,7 @@ class FIPAHandler(Handler):
                 tx_quantities_by_good_id={},
                 ledger_id=proposal.values["ledger_id"],
                 info={"dialogue_label": dialogue.dialogue_label.json},
+                tx_nonce=proposal.values.get("tx_nonce"),
             )
             self.context.decision_maker_message_queue.put_nowait(tx_msg)
             logger.info(

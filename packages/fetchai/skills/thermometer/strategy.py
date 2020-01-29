@@ -25,6 +25,7 @@ from typing import Any, Dict, Tuple
 from temper import Temper
 
 from aea.helpers.search.models import Description, Query
+from aea.mail.base import Address
 from aea.skills.base import SharedClass
 
 from packages.fetchai.skills.thermometer.thermometer_data_model import (
@@ -92,14 +93,21 @@ class Strategy(SharedClass):
         return True
 
     def generate_proposal_and_data(
-        self, query: Query
+        self, query: Query, counterparty: Address
     ) -> Tuple[Description, Dict[str, Any]]:
         """
         Generate a proposal matching the query.
 
+        :param counterparty: the counterparty of the proposal.
         :param query: the query
         :return: a tuple of proposal and the temprature data
         """
+
+        tx_nonce = self.context.ledger_apis.generate_tx_nonce(
+            identifier=self._ledger_id,
+            seller=self.context.agent_addresses[self._ledger_id],
+            client=counterparty,
+        )
 
         temp_data = self._build_data_payload()
         total_price = self._price_per_row
@@ -112,6 +120,7 @@ class Strategy(SharedClass):
                 "seller_tx_fee": self._seller_tx_fee,
                 "currency_id": self._currency_id,
                 "ledger_id": self._ledger_id,
+                "tx_nonce": tx_nonce,
             }
         )
         return proposal, temp_data
