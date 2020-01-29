@@ -26,6 +26,8 @@ from unittest import mock
 
 from eth_account.datastructures import AttributeDict
 
+from fetchai.ledger.api.tx import TxStatus
+
 from hexbytes import HexBytes
 
 import pytest
@@ -247,13 +249,20 @@ class TestLedgerApis:
         with pytest.raises(AssertionError):
             ledger_apis._is_tx_settled("Unknown", tx_digest=tx_digest)
 
-        # tx_status = mock.Mock()
-        # with mock.patch.object(
-        #     ledger_apis.apis[FETCHAI].api.tx, "status", return_value=tx_status
-        # ):
-        #     is_successful = ledger_apis.is_tx_settled(FETCHAI, tx_digest=tx_digest)
-        #     assert is_successful
-        #     assert ledger_apis.last_tx_statuses[FETCHAI] == "OK"
+        tx_status = TxStatus(
+            digest=tx_digest.encode(),
+            status="Executed",
+            exit_code=0,
+            charge=2,
+            charge_rate=1,
+            fee=10,
+        )
+        with mock.patch.object(
+            ledger_apis.apis[FETCHAI].api.tx, "status", return_value=tx_status
+        ):
+            is_successful = ledger_apis._is_tx_settled(FETCHAI, tx_digest=tx_digest)
+            assert is_successful
+            assert ledger_apis.last_tx_statuses[FETCHAI] == "OK"
 
         with mock.patch.object(
             ledger_apis.apis[FETCHAI].api.tx, "status", side_effect=Exception
@@ -360,3 +369,19 @@ class TestLedgerApis:
                 tx_nonce=tx_nonce,
                 amount=2,
             )
+
+    def test_generate_tx_nonce_fetchai(self):
+        """Test the generated tx_nonce."""
+        seller_crypto = FetchAICrypto()
+        client_crypto = FetchAICrypto()
+        ledger_apis = LedgerApis(
+            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            FETCHAI,
+        )
+        seller_address = seller_crypto.address
+        client_address = client_crypto.address
+        tx_nonce = ledger_apis.generate_tx_nonce(
+            FETCHAI, seller_address, client_address
+        )
+        logger.info(tx_nonce)
+        assert tx_nonce != ""

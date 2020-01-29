@@ -21,12 +21,14 @@
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
 import logging
+import time
 from pathlib import Path
 from typing import BinaryIO, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
-from fetchai.ledger.api.tx import TxStatus
+from fetchai.ledger.api.tx import TxContents, TxStatus
 from fetchai.ledger.crypto import Address, Entity, Identity  # type: ignore
+from fetchai.ledger.serialisation import sha256_hash
 
 from aea.crypto.base import AddressLike, Crypto, LedgerApi
 
@@ -198,9 +200,6 @@ class FetchAIApi(LedgerApi):
         tx_status = cast(TxStatus, self._api.tx.status(tx_digest))
         is_successful = False
         if tx_status.status in SUCCESSFUL_TERMINAL_STATES:
-            # tx_contents = cast(TxContents, api.tx.contents(tx_digest))
-            # tx_contents.transfers_to()
-            # TODO: check the amount of the transaction is correct
             is_successful = True
         return is_successful
 
@@ -223,8 +222,17 @@ class FetchAIApi(LedgerApi):
 
         :return: True if the random_message is equals to tx['input']
         """
-
-        raise NotImplementedError
+        tx_contents = cast(TxContents, self._api.tx.contents(tx_digest))
+        transfers = tx_contents.transfers
+        seller_address = Address(seller)
+        is_valid = (
+            str(tx_contents.from_address) == client
+            and amount == transfers[seller_address]
+        )
+        # TODO: Add the tx_nonce check here when the ledger supports extra data to the tx.
+        is_settled = self.is_transaction_settled(tx_digest=tx_digest)
+        result = is_valid and is_settled
+        return result
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -235,4 +243,11 @@ class FetchAIApi(LedgerApi):
         :return: return the hash in hex.
         """
 
-        raise NotImplementedError
+        time_stamp = int(time.time())
+        seller = cast(str, seller)
+        client = cast(str, client)
+        aggregate_hash = sha256_hash(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+
+        return aggregate_hash.hex()
