@@ -21,12 +21,14 @@
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
 import logging
+import time
 from pathlib import Path
 from typing import BinaryIO, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
 from fetchai.ledger.api.tx import TxStatus
 from fetchai.ledger.crypto import Address, Entity, Identity  # type: ignore
+from fetchai.ledger.serialisation import sha256_hash
 
 from aea.crypto.base import AddressLike, Crypto, LedgerApi
 
@@ -224,7 +226,7 @@ class FetchAIApi(LedgerApi):
         :return: True if the random_message is equals to tx['input']
         """
 
-        raise NotImplementedError
+        return self.is_transaction_settled(tx_digest=tx_digest)
 
     def generate_tx_nonce(self, seller: Address, client: Address) -> str:
         """
@@ -235,4 +237,11 @@ class FetchAIApi(LedgerApi):
         :return: return the hash in hex.
         """
 
-        raise NotImplementedError
+        time_stamp = int(time.time())
+        seller = cast(str, seller)
+        client = cast(str, client)
+        aggregate_hash = sha256_hash(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+
+        return aggregate_hash.hex()
