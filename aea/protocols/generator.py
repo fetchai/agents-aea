@@ -107,28 +107,111 @@ class ProtocolGenerator:
                 self._all_unique_contents[content_name] = pythonic_content_type
                 self._speech_acts[performative][content_name] = pythonic_content_type
 
+    def _handle_o(self, specification_type: str) -> str:
+        """
+        Handle an optional type.
+
+        :param specification_type: the type described in the specification
+        :return: The Python equivalent
+        """
+        self._imports["Optional"] = True
+        element_type = specification_type[
+            specification_type.index("[") + 1 : specification_type.rindex("]")
+        ]
+        element_type_in_python = self._specification_type_to_python_type(element_type)
+        python_type = "Optional[{}]".format(element_type_in_python)
+        return python_type
+
+    def _handle_ct(self, specification_type: str) -> str:
+        """
+        Handle a custom type.
+
+        :param specification_type: the type described in the specification
+        :return: The Python equivalent
+        """
+        python_type = specification_type[3:]
+        return python_type
+
+    def _handle_pt(self, specification_type: str) -> str:
+        """
+        Handle a primitive type.
+
+        :param specification_type: the type described in the specification
+        :return: The Python equivalent
+        """
+        python_type = specification_type[3:]
+        return python_type
+
+    def _handle_pct(self, specification_type: str) -> str:
+        """
+        Handle a primitive collection type.
+
+        :param specification_type: the type described in the specification
+        :return: The Python equivalent
+        """
+        element_type = specification_type[
+            specification_type.index("[") + 1 : specification_type.rindex("]")
+        ]
+        element_type_in_python = self._specification_type_to_python_type(element_type)
+        if specification_type.startswith("pt:set"):
+            self._imports["FrozenSet"] = True
+            python_type = "FrozenSet[{}]".format(element_type_in_python)
+        else:
+            self._imports["Tuple"] = True
+            python_type = "Tuple[{}]".format(element_type_in_python)
+        return python_type
+
+    def _handle_pmt(self, specification_type: str) -> str:
+        """
+        Handle a primitive mapping type.
+
+        :param specification_type: the type described in the specification
+        :return: The Python equivalent
+        """
+        self._imports["Dict"] = True
+        element1_type = specification_type[
+            specification_type.index("[") + 1 : specification_type.index(",")
+        ]
+        element2_type = specification_type[
+            specification_type.index(",") + 1 : specification_type.rindex("]")
+        ].strip()
+        element1_type_in_python = self._specification_type_to_python_type(element1_type)
+        element2_type_in_python = self._specification_type_to_python_type(element2_type)
+        python_type = "Dict[{}, {}]".format(
+            element1_type_in_python, element2_type_in_python
+        )
+        return python_type
+
+    def _handle_mt(self, specification_types: Set[str]) -> str:
+        """
+        Handle a multi type.
+
+        :param specification_types: the set of types which were separated with "or" in the protocol specification.
+        :return: The Python equivalent
+        """
+        self._imports["Union"] = True
+        python_type = "Union["
+        for t in specification_types:
+            python_type += "{}, ".format(self._specification_type_to_python_type(t))
+        python_type = python_type[:-2]
+        python_type += "]"
+        return python_type
+
     def _specification_type_to_python_type(self, specification_type: str) -> str:
         """
-        Convert a data type in protocol specification into its Python equivalent.
+        Convert a data type in protocol specification into its Python equivalent using the _handle_...() methods.
 
         :param specification_type: the type described in the specification
         :return: The Python equivalent
         """
         python_type = ""
         if specification_type.startswith("pt:optional"):
-            self._imports["Optional"] = True
-            element_type = specification_type[
-                specification_type.index("[") + 1 : specification_type.rindex("]")
-            ]
-            element_type_in_python = self._specification_type_to_python_type(
-                element_type
-            )
-            python_type = "Optional[{}]".format(element_type_in_python)
+            python_type = self._handle_o(specification_type)
         else:
             specification_types = set(specification_type.split(" or "))
             if len(specification_types) == 1:  # just one type (not a Union[])
                 if specification_type.startswith("ct:"):
-                    python_type = specification_type[3:]
+                    python_type = self._handle_ct(specification_type)
                 elif specification_type in [
                     "pt:bytes",
                     "pt:int",
@@ -136,53 +219,17 @@ class ProtocolGenerator:
                     "pt:bool",
                     "pt:str",
                 ]:
-                    python_type = specification_type[3:]
+                    python_type = self._handle_pt(specification_type)
                 elif specification_type.startswith(
                     "pt:set"
                 ) or specification_type.startswith("pt:list"):
-                    element_type = specification_type[
-                        specification_type.index("[")
-                        + 1 : specification_type.rindex("]")
-                    ]
-                    element_type_in_python = self._specification_type_to_python_type(
-                        element_type
-                    )
-                    if specification_type.startswith("pt:set"):
-                        self._imports["FrozenSet"] = True
-                        python_type = "FrozenSet[{}]".format(element_type_in_python)
-                    else:
-                        self._imports["Tuple"] = True
-                        python_type = "Tuple[{}]".format(element_type_in_python)
+                    python_type = self._handle_pct(specification_type)
                 elif specification_type.startswith("pt:dict"):
-                    self._imports["Dict"] = True
-                    element1_type = specification_type[
-                        specification_type.index("[")
-                        + 1 : specification_type.index(",")
-                    ]
-                    element2_type = specification_type[
-                        specification_type.index(",")
-                        + 1 : specification_type.rindex("]")
-                    ].strip()
-                    element1_type_in_python = self._specification_type_to_python_type(
-                        element1_type
-                    )
-                    element2_type_in_python = self._specification_type_to_python_type(
-                        element2_type
-                    )
-                    python_type = "Dict[{}, {}]".format(
-                        element1_type_in_python, element2_type_in_python
-                    )
+                    python_type = self._handle_pmt(specification_type)
                 else:
                     raise TypeError("Unsupported type: '{}'".format(specification_type))
             elif len(specification_types) > 1:  # has more than one type 'or' separated
-                self._imports["Union"] = True
-                python_type = "Union["
-                for t in specification_types:
-                    python_type += "{}, ".format(
-                        self._specification_type_to_python_type(t)
-                    )
-                python_type = python_type[:-2]
-                python_type += "]"
+                python_type = self._handle_mt(specification_types)
         return python_type
 
     def _import_from_typing_str(self) -> str:
@@ -304,8 +351,11 @@ class ProtocolGenerator:
         )
 
         # Class attribute
-        cls_str += '    protocol_id = ProtocolId(\"{}\", \"{}\", \"{}\")\n\n'.format(self.protocol_specification.author, self.protocol_specification.name,
-                                                                                     self.protocol_specification.version)
+        cls_str += '    protocol_id = ProtocolId("{}", "{}", "{}")\n\n'.format(
+            self.protocol_specification.author,
+            self.protocol_specification.name,
+            self.protocol_specification.version,
+        )
         cls_str += str.format("    _speech_acts = {}\n\n", self._speech_acts_str())
 
         # Performatives Enum
