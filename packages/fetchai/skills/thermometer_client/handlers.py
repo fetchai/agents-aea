@@ -107,7 +107,7 @@ class FIPAHandler(Handler):
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE.value,
             error_msg="Invalid dialogue.",
             error_data="fipa_message",
-        )  # TODO: send back FIPASerializer().encode(msg))
+        )
         self.context.outbox.put_message(
             to=msg.counterparty,
             sender=self.context.agent_address,

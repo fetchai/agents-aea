@@ -30,7 +30,7 @@ from aea.skills.base import SharedClass
 
 from packages.fetchai.skills.thermometer.thermometer_data_model import (
     SCHEME,
-    THERMOMETER_DATAMODEL,
+    Thermometer_Datamodel,
 )
 
 DEFAULT_PRICE_PER_ROW = 1
@@ -79,7 +79,7 @@ class Strategy(SharedClass):
 
         :return: a description of the offered services
         """
-        desc = Description(SCHEME, data_model=THERMOMETER_DATAMODEL())
+        desc = Description(SCHEME, data_model=Thermometer_Datamodel())
         return desc
 
     def is_matching_supply(self, query: Query) -> bool:

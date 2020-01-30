@@ -283,7 +283,6 @@ class FIPAHandler(Handler):
                 cast(str, proposal.values.get("tx_nonce")),
                 cast(int, proposal.values.get("price")),
             )
-            # TODO: check the tx_digest references a transaction with the correct terms
             if is_valid:
                 token_balance = self.context.ledger_apis.token_balance(
                     ledger_id, cast(str, self.context.agent_addresses.get(ledger_id))

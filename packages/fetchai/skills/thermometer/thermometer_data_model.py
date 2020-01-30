@@ -24,14 +24,14 @@ from aea.helpers.search.models import Attribute, DataModel
 SCHEME = {"country": "UK", "city": "Cambridge"}
 
 
-class THERMOMETER_DATAMODEL(DataModel):
+class Thermometer_Datamodel(DataModel):
     """Data model for the thermo Agent."""
 
     def __init__(self):
         """Initialise the dataModel."""
-        self.ATTRIBUTE_COUNTRY = Attribute("country", str, True)
-        self.ATTRIBUTE_CITY = Attribute("city", str, True)
+        self.attribute_country = Attribute("country", str, True)
+        self.attribute_city = Attribute("city", str, True)
 
         super().__init__(
-            "thermometer_datamodel", [self.ATTRIBUTE_COUNTRY, self.ATTRIBUTE_CITY]
+            "thermometer_datamodel", [self.attribute_country, self.attribute_city]
         )
