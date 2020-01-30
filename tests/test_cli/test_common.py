@@ -27,7 +27,7 @@ from aea.cli.common import (
     format_items,
     format_skills,
     try_get_item_source_path,
-    try_get_item_target_path,
+    try_get_vendorized_item_target_path,
 )
 
 
@@ -107,12 +107,14 @@ class TryGetItemSourcePathTestCase(TestCase):
 
 @mock.patch("aea.cli.common.os.path.join", return_value="some-path")
 class TryGetItemTargetPathTestCase(TestCase):
-    """Test case for try_get_item_target_path method."""
+    """Test case for try_get_vendorized_item_target_path method."""
 
     @mock.patch("aea.cli.common.os.path.exists", return_value=False)
     def test_get_item_target_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_target_path("packages", "author", "skills", "skill-name")
+        result = try_get_vendorized_item_target_path(
+            "packages", "author", "skills", "skill-name"
+        )
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
         join_mock.assert_called_once_with(
@@ -124,4 +126,6 @@ class TryGetItemTargetPathTestCase(TestCase):
     def test_get_item_target_path_already_exists(self, exists_mock, join_mock):
         """Test for get_item_target_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_item_target_path("skills", "author", "skill-name", "packages_path")
+            try_get_vendorized_item_target_path(
+                "skills", "author", "skill-name", "packages_path"
+            )

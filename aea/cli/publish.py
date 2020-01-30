@@ -29,7 +29,7 @@ from aea.cli.common import (
     DEFAULT_AEA_CONFIG_FILE,
     pass_ctx,
     try_get_item_source_path,
-    try_get_item_target_path,
+    try_get_vendorized_item_target_path,
     try_to_load_agent_config,
 )
 from aea.cli.registry.publish import publish_agent
@@ -80,7 +80,7 @@ def _save_agent_locally(ctx: Context) -> None:
 
     item_type_plural = "agents"
 
-    target_dir = try_get_item_target_path(
+    target_dir = try_get_vendorized_item_target_path(
         ctx.agent_config.registry_path,
         ctx.agent_config.author,
         item_type_plural,
