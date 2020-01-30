@@ -93,7 +93,7 @@ def delete(ctx: Context, agent_name):
     finally:
         os.chdir(cwd)
 
-    logger.info("Deleting AEA project directory './{}'...".format(path))
+    click.echo("Deleting AEA project directory './{}'...".format(path))
 
     # delete the agent's directory
     try:
@@ -123,7 +123,7 @@ def gui(ctx: Context, port):
     """Run the CLI GUI."""
     import aea.cli_gui  # pragma: no cover
 
-    logger.info("Running the GUI.....(press Ctrl+C to exit)")  # pragma: no cover
+    click.echo("Running the GUI.....(press Ctrl+C to exit)")  # pragma: no cover
     aea.cli_gui.run(port)  # pragma: no cover
 
 
@@ -285,7 +285,7 @@ def generate_wealth(ctx: Context, type_):
     wallet = Wallet(private_key_paths)
     try:
         address = wallet.addresses[type_]
-        logger.info("Requesting funds for address {}".format(address))
+        click.echo("Requesting funds for address {}".format(address))
         _try_generate_testnet_wealth(type_, address)
     except (AssertionError, ValueError) as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover

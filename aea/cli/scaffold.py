@@ -97,7 +97,7 @@ def _scaffold_item(ctx: Context, item_type, item_name):
 
     try:
         agent_name = ctx.agent_config.agent_name
-        logger.info(
+        click.echo(
             "Adding {} scaffold '{}' to the agent '{}'...".format(
                 item_type, item_name, agent_name
             )
