@@ -39,6 +39,7 @@ nav:
       - "TAC skills": 'tac-skills.md'
       - "TAC external app": 'tac.md'
       - "Weather skills": 'weather-skills.md'
+      - "Thermometer skills step by step": 'thermometer.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
       - "Architectural diagram": 'diagram.md'
