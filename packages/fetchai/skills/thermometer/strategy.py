@@ -135,7 +135,7 @@ class Strategy(SharedClass):
             temper = Temper()
             while True:
                 results = temper.read()
-                if "internal temperature" in results.keys():
+                if "internal temperature" in results[0].keys():
                     degrees = {"thermometer_data": results}
                 else:
                     logger.debug("Couldn't read the sensor I am re-trying.")

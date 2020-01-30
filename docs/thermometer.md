@@ -19,6 +19,21 @@ Throughout the tutorial we are using Python3.7, but you can use any Python >= 3.
 
 You can follow this link <a href=#raspberry-set-up.md> here </a> in order to setup your environment and prepare your raspberry.
 
+Once you setup your raspberry 
+
+Open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there 
+(I named mine 99-hidraw-permissions.rules)
+```bash
+sudo nano 99-hidraw-permissions.rules
+```  
+and add the following inside the file:
+```bash
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
+```
+this assigns all devices coming out of the hidraw subsystem in the kernel to the group plugdev and sets the permissions 
+to r/w r/w r (for root [the default owner], plugdev, and everyone else respectively)
+
+
 ## Step1: Create the thermometer_AEA
 
 Create a new AEA by typing the following command in the terminal: 
