@@ -328,7 +328,7 @@ class ComponentRegistry(
 
     def fetch_by_skill(self, skill_id: SkillId) -> List[Item]:
         """Fetch all the items of a given skill."""
-        return list(*self._items.get(skill_id, {}).values())
+        return [*self._items.get(skill_id, {}).values()]
 
     def fetch_all(self) -> List[SkillComponentType]:
         """Fetch all the items."""
@@ -597,6 +597,14 @@ class Resources(object):
         """Get the skill."""
         return self._skills.get(skill_id, None)
 
+    def get_all_skills(self) -> List[Skill]:
+        """
+        Get the list of all the skills.
+
+        :return: the list of skills.
+        """
+        return list(self._skills.values())
+
     def remove_skill(self, skill_id: SkillId):
         """Remove a skill from the set of resources."""
         self._skills.pop(skill_id, None)
@@ -716,6 +724,20 @@ class Filter(object):
                 logger.warning(
                     "Cannot handle a {} message.".format(type(internal_message))
                 )
+
+        # get new behaviours from the agent skills
+        for skill in self.resources.get_all_skills():
+            while not skill.skill_context.new_behaviours.empty():
+                new_behaviour = skill.skill_context.new_behaviours.get()
+                try:
+                    self.resources.behaviour_registry.register(
+                        (skill.skill_context.skill_id, new_behaviour.name),
+                        new_behaviour,
+                    )
+                except ValueError as e:
+                    logger.warning(
+                        "Error when trying to add a new behaviour: {}".format(str(e))
+                    )
 
     def _handle_tx_message(self, tx_message: TransactionMessage):
         """Handle transaction message from the Decision Maker."""
