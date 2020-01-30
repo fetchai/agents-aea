@@ -11,7 +11,7 @@ To follow this tutorial to completion you will need:
  
  - AEA Framework
 	
-The AEA will “leave” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the OEF and will identify itself as a seller of that data.
+The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the OEF and will identify itself as a seller of that data.
 
 Throughout the tutorial we are using Python3.7, but you can use any Python >= 3.6.
 
@@ -1774,6 +1774,17 @@ skills:
 
 ## Run the AEAs
 
+#### Make sure that your thermometer sensor is connected to the Raspberry's usb port.
+
+You can change the end point's address and port by modifying the connection's yaml file (my_aea/connection/oef/connection.yaml)
+
+Under config locate :
+
+```bash
+addr: ${OEF_ADDR: 127.0.0.1}
+```
+ and replace it with your ip (The ip of the machine that runs the oef image.)
+
 In a separate terminal, launch a local OEF node (for search and discovery).
 ```bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
@@ -1816,7 +1827,7 @@ You will see that the AEAs negotiate and then transact using the Fetch.ai testne
 ### Ethereum ledger payment
 
 A demo to run the same scenario but with a true ledger transaction on the Ethereum Ropsten testnet. 
-This demo assumes the temperature client trusts our agent to send the temperature data upon successful payment.
+This demo assumes the temperature client trusts our AEA to send the temperature data upon successful payment.
 
 Create the private key for the thermometer client AEA.
 
