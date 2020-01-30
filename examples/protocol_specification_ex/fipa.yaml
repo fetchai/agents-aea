@@ -5,16 +5,16 @@ license: Apache 2.0
 description: 'A protocol for FIPA ACL.'
 speech_acts:
   cfp:
-    query: Query
+    query: ct:Query
   propose:
-    proposal: Proposal
+    proposal: ct:Proposal
     price: pt:float
   accept_w_inform:
-    info: pt:dict[pt:str, AcceptInfo]
+    info: pt:dict[pt:str, ct:Info]
   match_accept_w_inform:
-    info: pt:dict[pt:str, MatchAcceptInfo]
+    info: pt:dict[pt:str, ct:Info]
   inform:
-    info: pt:dict[pt:str, InformInfo]
+    info: pt:dict[pt:str, ct:Info]
   accept: {}
   decline: {}
   match_accept: {}
