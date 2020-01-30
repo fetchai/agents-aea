@@ -221,6 +221,12 @@ class EthereumApi(LedgerApi):
             "gasPrice": self._api.toWei(GAS_PRICE, GAS_ID),
             "data": tx_nonce,
         }
+        gas_estimation = self._api.eth.estimateGas(transaction=transaction)
+        assert (
+            tx_fee >= gas_estimation
+        ), "Need to add more gas. Change the configs. Estimated Gas is: {}".format(
+            gas_estimation
+        )
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
 
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
