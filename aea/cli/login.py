@@ -27,7 +27,7 @@ from aea.cli.registry.utils import registry_login, write_cli_config
 
 @click.command(name="login", help="Login to Registry account")
 @click.argument("username", type=str, required=True)
-@click.argument("password", type=str, required=True)
+@click.option("--password", type=str, required=True, prompt=True, hide_input=True)
 def login(username, password):
     """Login to Registry account."""
     click.echo("Signing in as {}...".format(username))

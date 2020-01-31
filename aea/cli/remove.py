@@ -52,7 +52,7 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
     }
 
     agent_name = ctx.agent_config.agent_name
-    logger.info(
+    click.echo(
         "Removing {item_type} '{item_name}' from the agent '{agent_name}'...".format(
             agent_name=agent_name, item_type=item_type, item_name=item_name
         )

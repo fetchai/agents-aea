@@ -40,7 +40,9 @@ class LoginTestCase(TestCase):
         """Test for CLI login positive result."""
         username, password = ("Username", "Password")
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "login", username, password], standalone_mode=False
+            cli,
+            [*CLI_LOG_OPTION, "login", username, "--password={}".format(password)],
+            standalone_mode=False,
         )
         expected_output = (
             "Signing in as Username...\n" "Successfully signed in: Username.\n"

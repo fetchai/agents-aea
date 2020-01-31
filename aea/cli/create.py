@@ -88,15 +88,15 @@ def create(click_context, agent_name):
     ctx = cast(Context, click_context.obj)
     path = Path(agent_name)
 
-    logger.info("Initializing AEA project '{}'".format(agent_name))
-    logger.info("Creating project directory './{}'".format(agent_name))
+    click.echo("Initializing AEA project '{}'".format(agent_name))
+    click.echo("Creating project directory './{}'".format(agent_name))
 
     # create the agent's directory
     try:
         path.mkdir(exist_ok=False)
 
         # create a config file inside it
-        logger.info("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
+        click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
         config_file = open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w")
         agent_config = AgentConfig(
             agent_name=agent_name,
@@ -125,7 +125,7 @@ def create(click_context, agent_name):
         Path(ctx.cwd, "vendor").mkdir()
         Path(ctx.cwd, "vendor", "__init__.py").touch()
 
-        logger.info("Adding default packages ...")
+        click.echo("Adding default packages ...")
         click_context.invoke(connection, connection_public_id=DEFAULT_CONNECTION)
 
         click_context.invoke(skill, skill_public_id=DEFAULT_SKILL)

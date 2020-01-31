@@ -31,7 +31,7 @@ from aea.configurations.base import Dependency
 
 
 def _install_dependency(dependency_name: str, dependency: Dependency):
-    logger.info("Installing {}...".format(pprint.pformat(dependency_name)))
+    click.echo("Installing {}...".format(pprint.pformat(dependency_name)))
     try:
         index = dependency.get("index", None)
         git_url = dependency.get("git", None)
