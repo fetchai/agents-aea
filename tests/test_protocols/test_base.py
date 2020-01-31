@@ -111,7 +111,3 @@ class TestBaseSerializations:
             config=ProtocolConfig(),
         )
         assert protocol.config is not None
-
-    def test_check_consistency_returns_true(self):
-        """Test that the check consistency method returns True."""
-        assert self.message._check_consistency()

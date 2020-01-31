@@ -18,14 +18,13 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the OEF protocol."""
+from unittest import mock
+
 
 from aea.helpers.search.models import (
     Attribute,
-    Constraint,
-    ConstraintType,
     DataModel,
     Description,
-    Query,
 )
 
 from packages.fetchai.protocols.oef.message import OEFMessage
@@ -63,15 +62,39 @@ def test_oef_type_string_value():
     ), "The string representation must be search_result"
 
 
+def test_oef_error_operation():
+    """Test the string value of the error operation."""
+    assert (
+        str(OEFMessage.OEFErrorOperation.REGISTER_SERVICE) == "0"
+    ), "The string representation must be 0"
+    assert (
+        str(OEFMessage.OEFErrorOperation.UNREGISTER_SERVICE) == "1"
+    ), "The string representation must be 1"
+    assert (
+        str(OEFMessage.OEFErrorOperation.SEARCH_SERVICES) == "2"
+    ), "The string representation must be 2"
+    assert (
+        str(OEFMessage.OEFErrorOperation.SEARCH_SERVICES_WIDE) == "3"
+    ), "The string representation must be 3"
+    assert (
+        str(OEFMessage.OEFErrorOperation.SEARCH_AGENTS) == "4"
+    ), "The string representation must be 4"
+    assert (
+        str(OEFMessage.OEFErrorOperation.SEND_MESSAGE) == "5"
+    ), "The string representation must be 5"
+    assert (
+        str(OEFMessage.OEFErrorOperation.REGISTER_AGENT) == "6"
+    ), "The string representation must be 6"
+    assert (
+        str(OEFMessage.OEFErrorOperation.UNREGISTER_AGENT) == "7"
+    ), "The string representation must be 7"
+    assert (
+        str(OEFMessage.OEFErrorOperation.OTHER) == "10000"
+    ), "The string representation must be 10000"
+
+
 def test_oef_message_consistency():
     """Tests the consistency of an OEFMessage."""
-    foo_datamodel = DataModel("foo", [Attribute("bar", int, True, "A bar attribute.")])
-    msg = OEFMessage(
-        type=OEFMessage.Type.SEARCH_AGENTS,
-        id=2,
-        query=Query([Constraint("bar", ConstraintType("==", 1))], model=foo_datamodel),
-    )
-    assert msg._check_consistency(), "We expect the consistency to return TRUE"
 
     attribute_foo = Attribute("foo", int, True, "a foo attribute.")
     attribute_bar = Attribute("bar", str, True, "a bar attribute.")
@@ -87,16 +110,9 @@ def test_oef_message_consistency():
         agent_description=description_foobar,
         agent_id="address",
     )
-    assert msg._check_consistency()
 
-    msg = OEFMessage(
-        type=OEFMessage.Type.UNREGISTER_AGENT,
-        id=0,
-        agent_description=description_foobar,
-        agent_id="address",
-    )
-
-    assert msg._check_consistency()
+    with mock.patch.object(OEFMessage.Type, "__eq__", return_value=False):
+        assert not msg._check_consistency()
 
 
 def test_oef_message_oef_error():
