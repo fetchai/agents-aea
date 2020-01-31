@@ -1,7 +1,7 @@
 The AEA weather skills demonstrate an interaction between two AEAs.
 
 * The provider of weather data (the weather station).
-* The seller of weather data (the weather client).
+* The buyer of weather data (the weather client).
 
 ## Preparation instructions
 
