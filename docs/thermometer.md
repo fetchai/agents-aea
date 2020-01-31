@@ -9,6 +9,13 @@ The AEA thermometer skills demonstrate an interaction between two AEAs.
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+##Discussion
+
+The scope of the specific demo is to demonstrate how to create a very simple AEA with the usage of the AEA framework, a Raspberry Pi, and a thermometer sensor. The thermometer AEA
+will read data from the sensor each time a client requests and will deliver to the client upon payment. To keep the demo simple we avoided the usage of a database, since this would increase the complexity. As a result, the AEA can provide only one reading from the sensor.
+
+Another step that we avoided is the usage of a smart contract that could store the readings from the sensor. As a result, we interact with a ledger only to complete a transaction.
+
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
