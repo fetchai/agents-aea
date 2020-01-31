@@ -21,12 +21,12 @@
 
 import logging
 import os
-from typing import Dict, cast
+from typing import Dict
 from unittest import mock
 
 from eth_account.datastructures import AttributeDict
 
-from fetchai.ledger.api.tx import TxStatus, TxContents
+from fetchai.ledger.api.tx import TxContents, TxStatus
 
 from hexbytes import HexBytes
 
@@ -403,30 +403,36 @@ class TestLedgerApis:
 
         seller_address = str(seller_crypto.address)
         client_address = str(client_crypto.address)
-        tx_contents = TxContents(digest=b'digest',
-                                 action="action",
-                                 chain_code='1',
-                                 from_address=client_address,
-                                 contract_digest="Contract_digest",
-                                 contract_address=None,
-                                 valid_from=1,
-                                 valid_until=6,
-                                 charge=10,
-                                 charge_limit=2,
-                                 transfers=[{'to': seller_address,
-                                             'amount': 100}],
-                                 signatories=['signatories'],
-                                 data="data"
-                                 )
+        tx_contents = TxContents(
+            digest=b"digest",
+            action="action",
+            chain_code="1",
+            from_address=client_address,
+            contract_digest="Contract_digest",
+            contract_address=None,
+            valid_from=1,
+            valid_until=6,
+            charge=10,
+            charge_limit=2,
+            transfers=[{"to": seller_address, "amount": 100}],
+            signatories=["signatories"],
+            data="data",
+        )
 
-        with mock.patch.object(ledger_apis.apis.get(FETCHAI)._api.tx, "contents", return_value=tx_contents):
-            with mock.patch.object(ledger_apis.apis.get(FETCHAI), 'is_transaction_settled', return_value=True):
+        with mock.patch.object(
+            ledger_apis.apis.get(FETCHAI)._api.tx, "contents", return_value=tx_contents
+        ):
+            with mock.patch.object(
+                ledger_apis.apis.get(FETCHAI),
+                "is_transaction_settled",
+                return_value=True,
+            ):
                 result = ledger_apis.is_tx_valid(
-                            identifier=FETCHAI,
-                            tx_digest='transaction_digest',
-                            seller=seller_address,
-                            client=client_address,
-                            tx_nonce="tx_nonce",
-                            amount=100
-                        )
+                    identifier=FETCHAI,
+                    tx_digest="transaction_digest",
+                    seller=seller_address,
+                    client=client_address,
+                    tx_nonce="tx_nonce",
+                    amount=100,
+                )
                 assert result
