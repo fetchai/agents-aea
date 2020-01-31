@@ -1,7 +1,7 @@
 The AEA thermometer skills demonstrate an interaction between two AEAs.
 
 * The provider of thermometer data (the thermometer).
-* The buyer of thermometer data (the thermometer client).
+* The buyer of thermometer data (the thermometer_client).
 
 ## Preparation instructions
  
@@ -13,10 +13,11 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 The scope of the specific demo is to demonstrate how to create a very simple AEA with the usage of the AEA framework, a Raspberry Pi, and a thermometer sensor. The thermometer AEA
 will read data from the sensor each time a client requests and will deliver to the client upon payment. To keep the demo simple we avoided the usage of a database since this would increase the complexity. As a result, the AEA can provide only one reading from the sensor.
-Another step that we avoided is the usage of a smart contract that could store the readings from the sensor. As a result, we interact with a ledger only to complete a transaction.
+This demo does not utilise a smart contract. As a result, we interact with a ledger only to complete a transaction.
 
-Since the AEA framework enables us to use third-party libraries we don't have to do something to be able to read from the sensor. The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
-Though the AEA must run inside a Raspberry Pi or any other Linux system, and the sensor must be connected to the USB port.
+Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.
+The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
+The AEA must run inside a Raspberry Pi or any other Linux system, and the sensor must be connected to the USB port.
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
@@ -77,18 +78,6 @@ ledger_apis:
 Create some wealth for your thermometer client on the Fetch.ai `testnet`. (It takes a while).
 ``` bash
 aea generate-wealth fetchai
-```
-
-### Update the skill configs
-
-Tell the thermometer client skill of the thermometer client AEA that we want to settle the transaction on the ledger:
-``` bash
-aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.is_ledger_tx True --type bool
-```
-
-Similarly, for the thermometer skill of the thermometer AEA:
-``` bash
-aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 ## Run the AEAs
@@ -174,13 +163,11 @@ In the thermometer skill config (`my_thermometer_aea/skills/thermometer/skill.ya
 ``` bash
 currency_id: 'ETH'
 ledger_id: 'ethereum'
-is_ledger_tx: True
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
 aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.ledger_id ethereum
-aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 In the thermometer client skill config (`my_thermometer_client/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
@@ -188,14 +175,12 @@ In the thermometer client skill config (`my_thermometer_client/skills/thermomete
 max_buyer_tx_fee: 20000
 currency_id: 'ETH'
 ledger_id: 'ethereum'
-is_ledger_tx: True
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
 aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.max_buyer_tx_fee 10000 --type int
 aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.currency_id ETH
 aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.ledger_id ethereum
-aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.is_ledger_tx True --type bool
 ```
 
 ### Fund the thermometer client AEA
