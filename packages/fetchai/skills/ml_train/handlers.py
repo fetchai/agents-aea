@@ -157,9 +157,7 @@ class TrainHandler(Handler):
                     ml_trade_msg.counterparty[-5:], data[0].shape, terms.values
                 )
             )
-            training_task = MLTrainTask(
-                data, name="ml_train_task", skill_context=self.context
-            )
+            training_task = MLTrainTask(data, self.context.model)
             self.context.task_queue.put(training_task)
 
     def teardown(self) -> None:

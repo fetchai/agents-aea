@@ -37,7 +37,6 @@ from aea.configurations.base import (
     PublicId,
     SharedClassConfig,
     SkillConfig,
-    TaskConfig,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import ConnectionStatus

@@ -13,6 +13,7 @@ handlers:
   echo:
     class_name: EchoHandler
     args:
+      tick_interval: 1.0
       foo: bar
       bar: foo
 tasks:

@@ -18,8 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a scaffold of a task."""
-
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 
 class MyScaffoldTask(Task):

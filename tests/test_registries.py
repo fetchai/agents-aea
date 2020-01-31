@@ -177,14 +177,16 @@ class TestResources:
         # unregister the error handler and test that it has been actually unregistered.
         # TODO shouldn't we prevent the unregistration of this?
         error_handler = self.resources.handler_registry.fetch(
-            (self.error_skill_public_id, "error")
+            (self.error_skill_public_id, "error_handler")
         )
         assert error_handler is not None
         self.resources.handler_registry.unregister(
-            (self.error_skill_public_id, "error")
+            (self.error_skill_public_id, "error_handler")
         )
         assert (
-            self.resources.handler_registry.fetch((self.error_skill_public_id, "error"))
+            self.resources.handler_registry.fetch(
+                (self.error_skill_public_id, "error_handler")
+            )
             is None
         )
 

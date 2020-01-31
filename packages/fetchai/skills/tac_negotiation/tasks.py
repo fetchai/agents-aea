@@ -21,7 +21,7 @@
 
 from typing import cast
 
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
@@ -43,7 +43,7 @@ class TransactionCleanUpTask(Task):
 
         :return: None
         """
-        transactions = cast(Transactions, self.context.transactions)
+        transactions = cast(Transactions, self.context.transactions)  # type: ignore
         transactions.cleanup_pending_transactions()
 
     def teardown(self) -> None:

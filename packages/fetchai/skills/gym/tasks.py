@@ -23,7 +23,7 @@ import logging
 from queue import Queue
 from threading import Thread
 
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 from packages.fetchai.skills.gym.helpers import ProxyEnv
 from packages.fetchai.skills.gym.rl_agent import DEFAULT_NB_STEPS, MyRLAgent, NB_GOODS
@@ -39,7 +39,7 @@ class GymTask(Task):
         logger.info("GymTask.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
         self._rl_agent = MyRLAgent(NB_GOODS)
-        self._proxy_env = ProxyEnv(self.context)
+        self._proxy_env = ProxyEnv(self.context)  # type: ignore
         self.nb_steps = nb_steps
         self._rl_agent_training_thread = Thread(
             target=self._rl_agent.fit, args=[self._proxy_env, self.nb_steps]

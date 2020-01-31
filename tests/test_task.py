@@ -21,7 +21,7 @@ from multiprocessing.pool import AsyncResult
 
 import pytest
 
-from aea.skills.tasks import TaskManager, Task
+from aea.skills.tasks import Task, TaskManager
 
 
 class MyTask(Task):

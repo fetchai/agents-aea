@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class Task:
     """This class implements an abstract task."""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """Initialize a task."""
         self._executed = False
         # this is where we store the result.
