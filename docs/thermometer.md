@@ -16,7 +16,7 @@ will read data from the sensor each time a client requests and will deliver to t
 Another step that we avoided is the usage of a smart contract that could store the readings from the sensor. As a result, we interact with a ledger only to complete a transaction.
 
 Since the AEA framework enables us to use third-party libraries we don't have to do something to be able to read from the sensor. The `aea install` command will install each 
-dependency that the specific AEA needs and is listed in the skill's yaml file. Though, the AEA must run inside a Raspberry Pi or any other linux system.
+dependency that the specific AEA needs and is listed in the skill's yaml file. Though, the AEA must run inside a Raspberry Pi or any other linux system, and the sensor must be connected to the usb port.
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
