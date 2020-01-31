@@ -39,7 +39,7 @@ from aea.mail.base import Address
 logger = logging.getLogger(__name__)
 
 ETHEREUM = "ethereum"
-GAS_PRICE = "50"
+DEFAULT_GAS_PRICE = "50"
 GAS_ID = "gwei"
 
 
@@ -169,13 +169,14 @@ class EthereumApi(LedgerApi):
 
     identifier = ETHEREUM
 
-    def __init__(self, address: str):
+    def __init__(self, address: str, gas_price: str = DEFAULT_GAS_PRICE):
         """
         Initialize the Ethereum ledger APIs.
 
         :param address: the endpoint for Web3 APIs.
         """
         self._api = Web3(HTTPProvider(endpoint_uri=address))
+        self._gas_price = gas_price
 
     @property
     def api(self) -> Web3:
@@ -218,9 +219,15 @@ class EthereumApi(LedgerApi):
             "to": destination_address,
             "value": amount,
             "gas": tx_fee,
-            "gasPrice": self._api.toWei(GAS_PRICE, GAS_ID),
+            "gasPrice": self._api.toWei(self._gas_price, GAS_ID),
             "data": tx_nonce,
         }
+        gas_estimation = self._api.eth.estimateGas(transaction=transaction)
+        assert (
+            tx_fee >= gas_estimation
+        ), "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
+            gas_estimation
+        )
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
 
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)

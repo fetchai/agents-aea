@@ -66,7 +66,9 @@ class LedgerApis(object):
                 apis[identifier] = api
                 configs[identifier] = config
             elif identifier == ETHEREUM:
-                api = EthereumApi(cast(str, config["address"]))
+                api = EthereumApi(
+                    cast(str, config["address"]), cast(str, config["gas_price"])
+                )
                 apis[identifier] = api
                 configs[identifier] = config
             else:
@@ -160,7 +162,7 @@ class LedgerApis(object):
         logger.info("Waiting for the validation of the transaction ...")
         try:
             tx_digest = api.send_transaction(
-                crypto_object, destination_address, amount, tx_fee, tx_nonce, **kwargs
+                crypto_object, destination_address, amount, tx_fee, tx_nonce, **kwargs,
             )
             logger.info("transaction validated. TX digest: {}".format(tx_digest))
             self._last_tx_statuses[crypto_object.identifier] = OK

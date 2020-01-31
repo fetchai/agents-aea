@@ -301,7 +301,8 @@ def test_run_unknown_ledger(pytestconfig):
     replace_text = """ledger_apis:
     unknown:
         address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-        chain_id: 3"""
+        chain_id: 3
+        gas_price: 20"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -535,6 +536,7 @@ def test_run_ledger_apis(pytestconfig):
     ethereum:
         address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
         chain_id: 3
+        gas_price: 20
     fetchai:
         network: testnet"""
 
