@@ -20,6 +20,7 @@ nav:
     - Welcome: 'index.md'
     - Getting started:
       - AEA quick start: 'quickstart.md'
+      - AEA and Web Frameworks: 'aea-vs-mvc.md'
       - Build an AEA step by step: 'steps.md'
       - Build a skill for an AEA: 'skill-guide.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
