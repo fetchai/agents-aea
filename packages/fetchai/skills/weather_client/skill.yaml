@@ -26,7 +26,7 @@ shared_classes:
     args:
       country: UK
       max_row_price: 4
-      max_buyer_tx_fee: 1
+      max_tx_fee: 1
       currency_id: 'FET'
       ledger_id: 'fetchai'
       is_ledger_tx: True

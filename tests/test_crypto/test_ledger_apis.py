@@ -47,6 +47,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_ETHEREUM_CONFIG = {
     "address": "https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe",
     "chain_id": 3,
+    "gas_price": 20,
 }
 ALT_FETCHAI_CONFIG = {"host": "127.0.0.1", "port": 80}
 fet_address = "B3t9pv4rYccWqCjeuoXsDoeXLiKxVAQh6Q3CLAiNZZQ2mtqF1"
