@@ -15,8 +15,8 @@ The scope of the specific demo is to demonstrate how to create a very simple AEA
 will read data from the sensor each time a client requests and will deliver to the client upon payment. To keep the demo simple we avoided the usage of a database since this would increase the complexity. As a result, the AEA can provide only one reading from the sensor.
 Another step that we avoided is the usage of a smart contract that could store the readings from the sensor. As a result, we interact with a ledger only to complete a transaction.
 
-Since the AEA framework enables us to use third-party libraries we don't have to do something to be able to read from the sensor. The `aea install` command will install each 
-dependency that the specific AEA needs and is listed in the skill's yaml file. Though, the AEA must run inside a Raspberry Pi or any other linux system, and the sensor must be connected to the usb port.
+Since the AEA framework enables us to use third-party libraries we don't have to do something to be able to read from the sensor. The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. 
+Though the AEA must run inside a Raspberry Pi or any other Linux system, and the sensor must be connected to the USB port.
 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
