@@ -21,10 +21,88 @@ import logging
 import multiprocessing
 import signal
 import threading
+from abc import abstractmethod
 from multiprocessing.pool import AsyncResult, Pool
 from typing import Any, Callable, Dict, Optional, Sequence, cast
 
 logger = logging.getLogger(__name__)
+
+
+class Task:
+    """This class implements an abstract task."""
+
+    def __init__(self):
+        """Initialize a task."""
+        self._executed = False
+        # this is where we store the result.
+        self._result = None
+
+    def __call__(self, *args, **kwargs):
+        """
+        Execute the task.
+
+        :param args: positional arguments forwarded to the 'execute' method.
+        :param kwargs: keyword arguments forwarded to the 'execute' method.
+        :return the task instance
+        :raises ValueError: if the task has already been executed.
+        """
+        if self._executed:
+            raise ValueError("Task already executed.")
+
+        self.setup()
+        try:
+            self._result = self.execute(*args, **kwargs)
+            return self
+        except Exception as e:
+            logger.debug(
+                "Got exception of type {} with message '{}' while executing task.".format(
+                    type(e), str(e)
+                )
+            )
+        finally:
+            self._executed = True
+            self.teardown()
+
+    @property
+    def executed(self) -> bool:
+        """Check if the task has already been executed."""
+        return self._executed
+
+    @property
+    def result(self) -> Any:
+        """
+        Get the result.
+
+        :return the result from the execute method.
+        :raises ValueError: if the task has not been executed yet.
+        """
+        if not self._executed:
+            raise ValueError("Task not executed yet.")
+        return self._result
+
+    @abstractmethod
+    def setup(self) -> None:
+        """
+        Implement the behaviour setup.
+
+        :return: None
+        """
+
+    @abstractmethod
+    def execute(self, *args, **kwargs) -> None:
+        """
+        Run the task logic.
+
+        :return: None
+        """
+
+    @abstractmethod
+    def teardown(self) -> None:
+        """
+        Implement the behaviour teardown.
+
+        :return: None
+        """
 
 
 def init_worker():

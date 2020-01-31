@@ -264,35 +264,6 @@ class TestResources:
             (self.dummy_skill_public_id, "dummy"), dummy_behaviour
         )
 
-    def test_register_task_with_already_existing_skill_id(self):
-        """Test that registering a task with an already existing skill id behaves as expected."""
-        # this should raise an error, since the 'dummy" skill already has a task named "dummy"
-        with pytest.raises(
-            ValueError,
-            match="Item already registered with skill id '{}' and name '{}'".format(
-                self.dummy_skill_public_id, "dummy"
-            ),
-        ):
-            self.resources.task_registry.register(
-                (self.dummy_skill_public_id, "dummy"), None
-            )
-
-    def test_task_registry(self):
-        """Test that the task registry behaves as expected."""
-        assert len(self.resources.task_registry.fetch_all()) == 1
-        dummy_tasks = self.resources.task_registry.fetch(
-            (self.dummy_skill_public_id, "dummy")
-        )
-        self.resources.task_registry.unregister((self.dummy_skill_public_id, "dummy"))
-        assert (
-            self.resources.task_registry.fetch((self.dummy_skill_public_id, "dummy"))
-            is None
-        )
-
-        self.resources.task_registry.register(
-            (self.dummy_skill_public_id, "dummy"), dummy_tasks
-        )
-
     def test_skill_loading(self):
         """Test that the skills have been loaded correctly."""
         dummy_skill = self.resources.get_skill(self.dummy_skill_public_id)
@@ -300,21 +271,17 @@ class TestResources:
 
         handlers = dummy_skill.handlers
         behaviours = dummy_skill.behaviours
-        tasks = dummy_skill.tasks
         shared_classes = dummy_skill.shared_classes
 
         assert len(handlers) == len(skill_context.handlers.__dict__)
         assert len(behaviours) == len(skill_context.behaviours.__dict__)
-        assert len(tasks) == len(skill_context.tasks.__dict__)
 
         assert handlers["dummy"] == skill_context.handlers.dummy
         assert behaviours["dummy"] == skill_context.behaviours.dummy
-        assert tasks["dummy"] == skill_context.tasks.dummy
         assert shared_classes["dummy"] == skill_context.dummy
 
         assert handlers["dummy"].context == dummy_skill.skill_context
         assert behaviours["dummy"].context == dummy_skill.skill_context
-        assert tasks["dummy"].context == dummy_skill.skill_context
         assert shared_classes["dummy"].context == dummy_skill.skill_context
 
     def test_handler_configuration_loading(self):
@@ -336,13 +303,6 @@ class TestResources:
             (self.dummy_skill_public_id, "dummy")
         )
         assert dummy_behaviour.config == {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}
-
-    def test_task_configuration_loading(self):
-        """Test that the task configurations are loaded correctly."""
-        dummy_task = self.resources.task_registry.fetch(
-            (self.dummy_skill_public_id, "dummy")
-        )
-        assert dummy_task.config == {"task_arg_1": 1, "task_arg_2": "2"}
 
     def test_shared_class_configuration_loading(self):
         """Test that the shared class configurations are loaded correctly."""

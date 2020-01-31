@@ -18,8 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the implementation of the error tasks."""
-
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 
 class ErrorTask(Task):

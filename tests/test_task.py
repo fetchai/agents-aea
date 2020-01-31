@@ -21,13 +21,12 @@ from multiprocessing.pool import AsyncResult
 
 import pytest
 
-from aea.skills.base import Task
-from aea.skills.tasks import TaskManager
+from aea.skills.tasks import TaskManager, Task
 
 
 class MyTask(Task):
-    def __init__(self, return_value, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, return_value):
+        super().__init__()
         self.setup_called = False
         self.teardown_called = False
         self.execute_called = False
@@ -92,9 +91,7 @@ class TestTaskManager:
         expected_args = (0, 1)
         expected_kwargs = {"a": 0, "b": 2}
         expected_return_value = 42
-        my_task = MyTask(
-            return_value=expected_return_value, name="my_task", skill_context=object()
-        )
+        my_task = MyTask(return_value=expected_return_value)
         task_result = self.task_manager.enqueue_task(
             my_task, args=expected_args, kwds=expected_kwargs
         )
@@ -121,7 +118,7 @@ class TestTaskManager:
     def test_task_manager_task_object_fails_when_not_pickable(self):
         """Test task manager with task object fails when the task is not pickable."""
         expected_args = [lambda x: x]
-        my_task = MyTask(return_value=None, name="my_task", skill_context=object())
+        my_task = MyTask(return_value=None)
         task_result = self.task_manager.enqueue_task(my_task, args=expected_args)
         assert isinstance(task_result, AsyncResult)
 

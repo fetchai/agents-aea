@@ -54,8 +54,7 @@ class GymHandler(Handler):
         """
         gym_msg = cast(GymMessage, message)
         if gym_msg.performative == GymMessage.Performative.PERCEPT:
-            assert self.context.tasks is not None, "Incorrect initialization."
-            gym_task = cast(GymTask, self.context.tasks.gym)
+            gym_task = GymTask()
             gym_task.proxy_env_queue.put(gym_msg)
         else:
             raise ValueError(

@@ -172,12 +172,6 @@ class SkillContext:
         assert self._skill is not None, "Skill not initialized."
         return SimpleNamespace(**self._skill.behaviours)
 
-    @property
-    def tasks(self) -> SimpleNamespace:
-        """Get tasks of the skill."""
-        assert self._skill is not None, "Skill not initialized."
-        return SimpleNamespace(**self._skill.tasks)
-
     def __getattr__(self, item) -> Any:
         """Get attribute."""
         return super().__getattribute__(item)  # pragma: no cover
@@ -386,122 +380,6 @@ class Handler(SkillComponent):
         return handlers
 
 
-class Task(SkillComponent):
-    """This class implements an abstract task."""
-
-    def __init__(
-        self,
-        name: Optional[str] = None,
-        skill_context: Optional[SkillContext] = None,
-        **kwargs
-    ):
-        """
-        Initialize a task.
-
-        :param name: the name of the task (mandatory)
-        :param skill_context: the skill context (mandatory)
-        :param kwargs: keyword arguments.
-        """
-        super().__init__(name=name, skill_context=skill_context, **kwargs)
-
-        self._executed = False
-        # this is where we store the result.
-        self._result = None
-
-    def __call__(self, *args, **kwargs):
-        """
-        Execute the task.
-
-        :param args: positional arguments forwarded to the 'execute' method.
-        :param kwargs: keyword arguments forwarded to the 'execute' method.
-        :return the task instance
-        :raises ValueError: if the task has already been executed.
-        """
-        if self._executed:
-            raise ValueError("Task already executed.")
-
-        self.setup()
-        try:
-            self._result = self.execute(*args, **kwargs)
-            return self
-        except Exception as e:
-            logger.debug(
-                "Got exception of type {} with message '{}' while executing task {}.".format(
-                    type(e), str(e), self.name
-                )
-            )
-        finally:
-            self._executed = True
-            self.teardown()
-
-    @property
-    def executed(self) -> bool:
-        """Check if the task has already been executed."""
-        return self._executed
-
-    @property
-    def result(self) -> Any:
-        """
-        Get the result.
-
-        :return the result from the execute method.
-        :raises ValueError: if the task has not been executed yet.
-        """
-        if not self._executed:
-            raise ValueError("Task not executed yet.")
-        return self._result
-
-    @abstractmethod
-    def execute(self, *args, **kwargs) -> None:
-        """
-        Run the task logic.
-
-        :return: None
-        """
-
-    @classmethod
-    def parse_module(
-        cls,
-        path: str,
-        tasks_configs: Dict[str, TaskConfig],
-        skill_context: SkillContext,
-    ) -> Dict[str, "Task"]:
-        """
-        Parse the tasks module.
-
-        :param path: path to the Python module containing the Task classes.
-        :param tasks_configs: a list of tasks configurations.
-        :param skill_context: the skill context
-        :return: a list of Tasks.
-        """
-        tasks = {}
-        task_module = load_module("tasks", Path(path))
-        classes = inspect.getmembers(task_module, inspect.isclass)
-        tasks_classes = list(filter(lambda x: re.match("\\w+Task", x[0]), classes))
-
-        name_to_class = dict(tasks_classes)
-        for task_id, task_config in tasks_configs.items():
-            task_class_name = task_config.class_name
-            logger.debug("Processing task {}".format(task_class_name))
-            assert task_id.isidentifier(), "'{}' is not a valid identifier.".format(
-                task_id
-            )
-            task_class = name_to_class.get(task_class_name, None)
-            if task_class is None:
-                logger.warning("Task '{}' cannot be found.".format(task_class_name))
-            else:
-                args = task_config.args
-                assert (
-                    "skill_context" not in args.keys()
-                ), "'skill_context' is a reserved key. Please rename your arguments!"
-                args["skill_context"] = skill_context
-                args["name"] = task_id
-                task = task_class(**args)
-                tasks[task_id] = task
-
-        return tasks
-
-
 class SharedClass(SkillComponent):
     """This class implements an abstract shared class."""
 
@@ -608,7 +486,6 @@ class Skill:
         skill_context: SkillContext,
         handlers: Optional[Dict[str, Handler]],
         behaviours: Optional[Dict[str, Behaviour]],
-        tasks: Optional[Dict[str, Task]],
         shared_classes: Optional[Dict[str, SharedClass]],
     ):
         """
@@ -617,14 +494,12 @@ class Skill:
         :param config: the skill configuration.
         :param handlers: the list of handlers to handle incoming envelopes.
         :param behaviours: the list of behaviours that defines the proactive component of the agent.
-        :param tasks: the list of tasks executed at every iteration of the main loop.
         :param shared_classes: the list of classes shared across tasks, behaviours and
         """
         self.config = config
         self.skill_context = skill_context
         self.handlers = handlers if handlers is not None else {}
         self.behaviours = behaviours if behaviours is not None else {}
-        self.tasks = tasks if tasks is not None else {}
         self.shared_classes = shared_classes if shared_classes is not None else {}
 
     @classmethod
@@ -674,14 +549,6 @@ class Skill:
         else:
             behaviours = {}
 
-        tasks_by_id = dict(skill_config.tasks.read_all())
-        if len(tasks_by_id) > 0:
-            tasks = Task.parse_module(
-                os.path.join(directory, "tasks.py"), tasks_by_id, skill_context
-            )
-        else:
-            tasks = {}
-
         shared_classes_by_id = dict(skill_config.shared_classes.read_all())
         if len(shared_classes_by_id) > 0:
             shared_classes_instances = SharedClass.parse_module(
@@ -691,12 +558,7 @@ class Skill:
             shared_classes_instances = {}
 
         skill = Skill(
-            skill_config,
-            skill_context,
-            handlers,
-            behaviours,
-            tasks,
-            shared_classes_instances,
+            skill_config, skill_context, handlers, behaviours, shared_classes_instances
         )
         skill_context._skill = skill
 

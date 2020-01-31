@@ -42,7 +42,8 @@ from aea.configurations.loader import ConfigLoader
 from aea.decision_maker.messages.base import InternalMessage
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.protocols.base import Message, Protocol
-from aea.skills.base import AgentContext, Behaviour, Handler, Skill, Task
+from aea.skills.base import AgentContext, Behaviour, Handler, Skill
+from aea.skills.tasks import Task
 
 logger = logging.getLogger(__name__)
 
@@ -518,16 +519,12 @@ class Resources(object):
         self.protocol_registry = ProtocolRegistry()
         self.handler_registry = HandlerRegistry()
         self.behaviour_registry = ComponentRegistry[Behaviour]()
-        self.task_registry = ComponentRegistry[
-            Task
-        ]()  # TODO obsolete? task are now scheduled on demand.
         self._skills = dict()  # type: Dict[SkillId, Skill]
 
         self._registries = [
             self.protocol_registry,
             self.handler_registry,
             self.behaviour_registry,
-            self.task_registry,
         ]
 
     @property
@@ -591,9 +588,6 @@ class Resources(object):
         if skill.behaviours is not None:
             for behaviour in skill.behaviours.values():
                 self.behaviour_registry.register((skill_id, behaviour.name), behaviour)
-        if skill.tasks is not None:
-            for task in skill.tasks.values():
-                self.task_registry.register((skill_id, task.name), task)
 
     def get_skill(self, skill_id: SkillId) -> Optional[Skill]:
         """Get the skill."""
@@ -609,11 +603,6 @@ class Resources(object):
 
         try:
             self.behaviour_registry.unregister_by_skill(skill_id)
-        except ValueError:
-            pass
-
-        try:
-            self.task_registry.unregister_by_skill(skill_id)
         except ValueError:
             pass
 
@@ -670,17 +659,6 @@ class Filter(object):
         handlers = self.resources.handler_registry.fetch_by_protocol(protocol_id)
         active_handlers = list(filter(lambda h: h.context.is_active, handlers))
         return active_handlers
-
-    def get_active_tasks(self) -> List[Task]:
-        """
-        Get the active tasks.
-
-        :return: the list of tasks currently active
-        """
-        # TODO naive implementation
-        tasks = self.resources.task_registry.fetch_all()
-        active_tasks = list(filter(lambda t: t.context.is_active, tasks))
-        return active_tasks
 
     def get_active_behaviours(self) -> List[Behaviour]:
         """

@@ -18,16 +18,14 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'dummy' skill."""
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 
 class DummyTask(Task):
     """Dummy task."""
 
-    def __init__(self, **kwargs):
-        """Initialize the task."""
-        super().__init__(**kwargs)
-        self.kwargs = kwargs
+    def __init__(self):
+        super().__init__()
         self.nb_execute_called = 0
         self.nb_teardown_called = 0
 
