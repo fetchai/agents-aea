@@ -82,7 +82,6 @@ class TestOwnershipState:
 
         other_msg = InternalMessage(body={"test_key": "test_value"})
         assert msg == other_msg, "Messages should be equal."
-        assert msg.check_consistency(), "It is true."
         assert str(msg) == "InternalMessage(test_key=test_value)"
         assert msg._body is not None
         msg.body = {"Test": "My_test"}
