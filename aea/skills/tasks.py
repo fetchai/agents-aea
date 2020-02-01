@@ -18,7 +18,6 @@
 
 """This module contains the classes for tasks."""
 import logging
-import multiprocessing
 import signal
 import threading
 from abc import abstractmethod
@@ -179,9 +178,7 @@ class TaskManager:
             else:
                 logger.debug("Start the task manager.")
                 self._stopped = False
-                self._pool = multiprocessing.Pool(
-                    self._nb_workers, initializer=init_worker
-                )
+                self._pool = Pool(self._nb_workers, initializer=init_worker)
 
     def stop(self) -> None:
         """Stop the task manager."""

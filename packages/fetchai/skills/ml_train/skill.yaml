@@ -8,7 +8,7 @@ behaviours:
   search:
     class_name: MySearchBehaviour
     args:
-      search_interval: 30
+      search_interval: 10
 handlers:
   oef:
     class_name: OEFHandler

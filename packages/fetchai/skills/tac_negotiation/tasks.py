@@ -17,39 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a task."""
-
-from typing import cast
-
-from aea.skills.tasks import Task
-
-from packages.fetchai.skills.tac_negotiation.transactions import Transactions
-
-
-class TransactionCleanUpTask(Task):
-    """This class implements the cleanup of the transactions class."""
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-        pass
-
-    def execute(self, *args, **kwargs) -> None:
-        """
-        Implement the task execution.
-
-        :return: None
-        """
-        transactions = cast(Transactions, self.context.transactions)  # type: ignore
-        transactions.cleanup_pending_transactions()
-
-    def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
-        pass
+"""This package contains tasks for the 'tac_negotiation' skill."""

@@ -50,6 +50,7 @@ from aea.helpers.base import (
 )
 from aea.mail.base import OutBox
 from aea.protocols.base import Message
+from aea.skills.tasks import TaskManager
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +154,12 @@ class SkillContext:
     def agent_goal_pursuit_readiness(self) -> GoalPursuitReadiness:
         """Get the goal pursuit readiness."""
         return self._agent_context.goal_pursuit_readiness
+
+    @property
+    def task_manager(self) -> TaskManager:
+        """Get behaviours of the skill."""
+        assert self._skill is not None, "Skill not initialized."
+        return self._agent_context.task_manager
 
     @property
     def ledger_apis(self) -> LedgerApis:

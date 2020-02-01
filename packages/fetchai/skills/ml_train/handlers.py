@@ -31,7 +31,6 @@ from packages.fetchai.protocols.ml_trade.message import MLTradeMessage
 from packages.fetchai.protocols.ml_trade.serialization import MLTradeSerializer
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.skills.ml_train.strategy import Strategy
-from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 
 logger = logging.getLogger("aea.ml_train_skill")
 
@@ -60,7 +59,6 @@ class TrainHandler(Handler):
         Handle messages.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         ml_msg = cast(MLTradeMessage, message)
@@ -157,8 +155,10 @@ class TrainHandler(Handler):
                     ml_trade_msg.counterparty[-5:], data[0].shape, terms.values
                 )
             )
-            training_task = MLTrainTask(data, self.context.model)
-            self.context.task_queue.put(training_task)
+            # training_task = MLTrainTask(data, self.context.model)
+            # self.context.task_manager.enqueue_task(training_task)
+            self.context.model.update(data[0], data[1], 5)
+            self.context.strategy.is_searching = True
 
     def teardown(self) -> None:
         """
@@ -170,7 +170,7 @@ class TrainHandler(Handler):
 
 
 class OEFHandler(Handler):
-    """This class scaffolds a handler."""
+    """The OEF handler."""
 
     SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -254,7 +254,6 @@ class MyTransactionHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :param sender: the sender
         :return: None
         """
         tx_msg_response = cast(TransactionMessage, message)
