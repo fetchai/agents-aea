@@ -43,6 +43,12 @@ Conceptually, a `Behaviour`  class contains the business logic specific to initi
 
 There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
+A behaviour can be registered in two ways:
+
+- By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
+- In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
+
+
 * `act(self)`: is how the framework calls the `Behaviour` code.
 
 The framework supports different types of behaviours:
@@ -63,9 +69,35 @@ If your behaviour fits one of the above, we suggest subclassing your
 behaviour class with that behaviour class. Otherwise, you
 can always subclass the general-purpose `Behaviour` class.
 
-!!!	Todo
-	For example.
+!!
+Follows an example of a custom behaviour:
 
+```python
+
+from aea.skills.base import Behaviour
+
+class MyBehaviour(Behaviour):
+            
+    def setup(self):
+        """This method is called once, when the behaviour gets loaded."""
+
+    def act(self): 
+        """This methods is called in every iteration of the agent main loop."""
+
+    def teardown(self): 
+        """This method is called once, when the behaviour is teared down."""
+
+```
+
+If we want to register this behaviour dynamically, in any part of the skill code
+(i.e. wherever the skill context is available), we can write:
+
+```python
+self.context.new_behaviours.put(MyBehaviour())
+```
+
+The framework is then in charge of registering the behaviour and scheduling it 
+for execution.
 
 ### `tasks.py`
 

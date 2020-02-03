@@ -7,9 +7,9 @@ speech_acts:
   bytes:
     content: pt:bytes
   error:
-    error_code: ErrorCode
+    error_code: ct:ErrorCode
     error_msg: pt:str
-    error_data: pt:dict[pt:str, ErrorData]
+    error_data: pt:dict[pt:str, ct:ErrorData]
 
   # Problems:
   # error -> error_data is of type dict[str, Any]. Any is problematic.

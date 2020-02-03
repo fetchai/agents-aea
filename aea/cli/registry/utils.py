@@ -156,27 +156,27 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str) -> None:
 
     :return: None
     """
-    click.echo(
+    logger.debug(
         "Fetching {obj_type} {public_id} from Registry...".format(
             public_id=public_id, obj_type=obj_type
         )
     )
     author, name, version = public_id.author, public_id.name, public_id.version
-    plural_obj_type = obj_type + "s"  # used for API and folder paths
+    item_type_plural = obj_type + "s"  # used for API and folder paths
 
-    api_path = "/{}/{}/{}/{}".format(plural_obj_type, author, name, version)
+    api_path = "/{}/{}/{}/{}".format(item_type_plural, author, name, version)
     resp = request_api("GET", api_path)
     file_url = resp["file"]
 
-    click.echo(
+    logger.debug(
         "Downloading {obj_type} {public_id}...".format(
             public_id=public_id, obj_type=obj_type
         )
     )
     filepath = download_file(file_url, cwd)
-    target_folder = os.path.join(cwd, plural_obj_type)
+    target_folder = os.path.join(cwd, "vendor", author, item_type_plural)
 
-    click.echo(
+    logger.debug(
         "Extracting {obj_type} {public_id}...".format(
             public_id=public_id, obj_type=obj_type
         )

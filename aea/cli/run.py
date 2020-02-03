@@ -364,7 +364,7 @@ def run(
     try:
         agent.start()
     except KeyboardInterrupt:
-        logger.info("Interrupted.")  # pragma: no cover
+        click.echo("Interrupted.")  # pragma: no cover
     except Exception as e:
         logger.exception(e)
         sys.exit(1)

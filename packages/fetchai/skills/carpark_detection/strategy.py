@@ -25,6 +25,7 @@ import time
 from typing import Any, Dict, List, Tuple, cast
 
 from aea.helpers.search.models import Description, Query
+from aea.mail.base import Address
 from aea.skills.base import SharedClass
 
 from packages.fetchai.skills.carpark_detection.carpark_detection_data_model import (
@@ -72,6 +73,12 @@ class Strategy(SharedClass):
         else:
             db_dir = os.path.join(os.path.dirname(__file__), DEFAULT_DB_REL_DIR)
 
+        self.data_price = kwargs.pop("data_price", DEFAULT_PRICE)
+
+        self.currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_ID)
+
+        self.ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
+
         self.data_price_fet = (
             kwargs.pop("data_price_fet")
             if "data_price_fet" in kwargs.keys()
@@ -88,15 +95,16 @@ class Strategy(SharedClass):
             else DEFAULT_LEDGER_ID
         )
         self._seller_tx_fee = kwargs.pop("seller_tx_fee", DEFAULT_SELLER_TX_FEE)
+
         super().__init__(**kwargs)
 
         self.db = DetectionDatabase(db_dir, False)
 
         balance = self.context.ledger_apis.token_balance(
-            "fetchai", cast(str, self.context.agent_addresses.get("fetchai"))
+            self.ledger_id, cast(str, self.context.agent_addresses.get(self.ledger_id))
         )
         self.db.set_system_status(
-            "ledger-status", self.context.ledger_apis.last_tx_statuses["fetchai"]
+            "ledger-status", self.context.ledger_apis.last_tx_statuses[self.ledger_id]
         )
 
         if not os.path.isdir(db_dir):
@@ -159,14 +167,21 @@ class Strategy(SharedClass):
         return len(data) > 0
 
     def generate_proposal_and_data(
-        self, query: Query
+        self, query: Query, counterparty: Address
     ) -> Tuple[Description, Dict[str, List[Dict[str, Any]]]]:
         """
         Generate a proposal matching the query.
 
+        :param counterparty: the counterparty of the proposal.
         :param query: the query
         :return: a tuple of proposal and the bytes of carpark data
         """
+        tx_nonce = self.context.ledger_apis.generate_tx_nonce(
+            identifier=self.ledger_id,
+            seller=self.context.agent_addresses[self.ledger_id],
+            client=counterparty,
+        )
+
         assert self.db.is_db_exits()
 
         data = self.db.get_latest_detection_data(1)
@@ -185,16 +200,17 @@ class Strategy(SharedClass):
             {
                 "lat": data[0]["lat"],
                 "lon": data[0]["lon"],
-                "price": self.data_price_fet,
+                "price": self.data_price,
                 "currency_id": self.currency_id,
                 "seller_tx_fee": self._seller_tx_fee,
                 "ledger_id": self.ledger_id,
                 "last_detection_time": last_detection_time,
                 "max_spaces": max_spaces,
+                "tx_nonce": tx_nonce if tx_nonce is not None else "",
             }
         )
 
-        data[0]["price_fet"] = self.data_price_fet
+        data[0]["price_fet"] = self.data_price
         data[0]["message_type"] = "car_park_data"
 
         return proposal, data[0]

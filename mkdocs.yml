@@ -20,6 +20,7 @@ nav:
     - Welcome: 'index.md'
     - Getting started:
       - AEA quick start: 'quickstart.md'
+      - AEA and Web Frameworks: 'aea-vs-mvc.md'
       - Build an AEA step by step: 'steps.md'
       - Build a skill for an AEA: 'skill-guide.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
@@ -39,6 +40,8 @@ nav:
       - "TAC skills": 'tac-skills.md'
       - "TAC external app": 'tac.md'
       - "Weather skills": 'weather-skills.md'
+      - "Thermometer skills": 'thermometer-skills.md'
+      - "Thermometer skills step by step": 'thermometer-skills-step-by-step.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
       - "Architectural diagram": 'diagram.md'
@@ -59,6 +62,7 @@ nav:
          - "Generating wealth": 'wealth.md'
       - "Build an AEA on a Raspberry Pi": 'raspberry-set-up.md'
       - "Integrate with third parties": 'integration.md'
+      - Use multiplexer stand-alone: 'multiplexer-standalone.md'
 
 
 plugins:

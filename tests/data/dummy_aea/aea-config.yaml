@@ -17,6 +17,7 @@ ledger_apis:
      args:
        address: example.ethereum.com
        chain_id: 8080
+       gas_price: 20
 logging_config:
   disable_existing_loggers: false
   version: 1

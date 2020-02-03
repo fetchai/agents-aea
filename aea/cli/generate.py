@@ -94,7 +94,7 @@ def _generate_item(ctx: Context, item_type, specification_path):
 
     try:
         agent_name = ctx.agent_config.agent_name
-        logger.info(
+        click.echo(
             "Generating {} '{}' and adding it to the agent '{}'...".format(
                 item_type, protocol_spec.name, agent_name
             )

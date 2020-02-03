@@ -26,7 +26,7 @@ speech_acts:
     quantities_by_good_id: pt:dict[pt:str, pt:int]
     utility_params_by_good_id: pt:dict[pt:str, pt:float]
     tx_fee: pt:int
-    agent_addr_to_name: pt:dict[Address, pt:str]
+    agent_addr_to_name: pt:dict[ct:Address, pt:str]
     good_id_to_name: pt:dict[pt:str, pt:str]
     version_id: pt:str
   transaction_confirmation:
@@ -34,8 +34,8 @@ speech_acts:
     amount_by_currency_id: pt:dict[pt:str, pt:int]
     quantities_by_good_id: pt:dict[pt:str, pt:int]
   tac_error:
-    error_code: ErrorCode
-    info: pt:dict[pt:str, ErrorInfo]
+    error_code: ct:ErrorCode
+    info: pt:dict[pt:str, ct:ErrorInfo]
 
   # Problems:
   # info is of type dict[str, Any]. Any is problematic.

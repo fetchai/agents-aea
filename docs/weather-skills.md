@@ -1,7 +1,7 @@
 The AEA weather skills demonstrate an interaction between two AEAs.
 
 * The provider of weather data (the weather station).
-* The seller of weather data (the weather client).
+* The buyer of weather data (the weather client).
 
 ## Preparation instructions
 
@@ -241,6 +241,7 @@ ledger_apis:
   ethereum:
     address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
     chain_id: 3
+    gas_price: 50
 ```
 
 ### Update the skill configs
