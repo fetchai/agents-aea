@@ -134,7 +134,7 @@ t.join()
 Now it is your turn to develop a simple agent with the `Agent` class.
 
 ## Entire code listing
-If you just want to copy and past the entire script in you can find it here:
+If you just want to copy and paste the entire script in you can find it here:
 
 <details><summary>Click here to see full listing</summary>
 <p>
