@@ -19,7 +19,6 @@ handlers:
   transaction:
     class_name: MyTransactionHandler
     args: {}
-tasks: {}
 shared_classes:
   strategy:
     class_name: Strategy

@@ -464,26 +464,6 @@ class BehaviourConfig(Configuration):
         return BehaviourConfig(class_name=class_name, **obj.get("args", {}))
 
 
-class TaskConfig(Configuration):
-    """Handle a skill task configuration."""
-
-    def __init__(self, class_name: str = "", **args):
-        """Initialize a task configuration."""
-        self.class_name = class_name
-        self.args = args
-
-    @property
-    def json(self) -> Dict:
-        """Return the JSON representation."""
-        return {"class_name": self.class_name, "args": self.args}
-
-    @classmethod
-    def from_json(cls, obj: Dict):
-        """Initialize from a JSON object."""
-        class_name = cast(str, obj.get("class_name"))
-        return TaskConfig(class_name=class_name, **obj.get("args", {}))
-
-
 class SharedClassConfig(Configuration):
     """Handle a skill shared class configuration."""
 
@@ -528,7 +508,6 @@ class SkillConfig(PackageConfiguration):
         self.description = description
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
-        self.tasks = CRUDCollection[TaskConfig]()
         self.shared_classes = CRUDCollection[SharedClassConfig]()
 
     @property
@@ -544,7 +523,6 @@ class SkillConfig(PackageConfiguration):
             "dependencies": self.dependencies,
             "handlers": {key: h.json for key, h in self.handlers.read_all()},
             "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
-            "tasks": {key: t.json for key, t in self.tasks.read_all()},
             "shared_classes": {
                 key: s.json for key, s in self.shared_classes.read_all()
             },
@@ -577,10 +555,6 @@ class SkillConfig(PackageConfiguration):
         for behaviour_id, behaviour_data in obj.get("behaviours", {}).items():  # type: ignore
             behaviour_config = BehaviourConfig.from_json(behaviour_data)
             skill_config.behaviours.create(behaviour_id, behaviour_config)
-
-        for task_id, task_data in obj.get("tasks", {}).items():  # type: ignore
-            task_config = TaskConfig.from_json(task_data)
-            skill_config.tasks.create(task_id, task_config)
 
         for handler_id, handler_data in obj.get("handlers", {}).items():  # type: ignore
             handler_config = HandlerConfig.from_json(handler_data)

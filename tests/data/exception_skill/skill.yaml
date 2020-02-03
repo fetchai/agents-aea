@@ -8,7 +8,6 @@ behaviours:
     class_name: ExceptionBehaviour
     args: {}
 handlers: {}
-tasks: {}
 shared_classes: {}
 protocols: []
 dependencies: {}

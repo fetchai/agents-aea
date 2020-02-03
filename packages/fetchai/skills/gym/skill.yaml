@@ -10,7 +10,6 @@ handlers:
     class_name: GymHandler
     args:
       nb_steps: 4000
-tasks: {}
 shared_classes: {}
 protocols: ["fetchai/gym:0.1.0"]
 dependencies:

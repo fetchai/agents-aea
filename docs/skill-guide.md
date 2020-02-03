@@ -231,7 +231,6 @@ handlers:
   my_search_handler:
     class_name: MySearchHandler
     args: {}
-tasks:
   my_search_task:
     class_name: MySearchTask
     args: {}
