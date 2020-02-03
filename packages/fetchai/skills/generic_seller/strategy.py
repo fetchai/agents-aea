@@ -19,7 +19,7 @@
 
 """This module contains the strategy class."""
 
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
@@ -36,7 +36,7 @@ DEFAULT_TOTAL_PRICE = 10
 DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_HAS_SENSOR = False
-DEFAULT_DATA = {}   # type: Optional[Dict[str, Any]]
+DEFAULT_DATA = {}  # type: Optional[Dict[str, Any]]
 DEFAULT_IS_LEDGER_TX = True
 
 

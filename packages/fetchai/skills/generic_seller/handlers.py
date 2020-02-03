@@ -328,9 +328,6 @@ class FIPAHandler(Handler):
                 performative=FIPAMessage.Performative.INFORM,
                 info=dialogue.data,
             )
-            import pdb
-
-            pdb.set_trace()
             dialogue.outgoing_extend(inform_msg)
             self.context.outbox.put_message(
                 to=msg.counterparty,
