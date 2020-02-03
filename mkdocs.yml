@@ -62,6 +62,7 @@ nav:
          - "Generating wealth": 'wealth.md'
       - "Build an AEA on a Raspberry Pi": 'raspberry-set-up.md'
       - "Integrate with third parties": 'integration.md'
+      - Use multiplexer stand-alone: 'multiplexer-standalone.md'
 
 
 plugins:
