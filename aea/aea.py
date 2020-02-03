@@ -200,10 +200,6 @@ class AEA(Agent):
             logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
-        if not protocol.check(msg):  # pragma: no cover
-            error_handler.send_invalid_message(envelope)  # pragma: no cover
-            return  # pragma: no cover
-
         handlers = self.filter.get_active_handlers(protocol.id)
         if len(handlers) == 0:
             if error_handler is not None:
