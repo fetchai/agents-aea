@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the integration test for the weather skills."""
+"""This test module contains the integration test for the thermometer skills."""
 
 import io
 import os
@@ -48,7 +48,7 @@ def _read_error(pid: subprocess.Popen):
 
 
 class TestWeatherSkillsFetchaiLedger:
-    """Test that weather skills work."""
+    """Test that thermometer skills work."""
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
@@ -64,8 +64,8 @@ class TestWeatherSkillsFetchaiLedger:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_weather(self, pytestconfig):
-        """Run the weather skills sequence."""
+    def test_thermometer(self, pytestconfig):
+        """Run the thermometer skills sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
@@ -184,7 +184,7 @@ class TestWeatherSkillsFetchaiLedger:
         )
         assert result.exit_code == 0
 
-        # Add some funds to the weather station
+        # Add some funds to the thermometer
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "generate-wealth", "fetchai"], standalone_mode=False
         )
