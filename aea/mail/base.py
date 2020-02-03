@@ -413,7 +413,7 @@ class Multiplexer:
             if self.connection_status.is_connected:
                 logger.debug("Multiplexer already connected.")
                 return
-            self._start_loop_threaded()
+            self._start_loop_threaded_if_not_running()
             try:
                 asyncio.run_coroutine_threadsafe(
                     self._connect_all(), loop=self._loop
@@ -443,9 +443,7 @@ class Multiplexer:
                     self._disconnect_all(), loop=self._loop
                 ).result()
                 self._stop()
-                assert not self.is_connected
                 self._connection_status.is_connected = False
-                self._stop()
             except (CancelledError, Exception):
                 raise AEAConnectionError("Failed to disconnect the multiplexer.")
 
@@ -461,7 +459,7 @@ class Multiplexer:
         self._loop.run_forever()
         logger.debug("Asyncio loop has been stopped.")
 
-    def _start_loop_threaded(self):
+    def _start_loop_threaded_if_not_running(self):
         """Start the multiplexer."""
         if not self._loop.is_running() and not self._thread.is_alive():
             self._thread.start()
@@ -612,12 +610,10 @@ class Multiplexer:
 
             except asyncio.CancelledError:
                 logger.debug("Receiving loop cancelled.")
-                for t in task_to_connection.keys():
-                    await t
-                return
+                break
             except Exception as e:
                 logger.error("Error in the receiving loop: {}".format(str(e)))
-                return
+                break
 
         # cancel all the receiving tasks.
         for t in task_to_connection.keys():

@@ -199,8 +199,9 @@ def test_multiplexer_disconnect_all_raises_error():
             multiplexer.disconnect()
 
     # # do the true disconnection - for clean the test up
-    # multiplexer.disconnect()
     assert multiplexer.connection_status.is_connected
+    multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
 
 
 @pytest.mark.asyncio

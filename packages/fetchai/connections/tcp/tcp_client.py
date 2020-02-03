@@ -65,7 +65,14 @@ class TCPClientConnection(TCPConnection):
         """Tear the connection down."""
         if self._reader:
             self._reader.feed_eof()
+        if self._writer.can_write_eof():
+            self._writer.write_eof()
+        await self._writer.drain()
         self._writer.close()
+        # it should be 'await self._writer.wait_closed()'
+        # however, it is not backward compatible with Python 3.6.
+        # this turned out to work in the tests
+        await asyncio.sleep(0.0)
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
