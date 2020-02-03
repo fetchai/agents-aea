@@ -16,4 +16,10 @@ Building an AEA step by step:
 <li>Now, run your AEA.</li> 
 </ol>
 
+Sometimes, an AEA is more than is required for the task at hand. In particular, an AEA is much more than just an agent. In those cases, we suggest you have a look at the following two guides:
+<ul>
+	<li> the <a href="../agent-vs-aea/" target=_blank>AEA vs Agents</a> guide shows the difference between an agent and an AEA in code,
+	<li> the <a href="../multiplexer-standalone/" target=_blank>Use multiplexer standalone</a> guide shows how to use the multiplexer on its own to receive and send envelopes.
+</ul>
+
 <br />

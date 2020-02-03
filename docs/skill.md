@@ -51,6 +51,25 @@ A behaviour can be registered in two ways:
 
 * `act(self)`: is how the framework calls the `Behaviour` code.
 
+The framework supports different types of behaviours:
+- `OneShotBehaviour`: this behaviour is executed only once.
+- `CyclicBehaviour`: this behaviour is executed many times, 
+  as long as `done()` returns `True`.)
+- `TickerBehaviour`: the `act()` method is called every `tick_interval`.
+ E.g. if the `TickerBehaviour` subclass is instantiated
+ 
+There is another category of behaviours, called `CompositeBehaviour`. 
+- `SequenceBehaviour`: a sequence of `Behaviour` classes, executed 
+  one after the other.
+- `FSMBehaviour`_`: a state machine of `State` behaviours. 
+    A state is in charge of scheduling the next state.
+
+
+If your behaviour fits one of the above, we suggest subclassing your
+behaviour class with that behaviour class. Otherwise, you
+can always subclass the general-purpose `Behaviour` class.
+
+!!
 Follows an example of a custom behaviour:
 
 ```python
@@ -88,6 +107,73 @@ There can be one or more `Task` classes per skill. The developer subclasses abst
 
 * `execute(self)`: is how the framework calls a `Task`. 
 
+The `Task` class implements the [functor pattern](https://en.wikipedia.org/wiki/Function_object).
+An instance of the `Task` class can be invoked as if it 
+were an ordinary function. Once completed, it will store the
+result in the property `result`. Raises error if the task has not been executed yet,
+or an error occurred during computation.
+
+We suggest using the `task_manager`, accessible through the skill context,
+to manage long-running tasks. The task manager uses `multiprocessing` to 
+schedule tasks, so be aware that the changes on the task object will 
+not be updated.
+
+Here's an example:
+
+In `tasks.py`:
+```python
+
+from aea.skills.behaviours import TickerBehaviour
+from myagent.skills.my_skill.tasks import LongTask
+
+
+class MyBehaviour(TickerBehaviour):
+
+    def setup(self):
+        my_task = LongTask()
+        self.task_id = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
+        self.async_result = self.context.task_manager.get_task_result(self.task_id)
+
+    def act(self):
+        if self.async_result.ready() is False:
+            print("The task is not finished yet.")
+        else:
+            completed_task = self.async_result.get()  # type: LongTask
+            print("The result is:", completed_task.result)
+
+    def teardown(self):
+        pass
+
+
+```
+
+In `behaviours.py`:
+```python
+
+from aea.skills.behaviours import TickerBehaviour
+from packages.my_author_name.skills.my_skill.tasks import LongTask
+
+
+class MyBehaviour(TickerBehaviour):
+
+    def setup(self):
+        my_task = LongTask()
+        self.async_result = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
+
+    def act(self):
+        if self.async_result.ready() is False:
+            print("The task is not finished yet.")
+        else:
+            completed_task = self.async_result.get()  # type: LongTask
+            print("The result is:", completed_task.result)
+            # Stop the skill
+            self.context.is_active = False
+
+    def teardown(self):
+        pass
+
+
+```
 
 ### Shared classes
 
@@ -119,19 +205,12 @@ behaviours:
   echo:
     class_name: EchoBehaviour
     args:
-      foo: bar
+      tick_interval: 1.0
 handlers:
   echo:
     class_name: EchoHandler
     args:
       foo: bar
-      bar: foo
-tasks:
-  echo:
-    class_name: EchoTask
-    args:
-      foo: bar
-      bar: foo
 shared_classes: {}
 dependencies: {}
 protocols: ["fetchai/default:0.1.0"]

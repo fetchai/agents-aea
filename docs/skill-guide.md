@@ -168,7 +168,7 @@ We have implemented a behaviour and a handler. We conclude by implementing a tas
 import logging
 import time
 
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 logger = logging.getLogger("aea.my_search_skill")
 
@@ -231,7 +231,6 @@ handlers:
   my_search_handler:
     class_name: MySearchHandler
     args: {}
-tasks:
   my_search_task:
     class_name: MySearchTask
     args: {}

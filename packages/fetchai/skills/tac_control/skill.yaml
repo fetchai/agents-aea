@@ -15,7 +15,6 @@ handlers:
   oef:
     class_name: OEFRegistrationHandler
     args: {}
-tasks: {}
 shared_classes:
   parameters:
     class_name: Parameters
