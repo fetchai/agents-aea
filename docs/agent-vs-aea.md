@@ -1,4 +1,8 @@
-AEAs are more than just agents. In this guide we show some of the differences in terms of code.
+AEAs are more than just agents.
+
+<center>![AEA vs Agent vs Multiplexer](assets/aea-vs-agent-vs-multiplexer.png)</center>
+
+In this guide we show some of the differences in terms of code.
 
 The <a href="../build-aea-programmatically">Build an AEA programmatically</a> guide shows how to programmatically build an AEA. We can build an agent of the `Agent` class programmatically as well.
 
@@ -12,13 +16,10 @@ from typing import List, Optional
 from aea.agent import Agent
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
-from aea.crypto.default import DEFAULT
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, _create_default_private_key
-from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
 ```
 
-Unlike an `AEA`, an `Agent` does not require a `LedgerApis` or `Resources` module.
+Unlike an `AEA`, an `Agent` does not require a `Wallet`, `LedgerApis` or `Resources` module.
 
 However, we need to implement 5 abstract methods:
 - `setup()`
@@ -41,9 +42,8 @@ OUTPUT_FILE = "output.txt"
 
 
 class MyAgent(Agent):
-
-    def __init__(self, name: str, connections: List[Connection], wallet: Wallet):
-        super().__init__(name, connections, wallet)
+    def __init__(self, name: str, connections: List[Connection]):
+        super().__init__(name, connections)
 
     def setup(self):
         pass
@@ -83,15 +83,13 @@ if os.path.isfile(INPUT_FILE):
 if os.path.isfile(OUTPUT_FILE):
     os.remove(OUTPUT_FILE)
 
-# Create a private key
-_create_default_private_key()
-
-# Set up the wallet, stub connection, ledger and (empty) resources
-wallet = Wallet({DEFAULT: DEFAULT_PRIVATE_KEY_FILE})
-stub_connection = StubConnection(input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE)
+# Set up the stub connection
+stub_connection = StubConnection(
+    input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
+)
 
 # Create our Agent
-my_agent = MyAgent("my_agent", [stub_connection], wallet)
+my_agent = MyAgent("my_agent", [stub_connection])
 ```
 
 ## Start the agent
@@ -148,9 +146,6 @@ from typing import List, Optional
 from aea.agent import Agent
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
-from aea.crypto.default import DEFAULT
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, _create_default_private_key
-from aea.crypto.wallet import Wallet
 from aea.mail.base import Envelope
 
 
@@ -159,8 +154,8 @@ OUTPUT_FILE = "output.txt"
 
 
 class MyAgent(Agent):
-    def __init__(self, name: str, connections: List[Connection], wallet: Wallet):
-        super().__init__(name, connections, wallet)
+    def __init__(self, name: str, connections: List[Connection]):
+        super().__init__(name, connections)
 
     def setup(self):
         pass
@@ -198,17 +193,13 @@ def run():
     if os.path.isfile(OUTPUT_FILE):
         os.remove(OUTPUT_FILE)
 
-    # Create a private key
-    _create_default_private_key()
-
-    # Set up the wallet, stub connection, ledger and (empty) resources
-    wallet = Wallet({DEFAULT: DEFAULT_PRIVATE_KEY_FILE})
+    # Set up the stub connection
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
 
     # Create our Agent
-    my_agent = MyAgent("my_agent", [stub_connection], wallet)
+    my_agent = MyAgent("my_agent", [stub_connection])
 
     # Set the agent running in a different thread
     t = Thread(target=my_agent.start)

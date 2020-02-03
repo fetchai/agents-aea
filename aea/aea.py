@@ -72,7 +72,6 @@ class AEA(Agent):
         """
         super().__init__(
             name=name,
-            wallet=wallet,
             connections=connections,
             loop=loop,
             timeout=timeout,
@@ -80,6 +79,7 @@ class AEA(Agent):
             programmatic=programmatic,
         )
 
+        self._wallet = wallet
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
         self._decision_maker = DecisionMaker(
@@ -100,6 +100,11 @@ class AEA(Agent):
         )
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
+
+    @property
+    def wallet(self) -> Wallet:
+        """Get the wallet."""
+        return self._wallet
 
     @property
     def decision_maker(self) -> DecisionMaker:
