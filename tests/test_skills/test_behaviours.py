@@ -17,6 +17,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the behaviours."""
+from collections import Counter
 
 from aea.skills.behaviours import (
     FSMBehaviour,
@@ -111,3 +112,19 @@ def test_fms_behaviour():
         i += 1
 
     assert outputs == ["a", "b", "c"]
+
+
+def test_act_parameter():
+    """Test the 'act' parameter."""
+    counter = Counter(i=0)
+
+    def increment_counter(counter=counter):
+        counter += Counter(i=1)
+
+    assert counter["i"] == 0
+
+    one_shot_behaviour = OneShotBehaviour(
+        act=lambda: increment_counter(), skill_context=object(), name="my_behaviour"
+    )
+    one_shot_behaviour.act()
+    assert counter["i"] == 1
