@@ -3,7 +3,6 @@ author: fetchai
 version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
-url: ""
 description: "The scaffold skill is a scaffold for your own skill implementation."
 behaviours:
   scaffold:
@@ -13,11 +12,6 @@ behaviours:
 handlers:
   scaffold:
     class_name: MyScaffoldHandler
-    args:
-      foo: bar
-tasks:
-  scaffold:
-    class_name: MyScaffoldTask
     args:
       foo: bar
 shared_classes:

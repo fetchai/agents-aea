@@ -8,7 +8,6 @@
     "author",
     "version",
     "license",
-    "url",
     "protocols"
   ],
   "properties": {
@@ -25,9 +24,6 @@
       "type": "string"
     },
     "fingerprint": {
-      "type": "string"
-    },
-    "url": {
       "type": "string"
     },
     "protocols": {
@@ -57,15 +53,6 @@
         }
       }
     },
-    "tasks": {
-      "type": "object",
-      "uniqueItems": true,
-      "patternProperties": {
-        "^[^\\d\\W]\\w*\\Z": {
-          "$ref": "#/definitions/task"
-        }
-      }
-    },
     "shared_classes": {
       "type": "object",
       "uniqueItems": true,
@@ -91,21 +78,6 @@
   },
   "definitions": {
     "behaviour": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "class_name"
-      ],
-      "properties": {
-        "class_name": {
-          "type": "string"
-        },
-        "args": {
-          "type": "object"
-        }
-      }
-    },
-    "task": {
       "type": "object",
       "additionalProperties": false,
       "required": [

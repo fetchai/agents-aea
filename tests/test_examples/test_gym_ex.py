@@ -37,14 +37,16 @@ def test_gym_ex(pytestconfig):
         pytest.skip("Skipping the test since it doesn't work in CI.")
 
     # run the example
-    process = subprocess.Popen([
-        sys.executable,
-        str(Path(CUR_PATH, '..', 'examples/gym_ex/train.py').resolve()),
-        "--nb-steps",
-        "100"
-    ],
+    process = subprocess.Popen(
+        [
+            sys.executable,
+            str(Path(CUR_PATH, "..", "examples/gym_ex/train.py").resolve()),
+            "--nb-steps",
+            "100",
+        ],
         stdout=subprocess.PIPE,
-        env=os.environ.copy())
+        env=os.environ.copy(),
+    )
 
     time.sleep(3.0)
     process.send_signal(signal.SIGINT)

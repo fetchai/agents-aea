@@ -20,11 +20,11 @@
 
 """The base connection package."""
 import logging
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
-from typing import TYPE_CHECKING, Optional, Set
+from typing import Optional, Set, TYPE_CHECKING
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 
 if TYPE_CHECKING:
     from aea.mail.base import Envelope, Address  # pragma: no cover
@@ -44,8 +44,12 @@ class ConnectionStatus(object):
 class Connection(ABC):
     """Abstract definition of a connection."""
 
-    def __init__(self, connection_id: str, restricted_to_protocols: Optional[Set[str]] = None,
-                 excluded_protocols: Optional[Set[str]] = None):
+    def __init__(
+        self,
+        connection_id: Optional[PublicId] = None,
+        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        excluded_protocols: Optional[Set[PublicId]] = None,
+    ):
         """
         Initialize the connection.
 
@@ -53,25 +57,37 @@ class Connection(ABC):
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
+        if connection_id is None:
+            raise ValueError("Connection public id is a mandatory argument.")
         self._connection_id = connection_id
-        self._restricted_to_protocols = self._get_restricted_to_protocols(restricted_to_protocols)
+        self._restricted_to_protocols = self._get_restricted_to_protocols(
+            restricted_to_protocols
+        )
         self._excluded_protocols = self._get_excluded_protocols(excluded_protocols)
 
         self._loop = None  # type: Optional[AbstractEventLoop]
         self._connection_status = ConnectionStatus()
 
-    def _get_restricted_to_protocols(self, restricted_to_protocols: Optional[Set[str]] = None) -> Set[str]:
+    def _get_restricted_to_protocols(
+        self, restricted_to_protocols: Optional[Set[PublicId]] = None
+    ) -> Set[PublicId]:
         if restricted_to_protocols is not None:
             return restricted_to_protocols
-        elif hasattr(type(self), "restricted_to_protocols") and isinstance(getattr(type(self), "restricted_to_protocols"), set):
+        elif hasattr(type(self), "restricted_to_protocols") and isinstance(
+            getattr(type(self), "restricted_to_protocols"), set
+        ):
             return getattr(type(self), "restricted_to_protocols")
         else:
             return set()
 
-    def _get_excluded_protocols(self, excluded_protocols: Optional[Set[str]] = None) -> Set[str]:
+    def _get_excluded_protocols(
+        self, excluded_protocols: Optional[Set[PublicId]] = None
+    ) -> Set[PublicId]:
         if excluded_protocols is not None:
             return excluded_protocols
-        elif hasattr(type(self), "excluded_protocols") and isinstance(getattr(type(self), "excluded_protocols"), set):
+        elif hasattr(type(self), "excluded_protocols") and isinstance(
+            getattr(type(self), "excluded_protocols"), set
+        ):
             return getattr(type(self), "excluded_protocols")
         else:
             return set()
@@ -89,21 +105,23 @@ class Connection(ABC):
         :param loop: the event loop.
         :return: None
         """
-        assert self._loop is None or not self._loop.is_running(), "Cannot set the loop while it is running."
+        assert (
+            self._loop is None or not self._loop.is_running()
+        ), "Cannot set the loop while it is running."
         self._loop = loop
 
     @property
-    def connection_id(self) -> str:
+    def connection_id(self) -> PublicId:
         """Get the id of the connection."""
         return self._connection_id
 
     @property
-    def restricted_to_protocols(self) -> Set[str]:
+    def restricted_to_protocols(self) -> Set[PublicId]:
         """Get the restricted to protocols.."""
         return self._restricted_to_protocols
 
     @property
-    def excluded_protocols(self) -> Set[str]:
+    def excluded_protocols(self) -> Set[PublicId]:
         """Get the restricted to protocols.."""
         return self._excluded_protocols
 
@@ -121,7 +139,7 @@ class Connection(ABC):
         """Tear down the connection."""
 
     @abstractmethod
-    async def send(self, envelope: 'Envelope') -> None:
+    async def send(self, envelope: "Envelope") -> None:
         """
         Send an envelope.
 
@@ -130,7 +148,7 @@ class Connection(ABC):
         """
 
     @abstractmethod
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
@@ -139,7 +157,9 @@ class Connection(ABC):
 
     @classmethod
     @abstractmethod
-    def from_config(cls, address: 'Address', connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: "Address", connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """
         Initialize a connection instance from a configuration.
 

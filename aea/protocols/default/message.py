@@ -19,16 +19,18 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the default message definition."""
-from enum import Enum
-from typing import cast, Dict, Any
 
+from enum import Enum
+from typing import Any, Dict, cast
+
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 
 
 class DefaultMessage(Message):
     """The Default message class."""
 
-    protocol_id = "default"
+    protocol_id = PublicId("fetchai", "default", "0.1.0")
 
     class Type(Enum):
         """Default message types."""
@@ -49,15 +51,14 @@ class DefaultMessage(Message):
         UNSUPPORTED_SKILL = -10004
         INVALID_DIALOGUE = -10005
 
-    def __init__(self, type: Type,
-                 **kwargs):
+    def __init__(self, type: Type, **kwargs):
         """
         Initialize.
 
         :param type: the type.
         """
         super().__init__(type=type, **kwargs)
-        assert self.check_consistency(), "DefaultMessage initialization inconsistent."
+        assert self._check_consistency(), "DefaultMessage initialization inconsistent."
 
     @property
     def type(self) -> Type:  # noqa: F821
@@ -89,7 +90,7 @@ class DefaultMessage(Message):
         assert self.is_set("error_data"), "error_data is not set."
         return cast(Dict[str, Any], self.get("error_data"))
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.type, DefaultMessage.Type)
@@ -97,8 +98,12 @@ class DefaultMessage(Message):
                 assert isinstance(self.content, bytes), "Expect the content to be bytes"
                 assert len(self.body) == 2
             elif self.type == DefaultMessage.Type.ERROR:
-                assert self.error_code in DefaultMessage.ErrorCode, "ErrorCode is not valid"
-                assert isinstance(self.error_code, DefaultMessage.ErrorCode), "error_code has wrong type."
+                assert (
+                    self.error_code in DefaultMessage.ErrorCode
+                ), "ErrorCode is not valid"
+                assert isinstance(
+                    self.error_code, DefaultMessage.ErrorCode
+                ), "error_code has wrong type."
                 assert isinstance(self.error_msg, str), "error_msg should be str"
                 assert isinstance(self.error_data, dict), "error_data should be dict"
                 assert len(self.body) == 4

@@ -21,19 +21,22 @@
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
 import logging
+import time
 from pathlib import Path
-from typing import Optional, BinaryIO, cast
+from typing import BinaryIO, Optional, cast
 
 from fetchai.ledger.api import LedgerApi as FetchaiLedgerApi
-from fetchai.ledger.crypto import Entity, Identity, Address  # type: ignore
+from fetchai.ledger.api.tx import TxContents, TxStatus
+from fetchai.ledger.crypto import Address, Entity, Identity  # type: ignore
+from fetchai.ledger.serialisation import sha256_hash
 
-from aea.crypto.base import Crypto, LedgerApi, AddressLike
+from aea.crypto.base import AddressLike, Crypto, LedgerApi
 
 logger = logging.getLogger(__name__)
 
 FETCHAI = "fetchai"
-SUCCESSFUL_TERMINAL_STATES = ('Executed', 'Submitted')
-DEFAULT_FETCHAI_CONFIG = ('alpha.fetch-ai.com', 80)
+SUCCESSFUL_TERMINAL_STATES = ("Executed", "Submitted")
+DEFAULT_FETCHAI_CONFIG = {"network": "testnet"}
 
 
 class FetchAICrypto(Crypto):
@@ -47,7 +50,11 @@ class FetchAICrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._entity = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        self._entity = (
+            self._generate_private_key()
+            if private_key_path is None
+            else self._load_private_key_from_path(private_key_path)
+        )
         self._address = str(Address(Identity.from_hex(self.public_key)))
 
     @property
@@ -99,26 +106,25 @@ class FetchAICrypto(Crypto):
         entity = Entity()
         return entity
 
-    def sign_transaction(self, tx_hash: bytes) -> bytes:
+    def sign_message(self, message: bytes) -> bytes:
         """
-        Sing a transaction hash.
+        Sign a message in bytes string form.
 
-        :param tx_hash: the transaction hash
+        :param message: the message we want to send
         :return: Signed message in bytes
         """
-        signature = self.entity.sign(tx_hash)
+        signature = self.entity.sign(message)
         return signature
 
-    # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
-    #     """
-    #     Recover the address from the hash.
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
 
-    #     :param tx_hash: the transaction hash
-    #     :param signature: the transaction signature
-    #     :return: the recovered address
-    #     """
-    #     address = 'STUB'
-    #     return address
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :return: the recovered address
+        """
+        raise NotImplementedError  # praggma: no cover
 
     @classmethod
     def get_address_from_public_key(cls, public_key: str) -> Address:
@@ -156,14 +162,13 @@ class FetchAIApi(LedgerApi):
 
     identifier = FETCHAI
 
-    def __init__(self, host: str, port: int):
+    def __init__(self, **kwargs):
         """
         Initialize the Fetch.AI ledger APIs.
 
-        :param host: URL to the server.
-        :param port: the listening port.
+        :param kwargs: key word arguments (expects either a pair of 'host' and 'port' or a 'network')
         """
-        self._api = FetchaiLedgerApi(host, port)
+        self._api = FetchaiLedgerApi(**kwargs)
 
     @property
     def api(self) -> FetchaiLedgerApi:
@@ -174,24 +179,75 @@ class FetchAIApi(LedgerApi):
         """Get the balance of a given account."""
         return self._api.tokens.balance(address)
 
-    def send_transaction(self,
-                         crypto: Crypto,
-                         destination_address: AddressLike,
-                         amount: int,
-                         tx_fee: int,
-                         **kwargs) -> Optional[str]:
+    def send_transaction(
+        self,
+        crypto: Crypto,
+        destination_address: AddressLike,
+        amount: int,
+        tx_fee: int,
+        tx_nonce: str,
+        **kwargs
+    ) -> Optional[str]:
         """Submit a transaction to the ledger."""
-        tx_digest = self._api.tokens.transfer(crypto.entity, destination_address, amount, tx_fee)
+        tx_digest = self._api.tokens.transfer(
+            crypto.entity, destination_address, amount, tx_fee
+        )
         self._api.sync(tx_digest)
         return tx_digest
 
     def is_transaction_settled(self, tx_digest: str) -> bool:
         """Check whether a transaction is settled or not."""
-        tx_status = cast(str, self._api.tx.status(tx_digest))
+        tx_status = cast(TxStatus, self._api.tx.status(tx_digest))
         is_successful = False
-        if tx_status in SUCCESSFUL_TERMINAL_STATES:
-            # tx_contents = cast(TxContents, api.tx.contents(tx_digest))
-            # tx_contents.transfers_to()
-            # TODO: check the amount of the transaction is correct
+        if tx_status.status in SUCCESSFUL_TERMINAL_STATES:
             is_successful = True
         return is_successful
+
+    def validate_transaction(
+        self,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :param tx_digest: the transaction digest.
+
+        :return: True if the random_message is equals to tx['input']
+        """
+        tx_contents = cast(TxContents, self._api.tx.contents(tx_digest))
+        transfers = tx_contents.transfers
+        seller_address = Address(seller)
+        is_valid = (
+            str(tx_contents.from_address) == client
+            and amount == transfers[seller_address]
+        )
+        # TODO: Add the tx_nonce check here when the ledger supports extra data to the tx.
+        is_settled = self.is_transaction_settled(tx_digest=tx_digest)
+        result = is_valid and is_settled
+        return result
+
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+
+        time_stamp = int(time.time())
+        seller = cast(str, seller)
+        client = cast(str, client)
+        aggregate_hash = sha256_hash(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+
+        return aggregate_hash.hex()

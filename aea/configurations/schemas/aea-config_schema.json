@@ -9,7 +9,6 @@
     "author",
     "version",
     "license",
-    "url",
     "private_key_paths",
     "default_ledger",
     "connections",
@@ -36,9 +35,6 @@
     "fingerprint": {
       "type": "string"
     },
-    "url": {
-      "type": "string"
-    },
     "registry_path": {
       "type": "string"
     },
@@ -58,7 +54,7 @@
         }
       }
     },
-     "ledger_apis": {
+    "ledger_apis": {
       "type": "object",
       "uniqueItems": true,
       "patternProperties": {

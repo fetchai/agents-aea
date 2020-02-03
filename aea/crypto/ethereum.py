@@ -19,23 +19,28 @@
 # ------------------------------------------------------------------------------
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
+
+import logging
 import time
+from pathlib import Path
+from typing import BinaryIO, Optional
+
+from eth_account import Account
+from eth_account.messages import encode_defunct
+
+from eth_keys import keys
 
 import web3
-from web3 import Web3, HTTPProvider
-from eth_account import Account
-from eth_keys import keys
-import logging
-from pathlib import Path
-from typing import Optional, BinaryIO
+from web3 import HTTPProvider, Web3
 
-from aea.crypto.base import Crypto, LedgerApi, AddressLike
+from aea.crypto.base import AddressLike, Crypto, LedgerApi
+from aea.mail.base import Address
 
 logger = logging.getLogger(__name__)
 
 ETHEREUM = "ethereum"
-GAS_PRICE = '50'
-GAS_ID = 'gwei'
+DEFAULT_GAS_PRICE = "50"
+GAS_ID = "gwei"
 
 
 class EthereumCrypto(Crypto):
@@ -49,7 +54,11 @@ class EthereumCrypto(Crypto):
 
         :param private_key_path: the private key path of the agent
         """
-        self._account = self._generate_private_key() if private_key_path is None else self._load_private_key_from_path(private_key_path)
+        self._account = (
+            self._generate_private_key()
+            if private_key_path is None
+            else self._load_private_key_from_path(private_key_path)
+        )
         bytes_representation = Web3.toBytes(hexstr=self._account.key.hex())
         self._public_key = keys.PrivateKey(bytes_representation).public_key
 
@@ -92,29 +101,33 @@ class EthereumCrypto(Crypto):
             else:
                 account = self._generate_private_key()
             return account
-        except IOError as e:        # pragma: no cover
+        except IOError as e:  # pragma: no cover
             logger.exception(str(e))
 
-    def sign_transaction(self, tx_hash: bytes) -> bytes:
+    def sign_message(self, message: bytes) -> bytes:
         """
-        Sign a transaction hash.
+        Sign a message in bytes string form.
 
-        :param tx_hash: the transaction hash
+        :param message: the message we want to send
         :return: Signed message in bytes
         """
-        signature = self.entity.signHash(tx_hash)
-        return signature['signature']
+        signable_message = encode_defunct(primitive=message)
+        signature = self.entity.sign_message(signable_message=signable_message)
+        return signature["signature"]
 
-    # def recover_from_hash(self, tx_hash: bytes, signature: bytes) -> Address:
-    #     """
-    #     Recover the address from the hash.
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
 
-    #     :param tx_hash: the transaction hash
-    #     :param signature: the transaction signature
-    #     :return: the recovered address
-    #     """
-    #     address = self.entity.recoverHash(tx_hash, signature=signature)
-    #     return address
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :return: the recovered address
+        """
+        signable_message = encode_defunct(primitive=message)
+        addr = Account.recover_message(
+            signable_message=signable_message, signature=signature
+        )
+        return addr
 
     def _generate_private_key(self) -> Account:
         """Generate a key pair for ethereum network."""
@@ -156,13 +169,14 @@ class EthereumApi(LedgerApi):
 
     identifier = ETHEREUM
 
-    def __init__(self, address: str):
+    def __init__(self, address: str, gas_price: str = DEFAULT_GAS_PRICE):
         """
         Initialize the Ethereum ledger APIs.
 
         :param address: the endpoint for Web3 APIs.
         """
         self._api = Web3(HTTPProvider(endpoint_uri=address))
+        self._gas_price = gas_price
 
     @property
     def api(self) -> Web3:
@@ -173,16 +187,20 @@ class EthereumApi(LedgerApi):
         """Get the balance of a given account."""
         return self._api.eth.getBalance(address)
 
-    def send_transaction(self,
-                         crypto: Crypto,
-                         destination_address: AddressLike,
-                         amount: int,
-                         tx_fee: int,
-                         chain_id: int = 1,
-                         **kwargs) -> Optional[str]:
+    def send_transaction(
+        self,
+        crypto: Crypto,
+        destination_address: AddressLike,
+        amount: int,
+        tx_fee: int,
+        tx_nonce: str,
+        chain_id: int = 3,
+        **kwargs
+    ) -> Optional[str]:
         """
         Submit a transaction to the ledger.
 
+        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
@@ -190,18 +208,30 @@ class EthereumApi(LedgerApi):
         :param chain_id: the Chain ID of the Ethereum transaction. Default is 1 (i.e. mainnet).
         :return: the transaction digest, or None if not available.
         """
-        nonce = self._api.eth.getTransactionCount(self._api.toChecksumAddress(crypto.address))
+        nonce = self._api.eth.getTransactionCount(
+            self._api.toChecksumAddress(crypto.address)
+        )
+
         # TODO : handle misconfiguration
         transaction = {
-            'nonce': nonce,
-            'chainId': chain_id,
-            'to': destination_address,
-            'value': amount,
-            'gas': tx_fee,
-            'gasPrice': self._api.toWei(GAS_PRICE, GAS_ID)
+            "nonce": nonce,
+            "chainId": chain_id,
+            "to": destination_address,
+            "value": amount,
+            "gas": tx_fee,
+            "gasPrice": self._api.toWei(self._gas_price, GAS_ID),
+            "data": tx_nonce,
         }
+        gas_estimation = self._api.eth.estimateGas(transaction=transaction)
+        assert (
+            tx_fee >= gas_estimation
+        ), "Need to increase tx_fee in the configs to cover the gas consumption of the transaction. Estimated gas consumption is: {}.".format(
+            gas_estimation
+        )
         signed = self._api.eth.account.signTransaction(transaction, crypto.entity.key)
+
         hex_value = self._api.eth.sendRawTransaction(signed.rawTransaction)
+
         logger.info("TX Hash: {}".format(str(hex_value.hex())))
         while True:
             try:
@@ -221,3 +251,46 @@ class EthereumApi(LedgerApi):
         if tx_status is not None:
             is_successful = True
         return is_successful
+
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a unique hash to distinguish txs with the same terms.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
+        """
+        time_stamp = int(time.time())
+        aggregate_hash = Web3.keccak(
+            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+        )
+        return aggregate_hash.hex()
+
+    def validate_transaction(
+        self,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :param tx_digest: the transaction digest.
+
+        :return: True if the random_message is equals to tx['input']
+        """
+
+        tx = self._api.eth.getTransaction(tx_digest)
+        is_valid = (
+            tx.get("input") == tx_nonce
+            and tx.get("value") == amount
+            and tx.get("from") == client
+            and tx.get("to") == seller
+        )
+        return is_valid

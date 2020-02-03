@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea create` sub-command."""
+
 import filecmp
 import json
 import os
@@ -29,17 +30,25 @@ from typing import Dict
 from unittest.mock import patch
 
 import jsonschema
-import pytest
-import yaml
-from ..common.click_testing import CliRunner
 from jsonschema import Draft4Validator
+
+import pytest
+
+import yaml
 
 import aea
 import aea.cli.common
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader
-from ..conftest import AGENT_CONFIGURATION_SCHEMA, ROOT_DIR, CONFIGURATION_SCHEMA_DIR, CLI_LOG_OPTION
+
+from ..common.click_testing import CliRunner
+from ..conftest import (
+    AGENT_CONFIGURATION_SCHEMA,
+    CLI_LOG_OPTION,
+    CONFIGURATION_SCHEMA_DIR,
+    ROOT_DIR,
+)
 
 
 class TestCreate:
@@ -49,7 +58,9 @@ class TestCreate:
     def setup_class(cls):
         """Set the test up."""
         cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.resolver = jsonschema.RefResolver(
+            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+        )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         cls.runner = CliRunner()
@@ -57,11 +68,15 @@ class TestCreate:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
+        cls.agent_config = cls._load_config_file(cls.agent_name)
 
-    def _load_config_file(self) -> Dict:
+    @classmethod
+    def _load_config_file(cls, agent_name) -> Dict:
         """Load a config file."""
-        agent_config_file = Path(self.agent_name, DEFAULT_AEA_CONFIG_FILE)  # type: ignore
+        agent_config_file = Path(agent_name, DEFAULT_AEA_CONFIG_FILE)  # type: ignore
         file_pointer = open(agent_config_file, mode="r", encoding="utf-8")
         agent_config_instance = yaml.safe_load(file_pointer)
         return agent_config_instance
@@ -84,84 +99,149 @@ class TestCreate:
 
     def test_configuration_file_is_compliant_to_schema(self):
         """Check that the agent's configuration file is compliant with the schema."""
-        agent_config_instance = self._load_config_file()
         try:
-            self.validator.validate(instance=agent_config_instance)
+            self.validator.validate(instance=self.agent_config)
         except jsonschema.exceptions.ValidationError as e:
-            pytest.fail("Configuration file is not compliant with the schema. Exception: {}".format(str(e)))
+            pytest.fail(
+                "Configuration file is not compliant with the schema. Exception: {}".format(
+                    str(e)
+                )
+            )
 
     def test_aea_version_is_correct(self):
         """Check that the aea version in the configuration file is correct, i.e. the same of the installed package."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["aea_version"] == aea.__version__
+        assert self.agent_config["aea_version"] == aea.__version__
 
     def test_agent_name_is_correct(self):
         """Check that the agent name in the configuration file is correct."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["agent_name"] == self.agent_name
+        assert self.agent_config["agent_name"] == self.agent_name
 
     def test_authors_field_is_empty_string(self):
         """Check that the 'authors' field in the config file is the empty string."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["author"] == ""
+        assert self.agent_config["author"] == aea.cli.common.DEFAULT_AUTHOR
 
     def test_connections_contains_only_stub(self):
         """Check that the 'connections' list contains only the 'stub' connection."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["connections"] == ["fetchai/stub:0.1.0"]
+        assert self.agent_config["connections"] == ["fetchai/stub:0.1.0"]
 
     def test_default_connection_field_is_stub(self):
         """Check that the 'default_connection' is the 'stub' connection."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["default_connection"] == "fetchai/stub:0.1.0"
+        assert self.agent_config["default_connection"] == "fetchai/stub:0.1.0"
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["license"] == ""
+        assert self.agent_config["license"] == aea.cli.common.DEFAULT_LICENSE
 
     # def test_private_key_pem_path_field_is_empty_string(self):
     #     """Check that the 'private_key_pem_path' is the empty string."""
-    #     agent_config_instance = self._load_config_file()
-    #     assert agent_config_instance["private_key_pem_path"] == ""
+    #         #     assert self.agent_config["private_key_pem_path"] == ""
 
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["protocols"] == ["fetchai/default:0.1.0"]
+        assert self.agent_config["protocols"] == ["fetchai/default:0.1.0"]
 
     def test_skills_field_is_not_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["skills"] == ["fetchai/error:0.1.0"]
+        assert self.agent_config["skills"] == ["fetchai/error:0.1.0"]
 
-    def test_url_field_is_empty_string(self):
-        """Check that the 'url' field is the empty string."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["url"] == ""
+    def test_connections_field_is_not_empty_list(self):
+        """Check that the 'connections' field is a list with the 'error' skill."""
+        assert self.agent_config["skills"] == ["fetchai/error:0.1.0"]
 
     def test_version_field_is_equal_to_0_1_0(self):
         """Check that the 'version' field is equal to the string '0.1.0'."""
-        agent_config_instance = self._load_config_file()
-        assert agent_config_instance["version"] == "0.1.0"
+        assert self.agent_config["version"] == "0.1.0"
 
-    def test_connections_directory_exists(self):
-        """Check that the connections directory exists."""
-        connections_dirpath = Path(self.agent_name, "connections")
-        assert connections_dirpath.exists()
-        assert connections_dirpath.is_dir()
+    def test_vendor_content(self):
+        """Check the content of vendor directory is as expected."""
+        vendor_dir = Path(self.agent_name, "vendor")
+        assert vendor_dir.exists()
+        assert set(vendor_dir.iterdir()) == {
+            vendor_dir / "fetchai",
+            vendor_dir / "__init__.py",
+        }
 
-    def test_connections_contains_stub_connection(self):
-        """Check that the connections directory contains the stub directory."""
-        stub_connection_dirpath = Path(self.agent_name, "connections", "stub")
+        # assert that every subdirectory of vendor/fetchai is a Python package
+        # (i.e. that contains __init__.py)
+        for package_dir in (vendor_dir / "fetchai").iterdir():
+            assert (package_dir / "__init__.py").exists()
+
+    def test_vendor_connections_contains_stub_connection(self):
+        """Check that the vendor connections directory contains the stub directory."""
+        stub_connection_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "connections", "stub"
+        )
         assert stub_connection_dirpath.exists()
         assert stub_connection_dirpath.is_dir()
 
     def test_stub_connection_directory_is_equal_to_library_stub_connection(self):
         """Check that the stub connection directory is equal to the package's one (aea.connections.stub)."""
-        stub_connection_dirpath = Path(self.agent_name, "connections", "stub")
-        comparison = filecmp.dircmp(str(stub_connection_dirpath), str(Path(ROOT_DIR, "aea", "connections", "stub")))
+        stub_connection_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "connections", "stub"
+        )
+        comparison = filecmp.dircmp(
+            str(stub_connection_dirpath),
+            str(Path(ROOT_DIR, "aea", "connections", "stub")),
+        )
         assert comparison.diff_files == []
+
+    def test_vendor_protocols_contains_default_protocol(self):
+        """Check that the vendor protocols directory contains the default protocol."""
+        stub_connection_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "protocols", "default"
+        )
+        assert stub_connection_dirpath.exists()
+        assert stub_connection_dirpath.is_dir()
+
+    def test_default_protocol_is_equal_to_library_default_protocol(self):
+        """Check that the stub connection directory is equal to the package's one (aea.protocols.default)."""
+        default_protocol_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "protocols", "default"
+        )
+        comparison = filecmp.dircmp(
+            str(default_protocol_dirpath),
+            str(Path(ROOT_DIR, "aea", "protocols", "default")),
+        )
+        assert comparison.diff_files == []
+
+    def test_vendor_skills_contains_error_skill(self):
+        """Check that the vendor skills directory contains the error skill."""
+        error_skill_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "skills", "error"
+        )
+        assert error_skill_dirpath.exists()
+        assert error_skill_dirpath.is_dir()
+
+    def test_error_skill_is_equal_to_library_error_skill(self):
+        """Check that the error skill directory is equal to the package's one (aea.skills.error)."""
+        default_protocol_dirpath = Path(
+            self.agent_name, "vendor", "fetchai", "skills", "error"
+        )
+        comparison = filecmp.dircmp(
+            str(default_protocol_dirpath), str(Path(ROOT_DIR, "aea", "skills", "error"))
+        )
+        assert comparison.diff_files == []
+
+    def test_protocols_directory_content(self):
+        """Test the content of the 'protocols' directory."""
+        dir = Path(self.t, self.agent_name, "protocols")
+        assert dir.exists()
+        assert dir.is_dir()
+        assert set(dir.iterdir()) == {dir / "__init__.py"}
+
+    def test_connections_directory_content(self):
+        """Test the content of the 'connections' directory."""
+        dir = Path(self.t, self.agent_name, "connections")
+        assert dir.exists()
+        assert dir.is_dir()
+        assert set(dir.iterdir()) == {dir / "__init__.py"}
+
+    def test_skills_directory_content(self):
+        """Test the content of the 'skills' directory."""
+        dir = Path(self.t, self.agent_name, "skills")
+        assert dir.exists()
+        assert dir.is_dir()
+        assert set(dir.iterdir()) == {dir / "__init__.py"}
 
     @classmethod
     def teardown_class(cls):
@@ -182,7 +262,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.cwd = os.getcwd()
@@ -191,7 +271,9 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
@@ -226,14 +308,18 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         cls.agent_name = "myagent"
 
         # change the serialization of the AgentConfig class so to make the parsing to fail.
-        cls.patch = patch.object(aea.configurations.base.AgentConfig, "json", return_value={"hello": "world"})
+        cls.patch = patch.object(
+            aea.configurations.base.AgentConfig, "json", return_value={"hello": "world"}
+        )
         cls.patch.__enter__()
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
@@ -271,7 +357,9 @@ class TestCreateFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""
@@ -302,19 +390,23 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert cls.result.exit_code == 0
 
         # calling 'aea create myagent' again within an AEA project - recursively.
         os.chdir(cls.agent_name)
         os.mkdir("another_subdir")
         os.chdir("another_subdir")
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the error code is equal to 1 (i.e. catchall for general errors)."""

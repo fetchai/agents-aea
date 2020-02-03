@@ -1,0 +1,40 @@
+name: 'tac_control'
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+description: "The tac control skill implements the logic for an AEA to control an instance of the TAC."
+behaviours:
+  tac:
+    class_name: TACBehaviour
+    args: {}
+handlers:
+  tac:
+    class_name: TACHandler
+    args: {}
+  oef:
+    class_name: OEFRegistrationHandler
+    args: {}
+shared_classes:
+  parameters:
+    class_name: Parameters
+    args:
+      min_nb_agents: 2
+      money_endowment: 2000000
+      nb_goods: 10
+      tx_fee: 1
+      base_good_endowment: 2
+      lower_bound_factor: 1
+      upper_bound_factor: 1
+      start_time: 12 11 2019  15:01
+      registration_timeout: 60
+      competition_timeout: 180
+      inactivity_timeout: 60
+      whitelist: []
+      version_id: v1
+  game:
+    class_name: Game
+    args: {}
+protocols: ['fetchai/oef:0.1.0', 'fetchai/tac:0.1.0']
+dependencies:
+  numpy: {}

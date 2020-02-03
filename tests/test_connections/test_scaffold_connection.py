@@ -18,8 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the Scaffold connection.py."""
-
 from aea.connections.scaffold.connection import MyScaffoldConnection
+
+from ..conftest import UNKNOWN_CONNECTION_PUBLIC_ID
 
 
 class TestScaffold:
@@ -27,5 +28,6 @@ class TestScaffold:
 
     def test_scaffold_connection(self):
         """Test the initialisation of the scaffold_connection."""
-        m_connection = MyScaffoldConnection("my_scaffold_connection", address="pk")
+        connection_id = UNKNOWN_CONNECTION_PUBLIC_ID
+        m_connection = MyScaffoldConnection(address="pk", connection_id=connection_id)
         assert m_connection.address == "pk"

@@ -1,0 +1,39 @@
+name: carpark_detection
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+description: "The carpark detection skill implements the detection and trading functionality for a carpark agent."
+behaviours:
+  service_registration:
+    class_name: ServiceRegistrationBehaviour
+    args: {}
+  car_park_detection:
+    class_name: CarParkDetectionAndGUIBehaviour
+    args:
+      default_longitude: -73.967491
+      default_latitude: 40.780343
+      image_capture_interval: 120
+handlers:
+  fipa:
+    class_name: FIPAHandler
+    args: {}
+shared_classes:
+  strategy:
+    class_name: Strategy
+    args:
+      data_price_fet: 200000000
+      db_is_rel_to_cwd: true
+      db_rel_dir: ../temp_files
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+      seller_tx_fee: 0
+
+  dialogues:
+    class_name: Dialogues
+    args: {}
+protocols: ['fetchai/fipa:0.1.0', 'fetchai/oef:0.1.0', 'fetchai/default:0.1.0']
+ledgers: ['fetchai']
+dependencies:
+  scikit-image: {}

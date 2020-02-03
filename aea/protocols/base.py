@@ -20,24 +20,23 @@
 
 """This module contains the base message and serialization definition."""
 
-from abc import abstractmethod, ABC
-from copy import copy
 import json
+from abc import ABC, abstractmethod
+from copy import copy
 from typing import Any, Dict, Optional
 
 from google.protobuf.struct_pb2 import Struct
 
-from aea.configurations.base import ProtocolConfig
+from aea.configurations.base import ProtocolConfig, ProtocolId, PublicId
 from aea.mail.base import Address
 
 
 class Message:
     """This class implements a message."""
 
-    protocol_id = 'base'
+    protocol_id = None  # type: PublicId
 
-    def __init__(self, body: Optional[Dict] = None,
-                 **kwargs):
+    def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
 
@@ -47,6 +46,7 @@ class Message:
         self._counterparty = None  # type: Optional[Address]
         self._body = copy(body) if body else {}  # type: Dict[str, Any]
         self._body.update(kwargs)
+        assert self._check_consistency(), "Message initialization inconsistent."
 
     @property
     def counterparty(self) -> Address:
@@ -104,19 +104,30 @@ class Message:
         """Check value is set for key."""
         return key in self._body
 
-    def check_consistency(self) -> bool:
+    def _check_consistency(self) -> bool:
         """Check that the data is consistent."""
         return True
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, Message) \
-            and self.body == other.body \
+        return (
+            isinstance(other, Message)
+            and self.body == other.body
             and self._counterparty == other._counterparty
+        )
 
     def __str__(self):
         """Get the string representation of the message."""
-        return "Message(" + " ".join(map(lambda key_value: str(key_value[0]) + "=" + str(key_value[1]), self.body.items())) + ")"
+        return (
+            "Message("
+            + " ".join(
+                map(
+                    lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
+                    self.body.items(),
+                )
+            )
+            + ")"
+        )
 
 
 class Encoder(ABC):
@@ -210,22 +221,24 @@ class Protocol(ABC):
     - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
     """
 
-    def __init__(self, id: str, serializer: Serializer, config: ProtocolConfig):
+    def __init__(
+        self, protocol_id: ProtocolId, serializer: Serializer, config: ProtocolConfig
+    ):
         """
         Initialize the protocol manager.
 
-        :param id: the protocol id.
+        :param protocol_id: the protocol id.
         :param serializer: the serializer.
         :param config: the protocol configurations.
         """
-        self._id = id
+        self._protocol_id = protocol_id
         self._serializer = serializer
         self._config = config
 
     @property
-    def id(self):
+    def id(self) -> ProtocolId:
         """Get the name."""
-        return self._id
+        return self._protocol_id
 
     @property
     def serializer(self) -> Serializer:

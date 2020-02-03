@@ -18,10 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+
 import os
 
 from aea.crypto.ethereum import EthereumCrypto
-from web3 import Web3
+
 from ..conftest import ROOT_DIR
 
 PRIVATE_KEY_PATH = os.path.join(ROOT_DIR, "/tests/data/eth_private_key.txt")
@@ -38,14 +39,19 @@ def test_initialization():
     """Test the initialisation of the variables."""
     account = EthereumCrypto()
     assert account.entity is not None, "The property must return the account."
-    assert account.address is not None, "After creation the display address must not be None"
-    assert account.public_key is not None, "After creation the public key must no be None"
+    assert (
+        account.address is not None
+    ), "After creation the display address must not be None"
+    assert (
+        account.public_key is not None
+    ), "After creation the public key must no be None"
     assert account.entity is not None, "After creation the entity must no be None"
 
 
-def test_sign_transaction():
-    """Test the signing function for the eth_crypto."""
+def test_sign_and_recover_message():
+    """Test the signing and the recovery function for the eth_crypto."""
     account = EthereumCrypto(PRIVATE_KEY_PATH)
-    tx = Web3.solidityKeccak(['bytes'], [b'hello'])
-    sign_bytes = account.sign_transaction(tx)
+    sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
+    recovered_addr = account.recover_message(message=b"hello", signature=sign_bytes)
+    assert recovered_addr == account.address, "Failed to recover the correct address."

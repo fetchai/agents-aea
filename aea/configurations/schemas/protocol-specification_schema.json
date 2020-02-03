@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for the protocol-specification file.",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "name",
+    "author",
+    "version",
+    "license",
+    "speech_acts"
+  ],
+  "properties": {
+    "name": {
+      "$ref": "definitions.json#/definitions/resource_name"
+    },
+    "author": {
+      "$ref": "definitions.json#/definitions/author"
+    },
+    "version": {
+      "$ref": "definitions.json#/definitions/version"
+    },
+    "license": {
+      "type": "string"
+    },
+    "speech_acts": {
+      "type": "object",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "patternProperties": {
+        "^[^\\d\\W]\\w*\\Z": {
+          "$ref": "#/definitions/speech_act"
+        }
+      }
+    },
+    "dependencies": {
+      "$ref": "definitions.json#/definitions/dependencies"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "speech_act": {
+      "type": "object"
+    }
+  }
+}

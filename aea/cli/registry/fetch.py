@@ -17,22 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 """Methods for CLI fetch functionality."""
-from typing import Union
 
-import click
 import os
-
-from distutils.dir_util import copy_tree
 from shutil import rmtree
 
-from aea.cli.common import DEFAULT_REGISTRY_PATH
-from aea.cli.registry.utils import (
-    request_api, download_file, extract, fetch_package
-)
+import click
+
+from aea.cli.common import Context
+from aea.cli.registry.utils import download_file, extract, fetch_package, request_api
 from aea.configurations.base import PublicId
 
 
-def fetch_agent(public_id: Union[PublicId, str]) -> None:
+def fetch_agent(ctx: Context, public_id: PublicId) -> None:
     """
     Fetch Agent from Registry.
 
@@ -40,63 +36,30 @@ def fetch_agent(public_id: Union[PublicId, str]) -> None:
 
     :return: None
     """
-    if isinstance(public_id, str):
-        public_id = PublicId.from_string(public_id)
     author, name, version = public_id.author, public_id.name, public_id.version
-    api_path = '/agents/{}/{}/{}'.format(author, name, version)
-    resp = request_api('GET', api_path)
-    file_url = resp['file']
+    api_path = "/agents/{}/{}/{}".format(author, name, version)
+    resp = request_api("GET", api_path)
+    file_url = resp["file"]
 
-    cwd = os.getcwd()
-    target_folder = os.path.join(cwd, name)
+    target_folder = os.path.join(ctx.cwd, name)
+    os.makedirs(target_folder, exist_ok=True)
 
-    for item_type in ('connection', 'skill', 'protocol'):
-        item_type_plural = item_type + 's'
+    click.echo("Fetching dependencies...")
+    for item_type in ("connection", "skill", "protocol"):
+        item_type_plural = item_type + "s"
         for item_public_id in resp[item_type_plural]:
+            item_public_id = PublicId.from_str(item_public_id)
             try:
                 fetch_package(item_type, item_public_id, target_folder)
             except Exception as e:
                 rmtree(target_folder)
                 raise click.ClickException(
-                    'Unable to fetch dependency for agent "{}", aborting. {}'
-                    .format(name, e)
+                    'Unable to fetch dependency for agent "{}", aborting. {}'.format(
+                        name, e
+                    )
                 )
+    click.echo("Dependencies successfully fetched.")
 
-    filepath = download_file(file_url, cwd)
+    filepath = download_file(file_url, ctx.cwd)
     extract(filepath, target_folder)
-    click.echo(
-        'Agent {} successfully fetched to {}.'
-        .format(name, target_folder)
-    )
-
-
-def _get_agent_source_path(item_name: str) -> str:
-    packages_path = os.path.basename(DEFAULT_REGISTRY_PATH)
-    target_path = os.path.join(packages_path, 'agents', item_name)
-    if not os.path.exists(target_path):
-        raise click.ClickException(
-            'Agent "{}" not found in packages folder.'.format(item_name)
-        )
-    return target_path
-
-
-def fetch_agent_locally(public_id: Union[PublicId, str]) -> None:
-    """
-    Fetch Agent from local packages.
-
-    :param public_id: str public ID of desirable Agent.
-
-    :return: None
-    """
-    if isinstance(public_id, str):
-        public_id = PublicId.from_string(public_id)
-
-    name = public_id.name
-    source_dir = _get_agent_source_path(name)
-    cwd = os.getcwd()
-    target_dir = os.path.join(cwd, name)
-    copy_tree(source_dir, target_dir)
-    click.echo(
-        'Agent {} successfully saved in {}.'
-        .format(name, cwd)
-    )
+    click.echo("Agent {} successfully fetched to {}.".format(name, target_folder))

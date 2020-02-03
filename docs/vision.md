@@ -1,4 +1,4 @@
-The AEA framework has two commercial roles.
+The AEA framework has two commercial roles which are outlined below.
 
 
 ## Open source technology

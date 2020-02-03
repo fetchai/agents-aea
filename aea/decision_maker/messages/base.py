@@ -23,14 +23,15 @@
 from copy import copy
 from typing import Any, Dict, Optional
 
+from aea.configurations.base import PublicId
+
 
 class InternalMessage:
     """This class implements a message."""
 
-    protocol_id = "internal"
+    protocol_id = PublicId("fetchai", "internal", "0.1.0")
 
-    def __init__(self, body: Optional[Dict] = None,
-                 **kwargs):
+    def __init__(self, body: Optional[Dict] = None, **kwargs):
         """
         Initialize a Message object.
 
@@ -87,10 +88,17 @@ class InternalMessage:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, InternalMessage) \
-            and self.body == other.body \
-
+        return isinstance(other, InternalMessage) and self.body == other.body
 
     def __str__(self):
         """Get the string representation of the message."""
-        return "InternalMessage(" + " ".join(map(lambda key_value: str(key_value[0]) + "=" + str(key_value[1]), self.body.items())) + ")"
+        return (
+            "InternalMessage("
+            + " ".join(
+                map(
+                    lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
+                    self.body.items(),
+                )
+            )
+            + ")"
+        )

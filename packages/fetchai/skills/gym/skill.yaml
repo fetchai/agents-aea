@@ -1,0 +1,16 @@
+name: gym
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+description: "The gym skill wraps an RL agent."
+behaviours: {}
+handlers:
+  gym:
+    class_name: GymHandler
+    args:
+      nb_steps: 4000
+shared_classes: {}
+protocols: ["fetchai/gym:0.1.0"]
+dependencies:
+  gym: {}

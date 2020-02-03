@@ -1,0 +1,7 @@
+name: ml_trade
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+description: The ml trade protocol implements the messages an agent needs to engage
+             in trading data for training and prediction.

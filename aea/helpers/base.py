@@ -24,6 +24,7 @@ import importlib.util
 import logging
 import os
 import sys
+import types
 from pathlib import Path
 from typing import Optional
 
@@ -42,11 +43,11 @@ def _get_module(spec):
 
 def locate(path):
     """Locate an object by name or dotted path, importing as necessary."""
-    parts = [part for part in path.split('.') if part]
+    parts = [part for part in path.split(".") if part]
     module, n = None, 0
     while n < len(parts):
-        file_location = os.path.join(*parts[:n + 1])
-        spec_name = '.'.join(parts[:n + 1])
+        file_location = os.path.join(*parts[: n + 1])
+        spec_name = ".".join(parts[: n + 1])
         module_location = os.path.join(file_location, "__init__.py")
         spec = importlib.util.spec_from_file_location(spec_name, module_location)
         logger.debug("Trying to import {}".format(module_location))
@@ -89,7 +90,7 @@ def load_module(dotted_path: str, filepath: os.PathLike):
     return module
 
 
-def add_module_to_sys_modules(dotted_path: str, module_obj) -> None:
+def import_module(dotted_path: str, module_obj) -> None:
     """
     Add module to sys.modules.
 
@@ -97,39 +98,54 @@ def add_module_to_sys_modules(dotted_path: str, module_obj) -> None:
     :param module_obj: the module object. It is assumed it has been already executed.
     :return: None
     """
+    # if path is nested, and the root package is not present, add it to sys.modules
+    split = dotted_path.split(".")
+    if len(split) > 1 and split[0] not in sys.modules:
+        root = split[0]
+        sys.modules[root] = types.ModuleType(root)
+
+    # add the module at the specified path.
     sys.modules[dotted_path] = module_obj
 
 
-def load_agent_component_package(item_type: str, item_name: str, directory: os.PathLike):
+def load_agent_component_package(
+    item_type: str, item_name: str, author_name: str, directory: os.PathLike
+):
     """
-    Load a Python package associated to .
+    Load a Python package associated to a component..
 
-    :param item_type: the type of the item. One of "protocol", "connection", "skill"
-    :param item_name: the name of the item to load
+    :param item_type: the type of the item. One of "protocol", "connection", "skill".
+    :param item_name: the name of the item to load.
+    :param author_name: the name of the author of the item to load.
     :param directory: the component directory.
     :return: the module associated to the Python package of the component.
     """
     item_type_plural = item_type + "s"
-    dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
+    dotted_path = "packages.{}.{}.{}".format(author_name, item_type_plural, item_name)
     filepath = Path(directory) / "__init__.py"
     return load_module(dotted_path, filepath)
 
 
-def add_agent_component_module_to_sys_modules(item_type: str, item_name: str, module_obj) -> None:
+def add_agent_component_module_to_sys_modules(
+    item_type: str, item_name: str, author_name: str, module_obj
+) -> None:
     """
     Add an agent component module to sys.modules.
 
     :param item_type: the type of the item. One of "protocol", "connection", "skill"
     :param item_name: the name of the item to load
+    :param author_name: the name of the author of the item to load.
     :param module_obj: the module object. It is assumed it has been already executed.
     :return:
     """
     item_type_plural = item_type + "s"
-    dotted_path = "packages.{}.{}".format(item_type_plural, item_name)
-    add_module_to_sys_modules(dotted_path, module_obj)
+    dotted_path = "packages.{}.{}.{}".format(author_name, item_type_plural, item_name)
+    import_module(dotted_path, module_obj)
 
 
-def generate_fingerprint(author: str, package_name: str, version: str, nonce: Optional[int] = None) -> str:
+def generate_fingerprint(
+    author: str, package_name: str, version: str, nonce: Optional[int] = None
+) -> str:
     """Generate a unique id for the package.
 
     :param author: The author of the package.
@@ -139,6 +155,7 @@ def generate_fingerprint(author: str, package_name: str, version: str, nonce: Op
            (Can be used with different configuration)
     """
     import hashlib
+
     if nonce is not None:
         string_for_hash = "".join([author, package_name, version, str(nonce)])
     else:

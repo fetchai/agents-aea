@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea scaffold protocol` sub-command."""
+
 import filecmp
 import json
 import os
@@ -27,16 +28,22 @@ import unittest.mock
 from pathlib import Path
 
 import jsonschema
-import yaml
-from ...common.click_testing import CliRunner
-from jsonschema import ValidationError, Draft4Validator
+from jsonschema import Draft4Validator, ValidationError
 
-from aea import AEA_DIR
+import yaml
+
 import aea.cli.common
 import aea.configurations.base
-from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from aea import AEA_DIR
 from aea.cli import cli
-from ...conftest import CLI_LOG_OPTION, PROTOCOL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
+from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+
+from ...common.click_testing import CliRunner
+from ...conftest import (
+    CLI_LOG_OPTION,
+    CONFIGURATION_SCHEMA_DIR,
+    PROTOCOL_CONFIGURATION_SCHEMA,
+)
 
 
 class TestScaffoldProtocol:
@@ -50,19 +57,27 @@ class TestScaffoldProtocol:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.resolver = jsonschema.RefResolver(
+            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+        )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # scaffold protocol
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0."""
@@ -76,13 +91,21 @@ class TestScaffoldProtocol:
 
     def test_resource_folder_contains_module_protocol(self):
         """Test that the resource folder contains scaffold protocol.py module."""
-        p = Path(self.t, self.agent_name, "protocols", self.resource_name, "serialization.py")
+        p = Path(
+            self.t, self.agent_name, "protocols", self.resource_name, "serialization.py"
+        )
         original = Path(AEA_DIR, "protocols", "scaffold", "serialization.py")
         assert filecmp.cmp(p, original)
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""
-        p = Path(self.t, self.agent_name, "protocols", self.resource_name, DEFAULT_PROTOCOL_CONFIG_FILE)
+        p = Path(
+            self.t,
+            self.agent_name,
+            "protocols",
+            self.resource_name,
+            DEFAULT_PROTOCOL_CONFIG_FILE,
+        )
         config_file = yaml.safe_load(open(p))
         self.validator.validate(instance=config_file)
 
@@ -107,16 +130,24 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # create a dummy 'myresource' folder
-        Path(cls.t, cls.agent_name, "protocols", cls.resource_name).mkdir(exist_ok=False, parents=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
+        Path(cls.t, cls.agent_name, "protocols", cls.resource_name).mkdir(
+            exist_ok=False, parents=True
+        )
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -158,18 +189,28 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add protocol first time
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
         # scaffold protocol with the same protocol name
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -180,7 +221,9 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
 
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
-        s = "A protocol with name '{}' already exists. Aborting...".format(self.resource_name)
+        s = "A protocol with name '{}' already exists. Aborting...".format(
+            self.resource_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     def test_resource_directory_exists(self):
@@ -211,19 +254,27 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # change the dumping of yaml module to raise an exception.
-        cls.patch = unittest.mock.patch("yaml.safe_dump", side_effect=ValidationError("test error message"))
+        cls.patch = unittest.mock.patch(
+            "yaml.safe_dump", side_effect=ValidationError("test error message")
+        )
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -234,14 +285,18 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find protocol: '{protocol_name}'
         """
-        self.mocked_logger_error.assert_called_once_with("Error when validating the skill configuration file.")
+        self.mocked_logger_error.assert_called_once_with(
+            "Error when validating the protocol configuration file."
+        )
 
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(self.t, self.agent_name, "protocols", self.resource_name).exists()
+        assert not Path(
+            self.t, self.agent_name, "protocols", self.resource_name
+        ).exists()
 
     @classmethod
     def teardown_class(cls):
@@ -267,14 +322,22 @@ class TestScaffoldProtocolFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
-        cls.patch = unittest.mock.patch("shutil.copytree", side_effect=Exception("unknwon exception"))
+        cls.patch = unittest.mock.patch(
+            "shutil.copytree", side_effect=Exception("unknwon exception")
+        )
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -285,7 +348,9 @@ class TestScaffoldProtocolFailsWhenExceptionOccurs:
 
         This means that after every failure, we make sure we restore the previous state.
         """
-        assert not Path(self.t, self.agent_name, "protocols", self.resource_name).exists()
+        assert not Path(
+            self.t, self.agent_name, "protocols", self.resource_name
+        ).exists()
 
     @classmethod
     def teardown_class(cls):

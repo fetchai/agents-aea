@@ -144,3 +144,41 @@ Release History
 - Multiple minor doc updates
 - Adds additional tests
 - Multiple additional minor fixes and changes
+
+0.1.16 (2020-01-12)
+-------------------
+
+- Completes tac skills implementation
+- Adds default ledger field to agent config
+- Converts ledger apis to dictionary fields in agent config
+- Introduces public ids to CLI and deprecate usage of package names only
+- Adds local push and public commands to CLI
+- Introduces ledger api abstract class
+- Unifies import paths for static and dynamic imports
+- Disambiguates import paths by introducing pattern of `packages.author.package_type_pluralized.package_name`
+- Adds agent directory to packages with some samples
+- Adds protocol generator and exposes on CLI
+- Removes unused config fields
+- Updates docs to align with recent changes
+- Adds additional tests on CLI
+- Multiple additional minor fixes and changes
+
+0.1.17 (2020-01-27)
+-------------------
+
+- Add programmatic mode flag to AEA
+- Introduces vendorized project structure
+- Adds further tests for decision maker
+- Upgrades sign transaction function for ethereum api proxy
+- Adds black and bugbear to linters
+- Applies public id usage throughout AEA business logic
+- Adds guide on how to deploy an AEA on a raspberry pi
+- Addresses multiple issues in the protocol generator
+- Fixes aea config
+- Adds CLI commands to create wealth and get wealth and address
+- Change default author and license
+- Adds guide on agent vs AEAs
+- Updates docs and improves guides
+- Adds support for inactivating skills programmatically
+- Makes decision maker run in separate thread
+- Multiple additional minor fixes and changes

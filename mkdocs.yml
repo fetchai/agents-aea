@@ -16,45 +16,53 @@ theme:
 
 
 nav:
-
   - Autonomous Economic Agent Framework:
     - Welcome: 'index.md'
-    - Agent-oriented development: 'agent-oriented-development.md'
-    - AEA quick start: 'quickstart.md'
-    - Version: 'version.md'
+    - Getting started:
+      - Ways to build an AEA: 'steps.md'
+      - AEA quick start: 'quickstart.md'
+      - AEA and Web Frameworks: 'aea-vs-mvc.md'
+      - Build a skill for an AEA: 'skill-guide.md'
+      - Build an AEA programmatically: 'build-aea-programmatically.md'
+      - AEAs vs Agents: 'agent-vs-aea.md'
     - The AEA universe:
-      - "Vision": 'vision.md'
-      - "Application areas": 'app-areas.md'
-      - "Relation to OEF and Ledger": 'oef-ledger.md'
-      - "Trust issues": 'trust.md'
+      - Agent-oriented development: 'agent-oriented-development.md'
+      - Vision: 'vision.md'
+      - Application areas: 'app-areas.md'
+      - Relation to OEF and Ledger: 'oef-ledger.md'
+      - Trust issues: 'trust.md'
       # - "Two-layered machine learning": 'two-layer.md'
-    - Demos:
+    - Demo guides:
       - "Car park agent": 'car-park-skills.md'
-      - "Gym demo": 'gym-plugin.md'
+      - "Gym example": 'gym-example.md'
       - "Gym skill": 'gym-skill.md'
       - "ML skills": 'ml-skills.md'
       - "TAC skills": 'tac-skills.md'
       - "TAC external app": 'tac.md'
       - "Weather skills": 'weather-skills.md'
+      - "Thermometer skills": 'thermometer-skills.md'
+      - "Thermometer skills step by step": 'thermometer-skills-step-by-step.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
       - "Architectural diagram": 'diagram.md'
       - "Core components": 'core-components.md'
       - "File structure": 'file-structure.md'
-    - Developer guide:
-      - "Step by step": 'steps.md'
+    - Developer guides:
+      - Version: 'version.md'
       - "Skill": 'skill.md'
-      - "Build your own skill": 'skill-guide.md'
       - "Protocol": 'protocol.md'
       - "Connection": 'connection.md'
-      - "Scaffolding": 'scaffolding.md'
+      - "Scaffolding packages": 'scaffolding.md'
+      - "Generating protocols": 'generator.md'
       - "Logging": 'logging.md'
       - CLI:
          - "CLI tool": 'cli-how-to.md'
          - "Commands": 'cli-commands.md'
          - "GUI": 'cli-gui.md'
-      - "Build an AEA using code API": 'hacking-an-agent.md'
+         - "Generating wealth": 'wealth.md'
+      - "Build an AEA on a Raspberry Pi": 'raspberry-set-up.md'
       - "Integrate with third parties": 'integration.md'
+      - Use multiplexer stand-alone: 'multiplexer-standalone.md'
 
 
 plugins:

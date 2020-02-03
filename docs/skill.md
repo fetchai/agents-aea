@@ -1,13 +1,13 @@
-An agent developer writes skills that the framework can call.
+An AEA developer writes skills that the framework can call.
 
 When you add a skill with the CLI, a directory is created which includes modules for the `Behaviour,` `Task`, and `Handler` classes as well as a configuration file `skill.yaml`.
 
 
 ## Context
 
-The skill has a `context` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context also has a link to the agent context. The agent context provides read access to agent specific information like the public key and address of the agent, its preferences and ownership state. It also provides access to the `OutBox`.
+The skill has a `SkillContext` object which is shared by all `Handler`, `Behaviour`, and `Task` objects. The skill context also has a link to the `AgentContext`. The `AgentContext` provides read access to AEA specific information like the public key and address of the AEA, its preferences and ownership state. It also provides access to the `OutBox`.
 
-This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill and the agent.
+This means it is possible to, at any point, grab the `context` and have access to the code in other parts of the skill and the AEA.
 
 For example, in the `ErrorHandler(Handler)` class, the code often grabs a reference to its context and by doing so can access initialised and running framework objects such as an `OutBox` for putting messages into.
 
@@ -28,9 +28,9 @@ Then there is a specific method that the framework requires for each class.
 
 There can be none, one or more `Handler` class per skill.
 
-`Handler` classes can receive `Envelope` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol they require.
+`Handler` classes can receive `Message` objects of one protocol type only. However, `Handler` classes can send `Envelope` objects of any type of protocol they require.
 
-* `handle_envelope(self, Envelope)`: is where the skill receives a message contained within an `Envelope` and decides what to do with it.
+* `handle(self, message: Message)`: is where the skill receives a `Message` of the specified protocol and decides what to do with it.
 
 
 !!!	Todo
@@ -39,26 +39,141 @@ There can be none, one or more `Handler` class per skill.
 
 ### `behaviours.py`
 
-Conceptually, a `Behaviour`  class contains the business logic specific to initial actions initiated by the agent rather than reactions to other events.
+Conceptually, a `Behaviour`  class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
 
 There can be one or more `Behaviour` classes per skill. The developer must create a subclass from the abstract class `Behaviour` to create a new `Behaviour`.
 
-* `act(self)`: is how the framework calls the `Behaviour` code. 
+A behaviour can be registered in two ways:
 
-!!!	Todo
-	For example.
+- By declaring it in the skill configuration file `skill.yaml` (see [below](#skill-config))
+- In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
 
+
+* `act(self)`: is how the framework calls the `Behaviour` code.
+
+The framework supports different types of behaviours:
+- `OneShotBehaviour`: this behaviour is executed only once.
+- `CyclicBehaviour`: this behaviour is executed many times, 
+  as long as `done()` returns `True`.)
+- `TickerBehaviour`: the `act()` method is called every `tick_interval`.
+ E.g. if the `TickerBehaviour` subclass is instantiated
+ 
+There is another category of behaviours, called `CompositeBehaviour`. 
+- `SequenceBehaviour`: a sequence of `Behaviour` classes, executed 
+  one after the other.
+- `FSMBehaviour`_`: a state machine of `State` behaviours. 
+    A state is in charge of scheduling the next state.
+
+
+If your behaviour fits one of the above, we suggest subclassing your
+behaviour class with that behaviour class. Otherwise, you
+can always subclass the general-purpose `Behaviour` class.
+
+!!
+Follows an example of a custom behaviour:
+
+```python
+
+from aea.skills.base import Behaviour
+
+class MyBehaviour(Behaviour):
+            
+    def setup(self):
+        """This method is called once, when the behaviour gets loaded."""
+
+    def act(self): 
+        """This methods is called in every iteration of the agent main loop."""
+
+    def teardown(self): 
+        """This method is called once, when the behaviour is teared down."""
+
+```
+
+If we want to register this behaviour dynamically, in any part of the skill code
+(i.e. wherever the skill context is available), we can write:
+
+```python
+self.context.new_behaviours.put(MyBehaviour())
+```
+
+The framework is then in charge of registering the behaviour and scheduling it 
+for execution.
 
 ### `tasks.py`
 
-Conceptually, a `Task` is where the developer codes any internal tasks the agent requires.
+Conceptually, a `Task` is where the developer codes any internal tasks the AEA requires.
 
 There can be one or more `Task` classes per skill. The developer subclasses abstract class `Task` to create a new `Task`.
 
 * `execute(self)`: is how the framework calls a `Task`. 
 
-!!!	Todo
-	For example.
+The `Task` class implements the [functor pattern](https://en.wikipedia.org/wiki/Function_object).
+An instance of the `Task` class can be invoked as if it 
+were an ordinary function. Once completed, it will store the
+result in the property `result`. Raises error if the task has not been executed yet,
+or an error occurred during computation.
+
+We suggest using the `task_manager`, accessible through the skill context,
+to manage long-running tasks. The task manager uses `multiprocessing` to 
+schedule tasks, so be aware that the changes on the task object will 
+not be updated.
+
+Here's an example:
+
+In `tasks.py`:
+```python
+
+from aea.skills.behaviours import TickerBehaviour
+from myagent.skills.my_skill.tasks import LongTask
+
+
+class MyBehaviour(TickerBehaviour):
+
+    def setup(self):
+        my_task = LongTask()
+        self.task_id = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
+        self.async_result = self.context.task_manager.get_task_result(self.task_id)
+
+    def act(self):
+        if self.async_result.ready() is False:
+            print("The task is not finished yet.")
+        else:
+            completed_task = self.async_result.get()  # type: LongTask
+            print("The result is:", completed_task.result)
+
+    def teardown(self):
+        pass
+
+
+```
+
+In `behaviours.py`:
+```python
+
+from aea.skills.behaviours import TickerBehaviour
+from packages.my_author_name.skills.my_skill.tasks import LongTask
+
+
+class MyBehaviour(TickerBehaviour):
+
+    def setup(self):
+        my_task = LongTask()
+        self.async_result = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
+
+    def act(self):
+        if self.async_result.ready() is False:
+            print("The task is not finished yet.")
+        else:
+            completed_task = self.async_result.get()  # type: LongTask
+            print("The result is:", completed_task.result)
+            # Stop the skill
+            self.context.is_active = False
+
+    def teardown(self):
+        pass
+
+
+```
 
 ### Shared classes
 
@@ -83,35 +198,22 @@ It also details the protocol types used in the skill and points to shared module
 
 ``` yaml
 name: echo
-authors: Fetch.ai Limited
+authors: fetchai
 version: 0.1.0
 license: Apache 2.0
-url: ""
 behaviours:
-  - behaviour:
-      class_name: EchoBehaviour
-      args:
-        foo: bar
+  echo:
+    class_name: EchoBehaviour
+    args:
+      tick_interval: 1.0
 handlers:
-  - handler:
-      class_name: EchoHandler
-      args:
-        foo: bar
-        bar: foo
-tasks:
-  - task:
-      class_name: EchoTask
-      args:
-        foo: bar
-        bar: foo
-shared_classes: []
-dependencies:
-  - dependency:
-      class_name: EchoDependency
-      args:
-        foo: bar
-        bar: foo
-protocols: ["default"]
+  echo:
+    class_name: EchoHandler
+    args:
+      foo: bar
+shared_classes: {}
+dependencies: {}
+protocols: ["fetchai/default:0.1.0"]
 ```
 
 

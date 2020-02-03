@@ -17,7 +17,12 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the behaviours."""
-from aea.skills.behaviours import SequenceBehaviour, OneShotBehaviour, FSMBehaviour, State
+from aea.skills.behaviours import (
+    FSMBehaviour,
+    OneShotBehaviour,
+    SequenceBehaviour,
+    State,
+)
 
 
 def test_sequence_behaviour():
@@ -25,7 +30,6 @@ def test_sequence_behaviour():
     outputs = []
 
     class MySequenceBehaviour(SequenceBehaviour):
-
         def setup(self) -> None:
             pass
 
@@ -33,10 +37,8 @@ def test_sequence_behaviour():
             pass
 
     class SimpleOneShotBehaviour(OneShotBehaviour):
-
-        def __init__(self, id, **kwargs):
-            super().__init__(**kwargs)
-            self.id = id
+        def __init__(self, name, **kwargs):
+            super().__init__(name=name, **kwargs)
 
         def setup(self) -> None:
             pass
@@ -45,13 +47,13 @@ def test_sequence_behaviour():
             pass
 
         def act(self) -> None:
-            outputs.append(self.id)
+            outputs.append(self.name)
 
     # TODO let the initialization of a behaviour action from constructor
-    a = SimpleOneShotBehaviour("a", skill_context=None)
-    b = SimpleOneShotBehaviour("b", skill_context=None)
-    c = SimpleOneShotBehaviour("c", skill_context=None)
-    sequence = MySequenceBehaviour([a, b, c], skill_context=None)
+    a = SimpleOneShotBehaviour("a", skill_context=object())
+    b = SimpleOneShotBehaviour("b", skill_context=object())
+    c = SimpleOneShotBehaviour("c", skill_context=object())
+    sequence = MySequenceBehaviour([a, b, c], name="abc", skill_context=object())
 
     max_iterations = 10
     i = 0
@@ -67,7 +69,6 @@ def test_fms_behaviour():
     outputs = []
 
     class MyFSMBehaviour(FSMBehaviour):
-
         def setup(self) -> None:
             pass
 
@@ -75,10 +76,8 @@ def test_fms_behaviour():
             pass
 
     class SimpleOneShotBehaviour(State):
-
-        def __init__(self, id: int, **kwargs):
+        def __init__(self, **kwargs):
             super().__init__(**kwargs)
-            self.id = id
             self.executed = False
 
         def setup(self) -> None:
@@ -88,21 +87,21 @@ def test_fms_behaviour():
             pass
 
         def act(self) -> None:
-            outputs.append(self.id)
-            self.next_state = str(self.id + 1)
+            outputs.append(self.name)
+            self.next_state = chr(ord(self.name) + 1)
             self.executed = True
 
         def done(self) -> bool:
             return self.executed
 
     # TODO let the initialization of a behaviour action from constructor
-    a = SimpleOneShotBehaviour(0, skill_context=None)
-    b = SimpleOneShotBehaviour(1, skill_context=None)
-    c = SimpleOneShotBehaviour(2, skill_context=None)
-    fsm = MyFSMBehaviour(skill_context=None)
-    fsm.register_state(str(a.id), a, initial=True)
-    fsm.register_state(str(b.id), b)
-    fsm.register_state(str(c.id), c)
+    a = SimpleOneShotBehaviour(name="a", skill_context=object())
+    b = SimpleOneShotBehaviour(name="b", skill_context=object())
+    c = SimpleOneShotBehaviour(name="c", skill_context=object())
+    fsm = MyFSMBehaviour(name="abc", skill_context=object())
+    fsm.register_state(str(a.name), a, initial=True)
+    fsm.register_state(str(b.name), b)
+    fsm.register_state(str(c.name), c)
 
     max_iterations = 10
     i = 0
@@ -110,4 +109,4 @@ def test_fms_behaviour():
         fsm.act()
         i += 1
 
-    assert outputs == [0, 1, 2]
+    assert outputs == ["a", "b", "c"]

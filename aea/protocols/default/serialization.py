@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Serialization module for the default protocol."""
+
 import base64
 import json
 from typing import cast

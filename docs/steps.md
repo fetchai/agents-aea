@@ -1,24 +1,25 @@
-<ol>
-<li>There are a number of ways to build an agent.</li>
-
+There are a number of ways to build an AEA:
 <ul>
-	<li>We recommended you build an AEA project with the CLI tool as mentioned in the <a href="../quickstart/" target=_blank>quick start</a> guide. See information on the CLI tool <a href="../cli-how-to/" target=_blank>here</a>.</li>
-	<li>[Coming soon!] Using the CLI <code>fetch</code> command, pull in an already built project and run as normal.</li>
-	<li>The last option is to install the AEA without the CLI tool with <code>pip install aea</code> and, from there, import classes directly. See the guide for this <a href="../hacking-an-agent/" target=_blank>here</a>.</li>
+	<li>We recommended you build an AEA project step-by-step with the CLI tool as demonstrated in the <a href="../quickstart/" target=_blank>quick start</a> guide. See information on the CLI tool <a href="../cli-how-to/" target=_blank>here</a> and read on below.</li>
+	<li>Using the CLI <code>aea fetch</code> command, pull in an already built project and run as is or extend it to your needs.</li>
+	<li>The last option is to install the AEA without the CLI tool with <code>pip install aea</code> and, from there, import classes directly. See the guide for programmatically building an AEA like this <a href="../build-aea-programmatically/" target=_blank>here</a>.</li>
 </ul>
-
 <!-- maybe make it so the links open in the same page -->
 
-<li>Set up your <a href="../skill/">skills</a>.</li>
-<li>Code the <a href="../protocol/">protocols</a>.</li>
-<li>Add the <a href="../connection/">connections</a>.</li>
-<li>Scaffold any of the above resources with the <a href="../scaffolding/">scaffolding tool</a>. <a href="../skill-guide/">This guide</a> shows you step by step how to develop a skill.</li> 
-
-
-<li>Now, build and run your agent using the <a href="../quickstart/">quick start guide</a>.</li> 
-
-
-
+Building an AEA step by step:
+<ol>
+<li>Set up your AEA project.</li>
+<li>Add the right <a href="../connection/">connections</a> for your usecase.</li>
+<li>Add or code the <a href="../protocol/">protocols</a> you require.</li>
+<li>Add or code the <a href="../skill/">skills</a> you need. <a href="../skill-guide/">This guide</a> shows you step by step how to develop a skill.</li>
+<li>Where required, scaffold any of the above resources with the <a href="../scaffolding/">scaffolding tool</a> or generate a protocol with the <a href="../generator/">protocol generator</a>.</li>
+<li>Now, run your AEA.</li> 
 </ol>
+
+Sometimes, an AEA is more than is required for the task at hand. In particular, an AEA is much more than just an agent. In those cases, we suggest you have a look at the following two guides:
+<ul>
+	<li> the <a href="../agent-vs-aea/" target=_blank>AEA vs Agents</a> guide shows the difference between an agent and an AEA in code,
+	<li> the <a href="../multiplexer-standalone/" target=_blank>Use multiplexer standalone</a> guide shows how to use the multiplexer on its own to receive and send envelopes.
+</ul>
 
 <br />

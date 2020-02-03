@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea scaffold skill` sub-command."""
+
 import filecmp
 import json
 import os
@@ -27,16 +28,22 @@ import unittest.mock
 from pathlib import Path
 
 import jsonschema
-import yaml
-from ...common.click_testing import CliRunner
-from jsonschema import ValidationError, Draft4Validator
+from jsonschema import Draft4Validator, ValidationError
 
-from aea import AEA_DIR
+import yaml
+
 import aea.cli.common
 import aea.configurations.base
-from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
+from aea import AEA_DIR
 from aea.cli import cli
-from ...conftest import CLI_LOG_OPTION, SKILL_CONFIGURATION_SCHEMA, CONFIGURATION_SCHEMA_DIR
+from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE
+
+from ...common.click_testing import CliRunner
+from ...conftest import (
+    CLI_LOG_OPTION,
+    CONFIGURATION_SCHEMA_DIR,
+    SKILL_CONFIGURATION_SCHEMA,
+)
 
 
 class TestScaffoldSkill:
@@ -50,19 +57,27 @@ class TestScaffoldSkill:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver("file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema)
+        cls.resolver = jsonschema.RefResolver(
+            "file://{}/".format(Path(CONFIGURATION_SCHEMA_DIR).absolute()), cls.schema
+        )
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # scaffold skill
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0."""
@@ -88,13 +103,21 @@ class TestScaffoldSkill:
 
     def test_resource_folder_contains_module_shared_class(self):
         """Test that the resource folder contains scaffold my_shared_class.py.py module."""
-        p = Path(self.t, self.agent_name, "skills", self.resource_name, "my_shared_class.py")
+        p = Path(
+            self.t, self.agent_name, "skills", self.resource_name, "my_shared_class.py"
+        )
         original = Path(AEA_DIR, "skills", "scaffold", "my_shared_class.py")
         assert filecmp.cmp(p, original)
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""
-        p = Path(self.t, self.agent_name, "skills", self.resource_name, DEFAULT_SKILL_CONFIG_FILE)
+        p = Path(
+            self.t,
+            self.agent_name,
+            "skills",
+            self.resource_name,
+            DEFAULT_SKILL_CONFIG_FILE,
+        )
         config_file = yaml.safe_load(open(p))
         self.validator.validate(instance=config_file)
 
@@ -119,16 +142,24 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # create a dummy 'myresource' folder
-        Path(cls.t, cls.agent_name, "skills", cls.resource_name).mkdir(exist_ok=False, parents=True)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name], standalone_mode=False)
+        Path(cls.t, cls.agent_name, "skills", cls.resource_name).mkdir(
+            exist_ok=False, parents=True
+        )
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -170,18 +201,28 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add skill first time
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+            standalone_mode=False,
+        )
         assert result.exit_code == 0
         # scaffold skill with the same skill name
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -192,7 +233,9 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
 
         The expected message is: 'A skill with name '{skill_name}' already exists. Aborting...'
         """
-        s = "A skill with name '{}' already exists. Aborting...".format(self.resource_name)
+        s = "A skill with name '{}' already exists. Aborting...".format(
+            self.resource_name
+        )
         self.mocked_logger_error.assert_called_once_with(s)
 
     def test_resource_directory_exists(self):
@@ -223,19 +266,27 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
         cls.resource_name = "myresource"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, 'error')
+        cls.patch = unittest.mock.patch.object(aea.cli.common.logger, "error")
         cls.mocked_logger_error = cls.patch.__enter__()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
         # change the dumping of yaml module to raise an exception.
-        cls.patch = unittest.mock.patch("yaml.safe_dump", side_effect=ValidationError("test error message"))
+        cls.patch = unittest.mock.patch(
+            "yaml.safe_dump", side_effect=ValidationError("test error message")
+        )
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -246,7 +297,9 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Cannot find skill: '{skill_name}'
         """
-        self.mocked_logger_error.assert_called_once_with("Error when validating the skill configuration file.")
+        self.mocked_logger_error.assert_called_once_with(
+            "Error when validating the skill configuration file."
+        )
 
     def test_resource_directory_does_not_exists(self):
         """Test that the resource directory does not exist.
@@ -279,14 +332,22 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
         cls.t = tempfile.mkdtemp()
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False
+        )
         assert result.exit_code == 0
 
-        cls.patch = unittest.mock.patch("shutil.copytree", side_effect=Exception("unknwon exception"))
+        cls.patch = unittest.mock.patch(
+            "shutil.copytree", side_effect=Exception("unknwon exception")
+        )
         cls.patch.__enter__()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name], standalone_mode=False)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "skill", cls.resource_name],
+            standalone_mode=False,
+        )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

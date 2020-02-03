@@ -18,18 +18,19 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the stub connection."""
+
 import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Union, Optional, Set
+from typing import Optional, Union
 
-from watchdog.events import FileSystemEventHandler, FileModifiedEvent
+from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.connections.base import Connection
-from aea.mail.base import Envelope, Address
+from aea.mail.base import Address, Envelope
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,6 @@ SEPARATOR = b","
 
 
 class _ConnectionFileSystemEventHandler(FileSystemEventHandler):
-
     def __init__(self, connection, file_to_observe: Union[str, Path]):
         self._connection = connection
         self._file_to_observe = Path(file_to_observe).absolute()
@@ -54,7 +54,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += e.sender.encode("utf-8")
     result += separator
-    result += e.protocol_id.encode("utf-8")
+    result += str(e.protocol_id).encode("utf-8")
     result += separator
     result += e.message
 
@@ -69,7 +69,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 
     to = split[0].decode("utf-8").strip()
     sender = split[1].decode("utf-8").strip()
-    protocol_id = split[2].decode("utf-8").strip()
+    protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
     message = split[3]
 
     return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
@@ -103,11 +103,13 @@ class StubConnection(Connection):
     It is discouraged adding a message with a text editor since the outcome depends on the actual text editor used.
     """
 
-    restricted_to_protocols = set()  # type: Set[str]
-
-    def __init__(self, input_file_path: Union[str, Path], output_file_path: Union[str, Path],
-                 connection_id: str = "stub", restricted_to_protocols: Optional[Set[str]] = None,
-                 excluded_protocols: Optional[Set[str]] = None):
+    def __init__(
+        self,
+        input_file_path: Union[str, Path],
+        output_file_path: Union[str, Path],
+        *args,
+        **kwargs
+    ):
         """
         Initialize a stub connection.
 
@@ -117,7 +119,9 @@ class StubConnection(Connection):
         :param restricted_to_protocols: the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        super().__init__(connection_id=connection_id, restricted_to_protocols=restricted_to_protocols)
+        if kwargs.get("connection_id") is None:
+            kwargs["connection_id"] = PublicId("fetchai", "stub", "0.1.0")
+        super().__init__(*args, **kwargs)
 
         input_file_path = Path(input_file_path)
         output_file_path = Path(output_file_path)
@@ -162,7 +166,7 @@ class StubConnection(Connection):
         except Exception as e:
             logger.error("Error when processing a line. Message: {}".format(str(e)))
 
-    async def receive(self, *args, **kwargs) -> Optional['Envelope']:
+    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Receive an envelope."""
         try:
             assert self.in_queue is not None
@@ -183,7 +187,7 @@ class StubConnection(Connection):
             # which is known only at connection time.
             self.in_queue = asyncio.Queue()
             self._observer.start()
-        except Exception as e:      # pragma: no cover
+        except Exception as e:  # pragma: no cover
             raise e
         finally:
             self.connection_status.is_connected = False
@@ -221,7 +225,9 @@ class StubConnection(Connection):
         self.output_file.flush()
 
     @classmethod
-    def from_config(cls, address: Address, connection_configuration: ConnectionConfig) -> 'Connection':
+    def from_config(
+        cls, address: Address, connection_configuration: ConnectionConfig
+    ) -> "Connection":
         """
         Get the OEF connection from the connection configuration.
 
@@ -229,11 +235,22 @@ class StubConnection(Connection):
         :param connection_configuration: the connection configuration object.
         :return: the connection object
         """
-        input_file = connection_configuration.config.get("input_file", "./input_file")  # type: str
-        output_file = connection_configuration.config.get("output_file", "./output_file")  # type: str
-        restricted_to_protocols_names = {p.name for p in connection_configuration.restricted_to_protocols}
-        excluded_protocols_names = {p.name for p in connection_configuration.excluded_protocols}
-        return StubConnection(input_file, output_file,
-                              connection_id=connection_configuration.name,
-                              restricted_to_protocols=restricted_to_protocols_names,
-                              excluded_protocols=excluded_protocols_names)
+        input_file = connection_configuration.config.get(
+            "input_file", "./input_file"
+        )  # type: str
+        output_file = connection_configuration.config.get(
+            "output_file", "./output_file"
+        )  # type: str
+        restricted_to_protocols_names = {
+            p.name for p in connection_configuration.restricted_to_protocols
+        }
+        excluded_protocols_names = {
+            p.name for p in connection_configuration.excluded_protocols
+        }
+        return StubConnection(
+            input_file,
+            output_file,
+            connection_id=connection_configuration.public_id,
+            restricted_to_protocols=restricted_to_protocols_names,
+            excluded_protocols=excluded_protocols_names,
+        )

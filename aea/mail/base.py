@@ -18,22 +18,20 @@
 # ------------------------------------------------------------------------------
 
 """Mail module abstract base classes."""
+
 import asyncio
 import logging
 import queue
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures import Future
-from threading import Thread, Lock
-from typing import Optional, TYPE_CHECKING, List, Tuple, Dict, cast
+from threading import Lock, Thread
+from typing import Dict, List, Optional, Sequence, Tuple, cast
 from urllib.parse import urlparse
 
-from aea.configurations.base import ProtocolId
-from aea.connections.base import ConnectionStatus
+from aea.configurations.base import ProtocolId, PublicId
+from aea.connections.base import Connection, ConnectionStatus
 from aea.mail import base_pb2
-
-if TYPE_CHECKING:
-    from aea.connections.base import Connection  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
@@ -128,23 +126,27 @@ class URI:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, URI) \
-            and self.scheme == other.scheme \
-            and self.netloc == other.netloc \
-            and self.path == other.path \
-            and self.params == other.params \
-            and self.query == other.query \
-            and self.fragment == other.fragment \
-            and self.username == other.username \
-            and self.password == other.password \
-            and self.host == other.host \
+        return (
+            isinstance(other, URI)
+            and self.scheme == other.scheme
+            and self.netloc == other.netloc
+            and self.path == other.path
+            and self.params == other.params
+            and self.query == other.query
+            and self.fragment == other.fragment
+            and self.username == other.username
+            and self.password == other.password
+            and self.host == other.host
             and self.port == other.port
+        )
 
 
 class EnvelopeContext:
     """Extra information for the handling of an envelope."""
 
-    def __init__(self, connection_id: Optional[str] = None, uri: Optional[URI] = None):
+    def __init__(
+        self, connection_id: Optional[PublicId] = None, uri: Optional[URI] = None
+    ):
         """Initialize the envelope context."""
         self.connection_id = connection_id
         self.uri = uri  # must follow: https://tools.ietf.org/html/rfc3986.html
@@ -156,49 +158,52 @@ class EnvelopeContext:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, EnvelopeContext) \
-            and self.connection_id == other.connection_id \
+        return (
+            isinstance(other, EnvelopeContext)
+            and self.connection_id == other.connection_id
             and self.uri == other.uri
+        )
 
 
 class EnvelopeSerializer(ABC):
     """This abstract class let the devloper to specify serialization layer for the envelope."""
 
     @abstractmethod
-    def encode(self, envelope: 'Envelope') -> bytes:
+    def encode(self, envelope: "Envelope") -> bytes:
         """Encode the envelope."""
 
     @abstractmethod
-    def decode(self, envelope_bytes: bytes) -> 'Envelope':
+    def decode(self, envelope_bytes: bytes) -> "Envelope":
         """Decode the envelope."""
 
 
 class ProtobufEnvelopeSerializer(EnvelopeSerializer):
     """Envelope serializer using Protobuf."""
 
-    def encode(self, envelope: 'Envelope') -> bytes:
+    def encode(self, envelope: "Envelope") -> bytes:
         """Encode the envelope."""
         envelope_pb = base_pb2.Envelope()
         envelope_pb.to = envelope.to
         envelope_pb.sender = envelope.sender
-        envelope_pb.protocol_id = envelope.protocol_id
+        envelope_pb.protocol_id = str(envelope.protocol_id)
         envelope_pb.message = envelope.message
 
         envelope_bytes = envelope_pb.SerializeToString()
         return envelope_bytes
 
-    def decode(self, envelope_bytes: bytes) -> 'Envelope':
+    def decode(self, envelope_bytes: bytes) -> "Envelope":
         """Decode the envelope."""
         envelope_pb = base_pb2.Envelope()
         envelope_pb.ParseFromString(envelope_bytes)
 
         to = envelope_pb.to
         sender = envelope_pb.sender
-        protocol_id = envelope_pb.protocol_id
+        protocol_id = PublicId.from_str(envelope_pb.protocol_id)
         message = envelope_pb.message
 
-        envelope = Envelope(to=to, sender=sender,
-                            protocol_id=protocol_id, message=message)
+        envelope = Envelope(
+            to=to, sender=sender, protocol_id=protocol_id, message=message
+        )
         return envelope
 
 
@@ -210,11 +215,14 @@ class Envelope:
 
     default_serializer = DefaultEnvelopeSerializer()
 
-    def __init__(self, to: Address,
-                 sender: Address,
-                 protocol_id: ProtocolId,
-                 message: bytes,
-                 context: Optional[EnvelopeContext] = None):
+    def __init__(
+        self,
+        to: Address,
+        sender: Address,
+        protocol_id: ProtocolId,
+        message: bytes,
+        context: Optional[EnvelopeContext] = None,
+    ):
         """
         Initialize a Message object.
 
@@ -227,7 +235,9 @@ class Envelope:
         self._sender = sender
         self._protocol_id = protocol_id
         self._message = message
-        self._context = context if context is not None else EnvelopeContext()  # type: Optional[EnvelopeContext]
+        self._context = (
+            context if context is not None else EnvelopeContext()
+        )  # type: Optional[EnvelopeContext]
 
     @property
     def to(self) -> Address:
@@ -276,12 +286,14 @@ class Envelope:
 
     def __eq__(self, other):
         """Compare with another object."""
-        return isinstance(other, Envelope) \
-            and self.to == other.to \
-            and self.sender == other.sender \
-            and self.protocol_id == other.protocol_id \
-            and self.message == other.message \
+        return (
+            isinstance(other, Envelope)
+            and self.to == other.to
+            and self.sender == other.sender
+            and self.protocol_id == other.protocol_id
+            and self.message == other.message
             and self.context == other.context
+        )
 
     def encode(self, serializer: Optional[EnvelopeSerializer] = None) -> bytes:
         """
@@ -296,7 +308,9 @@ class Envelope:
         return envelope_bytes
 
     @classmethod
-    def decode(cls, envelope_bytes: bytes, serializer: Optional[EnvelopeSerializer] = None) -> 'Envelope':
+    def decode(
+        cls, envelope_bytes: bytes, serializer: Optional[EnvelopeSerializer] = None
+    ) -> "Envelope":
         """
         Decode the envelope.
 
@@ -311,30 +325,46 @@ class Envelope:
 
     def __str__(self):
         """Get the string representation of an envelope."""
-        return "Envelope(to={to}, sender={sender}, protocol_id={protocol_id}, message={message})"\
-            .format(to=self.to, sender=self.sender, protocol_id=self.protocol_id, message=self.message)
+        return "Envelope(to={to}, sender={sender}, protocol_id={protocol_id}, message={message})".format(
+            to=self.to,
+            sender=self.sender,
+            protocol_id=self.protocol_id,
+            message=self.message,
+        )
 
 
 class Multiplexer:
     """This class can handle multiple connections at once."""
 
-    def __init__(self, connections: List['Connection'],
-                 default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None):
+    def __init__(
+        self,
+        connections: Sequence["Connection"],
+        default_connection_index: int = 0,
+        loop: Optional[AbstractEventLoop] = None,
+    ):
         """
         Initialize the connection multiplexer.
 
-        :param connections: the connections.
+        :param connections: a sequence of connections.
         :param default_connection_index: the index of the connection to use as default.
                                        | this information is used for envelopes which
                                        | don't specify any routing context.
         :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
         """
         assert len(connections) > 0, "List of connections cannot be empty."
-        assert 0 <= default_connection_index <= len(connections) - 1, "Default connection index out of range."
-        assert len(set(c.connection_id for c in connections)) == len(connections), "Connection names must be unique."
-        self._connections = connections  # type: List['Connection']
-        self._name_to_connection = {c.connection_id: c for c in connections}  # type: Dict[str, Connection]
-        self.default_connection = self._connections[default_connection_index]  # type: Connection
+        assert (
+            0 <= default_connection_index <= len(connections) - 1
+        ), "Default connection index out of range."
+        assert len(set(c.connection_id for c in connections)) == len(
+            connections
+        ), "Connection names must be unique."
+        self._connections = connections  # type: Sequence[Connection]
+        self._id_to_connection = {
+            c.connection_id: c for c in connections
+        }  # type: Dict[PublicId, Connection]
+        self.default_connection = self._connections[
+            default_connection_index
+        ]  # type: Connection
         self._connection_status = ConnectionStatus()
 
         self._lock = Lock()
@@ -355,18 +385,22 @@ class Multiplexer:
     @property
     def out_queue(self) -> asyncio.Queue:
         """Get the out queue."""
-        assert self._out_queue is not None, "Accessing out queue before loop is started."
+        assert (
+            self._out_queue is not None
+        ), "Accessing out queue before loop is started."
         return self._out_queue
 
     @property
-    def connections(self) -> Tuple['Connection']:
+    def connections(self) -> Tuple["Connection"]:
         """Get the connections."""
-        return cast(Tuple['Connection'], tuple(self._connections))
+        return cast(Tuple["Connection"], tuple(self._connections))
 
     @property
     def is_connected(self) -> bool:
         """Check whether the multiplexer is processing messages."""
-        return self._loop.is_running() and all(c.connection_status.is_connected for c in self._connections)
+        return self._loop.is_running() and all(
+            c.connection_status.is_connected for c in self._connections
+        )
 
     @property
     def connection_status(self) -> ConnectionStatus:
@@ -381,10 +415,17 @@ class Multiplexer:
                 return
             self._start_loop_threaded()
             try:
-                asyncio.run_coroutine_threadsafe(self._connect_all(), loop=self._loop).result()
+                asyncio.run_coroutine_threadsafe(
+                    self._connect_all(), loop=self._loop
+                ).result()
+                assert self.is_connected
                 self._connection_status.is_connected = True
-                self._recv_loop_task = asyncio.run_coroutine_threadsafe(self._receiving_loop(), loop=self._loop)
-                self._send_loop_task = asyncio.run_coroutine_threadsafe(self._send_loop(), loop=self._loop)
+                self._recv_loop_task = asyncio.run_coroutine_threadsafe(
+                    self._receiving_loop(), loop=self._loop
+                )
+                self._send_loop_task = asyncio.run_coroutine_threadsafe(
+                    self._send_loop(), loop=self._loop
+                )
             except (CancelledError, Exception):
                 self._connection_status.is_connected = False
                 self._stop()
@@ -398,7 +439,11 @@ class Multiplexer:
                 return
             try:
                 logger.debug("Disconnecting the multiplexer...")
-                asyncio.run_coroutine_threadsafe(self._disconnect_all(), loop=self._loop).result()
+                asyncio.run_coroutine_threadsafe(
+                    self._disconnect_all(), loop=self._loop
+                ).result()
+                self._stop()
+                assert not self.is_connected
                 self._connection_status.is_connected = False
                 self._stop()
             except (CancelledError, Exception):
@@ -429,7 +474,9 @@ class Multiplexer:
 
         if self._send_loop_task is not None and not self._send_loop_task.done():
             # send a 'stop' token (a None value) to wake up the coroutine waiting for outgoing messages.
-            asyncio.run_coroutine_threadsafe(self.out_queue.put(None), self._loop).result()
+            asyncio.run_coroutine_threadsafe(
+                self.out_queue.put(None), self._loop
+            ).result()
             self._send_loop_task.cancel()
 
         if self._loop.is_running():
@@ -442,55 +489,76 @@ class Multiplexer:
     async def _connect_all(self):
         """Set all the connection up."""
         logger.debug("Start multiplexer connections.")
-        connected = []  # type: List[str]
-        for connection_id, connection in self._name_to_connection.items():
+        connected = []  # type: List[PublicId]
+        for connection_id, connection in self._id_to_connection.items():
             try:
                 await self._connect_one(connection_id)
                 connected.append(connection_id)
             except Exception as e:
-                logger.error("Error while connecting {}: {}".format(str(type(connection)), str(e)))
-                for c in connected: await self._disconnect_one(c)
+                logger.error(
+                    "Error while connecting {}: {}".format(
+                        str(type(connection)), str(e)
+                    )
+                )
+                for c in connected:
+                    await self._disconnect_one(c)
                 break
 
-    async def _connect_one(self, connection_id: str) -> None:
+    async def _connect_one(self, connection_id: PublicId) -> None:
         """
         Set a connection up.
 
         :param connection_id: the id of the connection.
         :return: None
         """
-        connection = self._name_to_connection[connection_id]
+        connection = self._id_to_connection[connection_id]
         logger.debug("Processing connection {}".format(connection.connection_id))
         if connection.connection_status.is_connected:
-            logger.debug("Connection {} already established.".format(connection.connection_id))
+            logger.debug(
+                "Connection {} already established.".format(connection.connection_id)
+            )
         else:
             connection.loop = self._loop
             await connection.connect()
-            logger.debug("Connection {} has been set up successfully.".format(connection.connection_id))
+            logger.debug(
+                "Connection {} has been set up successfully.".format(
+                    connection.connection_id
+                )
+            )
 
     async def _disconnect_all(self):
         """Tear all the connections down."""
         logger.debug("Tear the multiplexer connections down.")
-        for connection_id, connection in self._name_to_connection.items():
+        for connection_id, connection in self._id_to_connection.items():
             try:
                 await self._disconnect_one(connection_id)
             except Exception as e:
-                logger.error("Error while disconnecting {}: {}".format(str(type(connection)), str(e)))
+                logger.error(
+                    "Error while disconnecting {}: {}".format(
+                        str(type(connection)), str(e)
+                    )
+                )
 
-    async def _disconnect_one(self, connection_id: str) -> None:
+    async def _disconnect_one(self, connection_id: PublicId) -> None:
         """
         Tear a connection down.
 
         :param connection_id: the id of the connection.
         :return: None
         """
-        connection = self._name_to_connection[connection_id]
+        connection = self._id_to_connection[connection_id]
         logger.debug("Processing connection {}".format(connection.connection_id))
         if not connection.connection_status.is_connected:
-            logger.debug("Connection {} already disconnected.".format(connection.connection_id))
+            logger.debug(
+                "Connection {} already disconnected.".format(connection.connection_id)
+            )
         else:
             await connection.disconnect()
-            logger.debug("Connection {} has been disconnected successfully.".format(connection.connection_id))
+            logger.debug(
+                "Connection {} has been disconnected successfully.".format(
+                    connection.connection_id
+                )
+            )
 
     async def _send_loop(self):
         """Process the outgoing envelopes."""
@@ -519,13 +587,16 @@ class Multiplexer:
     async def _receiving_loop(self):
         """Process incoming messages."""
         logger.debug("Starting receving loop...")
-        task_to_connection = {asyncio.ensure_future(conn.receive()): conn for conn in self.connections}
+        task_to_connection = {
+            asyncio.ensure_future(conn.receive()): conn for conn in self.connections
+        }
 
         while self.connection_status.is_connected and len(task_to_connection) > 0:
             try:
                 logger.debug("Waiting for incoming messages...")
-                done, pending = await asyncio.wait(task_to_connection.keys(),
-                                                   return_when=asyncio.FIRST_COMPLETED)
+                done, pending = await asyncio.wait(
+                    task_to_connection.keys(), return_when=asyncio.FIRST_COMPLETED
+                )
 
                 # process completed receiving tasks.
                 for task in done:
@@ -563,20 +634,30 @@ class Multiplexer:
         :raises AEAConnectionError: if the connection id provided is not valid.
         """
         envelope_context = envelope.context
-        connection_id = envelope_context.connection_id if envelope_context is not None else None
+        connection_id = (
+            envelope_context.connection_id if envelope_context is not None else None
+        )
 
-        if connection_id is not None and connection_id not in self._name_to_connection:
-            raise AEAConnectionError("No connection registered with id: {}.".format(connection_id))
+        if connection_id is not None and connection_id not in self._id_to_connection:
+            raise AEAConnectionError(
+                "No connection registered with id: {}.".format(connection_id)
+            )
 
-        connection_id = cast(str, connection_id)
-        connection = self._name_to_connection.get(connection_id, None)
-        if connection is None:
+        connection = self._id_to_connection.get(connection_id, None)  # type: ignore
+        if connection_id is None:
             logger.debug("Using default connection: {}".format(self.default_connection))
             connection = self.default_connection
 
-        if len(connection.restricted_to_protocols) > 0 and envelope.protocol_id not in connection.restricted_to_protocols:
-            logger.warning("Connection {} cannot handle protocol {}. Cannot send the message."
-                           .format(connection.connection_id, envelope.protocol_id))
+        connection = cast(Connection, connection)
+        if (
+            len(connection.restricted_to_protocols) > 0
+            and envelope.protocol_id not in connection.restricted_to_protocols
+        ):
+            logger.warning(
+                "Connection {} cannot handle protocol {}. Cannot send the message.".format(
+                    connection.connection_id, envelope.protocol_id
+                )
+            )
             return
 
         try:
@@ -584,7 +665,9 @@ class Multiplexer:
         except Exception as e:  # pragma: no cover
             raise e
 
-    def get(self, block: bool = False, timeout: Optional[float] = None) -> Optional[Envelope]:
+    def get(
+        self, block: bool = False, timeout: Optional[float] = None
+    ) -> Optional[Envelope]:
         """
         Get an envelope within a timeout.
 
@@ -645,8 +728,11 @@ class InBox(object):
         envelope = self._multiplexer.get(block=block, timeout=timeout)
         if envelope is None:
             raise Empty()
-        logger.debug("Incoming message: to='{}' sender='{}' protocol_id='{}' message='{!r}'"
-                     .format(envelope.to, envelope.sender, envelope.protocol_id, envelope.message))
+        logger.debug(
+            "Incoming message: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
+                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
+            )
+        )
         return envelope
 
     def get_nowait(self) -> Optional[Envelope]:
@@ -689,12 +775,16 @@ class OutBox(object):
         :param envelope: the envelope.
         :return: None
         """
-        logger.debug("Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}'..."
-                     .format(envelope.to, envelope.sender, envelope.protocol_id, envelope.message))
+        logger.debug(
+            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}'...".format(
+                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
+            )
+        )
         self._multiplexer.put(envelope)
 
-    def put_message(self, to: Address, sender: Address,
-                    protocol_id: ProtocolId, message: bytes) -> None:
+    def put_message(
+        self, to: Address, sender: Address, protocol_id: ProtocolId, message: bytes
+    ) -> None:
         """
         Put a message in the outbox.
 
@@ -704,5 +794,7 @@ class OutBox(object):
         :param message: the content of the message.
         :return: None
         """
-        envelope = Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+        envelope = Envelope(
+            to=to, sender=sender, protocol_id=protocol_id, message=message
+        )
         self._multiplexer.put(envelope)

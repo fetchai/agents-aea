@@ -1,0 +1,19 @@
+name: echo
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+description: "The echo skill implements simple echo functionality."
+behaviours:
+  echo:
+    class_name: EchoBehaviour
+    args:
+      tick_interval: 1.0
+handlers:
+  echo:
+    class_name: EchoHandler
+    args:
+      foo: bar
+shared_classes: {}
+protocols: ["fetchai/default:0.1.0"]
+dependencies: {}

@@ -19,7 +19,7 @@
 """This module contains the classes for specific behaviours."""
 import datetime
 from abc import ABC
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 from aea.skills.base import Behaviour
 
@@ -77,7 +77,12 @@ class OneShotBehaviour(SimpleBehaviour, ABC):
 class TickerBehaviour(SimpleBehaviour, ABC):
     """This behaviour is executed periodically with an interval."""
 
-    def __init__(self, tick_interval: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs):
+    def __init__(
+        self,
+        tick_interval: float = 1.0,
+        start_at: Optional[datetime.datetime] = None,
+        **kwargs
+    ):
         """
         Initialize the ticker behaviour.
 
@@ -87,9 +92,13 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         super().__init__(**kwargs)
 
         self._tick_interval = tick_interval
-        self._start_at = start_at if start_at is not None else datetime.datetime.now()  # type: datetime.datetime
+        self._start_at = (
+            start_at if start_at is not None else datetime.datetime.now()
+        )  # type: datetime.datetime
         # note, we set _last_act_time to be in the past so the ticker starts immediately
-        self._last_act_time = datetime.datetime.now() - datetime.timedelta(seconds=tick_interval)
+        self._last_act_time = datetime.datetime.now() - datetime.timedelta(
+            seconds=tick_interval
+        )
 
     @property
     def tick_interval(self) -> float:
@@ -119,7 +128,10 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         :return: True if it is time to act, false otherwise.
         """
         now = datetime.datetime.now()
-        return now > self._start_at and (now - self._last_act_time).total_seconds() > self.tick_interval
+        return (
+            now > self._start_at
+            and (now - self._last_act_time).total_seconds() > self.tick_interval
+        )
 
 
 class SequenceBehaviour(CompositeBehaviour, ABC):
@@ -145,7 +157,11 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
 
         If None, the sequence behaviour can be considered done.
         """
-        return None if self._index >= len(self._behaviour_sequence) else self._behaviour_sequence[self._index]
+        return (
+            None
+            if self._index >= len(self._behaviour_sequence)
+            else self._behaviour_sequence[self._index]
+        )
 
     def _increase_index_if_possible(self):
         if self._index < len(self._behaviour_sequence):
@@ -153,10 +169,18 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
 
     def act(self) -> None:
         """Implement the behaviour."""
-        while not self.done() and self.current_behaviour is not None and self.current_behaviour.done():
+        while (
+            not self.done()
+            and self.current_behaviour is not None
+            and self.current_behaviour.done()
+        ):
             self._increase_index_if_possible()
 
-        if not self.done() and self.current_behaviour is not None and not self.current_behaviour.done():
+        if (
+            not self.done()
+            and self.current_behaviour is not None
+            and not self.current_behaviour.done()
+        ):
             self.current_behaviour.act_wrapper()
 
     def done(self) -> bool:
@@ -190,7 +214,7 @@ class State(OneShotBehaviour, ABC):
         self._next_state = state_name
 
 
-class FSMBehaviour(CompositeBehaviour):
+class FSMBehaviour(CompositeBehaviour, ABC):
     """This class implements a finite-state machine behaviour."""
 
     def __init__(self, **kwargs):

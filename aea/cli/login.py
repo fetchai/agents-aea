@@ -18,18 +18,19 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea login' subcommand."""
+
 import click
 
-from aea.cli.registry.utils import registry_login, write_cli_config
 from aea.cli.registry.settings import AUTH_TOKEN_KEY
+from aea.cli.registry.utils import registry_login, write_cli_config
 
 
-@click.command(name='login', help='Login to Registry account')
-@click.argument('username', type=str, required=True)
-@click.argument('password', type=str, required=True)
+@click.command(name="login", help="Login to Registry account")
+@click.argument("username", type=str, required=True)
+@click.option("--password", type=str, required=True, prompt=True, hide_input=True)
 def login(username, password):
     """Login to Registry account."""
-    click.echo('Signing in as {}...'.format(username))
+    click.echo("Signing in as {}...".format(username))
     token = registry_login(username, password)
     write_cli_config({AUTH_TOKEN_KEY: token})
-    click.echo('Successfully signed in: {}.'.format(username))
+    click.echo("Successfully signed in: {}.".format(username))

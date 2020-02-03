@@ -18,28 +18,33 @@
 # ------------------------------------------------------------------------------
 
 """Key pieces of functionality for CLI GUI."""
-import sys
-from enum import Enum
+
 import glob
 import io
 import logging
 import os
 import subprocess
+import sys
 import threading
 import time
-from typing import List, Dict
+from enum import Enum
+from typing import Dict, List
 
 import connexion
+
 import flask
 
+from aea.configurations.base import PublicId
 
-elements = [['local', 'agent', 'localAgents'],
-            ['registered', 'protocol', 'registeredProtocols'],
-            ['registered', 'connection', 'registeredConections'],
-            ['registered', 'skill', 'registeredSkills'],
-            ['local', 'protocol', 'localProtocols'],
-            ['local', 'connection', 'localConnections'],
-            ['local', 'skill', 'localSkills']]
+elements = [
+    ["local", "agent", "localAgents"],
+    ["registered", "protocol", "registeredProtocols"],
+    ["registered", "connection", "registeredConections"],
+    ["registered", "skill", "registeredSkills"],
+    ["local", "protocol", "localProtocols"],
+    ["local", "connection", "localConnections"],
+    ["local", "skill", "localSkills"],
+]
 
 
 class ProcessState(Enum):
@@ -88,7 +93,7 @@ def is_agent_dir(dir_name: str) -> bool:
 
 def get_agents() -> List[Dict]:
     """Return list of all local agents."""
-    file_list = glob.glob(os.path.join(app_context.agents_dir, '*'))
+    file_list = glob.glob(os.path.join(app_context.agents_dir, "*"))
 
     agent_list = []
 
@@ -106,8 +111,8 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
     output = []
     err = ""
     for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
-        if line[:6] == "Name: ":
-            item_ids.append(line[6:-1])
+        if line[:11] == "Public ID: ":
+            item_ids.append(line[11:-1])
 
         if line[:13] == "Description: ":
             item_descs.append(line[13:-1])
@@ -132,52 +137,108 @@ def _sync_extract_items_from_tty(pid: subprocess.Popen):
 def get_registered_items(item_type: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
-    pid = _call_aea_async([sys.executable, "-m", "aea.cli", "search", item_type + "s"], app_context.agents_dir)
+    pid = _call_aea_async(
+        [sys.executable, "-m", "aea.cli", "search", item_type + "s"],
+        app_context.agents_dir,
+    )
     return _sync_extract_items_from_tty(pid)
 
 
 def search_registered_items(item_type: str, search_term: str):
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
-    pid = _call_aea_async(["aea", "search", item_type + "s", "--query", search_term], os.path.join(app_context.agents_dir, "aea"))
+    pid = _call_aea_async(
+        ["aea", "search", item_type + "s", "--query", search_term],
+        os.path.join(app_context.agents_dir, "aea"),
+    )
     ret = _sync_extract_items_from_tty(pid)
     search_result, status = ret
-    response = {"search_result": search_result, "item_type": item_type, "search_term": search_term}
+    response = {
+        "search_result": search_result,
+        "item_type": item_type,
+        "search_term": search_term,
+    }
     return response, status
 
 
 def create_agent(agent_id: str):
     """Create a new AEA project."""
-    if _call_aea([sys.executable, "-m", "aea.cli", "create", agent_id], app_context.agents_dir) == 0:
+    if (
+        _call_aea(
+            [sys.executable, "-m", "aea.cli", "create", agent_id],
+            app_context.agents_dir,
+        )
+        == 0
+    ):
         return agent_id, 201  # 201 (Created)
     else:
-        return {"detail": "Failed to create Agent {} - a folder of this name may exist already".format(agent_id)}, 400  # 400 Bad request
+        return (
+            {
+                "detail": "Failed to create Agent {} - a folder of this name may exist already".format(
+                    agent_id
+                )
+            },
+            400,
+        )  # 400 Bad request
 
 
 def delete_agent(agent_id: str):
     """Delete an existing AEA project."""
-    if _call_aea([sys.executable, "-m", "aea.cli", "delete", agent_id], app_context.agents_dir) == 0:
-        return 'Agent {} deleted'.format(agent_id), 200   # 200 (OK)
+    if (
+        _call_aea(
+            [sys.executable, "-m", "aea.cli", "delete", agent_id],
+            app_context.agents_dir,
+        )
+        == 0
+    ):
+        return "Agent {} deleted".format(agent_id), 200  # 200 (OK)
     else:
-        return {"detail": "Failed to delete Agent {} - it may not exist".format(agent_id)}, 400   # 400 Bad request
+        return (
+            {"detail": "Failed to delete Agent {} - it may not exist".format(agent_id)},
+            400,
+        )  # 400 Bad request
 
 
 def add_item(agent_id: str, item_type: str, item_id: str):
     """Add a protocol, skill or connection to the register to a local agent."""
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
-    if _call_aea([sys.executable, "-m", "aea.cli", "add", item_type, item_id], agent_dir) == 0:
+    if (
+        _call_aea(
+            [sys.executable, "-m", "aea.cli", "add", item_type, item_id], agent_dir
+        )
+        == 0
+    ):
         return agent_id, 201  # 200 (OK)
     else:
-        return {"detail": "Failed to add {} {} to agent {}".format(item_type, item_id, agent_id)}, 400  # 400 Bad request
+        return (
+            {
+                "detail": "Failed to add {} {} to agent {}".format(
+                    item_type, item_id, agent_id
+                )
+            },
+            400,
+        )  # 400 Bad request
 
 
 def remove_local_item(agent_id: str, item_type: str, item_id: str):
     """Remove a protocol, skill or connection from a local agent."""
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
-    if _call_aea([sys.executable, "-m", "aea.cli", "remove", item_type, item_id], agent_dir) == 0:
+    if (
+        _call_aea(
+            [sys.executable, "-m", "aea.cli", "remove", item_type, item_id], agent_dir
+        )
+        == 0
+    ):
         return agent_id, 201  # 200 (OK)
     else:
-        return {"detail": "Failed to remove {} {} from agent {}".format(item_type, item_id, agent_id)}, 400  # 400 Bad request
+        return (
+            {
+                "detail": "Failed to remove {} {} from agent {}".format(
+                    item_type, item_id, agent_id
+                )
+            },
+            400,
+        )  # 400 Bad request
 
 
 def get_local_items(agent_id: str, item_type: str):
@@ -186,17 +247,32 @@ def get_local_items(agent_id: str, item_type: str):
         return [], 200  # 200 (Success)
 
     # need to place ourselves one directory down so the searcher can find the packages
-    pid = _call_aea_async([sys.executable, "-m", "aea.cli", "list", item_type + "s"], os.path.join(app_context.agents_dir, agent_id))
+    pid = _call_aea_async(
+        [sys.executable, "-m", "aea.cli", "list", item_type + "s"],
+        os.path.join(app_context.agents_dir, agent_id),
+    )
     return _sync_extract_items_from_tty(pid)
 
 
 def scaffold_item(agent_id: str, item_type: str, item_id: str):
     """Scaffold a moslty empty item on an agent (either protocol, skill or connection)."""
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
-    if _call_aea([sys.executable, "-m", "aea.cli", "scaffold", item_type, item_id], agent_dir) == 0:
+    if (
+        _call_aea(
+            [sys.executable, "-m", "aea.cli", "scaffold", item_type, item_id], agent_dir
+        )
+        == 0
+    ):
         return agent_id, 201  # 200 (OK)
     else:
-        return {"detail": "Failed to scaffold a new {} in to agent {}".format(item_type, agent_id)}, 400  # 400 Bad request
+        return (
+            {
+                "detail": "Failed to scaffold a new {} in to agent {}".format(
+                    item_type, agent_id
+                )
+            },
+            400,
+        )  # 400 Bad request
 
 
 def _call_aea(param_list: List[str], dir_arg: str) -> int:
@@ -216,7 +292,9 @@ def _call_aea_async(param_list: List[str], dir_arg: str) -> subprocess.Popen:
         os.chdir(dir_arg)
         env = os.environ.copy()
         env["PYTHONUNBUFFERED"] = "1"
-        ret = subprocess.Popen(param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+        ret = subprocess.Popen(
+            param_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
+        )
         os.chdir(old_cwd)
     return ret
 
@@ -232,7 +310,8 @@ def start_oef_node():
         "--name",
         oef_node_name,
         "-c",
-        "./scripts/oef/launch_config.json"]
+        "./scripts/oef/launch_config.json",
+    ]
 
     app_context.oef_process = _call_aea_async(param_list, app_context.agents_dir)
 
@@ -240,13 +319,17 @@ def start_oef_node():
         app_context.oef_tty = []
         app_context.oef_error = []
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(app_context.oef_process, app_context.oef_tty))
+        tty_read_thread = threading.Thread(
+            target=_read_tty, args=(app_context.oef_process, app_context.oef_tty)
+        )
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=_read_error, args=(app_context.oef_process, app_context.oef_error))
+        error_read_thread = threading.Thread(
+            target=_read_error, args=(app_context.oef_process, app_context.oef_error)
+        )
         error_read_thread.start()
 
-        return "OEF Node started", 200   # 200 (OK)
+        return "OEF Node started", 200  # 200 (OK)
     else:
         return {"detail": "Failed to start OEF Node"}, 400  # 400 Bad request
 
@@ -255,10 +338,12 @@ def get_oef_node_status():
     """Get the status of the OEF Node."""
     tty_str = ""
     error_str = ""
-    status_str = str(ProcessState.NOT_STARTED).replace('ProcessState.', '')
+    status_str = str(ProcessState.NOT_STARTED).replace("ProcessState.", "")
 
     if app_context.oef_process is not None:
-        status_str = str(get_process_status(app_context.oef_process)).replace('ProcessState.', '')
+        status_str = str(get_process_status(app_context.oef_process)).replace(
+            "ProcessState.", ""
+        )
 
         total_num_lines = len(app_context.oef_tty)
         for i in range(max(0, total_num_lines - max_log_lines), total_num_lines):
@@ -282,11 +367,14 @@ def stop_oef_node():
     return "All fine", 200  # 200 (OK)
 
 
-def start_agent(agent_id: str, connection_id: str):
+def start_agent(agent_id: str, connection_id: PublicId):
     """Start a local agent running."""
     # Test if it is already running in some form
     if agent_id in app_context.agent_processes:
-        if get_process_status(app_context.agent_processes[agent_id]) != ProcessState.RUNNING:
+        if (
+            get_process_status(app_context.agent_processes[agent_id])
+            != ProcessState.RUNNING
+        ):
             if app_context.agent_processes[agent_id] is not None:
                 app_context.agent_processes[agent_id].terminate()
                 app_context.agent_processes[agent_id].wait()
@@ -294,7 +382,10 @@ def start_agent(agent_id: str, connection_id: str):
             del app_context.agent_tty[agent_id]
             del app_context.agent_error[agent_id]
         else:
-            return {"detail": "Agent {} is already running".format(agent_id)}, 400  # 400 Bad request
+            return (
+                {"detail": "Agent {} is already running".format(agent_id)},
+                400,
+            )  # 400 Bad request
 
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
 
@@ -305,23 +396,57 @@ def start_agent(agent_id: str, connection_id: str):
             if element["id"] == connection_id:
                 has_named_connection = True
         if has_named_connection:
-            agent_process = _call_aea_async([sys.executable, "-m", "aea.cli", "run", "--connections", connection_id], agent_dir)
+            agent_process = _call_aea_async(
+                [
+                    sys.executable,
+                    "-m",
+                    "aea.cli",
+                    "run",
+                    "--connections",
+                    str(connection_id),
+                ],
+                agent_dir,
+            )
         else:
-            return {"detail": "Trying to run agent {} with non-existent connection: {}".format(agent_id, connection_id)}, 400  # 400 Bad request
+            return (
+                {
+                    "detail": "Trying to run agent {} with non-existent connection: {}".format(
+                        agent_id, connection_id
+                    )
+                },
+                400,
+            )  # 400 Bad request
     else:
-        agent_process = _call_aea_async([sys.executable, "-m", "aea.cli", "run"], agent_dir)
+        agent_process = _call_aea_async(
+            [sys.executable, "-m", "aea.cli", "run"], agent_dir
+        )
 
     if agent_process is None:
-        return {"detail": "Failed to run agent {}".format(agent_id)}, 400  # 400 Bad request
+        return (
+            {"detail": "Failed to run agent {}".format(agent_id)},
+            400,
+        )  # 400 Bad request
     else:
         app_context.agent_processes[agent_id] = agent_process
         app_context.agent_tty[agent_id] = []
         app_context.agent_error[agent_id] = []
 
-        tty_read_thread = threading.Thread(target=_read_tty, args=(app_context.agent_processes[agent_id], app_context.agent_tty[agent_id]))
+        tty_read_thread = threading.Thread(
+            target=_read_tty,
+            args=(
+                app_context.agent_processes[agent_id],
+                app_context.agent_tty[agent_id],
+            ),
+        )
         tty_read_thread.start()
 
-        error_read_thread = threading.Thread(target=_read_error, args=(app_context.agent_processes[agent_id], app_context.agent_error[agent_id]))
+        error_read_thread = threading.Thread(
+            target=_read_error,
+            args=(
+                app_context.agent_processes[agent_id],
+                app_context.agent_error[agent_id],
+            ),
+        )
         error_read_thread.start()
 
     return agent_id, 201  # 200 (OK)
@@ -345,13 +470,18 @@ def _read_error(pid: subprocess.Popen, str_list: List[str]):
 
 def get_agent_status(agent_id: str):
     """Get the status of the running agent Node."""
-    status_str = str(ProcessState.NOT_STARTED).replace('ProcessState.', '')
+    status_str = str(ProcessState.NOT_STARTED).replace("ProcessState.", "")
     tty_str = ""
     error_str = ""
 
     # agent_id will not be in lists if we haven't run it yet
-    if agent_id in app_context.agent_processes and app_context.agent_processes[agent_id] is not None:
-        status_str = str(get_process_status(app_context.agent_processes[agent_id])).replace('ProcessState.', '')
+    if (
+        agent_id in app_context.agent_processes
+        and app_context.agent_processes[agent_id] is not None
+    ):
+        status_str = str(
+            get_process_status(app_context.agent_processes[agent_id])
+        ).replace("ProcessState.", "")
 
     if agent_id in app_context.agent_tty:
         total_num_lines = len(app_context.agent_tty[agent_id])
@@ -385,7 +515,10 @@ def stop_agent(agent_id: str):
 def _stop_agent(agent_id: str):
     # Test if we have the process id
     if agent_id not in app_context.agent_processes:
-        return {"detail": "Agent {} is not running".format(agent_id)}, 400  # 400 Bad request
+        return (
+            {"detail": "Agent {} is not running".format(agent_id)},
+            400,
+        )  # 400 Bad request
 
     app_context.agent_processes[agent_id].terminate()
     app_context.agent_processes[agent_id].wait()
@@ -409,7 +542,7 @@ def get_process_status(process_id: subprocess.Popen) -> ProcessState:
 
 def _kill_running_oef_nodes():
     logging.info("Kill off any existing OEF nodes which are running...")
-    subprocess.call(['docker', 'kill', oef_node_name])
+    subprocess.call(["docker", "kill", oef_node_name])
 
 
 def create_app():
@@ -425,25 +558,34 @@ def create_app():
     app_context.agent_error = {}
     app_context.ui_is_starting = False
     app_context.agents_dir = os.path.abspath(os.getcwd())
-    app_context.module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
+    app_context.module_dir = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)), "../../"
+    )
 
-    app.add_api('aea_cli_rest.yaml')
+    app.add_api("aea_cli_rest.yaml")
 
-    @app.route('/')
+    @app.route("/")
     def home():
         """Respond to browser URL:  localhost:5000/."""
-        return flask.render_template('home.html', len=len(elements), htmlElements=elements)
+        return flask.render_template(
+            "home.html", len=len(elements), htmlElements=elements
+        )
 
-    @app.route('/static/js/home.js')
+    @app.route("/static/js/home.js")
     def homejs():
         """Serve the home.js file (as it needs templating)."""
-        return flask.render_template('home.js', len=len(elements), htmlElements=elements)
+        return flask.render_template(
+            "home.js", len=len(elements), htmlElements=elements
+        )
 
-    @app.route('/favicon.ico')
+    @app.route("/favicon.ico")
     def favicon():
         """Return an icon to be displayed in the browser."""
         return flask.send_from_directory(
-            os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+            os.path.join(app.root_path, "static"),
+            "favicon.ico",
+            mimetype="image/vnd.microsoft.icon",
+        )
 
     return app
 

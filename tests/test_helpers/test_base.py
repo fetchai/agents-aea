@@ -19,10 +19,11 @@
 
 """This module contains the tests for the helper module."""
 import os
-import sys
 
 from aea.helpers.base import locate
-from packages.connections.oef.connection import OEFConnection
+
+from packages.fetchai.connections.oef.connection import OEFConnection
+
 from ..conftest import CUR_PATH
 
 
@@ -33,10 +34,8 @@ class TestHelpersBase:
         """Test the locate function to locate modules."""
         cwd = os.getcwd()
         os.chdir(os.path.join(CUR_PATH, ".."))
-        sys.modules["gym_connection"] = locate("packages.connections.gym")
-        assert sys.modules['gym_connection'] is not None
-        sys.modules["gym_connection"] = locate("packages.connections.weather")
-        assert sys.modules['gym_connection'] is None
+        assert locate("packages.fetchai.connections.gym") is not None
+        assert locate("packages.fetchai.connections.non_existing_connection") is None
         os.chdir(cwd)
 
     def test_locate_class(self):
@@ -44,7 +43,9 @@ class TestHelpersBase:
         cwd = os.getcwd()
         os.chdir(os.path.join(CUR_PATH, ".."))
         expected_class = OEFConnection
-        actual_class = locate("packages.connections.oef.connection.OEFConnection")
+        actual_class = locate(
+            "packages.fetchai.connections.oef.connection.OEFConnection"
+        )
         # although they are the same class, they are different instances in memory
         # and the build-in default "__eq__" method does not compare the attributes.
         # so compare the names

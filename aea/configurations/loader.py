@@ -23,30 +23,35 @@ import inspect
 import json
 import os
 import re
-from enum import Enum
 from pathlib import Path
-from typing import TextIO, Type, TypeVar, Generic
+from typing import Generic, TextIO, Type, TypeVar, Union
 
 import jsonschema
-import yaml
 from jsonschema import Draft4Validator
+
+import yaml
 from yaml import SafeLoader
 
-from aea.configurations.base import AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig
+from aea.configurations.base import (
+    AgentConfig,
+    ConfigurationType,
+    ConnectionConfig,
+    ProtocolConfig,
+    ProtocolSpecification,
+    SkillConfig,
+)
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 _SCHEMAS_DIR = os.path.join(_CUR_DIR, "schemas")
 
-T = TypeVar('T', AgentConfig, SkillConfig, ConnectionConfig, ProtocolConfig)
-
-
-class ConfigurationType(Enum):
-    """Configuration types."""
-
-    AGENT = "agent"
-    PROTOCOL = "protocol"
-    CONNECTION = "connection"
-    SKILL = "skill"
+T = TypeVar(
+    "T",
+    AgentConfig,
+    SkillConfig,
+    ConnectionConfig,
+    ProtocolConfig,
+    ProtocolSpecification,
+)
 
 
 class ConfigLoader(Generic[T]):
@@ -92,8 +97,11 @@ class ConfigLoader(Generic[T]):
         yaml.safe_dump(result, fp)
 
     @classmethod
-    def from_configuration_type(cls, configuration_type: ConfigurationType) -> 'ConfigLoader':
+    def from_configuration_type(
+        cls, configuration_type: Union[ConfigurationType, str]
+    ) -> "ConfigLoader":
         """Get the configuration loader from the type."""
+        configuration_type = ConfigurationType(configuration_type)
         if configuration_type == ConfigurationType.AGENT:
             return ConfigLoader("aea-config_schema.json", AgentConfig)
         elif configuration_type == ConfigurationType.PROTOCOL:
@@ -107,7 +115,7 @@ class ConfigLoader(Generic[T]):
 
 
 def _config_loader():
-    envvar_matcher = re.compile(r'\${([^}^{]+)\}')
+    envvar_matcher = re.compile(r"\${([^}^{]+)\}")
 
     def envvar_constructor(loader, node):
         """Extract the matched value, expand env variable, and replace the match."""
@@ -120,10 +128,10 @@ def _config_loader():
         var_name = var_name.strip()
         default_value = default_value.strip()
         var_value = os.getenv(var_name, default_value)
-        return var_value + node_value[match.end():]
+        return var_value + node_value[match.end() :]
 
-    yaml.add_implicit_resolver('!envvar', envvar_matcher, None, SafeLoader)
-    yaml.add_constructor('!envvar', envvar_constructor, SafeLoader)
+    yaml.add_implicit_resolver("!envvar", envvar_matcher, None, SafeLoader)
+    yaml.add_constructor("!envvar", envvar_constructor, SafeLoader)
 
 
 _config_loader()

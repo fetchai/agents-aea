@@ -1,6 +1,6 @@
-aea_version: 0.1.7
+aea_version: 0.1.17
 agent_name: Agent0
-author: fetchai
+author: dummy_author
 connections:
 - fetchai/local:0.1.0
 default_connection: fetchai/local:0.1.0
@@ -17,6 +17,7 @@ ledger_apis:
      args:
        address: example.ethereum.com
        chain_id: 8080
+       gas_price: 20
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -35,7 +36,6 @@ protocols:
 - fetchai/fipa:0.1.0
 registry_path: aea
 skills:
-- fetchai/dummy:0.1.0
+- dummy_author/dummy:0.1.0
 - fetchai/error:0.1.0
-url: ''
 version: 1.0.0

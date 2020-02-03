@@ -19,8 +19,11 @@
 # ------------------------------------------------------------------------------
 
 """Abstract module wrapping the public and private key cryptography and ledger api."""
+
 from abc import ABC, abstractmethod
-from typing import Any, BinaryIO, Union, Optional
+from typing import Any, BinaryIO, Optional, Union
+
+from aea.mail.base import Address
 
 AddressLike = Union[str, bytes]
 
@@ -28,7 +31,7 @@ AddressLike = Union[str, bytes]
 class Crypto(ABC):
     """Base class for a crypto object."""
 
-    identifier = 'base'
+    identifier = "base"
 
     @property
     @abstractmethod
@@ -67,9 +70,28 @@ class Crypto(ABC):
         :return: str
         """
 
+    @abstractmethod
+    def sign_message(self, message: bytes) -> bytes:
+        """
+        Sign a message in bytes string form.
+
+        :param message: the message we want to send
+        :return: Signed message in bytes
+        """
+
+    @abstractmethod
+    def recover_message(self, message: bytes, signature: bytes) -> Address:
+        """
+        Recover the address from the hash.
+
+        :param message: the message we expect
+        :param signature: the transaction signature
+        :return: the recovered address
+        """
+
     @classmethod
     @abstractmethod
-    def load(cls, fp: BinaryIO) -> 'Crypto':
+    def load(cls, fp: BinaryIO) -> "Crypto":
         """
         Deserialize binary file `fp` (a `.read()`-supporting file-like object containing a private key).
 
@@ -94,7 +116,7 @@ class LedgerApi(ABC):
 
     @property
     @abstractmethod
-    def api(self) -> Optional[Any]:
+    def api(self) -> Any:
         """
         Get the underlying API object.
 
@@ -114,18 +136,22 @@ class LedgerApi(ABC):
         """
 
     @abstractmethod
-    def send_transaction(self,
-                         crypto: Crypto,
-                         destination_address: AddressLike,
-                         amount: int,
-                         tx_fee: int,
-                         **kwargs) -> Optional[str]:
+    def send_transaction(
+        self,
+        crypto: Crypto,
+        destination_address: AddressLike,
+        amount: int,
+        tx_fee: int,
+        tx_nonce: str,
+        **kwargs
+    ) -> Optional[str]:
         """
         Submit a transaction to the ledger.
 
         If the mandatory arguments are not enough for specifying a transaction
         in the concrete ledger API, use keyword arguments for the additional parameters.
 
+        :param tx_nonce: verifies the authenticity of the tx
         :param crypto: the crypto object associated to the payer.
         :param destination_address: the destination address of the payee.
         :param amount: the amount of wealth to be transferred.
@@ -140,4 +166,35 @@ class LedgerApi(ABC):
 
         :param tx_digest: the digest associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
+        """
+
+    @abstractmethod
+    def validate_transaction(
+        self,
+        tx_digest: str,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
+    ) -> bool:
+        """
+        Check whether a transaction is valid or not.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :param tx_nonce: the transaction nonce.
+        :param amount: the amount we expect to get from the transaction.
+        :param tx_digest: the transaction digest.
+
+        :return: True if the transaction referenced by the tx_digest matches the terms.
+        """
+
+    @abstractmethod
+    def generate_tx_nonce(self, seller: Address, client: Address) -> str:
+        """
+        Generate a random str message.
+
+        :param seller: the address of the seller.
+        :param client: the address of the client.
+        :return: return the hash in hex.
         """

@@ -3,10 +3,8 @@ author: fetchai
 version: 0.1.0
 license: Apache 2.0
 fingerprint: ""
-url: ""
 behaviours: {}
 handlers: {}
-tasks: {}
 shared_classes: {}
 protocols: ["fetchai/default:0.1.0"]
 dependencies:
