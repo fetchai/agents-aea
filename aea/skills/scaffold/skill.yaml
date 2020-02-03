@@ -14,11 +14,6 @@ handlers:
     class_name: MyScaffoldHandler
     args:
       foo: bar
-tasks:
-  scaffold:
-    class_name: MyScaffoldTask
-    args:
-      foo: bar
 shared_classes:
   scaffold:
     class_name: MySharedClass

@@ -23,12 +23,14 @@ import logging
 from typing import cast
 
 from aea.skills.base import Behaviour
+from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef.message import OEFMessage
 from packages.fetchai.protocols.oef.serialization import DEFAULT_OEF, OEFSerializer
 from packages.fetchai.skills.tac_negotiation.registration import Registration
 from packages.fetchai.skills.tac_negotiation.search import Search
 from packages.fetchai.skills.tac_negotiation.strategy import Strategy
+from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 logger = logging.getLogger("aea.tac_negotiation_skill")
 
@@ -242,3 +244,32 @@ class GoodsRegisterAndSearchBehaviour(Behaviour):
                     protocol_id=OEFMessage.protocol_id,
                     message=OEFSerializer().encode(oef_msg),
                 )
+
+
+class TransactionCleanUpBehaviour(TickerBehaviour):
+    """This class implements the cleanup of the transactions class."""
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def act(self) -> None:
+        """
+        Implement the task execution.
+
+        :return: None
+        """
+        transactions = cast(Transactions, self.context.transactions)  # type: ignore
+        transactions.cleanup_pending_transactions()
+
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        pass

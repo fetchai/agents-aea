@@ -18,7 +18,6 @@ handlers:
   transaction:
     class_name: TransactionHandler
     args: {}
-tasks: {}
 shared_classes:
   search:
     class_name: Search

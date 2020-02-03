@@ -197,45 +197,45 @@ version: 0.1.0
 license: Apache 2.0
 description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
 behaviours:
-  - behaviour:
+  behaviour:
       class_name: GoodsRegisterAndSearchBehaviour
       args:
         services_interval: 5
+  clean_up:
+    class_name: TransactionCleanUpTask
+    args:
+      tick_interval: 5.0
 handlers:
-  - handler:
-      class_name: FIPANegotiationHandler
-      args: {}
-  - handler:
-      class_name: TransactionHandler
-      args: {}
-  - handler:
-      class_name: OEFSearchHandler
-      args: {}
-tasks:
-  - task:
-      class_name: TransactionCleanUpTask
-      args: {}
+  fipa:
+    class_name: FIPANegotiationHandler
+    args: {}
+  transaction:
+    class_name: TransactionHandler
+    args: {}
+  oef:
+    class_name: OEFSearchHandler
+    args: {}
 shared_classes:
-  - shared_class:
-      class_name: Search
-      args:
-        search_interval: 5
-  - shared_class:
-      class_name: Registration
-      args:
-        update_interval: 5
-  - shared_class:
-      class_name: Strategy
-      args:
-        register_as: both
-        search_for: both
-  - shared_class:
-      class_name: Dialogues
-      args: {}
-  - shared_class:
-      class_name: Transactions
-      args:
-        pending_transaction_timeout: 30
+  search:
+    class_name: Search
+    args:
+      search_interval: 5
+  registration:
+    class_name: Registration
+    args:
+      update_interval: 5
+  strategy:
+    class_name: Strategy
+    args:
+      register_as: both
+      search_for: both
+  dialogues:
+    class_name: Dialogues
+    args: {}
+  transactions:
+    class_name: Transactions
+    args:
+      pending_transaction_timeout: 30
 protocols: ['fetchai/oef:0.1.0', 'fetchai/fipa:0.1.0']
 ```
 

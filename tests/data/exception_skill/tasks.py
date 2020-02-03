@@ -18,23 +18,3 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'exception' skill."""
-
-from aea.skills.base import Task
-
-
-class ExceptionTask(Task):
-    """Dummy task."""
-
-    def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-
-    def execute(self) -> None:
-        """Execute the task."""
-        raise Exception()
-
-    def teardown(self) -> None:
-        """Teardown the task."""

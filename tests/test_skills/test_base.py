@@ -185,14 +185,6 @@ class TestSkillFromDir:
             "Behaviour 'DummyBehaviour' cannot be found."
         )
 
-    def test_missing_task(self):
-        """Test that when parsing a skill and a task is missing, we behave correctly."""
-        Path(self.t, "tasks.py").write_text("")
-        Skill.from_dir(self.t, self.agent_context)
-        self.mocked_logger_warning.assert_called_with(
-            "Task 'DummyTask' cannot be found."
-        )
-
     def test_missing_shared_class(self):
         """Test that when parsing a skill and a shared_class is missing, we behave correctly."""
         Path(self.t, "dummy.py").write_text("")

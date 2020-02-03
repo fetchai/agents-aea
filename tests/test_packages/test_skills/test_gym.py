@@ -109,7 +109,7 @@ class TestGymSkill:
             self.t, self.agent_name, "vendor", "fetchai", "skills", "gym", "skill.yaml"
         )
         skill_config = SkillConfig.from_json(yaml.safe_load(open(skill_config_path)))
-        skill_config.tasks.read("gym").args["nb_steps"] = 20
+        skill_config.handlers.read("gym").args["nb_steps"] = 20
         yaml.safe_dump(skill_config.json, open(skill_config_path, "w"))
 
         process = subprocess.Popen(
@@ -127,7 +127,7 @@ class TestGymSkill:
 
         # check the gym run ends
 
-        time.sleep(10.0)
+        time.sleep(5.0)
         process.send_signal(signal.SIGINT)
         process.wait(timeout=5)
 
