@@ -61,6 +61,9 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 
 
+FUNDS_RELEASE_TIMEOUT = 10
+
+
 @click.group(name="aea")
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")
@@ -227,7 +230,7 @@ def get_address(ctx: Context, type_):
         logger.error(str(e))  # pragma: no cover
 
 
-def _get_balance(agent_config, wallet, type_):
+def _try_get_balance(agent_config, wallet, type_):
     try:
         _verify_ledger_apis_access()
         ledger_api_configs = dict(
@@ -264,14 +267,14 @@ def get_wealth(ctx: Context, type_):
         ]
     )
     wallet = Wallet(private_key_paths)
-    balance = _get_balance(ctx.agent_config, wallet, type_)
+    balance = _try_get_balance(ctx.agent_config, wallet, type_)
     click.echo(balance)
 
 
 def _wait_funds_release(balance, agent_config, wallet, type_):
-    end_time = time.time() + 10
+    end_time = time.time() + FUNDS_RELEASE_TIMEOUT
     while time.time() < end_time:
-        if balance != _get_balance(agent_config, wallet, type_):
+        if balance != _try_get_balance(agent_config, wallet, type_):
             break
         else:
             time.sleep(1)
@@ -301,7 +304,7 @@ def generate_wealth(ctx: Context, sync, type_):
     )
     wallet = Wallet(private_key_paths)
     try:
-        balance = _get_balance(ctx.agent_config, wallet, type_)
+        balance = _try_get_balance(ctx.agent_config, wallet, type_)
         address = wallet.addresses[type_]
         click.echo("Requesting funds for address {}".format(address))
         _try_generate_testnet_wealth(type_, address)
