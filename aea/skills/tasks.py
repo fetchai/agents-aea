@@ -138,7 +138,7 @@ class TaskManager:
 
     def enqueue_task(
         self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
-    ) -> AsyncResult:
+    ) -> int:
         """
         Enqueue a task with the executor.
 
@@ -158,12 +158,12 @@ class TaskManager:
                 func, args=args, kwds=kwds if kwds is not None else {}
             )
             self._results_by_task_id[task_id] = async_result
-            return async_result
+            return task_id
 
     def get_task_result(self, task_id: int) -> AsyncResult:
         """Get the result from a task."""
         task_result = self._results_by_task_id.get(
-            task_id, default=None
+            task_id, None
         )  # type: Optional[AsyncResult]
         if task_result is None:
             raise ValueError("Task id {} not present.".format(task_id))

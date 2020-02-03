@@ -139,9 +139,9 @@ class AEA(Agent):
         """
         if not self.programmatic:
             self.resources.load(self.context)
-        self.resources.setup()
         self.task_manager.start()
         self.decision_maker.start()
+        self.resources.setup()
 
     def act(self) -> None:
         """

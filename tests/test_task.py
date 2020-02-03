@@ -61,27 +61,28 @@ class TestTaskManager:
 
     def test_task_manager_function_with_default_arguments(self):
         """Test a function submitted to the task manager with default arguments."""
-        task_result = self.task_manager.enqueue_task(
-            self._return_a_constant, args=(32,)
-        )
+        task_id = self.task_manager.enqueue_task(self._return_a_constant, args=(32,))
+        task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
         result = task_result.get(2.0)
         assert result == 42
 
     def test_task_manager_function_with_keyword_arguments(self):
         """Test a function submitted to the task manager with keyword arguments."""
-        task_result = self.task_manager.enqueue_task(
+        task_id = self.task_manager.enqueue_task(
             self._return_a_constant, args=(32,), kwds={"b": 10}
         )
+        task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
         result = task_result.get(2.0)
         assert result == 42
 
     def test_task_manager_function_with_wrong_argument_number(self):
         """Test wrong number of arguments."""
-        task_result = self.task_manager.enqueue_task(
+        task_id = self.task_manager.enqueue_task(
             self._return_a_constant, args=(), kwds={"b": 10}
         )
+        task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
         with pytest.raises(TypeError, match="missing .+ required positional argument:"):
             task_result.get(2.0)
@@ -92,9 +93,10 @@ class TestTaskManager:
         expected_kwargs = {"a": 0, "b": 2}
         expected_return_value = 42
         my_task = MyTask(return_value=expected_return_value)
-        task_result = self.task_manager.enqueue_task(
+        task_id = self.task_manager.enqueue_task(
             my_task, args=expected_args, kwds=expected_kwargs
         )
+        task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
 
         expected_task = task_result.get(2.0)
@@ -119,7 +121,8 @@ class TestTaskManager:
         """Test task manager with task object fails when the task is not pickable."""
         expected_args = [lambda x: x]
         my_task = MyTask(return_value=None)
-        task_result = self.task_manager.enqueue_task(my_task, args=expected_args)
+        task_id = self.task_manager.enqueue_task(my_task, args=expected_args)
+        task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
 
         with pytest.raises(AttributeError, match="Can't pickle local object"):

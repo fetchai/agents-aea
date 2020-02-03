@@ -307,7 +307,8 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         # TODO the previous code caused an error:
         #      _pickle.PicklingError: Can't pickle <class 'tasks.DummyTask'>: import of module 'tasks' failed
         dummy_task = DummyTask()
-        async_result = self.aea.task_manager.enqueue_task(dummy_task)
+        task_id = self.aea.task_manager.enqueue_task(dummy_task)
+        async_result = self.aea.task_manager.get_task_result(task_id)
         expected_dummy_task = async_result.get(2.0)
         assert expected_dummy_task.nb_execute_called > 0
 
@@ -409,7 +410,8 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         assert dummy_behaviour.nb_act_called > 0
 
         dummy_task = DummyTask()
-        async_result = self.aea.task_manager.enqueue_task(dummy_task)
+        task_id = self.aea.task_manager.enqueue_task(dummy_task)
+        async_result = self.aea.task_manager.get_task_result(task_id)
         expected_dummy_task = async_result.get(2.0)
         assert expected_dummy_task.nb_execute_called > 0
 

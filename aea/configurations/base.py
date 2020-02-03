@@ -171,7 +171,7 @@ class PublicId(JSONSerializable):
     >>> assert public_id == another_public_id
     """
 
-    AUTHOR_REGEX = r"[a-zA-Z0-9_]*"
+    AUTHOR_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     PACKAGE_NAME_REGEX = r"[a-zA-Z_][a-zA-Z0-9_]*"
     VERSION_REGEX = r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
     PUBLIC_ID_REGEX = r"^({})/({}):({})$".format(
