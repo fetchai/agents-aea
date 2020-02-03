@@ -21,10 +21,19 @@
 
 import logging
 import os
+from unittest import mock
+from unittest.mock import patch
 
 import pytest
 
+import requests
+from requests import Response
+
+
+from aea.crypto.ethereum import ETHEREUM
+from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
+    _try_generate_testnet_wealth,
     _try_validate_ethereum_private_key_path,
     _try_validate_fet_private_key_path,
     _try_validate_private_key_pem_path,
@@ -58,3 +67,33 @@ class TestHelperFile:
         with pytest.raises(SystemExit):
             private_key_path = os.path.join(CUR_PATH, "data", "priv_wrong.pem")
             _try_validate_ethereum_private_key_path(private_key_path)
+
+    @patch("aea.crypto.helpers.logger")
+    def tests_generate_wealth_fetchai(self, mock_logging):
+        """Test generate wealth for fetchai."""
+        address = "my_address"
+        result = Response()
+        result.status_code = 500
+        with mock.patch.object(requests, "post", return_value=result):
+            _try_generate_testnet_wealth(identifier=FETCHAI, address=address)
+            assert mock_logging.error.called
+
+        result.status_code = 200
+        with pytest.raises(SystemExit):
+            with mock.patch.object(requests, "post", return_value=result):
+                _try_generate_testnet_wealth(identifier=FETCHAI, address=address)
+
+    @patch("aea.crypto.helpers.logger")
+    def tests_generate_wealth_ethereum(self, mock_logging):
+        """Test generate wealth for ethereum."""
+        address = "my_address"
+        result = Response()
+        result.status_code = 500
+        with mock.patch.object(requests, "get", return_value=result):
+            _try_generate_testnet_wealth(identifier=ETHEREUM, address=address)
+            assert mock_logging.error.called
+
+        result.status_code = 200
+        with pytest.raises(SystemExit):
+            with mock.patch.object(requests, "get", return_value=result):
+                _try_generate_testnet_wealth(identifier=ETHEREUM, address=address)
