@@ -76,16 +76,18 @@ Follows an example of a custom behaviour:
 
 from aea.skills.base import Behaviour
 
-class MyBehaviour(Behaviour):
-            
+class HelloWorldBehaviour(OneShotBehaviour):
+        
     def setup(self):
         """This method is called once, when the behaviour gets loaded."""
 
     def act(self): 
         """This methods is called in every iteration of the agent main loop."""
+        print("Hello, World!")
 
     def teardown(self): 
         """This method is called once, when the behaviour is teared down."""
+    
 
 ```
 
@@ -93,8 +95,19 @@ If we want to register this behaviour dynamically, in any part of the skill code
 (i.e. wherever the skill context is available), we can write:
 
 ```python
-self.context.new_behaviours.put(MyBehaviour())
+self.context.new_behaviours.put(HelloWorldBehaviour())
 ```
+
+Or, equivalently:
+```python
+def hello():
+    print("Hello, World!")
+
+self.context.new_behaviours.put(OneShotBehaviour(act=hello))
+```
+
+The callable passed to the `act` parameter is equivalent to the implementation
+of the `act` method described above. 
 
 The framework is then in charge of registering the behaviour and scheduling it 
 for execution.
