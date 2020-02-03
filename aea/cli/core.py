@@ -274,7 +274,7 @@ def get_wealth(ctx: Context, type_):
 
 
 def _wait_funds_release(agent_config, wallet, type_):
-    start_balance = _try_get_balance(ctx.agent_config, wallet, type_)
+    start_balance = _try_get_balance(agent_config, wallet, type_)
     end_time = time.time() + FUNDS_RELEASE_TIMEOUT
     while time.time() < end_time:
         if start_balance != _try_get_balance(agent_config, wallet, type_):
@@ -309,7 +309,11 @@ def generate_wealth(ctx: Context, sync, type_):
     try:
         address = wallet.addresses[type_]
         testnet = TESTNETS[type_]
-        click.echo("Requesting funds for address {} on test network '{}'".format(address, testnet))
+        click.echo(
+            "Requesting funds for address {} on test network '{}'".format(
+                address, testnet
+            )
+        )
         _try_generate_testnet_wealth(type_, address)
         if sync:
             _wait_funds_release(ctx.agent_config, wallet, type_)
