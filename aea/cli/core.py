@@ -245,6 +245,7 @@ def _try_get_balance(agent_config, wallet, type_):
         return ledger_apis.token_balance(type_, address)
     except (AssertionError, ValueError) as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
+        sys.exit(1)
 
 
 @cli.command()
