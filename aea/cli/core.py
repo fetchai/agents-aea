@@ -54,6 +54,7 @@ from aea.crypto.helpers import (
     DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
+    TESTNETS,
     _try_generate_testnet_wealth,
     _validate_private_key_path,
 )
@@ -272,10 +273,11 @@ def get_wealth(ctx: Context, type_):
     click.echo(balance)
 
 
-def _wait_funds_release(balance, agent_config, wallet, type_):
+def _wait_funds_release(agent_config, wallet, type_):
+    start_balance = _try_get_balance(ctx.agent_config, wallet, type_)
     end_time = time.time() + FUNDS_RELEASE_TIMEOUT
     while time.time() < end_time:
-        if balance != _try_get_balance(agent_config, wallet, type_):
+        if start_balance != _try_get_balance(agent_config, wallet, type_):
             break
         else:
             time.sleep(1)
@@ -305,12 +307,12 @@ def generate_wealth(ctx: Context, sync, type_):
     )
     wallet = Wallet(private_key_paths)
     try:
-        balance = _try_get_balance(ctx.agent_config, wallet, type_)
         address = wallet.addresses[type_]
-        click.echo("Requesting funds for address {}".format(address))
+        testnet = TESTNETS[type_]
+        click.echo("Requesting funds for address {} on test network '{}'".format(address, testnet))
         _try_generate_testnet_wealth(type_, address)
         if sync:
-            _wait_funds_release(balance, ctx.agent_config, wallet, type_)
+            _wait_funds_release(ctx.agent_config, wallet, type_)
 
     except (AssertionError, ValueError) as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
