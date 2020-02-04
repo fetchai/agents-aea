@@ -20,7 +20,14 @@
 
 from typing import List
 
+from click import ClickException
+
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
+
+
+def raise_click_exception(*args):
+    """Raise ClickException."""
+    raise ClickException("Message")
 
 
 class AgentConfigMock:

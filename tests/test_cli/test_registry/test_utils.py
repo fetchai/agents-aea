@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This test module contains the tests for CLI Registry utils."""
+"""This test module contains tests for CLI Registry utils."""
 
 import os
 from builtins import FileNotFoundError
@@ -29,14 +29,16 @@ from requests.exceptions import ConnectionError
 from yaml import YAMLError
 
 from aea.cli.common import AEAConfigException
-from aea.cli.registry.settings import REGISTRY_API_URL
+from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.registry.utils import (
     _init_config_folder,
+    _rm_tarfiles,
     check_is_author_logged_in,
     download_file,
     extract,
     fetch_package,
     read_cli_config,
+    registry_login,
     request_api,
     write_cli_config,
 )
@@ -65,7 +67,7 @@ class TestFetchPackage:
         )
 
 
-def _raise_connection_error(*args):
+def _raise_connection_error(*args, **kwargs):
     raise ConnectionError()
 
 
@@ -78,7 +80,7 @@ class RequestAPITestCase(TestCase):
     """Test case for request_api method."""
 
     def test_request_api_positive(self, request_mock):
-        """Test for fetch_package method positive result."""
+        """Test for request_api method positive result."""
         expected_result = {"correct": "json"}
 
         resp_mock = mock.Mock()
@@ -98,23 +100,42 @@ class RequestAPITestCase(TestCase):
         self.assertEqual(result, expected_result)
 
     def test_request_api_404(self, request_mock):
-        """Test for fetch_package method 404 sever response."""
+        """Test for request_api method 404 sever response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 404
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
+    def test_request_api_201(self, request_mock):
+        """Test for request_api method 201 sever response."""
+        expected_result = {"correct": "json"}
+
+        resp_mock = mock.Mock()
+        resp_mock.json = lambda: expected_result
+        resp_mock.status_code = 201
+        request_mock.return_value = resp_mock
+        result = request_api("GET", "/path")
+        self.assertEqual(result, expected_result)
+
     def test_request_api_403(self, request_mock):
-        """Test for fetch_package method not authorized sever response."""
+        """Test for request_api method not authorized sever response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 403
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
+    def test_request_api_400(self, request_mock):
+        """Test for request_api method 400 code sever response."""
+        resp_mock = mock.Mock()
+        resp_mock.status_code = 400
+        request_mock.return_value = resp_mock
+        with self.assertRaises(ClickException):
+            request_api("GET", "/path")
+
     def test_request_api_409(self, request_mock):
-        """Test for fetch_package method conflict sever response."""
+        """Test for request_api method conflict sever response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 409
         resp_mock.json = lambda: {"detail": "some"}
@@ -123,22 +144,54 @@ class RequestAPITestCase(TestCase):
             request_api("GET", "/path")
 
     def test_request_api_unexpected_response(self, request_mock):
-        """Test for fetch_package method unexpected sever response."""
+        """Test for request_api method unexpected sever response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 500
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
-    @mock.patch("aea.cli.registry.utils.requests.request", _raise_connection_error)
-    def test_request_api_server_not_responding(self, request_mock):
-        """Test for fetch_package method no server response."""
-        with self.assertRaises(ClickException):
-            request_api("GET", "/path")
-
     @mock.patch("aea.cli.registry.utils.read_cli_config", _raise_config_exception)
     def test_request_api_no_auth_data(self, request_mock):
-        """Test for fetch_package method no server response."""
+        """Test for request_api method no auth data."""
+        with self.assertRaises(ClickException):
+            request_api("GET", "/path", auth=True)
+
+    @mock.patch(
+        "aea.cli.registry.utils.read_cli_config", return_value={AUTH_TOKEN_KEY: "key"}
+    )
+    def test_request_api_with_auth_positive(self, read_cli_config_mock, request_mock):
+        """Test for request_api method with auth positive result."""
+        expected_result = {"correct": "json"}
+
+        resp_mock = mock.Mock()
+        resp_mock.json = lambda: expected_result
+        resp_mock.status_code = 200
+        request_mock.return_value = resp_mock
+
+        result = request_api("GET", "/path", auth=True)
+        self.assertEqual(result, expected_result)
+
+    @mock.patch("builtins.open", mock.mock_open())
+    def test_request_api_with_file_positive(self, request_mock):
+        """Test for request_api method with file positive result."""
+        expected_result = {"correct": "json"}
+
+        resp_mock = mock.Mock()
+        resp_mock.json = lambda: expected_result
+        resp_mock.status_code = 200
+        request_mock.return_value = resp_mock
+
+        result = request_api("GET", "/path", filepath="filepath")
+        self.assertEqual(result, expected_result)
+
+
+@mock.patch("aea.cli.registry.utils.requests.request", _raise_connection_error)
+class RequestAPINoResponseTestCase(TestCase):
+    """Test case for request_api method no server response."""
+
+    def test_request_api_server_not_responding(self):
+        """Test for request_api method no server response."""
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
 
@@ -283,3 +336,28 @@ class CheckIsAuthorLoggedInTestCase(TestCase):
         """Test for check_is_author_logged_in method negative result."""
         with self.assertRaises(ClickException):
             check_is_author_logged_in("not-current-user")
+
+
+@mock.patch("aea.cli.registry.utils.os.remove")
+@mock.patch("aea.cli.registry.utils.os.listdir", return_value=["file1.tar.gz", "file2"])
+@mock.patch("aea.cli.registry.utils.os.getcwd", return_value="cwd")
+class RmTarfilesTestCase(TestCase):
+    """Test case for _rm_tarfiles method."""
+
+    def test__rm_tarfiles_positive(self, getcwd_mock, listdir_mock, remove_mock):
+        """Test for _rm_tarfiles method positive result."""
+        _rm_tarfiles()
+        listdir_mock.assert_called_once_with("cwd")
+        remove_mock.assert_called_once()
+
+
+@mock.patch("aea.cli.registry.utils.request_api", return_value={"key": "key"})
+class RegistryLoginTestCase(TestCase):
+    """Test case for registry_login method."""
+
+    def test_registry_login_positive(self, request_api_mock):
+        """Test for registry_login method positive result."""
+        result = registry_login("username", "password")
+        expected_result = "key"
+        self.assertEqual(result, expected_result)
+        request_api_mock.assert_called_once()

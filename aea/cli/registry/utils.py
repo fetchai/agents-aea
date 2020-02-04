@@ -262,8 +262,8 @@ def read_cli_config() -> Dict:
 def _rm_tarfiles():
     cwd = os.getcwd()
     for filename in os.listdir(cwd):
-        filepath = os.path.join(cwd, filename)
-        if filepath.endswith(".tar.gz"):
+        if filename.endswith(".tar.gz"):
+            filepath = os.path.join(cwd, filename)
             os.remove(filepath)
 
 

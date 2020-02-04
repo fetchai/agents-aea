@@ -24,7 +24,11 @@ from click import ClickException
 
 from aea.cli.publish import _check_is_item_in_local_registry, _save_agent_locally
 
-from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
+from tests.test_cli.tools_for_testing import (
+    ContextMock,
+    PublicIdMock,
+    raise_click_exception,
+)
 
 
 @mock.patch("aea.cli.publish._check_is_item_in_local_registry")
@@ -53,10 +57,6 @@ class SaveAgentLocallyTestCase(TestCase):
         copyfile_mock.assert_called_once_with("joined-path", "joined-path")
 
 
-def _raise_click_exception(*args):
-    raise ClickException("Message")
-
-
 class CheckIsItemInLocalRegistryTestCase(TestCase):
     """Test case for _check_is_item_in_local_registry method."""
 
@@ -71,7 +71,7 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
             registry_path, public_id.author, item_type_plural, public_id.name
         )
 
-    @mock.patch("aea.cli.publish.try_get_item_source_path", _raise_click_exception)
+    @mock.patch("aea.cli.publish.try_get_item_source_path", raise_click_exception)
     def test__check_is_item_in_local_registry_negative(self):
         """Test for _check_is_item_in_local_registry negative result."""
         public_id = PublicIdMock.from_str("author/name:version")
