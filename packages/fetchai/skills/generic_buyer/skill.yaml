@@ -23,7 +23,6 @@ shared_classes:
   strategy:
     class_name: Strategy
     args:
-      country: UK
       max_price: 4
       max_buyer_tx_fee: 1
       currency_id: 'FET'
