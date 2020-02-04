@@ -29,6 +29,7 @@ import click
 from click import pass_context
 
 from aea.aea import AEA
+from aea.agent import Identity
 from aea.cli.common import (
     AEAConfigException,
     ConnectionsOption,
@@ -328,6 +329,7 @@ def run(
         ]
     )
 
+    identity = Identity(agent_name)
     wallet = Wallet(private_key_paths)
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
@@ -354,7 +356,7 @@ def run(
             click_context.invoke(install)
 
     agent = AEA(
-        agent_name,
+        identity,
         connections,
         wallet,
         ledger_apis,

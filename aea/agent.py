@@ -25,7 +25,7 @@ import time
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from aea.connections.base import Connection
 from aea.mail.base import InBox, Multiplexer, OutBox
@@ -54,12 +54,70 @@ class Liveness:
         return self._is_stopped
 
 
+class Identity:
+    """
+    An identity are the public elements identifying an agent.
+
+    It can include:
+    - the agent name
+    - the public half of private / public key pairs
+    - the addresses
+    """
+
+    def __init__(self, name: str):
+        """
+        Instantiate the agent.
+
+        :param name: the name of the agent.
+        """
+        self._name = name
+        self._public_keys = None  # type: Optional[Dict[str, str]]
+        self._addresses = None  # type: Optional[Dict[str, str]]
+
+    @property
+    def name(self) -> str:
+        """Get the agent name."""
+        return self._name
+
+    @property
+    def public_keys(self) -> Dict[str, str]:
+        """Get the public_keys."""
+        assert self._public_keys is not None, "The public_keys are not set."
+        return self._public_keys
+
+    @public_keys.setter
+    def public_keys(self, public_keys: Dict[str, str]) -> None:
+        """
+        Set the public keys.
+
+        :param public_keys: the public keys.
+        :return: None
+        """
+        self._public_keys = public_keys
+
+    @property
+    def addresses(self) -> Dict[str, str]:
+        """Get the addresses."""
+        assert self._addresses is not None, "The addresses are not set."
+        return self._addresses
+
+    @addresses.setter
+    def addresses(self, addresses: Dict[str, str]) -> None:
+        """
+        Set the addresses.
+
+        :param addresses: the addresses.
+        :return: None
+        """
+        self._addresses = addresses
+
+
 class Agent(ABC):
     """This class implements a template agent."""
 
     def __init__(
         self,
-        name: str,
+        identity: Identity,
         connections: List[Connection],
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
@@ -69,7 +127,7 @@ class Agent(ABC):
         """
         Instantiate the agent.
 
-        :param name: the name of the agent
+        :param identity: the identity of the agent.
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
@@ -78,7 +136,7 @@ class Agent(ABC):
 
         :return: None
         """
-        self._name = name
+        self._identity = identity
         self._connections = connections
 
         self._multiplexer = Multiplexer(self._connections, loop=loop)
@@ -91,6 +149,11 @@ class Agent(ABC):
 
         self.debug = debug
         self.programmatic = programmatic
+
+    @property
+    def identity(self) -> Identity:
+        """Get the identity."""
+        return self._identity
 
     @property
     def multiplexer(self) -> Multiplexer:
@@ -110,7 +173,7 @@ class Agent(ABC):
     @property
     def name(self) -> str:
         """Get the agent name."""
-        return self._name
+        return self.identity.name
 
     @property
     def liveness(self) -> Liveness:

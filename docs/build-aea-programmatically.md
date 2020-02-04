@@ -23,6 +23,7 @@ Then, import the application specific libraries.
 ``` python
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.agent import Identity
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
 from aea.crypto.default import DEFAULT
@@ -73,7 +74,8 @@ ledger_apis = LedgerApis({}, DEFAULT)
 resources = Resources()
 
 # Create our AEA
-my_aea = AEA("my_aea", [stub_connection], wallet, ledger_apis, resources)
+identity = Identity("my_aea")
+my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
 ```
 
 Create the default protocol and add it to the AEA.
@@ -166,6 +168,7 @@ import yaml
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.agent import Identity
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
 from aea.crypto.default import DEFAULT
@@ -201,7 +204,8 @@ def run():
     resources = Resources()
 
     # Create our AEA
-    my_aea = AEA("my_aea", [stub_connection], wallet, ledger_apis, resources)
+    identity = Identity("my_aea")
+    my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol_configuration = ProtocolConfig.from_json(

@@ -13,7 +13,7 @@ import time
 from threading import Thread
 from typing import List, Optional
 
-from aea.agent import Agent
+from aea.agent import Agent, Identity
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Envelope
@@ -89,7 +89,8 @@ stub_connection = StubConnection(
 )
 
 # Create our Agent
-my_agent = MyAgent("my_agent", [stub_connection])
+identity = Identity("my_agent")
+my_agent = MyAgent(identity, [stub_connection])
 ```
 
 ## Start the agent
@@ -143,7 +144,7 @@ import time
 from threading import Thread
 from typing import List, Optional
 
-from aea.agent import Agent
+from aea.agent import Agent, Identity
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
 from aea.mail.base import Envelope
@@ -199,7 +200,8 @@ def run():
     )
 
     # Create our Agent
-    my_agent = MyAgent("my_agent", [stub_connection])
+    identity = Identity("my_agent")
+    my_agent = MyAgent(identity, [stub_connection])
 
     # Set the agent running in a different thread
     t = Thread(target=my_agent.start)

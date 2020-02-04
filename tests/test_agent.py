@@ -22,7 +22,7 @@
 import time
 from threading import Thread
 
-from aea.agent import Agent, AgentState
+from aea.agent import Agent, AgentState, Identity
 from aea.configurations.base import PublicId
 from aea.mail.base import InBox, OutBox
 
@@ -61,15 +61,16 @@ def test_run_agent():
     """Test that we can set up and then run the agent."""
     with LocalNode() as node:
         agent_name = "dummyagent"
+        identity = Identity(agent_name)
         agent = DummyAgent(
-            agent_name,
+            identity,
             [
                 OEFLocalConnection(
                     "mypbk", node, connection_id=PublicId("fetchai", "oef", "0.1.0")
                 )
             ],
         )
-        assert agent.name == agent_name
+        assert agent.name == identity.name
         assert (
             agent.agent_state == AgentState.INITIATED
         ), "Agent state must be 'initiated'"

@@ -22,7 +22,7 @@ import logging
 from asyncio import AbstractEventLoop
 from typing import List, Optional, cast
 
-from aea.agent import Agent
+from aea.agent import Agent, Identity
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
@@ -43,7 +43,7 @@ class AEA(Agent):
 
     def __init__(
         self,
-        name: str,
+        identity: Identity,
         connections: List[Connection],
         wallet: Wallet,
         ledger_apis: LedgerApis,
@@ -57,7 +57,7 @@ class AEA(Agent):
         """
         Instantiate the agent.
 
-        :param name: the name of the agent
+        :param identity: the identity of the agent
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
         :param wallet: the wallet of the agent.
@@ -71,7 +71,7 @@ class AEA(Agent):
         :return: None
         """
         super().__init__(
-            name=name,
+            identity=identity,
             connections=connections,
             loop=loop,
             timeout=timeout,
@@ -79,6 +79,8 @@ class AEA(Agent):
             programmatic=programmatic,
         )
 
+        self.identity.public_keys = wallet.public_keys
+        self.identity.addresses = wallet.addresses
         self._wallet = wallet
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
@@ -87,8 +89,8 @@ class AEA(Agent):
         )
         self._context = AgentContext(
             self.name,
-            self.wallet.public_keys,
-            self.wallet.addresses,
+            self.identity.public_keys,
+            self.identity.addresses,
             ledger_apis,
             self.multiplexer.connection_status,
             self.outbox,
