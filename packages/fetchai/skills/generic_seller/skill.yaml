@@ -27,7 +27,7 @@ shared_classes:
         wind: 10
         pressure: 20
         temperature: 26
-      search_datamodel:
+      search_schema:
         attribute_one:
           name: country
           type: str

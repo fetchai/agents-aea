@@ -93,7 +93,7 @@ ledger_apis:
 
 ### Update the seller AEA skill configs
 
-In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_for_sale`, `datamodel`, and `search_data` with your data:
+In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_for_sale`, `search_schema`, and `search_data` with your data:
 ```bash
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
@@ -112,7 +112,7 @@ In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_fo
 |        wind: 10                   |        wind: 10                  |
 |        pressure: 20               |        pressure: 20              |
 |        temperature: 26            |        temperature: 26           |
-|      datamodel:                   |      datamodel:                  |
+|      search_schema:               |      search_schema:              |
 |        attribute_one:             |        attribute_one:            |
 |          name: country            |          name: country           |
 |          type: str                |          type: str               |
@@ -126,7 +126,7 @@ In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_fo
 |        city: Cambridge            |        city: Cambridge           |
 |----------------------------------------------------------------------| 
 ```
-The `datamodel` and the `search_data` are used to register the service in the OEF and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
+The `search_schema` and the `search_data` are used to register the service in the OEF and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
 In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
