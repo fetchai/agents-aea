@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a handler."""
+"""This package contains handlers for the generic buyer skill."""
 
 import logging
 import pprint
@@ -42,7 +42,7 @@ logger = logging.getLogger("aea.generic_buyer_skill")
 
 
 class FIPAHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -301,7 +301,7 @@ class FIPAHandler(Handler):
 
 
 class OEFHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class implements an OEF handler."""
 
     SUPPORTED_PROTOCOL = OEFMessage.protocol_id  # type: Optional[ProtocolId]
 

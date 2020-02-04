@@ -19,7 +19,6 @@ handlers:
   transaction:
     class_name: MyTransactionHandler
     args: {}
-tasks: {}
 shared_classes:
   strategy:
     class_name: Strategy
@@ -30,6 +29,10 @@ shared_classes:
       currency_id: 'FET'
       ledger_id: 'fetchai'
       is_ledger_tx: True
+      search_query:
+        search_term: country
+        search_value: UK
+        search_type: '=='
   dialogues:
     class_name: Dialogues
     args: {}

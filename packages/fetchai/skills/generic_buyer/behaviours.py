@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a behaviour."""
+"""This package contains the behaviour for the generic buyer skill."""
 
 import logging
 from typing import cast

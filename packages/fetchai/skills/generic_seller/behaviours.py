@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a behaviour."""
+"""This package contains the behaviour of a generic seller AEA."""
 
 import logging
 from typing import Optional, cast

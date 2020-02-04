@@ -24,8 +24,6 @@ from typing import cast
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.skills.base import SharedClass
 
-DEFAULT_COUNTRY = "UK"
-SEARCH_TERM = "country"
 DEFAULT_MAX_PRICE = 5
 DEFAULT_MAX_BUYER_TX_FEE = 2
 DEFAULT_CURRENCY_PBK = "FET"
@@ -42,7 +40,6 @@ class Strategy(SharedClass):
 
         :return: None
         """
-        self._country = kwargs.pop("country", DEFAULT_COUNTRY)
         self._max_price = kwargs.pop("max_price", DEFAULT_MAX_PRICE)
         self.max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_BUYER_TX_FEE)
         self._currency_id = kwargs.pop("currency_id", DEFAULT_CURRENCY_PBK)
@@ -51,6 +48,7 @@ class Strategy(SharedClass):
         super().__init__(**kwargs)
         self._search_id = 0
         self.is_searching = True
+        self.search_query = kwargs.pop("search_query")
 
     def get_next_search_id(self) -> int:
         """
@@ -68,7 +66,16 @@ class Strategy(SharedClass):
         :return: the query
         """
         query = Query(
-            [Constraint(SEARCH_TERM, ConstraintType("==", self._country))], model=None
+            [
+                Constraint(
+                    self.search_query["search_term"],
+                    ConstraintType(
+                        self.search_query["search_type"],
+                        self.search_query["search_value"],
+                    ),
+                )
+            ],
+            model=None,
         )
         return query
 

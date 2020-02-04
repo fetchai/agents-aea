@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a handler."""
+"""This package contains the handlers of a generic seller AEA."""
 
 import logging
 from typing import Optional, cast
@@ -38,7 +38,7 @@ logger = logging.getLogger("aea.generic_seller_skill")
 
 
 class FIPAHandler(Handler):
-    """This class scaffolds a handler."""
+    """This class implements a FIPA handler."""
 
     SUPPORTED_PROTOCOL = FIPAMessage.protocol_id  # type: Optional[ProtocolId]
 
@@ -143,10 +143,10 @@ class FIPAHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
 
         if strategy.is_matching_supply(query):
-            proposal, data = strategy.generate_proposal_and_data(
+            proposal, data_for_sale = strategy.generate_proposal_and_data(
                 query, msg.counterparty
             )
-            dialogue.data = data
+            dialogue.data_for_sale = data_for_sale
             dialogue.proposal = proposal
             logger.info(
                 "[{}]: sending sender={} a PROPOSE with proposal={}".format(
@@ -301,7 +301,7 @@ class FIPAHandler(Handler):
                     dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                     target=new_target,
                     performative=FIPAMessage.Performative.INFORM,
-                    info=dialogue.data,
+                    info=dialogue.data_for_sale,
                 )
                 dialogue.outgoing_extend(inform_msg)
                 self.context.outbox.put_message(
@@ -326,7 +326,7 @@ class FIPAHandler(Handler):
                 dialogue_reference=dialogue.dialogue_label.dialogue_reference,
                 target=new_target,
                 performative=FIPAMessage.Performative.INFORM,
-                info=dialogue.data,
+                info=dialogue.data_for_sale,
             )
             dialogue.outgoing_extend(inform_msg)
             self.context.outbox.put_message(

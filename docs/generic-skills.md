@@ -1,7 +1,7 @@
-The AEA generic skills demonstrate an interaction between two AEAs.
+The AEA generic buyer and seller skills demonstrate an interaction between two AEAs.
 
-* The provider of the data.
-* The buyer of the data.
+* The provider of a service in the form of data for sale.
+* The buyer of a service.
 
 ## Preparation instructions
  
@@ -12,12 +12,12 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 ##Discussion
 
 The scope of the specific demo is to demonstrate how to create an easy configurable AEA. The seller AEA
-will read data from `skill.yaml` file and will deliver to the buyer upon payment. To keep the demo simple we avoided the usage of a database or the usage of a hardware sensor since this would increase the complexity.
+will sell the service specified in the `skill.yaml` file and deliver it upon payment by the buyer. Adding a database or hardware sensor for loading the data is out of the scope of this demo.
 As a result, the AEA can provide data that are listed in the `skill.yaml` file.
 This demo does not utilize a smart contract. We interact with a ledger only to complete a transaction.
 
-Moreover, this example provides a way to write your code to collect data if you want. 
-You can modify the `has_sensor` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_data(self)` inside the strategy.py file. 
+Moreover, this example provides a way to customise the skill code and connect a database or sensor. 
+You can modify the `has_data_source` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_from_data_source(self)` inside the strategy.py file. 
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
@@ -74,7 +74,7 @@ ledger_apis:
 
 ### Update the seller AEA skill configs
 
-In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data` with your data:
+In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_for_sale` with your data:
 ```yaml
 shared_classes:
   strategy:
@@ -85,8 +85,8 @@ shared_classes:
       currency_id: 'FET'
       ledger_id: 'fetchai'
       is_ledger_tx: True
-      has_sensor: False
-      data:
+      has_data_source: False
+      data_for_sale:
         foo: {'bar': 'this is test'}
         test: 20
 ```
@@ -176,7 +176,7 @@ ledger_apis:
 ### Update the skill configs
 
 In the generic seller skill config (`my_seller_aea/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id`, `ledger_id` as follows and 
-`data` with your own data.
+`data_for_sale` with your own data.
 ```yaml
 shared_classes:
   strategy:
@@ -187,8 +187,8 @@ shared_classes:
       currency_id: 'ETH'
       ledger_id: 'ethereum'
       is_ledger_tx: True
-      has_sensor: False
-      data:
+      has_data_source: False
+      data_for_sale:
         foo: {'bar': 'this is test'}
         test: 20
 ```

@@ -18,20 +18,36 @@
 # ------------------------------------------------------------------------------
 
 """This package contains the dataModel for the generic seller aea."""
+import logging
+import sys
+from typing import Any, Dict
 
 from aea.helpers.search.models import Attribute, DataModel
 
-SCHEME = {"country": "UK", "city": "Cambridge"}
+SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
+
+logger = logging.getLogger(__name__)
 
 
 class Generic_Data_Model(DataModel):
     """Data model for the generic seller aea."""
 
-    def __init__(self):
+    def __init__(self, data_model_dict: Dict[str, Any]):
         """Initialise the dataModel."""
-        self.attribute_country = Attribute("country", str, True)
-        self.attribute_city = Attribute("city", str, True)
+        self.attributes = []
+        try:
+            for _k, v in data_model_dict.items():
+                self.attributes.append(
+                    Attribute(
+                        name=v["name"],
+                        type=SUPPORTED_TYPES[v["type"]],
+                        is_required=v["is_required"],
+                    )
+                )
+        except Exception:
+            logger.error(
+                msg="There was an error and could not generate the data model. Check your skill.yaml file."
+            )
+            sys.exit()
 
-        super().__init__(
-            "weather_station_datamodel", [self.attribute_country, self.attribute_city]
-        )
+        super().__init__("weather_station_datamodel", self.attributes)

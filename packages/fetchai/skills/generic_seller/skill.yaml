@@ -13,7 +13,6 @@ handlers:
   fipa:
     class_name: FIPAHandler
     args: {}
-tasks: {}
 shared_classes:
   strategy:
     class_name: Strategy
@@ -23,11 +22,23 @@ shared_classes:
       currency_id: 'FET'
       ledger_id: 'fetchai'
       is_ledger_tx: True
-      has_sensor: False
-      data:
+      has_data_source: False
+      data_for_sale:
         wind: 10
         pressure: 20
         temperature: 26
+      datamodel:
+        Attribute1:
+          name: country
+          type: str
+          is_required: True
+        Attribute2:
+          name: city
+          type: str
+          is_required: True
+      scheme:
+        country: UK
+        city: Cambridge
   dialogues:
     class_name: Dialogues
     args: {}

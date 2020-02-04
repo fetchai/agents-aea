@@ -18,26 +18,25 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-
+import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
 from aea.skills.base import SharedClass
 
-from packages.fetchai.skills.generic_seller.generic_data_model import (
-    Generic_Data_Model,
-    SCHEME,
-)
+from packages.fetchai.skills.generic_seller.generic_data_model import Generic_Data_Model
 
 
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_TOTAL_PRICE = 10
 DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
-DEFAULT_HAS_SENSOR = False
-DEFAULT_DATA = {}  # type: Optional[Dict[str, Any]]
+DEFAULT_HAS_DATA_SOURCE = False
+DEFAULT_DATA_FOR_SALE = {}  # type: Optional[Dict[str, Any]]
 DEFAULT_IS_LEDGER_TX = True
+
+logger = logging.getLogger(__name__)
 
 
 class Strategy(SharedClass):
@@ -57,17 +56,20 @@ class Strategy(SharedClass):
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self.is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
         self._total_price = kwargs.pop("total_price", DEFAULT_TOTAL_PRICE)
-        self._has_sensor = kwargs.pop("has_sensor", DEFAULT_HAS_SENSOR)
+        self._has_data_source = kwargs.pop("has_data_source", DEFAULT_HAS_DATA_SOURCE)
 
         # Read the data from the sensor if the bool is set to True.
         # Enables us to let the user implement his data collection logic without major changes.
-        if self._has_sensor:
-            self._data = self.collect_data()
+        if self._has_data_source:
+            self._data_for_sale = self.collect_from_data_source()
         else:
-            self._data = kwargs.pop("data", DEFAULT_DATA)
+            self._data_for_sale = kwargs.pop("data_for_sale", DEFAULT_DATA_FOR_SALE)
 
         super().__init__(**kwargs)
         self._oef_msg_id = 0
+
+        self._scheme = kwargs.pop("scheme")
+        self._datamodel = kwargs.pop("datamodel")
 
     def get_next_oef_msg_id(self) -> int:
         """
@@ -84,7 +86,7 @@ class Strategy(SharedClass):
 
         :return: a description of the offered services
         """
-        desc = Description(SCHEME, data_model=Generic_Data_Model())
+        desc = Description(self._scheme, data_model=Generic_Data_Model(self._datamodel))
         return desc
 
     def is_matching_supply(self, query: Query) -> bool:
@@ -124,8 +126,8 @@ class Strategy(SharedClass):
                 "tx_nonce": tx_nonce if tx_nonce is not None else "",
             }
         )
-        return proposal, self._data
+        return proposal, self._data_for_sale
 
-    def collect_data(self):
+    def collect_from_data_source(self):
         """Implement the logic to communicate with the sensor."""
         raise NotImplementedError
