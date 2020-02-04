@@ -40,7 +40,16 @@ class TwoPartyNegotiationMessage(Message):
 
     _speech_acts = {
         "cfp": {"query": DataModel},
-        "propose": {"number": int, "price": float, "description": str, "flag": bool, "query": DataModel, "proposal": Optional[Dict[IOTApp7, bytes]], "rounds": FrozenSet[int], "items": Tuple[Unit]},
+        "propose": {
+            "number": int,
+            "price": float,
+            "description": str,
+            "flag": bool,
+            "query": DataModel,
+            "proposal": Optional[Dict[IOTApp7, bytes]],
+            "rounds": FrozenSet[int],
+            "items": Tuple[Unit],
+        },
         "accept": {},
         "decline": {},
         "match_accept": {},
@@ -212,7 +221,10 @@ class TwoPartyNegotiationMessage(Message):
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
-            elif self.performative == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
+            elif (
+                self.performative
+                == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT
+            ):
                 expected_nb_of_contents = 0
 
             # # Check correct content count
