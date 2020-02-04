@@ -31,7 +31,7 @@ shared_classes:
       search_query:
         search_term: country
         search_value: UK
-        search_type: '=='
+        constraint_type: '=='
   dialogues:
     class_name: Dialogues
     args: {}

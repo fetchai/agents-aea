@@ -69,7 +69,7 @@ class Strategy(SharedClass):
         self._oef_msg_id = 0
 
         self._scheme = kwargs.pop("scheme")
-        self._datamodel = kwargs.pop("datamodel")
+        self._datamodel = kwargs.pop("search_datamodel")
 
     def get_next_oef_msg_id(self) -> int:
         """

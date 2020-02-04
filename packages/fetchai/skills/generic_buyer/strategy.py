@@ -70,7 +70,7 @@ class Strategy(SharedClass):
                 Constraint(
                     self.search_query["search_term"],
                     ConstraintType(
-                        self.search_query["search_type"],
+                        self.search_query["constraint_type"],
                         self.search_query["search_value"],
                     ),
                 )

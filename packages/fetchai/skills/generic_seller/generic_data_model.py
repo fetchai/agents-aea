@@ -19,7 +19,6 @@
 
 """This package contains the dataModel for the generic seller aea."""
 import logging
-import sys
 from typing import Any, Dict
 
 from aea.helpers.search.models import Attribute, DataModel
@@ -32,22 +31,23 @@ logger = logging.getLogger(__name__)
 class Generic_Data_Model(DataModel):
     """Data model for the generic seller aea."""
 
-    def __init__(self, data_model_dict: Dict[str, Any]):
+    def __init__(self, data_model_attributes: Dict[str, Any]):
         """Initialise the dataModel."""
         self.attributes = []
-        try:
-            for _k, v in data_model_dict.items():
-                self.attributes.append(
-                    Attribute(
-                        name=v["name"],
-                        type=SUPPORTED_TYPES[v["type"]],
-                        is_required=v["is_required"],
-                    )
+        for values in data_model_attributes.values():
+            assert values['type'] in SUPPORTED_TYPES.keys(), "Type is not supported. Use str, int, float or bool"
+            assert isinstance(
+                SUPPORTED_TYPES[values["type"]], values["name"]
+            ), "The datamodel values are of wrong type!"
+            assert isinstance(
+                bool, values["is_required"]
+            ), "Wrong type!! is_required must be bool"
+            self.attributes.append(
+                Attribute(
+                    name=values["name"],
+                    type=SUPPORTED_TYPES[values["type"]],
+                    is_required=values["is_required"],
                 )
-        except Exception:
-            logger.error(
-                msg="There was an error and could not generate the data model. Check your skill.yaml file."
             )
-            sys.exit()
 
         super().__init__("weather_station_datamodel", self.attributes)

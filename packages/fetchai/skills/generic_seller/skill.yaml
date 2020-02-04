@@ -27,12 +27,12 @@ shared_classes:
         wind: 10
         pressure: 20
         temperature: 26
-      datamodel:
-        Attribute1:
+      search_datamodel:
+        attribute_1:
           name: country
           type: str
           is_required: True
-        Attribute2:
+        attribute_2:
           name: city
           type: str
           is_required: True
