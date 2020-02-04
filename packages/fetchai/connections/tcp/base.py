@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Base classes for TCP communication."""
-
 import logging
 import struct
 from abc import ABC, abstractmethod

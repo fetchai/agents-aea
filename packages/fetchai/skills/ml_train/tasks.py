@@ -26,7 +26,7 @@ import numpy as np
 
 from tensorflow import keras
 
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 logger = logging.getLogger("aea.gym_skill")
 
@@ -34,27 +34,32 @@ logger = logging.getLogger("aea.gym_skill")
 class MLTrainTask(Task):
     """ML train task."""
 
-    def __init__(self, train_data: Tuple[np.ndarray, np.ndarray], *args, **kwargs):
+    def __init__(
+        self,
+        train_data: Tuple[np.ndarray, np.ndarray],
+        model: keras.Model,
+        epochs_per_batch: int = 10,
+        batch_size: int = 32,
+    ):
         """Initialize the task."""
-        super().__init__(*args, **kwargs)
+        super().__init__()
         self.train_x, self.train_y = train_data
 
-        self.model = self.context.model.tf_model  # type: keras.Model
-        self.epochs_per_batch = kwargs.pop("epochs_per_batch", 10)
-        # TODO not sure it's relevant - MLTrainTask already trains over a single batch.
-        self.batch_size = kwargs.pop("batch_size", 32)
+        self.model = model
+        self.epochs_per_batch = epochs_per_batch
+        self.batch_size = batch_size
 
     def setup(self) -> None:
         """Set up the task."""
         logger.info("ML Train task: setup method called.")
 
-    def execute(self, *args, **kwargs) -> None:
+    def execute(self, *args, **kwargs) -> keras.Model:
         """Execute the task."""
         logger.info("Start training with {} rows".format(self.train_x.shape[0]))
         self.model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)
         loss, acc = self.model.evaluate(self.train_x, self.train_y, verbose=2)
         logger.info("Loss: {}, Acc: {}".format(loss, acc))
-        self.completed = True
+        return self.model
 
     def teardown(self) -> None:
         """Teardown the task."""

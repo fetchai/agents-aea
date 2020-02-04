@@ -13,7 +13,6 @@ handlers:
   ml_trade:
     class_name: MLTradeHandler
     args: {}
-tasks: {}
 shared_classes:
   strategy:
     class_name: Strategy

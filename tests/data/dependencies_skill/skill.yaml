@@ -5,7 +5,6 @@ license: Apache 2.0
 fingerprint: ""
 behaviours: {}
 handlers: {}
-tasks: {}
 shared_classes: {}
 protocols: ["fetchai/default:0.1.0"]
 dependencies:

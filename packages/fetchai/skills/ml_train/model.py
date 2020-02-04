@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the strategy class."""
-
+import logging
 import threading
 from pathlib import Path
 
@@ -27,6 +27,8 @@ from tensorflow import keras
 from aea.skills.base import SharedClass
 
 DEFAULT_MODEL_CONFIG_PATH = str(Path("..", "..", "model.config").resolve())
+
+logger = logging.getLogger("aea.gym_skill")
 
 
 class Model(SharedClass):
@@ -57,12 +59,33 @@ class Model(SharedClass):
         )
         self._lock = threading.Lock()
 
-    @property
-    def tf_model(self) -> keras.Model:
-        """Get the TensorFlow model."""
+    def fit(self, *args, **kwargs):
+        """Fit a model."""
         with self._lock:
-            return self._model
+            return self._model.fit(*args, **kwargs)
+
+    def predict(self, *args, **kwargs):
+        """Predict."""
+        with self._lock:
+            return self._model.predict(*args, **kwargs)
+
+    def evaluate(self, *args, **kwargs):
+        """Predict."""
+        with self._lock:
+            return self._model.evaluate(*args, **kwargs)
 
     def save(self):
         """Save the model weights."""
         # TODO to implement.
+
+    def _update(self, X, y, epochs):
+        """Update the ML model."""
+        logger.info("Start training with {} rows".format(X.shape[0]))
+        self.fit(X, y, epochs=epochs)
+        loss, acc = self.evaluate(X, y, verbose=2)
+        logger.info("Loss: {}, Acc: {}".format(loss, acc))
+
+    def update(self, X, y, epochs):
+        """Update the ML model."""
+        thread = threading.Thread(target=self.fit, args=[X, y, epochs])
+        thread.start()

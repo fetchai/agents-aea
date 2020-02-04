@@ -28,7 +28,6 @@ from enum import Enum
 from typing import List, Optional
 
 from aea.connections.base import Connection
-from aea.crypto.wallet import Wallet
 from aea.mail.base import InBox, Multiplexer, OutBox
 
 logger = logging.getLogger(__name__)
@@ -62,7 +61,6 @@ class Agent(ABC):
         self,
         name: str,
         connections: List[Connection],
-        wallet: Wallet,
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
         debug: bool = False,
@@ -73,7 +71,6 @@ class Agent(ABC):
 
         :param name: the name of the agent
         :param connections: the list of connections of the agent.
-        :param wallet: the crypto wallet of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
         :param debug: if True, run the agent in debug mode.
@@ -83,7 +80,6 @@ class Agent(ABC):
         """
         self._name = name
         self._connections = connections
-        self._wallet = wallet
 
         self._multiplexer = Multiplexer(self._connections, loop=loop)
         self._inbox = InBox(self._multiplexer)
@@ -115,11 +111,6 @@ class Agent(ABC):
     def name(self) -> str:
         """Get the agent name."""
         return self._name
-
-    @property
-    def wallet(self) -> Wallet:
-        """Get the wallet."""
-        return self._wallet
 
     @property
     def liveness(self) -> Liveness:

@@ -19,18 +19,14 @@
 
 """This module contains the tests of the agent module."""
 
-import os
 import time
 from threading import Thread
 
 from aea.agent import Agent, AgentState
 from aea.configurations.base import PublicId
-from aea.crypto.wallet import Wallet
 from aea.mail.base import InBox, OutBox
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-
-from .conftest import CUR_PATH
 
 
 class DummyAgent(Agent):
@@ -65,8 +61,6 @@ def test_run_agent():
     """Test that we can set up and then run the agent."""
     with LocalNode() as node:
         agent_name = "dummyagent"
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
         agent = DummyAgent(
             agent_name,
             [
@@ -74,10 +68,8 @@ def test_run_agent():
                     "mypbk", node, connection_id=PublicId("fetchai", "oef", "0.1.0")
                 )
             ],
-            wallet,
         )
         assert agent.name == agent_name
-        assert isinstance(agent.wallet, Wallet)
         assert (
             agent.agent_state == AgentState.INITIATED
         ), "Agent state must be 'initiated'"

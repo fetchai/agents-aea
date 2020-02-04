@@ -19,13 +19,34 @@
 """This module contains the classes for specific behaviours."""
 import datetime
 from abc import ABC
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from aea.skills.base import Behaviour
 
 
 class SimpleBehaviour(Behaviour, ABC):
     """This class implements a simple behaviour."""
+
+    def __init__(self, act: Optional[Callable[[], None]] = None, **kwargs):
+        """
+        Initialize a simple behaviour.
+
+        :param act: the act callable.
+        :param kwargs: the keyword arguments to be passed to the parent class.
+        """
+        super().__init__(**kwargs)
+        if act is not None:
+            self.act = act  # type: ignore
+
+    def setup(self) -> None:
+        """Set the behaviour up."""
+
+    def act(self) -> None:
+        """Do the action."""
+        raise NotImplementedError
+
+    def teardown(self) -> None:
+        """Tear the behaviour down."""
 
 
 class CompositeBehaviour(Behaviour, ABC):
