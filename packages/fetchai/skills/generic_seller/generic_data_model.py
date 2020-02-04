@@ -35,7 +35,9 @@ class Generic_Data_Model(DataModel):
         """Initialise the dataModel."""
         self.attributes = []
         for values in data_model_attributes.values():
-            assert values['type'] in SUPPORTED_TYPES.keys(), "Type is not supported. Use str, int, float or bool"
+            assert (
+                values["type"] in SUPPORTED_TYPES.keys()
+            ), "Type is not supported. Use str, int, float or bool"
             assert isinstance(
                 SUPPORTED_TYPES[values["type"]], values["name"]
             ), "The datamodel values are of wrong type!"
