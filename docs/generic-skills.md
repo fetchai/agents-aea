@@ -26,9 +26,9 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for all the following demos.
 
-## Demo 1: Ledger payment
+## Demo: Ledger payment
 
-A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` or `Ethereum Ropsten testnet`. This demo assumes the buyer
+A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` or Ethereum Ropsten `testnet`. This demo assumes the buyer
 trusts the seller AEA to send the data upon successful payment.
 
 ### Create the seller AEA (ledger version)
@@ -166,7 +166,7 @@ client AEA is using (you need to first load your AEAs private key into MetaMask)
 
 ## Run the AEAs
 
-You can change the end point's address and port by modifying the connection's yaml file (my_thermometer_aea/connection/oef/connection.yaml)
+You can change the end point's address and port by modifying the connection's yaml file (my_seller_aea/connection/oef/connection.yaml)
 
 Under config locate :
 
