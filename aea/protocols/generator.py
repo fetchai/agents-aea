@@ -344,11 +344,15 @@ class ProtocolGenerator:
                 content_type.index("[") + 1 : content_type.rindex("]")
             ]
             # check the elements types
+            check_str += indents + "assert all(\n"
             check_str += (
                 indents
-                + "assert all(type(element) == {} for element in self.{}), \"Elements of {} are not '{}'.\"\n".format(
-                    element_type, content_name, content_name, element_type
+                + "    type(element) == {} for element in self.{}\n".format(
+                    element_type, content_name
                 )
+            )
+            check_str += indents + "), \"Elements of {} are not '{}'.\"\n".format(
+                content_name, element_type
             )
         elif content_type.startswith("Tuple["):
             # check the type
@@ -362,11 +366,15 @@ class ProtocolGenerator:
                 content_type.index("[") + 1 : content_type.rindex("]")
             ]
             # check the elements types
+            check_str += indents + "assert all(\n"
             check_str += (
                 indents
-                + "assert all(type(element) == {} for element in self.{}), \"Elements of {} are not '{}'.\"\n".format(
-                    element_type, content_name, content_name, element_type
+                + "    type(element) == {} for element in self.{}\n".format(
+                    element_type, content_name
                 )
+            )
+            check_str += indents + "), \"Elements of {} are not '{}'.\"\n".format(
+                content_name, element_type
             )
         elif content_type.startswith("Dict["):
             # check the type
@@ -386,16 +394,21 @@ class ProtocolGenerator:
             check_str += indents + "for key, value in self.{}.items():\n".format(
                 content_name
             )
+            check_str += indents + "    assert (\n"
+            check_str += indents + "        type(key) == {}\n".format(element1_type)
             check_str += (
                 indents
-                + "    assert type(key) == {}, \"Keys of {} dictionary are not '{}'.\"\n".format(
-                    element1_type, content_name, element1_type
+                + "    ), \"Keys of {} dictionary are not '{}'.\"\n".format(
+                    content_name, element1_type
                 )
             )
+
+            check_str += indents + "    assert (\n"
+            check_str += indents + "        type(value) == {}\n".format(element2_type)
             check_str += (
                 indents
-                + "    assert type(value) == {}, \"Values of {} dictionary are not '{}'.\"\n".format(
-                    element2_type, content_name, element2_type
+                + "    ), \"Values of {} dictionary are not '{}'.\"\n".format(
+                    content_name, element2_type
                 )
             )
         else:

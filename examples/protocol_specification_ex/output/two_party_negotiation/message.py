@@ -9,6 +9,14 @@ from aea.protocols.base import Message
 DEFAULT_BODY_SIZE = 4
 
 
+class DataModel:
+    """This class represents an instance of DataModel."""
+
+    def __init__(self):
+        """Initialise an instance of DataModel."""
+        raise NotImplementedError
+
+
 class Unit:
     """This class represents an instance of Unit."""
 
@@ -22,14 +30,6 @@ class IOTApp7:
 
     def __init__(self):
         """Initialise an instance of IOTApp7."""
-        raise NotImplementedError
-
-
-class DataModel:
-    """This class represents an instance of DataModel."""
-
-    def __init__(self):
-        """Initialise an instance of DataModel."""
         raise NotImplementedError
 
 
@@ -50,8 +50,8 @@ class TwoPartyNegotiationMessage(Message):
         """Performatives for the two_party_negotiation protocol."""
 
         DECLINE = "decline"
-        CFP = "cfp"
         MATCH_ACCEPT = "match_accept"
+        CFP = "cfp"
         PROPOSE = "propose"
         ACCEPT = "accept"
 
@@ -194,12 +194,20 @@ class TwoPartyNegotiationMessage(Message):
                 if self.is_set("proposal"):
                     assert type(self.proposal) == dict, "proposal is not 'dict'."
                     for key, value in self.proposal.items():
-                        assert type(key) == IOTApp7, "Keys of proposal dictionary are not 'IOTApp7'."
-                        assert type(value) == bytes, "Values of proposal dictionary are not 'bytes'."
+                        assert (
+                            type(key) == IOTApp7
+                        ), "Keys of proposal dictionary are not 'IOTApp7'."
+                        assert (
+                            type(value) == bytes
+                        ), "Values of proposal dictionary are not 'bytes'."
                 assert type(self.rounds) == frozenset, "rounds is not 'frozenset'."
-                assert all(type(element) == int for element in self.rounds), "Elements of rounds are not 'int'."
+                assert all(
+                    type(element) == int for element in self.rounds
+                ), "Elements of rounds are not 'int'."
                 assert type(self.items) == tuple, "items is not 'tuple'."
-                assert all(type(element) == Unit for element in self.items), "Elements of items are not 'Unit'."
+                assert all(
+                    type(element) == Unit for element in self.items
+                ), "Elements of items are not 'Unit'."
             elif self.performative == TwoPartyNegotiationMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
