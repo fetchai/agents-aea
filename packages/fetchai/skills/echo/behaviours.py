@@ -21,12 +21,12 @@
 
 import logging
 
-from aea.skills.base import Behaviour
+from aea.skills.behaviours import TickerBehaviour
 
 logger = logging.getLogger("aea.echo_skill")
 
 
-class EchoBehaviour(Behaviour):
+class EchoBehaviour(TickerBehaviour):
     """Echo behaviour."""
 
     def __init__(self, **kwargs):

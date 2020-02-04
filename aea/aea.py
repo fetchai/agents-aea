@@ -20,7 +20,6 @@
 """This module contains the implementation of an Autonomous Economic Agent."""
 import logging
 from asyncio import AbstractEventLoop
-from concurrent.futures import Executor
 from typing import List, Optional, cast
 
 from aea.agent import Agent
@@ -54,7 +53,6 @@ class AEA(Agent):
         debug: bool = False,
         programmatic: bool = True,
         max_reactions: int = 20,
-        executor: Optional[Executor] = None,
     ) -> None:
         """
         Instantiate the agent.
@@ -69,13 +67,11 @@ class AEA(Agent):
         :param debug: if True, run the agent in debug mode.
         :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
         :param max_reactions: the processing rate of messages per iteration.
-        :param executor: executor for asynchronous execution of tasks.
 
         :return: None
         """
         super().__init__(
             name=name,
-            wallet=wallet,
             connections=connections,
             loop=loop,
             timeout=timeout,
@@ -83,8 +79,9 @@ class AEA(Agent):
             programmatic=programmatic,
         )
 
+        self._wallet = wallet
         self.max_reactions = max_reactions
-        self._task_manager = TaskManager(executor)
+        self._task_manager = TaskManager()
         self._decision_maker = DecisionMaker(
             self.name, self.max_reactions, self.outbox, self.wallet, ledger_apis
         )
@@ -99,10 +96,15 @@ class AEA(Agent):
             self.decision_maker.ownership_state,
             self.decision_maker.preferences,
             self.decision_maker.goal_pursuit_readiness,
-            self.task_manager.task_queue,
+            self.task_manager,
         )
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
+
+    @property
+    def wallet(self) -> Wallet:
+        """Get the wallet."""
+        return self._wallet
 
     @property
     def decision_maker(self) -> DecisionMaker:
@@ -142,9 +144,9 @@ class AEA(Agent):
         """
         if not self.programmatic:
             self.resources.load(self.context)
-        self.resources.setup()
         self.task_manager.start()
         self.decision_maker.start()
+        self.resources.setup()
 
     def act(self) -> None:
         """
@@ -198,10 +200,6 @@ class AEA(Agent):
             logger.warning("Decoding error. Exception: {}".format(str(e)))
             return
 
-        if not protocol.check(msg):  # pragma: no cover
-            error_handler.send_invalid_message(envelope)  # pragma: no cover
-            return  # pragma: no cover
-
         handlers = self.filter.get_active_handlers(protocol.id)
         if len(handlers) == 0:
             if error_handler is not None:
@@ -217,9 +215,6 @@ class AEA(Agent):
 
         :return None
         """
-        # TODO: task should be submitted by the behaviours and handlers
-        for task in self.filter.get_active_tasks():
-            task.execute()
         self.filter.handle_internal_messages()
 
     def teardown(self) -> None:

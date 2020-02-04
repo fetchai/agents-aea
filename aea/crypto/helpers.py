@@ -36,6 +36,7 @@ FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
 ETHEREUM_PRIVATE_KEY_FILE = "eth_private_key.txt"
 FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
 ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
+TESTNETS = {FETCHAI: "testnet", ETHEREUM: "ropsten"}
 
 logger = logging.getLogger(__name__)
 

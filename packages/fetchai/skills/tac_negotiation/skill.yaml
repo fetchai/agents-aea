@@ -9,6 +9,10 @@ behaviours:
     class_name: GoodsRegisterAndSearchBehaviour
     args:
       services_interval: 5
+  clean_up:
+    class_name: TransactionCleanUpTask
+    args:
+      tick_interval: 5.0
 handlers:
   fipa:
     class_name: FIPANegotiationHandler
@@ -18,10 +22,6 @@ handlers:
     args: {}
   oef:
     class_name: OEFSearchHandler
-    args: {}
-tasks:
-  clean_up:
-    class_name: TransactionCleanUpTask
     args: {}
 shared_classes:
   search:

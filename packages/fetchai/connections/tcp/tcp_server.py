@@ -63,7 +63,7 @@ class TCPServerConnection(TCPConnection):
         """
         logger.debug("Waiting for client address...")
         address_bytes = await self._recv(reader)
-        if address_bytes:
+        if address_bytes is not None:
             address_bytes = cast(bytes, address_bytes)
             address = address_bytes.decode("utf-8")
             logger.debug("Public key of the client: {}".format(address))
@@ -122,6 +122,7 @@ class TCPServerConnection(TCPConnection):
             t.cancel()
 
         self._server.close()
+        await self._server.wait_closed()
 
     def select_writer_from_envelope(self, envelope: Envelope):
         """Select the destination, given the envelope."""

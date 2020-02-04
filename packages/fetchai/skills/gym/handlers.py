@@ -26,6 +26,7 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.gym.message import GymMessage
+from packages.fetchai.skills.gym.rl_agent import DEFAULT_NB_STEPS
 from packages.fetchai.skills.gym.tasks import GymTask
 
 logger = logging.getLogger("aea.gym_skill")
@@ -41,6 +42,12 @@ class GymHandler(Handler):
         logger.info("GymHandler.__init__: arguments: {}".format(kwargs))
         super().__init__(**kwargs)
 
+        nb_steps = kwargs.get("nb_steps", DEFAULT_NB_STEPS)
+        self.task = GymTask(self.context, nb_steps)
+        # launch the task
+        self.task.setup()
+        self.task.execute()
+
     def setup(self) -> None:
         """Set up the handler."""
         logger.info("Gym handler: setup method called.")
@@ -54,9 +61,7 @@ class GymHandler(Handler):
         """
         gym_msg = cast(GymMessage, message)
         if gym_msg.performative == GymMessage.Performative.PERCEPT:
-            assert self.context.tasks is not None, "Incorrect initialization."
-            gym_task = cast(GymTask, self.context.tasks.gym)
-            gym_task.proxy_env_queue.put(gym_msg)
+            self.task.proxy_env_queue.put(gym_msg)
         else:
             raise ValueError(
                 "Unexpected performative or no step_id: {}".format(gym_msg.performative)
@@ -69,3 +74,4 @@ class GymHandler(Handler):
         :return: None
         """
         logger.info("Gym handler: teardown method called.")
+        self.task.teardown()

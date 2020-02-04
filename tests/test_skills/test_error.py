@@ -186,7 +186,7 @@ class TestSkillError:
 
     def test_error_task_instantiation(self):
         """Test that we can instantiate the 'ErrorTask' class."""
-        ErrorTask(name="error", skill_context=self.skill_context)
+        ErrorTask()
 
     @classmethod
     def teardown_class(cls):

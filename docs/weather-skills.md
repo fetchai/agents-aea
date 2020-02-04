@@ -9,8 +9,16 @@ The AEA weather skills demonstrate an interaction between two AEAs.
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+##Discussion
+
+The scope of the specific demo is to demonstrate how to create a simple AEA with the usage of the AEA framework and a database. The weather_station AEA
+will read data from the database, that is populated with readings from a weather station, based on the requested dates and will deliver the data to the client upon payment.
+This demo does not utilize a smart contract. As a result, we interact with a ledger only to complete a transaction.
+
+You can use this AEA as an example of how to read data from a database and advertise these to possible clients.  
 
 ### Launch an OEF node
+
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
 python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
