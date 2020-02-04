@@ -27,12 +27,12 @@ python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
 
 Keep it running for all the following demos.
 
-## Demo 1: Fetch.ai ledger payment
+## Demo instructions: Ledger payment
 
-A demo to run the thermometer scenario with a true ledger transaction on Fetch.ai `testnet`. This demo assumes the thermometer
-client trusts the thermometer AEA to send the data upon successful payment.
+A demo to run the thermometer scenario with a true ledger transaction on Fetch.ai `testnet` or Ethereum `ropsten` network. This demo assumes the buyer
+trusts the seller AEA to send the data upon successful payment.
 
-### Create the thermometer AEA (ledger version)
+### Create the thermometer AEA
 
 Create the AEA that will provide thermometer measurements.
 
@@ -44,7 +44,7 @@ aea add skill fetchai/thermometer:0.1.0
 aea install
 ```
 
-### Create the thermometer client (ledger version)
+### Create the thermometer client
 
 In another terminal, create the AEA that will query the thermometer AEA.
 
@@ -56,28 +56,106 @@ aea add skill fetchai/thermometer_client:0.1.0
 aea install
 ```
 
-Additionally, create the private key for the thermometer client AEA.
+Additionally, create the private key for the weather_client AEA based on the network you want to transact.
+
+To generate and add a key for Fetch.ai use:
 ```bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
+To generate and add a key for Ethereum use:
+```bash
+aea generate-key ethereum
+aea add-key ethereum eth_private_key.txt
+```
+
 ### Update the AEA configs
 
 Both in `my_thermometer_aea/aea-config.yaml` and
-`my_thermometer_client/aea-config.yaml`, replace `ledger_apis: {}` with the following.
+`my_thermometer_client/aea-config.yaml`, replace `ledger_apis: {}` with the following based on the network you want to connect.
 
+To connect to Fetchai:
 ``` yaml
 ledger_apis:
   fetchai:
     network: testnet
 ```
 
-### Fund the thermometer client AEA
+To connect to Ethereum:
+```yaml
+ledger_apis:
+  ethereum:
+    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
+    chain_id: 3
+    gas_price: 50
+```
 
-Create some wealth for your thermometer client on the Fetch.ai `testnet`. (It takes a while).
+### Fund the weather client AEA
+
+Create some wealth for your weather client based on the network you want to transact with: 
+
+On the Fetch.ai `testnet` network.
 ``` bash
 aea generate-wealth fetchai
+```
+
+On the Ethereum `ropsten` . (It takes a while).
+``` bash
+aea generate-wealth ethereum
+```
+
+### Update the skill configs
+
+In the thermometer skill config (`my_thermometer_aea/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
+
+```bash
+|----------------------------------------------------------------------|
+|         FETCHAI                   |           ETHEREUM               |
+|-----------------------------------|----------------------------------|
+|shared_classes:                    |shared_classes:                   |              
+|  strategy:                        |  strategy:                       |
+|     class_name: Strategy          |     class_name: Strategy         |
+|    args:                          |    args:                         |
+|      price_per_row: 1             |      price_per_row: 1            |
+|      seller_tx_fee: 0             |      seller_tx_fee: 0            |
+|      currency_id: 'FET'           |      currency_id: 'ETH'          |
+|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
+|      has_sensor: True             |      has_sensor: True            |
+|      is_ledger_tx: True           |      is_ledger_tx: True          |
+|----------------------------------------------------------------------| 
+```
+
+An other way to update the skill config is via the `aea config get/set` command.
+``` bash
+aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.ledger_id ethereum
+```
+
+In the thermometer client skill config (`my_thermometer_client/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
+
+```bash
+|----------------------------------------------------------------------|
+|         FETCHAI                   |           ETHEREUM               |
+|-----------------------------------|----------------------------------|
+|shared_classes:                    |shared_classes:                   |              
+|  strategy:                        |  strategy:                       |
+|     class_name: Strategy          |     class_name: Strategy         |
+|    args:                          |    args:                         |
+|      max_price: 4                 |      max_price: 40               |
+|      max_buyer_tx_fee: 1          |      max_buyer_tx_fee: 200000    |
+|      currency_id: 'FET'           |      currency_id: 'ETH'          |
+|      ledger_id: 'fetchai'         |      ledger_id: 'ethereum'       |
+|      is_ledger_tx: True           |      is_ledger_tx: True          |
+|ledgers: ['fetchai']               |ledgers: ['ethereum']             |
+|----------------------------------------------------------------------| 
+```
+
+An other way to update the skill config is via the `aea config get/set` command.
+``` bash
+aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.max_buyer_tx_fee 10000 --type int
+aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.ledger_id ethereum
 ```
 
 ## Run the AEAs
@@ -105,113 +183,6 @@ You will see that the AEAs negotiate and then transact using the Fetch.ai testne
 ## Delete the AEAs
 When you're done, go up a level and delete the AEAs.
 ```bash 
-cd ..
-aea delete my_thermometer_aea
-aea delete my_thermometer_client
-```
-## Demo instructions 2: Ethereum ledger payment
-
-A demo to run the same scenario but with a true ledger transaction on the Ethereum Ropsten `testnet`. 
-This demo assumes the thermometer client trusts the thermometer AEA to send the data upon successful payment.
-
-### Create the thermometer AEA (ledger version)
-
-Create the AEA that will provide thermometer measurements.
-
-``` bash
-aea create my_thermometer_aea
-cd my_thermometer_aea
-aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/thermometer:0.1.0
-aea install
-```
-
-### Create the thermometer client (ledger version)
-
-In another terminal, create the AEA that will query the thermometer AEA.
-
-``` bash
-aea create my_thermometer_client
-cd my_thermometer_client
-aea add connection fetchai/oef:0.1.0
-aea add skill fetchai/thermometer_client:0.1.0
-aea install
-```
-
-Additionally, create the private key for the thermometer client AEA.
-```bash
-aea generate-key ethereum
-aea add-key ethereum eth_private_key.txt
-```
-
-### Update the AEA configs
-
-Both in `my_thermometer_aea/aea-config.yaml` and
-`my_thermometer_client/aea-config.yaml`, replace `ledger_apis: []` with the following.
-
-``` yaml
-ledger_apis:
-  ethereum:
-    address: https://ropsten.infura.io/v3/f00f7b3ba0e848ddbdc8941c527447fe
-    chain_id: 3
-    gas_price: 50
-```
-
-### Update the skill configs
-
-In the thermometer skill config (`my_thermometer_aea/skills/thermometer/skill.yaml`) under strategy, amend the `currency_id` and `ledger_id` as follows.
-``` bash
-currency_id: 'ETH'
-ledger_id: 'ethereum'
-```
-An other way to update the skill config is via the `aea config get/set` command.
-``` bash
-aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.ledger_id ethereum
-```
-
-In the thermometer client skill config (`my_thermometer_client/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
-``` bash
-max_buyer_tx_fee: 20000
-currency_id: 'ETH'
-ledger_id: 'ethereum'
-```
-An other way to update the skill config is via the `aea config get/set` command.
-``` bash
-aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.max_buyer_tx_fee 10000 --type int
-aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.ledger_id ethereum
-```
-
-### Fund the thermometer client AEA
-
-Create some wealth for your thermometer client on the Ethereum Ropsten test net.
-
-Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your thermometer
-client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_thermometer_client/eth_private_key.txt`.
-
-### Run the AEAs
-You can change the end point's address and port by modifying the connection's yaml file (my_thermometer_aea/connection/oef/connection.yaml)
-
-Under config locate :
-
-```bash
-addr: ${OEF_ADDR: 127.0.0.1}
-```
- and replace it with your ip (The ip of the machine that runs the oef image.)
-
-
-Run both AEAs, from their respective terminals.
-``` bash
-aea run --connections fetchai/oef:0.1.0
-```
-You will see that the AEAs negotiate and then transact using the Ethereum `testnet`.
-
-### Delete the AEAs
-
-When you're done, go up a level and delete the AEAs.
-
-``` bash
 cd ..
 aea delete my_thermometer_aea
 aea delete my_thermometer_client

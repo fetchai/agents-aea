@@ -7,6 +7,14 @@ The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that u
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+##Discussion
+
+The `gym` example demonstrates the AEA framework's flexibility with respect to Reinforcement Learning using OpenAI's `gym` framework.
+
+There is no immediate use case for this example as you can train an RL agent without the AEA proxy layer just fine (and faster). 
+
+However, the example decouples the RL agent from the `gym.Env` allowing them to run in separate execution environments, potentially owned by different entities.
+
 ## Demo instructions
 
 ### Create the AEA
