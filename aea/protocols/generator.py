@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the protocol generator."""
 
+import itertools
 import os
 import re
 from os import path
@@ -318,6 +319,95 @@ class ProtocolGenerator:
 
         return enum_str
 
+    @staticmethod
+    def _check_content_type_str(no_of_indents: int, content_name, content_type) -> str:
+        check_str = ""
+        indents = ""
+        for _ in itertools.repeat(None, no_of_indents):
+            indents += "    "
+        if content_type.startswith("Optional["):
+            # check if the content exists then...
+            check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
+            indents += "    "
+            content_type = content_type[
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
+        if content_type.startswith("FrozenSet["):
+            # check the type
+            check_str += (
+                indents
+                + "assert type(self.{}) == frozenset, \"{} is not 'frozenset'.\"\n".format(
+                    content_name, content_name
+                )
+            )
+            element_type = content_type[
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
+            # check the elements types
+            check_str += (
+                indents
+                + "assert all(type(element) == {} for element in self.{}), \"Elements of {} are not '{}'.\"\n".format(
+                    element_type, content_name, content_name, element_type
+                )
+            )
+        elif content_type.startswith("Tuple["):
+            # check the type
+            check_str += (
+                indents
+                + "assert type(self.{}) == tuple, \"{} is not 'tuple'.\"\n".format(
+                    content_name, content_name
+                )
+            )
+            element_type = content_type[
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
+            # check the elements types
+            check_str += (
+                indents
+                + "assert all(type(element) == {} for element in self.{}), \"Elements of {} are not '{}'.\"\n".format(
+                    element_type, content_name, content_name, element_type
+                )
+            )
+        elif content_type.startswith("Dict["):
+            # check the type
+            check_str += (
+                indents
+                + "assert type(self.{}) == dict, \"{} is not 'dict'.\"\n".format(
+                    content_name, content_name
+                )
+            )
+            element1_type = content_type[
+                content_type.index("[") + 1 : content_type.index(",")
+            ]
+            element2_type = content_type[
+                content_type.index(",") + 2 : content_type.rindex("]")
+            ]
+            # check the keys type then check the values type
+            check_str += indents + "for key, value in self.{}.items():\n".format(
+                content_name
+            )
+            check_str += (
+                indents
+                + "    assert type(key) == {}, \"Keys of {} dictionary are not '{}'.\"\n".format(
+                    element1_type, content_name, element1_type
+                )
+            )
+            check_str += (
+                indents
+                + "    assert type(value) == {}, \"Values of {} dictionary are not '{}'.\"\n".format(
+                    element2_type, content_name, element2_type
+                )
+            )
+        else:
+            # check the type
+            check_str += (
+                indents
+                + "assert type(self.{}) == {}, \"{} is not '{}'.\"\n".format(
+                    content_name, content_type, content_name, content_type
+                )
+            )
+        return check_str
+
     def _message_class_str(self) -> str:
         """
         Produce the content of the Message class.
@@ -485,9 +575,7 @@ class ProtocolGenerator:
             if len(contents) == 0:
                 continue
             for content_name, content_type in contents.items():
-                cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
-                    content_name, content_type, content_name, content_type,
-                )
+                cls_str += self._check_content_type_str(4, content_name, content_type)
             counter += 1
         cls_str += "\n            # # Check correct content count\n"
         cls_str += "            assert (\n"

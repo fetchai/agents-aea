@@ -7,8 +7,14 @@ speech_acts:
   cfp:
     query: ct:DataModel
   propose:
+    number: pt:int
+    price: pt:float
+    description: pt:str
+    flag: pt:bool
     query: ct:DataModel
-    price: pt:optional[pt:dict[ct:DataModel, pt:bool] or pt:str or pt:dict[pt:int, ct:Unit] or pt:set[pt:int] or pt:dict[ct:IOTApp7, pt:bytes] or pt:list[ct:Ali] or pt:bool]
+    proposal: pt:optional[pt:dict[ct:IOTApp7, pt:bytes]]
+    rounds: pt:set[pt:int]
+    items: pt:list[ct:Unit]
   accept: {}
   decline: {}
   match_accept: {}
