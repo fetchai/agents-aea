@@ -68,7 +68,7 @@ class Strategy(SharedClass):
         super().__init__(**kwargs)
         self._oef_msg_id = 0
 
-        self._scheme = kwargs.pop("scheme")
+        self._scheme = kwargs.pop("search_data")
         self._datamodel = kwargs.pop("search_datamodel")
 
     def get_next_oef_msg_id(self) -> int:

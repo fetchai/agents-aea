@@ -36,7 +36,7 @@ from ...conftest import CLI_LOG_OPTION
 
 
 class TestGenericSkills:
-    """Test that thermometer skills work."""
+    """Test that generic skills work."""
 
     @pytest.fixture(autouse=True)
     def _start_oef_node(self, network_node):
@@ -52,8 +52,8 @@ class TestGenericSkills:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_themrometer(self, pytestconfig):
-        """Run the weather skills sequence."""
+    def test_generic(self, pytestconfig):
+        """Run the generic skills sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder

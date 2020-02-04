@@ -28,15 +28,15 @@ shared_classes:
         pressure: 20
         temperature: 26
       search_datamodel:
-        attribute_1:
+        attribute_one:
           name: country
           type: str
           is_required: True
-        attribute_2:
+        attribute_two:
           name: city
           type: str
           is_required: True
-      scheme:
+      search_data:
         country: UK
         city: Cambridge
   dialogues:

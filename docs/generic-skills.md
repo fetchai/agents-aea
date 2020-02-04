@@ -28,7 +28,7 @@ Keep it running for all the following demos.
 
 ## Demo: Ledger payment
 
-A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` or Ethereum Ropsten `testnet`. This demo assumes the buyer
+A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` network or Ethereum `ropsten` network. This demo assumes the buyer
 trusts the seller AEA to send the data upon successful payment.
 
 ### Create the seller AEA (ledger version)
@@ -57,13 +57,13 @@ aea install
 
 Additionally, create the private key for the buyer AEA based on the network you want to transact.
 
-To generate a key for Fetch.ai use:
+To generate and add a key for Fetch.ai use:
 ```bash
 aea generate-key fetchai
 aea add-key fetchai fet_private_key.txt
 ```
 
-To generate a key for Ethereum use:
+To generate and add a key for Ethereum use:
 ```bash
 aea generate-key ethereum
 aea add-key ethereum eth_private_key.txt
@@ -93,7 +93,7 @@ ledger_apis:
 
 ### Update the seller AEA skill configs
 
-In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_for_sale`, `datamodel`, and `scheme` with your data:
+In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_for_sale`, `datamodel`, and `search_data` with your data:
 ```bash
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
@@ -113,20 +113,20 @@ In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_fo
 |        pressure: 20               |        pressure: 20              |
 |        temperature: 26            |        temperature: 26           |
 |      datamodel:                   |      datamodel:                  |
-|        Attribute1:                |        Attribute1:               |
+|        attribute_one:             |        attribute_one:            |
 |          name: country            |          name: country           |
 |          type: str                |          type: str               |
 |          is_required: True        |          is_required: True       |
-|        Attribute2:                |        Attribute2:               |
+|        attribute_two:             |        attribute_two:            |
 |          name: city               |          name: city              |
 |          type: str                |          type: str               |
 |          is_required: True        |          is_required: True       |
-|      scheme:                      |      scheme:                     |
+|      search_data:                 |      search_data:                |
 |        country: UK                |        country: UK               |
 |        city: Cambridge            |        city: Cambridge           |
 |----------------------------------------------------------------------| 
 ```
-The `datamodel` and the `scheme` are used to register the service in the OEF and make your agent discoverable. The name of each attribute must be a key in the `scheme` dictionary.
+The `datamodel` and the `search_data` are used to register the service in the OEF and make your agent discoverable. The name of each attribute must be a key in the `search_data` dictionary.
 
 In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml`) under strategy change the `currency_id`,`ledger_id`, and at the bottom of the file the `ledgers`.
 
@@ -153,16 +153,17 @@ In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml
 
 ### Fund the buyer AEA
 
-To create some wealth for your buyer AEA on the Fetch.ai `testnet`. (It takes a while).
+To create some wealth for your buyer AEA based on the network you want to transact with:
+
+On the Fetch.ai `testnet` network.
 ``` bash
 aea generate-wealth fetchai
 ```
 
-To create some wealth for your thermometer client on the Ethereum Ropsten test net.
-
-Go to the <a href="https://faucet.metamask.io/" target=_blank>MetaMask Faucet</a> and request some test ETH for the account your thermometer
-client AEA is using (you need to first load your AEAs private key into MetaMask). Your private key is at `my_buyer_aea/eth_private_key.txt`.
-
+On the Ethereum `rospten` network.
+``` bash
+aea generate-wealth ethereum
+```
 
 ## Run the AEAs
 
