@@ -43,11 +43,15 @@ class TestHelperFile:
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         _try_validate_fet_private_key_path(private_key_path)
         with pytest.raises(SystemExit):
-            private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key_wrong.txt")
+            private_key_path = os.path.join(
+                CUR_PATH, "data", "fet_private_key_wrong.txt"
+            )
             _try_validate_fet_private_key_path(private_key_path)
 
         private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
         _try_validate_ethereum_private_key_path(private_key_path)
         with pytest.raises(SystemExit):
-            private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key_wrong.txt")
+            private_key_path = os.path.join(
+                CUR_PATH, "data", "fet_private_key_wrong.txt"
+            )
             _try_validate_ethereum_private_key_path(private_key_path)

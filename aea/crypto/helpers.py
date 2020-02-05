@@ -51,9 +51,11 @@ def _try_validate_fet_private_key_path(private_key_path: str) -> None:
         with open(private_key_path, "r") as key:
             data = key.read()
             Entity.from_hex(data)
-    except ValueError:
+    except Exception as e:
         logger.error(
-            "This is not a valid private key file: '{}'".format(private_key_path)
+            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
+                private_key_path, e
+            )
         )
         sys.exit(1)
 
@@ -70,9 +72,11 @@ def _try_validate_ethereum_private_key_path(private_key_path: str) -> None:
         with open(private_key_path, "r") as key:
             data = key.read()
             Account.from_key(data)
-    except ValueError:
+    except Exception as e:
         logger.error(
-            "This is not a valid private key file: '{}'".format(private_key_path)
+            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
+                private_key_path, e
+            )
         )
         sys.exit(1)
 

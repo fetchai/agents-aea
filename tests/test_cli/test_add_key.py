@@ -79,7 +79,7 @@ class TestAddKey:
         assert private_key_configuration.ledger == FETCHAI
         assert private_key_configuration.path == FETCHAI_PRIVATE_KEY_FILE
 
-        assert len(config.private_key_paths.read_all()) == 2
+        assert len(config.private_key_paths.read_all()) == 1
 
     def test_ethereum(self):
         """Test that the ethereum private key is created correctly."""
@@ -103,7 +103,7 @@ class TestAddKey:
         assert private_key_configuration.ledger == ETHEREUM
         assert private_key_configuration.path == ETHEREUM_PRIVATE_KEY_FILE
 
-        assert len(config.private_key_paths.read_all()) == 3
+        assert len(config.private_key_paths.read_all()) == 2
 
     @classmethod
     def teardown_class(cls):
@@ -130,8 +130,11 @@ def test_add_key_fails_bad_key():
 
             result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, pvk_file])
             assert result.exit_code == 1
+            error_message = "Invalid length of private key, received 0, expected 32"
             mock_logger_error.assert_called_with(
-                "This is not a valid private key file: '{}'".format(pvk_file)
+                "This is not a valid private key file: '{}'\n Exception: '{}'".format(
+                    pvk_file, error_message
+                )
             )
 
             # check that no key has been added.

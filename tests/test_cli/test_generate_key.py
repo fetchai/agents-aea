@@ -99,7 +99,7 @@ class TestGenerateKeyWhenAlreadyExists:
         os.chdir(cls.t)
 
     def test_fetchai(self):
-        """Test that the default private key is overwritten or not dependending on the user input."""
+        """Test that the fetchai private key is overwritten or not dependending on the user input."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"])
         assert result.exit_code == 0
         assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
@@ -110,14 +110,14 @@ class TestGenerateKeyWhenAlreadyExists:
 
         # Saying 'no' leave the files as it is.
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="n"
+            cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"], input="n"
         )
         assert result.exit_code == 0
         assert Path(FETCHAI_PRIVATE_KEY_FILE).read_bytes() == content
 
         # Saying 'yes' overwrites the file.
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="y"
+            cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"], input="y"
         )
         assert result.exit_code == 0
         assert Path(FETCHAI_PRIVATE_KEY_FILE).read_bytes() != content
