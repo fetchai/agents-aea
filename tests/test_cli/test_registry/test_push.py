@@ -23,7 +23,7 @@ from unittest import TestCase, mock
 
 from click import ClickException
 
-from aea.cli.registry.push import _remove_pycache, push_item
+from aea.cli.registry.push import _compress_dir, _remove_pycache, push_item
 
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
@@ -113,3 +113,19 @@ class RemovePycacheTestCase(TestCase):
         source_dir = "somedir"
         _remove_pycache(source_dir)
         rmtree_mock.assert_not_called()
+
+
+@mock.patch("aea.cli.registry.push.tarfile")
+@mock.patch("aea.cli.registry.push._remove_pycache")
+class CompressDirTestCase(TestCase):
+    """Test case for _compress_dir method."""
+
+    def test__compress_dir_positive(self, _remove_pycache_mock, tarfile_mock):
+        """Test for _compress_dir positive result."""
+        tar_obj_mock = mock.MagicMock()
+        open_mock = mock.MagicMock(return_value=tar_obj_mock)
+        tarfile_mock.open = open_mock
+
+        _compress_dir("output_filename", "source_dir")
+        _remove_pycache_mock.assert_called_once_with("source_dir")
+        open_mock.assert_called_once_with("output_filename", "w:gz")
