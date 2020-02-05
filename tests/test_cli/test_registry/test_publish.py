@@ -22,11 +22,7 @@ from unittest import TestCase, mock
 
 from click import ClickException
 
-from aea.cli.registry.publish import (
-    _compress,
-    _load_agent_config,
-    publish_agent
-)
+from aea.cli.registry.publish import _compress, _load_agent_config, publish_agent
 
 from tests.test_cli.tools_for_testing import ContextMock
 
@@ -109,5 +105,5 @@ class CompressTestCase(TestCase):
         open_mock = mock.MagicMock(return_value=tar_obj_mock)
         tarfile_mock.open = open_mock
 
-        _compress('output_filename', 'file1', 'file2')
-        open_mock.assert_called_once_with('output_filename', 'w:gz')
+        _compress("output_filename", "file1", "file2")
+        open_mock.assert_called_once_with("output_filename", "w:gz")

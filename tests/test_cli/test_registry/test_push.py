@@ -126,6 +126,6 @@ class CompressDirTestCase(TestCase):
         open_mock = mock.MagicMock(return_value=tar_obj_mock)
         tarfile_mock.open = open_mock
 
-        _compress_dir('output_filename', 'source_dir')
-        _remove_pycache_mock.assert_called_once_with('source_dir')
-        open_mock.assert_called_once_with('output_filename', 'w:gz')
+        _compress_dir("output_filename", "source_dir")
+        _remove_pycache_mock.assert_called_once_with("source_dir")
+        open_mock.assert_called_once_with("output_filename", "w:gz")
