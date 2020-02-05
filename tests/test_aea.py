@@ -180,7 +180,7 @@ async def test_handle():
         agent_name = "MyAgent"
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, "default")
+        ledger_apis = LedgerApis({}, FETCHAI)
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         connection = OEFLocalConnection(
             identity.address, node, connection_id=DUMMY_SKILL_PUBLIC_ID
@@ -450,7 +450,7 @@ class TestAddBehaviourDynamically:
         agent_name = "MyAgent"
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         wallet = Wallet({FETCHAI: private_key_path})
-        ledger_apis = LedgerApis({}, "default")
+        ledger_apis = LedgerApis({}, FETCHAI)
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
         identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         input_file = tempfile.mktemp()
