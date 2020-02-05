@@ -23,11 +23,10 @@
 from typing import Dict, cast
 
 from aea.crypto.base import Crypto
-from aea.crypto.default import DEFAULT, DefaultCrypto
 from aea.crypto.ethereum import ETHEREUM, EthereumCrypto
 from aea.crypto.fetchai import FETCHAI, FetchAICrypto
 
-SUPPORTED_CRYPTOS = [DEFAULT, ETHEREUM, FETCHAI]
+SUPPORTED_CRYPTOS = [ETHEREUM, FETCHAI]
 
 
 class Wallet(object):
@@ -44,9 +43,7 @@ class Wallet(object):
         addresses = {}  # type: Dict[str, str]
 
         for identifier, path in private_key_paths.items():
-            if identifier == DEFAULT:
-                crypto_objects[identifier] = DefaultCrypto(path)
-            elif identifier == FETCHAI:
+            if identifier == FETCHAI:
                 crypto_objects[identifier] = FetchAICrypto(path)
             elif identifier == ETHEREUM:
                 crypto_objects[identifier] = EthereumCrypto(path)

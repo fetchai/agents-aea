@@ -24,7 +24,7 @@ from pathlib import Path
 from threading import Thread
 
 from aea.aea import AEA
-from aea.crypto.default import DEFAULT
+from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -52,14 +52,14 @@ class TestSkillError:
     def setup_class(cls):
         """Test the initialisation of the AEA."""
         cls.node = LocalNode()
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({DEFAULT: private_key_pem_path})
-        cls.ledger_apis = LedgerApis({}, DEFAULT)
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        cls.wallet = Wallet({FETCHAI: private_key_path})
+        cls.ledger_apis = LedgerApis({}, FETCHAI)
         cls.agent_name = "Agent0"
 
         cls.connection = DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)
         cls.connections = [cls.connection]
-        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[DEFAULT])
+        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
         cls.address = cls.identity.address
         cls.my_aea = AEA(
             cls.identity,

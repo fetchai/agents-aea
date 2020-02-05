@@ -27,7 +27,7 @@ It prints the key in PEM format to the specified file.
 
 import argparse
 
-from aea.crypto.default import DefaultCrypto
+from aea.crypto.fetchai import FetchAICrypto
 
 parser = argparse.ArgumentParser("generate_private_key", description=__doc__)
 parser.add_argument("out_file", type=str, help="Where to save the private key.")
@@ -35,6 +35,6 @@ parser.add_argument("out_file", type=str, help="Where to save the private key.")
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    crypto = DefaultCrypto()
+    crypto = FetchAICrypto()
     file = open(args.out_file, "wb")
     crypto.dump(file)

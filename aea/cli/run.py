@@ -51,15 +51,12 @@ from aea.connections.base import Connection
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
-    DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
-    _create_default_private_key,
     _create_ethereum_private_key,
     _create_fetchai_private_key,
     _try_validate_ethereum_private_key_path,
     _try_validate_fet_private_key_path,
-    _try_validate_private_key_pem_path,
 )
 from aea.crypto.ledger_apis import (
     LedgerApis,
@@ -67,7 +64,7 @@ from aea.crypto.ledger_apis import (
     _try_to_instantiate_ethereum_ledger_api,
     _try_to_instantiate_fetchai_ledger_api,
 )
-from aea.crypto.wallet import DEFAULT, SUPPORTED_CRYPTOS, Wallet
+from aea.crypto.wallet import SUPPORTED_CRYPTOS, Wallet
 from aea.helpers.base import (
     add_agent_component_module_to_sys_modules,
     load_agent_component_package,
@@ -91,30 +88,6 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
     for identifier, _value in aea_conf.private_key_paths.read_all():
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
-
-    default_private_key_config = aea_conf.private_key_paths.read(DEFAULT)
-    if default_private_key_config is None:
-        _create_default_private_key()
-        default_private_key_config = PrivateKeyPathConfig(
-            DEFAULT, DEFAULT_PRIVATE_KEY_FILE
-        )
-        aea_conf.private_key_paths.create(
-            default_private_key_config.ledger, default_private_key_config
-        )
-    else:
-        default_private_key_config = cast(
-            PrivateKeyPathConfig, default_private_key_config
-        )
-        try:
-            _try_validate_private_key_pem_path(default_private_key_config.path)
-        except FileNotFoundError:
-            logger.error(
-                "File {} for private key {} not found.".format(
-                    repr(default_private_key_config.path),
-                    default_private_key_config.ledger,
-                )
-            )
-            sys.exit(1)
 
     fetchai_private_key_config = aea_conf.private_key_paths.read(FETCHAI)
     if fetchai_private_key_config is None:

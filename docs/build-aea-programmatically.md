@@ -25,8 +25,8 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
-from aea.crypto.default import DEFAULT
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, _create_default_private_key
+from aea.crypto.fetchai import FETCHAI
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -66,15 +66,15 @@ We use the private key file we created to initialise a wallet, we also create th
 Then we pass all of this into the AEA constructor to create our AEA.
 ``` python
 # Set up the wallet, stub connection, ledger and (empty) resources
-wallet = Wallet({DEFAULT: DEFAULT_PRIVATE_KEY_FILE})
+wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
 stub_connection = StubConnection(
     input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
 )
-ledger_apis = LedgerApis({}, DEFAULT)
+ledger_apis = LedgerApis({}, FETCHAI)
 resources = Resources()
 
 # Create an identity
-identity = Identity(name="my_aea", addresses=wallet.addresses, default_address_key=DEFAULT)
+identity = Identity(name="my_aea", addresses=wallet.addresses, default_address_key=FETCHAI)
 
 # Create our AEA
 my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
@@ -173,8 +173,8 @@ from aea.aea import AEA
 from aea.agent import Identity
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
-from aea.crypto.default import DEFAULT
-from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, _create_default_private_key
+from aea.crypto.default import FETCHAI
+from aea.crypto.helpers import FETCHAI_PRIVATE_KEY_FILE, _create_fetchai_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -199,15 +199,15 @@ def run():
         os.remove(OUTPUT_FILE)
 
     # set up the Wallet, stub connection, ledger and (empty) resources
-    wallet = Wallet({DEFAULT: DEFAULT_PRIVATE_KEY_FILE})
+    wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE})
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
-    ledger_apis = LedgerApis({}, DEFAULT)
+    ledger_apis = LedgerApis({}, FETCHAI)
     resources = Resources()
 
     # Create an identity
-    identity = Identity(name="my_aea", addresses=wallet.addresses, default_address_key=DEFAULT)
+    identity = Identity(name="my_aea", addresses=wallet.addresses, default_address_key=FETCHAI)
 
     # Create our AEA
     my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
