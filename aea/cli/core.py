@@ -278,7 +278,7 @@ def _wait_funds_release(agent_config, wallet, type_):
     end_time = time.time() + FUNDS_RELEASE_TIMEOUT
     while time.time() < end_time:
         if start_balance != _try_get_balance(agent_config, wallet, type_):
-            break
+            break  # pragma: no cover
         else:
             time.sleep(1)
 
