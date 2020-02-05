@@ -7,6 +7,11 @@ The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that u
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+##Discussion
+
+The gym skills demonstrate how to wrap a Reinforcement Learning agent in a skill.
+The example decouples the RL agent from the `gym.Env` allowing them to run in separate execution environments, potentially owned by different entities.
+
 ## Demo instructions
 
 ### Create the AEA

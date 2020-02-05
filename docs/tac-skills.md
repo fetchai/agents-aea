@@ -11,6 +11,11 @@ There are two types of AEAs:
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+##Discussion
+
+The scope of the specific demo is to demonstrate how the agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC.
+An other AEA has the role of the controller and it's responsible for calculating the revenue for each participant and if the transaction messages are valid.
+
 ### Launch an OEF node
 In a separate terminal, launch a local OEF node (for search and discovery).
 ``` bash
