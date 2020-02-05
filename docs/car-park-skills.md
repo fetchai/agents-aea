@@ -1,7 +1,7 @@
 The AEA car-park skills demonstrate an interaction between two AEAs.
 
-* The carpark_detection AEA provides data.
-* The carpark_client AEA that buys these data.
+* The carpark_detection AEA provides information on the number of car parking spaces available in a given vicinity.
+* The carpark_client AEA is interested in purchasing information on available car parking spaces in the same vicinity.
 
 ## Preparation instructions
 

@@ -14,7 +14,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 ##Discussion
 
 The scope of the specific demo is to demonstrate how to create a simple AEA with integration of machine learning, and the usage of the AEA framework. The ml_data_provider AEA
-will provide some sample data and will deliver to the client upon payment. Once the client gets the data, it will train the model. The process can be found in the tasks.py file.
+will provide some sample data and will deliver to the client upon payment. Once the client gets the data, it will train the model. The process can be found in the `tasks.py` file.
 This demo does not utilize a smart contract. As a result, we interact with a ledger only to complete a transaction.
 
 Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies.

@@ -91,7 +91,7 @@ ledger_apis:
     gas_price: 50
 ```
 
-### Fund the weather client AEA
+### Fund the thermometer client AEA
 
 Create some wealth for your weather client based on the network you want to transact with: 
 
