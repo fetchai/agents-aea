@@ -29,7 +29,6 @@ import click
 from click import pass_context
 
 from aea.aea import AEA
-from aea.agent import Identity
 from aea.cli.common import (
     AEAConfigException,
     ConnectionsOption,
@@ -74,6 +73,7 @@ from aea.helpers.base import (
     load_agent_component_package,
     load_module,
 )
+from aea.identity.base import Identity
 from aea.registries.base import Resources
 
 

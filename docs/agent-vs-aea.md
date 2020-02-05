@@ -85,7 +85,7 @@ if os.path.isfile(OUTPUT_FILE):
     os.remove(OUTPUT_FILE)
 
 # Create an addresses identity:
-identity = Identity(name="my_agent", address='some_address')
+identity = Identity(name="my_agent", address="some_address")
 
 # Set up the stub connection
 stub_connection = StubConnection(
@@ -199,7 +199,7 @@ def run():
         os.remove(OUTPUT_FILE)
 
     # Create an addresses identity:
-    identity = Identity(name="my_agent", address='some_address')
+    identity = Identity(name="my_agent", address="some_address")
 
     # Set up the stub connection
     stub_connection = StubConnection(
