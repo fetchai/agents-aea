@@ -3,7 +3,7 @@ A framework for autonomous economic agent (AEA) development
 
 ## Get started
 
-- Create and launch a virtual environment with Python 3.7:
+- Create and launch a virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
       pipenv --python 3.7 && pipenv shell
 
@@ -31,7 +31,7 @@ Or, you can have more control on the installed dependencies by leveraging the se
 
 ### Preliminaries
 
-- Create and launch a virtual environment:
+- Create and launch a virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
       pipenv --python 3.7 && pipenv shell
 
@@ -39,13 +39,11 @@ Or, you can have more control on the installed dependencies by leveraging the se
 
       pip install .[all]
 
-- To install only specific extra dependencies, e.g. `cli`:
-
-      pip install .[cli]
+- Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
 ## Contribute
 
-The following dependency is only relevant if you intend to contribute to the repository:
+The following dependency is **only relevant if you intend to contribute** to the repository:
 - the project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
 The following steps are only relevant if you intend to contribute to the repository. They are not required for agent development.
@@ -54,13 +52,9 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 	  pipenv install --dev
 
-- Install package in (development mode):
+- Install package in development mode:
 
 	  pip install -e .
-
-- After changes to any protobuf schema run:
-
-	  python setup.py protoc
 
 - To run tests (ensure no oef docker containers are running):
 
