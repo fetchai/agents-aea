@@ -330,11 +330,16 @@ def run(
     )
 
     wallet = Wallet(private_key_paths)
-    identity = Identity(
-        agent_name,
-        addresses=wallet.addresses,
-        default_address_key=ctx.agent_config.default_ledger,
-    )
+    if len(wallet.addresses) > 1:
+        identity = Identity(
+            agent_name,
+            addresses=wallet.addresses,
+            default_address_key=ctx.agent_config.default_ledger,
+        )
+    else:
+        identity = Identity(
+            agent_name, address=wallet.addresses[ctx.agent_config.default_ledger],
+        )
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
     default_connection_id = PublicId.from_str(ctx.agent_config.default_connection)
