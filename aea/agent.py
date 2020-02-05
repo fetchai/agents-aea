@@ -28,6 +28,7 @@ from enum import Enum
 from typing import List, Optional
 
 from aea.connections.base import Connection
+from aea.identity.base import Identity
 from aea.mail.base import InBox, Multiplexer, OutBox
 
 logger = logging.getLogger(__name__)
@@ -59,7 +60,7 @@ class Agent(ABC):
 
     def __init__(
         self,
-        name: str,
+        identity: Identity,
         connections: List[Connection],
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
@@ -69,7 +70,7 @@ class Agent(ABC):
         """
         Instantiate the agent.
 
-        :param name: the name of the agent
+        :param identity: the identity of the agent.
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
@@ -78,7 +79,7 @@ class Agent(ABC):
 
         :return: None
         """
-        self._name = name
+        self._identity = identity
         self._connections = connections
 
         self._multiplexer = Multiplexer(self._connections, loop=loop)
@@ -91,6 +92,11 @@ class Agent(ABC):
 
         self.debug = debug
         self.programmatic = programmatic
+
+    @property
+    def identity(self) -> Identity:
+        """Get the identity."""
+        return self._identity
 
     @property
     def multiplexer(self) -> Multiplexer:
@@ -110,7 +116,7 @@ class Agent(ABC):
     @property
     def name(self) -> str:
         """Get the agent name."""
-        return self._name
+        return self.identity.name
 
     @property
     def liveness(self) -> Liveness:

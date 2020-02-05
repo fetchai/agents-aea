@@ -29,6 +29,7 @@ from aea.crypto.default import DEFAULT
 from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, _create_default_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
@@ -72,8 +73,11 @@ stub_connection = StubConnection(
 ledger_apis = LedgerApis({}, DEFAULT)
 resources = Resources()
 
+# Create an identity
+identity = Identity(name="my_aea", addresses=wallet.addresses, default_address_key=DEFAULT)
+
 # Create our AEA
-my_aea = AEA("my_aea", [stub_connection], wallet, ledger_apis, resources)
+my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
 ```
 
 Create the default protocol and add it to the AEA.
@@ -166,12 +170,14 @@ import yaml
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.agent import Identity
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
 from aea.crypto.default import DEFAULT
 from aea.crypto.helpers import DEFAULT_PRIVATE_KEY_FILE, _create_default_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.serialization import DefaultSerializer
 from aea.registries.base import Resources
@@ -200,8 +206,11 @@ def run():
     ledger_apis = LedgerApis({}, DEFAULT)
     resources = Resources()
 
+    # Create an identity
+    identity = Identity(name="my_aea", addresses=wallet.addresses, default_address_key=DEFAULT)
+
     # Create our AEA
-    my_aea = AEA("my_aea", [stub_connection], wallet, ledger_apis, resources)
+    my_aea = AEA(identity, [stub_connection], wallet, ledger_apis, resources)
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol_configuration = ProtocolConfig.from_json(

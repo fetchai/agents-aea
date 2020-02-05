@@ -16,6 +16,7 @@ from typing import List, Optional
 from aea.agent import Agent
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 ```
 
@@ -83,13 +84,16 @@ if os.path.isfile(INPUT_FILE):
 if os.path.isfile(OUTPUT_FILE):
     os.remove(OUTPUT_FILE)
 
+# Create an addresses identity:
+identity = Identity(name="my_agent", address="some_address")
+
 # Set up the stub connection
 stub_connection = StubConnection(
     input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
 )
 
 # Create our Agent
-my_agent = MyAgent("my_agent", [stub_connection])
+my_agent = MyAgent(identity, [stub_connection])
 ```
 
 ## Start the agent
@@ -146,6 +150,7 @@ from typing import List, Optional
 from aea.agent import Agent
 from aea.connections.base import Connection
 from aea.connections.stub.connection import StubConnection
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 
@@ -193,13 +198,16 @@ def run():
     if os.path.isfile(OUTPUT_FILE):
         os.remove(OUTPUT_FILE)
 
+    # Create an addresses identity:
+    identity = Identity(name="my_agent", address="some_address")
+
     # Set up the stub connection
     stub_connection = StubConnection(
         input_file_path=INPUT_FILE, output_file_path=OUTPUT_FILE
     )
 
     # Create our Agent
-    my_agent = MyAgent("my_agent", [stub_connection])
+    my_agent = MyAgent(identity, [stub_connection])
 
     # Set the agent running in a different thread
     t = Thread(target=my_agent.start)
