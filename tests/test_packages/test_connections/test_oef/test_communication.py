@@ -34,7 +34,7 @@ from oef.query import ConstraintExpr
 import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.fetchai import FetchAICrypto, FETCHAI
+from aea.crypto.fetchai import FETCHAI, FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.helpers.search.models import (
     Attribute,
