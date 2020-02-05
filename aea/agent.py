@@ -25,9 +25,10 @@ import time
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from aea.connections.base import Connection
+from aea.identity.base import Identity
 from aea.mail.base import InBox, Multiplexer, OutBox
 
 logger = logging.getLogger(__name__)
@@ -52,64 +53,6 @@ class Liveness:
     def is_stopped(self) -> bool:
         """Check whether the liveness is stopped."""
         return self._is_stopped
-
-
-class Identity:
-    """
-    An identity are the public elements identifying an agent.
-
-    It can include:
-    - the agent name
-    - the public half of private / public key pairs
-    - the addresses
-    """
-
-    def __init__(self, name: str):
-        """
-        Instantiate the agent.
-
-        :param name: the name of the agent.
-        """
-        self._name = name
-        self._public_keys = None  # type: Optional[Dict[str, str]]
-        self._addresses = None  # type: Optional[Dict[str, str]]
-
-    @property
-    def name(self) -> str:
-        """Get the agent name."""
-        return self._name
-
-    @property
-    def public_keys(self) -> Dict[str, str]:
-        """Get the public_keys."""
-        assert self._public_keys is not None, "The public_keys are not set."
-        return self._public_keys
-
-    @public_keys.setter
-    def public_keys(self, public_keys: Dict[str, str]) -> None:
-        """
-        Set the public keys.
-
-        :param public_keys: the public keys.
-        :return: None
-        """
-        self._public_keys = public_keys
-
-    @property
-    def addresses(self) -> Dict[str, str]:
-        """Get the addresses."""
-        assert self._addresses is not None, "The addresses are not set."
-        return self._addresses
-
-    @addresses.setter
-    def addresses(self, addresses: Dict[str, str]) -> None:
-        """
-        Set the addresses.
-
-        :param addresses: the addresses.
-        :return: None
-        """
-        self._addresses = addresses
 
 
 class Agent(ABC):

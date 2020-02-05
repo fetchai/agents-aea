@@ -22,12 +22,13 @@ import logging
 from asyncio import AbstractEventLoop
 from typing import List, Optional, cast
 
-from aea.agent import Agent, Identity
+from aea.agent import Agent
 from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import Filter, Resources
@@ -79,18 +80,13 @@ class AEA(Agent):
             programmatic=programmatic,
         )
 
-        self.identity.public_keys = wallet.public_keys
-        self.identity.addresses = wallet.addresses
-        self._wallet = wallet
         self.max_reactions = max_reactions
         self._task_manager = TaskManager()
         self._decision_maker = DecisionMaker(
-            self.name, self.max_reactions, self.outbox, self.wallet, ledger_apis
+            self.name, self.max_reactions, self.outbox, wallet, ledger_apis
         )
         self._context = AgentContext(
-            self.name,
-            self.identity.public_keys,
-            self.identity.addresses,
+            self.identity,
             ledger_apis,
             self.multiplexer.connection_status,
             self.outbox,
@@ -102,11 +98,6 @@ class AEA(Agent):
         )
         self._resources = resources
         self._filter = Filter(self.resources, self.decision_maker.message_out_queue)
-
-    @property
-    def wallet(self) -> Wallet:
-        """Get the wallet."""
-        return self._wallet
 
     @property
     def decision_maker(self) -> DecisionMaker:

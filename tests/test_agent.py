@@ -61,7 +61,8 @@ def test_run_agent():
     """Test that we can set up and then run the agent."""
     with LocalNode() as node:
         agent_name = "dummyagent"
-        identity = Identity(agent_name)
+        agent_address = "some_address"
+        identity = Identity(agent_name, address=agent_address)
         agent = DummyAgent(
             identity,
             [

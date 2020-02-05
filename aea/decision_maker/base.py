@@ -480,6 +480,10 @@ class DecisionMaker:
         return self._message_out_queue
 
     @property
+    def wallet(self) -> Wallet:
+        return self._wallet
+
+    @property
     def ledger_apis(self) -> LedgerApis:
         """Get outbox."""
         return self._ledger_apis
@@ -736,7 +740,7 @@ class DecisionMaker:
             tx_digest = OFF_CHAIN_SETTLEMENT_DIGEST
         else:
             logger.info("[{}]: Settling transaction on chain!".format(self._agent_name))
-            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
             tx_digest = self.ledger_apis.transfer(
                 crypto_object,
                 tx_message.tx_counterparty_addr,
@@ -802,10 +806,10 @@ class DecisionMaker:
         :return: the signature of the signing payload
         """
         if tx_message.ledger_id == OFF_CHAIN:
-            crypto_object = self._wallet.crypto_objects.get(ETHEREUM)
+            crypto_object = self.wallet.crypto_objects.get(ETHEREUM)
             # TODO: replace with default_ledger when recover_hash function is available for FETCHAI
         else:
-            crypto_object = self._wallet.crypto_objects.get(tx_message.ledger_id)
+            crypto_object = self.wallet.crypto_objects.get(tx_message.ledger_id)
         tx_hash = tx_message.signing_payload.get("tx_hash")
         tx_signature = crypto_object.sign_message(tx_hash)
         return tx_signature

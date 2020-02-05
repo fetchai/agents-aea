@@ -25,7 +25,8 @@ from typing import Any, Dict
 from aea.connections.base import ConnectionStatus
 from aea.crypto.ledger_apis import LedgerApis
 from aea.decision_maker.base import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.mail.base import OutBox
+from aea.identity.base import Identity
+from aea.mail.base import Address, OutBox
 from aea.skills.tasks import TaskManager
 
 
@@ -34,9 +35,7 @@ class AgentContext:
 
     def __init__(
         self,
-        agent_name: str,
-        public_keys: Dict[str, str],
-        addresses: Dict[str, str],
+        identity: Identity,
         ledger_apis: LedgerApis,
         connection_status: ConnectionStatus,
         outbox: OutBox,
@@ -49,8 +48,7 @@ class AgentContext:
         """
         Initialize an agent context.
 
-        :param agent_name: the agent's name
-        :param public_keys: the public keys of the agent
+        :param identity: the identity object
         :param ledger_apis: the ledger apis
         :param connection_status: the connection status
         :param outbox: the outbox
@@ -61,9 +59,7 @@ class AgentContext:
         :param task_manager: the task manager
         """
         self._shared_state = {}  # type: Dict[str, Any]
-        self._agent_name = agent_name
-        self._public_keys = public_keys
-        self._addresses = addresses
+        self._identity = identity
         self._ledger_apis = ledger_apis
         self._connection_status = connection_status
         self._outbox = outbox
@@ -79,29 +75,23 @@ class AgentContext:
         return self._shared_state
 
     @property
+    def identity(self) -> Identity:
+        return self._identity
+
+    @property
     def agent_name(self) -> str:
         """Get agent name."""
-        return self._agent_name
+        return self.identity.name
 
     @property
-    def public_keys(self) -> Dict[str, str]:
-        """Get public keys."""
-        return self._public_keys
-
-    @property
-    def addresses(self) -> Dict[str, str]:
+    def addresses(self) -> Dict[str, Address]:
         """Get addresses."""
-        return self._addresses
+        return self.identity.addresses
 
     @property
-    def address(self) -> str:
+    def address(self) -> Address:
         """Get the defualt address."""
-        return self._addresses[self.ledger_apis.default_ledger_id]
-
-    @property
-    def public_key(self) -> str:
-        """Get the default public key."""
-        return self._public_keys[self.ledger_apis.default_ledger_id]
+        return self.identity.address
 
     @property
     def connection_status(self) -> ConnectionStatus:

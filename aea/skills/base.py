@@ -115,16 +115,6 @@ class SkillContext:
         return self._new_behaviours_queue
 
     @property
-    def agent_public_key(self) -> str:
-        """Get public key."""
-        return self._agent_context.public_key
-
-    @property
-    def agent_public_keys(self) -> Dict[str, str]:
-        """Get public keys."""
-        return self._agent_context.public_keys
-
-    @property
     def agent_addresses(self) -> Dict[str, str]:
         """Get addresses."""
         return self._agent_context.addresses
