@@ -71,7 +71,9 @@ class TestSkillContext:
         )
         cls.ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
         cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
-        cls.identity = Identity("name", addresses=cls.wallet.addresses, default_address_key=FETCHAI)
+        cls.identity = Identity(
+            "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI
+        )
         cls.my_aea = AEA(
             cls.identity,
             cls.connections,
