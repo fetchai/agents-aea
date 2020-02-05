@@ -82,10 +82,6 @@ class TestSkillContext:
         """Test the agent's name."""
         assert self.skill_context.agent_name == self.my_aea.name
 
-    def test_agent_public_keys(self):
-        """Test the agent's public keys."""
-        assert self.skill_context.agent_public_keys == self.my_aea.wallet.public_keys
-
     def test_agent_addresses(self):
         """Test the agent's address."""
         assert self.skill_context.agent_addresses == self.my_aea.wallet.addresses

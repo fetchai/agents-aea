@@ -33,7 +33,13 @@ class Identity:
     - the addresses
     """
 
-    def __init__(self, name: str, address: Optional[str] = None, addresses: Optional[Dict[str, Address]] = None, default_address_key: Optional[str] = None):
+    def __init__(
+        self,
+        name: str,
+        address: Optional[str] = None,
+        addresses: Optional[Dict[str, Address]] = None,
+        default_address_key: Optional[str] = None,
+    ):
         """
         Instantiate the identity.
 
@@ -49,11 +55,15 @@ class Identity:
 
     def _check_consistency(self, address, addresses, default_address_key):
         is_single = address is not None
-        is_multiple = (addresses is not None and len(addresses) > 1)
-        assert is_single != is_multiple, "Either provide a single address or a dictionary of multiple addresses, not both."
+        is_multiple = addresses is not None and len(addresses) > 1
+        assert (
+            is_single != is_multiple
+        ), "Either provide a single address or a dictionary of multiple addresses, not both."
         if is_multiple:
             assert default_address_key is not None, "No key set for default address."
-            assert default_address_key in addresses.keys(), "Addresses does not contain default address key."
+            assert (
+                default_address_key in addresses.keys()
+            ), "Addresses does not contain default address key."
 
     @property
     def name(self) -> str:
@@ -72,5 +82,7 @@ class Identity:
         if self._address is not None:
             return self._address
         else:
-            assert self._default_address_key is not None, "No key set for default address."
+            assert (
+                self._default_address_key is not None
+            ), "No key set for default address."
             return self.addresses[self._default_address_key]

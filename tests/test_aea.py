@@ -35,6 +35,7 @@ from aea.connections.stub.connection import StubConnection
 from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
@@ -59,17 +60,17 @@ from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 def test_initialise_aea():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
-    address_1 = "address"
+    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
+    wallet = Wallet({DEFAULT: private_key_pem_path})
+    identity = Identity("my_name", address=wallet.addresses[DEFAULT])
     connections1 = [
         OEFLocalConnection(
-            address_1, node, connection_id=OEFLocalConnection.connection_id
+            identity.address, node, connection_id=OEFLocalConnection.connection_id
         )
     ]
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({"default": private_key_pem_path})
-    ledger_apis = LedgerApis({}, "default")
+    ledger_apis = LedgerApis({}, DEFAULT)
     my_AEA = AEA(
-        "Agent0",
+        identity,
         connections1,
         wallet,
         ledger_apis,
@@ -86,9 +87,7 @@ def test_initialise_aea():
     assert (
         my_AEA.context.shared_state is not None
     ), "Shared state must not be None after set"
-    assert (
-        my_AEA.context.public_key is not None
-    ), "Public key must not be None after set."
+    assert my_AEA.context.identity is not None, "Identity must not be None after set."
     my_AEA.stop()
 
 
@@ -97,16 +96,18 @@ def test_act():
     with LocalNode() as node:
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
-        address = wallet.addresses["default"]
+        wallet = Wallet({DEFAULT: private_key_pem_path})
+        identity = Identity(agent_name, address=wallet.addresses[DEFAULT])
+        ledger_apis = LedgerApis({}, DEFAULT)
         connections = [
-            OEFLocalConnection(address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID)
+            OEFLocalConnection(
+                identity.address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
+            )
         ]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         agent = AEA(
-            agent_name, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -127,28 +128,28 @@ def test_react():
     with LocalNode() as node:
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
-        address = wallet.addresses["default"]
+        wallet = Wallet({DEFAULT: private_key_pem_path})
+        identity = Identity(agent_name, address=wallet.addresses[DEFAULT])
+        ledger_apis = LedgerApis({}, DEFAULT)
         connection = OEFLocalConnection(
-            address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
+            identity.address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
         )
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         msg = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
-        msg.counterparty = address
+        msg.counterparty = identity.address
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
-            to=address,
-            sender=address,
+            to=identity.address,
+            sender=identity.address,
             protocol_id=DefaultMessage.protocol_id,
             message=message_bytes,
         )
 
         agent = AEA(
-            agent_name, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -178,11 +179,11 @@ async def test_handle():
     with LocalNode() as node:
         agent_name = "MyAgent"
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
+        wallet = Wallet({DEFAULT: private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
-        address = wallet.addresses["default"]
+        identity = Identity(agent_name, address=wallet.addresses[DEFAULT])
         connection = OEFLocalConnection(
-            address, node, connection_id=DUMMY_SKILL_PUBLIC_ID
+            identity.address, node, connection_id=DUMMY_SKILL_PUBLIC_ID
         )
         connections = [connection]
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
@@ -192,14 +193,14 @@ async def test_handle():
         message_bytes = DefaultSerializer().encode(msg)
 
         envelope = Envelope(
-            to=address,
-            sender=address,
+            to=identity.address,
+            sender=identity.address,
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
 
         agent = AEA(
-            agent_name, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -216,8 +217,8 @@ async def test_handle():
             #   DECODING ERROR
             msg = "hello".encode("utf-8")
             envelope = Envelope(
-                to=address,
-                sender=address,
+                to=identity.address,
+                sender=identity.address,
                 protocol_id=DefaultMessage.protocol_id,
                 message=msg,
             )
@@ -236,8 +237,8 @@ async def test_handle():
                 )
             )
             envelope = Envelope(
-                to=address,
-                sender=address,
+                to=identity.address,
+                sender=identity.address,
                 protocol_id=FIPAMessage.protocol_id,
                 message=msg,
             )
@@ -263,6 +264,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
         cls.wallet = Wallet({DEFAULT: cls.private_key_pem_path})
         cls.ledger_apis = LedgerApis({}, DEFAULT)
+        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[DEFAULT])
         cls.connection = OEFLocalConnection(
             cls.agent_name, cls.node, connection_id=LOCAL_CONNECTION_PUBLIC_ID,
         )
@@ -270,7 +272,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
 
         cls.resources = Resources(os.path.join(CUR_PATH, "data", "dummy_aea"))
         cls.aea = AEA(
-            cls.agent_name,
+            cls.identity,
             cls.connections,
             cls.wallet,
             cls.ledger_apis,
@@ -343,8 +345,9 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.node.start()
         cls.agent_name = "MyAgent"
         cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({"default": cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({}, "default")
+        cls.wallet = Wallet({DEFAULT: cls.private_key_pem_path})
+        cls.ledger_apis = LedgerApis({}, DEFAULT)
+        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[DEFAULT])
         cls.connection = OEFLocalConnection(
             cls.agent_name, cls.node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
         )
@@ -353,7 +356,7 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.temp = tempfile.mkdtemp(prefix="test_aea_resources")
         cls.resources = Resources(cls.temp)
         cls.aea = AEA(
-            cls.agent_name,
+            cls.identity,
             cls.connections,
             cls.wallet,
             cls.ledger_apis,
@@ -449,11 +452,11 @@ class TestAddBehaviourDynamically:
         wallet = Wallet({"default": private_key_pem_path})
         ledger_apis = LedgerApis({}, "default")
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
-
+        identity = Identity(agent_name, address=wallet.addresses[DEFAULT])
         input_file = tempfile.mktemp()
         output_file = tempfile.mktemp()
         cls.agent = AEA(
-            agent_name,
+            identity,
             [StubConnection(input_file, output_file)],
             wallet,
             ledger_apis,

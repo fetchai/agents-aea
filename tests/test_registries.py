@@ -33,9 +33,11 @@ import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.crypto.default import DEFAULT
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
+from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.protocols.default.message import DefaultMessage
 from aea.registries.base import ProtocolRegistry, Resources
@@ -152,11 +154,12 @@ class TestResources:
 
         connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
+        wallet = Wallet({DEFAULT: private_key_pem_path})
+        ledger_apis = LedgerApis({}, DEFAULT)
         cls.resources = Resources(os.path.join(cls.agent_folder))
+        identity = Identity(cls.agent_name, address=wallet.addresses[DEFAULT])
         cls.aea = AEA(
-            cls.agent_name,
+            identity,
             connections,
             wallet,
             ledger_apis,
@@ -342,10 +345,11 @@ class TestFilter:
 
         connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
         private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
+        wallet = Wallet({DEFAULT: private_key_pem_path})
+        ledger_apis = LedgerApis({}, DEFAULT)
+        identity = Identity(cls.agent_name, address=wallet.addresses[DEFAULT])
         cls.aea = AEA(
-            cls.agent_name,
+            identity,
             connections,
             wallet,
             ledger_apis,
