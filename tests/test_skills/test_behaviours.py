@@ -18,6 +18,8 @@
 
 """This module contains the tests for the behaviours."""
 
+from collections import Counter
+
 from aea.skills.behaviours import (
     FSMBehaviour,
     OneShotBehaviour,
@@ -51,10 +53,10 @@ def test_sequence_behaviour():
             outputs.append(self.name)
 
     # TODO let the initialization of a behaviour action from constructor
-    a = SimpleOneShotBehaviour("a", skill_context=None)
-    b = SimpleOneShotBehaviour("b", skill_context=None)
-    c = SimpleOneShotBehaviour("c", skill_context=None)
-    sequence = MySequenceBehaviour([a, b, c], name="abc", skill_context=None)
+    a = SimpleOneShotBehaviour("a", skill_context=object())
+    b = SimpleOneShotBehaviour("b", skill_context=object())
+    c = SimpleOneShotBehaviour("c", skill_context=object())
+    sequence = MySequenceBehaviour([a, b, c], name="abc", skill_context=object())
 
     max_iterations = 10
     i = 0
@@ -96,10 +98,10 @@ def test_fms_behaviour():
             return self.executed
 
     # TODO let the initialization of a behaviour action from constructor
-    a = SimpleOneShotBehaviour(name="a", skill_context=None)
-    b = SimpleOneShotBehaviour(name="b", skill_context=None)
-    c = SimpleOneShotBehaviour(name="c", skill_context=None)
-    fsm = MyFSMBehaviour(name="abc", skill_context=None)
+    a = SimpleOneShotBehaviour(name="a", skill_context=object())
+    b = SimpleOneShotBehaviour(name="b", skill_context=object())
+    c = SimpleOneShotBehaviour(name="c", skill_context=object())
+    fsm = MyFSMBehaviour(name="abc", skill_context=object())
     fsm.register_state(str(a.name), a, initial=True)
     fsm.register_state(str(b.name), b)
     fsm.register_state(str(c.name), c)
@@ -111,3 +113,19 @@ def test_fms_behaviour():
         i += 1
 
     assert outputs == ["a", "b", "c"]
+
+
+def test_act_parameter():
+    """Test the 'act' parameter."""
+    counter = Counter(i=0)
+
+    def increment_counter(counter=counter):
+        counter += Counter(i=1)
+
+    assert counter["i"] == 0
+
+    one_shot_behaviour = OneShotBehaviour(
+        act=lambda: increment_counter(), skill_context=object(), name="my_behaviour"
+    )
+    one_shot_behaviour.act()
+    assert counter["i"] == 1

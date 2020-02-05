@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a dummy skill for an AEA."""
+"""This module contains the implementation of the generic seller skill."""

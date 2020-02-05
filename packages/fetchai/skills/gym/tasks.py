@@ -23,7 +23,8 @@ import logging
 from queue import Queue
 from threading import Thread
 
-from aea.skills.base import Task
+from aea.skills.base import SkillContext
+from aea.skills.tasks import Task
 
 from packages.fetchai.skills.gym.helpers import ProxyEnv
 from packages.fetchai.skills.gym.rl_agent import DEFAULT_NB_STEPS, MyRLAgent, NB_GOODS
@@ -34,17 +35,22 @@ logger = logging.getLogger("aea.gym_skill")
 class GymTask(Task):
     """Gym task."""
 
-    def __init__(self, nb_steps: int = DEFAULT_NB_STEPS, **kwargs):
+    def __init__(self, skill_context: SkillContext, nb_steps: int = DEFAULT_NB_STEPS):
         """Initialize the task."""
-        logger.info("GymTask.__init__: arguments: {}".format(kwargs))
-        super().__init__(**kwargs)
+        logger.info("GymTask.__init__: arguments: nb_steps={}".format(nb_steps))
+        super().__init__()
         self._rl_agent = MyRLAgent(NB_GOODS)
-        self._proxy_env = ProxyEnv(self.context)
+        self._proxy_env = ProxyEnv(skill_context)
         self.nb_steps = nb_steps
         self._rl_agent_training_thread = Thread(
-            target=self._rl_agent.fit, args=[self._proxy_env, self.nb_steps]
+            target=self._fit, args=[self._proxy_env, self.nb_steps]
         )
         self.is_rl_agent_training = False
+
+    def _fit(self, proxy_env: ProxyEnv, nb_steps: int):
+        """Fit the RL agent."""
+        self._rl_agent.fit(proxy_env, nb_steps)
+        logger.info("Training finished. You can exit now via CTRL+C.")
 
     @property
     def proxy_env_queue(self) -> Queue:
@@ -55,7 +61,7 @@ class GymTask(Task):
         """Set up the task."""
         logger.info("Gym task: setup method called.")
 
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """Execute the task."""
         if not self._proxy_env.is_rl_agent_trained and not self.is_rl_agent_training:
             self._start_training()
@@ -79,4 +85,3 @@ class GymTask(Task):
         self.is_rl_agent_training = False
         self._proxy_env.close()
         self._rl_agent_training_thread.join()
-        logger.info("Training finished. You can exit now via CTRL+C.")

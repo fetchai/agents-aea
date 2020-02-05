@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2018-2019 Fetch.AI Limited
@@ -18,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Implementation of the Local OEF connection."""
+"""This module contains the identity modules."""

@@ -216,9 +216,7 @@ class Protocol(ABC):
     """
     This class implements a specifications for a protocol.
 
-    It includes:
-    - a serializer, to encode/decode a message.
-    - a 'check' abstract method (to be implemented) to check if a message is allowed for the protocol.
+    It includes a serializer to encode/decode a message.
     """
 
     def __init__(
@@ -249,13 +247,3 @@ class Protocol(ABC):
     def config(self) -> ProtocolConfig:
         """Get the configuration."""
         return self._config
-
-    def check(self, msg: Message) -> bool:
-        """
-        Check whether the message belongs to the allowed messages.
-
-        :param msg: the message.
-        :return: True if the message is valid wrt the protocol, False otherwise.
-        """
-        # TODO 'check' should check the message against the protocol rules, if such rules are provided.
-        return True

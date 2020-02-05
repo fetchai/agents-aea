@@ -1,0 +1,39 @@
+name: generic_buyer
+author: fetchai
+version: 0.1.0
+license: Apache 2.0
+fingerprint: ""
+description: "The weather client skill implements the skill to purchase weather data."
+behaviours:
+  search:
+    class_name: MySearchBehaviour
+    args:
+      search_interval: 5
+handlers:
+  fipa:
+    class_name: FIPAHandler
+    args: {}
+  oef:
+    class_name: OEFHandler
+    args: {}
+  transaction:
+    class_name: MyTransactionHandler
+    args: {}
+shared_classes:
+  strategy:
+    class_name: Strategy
+    args:
+      max_price: 4
+      max_buyer_tx_fee: 1
+      currency_id: 'FET'
+      ledger_id: 'fetchai'
+      is_ledger_tx: True
+      search_query:
+        search_term: country
+        search_value: UK
+        constraint_type: '=='
+  dialogues:
+    class_name: Dialogues
+    args: {}
+protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
+ledgers: ['fetchai']

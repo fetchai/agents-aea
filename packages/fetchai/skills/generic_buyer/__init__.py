@@ -17,10 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a dummy shared class."""
-
-from aea.skills.base import SharedClass
-
-
-class DummySharedClass(SharedClass):
-    """This class is a dummy shared class."""
+"""This module contains the implementation of the generic buyer skill."""

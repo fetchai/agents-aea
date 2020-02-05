@@ -9,11 +9,6 @@ handlers:
   gym:
     class_name: GymHandler
     args:
-      foo: bar
-tasks:
-  gym:
-    class_name: GymTask
-    args:
       nb_steps: 4000
 shared_classes: {}
 protocols: ["fetchai/gym:0.1.0"]

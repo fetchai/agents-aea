@@ -23,6 +23,7 @@
 import os
 import shutil
 import sys
+import time
 from pathlib import Path
 from typing import Dict, Union, cast
 
@@ -53,11 +54,15 @@ from aea.crypto.helpers import (
     DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
+    TESTNETS,
     _try_generate_testnet_wealth,
     _validate_private_key_path,
 )
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
+
+
+FUNDS_RELEASE_TIMEOUT = 10
 
 
 @click.group(name="aea")
@@ -226,6 +231,24 @@ def get_address(ctx: Context, type_):
         logger.error(str(e))  # pragma: no cover
 
 
+def _try_get_balance(agent_config, wallet, type_):
+    try:
+        _verify_ledger_apis_access()
+        ledger_api_configs = dict(
+            [
+                (identifier, cast(Dict[str, Union[str, int]], config))
+                for identifier, config in agent_config.ledger_apis.read_all()
+            ]
+        )
+        ledger_apis = LedgerApis(ledger_api_configs, agent_config.default_ledger)
+
+        address = wallet.addresses[type_]
+        return ledger_apis.token_balance(type_, address)
+    except (AssertionError, ValueError) as e:  # pragma: no cover
+        logger.error(str(e))  # pragma: no cover
+        sys.exit(1)
+
+
 @cli.command()
 @click.argument(
     "type_",
@@ -246,21 +269,18 @@ def get_wealth(ctx: Context, type_):
         ]
     )
     wallet = Wallet(private_key_paths)
-    try:
-        _verify_ledger_apis_access()
-        ledger_api_configs = dict(
-            [
-                (identifier, cast(Dict[str, Union[str, int]], config))
-                for identifier, config in ctx.agent_config.ledger_apis.read_all()
-            ]
-        )
-        ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
+    balance = _try_get_balance(ctx.agent_config, wallet, type_)
+    click.echo(balance)
 
-        address = wallet.addresses[type_]
-        balance = ledger_apis.token_balance(type_, address)
-        print(balance)
-    except (AssertionError, ValueError) as e:  # pragma: no cover
-        logger.error(str(e))  # pragma: no cover
+
+def _wait_funds_release(agent_config, wallet, type_):
+    start_balance = _try_get_balance(agent_config, wallet, type_)
+    end_time = time.time() + FUNDS_RELEASE_TIMEOUT
+    while time.time() < end_time:
+        if start_balance != _try_get_balance(agent_config, wallet, type_):
+            break
+        else:
+            time.sleep(1)
 
 
 @cli.command()
@@ -270,8 +290,11 @@ def get_wealth(ctx: Context, type_):
     type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
     required=True,
 )
+@click.option(
+    "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
+)
 @pass_ctx
-def generate_wealth(ctx: Context, type_):
+def generate_wealth(ctx: Context, sync, type_):
     """Generate wealth for address on test network."""
     try_to_load_agent_config(ctx)
 
@@ -285,8 +308,16 @@ def generate_wealth(ctx: Context, type_):
     wallet = Wallet(private_key_paths)
     try:
         address = wallet.addresses[type_]
-        click.echo("Requesting funds for address {}".format(address))
+        testnet = TESTNETS[type_]
+        click.echo(
+            "Requesting funds for address {} on test network '{}'".format(
+                address, testnet
+            )
+        )
         _try_generate_testnet_wealth(type_, address)
+        if sync:
+            _wait_funds_release(ctx.agent_config, wallet, type_)
+
     except (AssertionError, ValueError) as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
 

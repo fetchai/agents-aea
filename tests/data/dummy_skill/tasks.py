@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tasks for the 'dummy' skill."""
-from aea.skills.base import Task
+from aea.skills.tasks import Task
 
 
 class DummyTask(Task):
@@ -39,7 +39,7 @@ class DummyTask(Task):
         """
         pass
 
-    def execute(self) -> None:
+    def execute(self, *args, **kwargs) -> None:
         """Execute the task."""
         self.nb_execute_called += 1
 

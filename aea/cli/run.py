@@ -73,6 +73,7 @@ from aea.helpers.base import (
     load_agent_component_package,
     load_module,
 )
+from aea.identity.base import Identity
 from aea.registries.base import Resources
 
 
@@ -329,6 +330,16 @@ def run(
     )
 
     wallet = Wallet(private_key_paths)
+    if len(wallet.addresses) > 1:
+        identity = Identity(
+            agent_name,
+            addresses=wallet.addresses,
+            default_address_key=ctx.agent_config.default_ledger,
+        )
+    else:
+        identity = Identity(
+            agent_name, address=wallet.addresses[ctx.agent_config.default_ledger],
+        )
     ledger_apis = LedgerApis(ledger_api_configs, ctx.agent_config.default_ledger)
 
     default_connection_id = PublicId.from_str(ctx.agent_config.default_connection)
@@ -339,9 +350,7 @@ def run(
     _try_to_load_protocols(ctx)
     try:
         for connection_id in connection_ids:
-            connection = _setup_connection(
-                connection_id, wallet.addresses[ctx.agent_config.default_ledger], ctx
-            )
+            connection = _setup_connection(connection_id, identity.address, ctx)
             connections.append(connection)
     except AEAConfigException as e:
         logger.error(str(e))
@@ -354,7 +363,7 @@ def run(
             click_context.invoke(install)
 
     agent = AEA(
-        agent_name,
+        identity,
         connections,
         wallet,
         ledger_apis,
