@@ -134,7 +134,7 @@ def gui(ctx: Context, port):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier, "all",]),
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier, "all"]),
     required=True,
 )
 @pass_ctx
