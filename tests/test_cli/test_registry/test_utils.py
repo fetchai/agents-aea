@@ -100,7 +100,7 @@ class RequestAPITestCase(TestCase):
         self.assertEqual(result, expected_result)
 
     def test_request_api_404(self, request_mock):
-        """Test for request_api method 404 sever response."""
+        """Test for request_api method 404 server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 404
         request_mock.return_value = resp_mock
@@ -108,7 +108,7 @@ class RequestAPITestCase(TestCase):
             request_api("GET", "/path")
 
     def test_request_api_201(self, request_mock):
-        """Test for request_api method 201 sever response."""
+        """Test for request_api method 201 server response."""
         expected_result = {"correct": "json"}
 
         resp_mock = mock.Mock()
@@ -119,7 +119,7 @@ class RequestAPITestCase(TestCase):
         self.assertEqual(result, expected_result)
 
     def test_request_api_403(self, request_mock):
-        """Test for request_api method not authorized sever response."""
+        """Test for request_api method not authorized server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 403
         request_mock.return_value = resp_mock
@@ -127,7 +127,7 @@ class RequestAPITestCase(TestCase):
             request_api("GET", "/path")
 
     def test_request_api_400(self, request_mock):
-        """Test for request_api method 400 code sever response."""
+        """Test for request_api method 400 code server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 400
         request_mock.return_value = resp_mock
@@ -135,7 +135,7 @@ class RequestAPITestCase(TestCase):
             request_api("GET", "/path")
 
     def test_request_api_409(self, request_mock):
-        """Test for request_api method conflict sever response."""
+        """Test for request_api method conflict server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 409
         resp_mock.json = lambda: {"detail": "some"}
@@ -144,7 +144,7 @@ class RequestAPITestCase(TestCase):
             request_api("GET", "/path")
 
     def test_request_api_unexpected_response(self, request_mock):
-        """Test for request_api method unexpected sever response."""
+        """Test for request_api method unexpected server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 500
         request_mock.return_value = resp_mock
