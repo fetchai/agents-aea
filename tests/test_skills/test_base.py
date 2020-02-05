@@ -28,7 +28,7 @@ from queue import Queue
 import aea.registries.base
 from aea.aea import AEA, Resources
 from aea.connections.base import ConnectionStatus
-from aea.crypto.default import DEFAULT
+from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -41,11 +41,11 @@ from ..conftest import CUR_PATH, DUMMY_CONNECTION_PUBLIC_ID, DummyConnection
 
 def test_agent_context_ledger_apis():
     """Test that the ledger apis configurations are loaded correctly."""
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({DEFAULT: private_key_pem_path})
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    wallet = Wallet({FETCHAI: private_key_path})
     connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
     ledger_apis = LedgerApis({"fetchai": {"network": "testnet"}}, FETCHAI)
-    identity = Identity("name", address=wallet.addresses[DEFAULT])
+    identity = Identity("name", address=wallet.addresses[FETCHAI])
     my_aea = AEA(
         identity,
         connections,
@@ -64,10 +64,10 @@ class TestSkillContext:
     @classmethod
     def setup_class(cls):
         """Test the initialisation of the AEA."""
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        private_key_txt_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        eth_private_key_path = os.path.join(CUR_PATH, "data", "eth_private_key.txt")
+        fet_private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         cls.wallet = Wallet(
-            {DEFAULT: private_key_pem_path, FETCHAI: private_key_txt_path}
+            {ETHEREUM: eth_private_key_path, FETCHAI: fet_private_key_path}
         )
         cls.ledger_apis = LedgerApis({FETCHAI: {"network": "testnet"}}, FETCHAI)
         cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
@@ -157,11 +157,11 @@ class TestSkillFromDir:
         shutil.copytree(Path(CUR_PATH, "data", "dummy_skill"), cls.t)
         os.chdir(cls.t)
 
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({DEFAULT: private_key_pem_path})
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        cls.wallet = Wallet({FETCHAI: private_key_path})
         ledger_apis = LedgerApis({}, FETCHAI)
         cls.connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
-        cls.identity = Identity("name", address=cls.wallet.addresses[DEFAULT])
+        cls.identity = Identity("name", address=cls.wallet.addresses[FETCHAI])
         cls.my_aea = AEA(
             cls.identity,
             cls.connections,

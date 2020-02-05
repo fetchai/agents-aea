@@ -29,7 +29,7 @@ DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
 DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
-DEFAULT_PRIVATE_KEY_PATHS = {"default": "", "fetchai": "", "ethereum": ""}
+DEFAULT_PRIVATE_KEY_PATHS = {"fetchai": "", "ethereum": ""}
 T = TypeVar("T")
 
 """

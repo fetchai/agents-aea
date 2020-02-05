@@ -27,7 +27,6 @@ import pytest
 from aea.crypto.helpers import (
     _try_validate_ethereum_private_key_path,
     _try_validate_fet_private_key_path,
-    _try_validate_private_key_pem_path,
 )
 
 from ..conftest import CUR_PATH
@@ -41,12 +40,6 @@ class TestHelperFile:
 
     def tests_private_keys(self):
         """Test the private keys."""
-        private_key_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        _try_validate_private_key_pem_path(private_key_path)
-        with pytest.raises(SystemExit):
-            private_key_path = os.path.join(CUR_PATH, "data", "priv_wrong.pem")
-            _try_validate_private_key_pem_path(private_key_path)
-
         private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
         _try_validate_fet_private_key_path(private_key_path)
         with pytest.raises(SystemExit):

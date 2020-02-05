@@ -34,7 +34,7 @@ from oef.query import ConstraintExpr
 import pytest
 
 from aea.configurations.base import ConnectionConfig, PublicId
-from aea.crypto.default import DefaultCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.helpers.search.models import (
     Attribute,
@@ -75,7 +75,7 @@ class TestDefault:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.crypto1 = DefaultCrypto()
+        cls.crypto1 = FetchAICrypto()
         cls.connection = OEFConnection(
             cls.crypto1.address,
             oef_addr="127.0.0.1",
@@ -118,7 +118,7 @@ class TestOEF:
         @classmethod
         def setup_class(cls):
             """Set the test up."""
-            cls.crypto1 = DefaultCrypto()
+            cls.crypto1 = FetchAICrypto()
             cls.connection = OEFConnection(
                 cls.crypto1.address,
                 oef_addr="127.0.0.1",
@@ -196,7 +196,7 @@ class TestOEF:
         @classmethod
         def setup_class(cls):
             """Set the test up."""
-            cls.crypto1 = DefaultCrypto()
+            cls.crypto1 = FetchAICrypto()
             cls.connection = OEFConnection(
                 cls.crypto1.address,
                 oef_addr="127.0.0.1",
@@ -270,7 +270,7 @@ class TestOEF:
             - Register a service
             - Check that the registration worked.
             """
-            cls.crypto1 = DefaultCrypto()
+            cls.crypto1 = FetchAICrypto()
             cls.connection = OEFConnection(
                 cls.crypto1.address,
                 oef_addr="127.0.0.1",
@@ -391,7 +391,7 @@ class TestOEF:
         @classmethod
         def setup_class(cls):
             """Set the tests up."""
-            cls.crypto1 = DefaultCrypto()
+            cls.crypto1 = FetchAICrypto()
             cls.connection = OEFConnection(
                 cls.crypto1.address,
                 oef_addr="127.0.0.1",
@@ -446,8 +446,8 @@ class TestFIPA:
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
-        cls.crypto1 = DefaultCrypto()
-        cls.crypto2 = DefaultCrypto()
+        cls.crypto1 = FetchAICrypto()
+        cls.crypto2 = FetchAICrypto()
         cls.connection1 = OEFConnection(
             cls.crypto1.address,
             oef_addr="127.0.0.1",
@@ -816,7 +816,7 @@ class TestOefConnection:
 
     def test_connection(self):
         """Test that an OEF connection can be established to the OEF."""
-        crypto = DefaultCrypto()
+        crypto = FetchAICrypto()
         connection = OEFConnection(
             crypto.address,
             oef_addr="127.0.0.1",

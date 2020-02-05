@@ -27,11 +27,9 @@ from eth_account import Account  # type: ignore
 
 from fetchai.ledger.crypto import Entity  # type: ignore
 
-from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 
-DEFAULT_PRIVATE_KEY_FILE = "default_private_key.pem"
 FETCHAI_PRIVATE_KEY_FILE = "fet_private_key.txt"
 ETHEREUM_PRIVATE_KEY_FILE = "eth_private_key.txt"
 FETCHAI_TESTNET_FAUCET_URL = "https://explore-testnet.fetch.ai/api/v1/send_tokens/"
@@ -39,23 +37,6 @@ ETHEREUM_TESTNET_FAUCET_URL = "https://faucet.ropsten.be/donate/"
 TESTNETS = {FETCHAI: "testnet", ETHEREUM: "ropsten"}
 
 logger = logging.getLogger(__name__)
-
-
-def _try_validate_private_key_pem_path(private_key_pem_path: str) -> None:
-    """
-    Try to validate a private key.
-
-    :param private_key_pem_path: the path to the private key.
-    :return: None
-    :raises: an exception if the private key is invalid.
-    """
-    try:
-        DefaultCrypto(private_key_pem_path=private_key_pem_path)
-    except ValueError:
-        logger.error(
-            "This is not a valid private key file: '{}'".format(private_key_pem_path)
-        )
-        sys.exit(1)
 
 
 def _try_validate_fet_private_key_path(private_key_path: str) -> None:
@@ -101,13 +82,11 @@ def _validate_private_key_path(private_key_path: str, ledger_id: str):
     Validate a private key path.
 
     :param private_key_path: the path to the private key.
-    :param ledger_id: one of 'fetchai', 'ethereum', 'default'
+    :param ledger_id: one of 'fetchai', 'ethereum'
     :return: None
     :raises: ValueError if the private key is invalid.
     """
-    if ledger_id == "default":
-        _try_validate_private_key_pem_path(private_key_path)
-    elif ledger_id == "fetchai":
+    if ledger_id == "fetchai":
         _try_validate_fet_private_key_path(private_key_path)
     elif ledger_id == "ethereum":
         _try_validate_ethereum_private_key_path(private_key_path)
@@ -115,17 +94,6 @@ def _validate_private_key_path(private_key_path: str, ledger_id: str):
         raise ValueError(
             "Ledger id {} is not valid.".format(repr(ledger_id))
         )  # pragma: no cover
-
-
-def _create_default_private_key() -> None:
-    """
-    Create a default private key.
-
-    :return: None
-    """
-    crypto = DefaultCrypto()
-    with open(DEFAULT_PRIVATE_KEY_FILE, "wb") as file:
-        file.write(crypto.private_key_pem)
 
 
 def _create_fetchai_private_key() -> None:

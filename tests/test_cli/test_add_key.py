@@ -29,11 +29,9 @@ import yaml
 import aea
 from aea.cli import cli
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.default import DEFAULT, DefaultCrypto
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI, FetchAICrypto
 from aea.crypto.helpers import (
-    DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
 )
@@ -59,31 +57,7 @@ class TestAddKey:
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
 
-    def test_default(self):
-        """Test that the default private key is created correctly."""
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT])
-        assert result.exit_code == 0
-        assert Path(DEFAULT_PRIVATE_KEY_FILE).exists()
-
-        # this line tests that the content of the file is correct.
-        DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)
-
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", DEFAULT, DEFAULT_PRIVATE_KEY_FILE]
-        )
-        assert result.exit_code == 0
-
-        f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
-        expected_json = yaml.safe_load(f)
-        config = AgentConfig.from_json(expected_json)
-        private_key_configuration = config.private_key_paths.read(DEFAULT)
-        assert private_key_configuration is not None
-        assert private_key_configuration.ledger == DEFAULT
-        assert private_key_configuration.path == DEFAULT_PRIVATE_KEY_FILE
-
-        assert len(config.private_key_paths.read_all()) == 1
-
-    def test_fetch(self):
+    def test_fetchai(self):
         """Test that the fetch private key is created correctly."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", FETCHAI])
         assert result.exit_code == 0
@@ -151,10 +125,10 @@ def test_add_key_fails_bad_key():
             os.chdir(Path(tmpdir, agent_name))
 
             # create an empty file - surely not a private key
-            pvk_file = "this_is_not_a_key.pem"
+            pvk_file = "this_is_not_a_key.txt"
             Path(pvk_file).touch()
 
-            result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", DEFAULT, pvk_file])
+            result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, pvk_file])
             assert result.exit_code == 1
             mock_logger_error.assert_called_with(
                 "This is not a valid private key file: '{}'".format(pvk_file)
@@ -181,13 +155,13 @@ def test_add_key_fails_bad_ledger_id():
         os.chdir(Path(tmpdir, agent_name))
 
         # generate a private key file
-        result = runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT])
+        result = runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", FETCHAI])
         assert result.exit_code == 0
-        assert Path(DEFAULT_PRIVATE_KEY_FILE).exists()
+        assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
         bad_ledger_id = "this_is_a_bad_ledger_id"
 
         result = runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", bad_ledger_id, DEFAULT_PRIVATE_KEY_FILE]
+            cli, [*CLI_LOG_OPTION, "add-key", bad_ledger_id, FETCHAI_PRIVATE_KEY_FILE]
         )
         assert result.exit_code == 2
 

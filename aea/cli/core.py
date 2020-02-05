@@ -47,11 +47,9 @@ from aea.cli.run import _verify_ledger_apis_access, _verify_or_create_private_ke
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig
-from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
-    DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
     TESTNETS,
@@ -136,14 +134,7 @@ def gui(ctx: Context, port):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(
-        [
-            DefaultCrypto.identifier,
-            FetchAICrypto.identifier,
-            EthereumCrypto.identifier,
-            "all",
-        ]
-    ),
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier, "all",]),
     required=True,
 )
 @pass_ctx
@@ -160,9 +151,6 @@ def generate_key(ctx: Context, type_):
         else:
             return True
 
-    if type_ == DefaultCrypto.identifier or type_ == "all":
-        if _can_write(DEFAULT_PRIVATE_KEY_FILE):
-            DefaultCrypto().dump(open(DEFAULT_PRIVATE_KEY_FILE, "wb"))
     if type_ == FetchAICrypto.identifier or type_ == "all":
         if _can_write(FETCHAI_PRIVATE_KEY_FILE):
             FetchAICrypto().dump(open(FETCHAI_PRIVATE_KEY_FILE, "wb"))
@@ -175,9 +163,7 @@ def generate_key(ctx: Context, type_):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(
-        [DefaultCrypto.identifier, FetchAICrypto.identifier, EthereumCrypto.identifier]
-    ),
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
     required=True,
 )
 @click.argument(
@@ -206,9 +192,7 @@ def add_key(ctx: Context, type_, file):
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(
-        [DefaultCrypto.identifier, FetchAICrypto.identifier, EthereumCrypto.identifier]
-    ),
+    type=click.Choice([FetchAICrypto.identifier, EthereumCrypto.identifier]),
     required=True,
 )
 @pass_ctx

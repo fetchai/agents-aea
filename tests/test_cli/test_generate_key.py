@@ -25,11 +25,9 @@ import tempfile
 from pathlib import Path
 
 from aea.cli import cli
-from aea.crypto.default import DefaultCrypto
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
-    DEFAULT_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
 )
@@ -50,16 +48,7 @@ class TestGenerateKey:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_default(self):
-        """Test that the default private key is created correctly."""
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "default"])
-        assert result.exit_code == 0
-        assert Path(DEFAULT_PRIVATE_KEY_FILE).exists()
-        DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)
-
-        Path(DEFAULT_PRIVATE_KEY_FILE).unlink()
-
-    def test_fetch(self):
+    def test_fetchai(self):
         """Test that the fetch private key is created correctly."""
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"])
         assert result.exit_code == 0
@@ -82,14 +71,11 @@ class TestGenerateKey:
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "all"])
         assert result.exit_code == 0
 
-        assert Path(DEFAULT_PRIVATE_KEY_FILE).exists()
         assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
         assert Path(ETHEREUM_PRIVATE_KEY_FILE).exists()
-        DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)
         FetchAICrypto(FETCHAI_PRIVATE_KEY_FILE)
         EthereumCrypto(ETHEREUM_PRIVATE_KEY_FILE)
 
-        Path(DEFAULT_PRIVATE_KEY_FILE).unlink()
         Path(FETCHAI_PRIVATE_KEY_FILE).unlink()
         Path(ETHEREUM_PRIVATE_KEY_FILE).unlink()
 
@@ -112,30 +98,30 @@ class TestGenerateKeyWhenAlreadyExists:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_default(self):
+    def test_fetchai(self):
         """Test that the default private key is overwritten or not dependending on the user input."""
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "default"])
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"])
         assert result.exit_code == 0
-        assert Path(DEFAULT_PRIVATE_KEY_FILE).exists()
+        assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
 
         # This tests if the file has been created and its content is correct.
-        DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)
-        content = Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes()
+        FetchAICrypto(FETCHAI_PRIVATE_KEY_FILE)
+        content = Path(FETCHAI_PRIVATE_KEY_FILE).read_bytes()
 
         # Saying 'no' leave the files as it is.
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="n"
         )
         assert result.exit_code == 0
-        assert Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes() == content
+        assert Path(FETCHAI_PRIVATE_KEY_FILE).read_bytes() == content
 
         # Saying 'yes' overwrites the file.
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "generate-key", "default"], input="y"
         )
         assert result.exit_code == 0
-        assert Path(DEFAULT_PRIVATE_KEY_FILE).read_bytes() != content
-        DefaultCrypto(DEFAULT_PRIVATE_KEY_FILE)
+        assert Path(FETCHAI_PRIVATE_KEY_FILE).read_bytes() != content
+        FetchAICrypto(FETCHAI_PRIVATE_KEY_FILE)
 
     @classmethod
     def teardown_class(cls):
