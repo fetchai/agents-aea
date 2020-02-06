@@ -205,7 +205,10 @@ class TwoPartyNegotiationMessage(Message):
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
-            elif self.performative == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
+            elif (
+                self.performative
+                == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT
+            ):
                 expected_nb_of_contents = 0
 
             # # Check correct content count

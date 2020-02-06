@@ -480,7 +480,9 @@ class ProtocolGenerator:
         cls_str += "            performative=performative,\n"
         cls_str += "            **kwargs,\n"
         cls_str += "        )\n"
-        cls_str += "        self._performatives = {}\n".format(self._performatives_str())
+        cls_str += "        self._performatives = {}\n".format(
+            self._performatives_str()
+        )
         cls_str += "        assert (\n"
         cls_str += "            self._check_consistency()\n"
         cls_str += "        ), \"This message is invalid according to the '{}' protocol\"\n\n".format(
