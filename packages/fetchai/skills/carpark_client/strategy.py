@@ -24,7 +24,7 @@ import time
 from typing import cast
 
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 DEFAULT_COUNTRY = "UK"
 SEARCH_TERM = "country"
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_MAX_TX_FEE = 2
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:

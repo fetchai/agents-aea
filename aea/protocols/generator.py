@@ -18,11 +18,12 @@
 # ------------------------------------------------------------------------------
 """This module contains the protocol generator."""
 
+import itertools
 import os
 import re
 from os import path
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, List, Set
 
 from aea.configurations.base import ProtocolSpecification
 
@@ -77,9 +78,9 @@ class ProtocolGenerator:
         }
 
         self._speech_acts = dict()  # type: Dict[str, Dict[str, str]]
-        self._all_performatives = set()  # type: Set[str]
+        self._all_performatives = list()  # type: List[str]
         self._all_unique_contents = dict()  # type: Dict[str, str]
-        self._all_custom_types = set()  # type: Set[str]
+        self._all_custom_types = list()  # type: List[str]
 
         self._setup()
 
@@ -89,16 +90,19 @@ class ProtocolGenerator:
 
         :return: Dict[performatives, Dict[content names, content types]]
         """
+        all_performatives_set = set()
+        all_custom_types_set = set()
+
         for (
             performative,
             speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
-            self._all_performatives.add(performative)
+            all_performatives_set.add(performative)
             self._speech_acts[performative] = {}
             for content_name, content_type in speech_act_content_config.args.items():
                 custom_types = set(re.findall(CUSTOM_TYPE_PATTERN, content_type))
                 for custom_type in custom_types:
-                    self._all_custom_types.add(
+                    all_custom_types_set.add(
                         self._specification_type_to_python_type(custom_type)
                     )
                 pythonic_content_type = self._specification_type_to_python_type(
@@ -106,6 +110,8 @@ class ProtocolGenerator:
                 )
                 self._all_unique_contents[content_name] = pythonic_content_type
                 self._speech_acts[performative][content_name] = pythonic_content_type
+        self._all_performatives = sorted(all_performatives_set)
+        self._all_custom_types = sorted(all_custom_types_set)
 
     def _handle_o(self, specification_type: str) -> str:
         """
@@ -254,23 +260,18 @@ class ProtocolGenerator:
         import_str = import_str[:-2]
         return import_str
 
-    def _speech_acts_str(self) -> str:
+    def _performatives_str(self) -> str:
         """
         Generate the speech-act dictionary where content types are actual types (not strings).
 
         :return: the speech-act dictionary string
         """
-        speech_act_str = "{\n"
-        for (performative, contents,) in self._speech_acts.items():
-            speech_act_str += '        "{}": {{'.format(performative)
-            if len(contents.items()) > 0:
-                for (content_name, content_type,) in contents.items():
-                    speech_act_str += '"{}": {}, '.format(content_name, content_type,)
-                speech_act_str = speech_act_str[:-2]
-            speech_act_str += "},\n"
-        speech_act_str = speech_act_str[:-1]
-        speech_act_str += "\n    }"
-        return speech_act_str
+        performatives_str = "{"
+        for performative in self._all_performatives:
+            performatives_str += '"{}", '.format(performative)
+        performatives_str = performatives_str[:-2]
+        performatives_str += "}"
+        return performatives_str
 
     def _custom_types_classes_str(self) -> str:
         """
@@ -318,6 +319,108 @@ class ProtocolGenerator:
 
         return enum_str
 
+    @staticmethod
+    def _check_content_type_str(no_of_indents: int, content_name, content_type) -> str:
+        check_str = ""
+        indents = ""
+        for _ in itertools.repeat(None, no_of_indents):
+            indents += "    "
+        if content_type.startswith("Optional["):
+            # check if the content exists then...
+            check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
+            indents += "    "
+            content_type = content_type[
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
+        if content_type.startswith("FrozenSet["):
+            # check the type
+            check_str += (
+                indents
+                + "assert type(self.{}) == frozenset, \"{} is not 'frozenset'.\"\n".format(
+                    content_name, content_name
+                )
+            )
+            element_type = content_type[
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
+            # check the elements types
+            check_str += indents + "assert all(\n"
+            check_str += (
+                indents
+                + "    type(element) == {} for element in self.{}\n".format(
+                    element_type, content_name
+                )
+            )
+            check_str += indents + "), \"Elements of {} are not '{}'.\"\n".format(
+                content_name, element_type
+            )
+        elif content_type.startswith("Tuple["):
+            # check the type
+            check_str += (
+                indents
+                + "assert type(self.{}) == tuple, \"{} is not 'tuple'.\"\n".format(
+                    content_name, content_name
+                )
+            )
+            element_type = content_type[
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
+            # check the elements types
+            check_str += indents + "assert all(\n"
+            check_str += (
+                indents
+                + "    type(element) == {} for element in self.{}\n".format(
+                    element_type, content_name
+                )
+            )
+            check_str += indents + "), \"Elements of {} are not '{}'.\"\n".format(
+                content_name, element_type
+            )
+        elif content_type.startswith("Dict["):
+            # check the type
+            check_str += (
+                indents
+                + "assert type(self.{}) == dict, \"{} is not 'dict'.\"\n".format(
+                    content_name, content_name
+                )
+            )
+            element1_type = content_type[
+                content_type.index("[") + 1 : content_type.index(",")
+            ]
+            element2_type = content_type[
+                content_type.index(",") + 2 : content_type.rindex("]")
+            ]
+            # check the keys type then check the values type
+            check_str += indents + "for key, value in self.{}.items():\n".format(
+                content_name
+            )
+            check_str += indents + "    assert (\n"
+            check_str += indents + "        type(key) == {}\n".format(element1_type)
+            check_str += (
+                indents
+                + "    ), \"Keys of {} dictionary are not '{}'.\"\n".format(
+                    content_name, element1_type
+                )
+            )
+
+            check_str += indents + "    assert (\n"
+            check_str += indents + "        type(value) == {}\n".format(element2_type)
+            check_str += (
+                indents
+                + "    ), \"Values of {} dictionary are not '{}'.\"\n".format(
+                    content_name, element2_type
+                )
+            )
+        else:
+            # check the type
+            check_str += (
+                indents
+                + "assert type(self.{}) == {}, \"{} is not '{}'.\"\n".format(
+                    content_name, content_type, content_name, content_type
+                )
+            )
+        return check_str
+
     def _message_class_str(self) -> str:
         """
         Produce the content of the Message class.
@@ -356,7 +459,6 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification.version,
         )
-        cls_str += str.format("    _speech_acts = {}\n\n", self._speech_acts_str())
 
         # Performatives Enum
         cls_str += self._performatives_enum_str()
@@ -378,6 +480,9 @@ class ProtocolGenerator:
         cls_str += "            performative=performative,\n"
         cls_str += "            **kwargs,\n"
         cls_str += "        )\n"
+        cls_str += "        self._performatives = {}\n".format(
+            self._performatives_str()
+        )
         cls_str += "        assert (\n"
         cls_str += "            self._check_consistency()\n"
         cls_str += "        ), \"This message is invalid according to the '{}' protocol\"\n\n".format(
@@ -388,7 +493,7 @@ class ProtocolGenerator:
         cls_str += "    @property\n"
         cls_str += "    def valid_performatives(self) -> Set[str]:\n"
         cls_str += '        """Get valid performatives."""\n'
-        cls_str += "        return set(self._speech_acts.keys())\n\n"
+        cls_str += "        return self._performatives\n\n"
         cls_str += "    @property\n"
         cls_str += "    def dialogue_reference(self) -> Tuple[str, str]:\n"
         cls_str += '        """Get the dialogue_reference of the message."""\n'
@@ -402,11 +507,6 @@ class ProtocolGenerator:
         cls_str += '        assert self.is_set("message_id"), "message_id is not set"\n'
         cls_str += '        return cast(int, self.get("message_id"))\n\n'
         cls_str += "    @property\n"
-        cls_str += "    def target(self) -> int:\n"
-        cls_str += '        """Get the target of the message."""\n'
-        cls_str += '        assert self.is_set("target"), "target is not set."\n'
-        cls_str += '        return cast(int, self.get("target"))\n\n'
-        cls_str += "    @property\n"
         cls_str += "    def performative(self) -> Performative:  # noqa: F821\n"
         cls_str += '        """Get the performative of the message."""\n'
         cls_str += (
@@ -415,7 +515,13 @@ class ProtocolGenerator:
         cls_str += '        return cast({}Message.Performative, self.get("performative"))\n\n'.format(
             to_camel_case(self.protocol_specification.name)
         )
-        for content_name, content_type in self._all_unique_contents.items():
+        cls_str += "    @property\n"
+        cls_str += "    def target(self) -> int:\n"
+        cls_str += '        """Get the target of the message."""\n'
+        cls_str += '        assert self.is_set("target"), "target is not set."\n'
+        cls_str += '        return cast(int, self.get("target"))\n\n'
+        for content_name in sorted(self._all_unique_contents.keys()):
+            content_type = self._all_unique_contents[content_name]
             cls_str += "    @property\n"
             cls_str += "    def {}(self) -> {}:\n".format(content_name, content_type)
             cls_str += '        """Get the {} from the message."""\n'.format(
@@ -485,9 +591,7 @@ class ProtocolGenerator:
             if len(contents) == 0:
                 continue
             for content_name, content_type in contents.items():
-                cls_str += '                assert type(self.{}) == {}, "{} is not {}"\n'.format(
-                    content_name, content_type, content_name, content_type,
-                )
+                cls_str += self._check_content_type_str(4, content_name, content_type)
             counter += 1
         cls_str += "\n            # # Check correct content count\n"
         cls_str += "            assert (\n"
@@ -515,18 +619,6 @@ class ProtocolGenerator:
         cls_str += "        return True\n"
 
         return cls_str
-
-    def _generate_message_class(self) -> None:
-        """
-        Create the Message class file.
-
-        :return: None
-        """
-        pathname = path.join(self.output_folder_path, MESSAGE_FILE_NAME)
-        message_class = self._message_class_str()
-
-        with open(pathname, "w") as pyfile:
-            pyfile.write(message_class)
 
     def _serialization_class_str(self) -> str:
         """
@@ -608,6 +700,18 @@ class ProtocolGenerator:
         cls_str += "        )\n"
 
         return cls_str
+
+    def _generate_message_class(self) -> None:
+        """
+        Create the Message class file.
+
+        :return: None
+        """
+        pathname = path.join(self.output_folder_path, MESSAGE_FILE_NAME)
+        message_class = self._message_class_str()
+
+        with open(pathname, "w") as pyfile:
+            pyfile.write(message_class)
 
     def _generate_serialisation_class(self) -> None:
         """

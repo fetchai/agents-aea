@@ -32,7 +32,7 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.configurations.base import ProtocolConfig, PublicId
 from aea.connections.stub.connection import StubConnection
-from aea.crypto.default import DEFAULT
+from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
@@ -60,15 +60,15 @@ from .data.dummy_skill.behaviours import DummyBehaviour  # type: ignore
 def test_initialise_aea():
     """Tests the initialisation of the AEA."""
     node = LocalNode()
-    private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-    wallet = Wallet({DEFAULT: private_key_pem_path})
-    identity = Identity("my_name", address=wallet.addresses[DEFAULT])
+    private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+    wallet = Wallet({FETCHAI: private_key_path})
+    identity = Identity("my_name", address=wallet.addresses[FETCHAI])
     connections1 = [
         OEFLocalConnection(
             identity.address, node, connection_id=OEFLocalConnection.connection_id
         )
     ]
-    ledger_apis = LedgerApis({}, DEFAULT)
+    ledger_apis = LedgerApis({}, FETCHAI)
     my_AEA = AEA(
         identity,
         connections1,
@@ -95,10 +95,10 @@ def test_act():
     """Tests the act function of the AEA."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({DEFAULT: private_key_pem_path})
-        identity = Identity(agent_name, address=wallet.addresses[DEFAULT])
-        ledger_apis = LedgerApis({}, DEFAULT)
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        ledger_apis = LedgerApis({}, FETCHAI)
         connections = [
             OEFLocalConnection(
                 identity.address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
@@ -127,10 +127,10 @@ def test_react():
     """Tests income messages."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({DEFAULT: private_key_pem_path})
-        identity = Identity(agent_name, address=wallet.addresses[DEFAULT])
-        ledger_apis = LedgerApis({}, DEFAULT)
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
+        ledger_apis = LedgerApis({}, FETCHAI)
         connection = OEFLocalConnection(
             identity.address, node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
         )
@@ -178,10 +178,10 @@ async def test_handle():
     """Tests handle method of an agent."""
     with LocalNode() as node:
         agent_name = "MyAgent"
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({DEFAULT: private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
-        identity = Identity(agent_name, address=wallet.addresses[DEFAULT])
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        ledger_apis = LedgerApis({}, FETCHAI)
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         connection = OEFLocalConnection(
             identity.address, node, connection_id=DUMMY_SKILL_PUBLIC_ID
         )
@@ -261,10 +261,10 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
         cls.node = LocalNode()
         cls.node.start()
         cls.agent_name = "MyAgent"
-        cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({DEFAULT: cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({}, DEFAULT)
-        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[DEFAULT])
+        cls.private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        cls.wallet = Wallet({FETCHAI: cls.private_key_path})
+        cls.ledger_apis = LedgerApis({}, FETCHAI)
+        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
         cls.connection = OEFLocalConnection(
             cls.agent_name, cls.node, connection_id=LOCAL_CONNECTION_PUBLIC_ID,
         )
@@ -344,10 +344,10 @@ class TestInitializeAEAProgrammaticallyBuildResources:
         cls.node = LocalNode()
         cls.node.start()
         cls.agent_name = "MyAgent"
-        cls.private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        cls.wallet = Wallet({DEFAULT: cls.private_key_pem_path})
-        cls.ledger_apis = LedgerApis({}, DEFAULT)
-        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[DEFAULT])
+        cls.private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        cls.wallet = Wallet({FETCHAI: cls.private_key_path})
+        cls.ledger_apis = LedgerApis({}, FETCHAI)
+        cls.identity = Identity(cls.agent_name, address=cls.wallet.addresses[FETCHAI])
         cls.connection = OEFLocalConnection(
             cls.agent_name, cls.node, connection_id=LOCAL_CONNECTION_PUBLIC_ID
         )
@@ -448,11 +448,11 @@ class TestAddBehaviourDynamically:
     def setup_class(cls):
         """Set the test up."""
         agent_name = "MyAgent"
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({"default": private_key_pem_path})
-        ledger_apis = LedgerApis({}, "default")
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        ledger_apis = LedgerApis({}, FETCHAI)
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
-        identity = Identity(agent_name, address=wallet.addresses[DEFAULT])
+        identity = Identity(agent_name, address=wallet.addresses[FETCHAI])
         input_file = tempfile.mktemp()
         output_file = tempfile.mktemp()
         cls.agent = AEA(

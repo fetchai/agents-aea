@@ -14,9 +14,9 @@ handlers:
     class_name: MyScaffoldHandler
     args:
       foo: bar
-shared_classes:
+models:
   scaffold:
-    class_name: MySharedClass
+    class_name: MyModel
     args:
       foo: bar
 protocols: []

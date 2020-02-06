@@ -33,7 +33,7 @@ import aea
 import aea.registries.base
 from aea.aea import AEA
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
-from aea.crypto.default import DEFAULT
+from aea.crypto.fetchai import FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.messages.transaction import TransactionMessage
@@ -153,11 +153,11 @@ class TestResources:
         Path(cls.agent_folder, "skills", cls.fake_skill_id.name).mkdir()
 
         connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({DEFAULT: private_key_pem_path})
-        ledger_apis = LedgerApis({}, DEFAULT)
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        ledger_apis = LedgerApis({}, FETCHAI)
         cls.resources = Resources(os.path.join(cls.agent_folder))
-        identity = Identity(cls.agent_name, address=wallet.addresses[DEFAULT])
+        identity = Identity(cls.agent_name, address=wallet.addresses[FETCHAI])
         cls.aea = AEA(
             identity,
             connections,
@@ -276,18 +276,18 @@ class TestResources:
 
         handlers = dummy_skill.handlers
         behaviours = dummy_skill.behaviours
-        shared_classes = dummy_skill.shared_classes
+        models = dummy_skill.models
 
         assert len(handlers) == len(skill_context.handlers.__dict__)
         assert len(behaviours) == len(skill_context.behaviours.__dict__)
 
         assert handlers["dummy"] == skill_context.handlers.dummy
         assert behaviours["dummy"] == skill_context.behaviours.dummy
-        assert shared_classes["dummy"] == skill_context.dummy
+        assert models["dummy"] == skill_context.dummy
 
         assert handlers["dummy"].context == dummy_skill.skill_context
         assert behaviours["dummy"].context == dummy_skill.skill_context
-        assert shared_classes["dummy"].context == dummy_skill.skill_context
+        assert models["dummy"].context == dummy_skill.skill_context
 
     def test_handler_configuration_loading(self):
         """Test that the handler configurations are loaded correctly."""
@@ -309,16 +309,16 @@ class TestResources:
         )
         assert dummy_behaviour.config == {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}
 
-    def test_shared_class_configuration_loading(self):
-        """Test that the shared class configurations are loaded correctly."""
+    def test_model_configuration_loading(self):
+        """Test that the model configurations are loaded correctly."""
         dummy_skill = self.resources.get_skill(self.dummy_skill_public_id)
         assert dummy_skill is not None
-        assert len(dummy_skill.shared_classes) == 1
-        dummy_shared_class = dummy_skill.shared_classes["dummy"]
+        assert len(dummy_skill.models) == 1
+        dummy_model = dummy_skill.models["dummy"]
 
-        assert dummy_shared_class.config == {
-            "shared_class_arg_1": 1,
-            "shared_class_arg_2": "2",
+        assert dummy_model.config == {
+            "model_arg_1": 1,
+            "model_arg_2": "2",
         }
 
     @classmethod
@@ -344,10 +344,10 @@ class TestFilter:
         os.chdir(cls.agent_folder)
 
         connections = [DummyConnection(connection_id=DUMMY_CONNECTION_PUBLIC_ID)]
-        private_key_pem_path = os.path.join(CUR_PATH, "data", "priv.pem")
-        wallet = Wallet({DEFAULT: private_key_pem_path})
-        ledger_apis = LedgerApis({}, DEFAULT)
-        identity = Identity(cls.agent_name, address=wallet.addresses[DEFAULT])
+        private_key_path = os.path.join(CUR_PATH, "data", "fet_private_key.txt")
+        wallet = Wallet({FETCHAI: private_key_path})
+        ledger_apis = LedgerApis({}, FETCHAI)
+        identity = Identity(cls.agent_name, address=wallet.addresses[FETCHAI])
         cls.aea = AEA(
             identity,
             connections,

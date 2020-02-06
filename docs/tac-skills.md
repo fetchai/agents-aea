@@ -64,8 +64,8 @@ You must set the start time to a point in the future `start_time: 12 11 2019  15
 Alternatively, use the command line to get and set the start time:
 
 ``` bash
-aea config get skills.tac_control.shared_classes.parameters.args.start_time
-aea config set skills.tac_control.shared_classes.parameters.args.start_time '21 12 2019  07:14'
+aea config get skills.tac_control.models.parameters.args.start_time
+aea config set skills.tac_control.models.parameters.args.start_time '21 12 2019  07:14'
 ```
 
 ### Run the TAC controller AEA
@@ -220,7 +220,7 @@ handlers:
   oef:
     class_name: OEFSearchHandler
     args: {}
-shared_classes:
+models:
   search:
     class_name: Search
     args:
@@ -254,9 +254,9 @@ The `OEFSearchHandler` deals with `OEFMessage` types returned from the OEF searc
 
 The `TransactionCleanUpTask` is responsible for cleaning up transactions which are no longer likely to being settled with the controller AEA.
 
-### Shared classes
+### Models
 
-The `shared_classes` element in the configuration `yaml` lists a number of important classes which are shared between the handlers, behaviours and tasks.
+The `models` element in the configuration `yaml` lists a number of important classes which are shared between the handlers, behaviours and tasks.
 
 #### Search
 

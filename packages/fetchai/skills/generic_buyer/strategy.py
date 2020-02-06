@@ -22,7 +22,7 @@
 from typing import cast
 
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 DEFAULT_MAX_PRICE = 5
 DEFAULT_MAX_BUYER_TX_FEE = 2
@@ -31,7 +31,7 @@ DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:

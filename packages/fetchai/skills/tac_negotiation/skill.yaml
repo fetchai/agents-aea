@@ -23,7 +23,7 @@ handlers:
   oef:
     class_name: OEFSearchHandler
     args: {}
-shared_classes:
+models:
   search:
     class_name: Search
     args:

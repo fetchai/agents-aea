@@ -20,7 +20,7 @@ handlers:
     class_name: MyTransactionHandler
     args: {}
 tasks: {}
-shared_classes:
+models:
   strategy:
     class_name: Strategy
     args:

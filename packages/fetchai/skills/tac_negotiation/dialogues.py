@@ -24,12 +24,12 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FIPADialogues
 
 
-class Dialogues(SharedClass, FIPADialogues):
+class Dialogues(Model, FIPADialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
@@ -38,5 +38,5 @@ class Dialogues(SharedClass, FIPADialogues):
 
         :return: None
         """
-        SharedClass.__init__(self, **kwargs)
+        Model.__init__(self, **kwargs)
         FIPADialogues.__init__(self)

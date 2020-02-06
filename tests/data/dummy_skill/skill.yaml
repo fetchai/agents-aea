@@ -20,12 +20,12 @@ handlers:
     args:
       handler_arg_1: 1
       handler_arg_2: "2"
-shared_classes:
+models:
   dummy:
-    class_name: DummySharedClass
+    class_name: DummyModel
     args:
-      shared_class_arg_1: 1
-      shared_class_arg_2: "2"
+      model_arg_1: 1
+      model_arg_2: "2"
 protocols: ["fetchai/default:0.1.0"]
 dependencies: {}
 description: "a dummy_skill for testing purposes."

@@ -179,7 +179,7 @@ In the ml data provider skill config (`ml_data_provider/skills/ml_data_provider/
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|shared_classes:                    |shared_classes:                   |              
+|models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |
@@ -196,8 +196,8 @@ In the ml data provider skill config (`ml_data_provider/skills/ml_data_provider/
 
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set vendor.fetchai.skills.ml_data_provider.shared_classes.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.ml_data_provider.shared_classes.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.ml_data_provider.models.strategy.args.ledger_id ethereum
 ```
 
 
@@ -207,7 +207,7 @@ In the ml model trainer skill config (`ml_model_trainer/skills/ml_train/skill.ya
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|shared_classes:                    |shared_classes:                   |              
+|models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |
@@ -222,9 +222,9 @@ In the ml model trainer skill config (`ml_model_trainer/skills/ml_train/skill.ya
 
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set vendor.fetchai.skills.ml_train.shared_classes.strategy.args.max_buyer_tx_fee 10000 --type int
-aea config set vendor.fetchai.skills.ml_train.shared_classes.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.ml_train.shared_classes.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.ml_train.models.strategy.args.max_buyer_tx_fee 10000 --type int
+aea config set vendor.fetchai.skills.ml_train.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.ml_train.models.strategy.args.ledger_id ethereum
 ```
 
 

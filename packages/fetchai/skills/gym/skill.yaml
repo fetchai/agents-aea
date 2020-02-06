@@ -10,7 +10,7 @@ handlers:
     class_name: GymHandler
     args:
       nb_steps: 4000
-shared_classes: {}
+models: {}
 protocols: ["fetchai/gym:0.1.0"]
 dependencies:
   gym: {}

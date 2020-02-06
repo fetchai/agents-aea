@@ -35,7 +35,7 @@ from aea.helpers.preference_representations.base import (
     logarithmic_utility,
 )
 from aea.mail.base import Address
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.protocols.tac.message import TACMessage
 from packages.fetchai.skills.tac_control.helpers import (
@@ -776,7 +776,7 @@ class Registration:
         self._agent_addr_to_name.pop(agent_addr)
 
 
-class Game(SharedClass):
+class Game(Model):
     """A class to manage a TAC instance."""
 
     def __init__(self, **kwargs):

@@ -113,7 +113,7 @@ In the thermometer skill config (`my_thermometer_aea/skills/thermometer/skill.ya
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|shared_classes:                    |shared_classes:                   |              
+|models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |
@@ -128,8 +128,8 @@ In the thermometer skill config (`my_thermometer_aea/skills/thermometer/skill.ya
 
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.thermometer.shared_classes.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.thermometer.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.thermometer.models.strategy.args.ledger_id ethereum
 ```
 
 In the thermometer client skill config (`my_thermometer_client/skills/thermometer_client/skill.yaml`) under strategy change the `currency_id` and `ledger_id`.
@@ -138,7 +138,7 @@ In the thermometer client skill config (`my_thermometer_client/skills/thermomete
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|shared_classes:                    |shared_classes:                   |              
+|models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |
@@ -153,9 +153,9 @@ In the thermometer client skill config (`my_thermometer_client/skills/thermomete
 
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.max_buyer_tx_fee 10000 --type int
-aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.thermometer_client.shared_classes.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.max_buyer_tx_fee 10000 --type int
+aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.thermometer_client.models.strategy.args.ledger_id ethereum
 ```
 
 ## Run the AEAs

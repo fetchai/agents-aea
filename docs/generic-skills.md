@@ -98,7 +98,7 @@ In `my_seller_aea/vendor/fetchai/generi_seller/skill.yaml`, replace the `data_fo
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|shared_classes:                    |shared_classes:                   |              
+|models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |
@@ -134,7 +134,7 @@ In the generic buyer skill config (`my_buyer_aea/skills/generic_buyer/skill.yaml
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|shared_classes:                    |shared_classes:                   |              
+|models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |

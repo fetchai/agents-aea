@@ -49,7 +49,7 @@ aea scaffold skill thermometer
 This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder and it must contain the following files:
 - behaviours.py
 - handlers.py
-- my_shared_class.py
+- my_model.py
 - skills.yaml
 - tasks.py
 - \_\_init__.py
@@ -628,7 +628,7 @@ Otherwise we don’t do anything.
 
 ## Step4: Create the strategy
 
-We are going to create the strategy that we want our AEA to follow. Rename the `my_shared_class.py` file to `strategy.py`
+We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file to `strategy.py`
  and paste the following code: 
 
 ```bash 
@@ -640,7 +640,7 @@ from temper import Temper
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.skills.thermometer.thermometer_data_model import (
    SCHEME,
@@ -657,7 +657,7 @@ DEFAULT_HAS_SENSOR = True
 logger = logging.getLogger(__name__)
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
    """This class defines a strategy for the agent."""
 
    def __init__(self, **kwargs) -> None:
@@ -785,7 +785,7 @@ from typing import Any, Dict, Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FIPADialogue, FIPADialogues
 
@@ -807,7 +807,7 @@ class Dialogue(FIPADialogue):
        self.proposal = None  # type: Optional[Description]
 
 
-class Dialogues(SharedClass, FIPADialogues):
+class Dialogues(Model, FIPADialogues):
    """The dialogues class keeps track of all dialogues."""
 
    def __init__(self, **kwargs) -> None:
@@ -816,7 +816,7 @@ class Dialogues(SharedClass, FIPADialogues):
 
        :return: None
        """
-       SharedClass.__init__(self, **kwargs)
+       Model.__init__(self, **kwargs)
        FIPADialogues.__init__(self)
 
 ```
@@ -876,7 +876,7 @@ handlers:
    class_name: FIPAHandler
    args: {}
 tasks: {}
-shared_classes:
+models:
  strategy:
    class_name: Strategy
    args:
@@ -895,7 +895,7 @@ dependencies:
  pyserial: {}
  temper-py: {}
 ```
-We must pay attention to the shared_classes and the strategy’s variables. Here we can change the price we would like to sell each reading or the currency we would like to transact with. 
+We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to sell each reading or the currency we would like to transact with. 
 Lastly,the dependencies are the third party packages we need to install in order to get readings from the sensor. 
 
 The next file we have to update is the aea-config.yaml file. You can locate this file under your AEA’s folder. 
@@ -942,7 +942,7 @@ aea scaffold skill thermometer_client
 This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder and it must contain the following files:
 - behaviours.py
 - handlers.py
-- my_shared_class.py
+- my_model.py
 - skills.yaml
 - tasks.py
 - \_\_init__.py
@@ -1552,14 +1552,14 @@ Otherwise, inform us that something went wrong and the transaction was not succe
 
 ## Step4: Create the strategy
 
-We are going to create the strategy that we want our AEA to follow. Rename the `my_shared_class.py` file to `strategy.py` and paste the following code: 
+We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file to `strategy.py` and paste the following code: 
 
 ```bash
 
 from typing import cast
 
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 DEFAULT_COUNTRY = "UK"
 SEARCH_TERM = "country"
@@ -1570,7 +1570,7 @@ DEFAULT_LEDGER_ID = "fetchai"
 DEFAULT_IS_LEDGER_TX = True
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
    """This class defines a strategy for the agent."""
 
    def __init__(self, **kwargs) -> None:
@@ -1664,7 +1664,7 @@ from typing import Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FIPADialogue, FIPADialogues
 
@@ -1685,7 +1685,7 @@ class Dialogue(FIPADialogue):
        self.proposal = None  # type: Optional[Description]
 
 
-class Dialogues(SharedClass, FIPADialogues):
+class Dialogues(Model, FIPADialogues):
    """The dialogues class keeps track of all dialogues."""
 
    def __init__(self, **kwargs) -> None:
@@ -1694,7 +1694,7 @@ class Dialogues(SharedClass, FIPADialogues):
 
        :return: None
        """
-       SharedClass.__init__(self, **kwargs)
+       Model.__init__(self, **kwargs)
        FIPADialogues.__init__(self)
 ```
 
@@ -1732,7 +1732,7 @@ handlers:
    class_name: MyTransactionHandler
    args: {}
 tasks: {}
-shared_classes:
+models:
  strategy:
    class_name: Strategy
    args:
@@ -1748,7 +1748,7 @@ shared_classes:
 protocols: ['fetchai/fipa:0.1.0','fetchai/default:0.1.0','fetchai/oef:0.1.0']
 ledgers: ['fetchai']
 ```
-We must pay attention to the shared_classes and the strategy’s variables. Here we can change the price we would like to buy each reading or the currency we would like to transact with. 
+We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading or the currency we would like to transact with. 
 
 The next file we have to update is the aea-config.yaml file. You can locate this file under your agent’s folder. 
 We are going to modify this file later on before we run the aea but for now, make sure it matches the following code : 
