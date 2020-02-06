@@ -67,9 +67,20 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
 
     # TODO we assume the item in the agent config are necessarily in the agent projects.
     item_folder = Path("vendor", item_id.author, item_type_plural, item_name)
-    if not item_folder.exists() and ctx.agent_config.author == item_id.author:
+    if not item_folder.exists():
         # check if it is present in custom packages.
         item_folder = Path(item_type_plural, item_name)
+        if not item_folder.exists():
+            raise click.ClickException(
+                "{} {} not found. Aborting.".format(item_type.title(), item_name)
+            )
+        elif item_folder.exists() and not ctx.agent_config.author == item_id.author:
+            raise click.ClickException(
+                "{} {} author is different from {} agent author. "
+                "Please fix the author field.".format(item_name, item_type, agent_name)
+            )
+        else:
+            logger.debug("Removing local {} {}.".format(item_type, item_name))
 
     try:
         shutil.rmtree(item_folder)
