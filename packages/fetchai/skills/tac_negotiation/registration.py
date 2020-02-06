@@ -23,10 +23,10 @@ import datetime
 from typing import Optional
 
 from aea.helpers.search.models import Description
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 
-class Registration(SharedClass):
+class Registration(Model):
     """This class deals with the services registration state."""
 
     def __init__(self, **kwargs):

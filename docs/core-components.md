@@ -65,7 +65,7 @@ A skill encapsulates implementations of the abstract base classes `Handler`, `Be
 * `Behaviour`: none, one or more `Behaviours` encapsulate actions that cause interactions with other agents initiated by the AEA. Behaviours implement AEAs' pro-activeness.
 * `Task`: none, one or more `Tasks` encapsulate background work internal to the AEA.
 
-Skills further allow for `SharedClasses`. Classes sub-classed from the `SharedClass` can be accessed via the `SkillContext`.
+Skills further allow for `Models`. Classes that inherit from the `Model` can be accessed via the `SkillContext`.
 
 
 ## Agent 

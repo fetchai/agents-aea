@@ -464,11 +464,11 @@ class BehaviourConfig(Configuration):
         return BehaviourConfig(class_name=class_name, **obj.get("args", {}))
 
 
-class SharedClassConfig(Configuration):
-    """Handle a skill shared class configuration."""
+class ModelConfig(Configuration):
+    """Handle a skill model configuration."""
 
     def __init__(self, class_name: str = "", **args):
-        """Initialize a shared class configuration."""
+        """Initialize a model configuration."""
         self.class_name = class_name
         self.args = args
 
@@ -481,7 +481,7 @@ class SharedClassConfig(Configuration):
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
         class_name = cast(str, obj.get("class_name"))
-        return SharedClassConfig(class_name=class_name, **obj.get("args", {}))
+        return ModelConfig(class_name=class_name, **obj.get("args", {}))
 
 
 class SkillConfig(PackageConfiguration):
@@ -508,7 +508,7 @@ class SkillConfig(PackageConfiguration):
         self.description = description
         self.handlers = CRUDCollection[HandlerConfig]()
         self.behaviours = CRUDCollection[BehaviourConfig]()
-        self.shared_classes = CRUDCollection[SharedClassConfig]()
+        self.models = CRUDCollection[ModelConfig]()
 
     @property
     def json(self) -> Dict:
@@ -523,9 +523,7 @@ class SkillConfig(PackageConfiguration):
             "dependencies": self.dependencies,
             "handlers": {key: h.json for key, h in self.handlers.read_all()},
             "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
-            "shared_classes": {
-                key: s.json for key, s in self.shared_classes.read_all()
-            },
+            "models": {key: m.json for key, m in self.models.read_all()},
             "description": self.description,
         }
 
@@ -560,9 +558,9 @@ class SkillConfig(PackageConfiguration):
             handler_config = HandlerConfig.from_json(handler_data)
             skill_config.handlers.create(handler_id, handler_config)
 
-        for shared_class_id, shared_class_data in obj.get("shared_classes", {}).items():  # type: ignore
-            shared_class_config = SharedClassConfig.from_json(shared_class_data)
-            skill_config.shared_classes.create(shared_class_id, shared_class_config)
+        for model_id, model_data in obj.get("models", {}).items():  # type: ignore
+            model_config = ModelConfig.from_json(model_data)
+            skill_config.models.create(model_id, model_config)
 
         return skill_config
 

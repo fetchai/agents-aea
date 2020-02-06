@@ -17,10 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a scaffold of a shared class."""
+"""This package contains a scaffold of a model."""
 
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 
-class MySharedClass(SharedClass):
-    """This class scaffolds a shared class."""
+class MyModel(Model):
+    """This class scaffolds a model."""

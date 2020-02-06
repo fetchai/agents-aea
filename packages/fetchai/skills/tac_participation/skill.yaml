@@ -18,7 +18,7 @@ handlers:
   transaction:
     class_name: TransactionHandler
     args: {}
-shared_classes:
+models:
   search:
     class_name: Search
     args:

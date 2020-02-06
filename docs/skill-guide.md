@@ -234,7 +234,7 @@ handlers:
   my_search_task:
     class_name: MySearchTask
     args: {}
-shared_classes: {}
+models: {}
 protocols: ['fetchai/oef:0.1.0']
 dependencies: {}
 ```

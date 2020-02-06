@@ -24,7 +24,7 @@ import numpy as np
 from tensorflow import keras
 
 from aea.helpers.search.models import Attribute, DataModel, Description, Query
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 DEFAULT_PRICE_PER_DATA_BATCH = 10
 DEFAULT_DATASET_ID = "fmnist"
@@ -35,7 +35,7 @@ DEFAULT_CURRENCY_PBK = "FET"
 DEFAULT_LEDGER_ID = "fetchai"
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:

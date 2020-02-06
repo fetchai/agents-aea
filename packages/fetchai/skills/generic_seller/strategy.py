@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.skills.generic_seller.generic_data_model import Generic_Data_Model
 
@@ -39,7 +39,7 @@ DEFAULT_IS_LEDGER_TX = True
 logger = logging.getLogger(__name__)
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:

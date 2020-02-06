@@ -30,7 +30,7 @@ from aea.helpers.search.models import (
     Description,
     Query,
 )
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 DEFAULT_DATASET_ID = "UK"
 DEFAULT_MAX_ROW_PRICE = 5
@@ -39,7 +39,7 @@ DEFAULT_CURRENCY_ID = "FET"
 DEFAULT_LEDGER_ID = "None"
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:

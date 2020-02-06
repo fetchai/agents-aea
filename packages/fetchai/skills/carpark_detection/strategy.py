@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Tuple, cast
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.skills.carpark_detection.carpark_detection_data_model import (
     CarParkDataModel,
@@ -45,7 +45,7 @@ DEFAULT_LEDGER_ID = "fetchai"
 logger = logging.getLogger("aea.carpark_detection_skill")
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:

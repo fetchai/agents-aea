@@ -101,12 +101,10 @@ class TestScaffoldSkill:
         original = Path(AEA_DIR, "skills", "scaffold", "tasks.py")
         assert filecmp.cmp(p, original)
 
-    def test_resource_folder_contains_module_shared_class(self):
-        """Test that the resource folder contains scaffold my_shared_class.py.py module."""
-        p = Path(
-            self.t, self.agent_name, "skills", self.resource_name, "my_shared_class.py"
-        )
-        original = Path(AEA_DIR, "skills", "scaffold", "my_shared_class.py")
+    def test_resource_folder_contains_module_model(self):
+        """Test that the resource folder contains scaffold my_model.py module."""
+        p = Path(self.t, self.agent_name, "skills", self.resource_name, "my_model.py")
+        original = Path(AEA_DIR, "skills", "scaffold", "my_model.py")
         assert filecmp.cmp(p, original)
 
     def test_resource_folder_contains_configuration_file(self):
