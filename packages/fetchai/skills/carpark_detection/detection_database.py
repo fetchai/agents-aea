@@ -60,6 +60,7 @@ class DetectionDatabase:
         ret = self.get_system_status("db", False) == "Exists"
         return ret
 
+    # This is not used in the AEA example.
     def reset_database(self):
         """Reset the database and remove all data."""
         # If we need to reset the database, then remove the table and any stored images
@@ -78,6 +79,7 @@ class DetectionDatabase:
         self.initialise_backend()
         logger.info("Finished initialising backend!")
 
+    # This is not used in the AEA example
     def reset_mask(self):
         """Just reset the detection mask."""
         # If we need to reset the database, then remove the table and any stored images
@@ -129,12 +131,13 @@ class DetectionDatabase:
 
     def set_fet(self, amount, t):
         """Record how much FET we have and when we last read it from the ledger."""
-        self.execute_single_sql(
-            "INSERT OR REPLACE INTO fet_table(id, amount, last_updated) values(0, '{0}', '{1}')".format(
-                amount, t
-            )
+        command = (
+            "INSERT OR REPLACE INTO fet_table(id, amount, last_updated) values(0, ?, ?)"
         )
+        variables = (str(amount), str(t))
+        self.execute_single_sql(command, variables)
 
+    # This is not used in the AEA example.
     def get_fet(self):
         """Read how much FET we have."""
         result = self.execute_single_sql("SELECT amount FROM fet_table WHERE id=0")
@@ -143,10 +146,12 @@ class DetectionDatabase:
         else:
             return -99
 
+    # This is not used in the AEA example
     def save_max_capacity(self, max_capacity):
         """Record the maximum number of spaces we can report on."""
         self.set_system_status("max_capacity", str(max_capacity))
 
+    # This is not used in the AEA example
     def get_max_capacity(self):
         """Read the maximum number of spaces we can report on."""
         max_capacity = self.get_system_status("max_capacity")
@@ -156,6 +161,7 @@ class DetectionDatabase:
         else:
             return int(max_capacity)
 
+    # This is not used in the AEA example
     def save_lat_lon(self, lat, lon):
         """Record the longitude and latitude of our device."""
         self.set_system_status("lat", str(lat))
@@ -172,20 +178,17 @@ class DetectionDatabase:
 
     def set_system_status(self, system_name, status):
         """Record the status of one of the systems."""
-        self.execute_single_sql(
-            "INSERT OR REPLACE INTO status_table(system_name, status) values('{}', '{}')".format(
-                system_name, status
-            )
+        command = (
+            "INSERT OR REPLACE INTO status_table(system_name, status) values(?, ?)"
         )
+        variables = (str(system_name), str(status))
+        self.execute_single_sql(command, variables)
 
     def get_system_status(self, system_name, print_exceptions=True):
         """Read the status of one of the systems."""
-        result = self.execute_single_sql(
-            "SELECT status FROM status_table WHERE system_name='{}'".format(
-                system_name
-            ),
-            print_exceptions,
-        )
+        command = "SELECT status FROM status_table WHERE system_name=?"
+        variables = (str(system_name),)
+        result = self.execute_single_sql(command, variables, print_exceptions)
         if len(result) != 0:
             return result[0][0]
         else:
@@ -194,13 +197,17 @@ class DetectionDatabase:
     def set_dialogue_status(self, dialogue_id, other_agent_key, received_msg, sent_msg):
         """Record the status of a dialog we are having."""
         t = time.time()
-        self.execute_single_sql(
-            "INSERT INTO dialogue_statuses(dialogue_id, epoch, other_agent_key, received_msg, sent_msg) "
-            "values('{}', {}, '{}', '{}', '{}')".format(
-                dialogue_id, t, other_agent_key, received_msg, sent_msg
-            )
+        command = "INSERT INTO dialogue_statuses(dialogue_id, epoch, other_agent_key, received_msg, sent_msg) VALUES('{}', {}, '{}', '{}', '{}')"
+        variables = (
+            str(dialogue_id),
+            str(t),
+            str(other_agent_key),
+            str(received_msg),
+            str(sent_msg),
         )
+        self.execute_single_sql(command, variables)
 
+    # This is not used in the AEA example.
     def get_dialogue_statuses(self):
         """Read the statuses of all the dialog we are having."""
         data = self.execute_single_sql(
@@ -218,6 +225,7 @@ class DetectionDatabase:
 
         return results
 
+    # This is not used in the AEA example.
     def calc_uncleared_fet(self):
         """Calc our uncleared fet."""
         cleared_fet_result = self.execute_single_sql(
@@ -234,41 +242,38 @@ class DetectionDatabase:
         else:
             return -99
 
+    # This is not used in the AEA example.
     def add_friendly_name(self, oef_key, friendly_name, is_self=False):
         """Record the friendly name of one the agents we are dealing with (including ourselves)."""
         t = int(time.time())
-        self.execute_single_sql(
-            "INSERT OR REPLACE INTO name_lookup2(oef_key, friendly_name, epoch, is_self) "
-            "values('{}', '{}', {}, {})".format(
-                oef_key, friendly_name, t, 1 if is_self else 0
-            )
-        )
+        command = "INSERT OR REPLACE INTO name_lookup2(oef_key, friendly_name, epoch, is_self) VALUES(?, ?, ?, ?)"
+        variables = (str(oef_key), str(friendly_name), t, 1 if is_self else 0)
+        self.execute_single_sql(command, variables)
 
     def add_in_progress_transaction(self, tx, oef_key_payer, oef_key_payee, amount):
         """Record that a transaction in underway."""
         t = int(time.time())
-        self.execute_single_sql(
-            "INSERT OR REPLACE INTO transaction_history(tx, epoch, oef_key_payer, oef_key_payee, amount, status) "
-            "values('{}', {}, '{}', '{}', {}, 'in_progress')".format(
-                tx, t, oef_key_payer, oef_key_payee, amount
-            )
-        )
+        command = "INSERT OR REPLACE INTO transaction_history(tx, epoch, oef_key_payer, oef_key_payee, amount, status) VALUES(?, ?, ?, ?, ?, 'in_progress')"
+        variables = (str(tx), t, str(oef_key_payer), str(oef_key_payee), amount)
+        self.execute_single_sql(command, variables)
 
+    # This is not used in the AEA example.
     def get_in_progress_transactions(self):
         """Read all in-progress transactions."""
         return self.get_transactions_with_status("in_progress")
 
+    # This is not used in the AEA example.
     def get_complete_transactions(self):
         """Read all complete transactions."""
         return self.get_transactions_with_status("complete")
 
     def get_transactions_with_status(self, status):
         """Read all transactions with a given status."""
-        data = self.execute_single_sql(
-            "SELECT * from transaction_history WHERE status = '{}' ORDER BY epoch DESC".format(
-                status
-            )
+        command = (
+            "SELECT * from transaction_history WHERE status = ? ORDER BY epoch DESC"
         )
+        variables = (str(status),)
+        data = self.execute_single_sql(command, variables)
         results = []
         for datum in data:
             result = {}
@@ -282,13 +287,12 @@ class DetectionDatabase:
 
         return results
 
+    # This is not used in the AEA example.
     def get_n_transactions(self, count):
         """Get the most resent N transactions."""
-        data = self.execute_single_sql(
-            "SELECT * from transaction_history ORDER BY epoch DESC LIMIT {}".format(
-                count
-            )
-        )
+        command = "SELECT * from transaction_history ORDER BY epoch DESC LIMIT ?"
+        variables = (count,)
+        data = self.execute_single_sql(command, variables)
         results = []
         for datum in data:
             result = {}
@@ -304,24 +308,22 @@ class DetectionDatabase:
 
     def set_transaction_complete(self, tx):
         """Set a specific transaction as complete."""
-        self.execute_single_sql(
-            "UPDATE transaction_history SET status ='complete' WHERE tx = '{}'".format(
-                tx
-            )
-        )
+        command = "UPDATE transaction_history SET status ='complete' WHERE tx = ?"
+        variables = (str(tx),)
+        self.execute_single_sql(command, variables)
 
+    # This is not used in the AEA example.
     def lookup_friendly_name(self, oef_key):
         """Look iup friendly name given the OEF key."""
-        results = self.execute_single_sql(
-            "SELECT * FROM name_lookup2 WHERE oef_key = '{}' ORDER BY epoch DESC".format(
-                oef_key
-            )
-        )
+        command = "SELECT * FROM name_lookup2 WHERE oef_key = ? ORDER BY epoch DESC"
+        variables = (str(oef_key),)
+        results = self.execute_single_sql(command, variables)
         if len(results) == 0:
             return None
         else:
             return results[0][1]
 
+    # This is not used in the AEA example.
     def lookup_self_names(self):
         """Return out own name and key."""
         results = self.execute_single_sql(
@@ -332,25 +334,27 @@ class DetectionDatabase:
         else:
             return results[0][0], results[0][1]
 
+    # This is not used in the AEA example.
     def add_entry_no_save(
         self, raw_path, processed_path, total_count, moving_count, free_spaces, lat, lon
     ):
         """Add an entry into the detection database but do not save anything to disk."""
         # need to extract the time!
         t = self.extract_time_from_raw_path(raw_path)
-        self.execute_single_sql(
-            "INSERT INTO images VALUES ({}, '{}', '{}', {}, {}, {}, '{}', '{}')".format(
-                t,
-                raw_path,
-                processed_path,
-                total_count,
-                moving_count,
-                free_spaces,
-                lat,
-                lon,
-            )
+        command = "INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        variables = (
+            t,
+            raw_path,
+            processed_path,
+            total_count,
+            moving_count,
+            free_spaces,
+            lat,
+            lon,
         )
+        self.execute_single_sql(command, variables)
 
+    # This is not used in the AEA example.
     def add_entry(
         self,
         raw_image,
@@ -368,28 +372,27 @@ class DetectionDatabase:
 
         skimage.io.imsave(raw_path, raw_image)
         skimage.io.imsave(processed_path, processed_image)
-
-        self.execute_single_sql(
-            "INSERT INTO images VALUES ({}, '{}', '{}', {}, {}, {}, '{}', '{}')".format(
-                t,
-                raw_path,
-                processed_path,
-                total_count,
-                moving_count,
-                free_spaces,
-                lat,
-                lon,
-            )
+        command = "INSERT INTO images VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        variables = (
+            t,
+            raw_path,
+            processed_path,
+            total_count,
+            moving_count,
+            free_spaces,
+            lat,
+            lon,
         )
+        self.execute_single_sql(command, variables)
 
-    def execute_single_sql(self, command, print_exceptions=True):
+    def execute_single_sql(self, command, variables=(), print_exceptions=True):
         """Query the database - all the other functions use this under the hood."""
         conn = None
         ret = []
         try:
             conn = sqlite3.connect(self.database_path, timeout=300)  # 5 mins
             c = conn.cursor()
-            c.execute(command)
+            c.execute(command, variables)
             ret = c.fetchall()
             conn.commit()
         except Exception as e:
@@ -403,9 +406,9 @@ class DetectionDatabase:
 
     def get_latest_detection_data(self, max_num_rows):
         """Return the most recent detection data."""
-        results = self.execute_single_sql(
-            "SELECT * FROM images ORDER BY epoch DESC LIMIT {}".format(max_num_rows)
-        )
+        command = """SELECT * FROM images ORDER BY epoch DESC LIMIT ?"""
+        variables = (max_num_rows,)
+        results = self.execute_single_sql(command, variables)
 
         if results is None:
             return None
@@ -424,27 +427,33 @@ class DetectionDatabase:
 
         return ret_data
 
+    # This is not used in the AEA example.
     def prune_image_table(self, max_entries):
         """Remove image data if table longer than max_entries."""
         self.prune_table("images", max_entries)
 
+    # This is not used in the AEA example.
     def prune_transaction_table(self, max_entries):
         """Remove transaction data if table longer than max_entries."""
         self.prune_table("transaction_history", max_entries)
 
     def prune_table(self, table_name, max_entries):
         """Remove any data if table longer than max_entries."""
-        results = self.execute_single_sql(
-            "SELECT epoch FROM {} ORDER BY epoch DESC LIMIT 1 OFFSET {}".format(
-                table_name, max_entries - 1
-            )
+        command = "SELECT epoch FROM ? ORDER BY epoch DESC LIMIT 1 OFFSET ?"
+        variables = (
+            table_name,
+            max_entries - 1,
         )
+        results = self.execute_single_sql(command=command, variables=variables)
 
         if len(results) != 0:
             last_epoch = results[0][0]
-            self.execute_single_sql(
-                "DELETE FROM {} WHERE epoch<{}".format(table_name, last_epoch)
+            command = """DELETE FROM ? WHERE epoch<?"""
+            variables = (
+                table_name,
+                last_epoch,
             )
+            self.execute_single_sql(command, variables)
 
     def ensure_dirs_exist(self):
         """Test if we have our temp directotries, and if we don't create them."""
@@ -455,6 +464,7 @@ class DetectionDatabase:
         if not os.path.isdir(self.processed_image_dir):
             os.mkdir(self.processed_image_dir)
 
+    # Used by add_entry that is not used in this example.
     def generate_raw_image_path(self, t):
         """Return path where we store raw images."""
         return (
@@ -464,6 +474,7 @@ class DetectionDatabase:
             + self.image_file_ext
         )
 
+    # Used by add_entry that is not used in the AEA example.
     def generate_processed_path(self, t):
         """Return path where we store processed images."""
         return (
@@ -473,12 +484,14 @@ class DetectionDatabase:
             + self.image_file_ext
         )
 
+    # This is not used in the AEA example.
     def generate_processed_from_raw_path(self, raw_name):
         """Given the raw path, return the processes path."""
         return raw_name.replace("_raw_image.", "_processed_image.").replace(
             self.raw_image_dir, self.processed_image_dir
         )
 
+    # Used by add_entry_no_save that is not used in the AEA example
     def extract_time_from_raw_path(self, raw_name):
         """Given the raw path name, return the time the detection happened."""
         start_index = len(self.raw_image_dir)
