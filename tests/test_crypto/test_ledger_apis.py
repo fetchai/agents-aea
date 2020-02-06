@@ -56,6 +56,10 @@ GAS_PRICE = "50"
 GAS_ID = "gwei"
 
 
+def _raise_exception(*args, **kwargs):
+    raise Exception("Message")
+
+
 class TestLedgerApis:
     """Test the ledger_apis module."""
 
@@ -436,3 +440,35 @@ class TestLedgerApis:
                     amount=100,
                 )
                 assert result
+
+    @mock.patch("aea.crypto.ledger_apis.FetchAIApi.generate_tx_nonce", _raise_exception)
+    def test_generate_tx_nonce_negative(self, *mocks):
+        """Test generate_tx_nonce init negative result."""
+        ledger_apis = LedgerApis(
+            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            FETCHAI,
+        )
+        result = ledger_apis.generate_tx_nonce(FETCHAI, "seller", "client")
+        assert result == ""
+
+    @mock.patch(
+        "aea.crypto.ledger_apis.FetchAIApi.validate_transaction", _raise_exception
+    )
+    def test_is_tx_valid_negative(self, *mocks):
+        """Test is_tx_valid init negative result."""
+        ledger_apis = LedgerApis(
+            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            FETCHAI,
+        )
+        result = ledger_apis.is_tx_valid(
+            FETCHAI, "tx_digest", "seller", "client", "tx_nonce", 1
+        )
+        assert not result
+
+    def test_has_default_ledger_positive(self):
+        """Test has_default_ledger init positive result."""
+        ledger_apis = LedgerApis(
+            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            FETCHAI,
+        )
+        assert ledger_apis.has_default_ledger
