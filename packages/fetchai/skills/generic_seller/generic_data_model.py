@@ -46,7 +46,7 @@ class Generic_Data_Model(DataModel):
             ), "Wrong type!! is_required must be bool"
             self.attributes.append(
                 Attribute(
-                    name=values["name"],        # type: ignore
+                    name=values["name"],  # type: ignore
                     type=SUPPORTED_TYPES[values["type"]],
                     is_required=values["is_required"],
                 )
