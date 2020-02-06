@@ -76,9 +76,8 @@ def _remove_item(ctx: Context, item_type, item_id: PublicId):
             )
         elif item_folder.exists() and not ctx.agent_config.author == item_id.author:
             raise click.ClickException(
-                "{} {} author is different from {} agent author. Aborting.".format(
-                    item_name, item_type, agent_name
-                )
+                "{} {} author is different from {} agent author. "
+                "Please fix the author field.".format(item_name, item_type, agent_name)
             )
         else:
             logger.debug("Removing local {} {}.".format(item_type, item_name))
