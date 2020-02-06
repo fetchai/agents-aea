@@ -39,10 +39,10 @@ class Generic_Data_Model(DataModel):
                 values["type"] in SUPPORTED_TYPES.keys()
             ), "Type is not supported. Use str, int, float or bool"
             assert isinstance(
-                SUPPORTED_TYPES[values["type"]], values["name"]
+                values["name"], (SUPPORTED_TYPES[values["type"]],)
             ), "The datamodel values are of wrong type!"
             assert isinstance(
-                bool, values["is_required"]
+                values["is_required"], bool
             ), "Wrong type!! is_required must be bool"
             self.attributes.append(
                 Attribute(
