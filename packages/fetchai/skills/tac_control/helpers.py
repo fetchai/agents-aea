@@ -114,8 +114,8 @@ def generate_utility_params(
     utility_function_params = {}  # type: Dict[str, Dict[str, float]]
     for agent_addr in agent_addresses:
         random_integers = [
-            random.randint(1, 101) for _ in range(len(good_ids))
-        ]  # nosec
+            random.randint(1, 101) for _ in range(len(good_ids))  # nosec
+        ]
         total = sum(random_integers)
         normalized_fractions = [
             round(i / float(total), decimals) for i in random_integers

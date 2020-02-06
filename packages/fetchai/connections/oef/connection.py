@@ -350,7 +350,7 @@ class OEFChannel(OEFAgent):
             query = pickle.loads(query)
         except Exception as e:
             logger.debug(
-                "When trying to unpickke the query the following exception occured: {}".format(
+                "When trying to unpickle the query the following exception occured: {}".format(
                     e
                 )
             )
