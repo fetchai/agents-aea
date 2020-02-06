@@ -523,9 +523,7 @@ class SkillConfig(PackageConfiguration):
             "dependencies": self.dependencies,
             "handlers": {key: h.json for key, h in self.handlers.read_all()},
             "behaviours": {key: b.json for key, b in self.behaviours.read_all()},
-            "models": {
-                key: m.json for key, m in self.models.read_all()
-            },
+            "models": {key: m.json for key, m in self.models.read_all()},
             "description": self.description,
         }
 

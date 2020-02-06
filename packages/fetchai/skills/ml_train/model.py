@@ -31,7 +31,7 @@ DEFAULT_MODEL_CONFIG_PATH = str(Path("..", "..", "model.config").resolve())
 logger = logging.getLogger("aea.gym_skill")
 
 
-class Model(Model):
+class MLModel(Model):
     """This class defines a machine learning model."""
 
     def __init__(self, **kwargs):

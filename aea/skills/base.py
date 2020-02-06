@@ -426,9 +426,7 @@ class Model(SkillComponent):
         instances = {}
         models = []
 
-        model_names = set(
-            config.class_name for _, config in model_configs.items()
-        )
+        model_names = set(config.class_name for _, config in model_configs.items())
 
         # get all Python modules except the standard ones
         ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "__.*"])
@@ -449,9 +447,7 @@ class Model(SkillComponent):
             classes = inspect.getmembers(model_module, inspect.isclass)
             filtered_classes = list(
                 filter(
-                    lambda x: any(
-                        re.match(shared, x[0]) for shared in model_names
-                    )
+                    lambda x: any(re.match(shared, x[0]) for shared in model_names)
                     and Model in inspect.getmro(x[1]),
                     classes,
                 )
@@ -462,18 +458,14 @@ class Model(SkillComponent):
         for model_id, model_config in model_configs.items():
             model_class_name = model_config.class_name
             logger.debug(
-                "Processing model id={}, class={}".format(
-                    model_id, model_class_name
-                )
+                "Processing model id={}, class={}".format(model_id, model_class_name)
             )
-            assert (
-                model_id.isidentifier()
-            ), "'{}' is not a valid identifier.".format(model_id)
-            model = name_to_class.get(model_name, None)
+            assert model_id.isidentifier(), "'{}' is not a valid identifier.".format(
+                model_id
+            )
+            model = name_to_class.get(model_class_name, None)
             if model is None:
-                logger.warning(
-                    "Model '{}' cannot be found.".format(model_name)
-                )
+                logger.warning("Model '{}' cannot be found.".format(model_class_name))
             else:
                 args = model_config.args
                 assert (
@@ -561,9 +553,7 @@ class Skill:
 
         models_by_id = dict(skill_config.models.read_all())
         if len(models_by_id) > 0:
-            model_instances = Model.parse_module(
-                directory, model_by_id, skill_context
-            )
+            model_instances = Model.parse_module(directory, models_by_id, skill_context)
         else:
             model_instances = {}
 

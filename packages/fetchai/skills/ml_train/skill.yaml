@@ -29,8 +29,8 @@ models:
       currency_id: 'FET'
       ledger_id: 'fetchai'
       is_ledger_tx: False
-  model:
-    class_name: Model
+  ml_model:
+    class_name: MLModel
     args:
       model_config_path: "./skills/ml_train/model.json"
 protocols: ['fetchai/oef:0.1.0', 'fetchai/ml_trade:0.1.0']
