@@ -21,8 +21,7 @@
 
 import logging
 import os
-from unittest import mock
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
 
 import pytest
 
@@ -33,15 +32,23 @@ from requests import Response
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
 from aea.crypto.helpers import (
+    _create_ethereum_private_key,
+    _create_fetchai_private_key,
     _try_generate_testnet_wealth,
     _try_validate_ethereum_private_key_path,
     _try_validate_fet_private_key_path,
+    _validate_private_key_path,
 )
 
 from ..conftest import CUR_PATH
 
 
 logger = logging.getLogger(__name__)
+
+
+class ResponseMock:
+    status_code = 200
+    text = "some text"
 
 
 class TestHelperFile:
@@ -71,13 +78,13 @@ class TestHelperFile:
         address = "my_address"
         result = Response()
         result.status_code = 500
-        with mock.patch.object(requests, "post", return_value=result):
+        with patch.object(requests, "post", return_value=result):
             _try_generate_testnet_wealth(identifier=FETCHAI, address=address)
             assert mock_logging.error.called
 
         result.status_code = 200
         with pytest.raises(SystemExit):
-            with mock.patch.object(requests, "post", return_value=result):
+            with patch.object(requests, "post", return_value=result):
                 _try_generate_testnet_wealth(identifier=FETCHAI, address=address)
 
     @patch("aea.crypto.helpers.logger")
@@ -86,11 +93,35 @@ class TestHelperFile:
         address = "my_address"
         result = Response()
         result.status_code = 500
-        with mock.patch.object(requests, "get", return_value=result):
+        with patch.object(requests, "get", return_value=result):
             _try_generate_testnet_wealth(identifier=ETHEREUM, address=address)
             assert mock_logging.error.called
 
         result.status_code = 200
         with pytest.raises(SystemExit):
-            with mock.patch.object(requests, "get", return_value=result):
+            with patch.object(requests, "get", return_value=result):
                 _try_generate_testnet_wealth(identifier=ETHEREUM, address=address)
+
+    @patch("aea.crypto.helpers.requests.post", return_value=ResponseMock())
+    @patch("aea.crypto.helpers.json.loads", return_value={"error_message": ""})
+    def test__try_generate_testnet_wealth_error_resp(self, *mocks):
+        """Test _try_generate_testnet_wealth error_resp."""
+        _try_generate_testnet_wealth(FETCHAI, "address")
+        _try_generate_testnet_wealth(ETHEREUM, "address")
+
+    @patch("aea.crypto.helpers._try_validate_fet_private_key_path")
+    @patch("aea.crypto.helpers._try_validate_ethereum_private_key_path")
+    def test__validate_private_key_path_positive(self, *mocks):
+        """Test _validate_private_key_path positive result."""
+        _validate_private_key_path("path", FETCHAI)
+        _validate_private_key_path("path", ETHEREUM)
+
+    @patch("builtins.open", mock_open())
+    def test__create_fetchai_private_key_positive(self, *mocks):
+        """Test _create_ethereum_private_key positive result."""
+        _create_fetchai_private_key()
+
+    @patch("builtins.open", mock_open())
+    def test__create_ethereum_private_key_positive(self, *mocks):
+        """Test _create_ethereum_private_key positive result."""
+        _create_ethereum_private_key()
