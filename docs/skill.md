@@ -190,7 +190,7 @@ class MyBehaviour(TickerBehaviour):
 
 ### Models
 
-The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end the developer can subclass an abstract `Model`. These models are made available on the context level upon initialization of the AEA.
+The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end, the developer can subclass an abstract `Model`. These models are made available on the context level upon initialization of the AEA.
 
 Say, the developer has a class called `SomeModel`
 ``` python
