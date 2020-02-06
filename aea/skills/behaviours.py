@@ -63,7 +63,7 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
-        if not self.done():
+        if not self.is_done():
             self.act()
             self._number_of_executions += 1
 
@@ -138,7 +138,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 
     def act_wrapper(self) -> None:
         """Wrap the call of the action. This method must be called only by the framework."""
-        if not self.done() and self.is_time_to_act():
+        if not self.is_done() and self.is_time_to_act():
             self._last_act_time = datetime.datetime.now()
             self.act()
 
@@ -191,16 +191,16 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
     def act(self) -> None:
         """Implement the behaviour."""
         while (
-            not self.done()
+            not self.is_done()
             and self.current_behaviour is not None
-            and self.current_behaviour.done()
+            and self.current_behaviour.is_done()
         ):
             self._increase_index_if_possible()
 
         if (
-            not self.done()
+            not self.is_done()
             and self.current_behaviour is not None
-            and not self.current_behaviour.done()
+            and not self.current_behaviour.is_done()
         ):
             self.current_behaviour.act_wrapper()
 

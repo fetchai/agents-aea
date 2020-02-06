@@ -677,7 +677,7 @@ class Filter(object):
         # TODO naive implementation
         behaviours = self.resources.behaviour_registry.fetch_all()
         active_behaviour = list(
-            filter(lambda b: b.context.is_active and not b.done(), behaviours,)
+            filter(lambda b: b.context.is_active and not b.is_done(), behaviours,)
         )
         return active_behaviour
 

@@ -341,7 +341,7 @@ def run(
         wallet,
         ledger_apis,
         resources=Resources(str(Path("."))),
-        programmatic=False,
+        is_programmatic=False,
     )
     try:
         agent.start()

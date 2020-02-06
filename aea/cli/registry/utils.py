@@ -292,7 +292,7 @@ def check_is_author_logged_in(author_name: str) -> None:
     :raise ClickException: if username and author's name are not equal.
     :return: None.
     """
-    resp = request_api("GET", "/rest-auth/user/", auth=True)
+    resp = request_api("GET", "/rest-auth/user/", is_auth=True)
     if not author_name == resp["username"]:
         raise click.ClickException(
             "Author username is not equal to current logged in username "

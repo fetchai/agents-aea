@@ -159,7 +159,7 @@ class MyRLAgent(RLAgent):
 
         :return: a random good
         """
-        return random.choice(list(self.good_price_models.keys()))
+        return random.choice(list(self.good_price_models.keys()))  # nosec
 
     def fit(self, proxy_env: ProxyEnv, nb_steps: int) -> None:
         """

@@ -62,9 +62,7 @@ class StateUpdateMessage(InternalMessage):
             quantities_by_good_id=quantities_by_good_id,
             **kwargs
         )
-        assert (
-            self.is_consistent()
-        ), "StateUpdateMessage initialization inconsistent."
+        assert self.is_consistent(), "StateUpdateMessage initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821

@@ -122,7 +122,7 @@ class OwnershipState:
         assert self._quantities_by_good_id is not None, "GoodHoldings not set!"
         return copy.copy(self._quantities_by_good_id)
 
-    def is_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
+    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable (and consistent).
 
@@ -162,9 +162,7 @@ class OwnershipState:
         :param tx_message:
         :return: None
         """
-        assert self.is_transaction_is_affordable(
-            tx_message
-        ), "Inconsistent transaction."
+        assert self.is_affordable_transaction(tx_message), "Inconsistent transaction."
 
         self._amount_by_currency_id[tx_message.currency_id] += tx_message.sender_amount
 
@@ -237,7 +235,7 @@ class LedgerStateProxy:
         """Get the initialization status."""
         return self._ledger_apis.has_default_ledger
 
-    def is_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
+    def is_affordable_transaction(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable on the ledger.
 
@@ -692,18 +690,14 @@ class DecisionMaker:
         """
         is_affordable = True
         if self.ownership_state.is_initialized:
-            is_affordable = self.ownership_state.is_transaction_is_affordable(
-                tx_message
-            )
+            is_affordable = self.ownership_state.is_affordable_transaction(tx_message)
         if self.ledger_state_proxy.is_initialized and (
             tx_message.ledger_id != OFF_CHAIN
         ):
             if tx_message.ledger_id in self.ledger_apis.apis.keys():
                 is_affordable = (
                     is_affordable
-                    and self.ledger_state_proxy.is_transaction_is_affordable(
-                        tx_message
-                    )
+                    and self.ledger_state_proxy.is_affordable_transaction(tx_message)
                 )
             else:
                 logger.error(

@@ -92,9 +92,7 @@ class TransactionMessage(InternalMessage):
             info=info,
             **kwargs
         )
-        assert (
-            self.is_consistent()
-        ), "Transaction message initialization inconsistent."
+        assert self.is_consistent(), "Transaction message initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
