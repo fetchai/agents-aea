@@ -63,7 +63,7 @@ class StateUpdateMessage(InternalMessage):
             **kwargs
         )
         assert (
-            self.check_consistency()
+            self.is_consistent()
         ), "StateUpdateMessage initialization inconsistent."
 
     @property
@@ -102,7 +102,7 @@ class StateUpdateMessage(InternalMessage):
         assert self.is_set("tx_fee")
         return cast(int, self.get("tx_fee"))
 
-    def check_consistency(self) -> bool:
+    def is_consistent(self) -> bool:
         """
         Check that the data is consistent.
 

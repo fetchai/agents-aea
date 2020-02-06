@@ -82,7 +82,7 @@ class InternalMessage:
         """Check value is set for key."""
         return key in self._body
 
-    def check_consistency(self) -> bool:
+    def is_consistent(self) -> bool:
         """Check that the data is consistent."""
         return True
 

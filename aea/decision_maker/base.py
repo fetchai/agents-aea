@@ -122,7 +122,7 @@ class OwnershipState:
         assert self._quantities_by_good_id is not None, "GoodHoldings not set!"
         return copy.copy(self._quantities_by_good_id)
 
-    def check_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
+    def is_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable (and consistent).
 
@@ -162,7 +162,7 @@ class OwnershipState:
         :param tx_message:
         :return: None
         """
-        assert self.check_transaction_is_affordable(
+        assert self.is_transaction_is_affordable(
             tx_message
         ), "Inconsistent transaction."
 
@@ -237,7 +237,7 @@ class LedgerStateProxy:
         """Get the initialization status."""
         return self._ledger_apis.has_default_ledger
 
-    def check_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
+    def is_transaction_is_affordable(self, tx_message: TransactionMessage) -> bool:
         """
         Check if the transaction is affordable on the ledger.
 
@@ -692,7 +692,7 @@ class DecisionMaker:
         """
         is_affordable = True
         if self.ownership_state.is_initialized:
-            is_affordable = self.ownership_state.check_transaction_is_affordable(
+            is_affordable = self.ownership_state.is_transaction_is_affordable(
                 tx_message
             )
         if self.ledger_state_proxy.is_initialized and (
@@ -701,7 +701,7 @@ class DecisionMaker:
             if tx_message.ledger_id in self.ledger_apis.apis.keys():
                 is_affordable = (
                     is_affordable
-                    and self.ledger_state_proxy.check_transaction_is_affordable(
+                    and self.ledger_state_proxy.is_transaction_is_affordable(
                         tx_message
                     )
                 )

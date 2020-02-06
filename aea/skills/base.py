@@ -270,7 +270,7 @@ class Behaviour(SkillComponent):
         :return: None
         """
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return False
 

@@ -46,10 +46,10 @@ class MyScaffoldMessage(Message):
         """
         super().__init__(performative=performative, **kwargs)
         assert (
-            self.check_consistency()
+            self._is_consistent()
         ), "MyScaffoldMessage initialization inconsistent."
 
-    def check_consistency(self) -> bool:
+    def _is_consistent(self) -> bool:
         """Check that the data is consistent."""
         try:
             raise NotImplementedError

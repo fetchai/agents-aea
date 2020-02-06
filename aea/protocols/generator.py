@@ -379,7 +379,7 @@ class ProtocolGenerator:
         cls_str += "            **kwargs,\n"
         cls_str += "        )\n"
         cls_str += "        assert (\n"
-        cls_str += "            self._check_consistency()\n"
+        cls_str += "            self._is_consistent()\n"
         cls_str += "        ), \"This message is invalid according to the '{}' protocol\"\n\n".format(
             self.protocol_specification.name
         )
@@ -429,7 +429,7 @@ class ProtocolGenerator:
             )
 
         # check_consistency method
-        cls_str += "    def _check_consistency(self) -> bool:\n"
+        cls_str += "    def _is_consistent(self) -> bool:\n"
         cls_str += str.format(
             '        """Check that the message follows the {} protocol."""\n',
             self.protocol_specification.name,

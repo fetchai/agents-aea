@@ -31,10 +31,9 @@ numpy = "*"
 tensorflow = "*"
 scikit-image = "*"
 mkdocs-mermaid-plugin = {editable = true,git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
+bandit = "*"
 
 [packages]
-cryptography = "*"
-base58 = "*"
 docker = "*"
 click = "*"
 pyyaml = ">=4.2b1"

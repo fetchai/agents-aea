@@ -67,7 +67,7 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
             self.act()
             self._number_of_executions += 1
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """
         Return True if the behaviour is terminated, False otherwise.
 
@@ -84,7 +84,7 @@ class OneShotBehaviour(SimpleBehaviour, ABC):
         super().__init__(**kwargs)
         self._already_executed = False  # type
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return self._already_executed
 
@@ -204,7 +204,7 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
         ):
             self.current_behaviour.act_wrapper()
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return self._index >= len(self._behaviour_sequence)
 
@@ -299,6 +299,6 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         if current_state.done():
             self.current = current_state.next_state
 
-    def done(self) -> bool:
+    def is_done(self) -> bool:
         """Return True if the behaviour is terminated, False otherwise."""
         return self.current is None

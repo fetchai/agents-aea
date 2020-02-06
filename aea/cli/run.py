@@ -271,7 +271,7 @@ def _setup_connection(
 )
 @click.option(
     "--install-deps",
-    "install_deps",
+    "is_install_deps",
     is_flag=True,
     required=False,
     default=False,
@@ -279,7 +279,7 @@ def _setup_connection(
 )
 @pass_context
 def run(
-    click_context, connection_ids: List[PublicId], env_file: str, install_deps: bool
+    click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
 ):
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
@@ -329,7 +329,7 @@ def run(
         logger.error(str(e))
         sys.exit(1)
 
-    if install_deps:
+    if is_install_deps:
         if Path("requirements.txt").exists():
             click_context.invoke(install, requirement="requirements.txt")
         else:
