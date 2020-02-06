@@ -17,14 +17,6 @@ class DataModel:
         raise NotImplementedError
 
 
-class Unit:
-    """This class represents an instance of Unit."""
-
-    def __init__(self):
-        """Initialise an instance of Unit."""
-        raise NotImplementedError
-
-
 class IOTApp7:
     """This class represents an instance of IOTApp7."""
 
@@ -33,36 +25,27 @@ class IOTApp7:
         raise NotImplementedError
 
 
+class Unit:
+    """This class represents an instance of Unit."""
+
+    def __init__(self):
+        """Initialise an instance of Unit."""
+        raise NotImplementedError
+
+
 class TwoPartyNegotiationMessage(Message):
     """A protocol for negotiation over a fixed set of resources involving two parties."""
 
     protocol_id = ProtocolId("fetchai", "two_party_negotiation", "0.1.0")
 
-    _speech_acts = {
-        "cfp": {"query": DataModel},
-        "propose": {
-            "number": int,
-            "price": float,
-            "description": str,
-            "flag": bool,
-            "query": DataModel,
-            "proposal": Optional[Dict[IOTApp7, bytes]],
-            "rounds": FrozenSet[int],
-            "items": Tuple[Unit],
-        },
-        "accept": {},
-        "decline": {},
-        "match_accept": {},
-    }
-
     class Performative(Enum):
         """Performatives for the two_party_negotiation protocol."""
 
+        ACCEPT = "accept"
+        CFP = "cfp"
         DECLINE = "decline"
         MATCH_ACCEPT = "match_accept"
-        CFP = "cfp"
         PROPOSE = "propose"
-        ACCEPT = "accept"
 
         def __str__(self):
             """Get string representation."""
@@ -84,6 +67,7 @@ class TwoPartyNegotiationMessage(Message):
             performative=performative,
             **kwargs,
         )
+        self._performatives = {"accept", "cfp", "decline", "match_accept", "propose"}
         assert (
             self._check_consistency()
         ), "This message is invalid according to the 'two_party_negotiation' protocol"
@@ -91,7 +75,7 @@ class TwoPartyNegotiationMessage(Message):
     @property
     def valid_performatives(self) -> Set[str]:
         """Get valid performatives."""
-        return set(self._speech_acts.keys())
+        return self._performatives
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
@@ -106,34 +90,16 @@ class TwoPartyNegotiationMessage(Message):
         return cast(int, self.get("message_id"))
 
     @property
-    def target(self) -> int:
-        """Get the target of the message."""
-        assert self.is_set("target"), "target is not set."
-        return cast(int, self.get("target"))
-
-    @property
     def performative(self) -> Performative:  # noqa: F821
         """Get the performative of the message."""
         assert self.is_set("performative"), "performative is not set"
         return cast(TwoPartyNegotiationMessage.Performative, self.get("performative"))
 
     @property
-    def query(self) -> DataModel:
-        """Get the query from the message."""
-        assert self.is_set("query"), "query is not set"
-        return cast(DataModel, self.get("query"))
-
-    @property
-    def number(self) -> int:
-        """Get the number from the message."""
-        assert self.is_set("number"), "number is not set"
-        return cast(int, self.get("number"))
-
-    @property
-    def price(self) -> float:
-        """Get the price from the message."""
-        assert self.is_set("price"), "price is not set"
-        return cast(float, self.get("price"))
+    def target(self) -> int:
+        """Get the target of the message."""
+        assert self.is_set("target"), "target is not set."
+        return cast(int, self.get("target"))
 
     @property
     def description(self) -> str:
@@ -148,22 +114,40 @@ class TwoPartyNegotiationMessage(Message):
         return cast(bool, self.get("flag"))
 
     @property
+    def items(self) -> Tuple[Unit]:
+        """Get the items from the message."""
+        assert self.is_set("items"), "items is not set"
+        return cast(Tuple[Unit], self.get("items"))
+
+    @property
+    def number(self) -> int:
+        """Get the number from the message."""
+        assert self.is_set("number"), "number is not set"
+        return cast(int, self.get("number"))
+
+    @property
+    def price(self) -> float:
+        """Get the price from the message."""
+        assert self.is_set("price"), "price is not set"
+        return cast(float, self.get("price"))
+
+    @property
     def proposal(self) -> Optional[Dict[IOTApp7, bytes]]:
         """Get the proposal from the message."""
         assert self.is_set("proposal"), "proposal is not set"
         return cast(Optional[Dict[IOTApp7, bytes]], self.get("proposal"))
 
     @property
+    def query(self) -> DataModel:
+        """Get the query from the message."""
+        assert self.is_set("query"), "query is not set"
+        return cast(DataModel, self.get("query"))
+
+    @property
     def rounds(self) -> FrozenSet[int]:
         """Get the rounds from the message."""
         assert self.is_set("rounds"), "rounds is not set"
         return cast(FrozenSet[int], self.get("rounds"))
-
-    @property
-    def items(self) -> Tuple[Unit]:
-        """Get the items from the message."""
-        assert self.is_set("items"), "items is not set"
-        return cast(Tuple[Unit], self.get("items"))
 
     def _check_consistency(self) -> bool:
         """Check that the message follows the two_party_negotiation protocol."""
@@ -221,10 +205,7 @@ class TwoPartyNegotiationMessage(Message):
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
-            elif (
-                self.performative
-                == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT
-            ):
+            elif self.performative == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
                 expected_nb_of_contents = 0
 
             # # Check correct content count

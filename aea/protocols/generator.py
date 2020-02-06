@@ -23,7 +23,7 @@ import os
 import re
 from os import path
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, List, Set
 
 from aea.configurations.base import ProtocolSpecification
 
@@ -78,9 +78,9 @@ class ProtocolGenerator:
         }
 
         self._speech_acts = dict()  # type: Dict[str, Dict[str, str]]
-        self._all_performatives = set()  # type: Set[str]
+        self._all_performatives = list()  # type: List[str]
         self._all_unique_contents = dict()  # type: Dict[str, str]
-        self._all_custom_types = set()  # type: Set[str]
+        self._all_custom_types = list()  # type: List[str]
 
         self._setup()
 
@@ -90,16 +90,19 @@ class ProtocolGenerator:
 
         :return: Dict[performatives, Dict[content names, content types]]
         """
+        all_performatives_set = set()
+        all_custom_types_set = set()
+
         for (
             performative,
             speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
-            self._all_performatives.add(performative)
+            all_performatives_set.add(performative)
             self._speech_acts[performative] = {}
             for content_name, content_type in speech_act_content_config.args.items():
                 custom_types = set(re.findall(CUSTOM_TYPE_PATTERN, content_type))
                 for custom_type in custom_types:
-                    self._all_custom_types.add(
+                    all_custom_types_set.add(
                         self._specification_type_to_python_type(custom_type)
                     )
                 pythonic_content_type = self._specification_type_to_python_type(
@@ -107,6 +110,8 @@ class ProtocolGenerator:
                 )
                 self._all_unique_contents[content_name] = pythonic_content_type
                 self._speech_acts[performative][content_name] = pythonic_content_type
+        self._all_performatives = sorted(all_performatives_set)
+        self._all_custom_types = sorted(all_custom_types_set)
 
     def _handle_o(self, specification_type: str) -> str:
         """
@@ -255,23 +260,18 @@ class ProtocolGenerator:
         import_str = import_str[:-2]
         return import_str
 
-    def _speech_acts_str(self) -> str:
+    def _performatives_str(self) -> str:
         """
         Generate the speech-act dictionary where content types are actual types (not strings).
 
         :return: the speech-act dictionary string
         """
-        speech_act_str = "{\n"
-        for (performative, contents,) in self._speech_acts.items():
-            speech_act_str += '        "{}": {{'.format(performative)
-            if len(contents.items()) > 0:
-                for (content_name, content_type,) in contents.items():
-                    speech_act_str += '"{}": {}, '.format(content_name, content_type,)
-                speech_act_str = speech_act_str[:-2]
-            speech_act_str += "},\n"
-        speech_act_str = speech_act_str[:-1]
-        speech_act_str += "\n    }"
-        return speech_act_str
+        performatives_str = "{"
+        for performative in self._all_performatives:
+            performatives_str += '"{}", '.format(performative)
+        performatives_str = performatives_str[:-2]
+        performatives_str += "}"
+        return performatives_str
 
     def _custom_types_classes_str(self) -> str:
         """
@@ -459,7 +459,6 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification.version,
         )
-        cls_str += str.format("    _speech_acts = {}\n\n", self._speech_acts_str())
 
         # Performatives Enum
         cls_str += self._performatives_enum_str()
@@ -481,6 +480,7 @@ class ProtocolGenerator:
         cls_str += "            performative=performative,\n"
         cls_str += "            **kwargs,\n"
         cls_str += "        )\n"
+        cls_str += "        self._performatives = {}\n".format(self._performatives_str())
         cls_str += "        assert (\n"
         cls_str += "            self._check_consistency()\n"
         cls_str += "        ), \"This message is invalid according to the '{}' protocol\"\n\n".format(
@@ -491,7 +491,7 @@ class ProtocolGenerator:
         cls_str += "    @property\n"
         cls_str += "    def valid_performatives(self) -> Set[str]:\n"
         cls_str += '        """Get valid performatives."""\n'
-        cls_str += "        return set(self._speech_acts.keys())\n\n"
+        cls_str += "        return self._performatives\n\n"
         cls_str += "    @property\n"
         cls_str += "    def dialogue_reference(self) -> Tuple[str, str]:\n"
         cls_str += '        """Get the dialogue_reference of the message."""\n'
@@ -505,11 +505,6 @@ class ProtocolGenerator:
         cls_str += '        assert self.is_set("message_id"), "message_id is not set"\n'
         cls_str += '        return cast(int, self.get("message_id"))\n\n'
         cls_str += "    @property\n"
-        cls_str += "    def target(self) -> int:\n"
-        cls_str += '        """Get the target of the message."""\n'
-        cls_str += '        assert self.is_set("target"), "target is not set."\n'
-        cls_str += '        return cast(int, self.get("target"))\n\n'
-        cls_str += "    @property\n"
         cls_str += "    def performative(self) -> Performative:  # noqa: F821\n"
         cls_str += '        """Get the performative of the message."""\n'
         cls_str += (
@@ -518,7 +513,13 @@ class ProtocolGenerator:
         cls_str += '        return cast({}Message.Performative, self.get("performative"))\n\n'.format(
             to_camel_case(self.protocol_specification.name)
         )
-        for content_name, content_type in self._all_unique_contents.items():
+        cls_str += "    @property\n"
+        cls_str += "    def target(self) -> int:\n"
+        cls_str += '        """Get the target of the message."""\n'
+        cls_str += '        assert self.is_set("target"), "target is not set."\n'
+        cls_str += '        return cast(int, self.get("target"))\n\n'
+        for content_name in sorted(self._all_unique_contents.keys()):
+            content_type = self._all_unique_contents[content_name]
             cls_str += "    @property\n"
             cls_str += "    def {}(self) -> {}:\n".format(content_name, content_type)
             cls_str += '        """Get the {} from the message."""\n'.format(
@@ -617,18 +618,6 @@ class ProtocolGenerator:
 
         return cls_str
 
-    def _generate_message_class(self) -> None:
-        """
-        Create the Message class file.
-
-        :return: None
-        """
-        pathname = path.join(self.output_folder_path, MESSAGE_FILE_NAME)
-        message_class = self._message_class_str()
-
-        with open(pathname, "w") as pyfile:
-            pyfile.write(message_class)
-
     def _serialization_class_str(self) -> str:
         """
         Produce the content of the Serialization class.
@@ -709,6 +698,18 @@ class ProtocolGenerator:
         cls_str += "        )\n"
 
         return cls_str
+
+    def _generate_message_class(self) -> None:
+        """
+        Create the Message class file.
+
+        :return: None
+        """
+        pathname = path.join(self.output_folder_path, MESSAGE_FILE_NAME)
+        message_class = self._message_class_str()
+
+        with open(pathname, "w") as pyfile:
+            pyfile.write(message_class)
 
     def _generate_serialisation_class(self) -> None:
         """
