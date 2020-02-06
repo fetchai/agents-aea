@@ -8,7 +8,7 @@ behaviours:
     class_name: ExceptionBehaviour
     args: {}
 handlers: {}
-shared_classes: {}
+models: {}
 protocols: []
 dependencies: {}
 description: "Raise an exception, at some point."

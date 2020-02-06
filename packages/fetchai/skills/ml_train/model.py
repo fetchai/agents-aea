@@ -24,14 +24,14 @@ from pathlib import Path
 
 from tensorflow import keras
 
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 DEFAULT_MODEL_CONFIG_PATH = str(Path("..", "..", "model.config").resolve())
 
 logger = logging.getLogger("aea.gym_skill")
 
 
-class Model(SharedClass):
+class Model(Model):
     """This class defines a machine learning model."""
 
     def __init__(self, **kwargs):

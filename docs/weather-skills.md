@@ -208,7 +208,7 @@ In `my_weather_station/vendor/fetchai/weather_station/skill.yaml`, under strateg
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|shared_classes:                    |shared_classes:                   |              
+|models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |
@@ -228,7 +228,7 @@ In the weather client skill config (`my_weather_client/skills/weather_client/ski
 |----------------------------------------------------------------------|
 |         FETCHAI                   |           ETHEREUM               |
 |-----------------------------------|----------------------------------|
-|shared_classes:                    |shared_classes:                   |              
+|models:                            |models:                           |              
 |  strategy:                        |  strategy:                       |
 |     class_name: Strategy          |     class_name: Strategy         |
 |    args:                          |    args:                         |
@@ -242,10 +242,10 @@ In the weather client skill config (`my_weather_client/skills/weather_client/ski
 ```
 An other way to update the skill config is via the `aea config get/set` command.
 ``` bash
-aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.max_buyer_tx_fee 10000 --type int
-aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.currency_id ETH
-aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.ledger_id ethereum
-aea config set vendor.fetchai.skills.weather_client.shared_classes.strategy.args.is_ledger_tx True --type bool
+aea config set vendor.fetchai.skills.weather_client.models.strategy.args.max_buyer_tx_fee 10000 --type int
+aea config set vendor.fetchai.skills.weather_client.models.strategy.args.currency_id ETH
+aea config set vendor.fetchai.skills.weather_client.models.strategy.args.ledger_id ethereum
+aea config set vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx True --type bool
 ```
 
 ### Run the AEAs

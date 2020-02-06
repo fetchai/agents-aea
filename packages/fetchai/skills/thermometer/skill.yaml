@@ -14,7 +14,7 @@ handlers:
     class_name: FIPAHandler
     args: {}
 tasks: {}
-shared_classes:
+models:
   strategy:
     class_name: Strategy
     args:

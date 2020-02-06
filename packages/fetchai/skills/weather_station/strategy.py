@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Tuple
 
 from aea.helpers.search.models import Description, Query
 from aea.mail.base import Address
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.skills.weather_station.db_communication import DBCommunication
 from packages.fetchai.skills.weather_station.weather_station_data_model import (
@@ -41,7 +41,7 @@ DEFAULT_DATE_TWO = "15/10/2019"
 DEFAULT_IS_LEDGER_TX = False
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:

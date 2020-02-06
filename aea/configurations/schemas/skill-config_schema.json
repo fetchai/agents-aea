@@ -53,12 +53,12 @@
         }
       }
     },
-    "shared_classes": {
+    "models": {
       "type": "object",
       "uniqueItems": true,
       "patternProperties": {
         "^[^\\d\\W]\\w*\\Z": {
-          "$ref": "#/definitions/shared_class"
+          "$ref": "#/definitions/model"
         }
       }
     },
@@ -107,7 +107,7 @@
         }
       }
     },
-    "shared_class": {
+    "model": {
       "type": "object",
       "additionalProperties": false,
       "required": [

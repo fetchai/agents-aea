@@ -19,7 +19,7 @@ handlers:
   transaction:
     class_name: MyTransactionHandler
     args: {}
-shared_classes:
+models:
   strategy:
     class_name: Strategy
     args:

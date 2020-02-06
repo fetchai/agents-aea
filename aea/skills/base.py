@@ -34,9 +34,9 @@ from aea.configurations.base import (
     BehaviourConfig,
     DEFAULT_SKILL_CONFIG_FILE,
     HandlerConfig,
+    ModelConfig,
     ProtocolId,
     PublicId,
-    SharedClassConfig,
     SkillConfig,
 )
 from aea.configurations.loader import ConfigLoader
@@ -390,12 +390,12 @@ class Handler(SkillComponent):
         return handlers
 
 
-class SharedClass(SkillComponent):
-    """This class implements an abstract shared class."""
+class Model(SkillComponent):
+    """This class implements an abstract model."""
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize a task.
+        Initialize a model.
 
         :param skill_context: the skill context
         :param kwargs: keyword arguments.
@@ -412,22 +412,22 @@ class SharedClass(SkillComponent):
     def parse_module(
         cls,
         path: str,
-        shared_classes_configs: Dict[str, SharedClassConfig],
+        model_configs: Dict[str, ModelConfig],
         skill_context: SkillContext,
-    ) -> Dict[str, "SharedClass"]:
+    ) -> Dict[str, "Model"]:
         """
         Parse the tasks module.
 
         :param path: path to the Python skill module.
-        :param shared_classes_configs: a list of shared class configurations.
+        :param model_configs: a list of model configurations.
         :param skill_context: the skill context
-        :return: a list of SharedClass.
+        :return: a list of Model.
         """
         instances = {}
-        shared_classes = []
+        models = []
 
-        shared_classes_names = set(
-            config.class_name for _, config in shared_classes_configs.items()
+        model_names = set(
+            config.class_name for _, config in model_configs.items()
         )
 
         # get all Python modules except the standard ones
@@ -445,45 +445,45 @@ class SharedClass(SkillComponent):
         for module_path in module_paths:
             logger.debug("Trying to load module {}".format(module_path))
             module_name = module_path.replace(".py", "")
-            shared_class_module = load_module(module_name, Path(module_path))
-            classes = inspect.getmembers(shared_class_module, inspect.isclass)
+            model_module = load_module(module_name, Path(module_path))
+            classes = inspect.getmembers(model_module, inspect.isclass)
             filtered_classes = list(
                 filter(
                     lambda x: any(
-                        re.match(shared, x[0]) for shared in shared_classes_names
+                        re.match(shared, x[0]) for shared in model_names
                     )
-                    and SharedClass in inspect.getmro(x[1]),
+                    and Model in inspect.getmro(x[1]),
                     classes,
                 )
             )
-            shared_classes.extend(filtered_classes)
+            models.extend(filtered_classes)
 
-        name_to_class = dict(shared_classes)
-        for shared_class_id, shared_class_config in shared_classes_configs.items():
-            shared_class_name = shared_class_config.class_name
+        name_to_class = dict(models)
+        for model_id, model_config in model_configs.items():
+            model_class_name = model_config.class_name
             logger.debug(
-                "Processing shared class id={}, class={}".format(
-                    shared_class_id, shared_class_name
+                "Processing model id={}, class={}".format(
+                    model_id, model_class_name
                 )
             )
             assert (
-                shared_class_id.isidentifier()
-            ), "'{}' is not a valid identifier.".format(shared_class_id)
-            shared_class = name_to_class.get(shared_class_name, None)
-            if shared_class is None:
+                model_id.isidentifier()
+            ), "'{}' is not a valid identifier.".format(model_id)
+            model = name_to_class.get(model_name, None)
+            if model is None:
                 logger.warning(
-                    "Shared class '{}' cannot be found.".format(shared_class_name)
+                    "Model '{}' cannot be found.".format(model_name)
                 )
             else:
-                args = shared_class_config.args
+                args = model_config.args
                 assert (
                     "skill_context" not in args.keys()
                 ), "'skill_context' is a reserved key. Please rename your arguments!"
                 args["skill_context"] = skill_context
-                args["name"] = shared_class_id
-                shared_class_instance = shared_class(**args)
-                instances[shared_class_id] = shared_class_instance
-                setattr(skill_context, shared_class_id, shared_class_instance)
+                args["name"] = model_id
+                model_instance = model(**args)
+                instances[model_id] = model_instance
+                setattr(skill_context, model_id, model_instance)
         return instances
 
 
@@ -496,7 +496,7 @@ class Skill:
         skill_context: SkillContext,
         handlers: Optional[Dict[str, Handler]],
         behaviours: Optional[Dict[str, Behaviour]],
-        shared_classes: Optional[Dict[str, SharedClass]],
+        models: Optional[Dict[str, Model]],
     ):
         """
         Initialize a skill.
@@ -504,13 +504,13 @@ class Skill:
         :param config: the skill configuration.
         :param handlers: the list of handlers to handle incoming envelopes.
         :param behaviours: the list of behaviours that defines the proactive component of the agent.
-        :param shared_classes: the list of classes shared across tasks, behaviours and
+        :param models: the list of models shared across tasks, behaviours and
         """
         self.config = config
         self.skill_context = skill_context
         self.handlers = handlers if handlers is not None else {}
         self.behaviours = behaviours if behaviours is not None else {}
-        self.shared_classes = shared_classes if shared_classes is not None else {}
+        self.models = models if models is not None else {}
 
     @classmethod
     def from_dir(cls, directory: str, agent_context: AgentContext) -> "Skill":
@@ -559,16 +559,16 @@ class Skill:
         else:
             behaviours = {}
 
-        shared_classes_by_id = dict(skill_config.shared_classes.read_all())
-        if len(shared_classes_by_id) > 0:
-            shared_classes_instances = SharedClass.parse_module(
-                directory, shared_classes_by_id, skill_context
+        models_by_id = dict(skill_config.models.read_all())
+        if len(models_by_id) > 0:
+            model_instances = Model.parse_module(
+                directory, model_by_id, skill_context
             )
         else:
-            shared_classes_instances = {}
+            model_instances = {}
 
         skill = Skill(
-            skill_config, skill_context, handlers, behaviours, shared_classes_instances
+            skill_config, skill_context, handlers, behaviours, model_instances
         )
         skill_context._skill = skill
 

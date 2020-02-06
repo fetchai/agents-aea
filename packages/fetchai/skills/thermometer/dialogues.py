@@ -29,7 +29,7 @@ from typing import Any, Dict, Optional
 
 from aea.helpers.dialogue.base import DialogueLabel
 from aea.helpers.search.models import Description
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.protocols.fipa.dialogues import FIPADialogue, FIPADialogues
 
@@ -51,7 +51,7 @@ class Dialogue(FIPADialogue):
         self.proposal = None  # type: Optional[Description]
 
 
-class Dialogues(SharedClass, FIPADialogues):
+class Dialogues(Model, FIPADialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
@@ -60,5 +60,5 @@ class Dialogues(SharedClass, FIPADialogues):
 
         :return: None
         """
-        SharedClass.__init__(self, **kwargs)
+        Model.__init__(self, **kwargs)
         FIPADialogues.__init__(self)

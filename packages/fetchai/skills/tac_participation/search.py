@@ -22,12 +22,12 @@
 import datetime
 from typing import Set, cast
 
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 DEFAULT_SEARCH_INTERVAL = 30
 
 
-class Search(SharedClass):
+class Search(Model):
     """This class deals with the search state."""
 
     def __init__(self, **kwargs):

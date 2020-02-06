@@ -188,26 +188,26 @@ class MyBehaviour(TickerBehaviour):
 
 ```
 
-### Shared classes
+### Models
 
-The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end the developer can subclass an abstract `SharedClass`. These shared classes are made available on the context level upon initialization of the AEA.
+The developer might want to add other classes on the context level which are shared equally across the `Handler`, `Behaviour` and `Task` classes. To this end the developer can subclass an abstract `Model`. These models are made available on the context level upon initialization of the AEA.
 
-Say, the developer has a class called `SomeClass`
+Say, the developer has a class called `SomeModel`
 ``` python
-class SomeClass(SharedClass):
+class SomeModel(Model):
     ...
 ```
 
 Then, an instance of this class is available on the context level like so:
 ``` python
-some_class = self.context.some_class
+some_model = self.context.some_model
 ``` 
 
 ### Skill config
 
 Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
 
-It also details the protocol types used in the skill and points to shared modules, i.e. modules of type `SharedClass`, which allow custom classes within the skill to be accessible in the skill context.
+It also details the protocol types used in the skill and points to shared modules, i.e. modules of type `Model`, which allow custom classes within the skill to be accessible in the skill context.
 
 ``` yaml
 name: echo
@@ -224,7 +224,7 @@ handlers:
     class_name: EchoHandler
     args:
       foo: bar
-shared_classes: {}
+models: {}
 dependencies: {}
 protocols: ["fetchai/default:0.1.0"]
 ```

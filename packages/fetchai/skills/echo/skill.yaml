@@ -14,6 +14,6 @@ handlers:
     class_name: EchoHandler
     args:
       foo: bar
-shared_classes: {}
+models: {}
 protocols: ["fetchai/default:0.1.0"]
 dependencies: {}

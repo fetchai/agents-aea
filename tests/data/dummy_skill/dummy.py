@@ -17,10 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a dummy shared class."""
+"""This module contains a dummy model."""
 
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 
-class DummySharedClass(SharedClass):
-    """This class is a dummy shared class."""
+class DummyModel(Model):
+    """This class is a dummy model."""

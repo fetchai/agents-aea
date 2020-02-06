@@ -28,7 +28,7 @@ from typing import Dict, Optional, cast
 
 from aea.decision_maker.messages.transaction import TransactionMessage
 from aea.helpers.search.models import Description, Query
-from aea.skills.base import SharedClass
+from aea.skills.base import Model
 
 from packages.fetchai.skills.tac_negotiation.helpers import (
     build_goods_description,
@@ -41,7 +41,7 @@ logger = logging.getLogger("aea.tac_negotiation_skill")
 ROUNDING_ADJUSTMENT = 1
 
 
-class Strategy(SharedClass):
+class Strategy(Model):
     """This class defines an abstract strategy for the agent."""
 
     class RegisterAs(Enum):

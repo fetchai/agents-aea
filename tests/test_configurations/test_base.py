@@ -129,7 +129,7 @@ class TestSkillConfig:
     """
     Test the skill configuration class.
 
-    This suite tests also the handlers/tasks/behaviours/shared classes configuration classes.
+    This suite tests also the handlers/tasks/behaviours/models configuration classes.
     """
 
     @pytest.mark.parametrize("skill_path", skill_config_files)

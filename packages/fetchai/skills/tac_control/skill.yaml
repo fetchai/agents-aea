@@ -15,7 +15,7 @@ handlers:
   oef:
     class_name: OEFRegistrationHandler
     args: {}
-shared_classes:
+models:
   parameters:
     class_name: Parameters
     args:
