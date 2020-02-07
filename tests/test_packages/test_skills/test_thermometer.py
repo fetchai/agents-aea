@@ -17,14 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the integration test for the weather skills."""
+"""This test module contains the integration test for the thermometer skills."""
 
+import io
 import os
 import shutil
 import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
 import pytest
@@ -35,7 +37,17 @@ from ...common.click_testing import CliRunner
 from ...conftest import CLI_LOG_OPTION
 
 
-class TestThermometerSkills:
+def _read_tty(pid: subprocess.Popen):
+    for line in io.TextIOWrapper(pid.stdout, encoding="utf-8"):
+        print("stdout: " + line.replace("\n", ""))
+
+
+def _read_error(pid: subprocess.Popen):
+    for line in io.TextIOWrapper(pid.stderr, encoding="utf-8"):
+        print("stderr: " + line.replace("\n", ""))
+
+
+class TestWeatherSkillsFetchaiLedger:
     """Test that thermometer skills work."""
 
     @pytest.fixture(autouse=True)
@@ -52,14 +64,19 @@ class TestThermometerSkills:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_themrometer(self, pytestconfig):
-        """Run the weather skills sequence."""
+    def test_thermometer(self, pytestconfig):
+        """Run the thermometer skills sequence."""
         if pytestconfig.getoption("ci"):
             pytest.skip("Skipping the test since it doesn't work in CI.")
         # add packages folder
         packages_src = os.path.join(self.cwd, "packages")
         packages_dst = os.path.join(os.getcwd(), "packages")
         shutil.copytree(packages_src, packages_dst)
+
+        # Add scripts folder
+        scripts_src = os.path.join(self.cwd, "scripts")
+        scripts_dst = os.path.join(os.getcwd(), "scripts")
+        shutil.copytree(scripts_src, scripts_dst)
 
         # create agent one and agent two
         result = self.runner.invoke(
@@ -104,6 +121,7 @@ class TestThermometerSkills:
                 "fetchai/oef:0.1.0",
             ],
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             env=os.environ.copy(),
         )
 
@@ -132,6 +150,47 @@ class TestThermometerSkills:
         )
         assert result.exit_code == 0
 
+        # Load the agent yaml file and manually insert the things we need
+        file = open("aea-config.yaml", mode="r")
+
+        # read all lines at once
+        whole_file = file.read()
+
+        # add in the ledger address
+        find_text = "ledger_apis: {}"
+        replace_text = """ledger_apis:
+        fetchai:
+            network: testnet"""
+
+        whole_file = whole_file.replace(find_text, replace_text)
+
+        # close the file
+        file.close()
+
+        with open("aea-config.yaml", "w") as f:
+            f.write(whole_file)
+
+        # Generate the private keys
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", "fetchai"], standalone_mode=False
+        )
+        assert result.exit_code == 0
+
+        # Add the private key
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add-key", "fetchai", "fet_private_key.txt"],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        # Add some funds to the thermometer
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-wealth", "fetchai"], standalone_mode=False
+        )
+        assert result.exit_code == 0
+
+        os.chdir(agent_two_dir_path)
         process_two = subprocess.Popen(
             [
                 sys.executable,
@@ -142,16 +201,31 @@ class TestThermometerSkills:
                 "fetchai/oef:0.1.0",
             ],
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             env=os.environ.copy(),
         )
 
-        # check the gym run ends
+        tty_read_thread = threading.Thread(target=_read_tty, args=(process_one,))
+        tty_read_thread.start()
 
-        time.sleep(20.0)
+        error_read_thread = threading.Thread(target=_read_error, args=(process_one,))
+        error_read_thread.start()
+
+        tty_read_thread = threading.Thread(target=_read_tty, args=(process_two,))
+        tty_read_thread.start()
+
+        error_read_thread = threading.Thread(target=_read_error, args=(process_two,))
+        error_read_thread.start()
+
+        time.sleep(60)
         process_one.send_signal(signal.SIGINT)
-        process_one.wait(timeout=20)
         process_two.send_signal(signal.SIGINT)
-        process_two.wait(timeout=20)
+
+        process_one.wait(timeout=60)
+        process_two.wait(timeout=60)
+
+        # text1, err1 = process_one.communicate()
+        # text2, err2 = process_two.communicate()
 
         assert process_one.returncode == 0
         assert process_two.returncode == 0

@@ -20,12 +20,15 @@
 
 """Module wrapping the helpers of public and private key cryptography."""
 
+import json
 import logging
 import sys
 
 from eth_account import Account  # type: ignore
 
 from fetchai.ledger.crypto import Entity  # type: ignore
+
+import requests
 
 from aea.crypto.ethereum import ETHEREUM
 from aea.crypto.fetchai import FETCHAI
@@ -131,8 +134,6 @@ def _try_generate_testnet_wealth(identifier: str, address: str) -> None:
     :return: None
     """
     try:
-        import requests
-        import json
 
         if identifier == FETCHAI:
             payload = json.dumps({"address": address})
@@ -154,7 +155,7 @@ def _try_generate_testnet_wealth(identifier: str, address: str) -> None:
                             response_dict.get("message"),
                             response_dict.get("digest"),
                         )
-                    )
+                    )  # pragma: no cover
         elif identifier == ETHEREUM:
             response = requests.get(ETHEREUM_TESTNET_FAUCET_URL + address)
             if response.status_code // 100 == 5:
@@ -172,7 +173,7 @@ def _try_generate_testnet_wealth(identifier: str, address: str) -> None:
                     "Response: {}\nMessage: {}".format(
                         response.status_code, response_dict.get("message")
                     )
-                )
+                )  # pragma: no cover
     except Exception as e:
         logger.warning(
             "An error occured while attempting to generate wealth:\n{}".format(e)
