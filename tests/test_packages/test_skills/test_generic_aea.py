@@ -81,12 +81,16 @@ class TestGenericSkills:
 
         agent_one_config = Path(self.agent_name_one, DEFAULT_AEA_CONFIG_FILE)
         agent_one_config_content = agent_one_config.read_text()
-        agent_one_config_content = agent_one_config_content.replace(find_text, replace_text)
+        agent_one_config_content = agent_one_config_content.replace(
+            find_text, replace_text
+        )
         agent_one_config.write_text(agent_one_config_content)
 
         agent_two_config = Path(self.agent_name_two, DEFAULT_AEA_CONFIG_FILE)
         agent_two_config_content = agent_two_config.read_text()
-        agent_two_config_content = agent_two_config_content.replace(find_text, replace_text)
+        agent_two_config_content = agent_two_config_content.replace(
+            find_text, replace_text
+        )
         agent_two_config.write_text(agent_two_config_content)
 
         # add packages for agent one and run it
