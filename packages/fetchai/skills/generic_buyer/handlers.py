@@ -281,7 +281,7 @@ class FIPAHandler(Handler):
                 self.context.agent_name, msg.counterparty[-5:]
             )
         )
-        if len(msg.info.keys()) > 1:
+        if len(msg.info.keys()) >= 1:
             data = msg.info
             logger.info(
                 "[{}]: received the following data={}".format(
