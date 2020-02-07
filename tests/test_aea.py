@@ -107,7 +107,7 @@ def test_act():
         resources = Resources(str(Path(CUR_PATH, "data", "dummy_aea")))
 
         agent = AEA(
-            identity, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, is_programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -149,7 +149,7 @@ def test_react():
         )
 
         agent = AEA(
-            identity, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, is_programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -200,7 +200,7 @@ async def test_handle():
         )
 
         agent = AEA(
-            identity, connections, wallet, ledger_apis, resources, programmatic=False
+            identity, connections, wallet, ledger_apis, resources, is_programmatic=False
         )
         t = Thread(target=agent.start)
         try:
@@ -277,7 +277,7 @@ class TestInitializeAEAProgrammaticallyFromResourcesDir:
             cls.wallet,
             cls.ledger_apis,
             cls.resources,
-            programmatic=False,
+            is_programmatic=False,
         )
 
         cls.expected_message = DefaultMessage(
@@ -461,7 +461,7 @@ class TestAddBehaviourDynamically:
             wallet,
             ledger_apis,
             resources,
-            programmatic=False,
+            is_programmatic=False,
         )
 
         cls.t = Thread(target=cls.agent.start)

@@ -116,7 +116,7 @@ class TestOwnershipState:
             tx_nonce="transaction nonce",
         )
 
-        assert self.ownership_state.check_transaction_is_affordable(
+        assert self.ownership_state.is_affordable_transaction(
             tx_message=tx_message
         ), "We should have the money for the transaction!"
 
@@ -143,7 +143,7 @@ class TestOwnershipState:
             tx_nonce="transaction nonce",
         )
 
-        assert not self.ownership_state.check_transaction_is_affordable(
+        assert not self.ownership_state.is_affordable_transaction(
             tx_message=tx_message
         ), "We must reject the transaction."
 
@@ -170,7 +170,7 @@ class TestOwnershipState:
             tx_nonce="transaction nonce",
         )
 
-        assert self.ownership_state.check_transaction_is_affordable(
+        assert self.ownership_state.is_affordable_transaction(
             tx_message=tx_message
         ), "We must reject the transaction."
 
@@ -197,7 +197,7 @@ class TestOwnershipState:
             tx_nonce="transaction nonce",
         )
 
-        assert not self.ownership_state.check_transaction_is_affordable(
+        assert not self.ownership_state.is_affordable_transaction(
             tx_message=tx_message
         ), "We must reject the transaction."
 
@@ -607,7 +607,7 @@ class TestDecisionMaker:
         mocked_logger_error = patch_logger_error.__enter__()
 
         with mock.patch(
-            "aea.decision_maker.messages.transaction.TransactionMessage.check_consistency",
+            "aea.decision_maker.messages.transaction.TransactionMessage._is_consistent",
             return_value=True,
         ):
             tx_message = TransactionMessage(
@@ -783,7 +783,7 @@ class TestDecisionMaker:
     def test_is_not_affordable_ledger_state_proxy(self):
         """Test that the tx_message is not affordable with initialized ledger_state_proxy."""
         with mock.patch(
-            "aea.decision_maker.messages.transaction.TransactionMessage.check_consistency",
+            "aea.decision_maker.messages.transaction.TransactionMessage._is_consistent",
             return_value=True,
         ):
             tx_message = TransactionMessage(
@@ -996,7 +996,7 @@ class TestLedgerStateProxy:
         with mock.patch.object(
             self.ledger_state_proxy.ledger_apis, "token_balance", return_value=0
         ):
-            result = self.ledger_state_proxy.check_transaction_is_affordable(
+            result = self.ledger_state_proxy.is_affordable_transaction(
                 tx_message=tx_message
             )
         assert not result
@@ -1020,7 +1020,7 @@ class TestLedgerStateProxy:
         with mock.patch.object(
             self.ledger_state_proxy.ledger_apis, "token_balance", return_value=0
         ):
-            result = self.ledger_state_proxy.check_transaction_is_affordable(
+            result = self.ledger_state_proxy.is_affordable_transaction(
                 tx_message=tx_message
             )
         assert result
