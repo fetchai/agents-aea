@@ -164,7 +164,7 @@ class TestResources:
             wallet,
             ledger_apis,
             resources=cls.resources,
-            programmatic=False,
+            is_programmatic=False,
         )
         cls.resources.load(cls.aea.context)
 
@@ -354,7 +354,7 @@ class TestFilter:
             wallet,
             ledger_apis,
             resources=Resources(cls.agent_folder),
-            programmatic=False,
+            is_programmatic=False,
         )
         cls.aea.setup()
 

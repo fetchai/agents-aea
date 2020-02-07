@@ -155,7 +155,7 @@ class RequestAPITestCase(TestCase):
     def test_request_api_no_auth_data(self, request_mock):
         """Test for request_api method no auth data."""
         with self.assertRaises(ClickException):
-            request_api("GET", "/path", auth=True)
+            request_api("GET", "/path", is_auth=True)
 
     @mock.patch(
         "aea.cli.registry.utils.read_cli_config", return_value={AUTH_TOKEN_KEY: "key"}
@@ -169,7 +169,7 @@ class RequestAPITestCase(TestCase):
         resp_mock.status_code = 200
         request_mock.return_value = resp_mock
 
-        result = request_api("GET", "/path", auth=True)
+        result = request_api("GET", "/path", is_auth=True)
         self.assertEqual(result, expected_result)
 
     @mock.patch("builtins.open", mock.mock_open())

@@ -71,7 +71,7 @@ class PublishAgentTestCase(TestCase):
                 "protocols": [],
                 "skills": [],
             },
-            auth=True,
+            is_auth=True,
             filepath="cwd/agent-name.tar.gz",
         )
 

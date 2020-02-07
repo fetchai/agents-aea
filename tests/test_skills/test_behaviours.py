@@ -60,7 +60,7 @@ def test_sequence_behaviour():
 
     max_iterations = 10
     i = 0
-    while not sequence.done() and i < max_iterations:
+    while not sequence.is_done() and i < max_iterations:
         sequence.act()
         i += 1
 
@@ -108,7 +108,7 @@ def test_fms_behaviour():
 
     max_iterations = 10
     i = 0
-    while not fsm.done() and i < max_iterations:
+    while not fsm.is_done() and i < max_iterations:
         fsm.act()
         i += 1
 
