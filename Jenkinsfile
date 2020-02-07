@@ -57,13 +57,13 @@ pipeline {
 
                 } // static type check
 
-                stage('Docs') {
+                // stage('Docs') {
 
-                    steps {
-                        sh 'tox -e docs'
-                    }
+                //     steps {
+                //         sh 'tox -e docs'
+                //     }
 
-                } // docs
+                // } // docs
 
                 stage('Unit Tests: Python 3.6') {
 
