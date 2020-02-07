@@ -56,7 +56,7 @@ class ProtocolGenerator:
     """This class generates a protocol_verification package from a ProtocolTemplate object."""
 
     def __init__(
-            self, protocol_specification: ProtocolSpecification, output_path: str = "."
+        self, protocol_specification: ProtocolSpecification, output_path: str = "."
     ) -> None:
         """
         Instantiate a protocol generator.
@@ -66,7 +66,9 @@ class ProtocolGenerator:
         :return: None
         """
         self.protocol_specification = protocol_specification
-        self.protocol_specification_in_camel_case = to_camel_case(self.protocol_specification.name)
+        self.protocol_specification_in_camel_case = to_camel_case(
+            self.protocol_specification.name
+        )
         self.output_folder_path = os.path.join(output_path, protocol_specification.name)
 
         self._imports = {
@@ -96,8 +98,8 @@ class ProtocolGenerator:
         all_custom_types_set = set()
 
         for (
-                performative,
-                speech_act_content_config,
+            performative,
+            speech_act_content_config,
         ) in self.protocol_specification.speech_acts.read_all():
             all_performatives_set.add(performative)
             self._speech_acts[performative] = {}
@@ -116,32 +118,56 @@ class ProtocolGenerator:
         self._all_custom_types = sorted(all_custom_types_set)
 
     def _get_sub_types_of_compositional_types(self, compositional_type: str) -> tuple:
-        if compositional_type.startswith("Optional") or compositional_type.startswith("pt:optional"):
-            sub_type1 = compositional_type[compositional_type.index("[") + 1: compositional_type.rindex("]")].strip()
+        if compositional_type.startswith("Optional") or compositional_type.startswith(
+            "pt:optional"
+        ):
+            sub_type1 = compositional_type[
+                compositional_type.index("[") + 1 : compositional_type.rindex("]")
+            ].strip()
             sub_types = (sub_type1,)
-        if compositional_type.startswith("FrozenSet") \
-                or compositional_type.startswith("pt:set") \
-                or compositional_type.startswith("Tuple") \
-                or compositional_type.startswith("pt:list"):
-            sub_type1 = compositional_type[compositional_type.index("[") + 1: compositional_type.rindex("]")].strip()
+        if (
+            compositional_type.startswith("FrozenSet")
+            or compositional_type.startswith("pt:set")
+            or compositional_type.startswith("Tuple")
+            or compositional_type.startswith("pt:list")
+        ):
+            sub_type1 = compositional_type[
+                compositional_type.index("[") + 1 : compositional_type.rindex("]")
+            ].strip()
             sub_types = (sub_type1,)
-        if compositional_type.startswith("Dict") or compositional_type.startswith("pt:dict"):
-            sub_type1 = compositional_type[compositional_type.index("[") + 1: compositional_type.index(",")].strip()
-            sub_type2 = compositional_type[compositional_type.index(",") + 1: compositional_type.rindex("]")].strip()
+        if compositional_type.startswith("Dict") or compositional_type.startswith(
+            "pt:dict"
+        ):
+            sub_type1 = compositional_type[
+                compositional_type.index("[") + 1 : compositional_type.index(",")
+            ].strip()
+            sub_type2 = compositional_type[
+                compositional_type.index(",") + 1 : compositional_type.rindex("]")
+            ].strip()
             sub_types = (sub_type1, sub_type2)
-        if compositional_type.startswith("Union") or compositional_type.startswith("pt:union"):
-            inside_union = compositional_type[compositional_type.index("[") + 1: compositional_type.rindex("]")].strip()
+        if compositional_type.startswith("Union") or compositional_type.startswith(
+            "pt:union"
+        ):
+            inside_union = compositional_type[
+                compositional_type.index("[") + 1 : compositional_type.rindex("]")
+            ].strip()
             sub_type_list = list()
             while inside_union != "":
-                if inside_union.startswith("Dict") or inside_union.startswith("pt:dict"):
-                    sub_type = inside_union[:inside_union.index("]") + 1].strip()
-                    rest_of_inside_union = inside_union[inside_union.index("]") + 1:].strip()
+                if inside_union.startswith("Dict") or inside_union.startswith(
+                    "pt:dict"
+                ):
+                    sub_type = inside_union[: inside_union.index("]") + 1].strip()
+                    rest_of_inside_union = inside_union[
+                        inside_union.index("]") + 1 :
+                    ].strip()
                     if rest_of_inside_union.find(",") == -1:
                         # it is the last sub-type
                         inside_union = rest_of_inside_union.strip()
                     else:
                         # it is not the last sub-type
-                        inside_union = rest_of_inside_union[rest_of_inside_union.index(",") + 1:].strip()
+                        inside_union = rest_of_inside_union[
+                            rest_of_inside_union.index(",") + 1 :
+                        ].strip()
                 else:
                     if inside_union.find(",") == -1:
                         # it is the last sub-type
@@ -149,8 +175,10 @@ class ProtocolGenerator:
                         inside_union = ""
                     else:
                         # it is not the last sub-type
-                        sub_type = inside_union[:inside_union.index(",")].strip()
-                        inside_union = inside_union[inside_union.index(",") + 1:].strip()
+                        sub_type = inside_union[: inside_union.index(",")].strip()
+                        inside_union = inside_union[
+                            inside_union.index(",") + 1 :
+                        ].strip()
                 sub_type_list.append(sub_type)
             sub_types = tuple(sub_type_list)
         return sub_types
@@ -164,7 +192,9 @@ class ProtocolGenerator:
         """
         self._imports["Optional"] = True
         element_types = self._get_sub_types_of_compositional_types(specification_type)
-        element_type_in_python = self._specification_type_to_python_type(element_types[0])
+        element_type_in_python = self._specification_type_to_python_type(
+            element_types[0]
+        )
         python_type = "Optional[{}]".format(element_type_in_python)
         return python_type
 
@@ -196,7 +226,9 @@ class ProtocolGenerator:
         :return: The Python equivalent
         """
         element_types = self._get_sub_types_of_compositional_types(specification_type)
-        element_type_in_python = self._specification_type_to_python_type(element_types[0])
+        element_type_in_python = self._specification_type_to_python_type(
+            element_types[0]
+        )
         if specification_type.startswith("pt:set"):
             self._imports["FrozenSet"] = True
             python_type = "FrozenSet[{}]".format(element_type_in_python)
@@ -214,8 +246,12 @@ class ProtocolGenerator:
         """
         self._imports["Dict"] = True
         element_types = self._get_sub_types_of_compositional_types(specification_type)
-        element1_type_in_python = self._specification_type_to_python_type(element_types[0])
-        element2_type_in_python = self._specification_type_to_python_type(element_types[1])
+        element1_type_in_python = self._specification_type_to_python_type(
+            element_types[0]
+        )
+        element2_type_in_python = self._specification_type_to_python_type(
+            element_types[1]
+        )
         python_type = "Dict[{}, {}]".format(
             element1_type_in_python, element2_type_in_python
         )
@@ -232,7 +268,9 @@ class ProtocolGenerator:
         sub_types = self._get_sub_types_of_compositional_types(specification_type)
         python_type = "Union["
         for sub_type in sub_types:
-            python_type += "{}, ".format(self._specification_type_to_python_type(sub_type))
+            python_type += "{}, ".format(
+                self._specification_type_to_python_type(sub_type)
+            )
         python_type = python_type[:-2]
         python_type += "]"
         return python_type
@@ -261,9 +299,9 @@ class ProtocolGenerator:
             "pt:str",
         ]:
             python_type = self._handle_pt(specification_type)
-        elif specification_type.startswith(
-                "pt:set"
-        ) or specification_type.startswith("pt:list"):
+        elif specification_type.startswith("pt:set") or specification_type.startswith(
+            "pt:list"
+        ):
             python_type = self._handle_pct(specification_type)
         elif specification_type.startswith("pt:dict"):
             python_type = self._handle_pmt(specification_type)
@@ -365,26 +403,26 @@ class ProtocolGenerator:
             check_str += indents + 'if self.is_set("{}"):\n'.format(content_name)
             indents += "    "
             content_type = content_type[
-                           content_type.index("[") + 1: content_type.rindex("]")
-                           ]
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
         if content_type.startswith("FrozenSet["):
             # check the type
             check_str += (
-                    indents
-                    + "assert type(self.{}) == frozenset, \"{} is not 'frozenset'.\"\n".format(
-                content_name, content_name
-            )
+                indents
+                + "assert type(self.{}) == frozenset, \"{} is not 'frozenset'.\"\n".format(
+                    content_name, content_name
+                )
             )
             element_type = content_type[
-                           content_type.index("[") + 1: content_type.rindex("]")
-                           ]
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
             # check the elements types
             check_str += indents + "assert all(\n"
             check_str += (
-                    indents
-                    + "    type(element) == {} for element in self.{}\n".format(
-                element_type, content_name
-            )
+                indents
+                + "    type(element) == {} for element in self.{}\n".format(
+                    element_type, content_name
+                )
             )
             check_str += indents + "), \"Elements of {} are not '{}'.\"\n".format(
                 content_name, element_type
@@ -392,21 +430,21 @@ class ProtocolGenerator:
         elif content_type.startswith("Tuple["):
             # check the type
             check_str += (
-                    indents
-                    + "assert type(self.{}) == tuple, \"{} is not 'tuple'.\"\n".format(
-                content_name, content_name
-            )
+                indents
+                + "assert type(self.{}) == tuple, \"{} is not 'tuple'.\"\n".format(
+                    content_name, content_name
+                )
             )
             element_type = content_type[
-                           content_type.index("[") + 1: content_type.rindex("]")
-                           ]
+                content_type.index("[") + 1 : content_type.rindex("]")
+            ]
             # check the elements types
             check_str += indents + "assert all(\n"
             check_str += (
-                    indents
-                    + "    type(element) == {} for element in self.{}\n".format(
-                element_type, content_name
-            )
+                indents
+                + "    type(element) == {} for element in self.{}\n".format(
+                    element_type, content_name
+                )
             )
             check_str += indents + "), \"Elements of {} are not '{}'.\"\n".format(
                 content_name, element_type
@@ -414,17 +452,17 @@ class ProtocolGenerator:
         elif content_type.startswith("Dict["):
             # check the type
             check_str += (
-                    indents
-                    + "assert type(self.{}) == dict, \"{} is not 'dict'.\"\n".format(
-                content_name, content_name
-            )
+                indents
+                + "assert type(self.{}) == dict, \"{} is not 'dict'.\"\n".format(
+                    content_name, content_name
+                )
             )
             element1_type = content_type[
-                            content_type.index("[") + 1: content_type.index(",")
-                            ]
+                content_type.index("[") + 1 : content_type.index(",")
+            ]
             element2_type = content_type[
-                            content_type.index(",") + 2: content_type.rindex("]")
-                            ]
+                content_type.index(",") + 2 : content_type.rindex("]")
+            ]
             # check the keys type then check the values type
             check_str += indents + "for key, value in self.{}.items():\n".format(
                 content_name
@@ -432,27 +470,27 @@ class ProtocolGenerator:
             check_str += indents + "    assert (\n"
             check_str += indents + "        type(key) == {}\n".format(element1_type)
             check_str += (
-                    indents
-                    + "    ), \"Keys of {} dictionary are not '{}'.\"\n".format(
-                content_name, element1_type
-            )
+                indents
+                + "    ), \"Keys of {} dictionary are not '{}'.\"\n".format(
+                    content_name, element1_type
+                )
             )
 
             check_str += indents + "    assert (\n"
             check_str += indents + "        type(value) == {}\n".format(element2_type)
             check_str += (
-                    indents
-                    + "    ), \"Values of {} dictionary are not '{}'.\"\n".format(
-                content_name, element2_type
-            )
+                indents
+                + "    ), \"Values of {} dictionary are not '{}'.\"\n".format(
+                    content_name, element2_type
+                )
             )
         else:
             # check the type
             check_str += (
-                    indents
-                    + "assert type(self.{}) == {}, \"{} is not '{}'.\"\n".format(
-                content_name, content_type, content_name, content_type
-            )
+                indents
+                + "assert type(self.{}) == {}, \"{} is not '{}'.\"\n".format(
+                    content_name, content_type, content_name, content_type
+                )
             )
         return check_str
 
@@ -481,8 +519,7 @@ class ProtocolGenerator:
 
         # Class Header
         cls_str += str.format(
-            "class {}Message(Message):\n",
-            self.protocol_specification_in_camel_case,
+            "class {}Message(Message):\n", self.protocol_specification_in_camel_case,
         )
         cls_str += str.format(
             '    """{}"""\n\n', self.protocol_specification.description
@@ -612,13 +649,11 @@ class ProtocolGenerator:
         for performative, contents in self._speech_acts.items():
             if counter == 1:
                 cls_str += "            if self.performative == {}Message.Performative.{}:\n".format(
-                    self.protocol_specification_in_camel_case,
-                    performative.upper(),
+                    self.protocol_specification_in_camel_case, performative.upper(),
                 )
             else:
                 cls_str += "            elif self.performative == {}Message.Performative.{}:\n".format(
-                    self.protocol_specification_in_camel_case,
-                    performative.upper(),
+                    self.protocol_specification_in_camel_case, performative.upper(),
                 )
             cls_str += "                expected_nb_of_contents = {}\n".format(
                 len(contents)
@@ -706,17 +741,34 @@ class ProtocolGenerator:
             '        """Encode a \'{}\' message into bytes."""\n',
             self.protocol_specification_in_camel_case,
         )
-        cls_str += '        msg = cast({}Message, msg)\n'.format(self.protocol_specification_in_camel_case)
-        cls_str += '        {}_msg = {}_pb2.{}Message()\n'.format(self.protocol_specification.name, self.protocol_specification.name,
-                                                                  self.protocol_specification_in_camel_case)
-        cls_str += '        {}_msg.message_id = msg.message_id\n'.format(self.protocol_specification.name)
-        cls_str += '        dialogue_reference = msg.dialogue_reference\n'
-        cls_str += '        {}_msg.dialogue_starter_reference = dialogue_reference[0]\n'.format(self.protocol_specification.name)
-        cls_str += '        {}_msg.dialogue_responder_reference = dialogue_reference[1]\n'.format(self.protocol_specification.name)
-        cls_str += '        {}_msg.target = msg.target\n\n'.format(self.protocol_specification.name)
+        cls_str += "        msg = cast({}Message, msg)\n".format(
+            self.protocol_specification_in_camel_case
+        )
+        cls_str += "        {}_msg = {}_pb2.{}Message()\n".format(
+            self.protocol_specification.name,
+            self.protocol_specification.name,
+            self.protocol_specification_in_camel_case,
+        )
+        cls_str += "        {}_msg.message_id = msg.message_id\n".format(
+            self.protocol_specification.name
+        )
+        cls_str += "        dialogue_reference = msg.dialogue_reference\n"
+        cls_str += "        {}_msg.dialogue_starter_reference = dialogue_reference[0]\n".format(
+            self.protocol_specification.name
+        )
+        cls_str += "        {}_msg.dialogue_responder_reference = dialogue_reference[1]\n".format(
+            self.protocol_specification.name
+        )
+        cls_str += "        {}_msg.target = msg.target\n\n".format(
+            self.protocol_specification.name
+        )
 
-        cls_str += '        {}_bytes = {}_msg.SerializeToString()\n'.format(self.protocol_specification.name, self.protocol_specification.name)
-        cls_str += '        return {}_bytes\n\n'.format(self.protocol_specification.name)
+        cls_str += "        {}_bytes = {}_msg.SerializeToString()\n".format(
+            self.protocol_specification.name, self.protocol_specification.name
+        )
+        cls_str += "        return {}_bytes\n\n".format(
+            self.protocol_specification.name
+        )
 
         # decoder
         cls_str += str.format("    def decode(self, obj: bytes) -> Message:\n")
@@ -725,19 +777,31 @@ class ProtocolGenerator:
             self.protocol_specification_in_camel_case,
         )
 
-        cls_str += '        {}_pb = {}_pb2.{}Message()\n'.format(self.protocol_specification.name, self.protocol_specification.name,
-                                                                  self.protocol_specification_in_camel_case)
-        cls_str += '        {}_pb.ParseFromString(obj)\n'.format(self.protocol_specification.name)
-        cls_str += '        message_id = {}_pb.message_id\n'.format(self.protocol_specification.name)
-        cls_str += '        dialogue_reference = (\n'
-        cls_str += '            {}_pb.dialogue_starter_reference,\n'.format(self.protocol_specification.name)
-        cls_str += '            {}_pb.dialogue_responder_reference,\n'.format(self.protocol_specification.name)
-        cls_str += '        )\n'
-        cls_str += '        target = {}_pb.target\n\n'.format(self.protocol_specification.name)
+        cls_str += "        {}_pb = {}_pb2.{}Message()\n".format(
+            self.protocol_specification.name,
+            self.protocol_specification.name,
+            self.protocol_specification_in_camel_case,
+        )
+        cls_str += "        {}_pb.ParseFromString(obj)\n".format(
+            self.protocol_specification.name
+        )
+        cls_str += "        message_id = {}_pb.message_id\n".format(
+            self.protocol_specification.name
+        )
+        cls_str += "        dialogue_reference = (\n"
+        cls_str += "            {}_pb.dialogue_starter_reference,\n".format(
+            self.protocol_specification.name
+        )
+        cls_str += "            {}_pb.dialogue_responder_reference,\n".format(
+            self.protocol_specification.name
+        )
+        cls_str += "        )\n"
+        cls_str += "        target = {}_pb.target\n\n".format(
+            self.protocol_specification.name
+        )
 
         cls_str += str.format(
-            "        return {}Message(\n",
-            self.protocol_specification_in_camel_case,
+            "        return {}Message(\n", self.protocol_specification_in_camel_case,
         )
         cls_str += "            message_id=message_id,\n"
         cls_str += "            dialogue_reference=dialogue_reference,\n"
@@ -755,14 +819,18 @@ class ProtocolGenerator:
         indents = ""
         cls_str = ""
         cls_str += indents + 'syntax = "proto3";\n'
-        cls_str += indents + 'package fetch.aea.{};\n'.format(self.protocol_specification_in_camel_case)
-        cls_str += indents + 'message {}Message{{\n\n'.format(self.protocol_specification_in_camel_case)
-        indents += '    '
-        cls_str += indents + 'int32 message_id = 1;\n'
-        cls_str += indents + 'string dialogue_starter_reference = 2;\n'
-        cls_str += indents + 'string dialogue_responder_reference = 3;\n'
-        cls_str += indents + 'int32 target = 4;\n'
-        cls_str += '}\n'
+        cls_str += indents + "package fetch.aea.{};\n".format(
+            self.protocol_specification_in_camel_case
+        )
+        cls_str += indents + "message {}Message{{\n\n".format(
+            self.protocol_specification_in_camel_case
+        )
+        indents += "    "
+        cls_str += indents + "int32 message_id = 1;\n"
+        cls_str += indents + "string dialogue_starter_reference = 2;\n"
+        cls_str += indents + "string dialogue_responder_reference = 3;\n"
+        cls_str += indents + "int32 target = 4;\n"
+        cls_str += "}\n"
         return cls_str
 
     def _generate_message_class(self) -> None:
@@ -783,7 +851,13 @@ class ProtocolGenerator:
 
         :return: None
         """
-        pathname = path.join(self.output_folder_path, "{}{}.proto".format(self.protocol_specification.name[:1], self.protocol_specification_in_camel_case[1:]))
+        pathname = path.join(
+            self.output_folder_path,
+            "{}{}.proto".format(
+                self.protocol_specification.name[:1],
+                self.protocol_specification_in_camel_case[1:],
+            ),
+        )
         protobuf_schema_file = self._protocol_buffer_schema_str()
 
         with open(pathname, "w") as pyfile:
@@ -856,6 +930,8 @@ class ProtocolGenerator:
         self._generate_protobuf_schema_file()
         self._generate_init_file()
         self._generate_protocol_yaml()
-        cmd = 'protoc --python_out=. protocols/{}/{}.proto'.format(self.protocol_specification.name, self.protocol_specification_in_camel_case)
+        cmd = "protoc --python_out=. protocols/{}/{}.proto".format(
+            self.protocol_specification.name, self.protocol_specification_in_camel_case
+        )
         print("executing command:\n{}".format(cmd))
         os.system(cmd)
