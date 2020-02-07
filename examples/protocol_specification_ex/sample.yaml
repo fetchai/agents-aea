@@ -15,6 +15,7 @@ speech_acts:
     proposal: pt:optional[pt:dict[ct:IOTApp7, pt:bytes]]
     rounds: pt:set[pt:int]
     items: pt:list[ct:Unit]
+    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[ct:DataModel], pt:dict[pt:bytes, pt:float]]]
   accept: {}
   decline: {}
   match_accept: {}
