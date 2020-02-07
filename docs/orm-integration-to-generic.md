@@ -208,7 +208,7 @@ At the end of the file modify the `collect_from_data_source` function :
         result_proxy = connection.execute(query)
         return {"data": result_proxy.fetchall()}
 ```
-Also create two new function one that will create the connection with the database and the other one will populate the database with some fake data:
+Also, create two new functions, one that will create a connection with the database, and another one will populate the database with some fake data:
 
 ```python
     def create_database_and_table(self):
