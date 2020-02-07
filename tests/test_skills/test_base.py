@@ -52,7 +52,7 @@ def test_agent_context_ledger_apis():
         wallet,
         ledger_apis,
         resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-        programmatic=False,
+        is_programmatic=False,
     )
 
     assert set(my_aea.context.ledger_apis.apis.keys()) == {"fetchai"}
@@ -80,7 +80,7 @@ class TestSkillContext:
             cls.wallet,
             cls.ledger_apis,
             resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-            programmatic=False,
+            is_programmatic=False,
         )
         cls.skill_context = SkillContext(cls.my_aea.context)
 
@@ -168,7 +168,7 @@ class TestSkillFromDir:
             cls.wallet,
             ledger_apis,
             resources=Resources(str(Path(CUR_PATH, "data", "dummy_aea"))),
-            programmatic=False,
+            is_programmatic=False,
         )
         cls.agent_context = cls.my_aea.context
 

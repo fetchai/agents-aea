@@ -87,4 +87,4 @@ def test_check_consistency_raises_exception_when_type_not_recognized():
     message = DefaultMessage(type=DefaultMessage.Type.BYTES, content=b"hello")
     # mock the __eq__ method such that any kind of matching is going to fail.
     with mock.patch.object(DefaultMessage.Type, "__eq__", return_value=False):
-        assert not message._check_consistency()
+        assert not message._is_consistent()

@@ -61,7 +61,7 @@ def test_ml_messge_consistency():
     query = Query([Constraint("dataset_id", ConstraintType("==", "fmnist"))], model=dm)
     msg = MLTradeMessage(performative=MLTradeMessage.Performative.CFT, query=query)
     with mock.patch.object(MLTradeMessage.Performative, "__eq__", return_value=False):
-        assert not msg._check_consistency()
+        assert not msg._is_consistent()
 
 
 def test_ml_message_creation():

@@ -112,7 +112,7 @@ def test_oef_message_consistency():
     )
 
     with mock.patch.object(OEFMessage.Type, "__eq__", return_value=False):
-        assert not msg._check_consistency()
+        assert not msg._is_consistent()
 
 
 def test_oef_message_oef_error():
