@@ -43,8 +43,8 @@ OUTPUT_FILE = "output.txt"
 
 
 class MyAgent(Agent):
-    def __init__(self, name: str, connections: List[Connection]):
-        super().__init__(name, connections)
+    def __init__(self, identity: Identity, connections: List[Connection]):
+        super().__init__(identity, connections)
 
     def setup(self):
         pass
@@ -159,8 +159,8 @@ OUTPUT_FILE = "output.txt"
 
 
 class MyAgent(Agent):
-    def __init__(self, name: str, connections: List[Connection]):
-        super().__init__(name, connections)
+    def __init__(self, identity: Identity, connections: List[Connection]):
+        super().__init__(identity, connections)
 
     def setup(self):
         pass

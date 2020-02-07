@@ -136,25 +136,34 @@ Here's an example:
 In `tasks.py`:
 ```python
 
-from aea.skills.behaviours import TickerBehaviour
-from myagent.skills.my_skill.tasks import LongTask
+from aea.skills.tasks import Task
 
 
-class MyBehaviour(TickerBehaviour):
+def nth_prime_number(n: int) -> int:
+    """A naive algorithm to find the n_th prime number."""
+    primes = [2]
+    num = 3
+    while len(primes) < n:
+        for p in primes:
+            if num % p == 0:
+                break
+        else:
+            primes.append(num)
+        num += 2
+    return primes[-1]
+
+
+class LongTask(Task):
 
     def setup(self):
-        my_task = LongTask()
-        self.task_id = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
-        self.async_result = self.context.task_manager.get_task_result(self.task_id)
+        """Set the task up before execution."""
+        pass
 
-    def act(self):
-        if self.async_result.ready() is False:
-            print("The task is not finished yet.")
-        else:
-            completed_task = self.async_result.get()  # type: LongTask
-            print("The result is:", completed_task.result)
+    def execute(self, n: int):
+        return nth_prime_number(n)
 
     def teardown(self):
+        """Clean the task up after execution."""
         pass
 
 
@@ -171,7 +180,8 @@ class MyBehaviour(TickerBehaviour):
 
     def setup(self):
         my_task = LongTask()
-        self.async_result = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
+        task_id = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
+        self.async_result = self.context.task_manager.get_task_result(task_id)  # type: multiprocessing.pool.AsyncResult
 
     def act(self):
         if self.async_result.ready() is False:
