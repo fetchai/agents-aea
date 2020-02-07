@@ -234,11 +234,9 @@ def test_run_unknown_private_key(pytestconfig):
     # read all lines at once
     whole_file = file.read()
 
-    find_text = "private_key_paths: []"
+    find_text = "private_key_paths: {}"
     replace_text = """private_key_paths:
-- private_key_path:
-    ledger: fetchai-not
-    path: fet_private_key.txt"""
+        fetchai-not: fet_private_key.txt"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -356,11 +354,9 @@ def test_run_fet_private_key_config(pytestconfig):
     # read all lines at once
     whole_file = file.read()
 
-    find_text = "private_key_paths: []"
+    find_text = "private_key_paths: {}"
     replace_text = """private_key_paths:
-- private_key_path:
-    ledger: fetchai
-    path: default_private_key_not.txt"""
+    fetchai: default_private_key_not.txt"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 
@@ -414,11 +410,9 @@ def test_run_ethereum_private_key_config(pytestconfig):
     # read all lines at once
     whole_file = file.read()
 
-    find_text = "private_key_paths: []"
+    find_text = "private_key_paths: {}"
     replace_text = """private_key_paths:
-- private_key_path:
-    ledger: ethereum
-    path: default_private_key_not.txt"""
+    ethereum: default_private_key_not.txt"""
 
     whole_file = whole_file.replace(find_text, replace_text)
 

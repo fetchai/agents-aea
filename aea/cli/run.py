@@ -43,7 +43,6 @@ from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
-    PrivateKeyPathConfig,
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader
@@ -89,50 +88,32 @@ def _verify_or_create_private_keys(ctx: Context) -> None:
         if identifier not in SUPPORTED_CRYPTOS:
             ValueError("Unsupported identifier in private key paths.")
 
-    fetchai_private_key_config = aea_conf.private_key_paths.read(FETCHAI)
-    if fetchai_private_key_config is None:
+    fetchai_private_key_path = aea_conf.private_key_paths.read(FETCHAI)
+    if fetchai_private_key_path is None:
         _create_fetchai_private_key()
-        fetchai_private_key_config = PrivateKeyPathConfig(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE
-        )
-        aea_conf.private_key_paths.create(
-            fetchai_private_key_config.ledger, fetchai_private_key_config
-        )
+        aea_conf.private_key_paths.update(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
     else:
-        fetchai_private_key_config = cast(
-            PrivateKeyPathConfig, fetchai_private_key_config
-        )
         try:
-            _try_validate_fet_private_key_path(fetchai_private_key_config.path)
+            _try_validate_fet_private_key_path(fetchai_private_key_path)
         except FileNotFoundError:
             logger.error(
                 "File {} for private key {} not found.".format(
-                    repr(fetchai_private_key_config.path),
-                    fetchai_private_key_config.ledger,
+                    repr(fetchai_private_key_path), FETCHAI,
                 )
             )
             sys.exit(1)
 
-    ethereum_private_key_config = aea_conf.private_key_paths.read(ETHEREUM)
-    if ethereum_private_key_config is None:
+    ethereum_private_key_path = aea_conf.private_key_paths.read(ETHEREUM)
+    if ethereum_private_key_path is None:
         _create_ethereum_private_key()
-        ethereum_private_key_config = PrivateKeyPathConfig(
-            ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE
-        )
-        aea_conf.private_key_paths.create(
-            ethereum_private_key_config.ledger, ethereum_private_key_config
-        )
+        aea_conf.private_key_paths.update(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
     else:
-        ethereum_private_key_config = cast(
-            PrivateKeyPathConfig, ethereum_private_key_config
-        )
         try:
-            _try_validate_ethereum_private_key_path(ethereum_private_key_config.path)
+            _try_validate_ethereum_private_key_path(ethereum_private_key_path)
         except FileNotFoundError:
             logger.error(
                 "File {} for private key {} not found.".format(
-                    repr(ethereum_private_key_config.path),
-                    ethereum_private_key_config.ledger,
+                    repr(ethereum_private_key_path), ETHEREUM,
                 )
             )
             sys.exit(1)
@@ -289,12 +270,10 @@ def run(
 
     _verify_or_create_private_keys(ctx)
     _verify_ledger_apis_access()
-    private_key_paths = dict(
-        [
-            (identifier, config.path)
-            for identifier, config in ctx.agent_config.private_key_paths.read_all()
-        ]
-    )
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     ledger_api_configs = dict(
         [
             (identifier, cast(Dict[str, Union[str, int]], config))

@@ -11,7 +11,7 @@ fingerprint: ''
 ledger_apis:
   fetchai:
     network: testnet
-license: Apache 2.0
+license: Apache-2.0
 logging_config:
   disable_existing_loggers: False
   version: 1

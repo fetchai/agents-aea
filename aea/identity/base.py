@@ -53,7 +53,7 @@ class Identity:
         self._default_address_key = default_address_key
         self._check_consistency(address, addresses, default_address_key)
 
-    def _check_consistency(self, address, addresses, default_address_key):
+    def _check_consistency(self, address, addresses, default_address_key) -> None:
         is_single = address is not None
         is_multiple = addresses is not None and len(addresses) > 1
         assert (

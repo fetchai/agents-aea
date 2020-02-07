@@ -1,7 +1,7 @@
 name: generic_seller
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The weather station skill implements the functionality to sell weather data."
 behaviours:

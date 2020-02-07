@@ -1,7 +1,7 @@
 name: oef
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 description: 'A protocol for interacting with an OEF service.'
 speech_acts:
   register_service:

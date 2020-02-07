@@ -2,22 +2,15 @@ aea_version: 0.1.1
 agent_name: myagent
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 connections:
 - fetchai/oef:0.1.0
 default_connection: fetchai/oef:0.1.0
 default_ledger: fetchai
 private_key_paths:
-- private_key_path:
-    ledger: default
-    path: 'private.pem'
-- private_key_path:
-    ledger: fetchai
-    path: 'fet_private_key.txt'
-- private_key_path:
-    ledger: ethereum
-    path: 'eth_private_key.txt'
+   fetchai: 'fet_private_key.txt'
+   ethereum: 'eth_private_key.txt'
 protocols:
 - fetchai/oef:0.1.0
 - fetchai/default:0.1.0
