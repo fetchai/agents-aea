@@ -72,7 +72,7 @@ class PushItemTestCase(TestCase):
                 "description": "some-description",
                 "version": "some-version",
             },
-            auth=True,
+            is_auth=True,
             filepath="cwd/some-name.tar.gz",
         )
 
