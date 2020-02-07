@@ -17,6 +17,22 @@ pipeline {
 
             parallel {
 
+                stage('Security Check: Main') {
+
+                    steps {
+                        sh 'tox -e bandit-main'
+                    }
+
+                } // bandit security check main
+
+                stage('Security Check: Tests') {
+
+                    steps {
+                        sh 'tox -e bandit-tests'
+                    }
+
+                } // bandit security check tests
+
                 stage('Black Reformatting') {
 
                     steps {

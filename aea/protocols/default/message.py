@@ -58,7 +58,7 @@ class DefaultMessage(Message):
         :param type: the type.
         """
         super().__init__(type=type, **kwargs)
-        assert self._check_consistency(), "DefaultMessage initialization inconsistent."
+        assert self._is_consistent(), "DefaultMessage initialization inconsistent."
 
     @property
     def type(self) -> Type:  # noqa: F821
@@ -90,7 +90,7 @@ class DefaultMessage(Message):
         assert self.is_set("error_data"), "error_data is not set."
         return cast(Dict[str, Any], self.get("error_data"))
 
-    def _check_consistency(self) -> bool:
+    def _is_consistent(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.type, DefaultMessage.Type)

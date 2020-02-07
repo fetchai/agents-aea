@@ -274,7 +274,7 @@ class CliRunner(object):
                 if value is None:
                     try:
                         del os.environ[key]
-                    except Exception:
+                    except Exception:  # nosec
                         pass
                 else:
                     os.environ[key] = value
@@ -284,7 +284,7 @@ class CliRunner(object):
                 if value is None:
                     try:
                         del os.environ[key]
-                    except Exception:
+                    except Exception:  # nosec
                         pass
                 else:
                     os.environ[key] = value

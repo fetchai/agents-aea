@@ -90,7 +90,7 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     }
     path = "/{}/create".format(item_type_plural)
     logger.debug("Pushing {} {} to Registry ...".format(item_id.name, item_type))
-    resp = request_api("POST", path, data=data, auth=True, filepath=output_filepath)
+    resp = request_api("POST", path, data=data, is_auth=True, filepath=output_filepath)
     click.echo(
         "Successfully pushed {} {} to the Registry. Public ID: {}".format(
             item_type, item_id.name, resp["public_id"]

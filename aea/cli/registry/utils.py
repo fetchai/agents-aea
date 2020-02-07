@@ -35,7 +35,7 @@ from aea.configurations.base import PublicId
 
 
 def request_api(
-    method: str, path: str, params=None, data=None, auth=False, filepath=None
+    method: str, path: str, params=None, data=None, is_auth=False, filepath=None
 ) -> Dict:
     """
     Request Registry API.
@@ -44,13 +44,13 @@ def request_api(
     :param path: str URL path.
     :param params: dict GET params.
     :param data: dict POST data.
-    :param auth: bool is auth requied (default False).
+    :param is_auth: bool is auth requied (default False).
     :param filepath: str path to file to upload (default None).
 
     :return: dict response from Registry API
     """
     headers = {}
-    if auth:
+    if is_auth:
         try:
             token = read_cli_config()[AUTH_TOKEN_KEY]
         except AEAConfigException:
@@ -292,7 +292,7 @@ def check_is_author_logged_in(author_name: str) -> None:
     :raise ClickException: if username and author's name are not equal.
     :return: None.
     """
-    resp = request_api("GET", "/rest-auth/user/", auth=True)
+    resp = request_api("GET", "/rest-auth/user/", is_auth=True)
     if not author_name == resp["username"]:
         raise click.ClickException(
             "Author username is not equal to current logged in username "

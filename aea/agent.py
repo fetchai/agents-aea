@@ -64,8 +64,8 @@ class Agent(ABC):
         connections: List[Connection],
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 1.0,
-        debug: bool = False,
-        programmatic: bool = True,
+        is_debug: bool = False,
+        is_programmatic: bool = True,
     ) -> None:
         """
         Instantiate the agent.
@@ -74,8 +74,8 @@ class Agent(ABC):
         :param connections: the list of connections of the agent.
         :param loop: the event loop to run the connections.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param debug: if True, run the agent in debug mode.
-        :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
+        :param is_debug: if True, run the agent in debug mode.
+        :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
 
         :return: None
         """
@@ -90,8 +90,8 @@ class Agent(ABC):
 
         self._tick = 0
 
-        self.debug = debug
-        self.programmatic = programmatic
+        self.is_debug = is_debug
+        self.is_programmatic = is_programmatic
 
     @property
     def identity(self) -> Identity:
@@ -164,7 +164,7 @@ class Agent(ABC):
 
         :return: None
         """
-        if not self.debug and not self.multiplexer.connection_status.is_connected:
+        if not self.is_debug and not self.multiplexer.connection_status.is_connected:
             self.multiplexer.connect()
 
         logger.debug("[{}]: Calling setup method...".format(self.name))

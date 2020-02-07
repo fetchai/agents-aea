@@ -72,6 +72,11 @@ The following steps are only relevant if you intend to contribute to the reposit
 
 	  tox -e black
 
+- To run bandit security checks:
+
+	  tox -e bandit-main
+	  tox -e bandit-tests
+
 - Docs:
 
 	* `mkdocs serve` - Start the live-reloading docs server on localhost.

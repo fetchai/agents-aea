@@ -135,7 +135,7 @@ class TestResources:
 
         # create temp agent folder
         cls.oldcwd = os.getcwd()
-        cls.agent_name = "agent_test" + str(random.randint(0, 1000))
+        cls.agent_name = "agent_test" + str(random.randint(0, 1000))  # nosec
         cls.t = tempfile.mkdtemp()
         cls.agent_folder = os.path.join(cls.t, cls.agent_name)
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)
@@ -337,7 +337,7 @@ class TestFilter:
         """Set the tests up."""
         # create temp agent folder
         cls.oldcwd = os.getcwd()
-        cls.agent_name = "agent_test" + str(random.randint(0, 1000))
+        cls.agent_name = "agent_test" + str(random.randint(0, 1000))  # nosec
         cls.t = tempfile.mkdtemp()
         cls.agent_folder = os.path.join(cls.t, cls.agent_name)
         shutil.copytree(os.path.join(CUR_PATH, "data", "dummy_aea"), cls.agent_folder)

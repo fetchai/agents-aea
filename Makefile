@@ -19,6 +19,7 @@ clean-pyc:
 clean-test:
 	rm -fr .tox/
 	rm -f .coverage
+	rm -fr .coverage*
 	rm -fr htmlcov/
 	rm -fr .hypothesis
 	rm -fr .pytest_cache

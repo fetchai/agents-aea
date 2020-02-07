@@ -209,7 +209,7 @@ class Strategy(Model):
         if not proposals:
             return None
         else:
-            return random.choice(proposals)
+            return random.choice(proposals)  # nosec
 
     def get_proposal_for_query(
         self, query: Query, is_seller: bool
@@ -330,9 +330,7 @@ class Strategy(Model):
         ownership_state_after_locks = transactions.ownership_state_after_locks(
             is_seller
         )
-        if not ownership_state_after_locks.check_transaction_is_affordable(
-            transaction_msg
-        ):
+        if not ownership_state_after_locks.is_affordable_transaction(transaction_msg):
             return False
         proposal_delta_score = self.context.agent_preferences.get_score_diff_from_transaction(
             ownership_state_after_locks, transaction_msg
