@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fetch.aea.TwoPartyNegotiation;
+message TwoPartyNegotiationMessage{
+
+    int32 message_id = 1;
+    string dialogue_starter_reference = 2;
+    string dialogue_responder_reference = 3;
+    int32 target = 4;
+}
