@@ -231,7 +231,8 @@ def run():
 
     # Add the error skill (from the local packages dir) and the echo skill (which is part of the AEA distribution)
     echo_skill = Skill.from_dir(
-        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), my_aea.context,
+        os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "echo"), 
+        my_aea.context,
     )
     resources.add_skill(echo_skill)
     error_skill = Skill.from_dir(
