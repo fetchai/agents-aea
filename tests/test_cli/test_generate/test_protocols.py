@@ -19,7 +19,6 @@
 
 """This test module contains the tests for the `aea generate protocol` sub-command."""
 
-import filecmp
 import json
 import os
 import shutil
