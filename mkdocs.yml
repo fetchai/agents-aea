@@ -33,7 +33,7 @@ nav:
       - Trust issues: 'trust.md'
       # - "Two-layered machine learning": 'two-layer.md'
     - Demo guides:
-      - "Car park agent": 'car-park-skills.md'
+      - "Car park skills": 'car-park-skills.md'
       - "Gym example": 'gym-example.md'
       - "Gym skill": 'gym-skill.md'
       - "ML skills": 'ml-skills.md'
@@ -41,9 +41,10 @@ nav:
       - "TAC external app": 'tac.md'
       - "Weather skills": 'weather-skills.md'
       - "Thermometer skills": 'thermometer-skills.md'
-      - "Thermometer skills step by step": 'thermometer-skills-step-by-step.md'
     - Use cases:
         - "Generic skills": 'generic-skills.md'
+    - Step by step guydes:
+        - "Thermometer skills step by step": 'thermometer-skills-step-by-step.md'
     - Architecture:
       - "Design principles": 'design-principles.md'
       - "Architectural diagram": 'diagram.md'

@@ -3,7 +3,7 @@
 | Command                                     | Description                                                                  |
 | ------------------------------------------- | ---------------------------------------------------------------------------- |
 | `add connection/protocol/skill [public_id]` | Add connection, protocol, or skill, with `[public_id]`, to the AEA. `add --registry` to add from remote registry. |
-| `add-key default/fetchai/ethereum file`     | Add a private key from a file.	                                             |
+| `add-key fetchai/ethereum file`             | Add a private key from a file.	                                             |
 | `create NAME`                               | Create a new aea project called `[name]`.                                    |
 | `config get [path]`                         | Reads the config specified in `[path]` and prints its target.                |
 | `config set [path] [--type TYPE]`           | Sets a new value for the target of the `[path]`. Optionally cast to type.    |
@@ -11,7 +11,7 @@
 | `fetch PUBLIC_ID`                           | Fetch an aea project with `[public_id]`. `fetch --registry` to fetch from remote registry. |
 | `freeze`                                    | Get all the dependencies needed for the aea project and its components.      |
 | `gui`                                       | Run the GUI.                                                                 |
-| `generate-key default/fetchai/ethereum/all` | Generate private keys.                                                       |
+| `generate-key fetchai/ethereum/all`         | Generate private keys.                                                       |
 | `generate-wealth fetchai/ethereum`          | Generate wealth for address on test network.                                 |
 | `get-address fetchai/ethereum`              | Get the address associated with the private key.                             |
 | `get-wealth fetchai/ethereum`               | Get the wealth associated with the private key.                              |

@@ -20,4 +20,5 @@ The following figure illustrates the framework's architecture:
 
 <br />
 
-In most cases, as a developer in the AEA framework, it is sufficient to focus on skills development, utilising existing protocols and connections.
+In most cases, as a developer in the AEA framework, it is sufficient to focus on skills development, utilising existing protocols and connections. 
+The later doesn't try to discourage you though, from creating your own `connections` or `protocols` but you will need a better understanding of the framework than creating a skill.
