@@ -202,11 +202,11 @@ Then modify your strategy's \_\_init__ function to match the following code:
 
 At the end of the file modify the `collect_from_data_source` function : 
 ```python
- def collect_from_data_source(self):
+    def collect_from_data_source(self) -> Dict[str, Any]:
         connection = self._db_engine.connect()
         query = db.select([self._tbl])
         result_proxy = connection.execute(query)
-        return result_proxy.fetchall()
+        return {"data": result_proxy.fetchall()}
 ```
 Also create two new function one that will create the connection with the database and the other one will populate the database with some fake data:
 
