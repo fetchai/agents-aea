@@ -199,7 +199,7 @@ The `tac_negotiation` skill `skill.yaml` configuration file looks like this.
 name: tac_negotiation
 authors: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 description: "The tac negotiation skill implements the logic for an AEA to do fipa negotiation in the TAC."
 behaviours:
   behaviour:

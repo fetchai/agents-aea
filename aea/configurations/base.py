@@ -280,27 +280,6 @@ class PackageConfiguration(Configuration, ABC):
         return PublicId(self.author, self.name, self.version)
 
 
-class PrivateKeyPathConfig(Configuration):
-    """Handle a private key path configuration."""
-
-    def __init__(self, ledger: str = "", path: str = ""):
-        """Initialize a handler configuration."""
-        self.ledger = ledger
-        self.path = path
-
-    @property
-    def json(self) -> Dict:
-        """Return the JSON representation."""
-        return {"ledger": self.ledger, "path": self.path}
-
-    @classmethod
-    def from_json(cls, obj: Dict):
-        """Initialize from a JSON object."""
-        ledger = cast(str, obj.get("ledger"))
-        path = cast(str, obj.get("path"))
-        return PrivateKeyPathConfig(ledger=ledger, path=path)
-
-
 class ConnectionConfig(PackageConfiguration):
     """Handle connection configuration."""
 
@@ -578,7 +557,6 @@ class AgentConfig(PackageConfiguration):
         fingerprint: str = "",
         registry_path: str = "",
         description: str = "",
-        private_key_paths: Dict[str, str] = None,
         logging_config: Optional[Dict] = None,
     ):
         """Instantiate the agent configuration object."""
@@ -589,12 +567,8 @@ class AgentConfig(PackageConfiguration):
         self.fingerprint = fingerprint
         self.registry_path = registry_path
         self.description = description
-        self.private_key_paths = CRUDCollection[PrivateKeyPathConfig]()
+        self.private_key_paths = CRUDCollection[str]()
         self.ledger_apis = CRUDCollection[Dict]()
-
-        private_key_paths = private_key_paths if private_key_paths is not None else {}
-        for ledger, path in private_key_paths.items():
-            self.private_key_paths.create(ledger, PrivateKeyPathConfig(ledger, path))
 
         self.logging_config = logging_config if logging_config is not None else {}
         self._default_ledger = None  # type: Optional[str]
@@ -656,10 +630,9 @@ class AgentConfig(PackageConfiguration):
             "fingerprint": self.fingerprint,
             "registry_path": self.registry_path,
             "description": self.description,
-            "private_key_paths": [
-                {"private_key_path": p.json}
-                for l, p in self.private_key_paths.read_all()
-            ],
+            "private_key_paths": {
+                key: path for key, path in self.private_key_paths.read_all()
+            },
             "ledger_apis": {key: config for key, config in self.ledger_apis.read_all()},
             "logging_config": self.logging_config,
             "default_ledger": self.default_ledger,
@@ -672,11 +645,6 @@ class AgentConfig(PackageConfiguration):
     @classmethod
     def from_json(cls, obj: Dict):
         """Initialize from a JSON object."""
-        private_key_paths = {}
-        for p in obj.get("private_key_paths", []):  # type: ignore
-            private_key_path = PrivateKeyPathConfig.from_json(p["private_key_path"])
-            private_key_paths[private_key_path.ledger] = private_key_path.path
-
         agent_config = AgentConfig(
             agent_name=cast(str, obj.get("agent_name")),
             aea_version=cast(str, obj.get("aea_version")),
@@ -686,8 +654,10 @@ class AgentConfig(PackageConfiguration):
             registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             logging_config=cast(Dict, obj.get("logging_config", {})),
-            private_key_paths=cast(Dict, private_key_paths),
         )
+
+        for crypto_id, path in obj.get("private_key_paths", {}).items():  # type: ignore
+            agent_config.private_key_paths.create(crypto_id, path)
 
         for ledger_id, ledger_data in obj.get("ledger_apis", {}).items():  # type: ignore
             agent_config.ledger_apis.create(ledger_id, ledger_data)

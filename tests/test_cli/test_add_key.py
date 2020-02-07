@@ -74,10 +74,8 @@ class TestAddKey:
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
         expected_json = yaml.safe_load(f)
         config = AgentConfig.from_json(expected_json)
-        private_key_configuration = config.private_key_paths.read(FETCHAI)
-        assert private_key_configuration is not None
-        assert private_key_configuration.ledger == FETCHAI
-        assert private_key_configuration.path == FETCHAI_PRIVATE_KEY_FILE
+        private_key_path = config.private_key_paths.read(FETCHAI)
+        assert private_key_path == FETCHAI_PRIVATE_KEY_FILE
 
         assert len(config.private_key_paths.read_all()) == 1
 
@@ -98,10 +96,8 @@ class TestAddKey:
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
         expected_json = yaml.safe_load(f)
         config = AgentConfig.from_json(expected_json)
-        private_key_configuration = config.private_key_paths.read(ETHEREUM)
-        assert private_key_configuration is not None
-        assert private_key_configuration.ledger == ETHEREUM
-        assert private_key_configuration.path == ETHEREUM_PRIVATE_KEY_FILE
+        private_key_path = config.private_key_paths.read(ETHEREUM)
+        assert private_key_path == ETHEREUM_PRIVATE_KEY_FILE
 
         assert len(config.private_key_paths.read_all()) == 2
 

@@ -1,7 +1,7 @@
 name: p2p
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The p2p connection provides a connection with the fetch.ai mail provider."
 class_name: PeerToPeerConnection

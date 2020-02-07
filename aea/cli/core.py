@@ -46,7 +46,7 @@ from aea.cli.remove import remove
 from aea.cli.run import _verify_ledger_apis_access, _verify_or_create_private_keys, run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PrivateKeyPathConfig
+from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
@@ -178,9 +178,7 @@ def add_key(ctx: Context, type_, file):
     try_to_load_agent_config(ctx)
     _validate_private_key_path(file, type_)
     try:
-        ctx.agent_config.private_key_paths.create(
-            type_, PrivateKeyPathConfig(type_, file)
-        )
+        ctx.agent_config.private_key_paths.create(type_, file)
     except ValueError as e:  # pragma: no cover
         logger.error(str(e))  # pragma: no cover
     ctx.agent_loader.dump(
@@ -201,12 +199,10 @@ def get_address(ctx: Context, type_):
     try_to_load_agent_config(ctx)
 
     _verify_or_create_private_keys(ctx)
-    private_key_paths = dict(
-        [
-            (identifier, config.path)
-            for identifier, config in ctx.agent_config.private_key_paths.read_all()
-        ]
-    )
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     try:
         wallet = Wallet(private_key_paths)
         address = wallet.addresses[type_]
@@ -246,12 +242,10 @@ def get_wealth(ctx: Context, type_):
     try_to_load_agent_config(ctx)
 
     _verify_or_create_private_keys(ctx)
-    private_key_paths = dict(
-        [
-            (identifier, config.path)
-            for identifier, config in ctx.agent_config.private_key_paths.read_all()
-        ]
-    )
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     wallet = Wallet(private_key_paths)
     balance = _try_get_balance(ctx.agent_config, wallet, type_)
     click.echo(balance)
@@ -283,12 +277,10 @@ def generate_wealth(ctx: Context, sync, type_):
     try_to_load_agent_config(ctx)
 
     _verify_or_create_private_keys(ctx)
-    private_key_paths = dict(
-        [
-            (identifier, config.path)
-            for identifier, config in ctx.agent_config.private_key_paths.read_all()
-        ]
-    )
+    private_key_paths = {
+        config_pair[0]: config_pair[1]
+        for config_pair in ctx.agent_config.private_key_paths.read_all()
+    }
     wallet = Wallet(private_key_paths)
     try:
         address = wallet.addresses[type_]

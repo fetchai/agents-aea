@@ -27,7 +27,7 @@ license: ''
 logging_config:
   disable_existing_loggers: false
   version: 1
-private_key_paths: []
+private_key_paths: {}
 protocols:
 - fetchai/default:0.1.0
 registry_path: ../packages

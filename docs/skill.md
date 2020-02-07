@@ -213,7 +213,7 @@ It also details the protocol types used in the skill and points to shared module
 name: echo
 authors: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 behaviours:
   echo:
     class_name: EchoBehaviour

@@ -33,7 +33,7 @@ The following is an example protocol specification:
 name: two_party_negotiation
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:

@@ -1,7 +1,7 @@
 name: error
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The error skill implements basic error handling required by all AEAs."
 behaviours: {}

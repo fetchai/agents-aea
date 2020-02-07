@@ -863,7 +863,7 @@ Firstly, we will update the skill.yaml. Make sure that your skill.yaml matches w
 name: thermometer
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The thermometer skill implements the functionality to sell data."
 behaviours:
@@ -917,7 +917,7 @@ license: Apache-2.0
 logging_config:
  disable_existing_loggers: false
  version: 1
-private_key_paths: []
+private_key_paths: {}
 protocols:
 - fetchai/default:0.1.0
 registry_path: ../packages
@@ -1713,7 +1713,7 @@ Firstly, we will update the skill.yaml. Make sure that your skill.yaml matches w
 name: thermometer_client
 author: fetchai
 version: 0.1.0
-license: Apache 2.0
+license: Apache-2.0
 fingerprint: ""
 description: "The thermometer client skill implements the skill to purchase temperature data."
 behaviours:
@@ -1769,7 +1769,7 @@ license: Apache-2.0
 logging_config:
  disable_existing_loggers: false
  version: 1
-private_key_paths: []
+private_key_paths: {}
 protocols:
 - fetchai/default:0.1.0
 registry_path: ../packages
