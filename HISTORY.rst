@@ -193,6 +193,7 @@ Release History
 - Adds documentation for the protocol generator
 - Fixes several compatibility issues between CLI and registry
 - Adds skills to connect a thermometer to an AEA
+- Adds generic buyer and seller skills
 - Adds much more documentation on AEA vs MVC frameworks, core components, new guides and more
 - Removes the wallet from the agent constructor and moves it to the AEA constructor
 - Allows behaviours to be initialized from a skill
@@ -202,4 +203,5 @@ Release History
 - Adds bandit to CLI for security checks
 - Makes private key paths in configs a dictionary so values can be set from CLI
 - Introduces Identity object
+- Increases test coverage
 - Multiple additional minor fixes and changes
