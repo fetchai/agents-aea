@@ -68,7 +68,7 @@ class TestSkillError:
             cls.ledger_apis,
             timeout=2.0,
             resources=Resources(str(Path(CUR_PATH, "data/dummy_aea"))),
-            programmatic=False,
+            is_programmatic=False,
         )
         cls.t = Thread(target=cls.my_aea.start)
         cls.t.start()

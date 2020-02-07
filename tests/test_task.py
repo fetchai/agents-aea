@@ -110,7 +110,7 @@ class TestTaskManager:
         # the original instance is different than the one returned by the task manager.
         with pytest.raises(ValueError):
             result = my_task.result  # noqa
-        assert not my_task.executed
+        assert not my_task.is_executed
         assert not my_task.setup_called
         assert not my_task.execute_called
         assert not my_task.teardown_called
