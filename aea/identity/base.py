@@ -23,6 +23,8 @@ from typing import Dict, Optional
 
 from aea.mail.base import Address
 
+DEFAULT_ADDRESS_KEY = "fetchai"
+
 
 class Identity:
     """
@@ -38,7 +40,7 @@ class Identity:
         name: str,
         address: Optional[str] = None,
         addresses: Optional[Dict[str, Address]] = None,
-        default_address_key: Optional[str] = None,
+        default_address_key: str = DEFAULT_ADDRESS_KEY,
     ):
         """
         Instantiate the identity.
@@ -48,22 +50,20 @@ class Identity:
         :param default_address_key: the key for the default address
         """
         self._name = name
+        assert default_address_key is not None, "Provide a key for the default address."
+        assert (address is None) != (
+            addresses is None
+        ), "Either provide a single address or a dictionary of addresses, not both."
+        if address is None:
+            assert (addresses is not None) and len(
+                addresses
+            ) > 0, "Provide at least one pair of addresses."
+            address = addresses[default_address_key]
         self._address = address
+        if addresses is None:
+            addresses = {default_address_key: address}
         self._addresses = addresses
         self._default_address_key = default_address_key
-        self._check_consistency(address, addresses, default_address_key)
-
-    def _check_consistency(self, address, addresses, default_address_key) -> None:
-        is_single = address is not None
-        is_multiple = addresses is not None and len(addresses) > 1
-        assert (
-            is_single != is_multiple
-        ), "Either provide a single address or a dictionary of multiple addresses, not both."
-        if is_multiple:
-            assert default_address_key is not None, "No key set for default address."
-            assert (
-                default_address_key in addresses.keys()
-            ), "Addresses does not contain default address key."
 
     @property
     def name(self) -> str:
@@ -73,16 +73,9 @@ class Identity:
     @property
     def addresses(self) -> Dict[str, Address]:
         """Get the addresses."""
-        assert self._addresses is not None, "No addresses assigned."
         return self._addresses
 
     @property
     def address(self) -> Address:
         """Get the default address."""
-        if self._address is not None:
-            return self._address
-        else:
-            assert (
-                self._default_address_key is not None
-            ), "No key set for default address."
-            return self.addresses[self._default_address_key]
+        return self._address
