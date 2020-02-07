@@ -165,7 +165,7 @@ Import the newly installed library to your strategy.
 import sqlalchemy as db
 ```
 Then modify your strategy's \_\_init__ function to match the following code:
-```
+```python
   def __init__(self, **kwargs) -> None:
         """
         Initialize the strategy of the agent.
