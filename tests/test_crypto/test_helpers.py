@@ -26,7 +26,6 @@ from unittest.mock import mock_open, patch
 import pytest
 
 import requests
-from requests import Response
 
 
 from aea.crypto.ethereum import ETHEREUM
