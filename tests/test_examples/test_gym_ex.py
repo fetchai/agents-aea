@@ -42,13 +42,13 @@ def test_gym_ex(pytestconfig):
             sys.executable,
             str(Path(CUR_PATH, "..", "examples/gym_ex/train.py").resolve()),
             "--nb-steps",
-            "100",
+            "50",
         ],
         stdout=subprocess.PIPE,
         env=os.environ.copy(),
     )
 
-    time.sleep(3.0)
+    time.sleep(5.0)
     process.send_signal(signal.SIGINT)
     process.wait(timeout=10)
 
