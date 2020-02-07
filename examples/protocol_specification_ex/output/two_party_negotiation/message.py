@@ -102,10 +102,17 @@ class TwoPartyNegotiationMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def conditions(self) -> Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]]:
+    def conditions(
+        self,
+    ) -> Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]]:
         """Get the conditions from the message."""
         assert self.is_set("conditions"), "conditions is not set"
-        return cast(Optional[Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]], self.get("conditions"))
+        return cast(
+            Optional[
+                Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]
+            ],
+            self.get("conditions"),
+        )
 
     @property
     def description(self) -> str:
@@ -208,12 +215,23 @@ class TwoPartyNegotiationMessage(Message):
                     type(element) == Unit for element in self.items
                 ), "Elements of items are not 'Unit'."
                 if self.is_set("conditions"):
-                    assert type(self.conditions) == Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]], "conditions is not 'Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]'."
+                    assert (
+                        type(self.conditions)
+                        == Union[
+                            str,
+                            Dict[str, int],
+                            FrozenSet[DataModel],
+                            Dict[bytes, float],
+                        ]
+                    ), "conditions is not 'Union[str, Dict[str, int], FrozenSet[DataModel], Dict[bytes, float]]'."
             elif self.performative == TwoPartyNegotiationMessage.Performative.ACCEPT:
                 expected_nb_of_contents = 0
             elif self.performative == TwoPartyNegotiationMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
-            elif self.performative == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT:
+            elif (
+                self.performative
+                == TwoPartyNegotiationMessage.Performative.MATCH_ACCEPT
+            ):
                 expected_nb_of_contents = 0
 
             # # Check correct content count

@@ -5,9 +5,7 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.protocols.base import Serializer
 
-from packages.fetchai.protocols.two_party_negotiation import (
-    two_party_negotiation_pb2,
-)
+from packages.fetchai.protocols.two_party_negotiation import two_party_negotiation_pb2
 from packages.fetchai.protocols.two_party_negotiation.message import (
     TwoPartyNegotiationMessage,
 )
@@ -19,7 +17,9 @@ class TwoPartyNegotiationSerializer(Serializer):
     def encode(self, msg: Message) -> bytes:
         """Encode a 'TwoPartyNegotiation' message into bytes."""
         msg = cast(TwoPartyNegotiationMessage, msg)
-        two_party_negotiation_msg = two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        two_party_negotiation_msg = (
+            two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        )
         two_party_negotiation_msg.message_id = msg.message_id
         dialogue_reference = msg.dialogue_reference
         two_party_negotiation_msg.dialogue_starter_reference = dialogue_reference[0]
@@ -31,7 +31,9 @@ class TwoPartyNegotiationSerializer(Serializer):
 
     def decode(self, obj: bytes) -> Message:
         """Decode bytes into a 'TwoPartyNegotiation' message."""
-        two_party_negotiation_pb = two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        two_party_negotiation_pb = (
+            two_party_negotiation_pb2.TwoPartyNegotiationMessage()
+        )
         two_party_negotiation_pb.ParseFromString(obj)
         message_id = two_party_negotiation_pb.message_id
         dialogue_reference = (
@@ -41,7 +43,5 @@ class TwoPartyNegotiationSerializer(Serializer):
         target = two_party_negotiation_pb.target
 
         return TwoPartyNegotiationMessage(
-            message_id=message_id,
-            dialogue_reference=dialogue_reference,
-            target=target,
+            message_id=message_id, dialogue_reference=dialogue_reference, target=target,
         )
