@@ -47,8 +47,10 @@ logger = logging.getLogger(__name__)
 
 
 class ResponseMock:
-    status_code = 200
     text = "some text"
+
+    def __init__(self, status_code=200):
+        self.status_code = status_code
 
 
 class TestHelperFile:
@@ -76,8 +78,7 @@ class TestHelperFile:
     def tests_generate_wealth_fetchai(self, mock_logging):
         """Test generate wealth for fetchai."""
         address = "my_address"
-        result = Response()
-        result.status_code = 500
+        result = ResponseMock(status_code=500)
         with patch.object(requests, "post", return_value=result):
             _try_generate_testnet_wealth(identifier=FETCHAI, address=address)
             assert mock_logging.error.called
@@ -91,8 +92,7 @@ class TestHelperFile:
     def tests_generate_wealth_ethereum(self, mock_logging):
         """Test generate wealth for ethereum."""
         address = "my_address"
-        result = Response()
-        result.status_code = 500
+        result = ResponseMock(status_code=500)
         with patch.object(requests, "get", return_value=result):
             _try_generate_testnet_wealth(identifier=ETHEREUM, address=address)
             assert mock_logging.error.called
