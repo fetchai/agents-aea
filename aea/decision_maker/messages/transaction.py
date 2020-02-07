@@ -92,9 +92,7 @@ class TransactionMessage(InternalMessage):
             info=info,
             **kwargs
         )
-        assert (
-            self.check_consistency()
-        ), "Transaction message initialization inconsistent."
+        assert self._is_consistent(), "Transaction message initialization inconsistent."
 
     @property
     def performative(self) -> Performative:  # noqa: F821
@@ -215,7 +213,7 @@ class TransactionMessage(InternalMessage):
         """Get the tx fees."""
         return self.tx_sender_fee + self.tx_counterparty_fee
 
-    def check_consistency(self) -> bool:
+    def _is_consistent(self) -> bool:
         """
         Check that the data is consistent.
 

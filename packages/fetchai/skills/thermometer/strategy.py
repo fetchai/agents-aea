@@ -140,7 +140,7 @@ class Strategy(Model):
                 else:
                     logger.debug("Couldn't read the sensor I am re-trying.")
         else:
-            degrees = {"thermometer_data": randrange(10, 25)}
+            degrees = {"thermometer_data": randrange(10, 25)}  # nosec
             logger.info(degrees)
 
         return degrees

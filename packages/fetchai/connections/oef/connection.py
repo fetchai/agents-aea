@@ -348,8 +348,12 @@ class OEFChannel(OEFAgent):
         )
         try:
             query = pickle.loads(query)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(
+                "When trying to unpickle the query the following exception occured: {}".format(
+                    e
+                )
+            )
         msg = FIPAMessage(
             message_id=msg_id,
             dialogue_reference=(str(dialogue_id), ""),

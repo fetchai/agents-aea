@@ -51,8 +51,8 @@ class AEA(Agent):
         resources: Resources,
         loop: Optional[AbstractEventLoop] = None,
         timeout: float = 0.0,
-        debug: bool = False,
-        programmatic: bool = True,
+        is_debug: bool = False,
+        is_programmatic: bool = True,
         max_reactions: int = 20,
     ) -> None:
         """
@@ -65,8 +65,8 @@ class AEA(Agent):
         :param ledger_apis: the ledger apis of the agent.
         :param resources: the resources of the agent.
         :param timeout: the time in (fractions of) seconds to time out an agent between act and react
-        :param debug: if True, run the agent in debug mode.
-        :param programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
+        :param is_debug: if True, run the agent in debug mode.
+        :param is_programmatic: if True, run the agent in programmatic mode (skips loading of resources from directory).
         :param max_reactions: the processing rate of messages per iteration.
 
         :return: None
@@ -76,8 +76,8 @@ class AEA(Agent):
             connections=connections,
             loop=loop,
             timeout=timeout,
-            debug=debug,
-            programmatic=programmatic,
+            is_debug=is_debug,
+            is_programmatic=is_programmatic,
         )
 
         self.max_reactions = max_reactions
@@ -135,7 +135,7 @@ class AEA(Agent):
 
         :return: None
         """
-        if not self.programmatic:
+        if not self.is_programmatic:
             self.resources.load(self.context)
         self.task_manager.start()
         self.decision_maker.start()

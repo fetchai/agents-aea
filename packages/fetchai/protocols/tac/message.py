@@ -85,7 +85,7 @@ class TACMessage(Message):
         :param tac_type: the type of TAC message.
         """
         super().__init__(type=type, **kwargs)
-        assert self._check_consistency(), "TACMessage initialization inconsistent."
+        assert self._is_consistent(), "TACMessage initialization inconsistent."
 
     @property
     def type(self) -> Type:  # noqa: F821
@@ -213,7 +213,7 @@ class TACMessage(Message):
         ), "Tx_counterparty_fee is not set."
         return cast(bytes, self.get("tx_counterparty_signature"))
 
-    def _check_consistency(self) -> bool:
+    def _is_consistent(self) -> bool:
         """Check that the data is consistent."""
         try:
             assert isinstance(self.type, TACMessage.Type), "Type is not valid type."

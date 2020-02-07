@@ -32,7 +32,7 @@ class Task:
 
     def __init__(self, **kwargs):
         """Initialize a task."""
-        self._executed = False
+        self._is_executed = False
         # this is where we store the result.
         self._result = None
 
@@ -45,7 +45,7 @@ class Task:
         :return the task instance
         :raises ValueError: if the task has already been executed.
         """
-        if self._executed:
+        if self._is_executed:
             raise ValueError("Task already executed.")
 
         self.setup()
@@ -59,13 +59,13 @@ class Task:
                 )
             )
         finally:
-            self._executed = True
+            self._is_executed = True
             self.teardown()
 
     @property
-    def executed(self) -> bool:
+    def is_executed(self) -> bool:
         """Check if the task has already been executed."""
-        return self._executed
+        return self._is_executed
 
     @property
     def result(self) -> Any:
@@ -75,7 +75,7 @@ class Task:
         :return the result from the execute method.
         :raises ValueError: if the task has not been executed yet.
         """
-        if not self._executed:
+        if not self._is_executed:
             raise ValueError("Task not executed yet.")
         return self._result
 

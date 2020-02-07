@@ -26,7 +26,7 @@ from unittest import mock
 
 from eth_account.datastructures import AttributeDict
 
-from fetchai.ledger.api.tx import TxStatus
+from fetchai.ledger.api.tx import TxContents, TxStatus
 
 from hexbytes import HexBytes
 
@@ -54,6 +54,10 @@ fet_address = "B3t9pv4rYccWqCjeuoXsDoeXLiKxVAQh6Q3CLAiNZZQ2mtqF1"
 eth_address = "0x21795D753752ccC1AC728002D23Ba33cbF13b8b0"
 GAS_PRICE = "50"
 GAS_ID = "gwei"
+
+
+def _raise_exception(*args, **kwargs):
+    raise Exception("Message")
 
 
 class TestLedgerApis:
@@ -391,3 +395,80 @@ class TestLedgerApis:
         )
         logger.info(tx_nonce)
         assert tx_nonce != ""
+
+    def test_validate_transaction_fetchai(self):
+        """Test the validate transaction for fetchai ledger."""
+        seller_crypto = FetchAICrypto()
+        client_crypto = FetchAICrypto()
+        ledger_apis = LedgerApis(
+            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            FETCHAI,
+        )
+
+        seller_address = str(seller_crypto.address)
+        client_address = str(client_crypto.address)
+        tx_contents = TxContents(
+            digest=b"digest",
+            action="action",
+            chain_code="1",
+            from_address=client_address,
+            contract_digest="Contract_digest",
+            contract_address=None,
+            valid_from=1,
+            valid_until=6,
+            charge=10,
+            charge_limit=2,
+            transfers=[{"to": seller_address, "amount": 100}],
+            signatories=["signatories"],
+            data="data",
+        )
+
+        with mock.patch.object(
+            ledger_apis.apis.get(FETCHAI)._api.tx, "contents", return_value=tx_contents
+        ):
+            with mock.patch.object(
+                ledger_apis.apis.get(FETCHAI),
+                "is_transaction_settled",
+                return_value=True,
+            ):
+                result = ledger_apis.is_tx_valid(
+                    identifier=FETCHAI,
+                    tx_digest="transaction_digest",
+                    seller=seller_address,
+                    client=client_address,
+                    tx_nonce="tx_nonce",
+                    amount=100,
+                )
+                assert result
+
+    @mock.patch("aea.crypto.ledger_apis.FetchAIApi.generate_tx_nonce", _raise_exception)
+    def test_generate_tx_nonce_negative(self, *mocks):
+        """Test generate_tx_nonce init negative result."""
+        ledger_apis = LedgerApis(
+            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            FETCHAI,
+        )
+        result = ledger_apis.generate_tx_nonce(FETCHAI, "seller", "client")
+        assert result == ""
+
+    @mock.patch(
+        "aea.crypto.ledger_apis.FetchAIApi.validate_transaction", _raise_exception
+    )
+    def test_is_tx_valid_negative(self, *mocks):
+        """Test is_tx_valid init negative result."""
+        ledger_apis = LedgerApis(
+            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            FETCHAI,
+        )
+        result = ledger_apis.is_tx_valid(
+            FETCHAI, "tx_digest", "seller", "client", "tx_nonce", 1
+        )
+        assert not result
+
+    def test_has_default_ledger_positive(self):
+        """Test has_default_ledger init positive result."""
+        ledger_apis = LedgerApis(
+            {ETHEREUM: DEFAULT_ETHEREUM_CONFIG, FETCHAI: DEFAULT_FETCHAI_CONFIG},
+            FETCHAI,
+        )
+        assert ledger_apis.has_default_ledger

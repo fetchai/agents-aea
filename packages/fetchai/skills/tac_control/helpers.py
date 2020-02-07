@@ -93,7 +93,7 @@ def generate_good_endowments(
     # randomly assign additional goods to create differences
     for good_id in good_ids:
         for _ in range(instances_per_good[good_id] - (base_amount * nb_agents)):
-            idx = random.randint(0, nb_agents - 1)
+            idx = random.randint(0, nb_agents - 1)  # nosec
             agent_addr = agent_addresses[idx]
             endowments[agent_addr][good_id] += 1
     return endowments
@@ -113,7 +113,9 @@ def generate_utility_params(
     decimals = 4 if len(good_ids) < 100 else 8
     utility_function_params = {}  # type: Dict[str, Dict[str, float]]
     for agent_addr in agent_addresses:
-        random_integers = [random.randint(1, 101) for _ in range(len(good_ids))]
+        random_integers = [
+            random.randint(1, 101) for _ in range(len(good_ids))  # nosec
+        ]
         total = sum(random_integers)
         normalized_fractions = [
             round(i / float(total), decimals) for i in random_integers
